@@ -35,69 +35,45 @@ exports[`should match snapshot 1`] = `
             <ul
               class="css-2xogyv"
               role="list"
-            >
-              <li
-                class="css-0"
-              >
-                <a
-                  class="chakra-link css-0"
-                  href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                  rel="noopener"
-                  target="_blank"
-                >
-                  <div
-                    class="css-gmuwbf"
-                  >
-                    Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
-                    <svg
-                      class="chakra-icon css-417j41"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <g
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-width="2"
-                      >
-                        <path
-                          d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                        />
-                        <path
-                          d="M15 3h6v6"
-                        />
-                        <path
-                          d="M10 14L21 3"
-                        />
-                      </g>
-                    </svg>
-                  </div>
-                </a>
-              </li>
-            </ul>
+            />
           </div>
           <div
             class="css-1tqkm5s"
           >
-            <i
-              class="chakra-text css-g5hezf"
-            >
-              Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des ministères sociaux.
-            </i>
             <p
-              class="chakra-text css-iesxu2"
+              class="chakra-text css-3snc0f"
             >
-              Pour nous aider à l'améliorer
-               
-              <a
-                class="chakra-link css-1qsits3"
-                href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
-                rel="noopener"
-                target="_blank"
-              >
-                contribuez sur Github
-              </a>
+              Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.
             </p>
+            <div
+              class="chakra-stack css-xuczl3"
+            >
+              <span
+                class="chakra-text css-g5hezf"
+              >
+                Contact: 
+                <a
+                  class="chakra-link css-1qsits3"
+                  href="mailto:index@travail.gouv.fr"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  index@travail.gouv.fr
+                </a>
+              </span>
+              <span
+                class="chakra-text css-g5hezf"
+              >
+                <a
+                  class="chakra-link css-1qsits3"
+                  href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  Contribuer sur GitHub
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>
@@ -134,69 +110,45 @@ exports[`should match snapshot 1`] = `
           <ul
             class="css-2xogyv"
             role="list"
-          >
-            <li
-              class="css-0"
-            >
-              <a
-                class="chakra-link css-0"
-                href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                rel="noopener"
-                target="_blank"
-              >
-                <div
-                  class="css-gmuwbf"
-                >
-                  Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
-                  <svg
-                    class="chakra-icon css-417j41"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <g
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-width="2"
-                    >
-                      <path
-                        d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                      />
-                      <path
-                        d="M15 3h6v6"
-                      />
-                      <path
-                        d="M10 14L21 3"
-                      />
-                    </g>
-                  </svg>
-                </div>
-              </a>
-            </li>
-          </ul>
+          />
         </div>
         <div
           class="css-1tqkm5s"
         >
-          <i
-            class="chakra-text css-g5hezf"
-          >
-            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des ministères sociaux.
-          </i>
           <p
-            class="chakra-text css-iesxu2"
+            class="chakra-text css-3snc0f"
           >
-            Pour nous aider à l'améliorer
-             
-            <a
-              class="chakra-link css-1qsits3"
-              href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
-              rel="noopener"
-              target="_blank"
-            >
-              contribuez sur Github
-            </a>
+            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.
           </p>
+          <div
+            class="chakra-stack css-xuczl3"
+          >
+            <span
+              class="chakra-text css-g5hezf"
+            >
+              Contact: 
+              <a
+                class="chakra-link css-1qsits3"
+                href="mailto:index@travail.gouv.fr"
+                rel="noopener"
+                target="_blank"
+              >
+                index@travail.gouv.fr
+              </a>
+            </span>
+            <span
+              class="chakra-text css-g5hezf"
+            >
+              <a
+                class="chakra-link css-1qsits3"
+                href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
+                rel="noopener"
+                target="_blank"
+              >
+                Contribuer sur GitHub
+              </a>
+            </span>
+          </div>
         </div>
       </div>
     </footer>
