@@ -160,7 +160,7 @@ exports[`should match snapshot 1`] = `
                 >
                   <a
                     class="chakra-link css-18ktbam"
-                    href="https://github.com/SocialGouv/egapro/commit/"
+                    href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
                     rel="noopener"
                     target="_blank"
                   >
@@ -372,7 +372,7 @@ exports[`should match snapshot 1`] = `
               >
                 <a
                   class="chakra-link css-18ktbam"
-                  href="https://github.com/SocialGouv/egapro/commit/"
+                  href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
                   rel="noopener"
                   target="_blank"
                 >
