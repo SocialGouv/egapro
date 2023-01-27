@@ -1,3 +1,10 @@
+## [2.79.3](https://github.com/SocialGouv/egapro/compare/v2.79.2...v2.79.3) (2023-01-27)
+
+
+### Bug Fixes
+
+* adapt nav in decla direct with good data ([#1542](https://github.com/SocialGouv/egapro/issues/1542)) ([4029ed3](https://github.com/SocialGouv/egapro/commit/4029ed3e0c319d9fe37824ec884c896a8fabefc2))
+
 ## [2.79.2](https://github.com/SocialGouv/egapro/compare/v2.79.1...v2.79.2) (2023-01-26)
 
 
