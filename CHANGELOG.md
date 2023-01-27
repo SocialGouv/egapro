@@ -1,3 +1,11 @@
+## [2.79.4](https://github.com/SocialGouv/egapro/compare/v2.79.3...v2.79.4) (2023-01-27)
+
+
+### Bug Fixes
+
+* Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541)) ([0e8f844](https://github.com/SocialGouv/egapro/commit/0e8f844f0c406d7525d04480a827c9ce27e2cd6d))
+* handle nc value in dgt file (Fixes [#1488](https://github.com/SocialGouv/egapro/issues/1488)) ([fd6d7e3](https://github.com/SocialGouv/egapro/commit/fd6d7e35f15537fa8945065c1bb19dbf7f072511))
+
 ## [2.79.3](https://github.com/SocialGouv/egapro/compare/v2.79.2...v2.79.3) (2023-01-27)
 
 
