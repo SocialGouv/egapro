@@ -1,3 +1,11 @@
+## [2.79.5](https://github.com/SocialGouv/egapro/compare/v2.79.4...v2.79.5) (2023-01-27)
+
+
+### Bug Fixes
+
+* Revert "fix: Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541))" ([9c5d64c](https://github.com/SocialGouv/egapro/commit/9c5d64c5ed3a9140cd23082a5f98760e60e57d5e))
+* use redirects in new ingress instead of url rewrite ([7c39a35](https://github.com/SocialGouv/egapro/commit/7c39a3580d22f62033700cab37a7ed04f9584bb0))
+
 ## [2.79.4](https://github.com/SocialGouv/egapro/compare/v2.79.3...v2.79.4) (2023-01-27)
 
 
