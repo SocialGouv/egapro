@@ -1,3 +1,26 @@
+## [2.79.5](https://github.com/SocialGouv/egapro/compare/v2.79.4...v2.79.5) (2023-01-27)
+
+
+### Bug Fixes
+
+* Revert "fix: Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541))" ([9c5d64c](https://github.com/SocialGouv/egapro/commit/9c5d64c5ed3a9140cd23082a5f98760e60e57d5e))
+* use redirects in new ingress instead of url rewrite ([7c39a35](https://github.com/SocialGouv/egapro/commit/7c39a3580d22f62033700cab37a7ed04f9584bb0))
+
+## [2.79.4](https://github.com/SocialGouv/egapro/compare/v2.79.3...v2.79.4) (2023-01-27)
+
+
+### Bug Fixes
+
+* Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541)) ([0e8f844](https://github.com/SocialGouv/egapro/commit/0e8f844f0c406d7525d04480a827c9ce27e2cd6d))
+* handle nc value in dgt file (Fixes [#1488](https://github.com/SocialGouv/egapro/issues/1488)) ([fd6d7e3](https://github.com/SocialGouv/egapro/commit/fd6d7e35f15537fa8945065c1bb19dbf7f072511))
+
+## [2.79.3](https://github.com/SocialGouv/egapro/compare/v2.79.2...v2.79.3) (2023-01-27)
+
+
+### Bug Fixes
+
+* adapt nav in decla direct with good data ([#1542](https://github.com/SocialGouv/egapro/issues/1542)) ([4029ed3](https://github.com/SocialGouv/egapro/commit/4029ed3e0c319d9fe37824ec884c896a8fabefc2))
+
 ## [2.79.2](https://github.com/SocialGouv/egapro/compare/v2.79.1...v2.79.2) (2023-01-26)
 
 
