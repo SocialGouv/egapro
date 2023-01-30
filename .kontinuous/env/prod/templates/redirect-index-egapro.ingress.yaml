@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-redirect-index-egapro
+  namespace: egapro
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/permanent-redirect: https://egapro.travail.gouv.fr/index-egapro$request_uri
+spec:
+  tls:
+    - hosts:
+        - index-egapro.travail.gouv.fr
+      secretName: app-redirect
+  rules:
+    - host: index-egapro.travail.gouv.fr
+      http:
+        paths:
+          - path: /simulateur
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  name: http
+          - path: /declaration
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  name: http

@@ -390,8 +390,6 @@ class AppStorage {
       return await this.save()
     }
 
-    console.log("respnose", response)
-
     if(response.ok && response.data) {
       Object.assign(this.data, response.data.data)
     }
