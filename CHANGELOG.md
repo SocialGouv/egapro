@@ -1,3 +1,10 @@
+# [2.80.0](https://github.com/SocialGouv/egapro/compare/v2.79.5...v2.80.0) (2023-01-30)
+
+
+### Features
+
+* freeze décla when time is passed ([#1540](https://github.com/SocialGouv/egapro/issues/1540)) ([01f897e](https://github.com/SocialGouv/egapro/commit/01f897e37608b0bf2dfbae0ce7a91e0a6b0530d3))
+
 ## [2.79.5](https://github.com/SocialGouv/egapro/compare/v2.79.4...v2.79.5) (2023-01-27)
 
 
