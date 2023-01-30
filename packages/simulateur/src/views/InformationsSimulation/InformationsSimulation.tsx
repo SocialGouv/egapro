@@ -1,16 +1,15 @@
-import React, { useCallback, PropsWithChildren } from "react"
-import { useParams } from "react-router-dom"
 import { Box } from "@chakra-ui/react"
+import React, { PropsWithChildren, useCallback } from "react"
+import { useParams } from "react-router-dom"
 
-import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
+import { ActionInformationsSimulationData, ActionType, AppState, FormState } from "../../globals"
 
-import { useTitle } from "../../utils/hooks"
-import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import { useDeclaration } from "../../hooks/useDeclaration"
+import { useTitle } from "../../utils/hooks"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
 import InformationsSimulationForm from "./InformationsSimulationForm"
 
 interface InformationsSimulationProps {
@@ -39,8 +38,6 @@ const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps
   useTitle(title)
   const { code } = useParams<Params>()
 
-  const frozenDeclaration = isFrozenDeclaration(state)
-
   const updateInformationsSimulation = useCallback(
     (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
     [dispatch],
@@ -61,7 +58,7 @@ const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps
         childrenForm={
           <InformationsSimulationForm
             informations={state.informations}
-            readOnly={frozenDeclaration || state.informations.formValidated === "Valid"}
+            readOnly={state.informations.formValidated === "Valid"}
             updateInformationsSimulation={updateInformationsSimulation}
             validateInformationsSimulation={validateInformationsSimulation}
             alreadyDeclared={alreadyDeclared}
