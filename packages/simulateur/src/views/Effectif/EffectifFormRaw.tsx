@@ -1,8 +1,8 @@
-import React, { FunctionComponent, ReactNode } from "react"
+import React, { FunctionComponent, useCallback } from "react"
 import { Grid, GridItem, Text } from "@chakra-ui/react"
 import { Form } from "react-final-form"
 
-import { FormState, GroupTranchesAgesEffectif } from "../../globals"
+import { ActionEffectifData, FormState, GroupTranchesAgesEffectif } from "../../globals"
 
 import {
   composeFormValidators,
@@ -25,6 +25,8 @@ import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import FormError from "../../components/FormError"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 type Effectif = Array<{
   id: any
@@ -37,9 +39,6 @@ const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNu
 interface EffectifFormRawProps {
   effectifRaw: Effectif
   readOnly: boolean
-  updateEffectif: (data: Effectif) => void
-  validateEffectif: (valid: FormState) => void
-  nextLink: ReactNode
   formValidator?: FormValidatorFunction
 }
 
@@ -67,14 +66,9 @@ export const getTotalNbSalarie = (effectif: Effectif) =>
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 },
   )
 
-const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
-  effectifRaw,
-  readOnly,
-  updateEffectif,
-  validateEffectif,
-  nextLink,
-  formValidator,
-}) => {
+const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({ formValidator }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
   const initialValues = {
     effectif: effectifRaw.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
@@ -96,6 +90,40 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
       ? "Le nombre total d'effectifs pris en compte ne peut pas être égal à zéro."
       : undefined
   }
+
+  const updateEffectif = useCallback(
+    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
+    [dispatch],
+  )
+
+  const validateEffectif = useCallback((valid: FormState) => dispatch({ type: "validateEffectif", valid }), [dispatch])
+
+  const effectifRaw = useMemo(
+    () =>
+      effectif.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
+        id: categorieSocioPro,
+        name: displayNameCategorieSocioPro(categorieSocioPro),
+        tranchesAges,
+      })),
+    [effectif],
+  )
+
+  const updateEffectifRaw = useCallback(
+    (
+      data: Array<{
+        id: any
+        name: string
+        tranchesAges: Array<GroupTranchesAgesEffectif>
+      }>,
+    ) => {
+      const nombreSalaries = data.map(({ id, tranchesAges }) => ({
+        categorieSocioPro: id,
+        tranchesAges,
+      }))
+      updateEffectif({ nombreSalaries })
+    },
+    [updateEffectif],
+  )
 
   const validateForm = (values: Record<string, unknown>) => {
     const composedValidator = formValidator
@@ -215,7 +243,9 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
             </Grid>
 
             {readOnly ? (
-              <ActionBar>{nextLink}</ActionBar>
+              <ActionBar>
+                <ButtonSimulatorLink to="/indicateur1" label="Suivant" />
+              </ActionBar>
             ) : (
               <ActionBar>
                 <FormSubmit />

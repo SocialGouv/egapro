@@ -4,20 +4,18 @@ import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } fr
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EffectifFormRaw from "./EffectifFormRaw"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 interface EffectifFormProps {
-  effectif: AppState["effectif"]
-  readOnly: boolean
   updateEffectif: (data: ActionEffectifData) => void
   validateEffectif: (valid: FormState) => void
 }
 
-const EffectifForm: FunctionComponent<EffectifFormProps> = ({
-  effectif,
-  readOnly,
-  updateEffectif,
-  validateEffectif,
-}) => {
+const EffectifForm: FunctionComponent<EffectifFormProps> = ({ updateEffectif, validateEffectif }) => {
+  const { state } = useAppStateContextProvider()
+
+  const effectif = state.effectif
+
   const effectifRaw = useMemo(
     () =>
       effectif.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
@@ -45,13 +43,16 @@ const EffectifForm: FunctionComponent<EffectifFormProps> = ({
     [updateEffectif],
   )
 
+  if (!state) return null
+
+  const readOnly = state.effectif.formValidated === "Valid"
+
   return (
     <EffectifFormRaw
       effectifRaw={effectifRaw}
       readOnly={readOnly}
       updateEffectif={updateEffectifRaw}
       validateEffectif={validateEffectif}
-      nextLink={<ButtonSimulatorLink to="/indicateur1" label="Suivant" />}
     />
   )
 }

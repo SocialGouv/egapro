@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
-import { FunctionComponent } from "react"
+import { FunctionComponent, useCallback } from "react"
 import { Form, useField } from "react-final-form"
 
-import { ActionInformationsSimulationData, AppState, FormState } from "../../globals"
+import { ActionInformationsSimulationData, FormState } from "../../globals"
 
 import {
   parseBooleanFormValue,
@@ -25,11 +25,15 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { hasFieldError } from "../../components/Input"
 
+import { useParams } from "react-router-dom"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormError from "../../components/FormError"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const validateForm = ({
   nomEntreprise,
@@ -101,21 +105,35 @@ const FieldPeriodeSuffisante = ({ readOnly }: { readOnly: boolean }) => {
   )
 }
 
-interface InformationsSimulationFormProps {
-  informations: AppState["informations"]
-  readOnly: boolean
-  updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
-  validateInformationsSimulation: (valid: FormState) => void
-  alreadyDeclared: boolean
+type Params = {
+  code: string
 }
 
-const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormProps> = ({
-  informations,
-  readOnly,
-  updateInformationsSimulation,
-  validateInformationsSimulation,
-  alreadyDeclared,
-}) => {
+const InformationsSimulationForm: FunctionComponent = () => {
+  const { code } = useParams<Params>()
+  const { state, dispatch } = useAppStateContextProvider()
+
+  const updateInformationsSimulation = useCallback(
+    (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
+    [dispatch],
+  )
+
+  const validateInformationsSimulation = useCallback(
+    (valid: FormState) => dispatch({ type: "validateInformationsSimulation", valid }),
+    [dispatch],
+  )
+
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+  if (!state) return null
+
+  const alreadyDeclared = declaration?.data?.id === code
+
+  const readOnly = frozenDeclaration || state.informations.formValidated === "Valid"
+
+  const informations = state.informations
+
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,

@@ -1,27 +1,23 @@
+import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent, useCallback } from "react"
-import { Text, VStack, UnorderedList, ListItem } from "@chakra-ui/react"
-import { RouteComponentProps } from "react-router-dom"
 
-import { AppState, ActionType, FormState, ActionEffectifData } from "../../globals"
+import { ActionEffectifData, FormState } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useTitle } from "../../utils/hooks"
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
-import { useTitle } from "../../utils/hooks"
-
-interface EffectifProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
 
 const title = "Effectifs pris en compte"
 
-const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
+const Effectif: FunctionComponent = () => {
   useTitle(title)
+  const { state, dispatch } = useAppStateContextProvider()
 
   const updateEffectif = useCallback(
     (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
@@ -29,6 +25,8 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
   )
 
   const validateEffectif = useCallback((valid: FormState) => dispatch({ type: "validateEffectif", valid }), [dispatch])
+
+  if (!state) return null
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
@@ -46,14 +44,7 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
     >
       <VStack spacing={8} align="stretch">
         <LayoutFormAndResult
-          childrenForm={
-            <EffectifForm
-              effectif={state.effectif}
-              readOnly={state.effectif.formValidated === "Valid"}
-              updateEffectif={updateEffectif}
-              validateEffectif={validateEffectif}
-            />
-          }
+          childrenForm={<EffectifForm updateEffectif={updateEffectif} validateEffectif={validateEffectif} />}
           childrenResult={
             state.effectif.formValidated === "Valid" && (
               <EffectifResult

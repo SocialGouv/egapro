@@ -1,7 +1,7 @@
 import { useEffect } from "react"
-import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
+import { useHistory, useLocation } from "react-router-dom"
 import { useCheckTokenInURL } from "../components/AuthContext"
-import { ActionType, AppState } from "../globals"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { postSimulation } from "../utils/api"
 
 /**
@@ -13,14 +13,11 @@ import { postSimulation } from "../utils/api"
  *
  * So, in waiting for a better state management and route management, we decided to add this page.
  */
-interface ResetPageProps extends RouteComponentProps {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
 
-function ResetPage({ dispatch, state }: ResetPageProps): null {
+function ResetPage(): null {
   const history = useHistory()
   const location = useLocation()
+  const { state, dispatch } = useAppStateContextProvider()
 
   useCheckTokenInURL()
 

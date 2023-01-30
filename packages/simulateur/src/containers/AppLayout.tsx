@@ -27,6 +27,7 @@ import ResetPage from "../views/ResetPage"
 import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
 import MesDeclarations from "../views/private/MesDeclarations"
 import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 
 interface Props {
   state: AppState | undefined
@@ -81,15 +82,13 @@ function DashboardRoutes() {
   )
 }
 
-function AppLayout({ state, dispatch }: Props) {
+function AppLayout() {
+  const { state } = useAppStateContextProvider()
+
   return (
     <AuthContextProvider>
       <Switch>
-        <Route
-          path="/nouvelle-simulation"
-          exact
-          render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
-        />
+        <Route path="/nouvelle-simulation" exact render={() => <ResetPage />} />
 
         <Route path="/tableauDeBord/">
           <DashboardRoutes />
@@ -124,9 +123,9 @@ function AppLayout({ state, dispatch }: Props) {
             <Header />
             <MainScrollView state={state}>
               <Switch>
-                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
+                <Route path="/" exact render={(props) => <Home {...props} />} />
                 <Route path="/simulateur/:code">
-                  <Simulateur state={state} dispatch={dispatch} />
+                  <Simulateur />
                 </Route>
                 <Route>
                   <PageNotFound />

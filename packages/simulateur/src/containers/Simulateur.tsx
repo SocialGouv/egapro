@@ -3,8 +3,6 @@ import { css } from "@emotion/react"
 import { Fragment, ReactNode, useEffect, useState } from "react"
 import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
-import { ActionType, AppState } from "../globals"
-
 import { getSimulation, putSimulation } from "../utils/api"
 import globalStyles from "../utils/globalStyles"
 import { useDebounceEffect } from "../utils/hooks"
@@ -15,6 +13,8 @@ import ErrorMessage from "../components/ErrorMessage"
 
 import { Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import TextLink from "../components/ds/TextLink"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"
 import AskEmail from "../views/AskEmail"
@@ -31,22 +31,17 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
-import TextLink from "../components/ds/TextLink"
-
-interface Props {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
 
 type Params = {
   code: string
 }
 
-function Simulateur({ state, dispatch }: Props): JSX.Element {
+function Simulateur(): JSX.Element {
   const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined | ReactNode>(undefined)
   const { email, isAuthenticated, loading: isLoadingAuth } = useUser()
+  const { state, dispatch } = useAppStateContextProvider()
 
   // useEffect de récupération des données de la déclaration.
   useEffect(() => {
@@ -174,7 +169,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
         <HomeSimulateur />
       </Route>
       <Route path="/simulateur/:code/informations">
-        <InformationsSimulation state={state} dispatch={dispatch} />
+        <InformationsSimulation />
       </Route>
 
       {/*  We ensure to have the informations page always filleds before allowing to go to other form pages.  */}
@@ -183,10 +178,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
       ) : (
         <Fragment>
           <Switch>
-            <Route
-              path="/simulateur/:code/effectifs"
-              render={(props) => <Effectif {...props} state={state} dispatch={dispatch} />}
-            />
+            <Route path="/simulateur/:code/effectifs" render={() => <Effectif />} />
             <Route
               path="/simulateur/:code/indicateur1"
               render={(props) => <IndicateurUn {...props} state={state} dispatch={dispatch} />}

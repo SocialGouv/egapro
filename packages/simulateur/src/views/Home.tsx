@@ -1,22 +1,19 @@
+import { Heading, SimpleGrid } from "@chakra-ui/react"
 import React, { FunctionComponent, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
-import { Heading, SimpleGrid } from "@chakra-ui/react"
 
-import { ActionType } from "../globals"
 import { postSimulation } from "../utils/api"
 
 import ButtonAction from "../components/ds/ButtonAction"
 import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"
 import Card from "../components/ds/Card"
-import Page from "../components/Page"
 import ErrorMessage from "../components/ErrorMessage"
+import Page from "../components/Page"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { logToSentry } from "../utils/sentry"
 
-interface HomeProps extends RouteComponentProps {
-  dispatch: (action: ActionType) => void
-}
-
-const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => {
+const Home: FunctionComponent<RouteComponentProps> = ({ history, location }) => {
+  const { dispatch } = useAppStateContextProvider()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
 
