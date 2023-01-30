@@ -1,4 +1,4 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { AnchorLink, Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
 import Head from "next/head";
 
@@ -731,7 +731,7 @@ const AideSimulation: NextPageWithLayout = () => {
 };
 
 AideSimulation.getLayout = ({ children }) => {
-  return <BasicLayout title="Aide simulation">{children}</BasicLayout>;
+  return <BasicLayoutPublic title="Aide simulation">{children}</BasicLayoutPublic>;
 };
 
 export default AideSimulation;

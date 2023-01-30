@@ -1,4 +1,4 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
 import type { NextPageWithLayout } from "./_app";
@@ -61,7 +61,7 @@ const LegalNotice: NextPageWithLayout = () => {
 };
 
 LegalNotice.getLayout = ({ children }) => {
-  return <BasicLayout title="Mentions légales">{children}</BasicLayout>;
+  return <BasicLayoutPublic title="Mentions légales">{children}</BasicLayoutPublic>;
 };
 
 export default LegalNotice;

@@ -1,4 +1,4 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
 
@@ -137,7 +137,7 @@ const Cgu: NextPageWithLayout = () => {
 };
 
 Cgu.getLayout = ({ children }) => {
-  return <BasicLayout title="Conditions d’utilisation">{children}</BasicLayout>;
+  return <BasicLayoutPublic title="Conditions d’utilisation">{children}</BasicLayoutPublic>;
 };
 
 export default Cgu;

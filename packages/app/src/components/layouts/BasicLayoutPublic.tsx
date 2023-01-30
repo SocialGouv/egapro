@@ -10,7 +10,7 @@ const DEFAULT_TITLE = "Egapro";
 /**
  * Layout for unauthenticated users (standalone pages, etc.).
  */
-export const BasicLayout = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
+export const BasicLayoutPublic = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
   return (
     <App footer={<PublicFooter />}>
       <Head>
