@@ -1,15 +1,15 @@
-import React, { useCallback, PropsWithChildren } from "react"
-import { useParams } from "react-router-dom"
 import { Box } from "@chakra-ui/react"
+import React, { PropsWithChildren, useCallback } from "react"
+import { useParams } from "react-router-dom"
 
-import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
+import { ActionInformationsSimulationData, ActionType, AppState, FormState } from "../../globals"
 
-import { useTitle } from "../../utils/hooks"
 import { useDeclaration } from "../../hooks/useDeclaration"
+import { useTitle } from "../../utils/hooks"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
 import InformationsSimulationForm from "./InformationsSimulationForm"
 
 interface InformationsSimulationProps {
