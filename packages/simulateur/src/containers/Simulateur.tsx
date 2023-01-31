@@ -182,10 +182,7 @@ function Simulateur(): JSX.Element {
             <Route path="/simulateur/:code/indicateur1" render={() => <IndicateurUn />} />
             <Route path="/simulateur/:code/indicateur2" render={() => <IndicateurDeux />} />
             <Route path="/simulateur/:code/indicateur3" render={() => <IndicateurTrois />} />
-            <Route
-              path="/simulateur/:code/indicateur2et3"
-              render={(props) => <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />}
-            />
+            <Route path="/simulateur/:code/indicateur2et3" render={() => <IndicateurDeuxTrois />} />
             <Route
               path="/simulateur/:code/indicateur4"
               render={(props) => <IndicateurQuatre {...props} state={state} dispatch={dispatch} />}

@@ -8,7 +8,7 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 
 import { indicateursInfo } from "../../config"
-import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
+import { calculerResultats } from "../Indicateur2et3/IndicateurDeuxTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
@@ -67,7 +67,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
-  const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
+  const results = calculerResultats(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
 
   return (
     <div>
