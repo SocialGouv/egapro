@@ -1,26 +1,26 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
 interface IndicateurDeuxResultProps {
-  indicateurEcartAugmentation: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeux: number | undefined
-  correctionMeasure: boolean
-  validateIndicateurDeux: (valid: FormState) => void
+  dataCalculIndicateurDeux: Pick<
+    ReturnType<typeof calculIndicateurDeux>,
+    "indicateurEcartAugmentation" | "indicateurSexeSurRepresente" | "noteIndicateurDeux" | "correctionMeasure"
+  >
 }
 
-const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({
-  indicateurEcartAugmentation,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeux,
-  correctionMeasure,
-  validateIndicateurDeux,
-}) => {
+const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ dataCalculIndicateurDeux }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  const { indicateurEcartAugmentation, indicateurSexeSurRepresente, noteIndicateurDeux, correctionMeasure } =
+    dataCalculIndicateurDeux
+
+  if (!state) return null
+
   return (
     <ResultSummary
       firstLineLabel="votre résultat final est"
@@ -30,7 +30,7 @@ const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({
       secondLineData={(noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"}
       secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      onEdit={() => validateIndicateurDeux("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}
     />
   )
 }

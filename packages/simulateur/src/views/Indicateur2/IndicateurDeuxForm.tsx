@@ -1,34 +1,30 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
-import { FormState, ActionIndicateurDeuxData } from "../../globals"
-
 import { effectifEtEcartAugmentGroup } from "../../utils/calculsEgaProIndicateurDeux"
 
+import ActionBar from "../../components/ActionBar"
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
+import RadiosBoolean from "../../components/RadiosBoolean"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import FormStack from "../../components/ds/FormStack"
+import FormError from "../../components/FormError"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import {
-  parseFloatFormValue,
-  parseFloatStateValue,
-  parseBooleanFormValue,
-  parseBooleanStateValue,
   composeValidators,
   minNumber,
   mustBeNumber,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
+  parseFloatFormValue,
+  parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
-import {
-  displayNameCategorieSocioPro,
-  // displayFractionPercent
-} from "../../utils/helpers"
-import FormError from "../../components/FormError"
-import FormStack from "../../components/ds/FormStack"
+import { displayNameCategorieSocioPro } from "../../utils/helpers"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -68,19 +64,19 @@ const validateForm = ({
 
 interface IndicateurDeuxFormProps {
   ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>
-  presenceAugmentation: boolean
   readOnly: boolean
-  updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void
-  validateIndicateurDeux: (valid: FormState) => void
 }
 
 const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
   ecartAugmentParCategorieSocioPro,
-  presenceAugmentation,
   readOnly,
-  updateIndicateurDeux,
-  validateIndicateurDeux,
 }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const presenceAugmentation = state.indicateurDeux.presenceAugmentation
+
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
     tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
@@ -101,15 +97,19 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
         tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes),
       }),
     )
-    updateIndicateurDeux({
-      tauxAugmentation,
-      presenceAugmentation,
+
+    dispatch({
+      type: "updateIndicateurDeux",
+      data: {
+        tauxAugmentation,
+        presenceAugmentation,
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurDeux("Valid")
+    dispatch({ type: "validateIndicateurDeux", valid: "Valid" })
   }
 
   // Only for Total with updated values
