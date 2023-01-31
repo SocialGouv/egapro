@@ -179,10 +179,7 @@ function Simulateur(): JSX.Element {
         <Fragment>
           <Switch>
             <Route path="/simulateur/:code/effectifs" render={() => <Effectif />} />
-            <Route
-              path="/simulateur/:code/indicateur1"
-              render={(props) => <IndicateurUn {...props} state={state} dispatch={dispatch} />}
-            />
+            <Route path="/simulateur/:code/indicateur1" render={() => <IndicateurUn />} />
             <Route
               path="/simulateur/:code/indicateur2"
               render={(props) => <IndicateurDeux {...props} state={state} dispatch={dispatch} />}

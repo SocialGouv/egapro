@@ -1,38 +1,31 @@
-import React from "react"
 import { Flex, Spinner } from "@chakra-ui/react"
+import React from "react"
 
-import { Route, Switch, Redirect, RouteProps } from "react-router-dom"
-
-import { AppState, ActionType } from "../globals"
+import { Redirect, Route, RouteProps, Switch } from "react-router-dom"
 
 import Header from "../components/Header"
 
 import CGU from "../views/CGU"
 import Home from "../views/Home"
 import MentionsLegales from "../views/MentionsLegales"
-import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 import PageNotFound from "../views/PageNotFound"
+import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 
-import Simulateur from "./Simulateur"
-import MainScrollView from "./MainScrollView"
-import { SinglePageLayout } from "./SinglePageLayout"
-import Accessibilite from "../views/Accessibilite"
-import MesEntreprises from "../views/private/MesEntreprises"
-import MonProfil from "../views/private/MonProfil"
-import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
-import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
-import ResetPage from "../views/ResetPage"
-import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
-import MesDeclarations from "../views/private/MesDeclarations"
-import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
 import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
-
-interface Props {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
+import Accessibilite from "../views/Accessibilite"
+import Mire from "../views/Mire"
+import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
+import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
+import MesDeclarations from "../views/private/MesDeclarations"
+import MesEntreprises from "../views/private/MesEntreprises"
+import MonProfil from "../views/private/MonProfil"
+import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
+import ResetPage from "../views/ResetPage"
+import MainScrollView from "./MainScrollView"
+import Simulateur from "./Simulateur"
+import { SinglePageLayout } from "./SinglePageLayout"
 
 /**
  * A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.

@@ -1,12 +1,12 @@
-import React, { FunctionComponent, useCallback, useState } from "react"
-import { Tag, Box, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
+import { Box, Tab, TabList, TabPanel, TabPanels, Tabs, Tag } from "@chakra-ui/react"
+import React, { FunctionComponent, useState } from "react"
 
-import { AppState, FormState, ActionType, ActionIndicateurUnCoefData } from "../../../globals"
+import { ActionType, AppState } from "../../../globals"
 
 import { useScrollTo } from "../../../components/ScrollContext"
 
-import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm"
 import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm"
+import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm"
 import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm"
 
 interface StepProps {
@@ -31,54 +31,28 @@ interface IndicateurUnCoefProps {
   dispatch: (action: ActionType) => void
 }
 
+export type TabIndicateurUnCoef = "Groupe" | "Effectif" | "Remuneration"
+
 const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dispatch }) => {
-  const updateIndicateurUnCoefAddGroup = useCallback(
-    () => dispatch({ type: "updateIndicateurUnCoefAddGroup" }),
-    [dispatch],
-  )
-
-  const updateIndicateurUnCoefDeleteGroup = useCallback(
-    (index: number) => dispatch({ type: "updateIndicateurUnCoefDeleteGroup", index }),
-    [dispatch],
-  )
-
-  const updateIndicateurUnCoef = useCallback(
-    (data: ActionIndicateurUnCoefData) => dispatch({ type: "updateIndicateurUnCoef", data }),
-    [dispatch],
-  )
-
-  const validateIndicateurUnCoefGroup = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurUnCoefGroup", valid }),
-    [dispatch],
-  )
-
-  const validateIndicateurUnCoefEffectif = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid }),
-    [dispatch],
-  )
-
-  const validateIndicateurUn = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid }),
-    [dispatch],
-  )
-
   const [tabIndex, setTabIndex] = useState(0)
 
   const scrollTo = useScrollTo()
 
-  const navigateTo = (index: number) => {
+  const navigateToIndex = (index: number) => {
     scrollTo(0)
     setTabIndex(index)
   }
 
-  const navigateToGroupe = () => navigateTo(0)
-  const navigateToEffectif = () => navigateTo(1)
-  const navigateToRemuneration = () => navigateTo(2)
+  const navigateTo = (tab: TabIndicateurUnCoef) => {
+    if (tab === "Groupe") navigateToIndex(0)
+    if (tab === "Effectif") navigateToIndex(1)
+    if (tab === "Remuneration") navigateToIndex(2)
+  }
 
   return (
     <Tabs
       index={tabIndex}
-      onChange={navigateTo}
+      onChange={navigateToIndex}
       colorScheme="primary"
       isFitted
       bg="white"
@@ -99,32 +73,13 @@ const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dis
       </TabList>
       <TabPanels>
         <TabPanel>
-          <IndicateurUnCoefGroupForm
-            state={state}
-            updateIndicateurUnCoefAddGroup={updateIndicateurUnCoefAddGroup}
-            updateIndicateurUnCoefDeleteGroup={updateIndicateurUnCoefDeleteGroup}
-            updateIndicateurUnCoef={updateIndicateurUnCoef}
-            validateIndicateurUnCoefGroup={validateIndicateurUnCoefGroup}
-            navigateToEffectif={navigateToEffectif}
-            navigateToRemuneration={navigateToRemuneration}
-          />
+          <IndicateurUnCoefGroupForm navigateTo={navigateTo} />
         </TabPanel>
         <TabPanel>
-          <IndicateurUnCoefEffectifForm
-            state={state}
-            updateIndicateurUnCoef={updateIndicateurUnCoef}
-            validateIndicateurUnCoefEffectif={validateIndicateurUnCoefEffectif}
-            navigateToGroupe={navigateToGroupe}
-            navigateToRemuneration={navigateToRemuneration}
-          />
+          <IndicateurUnCoefEffectifForm navigateTo={navigateTo} />
         </TabPanel>
         <TabPanel>
-          <IndicateurUnCoefRemuForm
-            state={state}
-            updateIndicateurUnCoef={updateIndicateurUnCoef}
-            validateIndicateurUn={validateIndicateurUn}
-            navigateToEffectif={navigateToEffectif}
-          />
+          <IndicateurUnCoefRemuForm navigateTo={navigateTo} />
         </TabPanel>
       </TabPanels>
     </Tabs>

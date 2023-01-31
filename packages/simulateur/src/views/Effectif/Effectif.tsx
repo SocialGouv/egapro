@@ -1,7 +1,7 @@
 import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
-import React, { FunctionComponent, useCallback } from "react"
+import React, { FunctionComponent } from "react"
 
-import { ActionEffectifData, FormState } from "../../globals"
+import { FormState } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
@@ -18,13 +18,6 @@ const title = "Effectifs pris en compte"
 const Effectif: FunctionComponent = () => {
   useTitle(title)
   const { state, dispatch } = useAppStateContextProvider()
-
-  const updateEffectif = useCallback(
-    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
-    [dispatch],
-  )
-
-  const validateEffectif = useCallback((valid: FormState) => dispatch({ type: "validateEffectif", valid }), [dispatch])
 
   if (!state) return null
 
@@ -44,13 +37,13 @@ const Effectif: FunctionComponent = () => {
     >
       <VStack spacing={8} align="stretch">
         <LayoutFormAndResult
-          childrenForm={<EffectifForm updateEffectif={updateEffectif} validateEffectif={validateEffectif} />}
+          childrenForm={<EffectifForm />}
           childrenResult={
             state.effectif.formValidated === "Valid" && (
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
                 totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
-                validateEffectif={validateEffectif}
+                validateEffectif={(valid: FormState) => dispatch({ type: "validateEffectif", valid })}
               />
             )
           }

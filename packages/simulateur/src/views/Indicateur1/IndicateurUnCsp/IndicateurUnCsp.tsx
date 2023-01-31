@@ -1,26 +1,18 @@
-import React, { FunctionComponent, useCallback } from "react"
+import React, { FunctionComponent } from "react"
 
-import { AppState, FormState, ActionType, ActionIndicateurUnCspData } from "../../../globals"
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import IndicateurUnCspForm from "./IndicateurUnCspForm"
+import { FormState } from "../../../globals"
+import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
+import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import IndicateurUnResult from "../IndicateurUnResult"
+import IndicateurUnCspForm from "./IndicateurUnCspForm"
 
-interface IndicateurUnCspProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
+const IndicateurUnCsp: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurUnCsp: FunctionComponent<IndicateurUnCspProps> = ({ state, dispatch }) => {
-  const updateIndicateurUn = useCallback(
-    (data: ActionIndicateurUnCspData) => dispatch({ type: "updateIndicateurUnCsp", data }),
-    [dispatch],
-  )
+  if (!state) return null
 
-  const validateIndicateurUn = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid }),
-    [dispatch],
-  )
+  const validateIndicateurUn = (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid })
 
   const {
     effectifEtEcartRemuParTrancheCsp,
@@ -33,10 +25,8 @@ const IndicateurUnCsp: FunctionComponent<IndicateurUnCspProps> = ({ state, dispa
     <LayoutFormAndResult
       childrenForm={
         <IndicateurUnCspForm
-          state={state}
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
           readOnly={state.indicateurUn.formValidated === "Valid"}
-          updateIndicateurUn={updateIndicateurUn}
           validateIndicateurUn={validateIndicateurUn}
         />
       }
