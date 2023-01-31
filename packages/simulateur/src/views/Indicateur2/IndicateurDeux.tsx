@@ -1,7 +1,7 @@
 import { Text } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import { messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 
@@ -25,7 +25,7 @@ const IndicateurDeux: FunctionComponent = () => {
 
   if (!state) return null
 
-  const dataCalculIndicateurDeux = calculIndicateurDeux(state)
+  const calculsIndicateurDeux = calculerIndicateurDeux(state)
 
   const {
     effectifsIndicateurCalculable,
@@ -33,7 +33,7 @@ const IndicateurDeux: FunctionComponent = () => {
     indicateurCalculable,
     indicateurSexeSurRepresente,
     correctionMeasure,
-  } = dataCalculIndicateurDeux
+  } = calculsIndicateurDeux
 
   const readOnly = state.indicateurDeux.formValidated === "Valid"
 
@@ -54,16 +54,14 @@ const IndicateurDeux: FunctionComponent = () => {
   if (!effectifsIndicateurCalculable) {
     return (
       <PageIndicateurDeux>
-        <>
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
-          />
-          <ActionBar>
-            <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
-          </ActionBar>
-        </>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+        />
+        <ActionBar>
+          <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
+        </ActionBar>
       </PageIndicateurDeux>
     )
   }
@@ -72,21 +70,19 @@ const IndicateurDeux: FunctionComponent = () => {
   if (state.indicateurDeux.formValidated === "Valid" && !indicateurCalculable) {
     return (
       <PageIndicateurDeux>
-        <>
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
-          />
-          <ActionBar>
-            <ActionLink onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}>
-              Modifier les données saisies
-            </ActionLink>
-          </ActionBar>
-          <ActionBar>
-            <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
-          </ActionBar>
-        </>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
+        />
+        <ActionBar>
+          <ActionLink onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}>
+            Modifier les données saisies
+          </ActionLink>
+        </ActionBar>
+        <ActionBar>
+          <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
+        </ActionBar>
       </PageIndicateurDeux>
     )
   }
@@ -95,7 +91,7 @@ const IndicateurDeux: FunctionComponent = () => {
     <PageIndicateurDeux>
       <LayoutFormAndResult
         childrenForm={
-          <div>
+          <>
             <IndicateurDeuxForm
               ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
               readOnly={readOnly}
@@ -105,9 +101,9 @@ const IndicateurDeux: FunctionComponent = () => {
                 {messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}
               </Text>
             )}
-          </div>
+          </>
         }
-        childrenResult={readOnly && <IndicateurDeuxResult dataCalculIndicateurDeux={dataCalculIndicateurDeux} />}
+        childrenResult={readOnly && <IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
       />
     </PageIndicateurDeux>
   )

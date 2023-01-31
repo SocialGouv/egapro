@@ -7,17 +7,17 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
 interface IndicateurDeuxResultProps {
-  dataCalculIndicateurDeux: Pick<
+  calculsIndicateurDeux: Pick<
     ReturnType<typeof calculIndicateurDeux>,
     "indicateurEcartAugmentation" | "indicateurSexeSurRepresente" | "noteIndicateurDeux" | "correctionMeasure"
   >
 }
 
-const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ dataCalculIndicateurDeux }) => {
+const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ calculsIndicateurDeux }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
   const { indicateurEcartAugmentation, indicateurSexeSurRepresente, noteIndicateurDeux, correctionMeasure } =
-    dataCalculIndicateurDeux
+    calculsIndicateurDeux
 
   if (!state) return null
 

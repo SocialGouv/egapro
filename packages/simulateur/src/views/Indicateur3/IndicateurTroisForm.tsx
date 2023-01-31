@@ -1,29 +1,29 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { FormState, ActionIndicateurTroisData } from "../../globals"
 
 import { effectifEtEcartPromoGroup } from "../../utils/calculsEgaProIndicateurTrois"
 import {
-  parseFloatFormValue,
-  parseFloatStateValue,
-  parseBooleanFormValue,
-  parseBooleanStateValue,
   composeValidators,
   minNumber,
   mustBeNumber,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
+  parseFloatFormValue,
+  parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
 
-import FormStack from "../../components/ds/FormStack"
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
 import ActionBar from "../../components/ActionBar"
+import BlocForm from "../../components/BlocForm"
+import FormStack from "../../components/ds/FormStack"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -62,19 +62,19 @@ const validateForm = ({
 
 interface IndicateurTroisFormProps {
   ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>
-  presencePromotion: boolean
   readOnly: boolean
-  updateIndicateurTrois: (data: ActionIndicateurTroisData) => void
-  validateIndicateurTrois: (valid: FormState) => void
 }
 
 const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
   ecartPromoParCategorieSocioPro,
-  presencePromotion,
   readOnly,
-  updateIndicateurTrois,
-  validateIndicateurTrois,
 }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const presencePromotion = state.indicateurTrois.presencePromotion
+
   const initialValues = {
     presencePromotion: parseBooleanStateValue(presencePromotion),
     tauxPromotion: ecartPromoParCategorieSocioPro.map(
@@ -95,15 +95,19 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
         tauxPromotionHommes: parseFloatFormValue(tauxPromotionHommes),
       }),
     )
-    updateIndicateurTrois({
-      tauxPromotion,
-      presencePromotion,
+
+    dispatch({
+      type: "updateIndicateurTrois",
+      data: {
+        tauxPromotion,
+        presencePromotion,
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurTrois("Valid")
+    dispatch({ type: "validateIndicateurTrois", valid: "Valid" })
   }
 
   // Only for Total with updated values
