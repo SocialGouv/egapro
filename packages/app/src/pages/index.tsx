@@ -1,5 +1,5 @@
 import { config } from "@common/config";
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import {
   Box,
   ButtonAsLink,
@@ -127,7 +127,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = _ctx => {
 };
 
 Home.getLayout = ({ children }) => {
-  return <BasicLayout>{children}</BasicLayout>;
+  return <BasicLayoutPublic>{children}</BasicLayoutPublic>;
 };
 
 export default Home;

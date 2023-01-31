@@ -1,3 +1,10 @@
+# [2.81.0](https://github.com/SocialGouv/egapro/compare/v2.80.0...v2.81.0) (2023-01-30)
+
+
+### Features
+
+* new layout ([#1545](https://github.com/SocialGouv/egapro/issues/1545)) ([ab0071f](https://github.com/SocialGouv/egapro/commit/ab0071fceb52f937b3935276f2dbd0d437a52aa0))
+
 # [2.80.0](https://github.com/SocialGouv/egapro/compare/v2.79.5...v2.80.0) (2023-01-30)
 
 
