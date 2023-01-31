@@ -1,4 +1,4 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
 import type { NextPageWithLayout } from "./_app";
@@ -260,7 +260,7 @@ const PrivacyPolicy: NextPageWithLayout = () => {
 };
 
 PrivacyPolicy.getLayout = ({ children }) => {
-  return <BasicLayout title="Politique de confidentialité">{children}</BasicLayout>;
+  return <BasicLayoutPublic title="Politique de confidentialité">{children}</BasicLayoutPublic>;
 };
 
 export default PrivacyPolicy;

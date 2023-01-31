@@ -1,5 +1,5 @@
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import {
   Container,
   FormButton,
@@ -158,9 +158,9 @@ const AddDeclarer: NextPageWithLayout = () => {
 
 AddDeclarer.getLayout = ({ children }) => {
   return (
-    <BasicLayout title={title}>
+    <BasicLayoutPublic title={title}>
       <FeatureStatusProvider>{children}</FeatureStatusProvider>
-    </BasicLayout>
+    </BasicLayoutPublic>
   );
 };
 

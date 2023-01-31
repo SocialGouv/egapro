@@ -1,4 +1,4 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutEntreprise } from "@components/layouts/BasicLayoutEntreprise";
 import {
   Box,
   ButtonAsLink,
@@ -133,9 +133,9 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
 
 RepresentationEquilibree.getLayout = ({ children }) => {
   return (
-    <BasicLayout title="Déclaration des écarts de représentation F/H dans les postes de direction">
+    <BasicLayoutEntreprise title="Déclaration des écarts de représentation F/H dans les postes de direction">
       {children}
-    </BasicLayout>
+    </BasicLayoutEntreprise>
   );
 };
 
