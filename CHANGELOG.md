@@ -1,3 +1,12 @@
+## [2.82.1](https://github.com/SocialGouv/egapro/compare/v2.82.0...v2.82.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* remove print button (Fixes [#1342](https://github.com/SocialGouv/egapro/issues/1342)) ([9fa1bce](https://github.com/SocialGouv/egapro/commit/9fa1bce54675bfd370ddfc4d0b0b99ac43326efa))
+* wording info calcul simu (Fixes [#1361](https://github.com/SocialGouv/egapro/issues/1361)) ([3581e22](https://github.com/SocialGouv/egapro/commit/3581e22b3cb274a6465b745444bb38af4a18558b))
+* wording simu connect button (Fixes [#1539](https://github.com/SocialGouv/egapro/issues/1539)) ([ae50cec](https://github.com/SocialGouv/egapro/commit/ae50cec72e6d3726cb498bfc370b6d728af76fd9))
+
 # [2.82.0](https://github.com/SocialGouv/egapro/compare/v2.81.1...v2.82.0) (2023-02-01)
 
 
