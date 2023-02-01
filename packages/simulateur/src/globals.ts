@@ -98,6 +98,12 @@ export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus"
 
 export type TrancheEffectifsAPI = "50:250" | "251:999" | "1000:"
 
+/**
+ * Explication :
+ * None    => l'utilisateur n'a pas encore soumis ce formulaire qui était en écriture.
+ * Valid   => l'utilisateur a soumis ce formulaire et le formulaire devient read-only.
+ * Invalid => ce formulaire précédemment soumis est devenu invalide suite à une modification d'un autre formulaire.
+ */
 export type FormState = "None" | "Valid" | "Invalid"
 
 export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)"
