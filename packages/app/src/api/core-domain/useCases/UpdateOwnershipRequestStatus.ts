@@ -34,11 +34,8 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
     }
 
     const isAccepted = action === "accept";
-    console.log("isAccepted", isAccepted);
 
     const newStatus = isAccepted ? OwnershipRequestStatus.Enum.ACCEPTED : OwnershipRequestStatus.Enum.REFUSED;
-
-    console.log("newStatus", newStatus);
 
     const ownershipRequests = await this.ownershipRequestRepo.getMultiple(...uuids.map(uuid => new UniqueID(uuid)));
 
@@ -74,11 +71,9 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
       request => request.shouldBeProcessed,
     );
 
-    console.log("processableRequests", processableRequests);
-
     if (processableRequests.length) {
       processableRequests.forEach(request => request.changeStatus(newStatus));
-      console.log("processableRequests after", processableRequests);
+
       try {
         // 1.1
         // NB: This call to `updateWithOwnershipBulk` makes an update in `ownership` table as well, wrapped in a transaction. /!\
