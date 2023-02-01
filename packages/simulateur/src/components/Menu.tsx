@@ -1,10 +1,10 @@
-import React, { Fragment } from "react"
-import { Switch, Route, Link as ReachLink } from "react-router-dom"
-import { Box, Heading, List, ListItem, Link } from "@chakra-ui/react"
+import { Box, Heading, Link, List, ListItem } from "@chakra-ui/react"
+import React from "react"
+import { Link as ReachLink, Route, Switch } from "react-router-dom"
 import { FormState, TrancheEffectifs } from "../globals"
 import globalStyles from "../utils/globalStyles"
-import { IconValid, IconInvalid, IconQuestionMarkCircle } from "./ds/Icons"
 import ButtonLink from "./ds/ButtonLink"
+import { IconInvalid, IconQuestionMarkCircle, IconValid } from "./ds/Icons"
 
 interface CustomNavLinkProps {
   title: string
@@ -166,7 +166,7 @@ function Menu({
               params: { code },
             },
           }) => (
-            <React.Fragment>
+            <>
               <List spacing={2} sx={listStyles}>
                 <ListItem mb={6}>
                   <ButtonLink
@@ -222,7 +222,7 @@ function Menu({
                   />
                 </ListItem>
                 {(trancheEffectifs !== "50 à 250" && (
-                  <Fragment>
+                  <>
                     <ListItem>
                       <CustomNavLink
                         to={`/simulateur/${code}/indicateur2`}
@@ -243,7 +243,7 @@ function Menu({
                         onClick={onClose}
                       />
                     </ListItem>
-                  </Fragment>
+                  </>
                 )) || (
                   <ListItem>
                     <CustomNavLink
@@ -310,7 +310,7 @@ function Menu({
                   />
                 </ListItem>
               </List>
-            </React.Fragment>
+            </>
           )}
         />
       </Switch>

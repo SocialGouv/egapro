@@ -1,5 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { Fragment } from "react"
 import { css } from "@emotion/react"
 import { Field } from "react-final-form"
 
@@ -19,7 +18,7 @@ function RegionsDepartements({
   return (
     <Field name={nameRegion} validate={required} component="select">
       {({ input: regionInput, meta: regionMeta }) => (
-        <Fragment>
+        <>
           <div css={styles.formField}>
             <label
               css={[styles.label, regionMeta.error && regionMeta.touched && styles.labelError]}
@@ -32,7 +31,7 @@ function RegionsDepartements({
                 <div css={styles.fakeInput}>{regionInput.value}</div>
               </div>
             ) : (
-              <Fragment>
+              <>
                 <div css={styles.fieldRow}>
                   <select {...regionInput}>
                     <option value="" key="empty"></option>
@@ -46,7 +45,7 @@ function RegionsDepartements({
                 {regionMeta.error && regionMeta.touched && (
                   <p css={styles.error}>veuillez sélectionner une région dans la liste</p>
                 )}
-              </Fragment>
+              </>
             )}
           </div>
 
@@ -75,7 +74,7 @@ function RegionsDepartements({
                     <div css={styles.fakeInput}>{deptInput.value}</div>
                   </div>
                 ) : (
-                  <Fragment>
+                  <>
                     <div css={styles.fieldRow}>
                       <select {...deptInput}>
                         <option value="" key="empty"></option>
@@ -91,12 +90,12 @@ function RegionsDepartements({
                     {deptMeta.error && deptMeta.touched && (
                       <p css={styles.error}>veuillez sélectionner un département dans la liste</p>
                     )}
-                  </Fragment>
+                  </>
                 )}
               </div>
             )}
           </Field>
-        </Fragment>
+        </>
       )}
     </Field>
   )
