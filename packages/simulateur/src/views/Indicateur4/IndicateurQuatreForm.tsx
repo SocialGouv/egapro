@@ -34,16 +34,14 @@ const lessThanPreviousField: (previousField: string) => ValidatorFunction = (pre
     ? "ce champ ne peut être supérieur au précédent"
     : undefined
 
-interface IndicateurQuatreFormProps {
-  readOnly: boolean
-}
-
-const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({ readOnly }) => {
+const IndicateurQuatreForm: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
 
   const indicateurQuatre = state.indicateurQuatre
+
+  const readOnly = state.indicateurQuatre.formValidated === "Valid"
 
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
