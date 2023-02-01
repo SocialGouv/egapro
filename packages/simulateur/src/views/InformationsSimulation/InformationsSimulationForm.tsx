@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
-import { FunctionComponent, useCallback } from "react"
+import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
-
-import { ActionInformationsSimulationData, FormState } from "../../globals"
 
 import {
   isFormValid,
@@ -114,16 +112,6 @@ const InformationsSimulationForm: FunctionComponent = () => {
   const { code } = useParams<Params>()
   const { state, dispatch } = useAppStateContextProvider()
 
-  const updateInformationsSimulation = useCallback(
-    (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
-    [dispatch],
-  )
-
-  const validateInformationsSimulation = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformationsSimulation", valid }),
-    [dispatch],
-  )
-
   const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
 
   const frozenDeclaration = isFrozenDeclaration(state)
@@ -152,18 +140,21 @@ const InformationsSimulationForm: FunctionComponent = () => {
   const saveForm = (formData: typeof initialValues) => {
     const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = formData
 
-    updateInformationsSimulation({
-      nomEntreprise,
-      trancheEffectifs,
-      anneeDeclaration: parseIntFormValue(anneeDeclaration),
-      ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
-      periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
+    dispatch({
+      type: "updateInformationsSimulation",
+      data: {
+        nomEntreprise,
+        trancheEffectifs,
+        anneeDeclaration: parseIntFormValue(anneeDeclaration),
+        ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
+        periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
+      },
     })
   }
 
   const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
-    validateInformationsSimulation("Valid")
+    dispatch({ type: "validateInformationsSimulation", valid: "Valid" })
   }
 
   return (
@@ -238,12 +229,10 @@ const InformationsSimulationForm: FunctionComponent = () => {
             </FormControl>
             <FieldPeriodeSuffisante readOnly={readOnly} />
             {values.periodeSuffisante === "true" && (
-              <>
-                <FieldPeriodeReference
-                  readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
-                  onClick={form.mutators.selectEndOfYear}
-                />
-              </>
+              <FieldPeriodeReference
+                readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
+                onClick={form.mutators.selectEndOfYear}
+              />
             )}
           </FormStack>
           {readOnly ? (
@@ -256,7 +245,7 @@ const InformationsSimulationForm: FunctionComponent = () => {
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
-                  onClick={() => validateInformationsSimulation("None")}
+                  onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
                   variant="link"
                   size="sm"
                 />
