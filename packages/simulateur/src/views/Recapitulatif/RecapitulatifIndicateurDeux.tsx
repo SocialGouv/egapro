@@ -1,8 +1,6 @@
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { CategorieSocioPro, FormState } from "../../globals"
-
 import {
   displayFractionPercentWithEmptyData,
   displayNameCategorieSocioPro,
@@ -12,40 +10,41 @@ import {
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurDeuxProps {
-  isEffectifsFilled: boolean
-  indicateurDeuxFormValidated: FormState
-  effectifsIndicateurDeuxCalculable: boolean
-  indicateurDeuxCalculable: boolean
-  effectifEtEcartAugmentParGroupe: Array<{
-    categorieSocioPro: CategorieSocioPro
-    ecartTauxAugmentation: number | undefined
-  }>
-  indicateurEcartAugmentation: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeux: number | undefined
-  correctionMeasure: boolean
+  calculsIndicateurDeux: ReturnType<typeof calculerIndicateurDeux>
 }
 
 const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeuxProps> = ({
-  isEffectifsFilled,
-  indicateurDeuxFormValidated,
-  effectifsIndicateurDeuxCalculable,
-  indicateurDeuxCalculable,
-  effectifEtEcartAugmentParGroupe,
-  indicateurEcartAugmentation,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeux,
-  correctionMeasure,
+  calculsIndicateurDeux,
 }) => {
-  if (!isEffectifsFilled) {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const indicateurDeuxFormValidated = state.indicateurDeux.formValidated
+
+  const isEffectifsFilled = state.effectif.formValidated === "Valid"
+
+  const {
+    effectifsIndicateurCalculable,
+    indicateurCalculable,
+    effectifEtEcartAugmentParGroupe,
+    indicateurEcartAugmentation,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeux,
+    correctionMeasure,
+  } = calculsIndicateurDeux
+
+  if (!isEffectifsFilled || indicateurDeuxFormValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
-  if (!effectifsIndicateurDeuxCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -55,7 +54,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
-  if (!indicateurDeuxCalculable) {
+  if (!indicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -63,10 +62,6 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d’augmentation durant la période de référence"
       />
     )
-  }
-
-  if (indicateurDeuxFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
   return (
