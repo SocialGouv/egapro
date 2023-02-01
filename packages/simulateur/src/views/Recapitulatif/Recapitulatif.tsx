@@ -43,12 +43,7 @@ const Recapitulatif: FunctionComponent = () => {
   const calculsIndicateurDeux = calculerIndicateurDeux(state)
   const calculsIndicateurTrois = calculerIndicateurTrois(state)
   const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
-
-  const {
-    indicateurCalculable: indicateurQuatreCalculable,
-    indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre,
-  } = calculerIndicateurQuatre(state)
+  const calculsIndicateurQuatre = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
@@ -90,7 +85,7 @@ const Recapitulatif: FunctionComponent = () => {
     calculsIndicateurDeux.noteIndicateurDeux,
     calculsIndicateurTrois.noteIndicateurTrois,
     calculsIndicateurDeuxTrois.noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
+    calculsIndicateurQuatre.noteIndicateurQuatre,
     noteIndicateurCinq,
   )
 
@@ -121,14 +116,9 @@ const Recapitulatif: FunctionComponent = () => {
                 <RecapitulatifIndicateurTrois calculsIndicateurTrois={calculsIndicateurTrois} />
               </>
             )) || <RecapitulatifIndicateurDeuxTrois calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />}
-            <RecapitulatifIndicateurQuatre
-              indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
-              indicateurQuatreCalculable={indicateurQuatreCalculable}
-              indicateurEcartNombreSalarieesAugmentees={indicateurEcartNombreSalarieesAugmentees}
-              presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
-              nombreSalarieesPeriodeAugmentation={state.indicateurQuatre.nombreSalarieesPeriodeAugmentation}
-              noteIndicateurQuatre={noteIndicateurQuatre}
-            />
+
+            <RecapitulatifIndicateurQuatre calculsIndicateurQuatre={calculsIndicateurQuatre} />
+
             <RecapitulatifIndicateurCinq
               indicateurCinqFormValidated={state.indicateurCinq.formValidated}
               indicateurSexeSousRepresente={indicateurCinqSexeSousRepresente}

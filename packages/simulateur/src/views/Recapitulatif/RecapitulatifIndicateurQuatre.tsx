@@ -1,32 +1,31 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import { displayPercent } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurQuatreProps {
-  indicateurQuatreFormValidated: FormState
-  indicateurQuatreCalculable: boolean
-  indicateurEcartNombreSalarieesAugmentees: number | undefined
-  presenceCongeMat: boolean
-  nombreSalarieesPeriodeAugmentation: number | undefined
-  noteIndicateurQuatre: number | undefined
+  calculsIndicateurQuatre: ReturnType<typeof calculerIndicateurQuatre>
 }
 
 const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQuatreProps> = ({
-  indicateurQuatreFormValidated,
-  indicateurQuatreCalculable,
-  indicateurEcartNombreSalarieesAugmentees,
-  presenceCongeMat,
-  nombreSalarieesPeriodeAugmentation,
-  noteIndicateurQuatre,
+  calculsIndicateurQuatre,
 }) => {
-  if (indicateurQuatreFormValidated !== "None" && !indicateurQuatreCalculable) {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const { formValidated, presenceCongeMat, nombreSalarieesPeriodeAugmentation } = state.indicateurQuatre
+
+  const { indicateurCalculable, indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre } =
+    calculsIndicateurQuatre
+
+  if (formValidated !== "None" && !indicateurCalculable) {
     const messageNonCalculable =
       presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation === 0
         ? "d’augmentations salariales pendant la durée du ou des congés maternité"
@@ -40,7 +39,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
     )
   }
 
-  if (indicateurQuatreFormValidated === "None") {
+  if (formValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur4" />
   }
 
