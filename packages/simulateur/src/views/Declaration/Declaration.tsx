@@ -1,6 +1,5 @@
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 import React, { PropsWithChildren, useEffect, useState } from "react"
-import { RouteComponentProps } from "react-router-dom"
 
 import type {
   AppState,

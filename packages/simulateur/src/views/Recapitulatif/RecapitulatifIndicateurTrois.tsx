@@ -1,8 +1,6 @@
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { CategorieSocioPro, FormState } from "../../globals"
-
 import {
   displayFractionPercentWithEmptyData,
   displayNameCategorieSocioPro,
@@ -11,11 +9,11 @@ import {
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import MessageWhenInvalid from "./components/MessageWhenInvalid"
-import RecapBloc from "./components/RecapBloc"
 import { indicateursInfo } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
+import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurTroisProps {
   calculsIndicateurTrois: ReturnType<typeof calculerIndicateurTrois>
