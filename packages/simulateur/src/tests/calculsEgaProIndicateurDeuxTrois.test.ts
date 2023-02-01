@@ -1,6 +1,6 @@
 import stateComplete from "../__fixtures__/stateComplete"
 import { calculBarem, calculNote } from "../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
 import { AppState, PeriodeDeclaration } from "../globals"
 
 ///////////////////////
@@ -220,6 +220,6 @@ describe("test calculIndicateurDeuxTrois", () => {
     },
   } as AppState
   test("test data", () => {
-    expect(calculIndicateurDeuxTrois(state)).toMatchSnapshot()
+    expect(calculerIndicateurDeuxTrois(state)).toMatchSnapshot()
   })
 })

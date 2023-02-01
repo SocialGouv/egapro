@@ -24,7 +24,7 @@ import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculerIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculerIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
 import calculerIndicateurUn, {
@@ -82,7 +82,7 @@ function buildHelpers(state: AppState) {
     noteEcartNombreSalaries: noteNombreSalaries,
     correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois,
-  } = calculIndicateurDeuxTrois(state)
+  } = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,

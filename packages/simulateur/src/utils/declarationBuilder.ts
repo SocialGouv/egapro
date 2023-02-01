@@ -16,7 +16,7 @@ import { departementCode, regionCode } from "../components/RegionsDepartements"
 import { calculerNoteIndex } from "./calculsEgaProIndex"
 import calculerIndicateurCinq from "./calculsEgaProIndicateurCinq"
 import calculerIndicateurDeux from "./calculsEgaProIndicateurDeux"
-import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
 import calculerIndicateurTrois from "./calculsEgaProIndicateurTrois"
 import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
@@ -474,7 +474,7 @@ export function computeValuesFromState(state: AppState) {
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
     plusPetitNombreSalaries,
-  } = calculIndicateurDeuxTrois(state)
+  } = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,

@@ -6,12 +6,12 @@ import ResultSummary from "../../components/ResultSummary"
 
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { Results } from "./IndicateurDeuxTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 
 interface IndicateurDeuxTroisResultProps {
   results: Results
   calculsIndicateurDeuxTrois: Pick<
-    ReturnType<typeof calculIndicateurDeuxTrois>,
+    ReturnType<typeof calculerIndicateurDeuxTrois>,
     "indicateurSexeSurRepresente" | "noteIndicateurDeuxTrois" | "correctionMeasure"
   >
 }

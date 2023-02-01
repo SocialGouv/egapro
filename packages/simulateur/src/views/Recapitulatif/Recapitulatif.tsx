@@ -47,30 +47,32 @@ const Recapitulatif: FunctionComponent = () => {
   const calculsIndicateurCinq = calculerIndicateurCinq(state)
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
-  const indicateurUnValid =
+  const indicateurUnCompliant =
     state.indicateurUn.formValidated === "Valid" ||
     // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
     (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.csp) ||
     !calculsIndicateurUn.effectifsIndicateurCalculable
 
-  const indicateurDeuxTroisValid =
-    state.indicateurDeuxTrois.formValidated === "Valid" ||
-    !calculsIndicateurDeuxTrois.effectifsIndicateurCalculable ||
-    !calculsIndicateurDeuxTrois.indicateurCalculable
-
-  const indicateurDeuxValid =
+  const indicateurDeuxCompliant =
     state.indicateurDeux.formValidated === "Valid" ||
     !calculsIndicateurDeux.effectifsIndicateurCalculable ||
     !calculsIndicateurDeux.indicateurCalculable
 
-  const indicateurTroisValid =
+  const indicateurTroisCompliant =
     state.indicateurTrois.formValidated === "Valid" ||
     !calculsIndicateurTrois.effectifsIndicateurCalculable ||
     !calculsIndicateurTrois.indicateurCalculable
 
-  const allIndicateursValid =
-    indicateurUnValid &&
-    (trancheEffectifs === "50 à 250" ? indicateurDeuxTroisValid : indicateurDeuxValid && indicateurTroisValid) &&
+  const indicateurDeuxTroisCompliant =
+    state.indicateurDeuxTrois.formValidated === "Valid" ||
+    !calculsIndicateurDeuxTrois.effectifsIndicateurCalculable ||
+    !calculsIndicateurDeuxTrois.indicateurCalculable
+
+  const allIndicateursCompliant =
+    indicateurUnCompliant &&
+    (trancheEffectifs === "50 à 250"
+      ? indicateurDeuxTroisCompliant
+      : indicateurDeuxCompliant && indicateurTroisCompliant) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid"
 
@@ -96,11 +98,10 @@ const Recapitulatif: FunctionComponent = () => {
         {periodeSuffisante && (
           <>
             <RecapitulatifIndex
-              allIndicateurValid={allIndicateursValid}
+              allIndicateurValid={allIndicateursCompliant}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
-              anneeDeclaration={Number(state.informations.anneeDeclaration)}
             />
             <RecapitulatifIndicateurUn calculsIndicateurUn={calculsIndicateurUn} />
 

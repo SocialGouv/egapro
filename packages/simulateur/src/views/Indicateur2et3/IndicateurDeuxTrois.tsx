@@ -1,7 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculIndicateurDeuxTrois, {
+import calculerIndicateurDeuxTrois, {
   calculBarem,
   calculPlusPetitNombreSalaries,
 } from "../../utils/calculsEgaProIndicateurDeuxTrois"
@@ -29,7 +29,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
 
   if (!state) return null
 
-  const calculsIndicateurDeuxTrois = calculIndicateurDeuxTrois(state)
+  const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
 
   const {
     effectifsIndicateurCalculable,
@@ -163,7 +163,7 @@ export const calculerResultats = (
 type AdditionalInfoProps = {
   results: Results
   calculsIndicateurDeuxTrois: Pick<
-    ReturnType<typeof calculIndicateurDeuxTrois>,
+    ReturnType<typeof calculerIndicateurDeuxTrois>,
     "indicateurSexeSurRepresente" | "correctionMeasure"
   >
 }

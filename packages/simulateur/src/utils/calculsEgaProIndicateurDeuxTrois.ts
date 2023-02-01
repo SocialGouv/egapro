@@ -140,7 +140,7 @@ export const calculNote = (
 // ALL //
 /////////
 
-export default function calculIndicateurDeuxTrois(state: AppState) {
+export default function calculerIndicateurDeuxTrois(state: AppState) {
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(state.effectif.nombreSalaries)
 
