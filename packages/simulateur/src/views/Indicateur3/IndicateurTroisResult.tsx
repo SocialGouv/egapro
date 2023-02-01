@@ -21,6 +21,10 @@ const IndicateurTroisResult: FunctionComponent<IndicateurTroisResultProps> = ({ 
 
   if (!state) return null
 
+  const readOnly = state.indicateurTrois.formValidated === "Valid"
+
+  if (readOnly) return null
+
   return (
     <ResultSummary
       firstLineLabel="votre résultat final est"

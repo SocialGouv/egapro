@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
-import { effectifEtEcartPromoGroup } from "../../utils/calculsEgaProIndicateurTrois"
+import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import {
   composeValidators,
   minNumber,
@@ -12,8 +12,9 @@ import {
   parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
-import { displayNameCategorieSocioPro } from "../../utils/helpers"
+import { displayNameCategorieSocioPro, messageMesureCorrection } from "../../utils/helpers"
 
+import { Text } from "@chakra-ui/react"
 import ActionBar from "../../components/ActionBar"
 import BlocForm from "../../components/BlocForm"
 import FormStack from "../../components/ds/FormStack"
@@ -61,19 +62,26 @@ const validateForm = ({
 }
 
 interface IndicateurTroisFormProps {
-  ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>
-  readOnly: boolean
+  calculsIndicateurTrois: Pick<
+    ReturnType<typeof calculIndicateurTrois>,
+    "effectifEtEcartPromoParGroupe" | "correctionMeasure" | "indicateurSexeSurRepresente"
+  >
 }
 
-const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
-  ecartPromoParCategorieSocioPro,
-  readOnly,
-}) => {
+const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({ calculsIndicateurTrois }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
 
   const presencePromotion = state.indicateurTrois.presencePromotion
+
+  const readOnly = state.indicateurTrois.formValidated === "Valid"
+
+  const {
+    effectifEtEcartPromoParGroupe: ecartPromoParCategorieSocioPro,
+    correctionMeasure,
+    indicateurSexeSurRepresente,
+  } = calculsIndicateurTrois
 
   const initialValues = {
     presencePromotion: parseBooleanStateValue(presencePromotion),
@@ -140,80 +148,87 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
   // );
 
   return (
-    <Form
-      onSubmit={onSubmit}
-      validate={validateForm}
-      initialValues={initialValues}
-      // mandatory to not change user inputs
-      // because we want to keep wrong string inside the input
-      // we don't want to block string value
-      initialValuesEqual={() => true}
-    >
-      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit}>
-          <FormAutoSave saveForm={saveForm} />
-          <FormStack>
-            {submitFailed && hasValidationErrors && (
-              <FormError
-                message={
-                  errors?.notAll0
-                    ? errors.notAll0
-                    : "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés."
-                }
+    <>
+      <Form
+        onSubmit={onSubmit}
+        validate={validateForm}
+        initialValues={initialValues}
+        // mandatory to not change user inputs
+        // because we want to keep wrong string inside the input
+        // we don't want to block string value
+        initialValuesEqual={() => true}
+      >
+        {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
+          <form onSubmit={handleSubmit}>
+            <FormAutoSave saveForm={saveForm} />
+            <FormStack>
+              {submitFailed && hasValidationErrors && (
+                <FormError
+                  message={
+                    errors?.notAll0
+                      ? errors.notAll0
+                      : "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés."
+                  }
+                />
+              )}
+              <RadiosBoolean
+                fieldName="presencePromotion"
+                value={values.presencePromotion}
+                readOnly={readOnly}
+                label={<>Y a-t-il eu des promotions durant la période de référence&nbsp;?</>}
               />
-            )}
-            <RadiosBoolean
-              fieldName="presencePromotion"
-              value={values.presencePromotion}
-              readOnly={readOnly}
-              label={<>Y a-t-il eu des promotions durant la période de référence&nbsp;?</>}
-            />
 
-            {values.presencePromotion === "true" && (
-              <BlocForm
-                title="Pourcentage de promotions"
-                // footer={[
-                //   displayFractionPercent(totalTauxPromotionFemmes),
-                //   displayFractionPercent(totalTauxPromotionHommes)
-                // ]}
-              >
-                {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                  return (
-                    <FieldInputsMenWomen
-                      key={categorieSocioPro}
-                      legend="% de salariés promus"
-                      title={displayNameCategorieSocioPro(categorieSocioPro)}
-                      label={{
-                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} promues`,
-                        men: `Pourcentage d'hommes ${displayNameCategorieSocioPro(categorieSocioPro)} promus`,
-                      }}
-                      readOnly={readOnly}
-                      calculable={validiteGroupe}
-                      calculableNumber={10}
-                      mask="percent"
-                      femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
-                      hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
-                      validatorFemmes={validator}
-                      validatorHommes={validator}
-                    />
-                  )
-                })}
-              </BlocForm>
-            )}
-          </FormStack>
+              {values.presencePromotion === "true" && (
+                <BlocForm
+                  title="Pourcentage de promotions"
+                  // footer={[
+                  //   displayFractionPercent(totalTauxPromotionFemmes),
+                  //   displayFractionPercent(totalTauxPromotionHommes)
+                  // ]}
+                >
+                  {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                    return (
+                      <FieldInputsMenWomen
+                        key={categorieSocioPro}
+                        legend="% de salariés promus"
+                        title={displayNameCategorieSocioPro(categorieSocioPro)}
+                        label={{
+                          women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} promues`,
+                          men: `Pourcentage d'hommes ${displayNameCategorieSocioPro(categorieSocioPro)} promus`,
+                        }}
+                        readOnly={readOnly}
+                        calculable={validiteGroupe}
+                        calculableNumber={10}
+                        mask="percent"
+                        femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
+                        hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
+                        validatorFemmes={validator}
+                        validatorHommes={validator}
+                      />
+                    )
+                  })}
+                </BlocForm>
+              )}
+            </FormStack>
 
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
-        </form>
+            {readOnly ? (
+              <ActionBar>
+                <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
+              </ActionBar>
+            ) : (
+              <ActionBar>
+                <FormSubmit />
+              </ActionBar>
+            )}
+          </form>
+        )}
+      </Form>
+      {readOnly && correctionMeasure && (
+        <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
+          {messageMesureCorrection(indicateurSexeSurRepresente, "de promotions", "15/15")}
+        </Text>
       )}
-    </Form>
+    </>
   )
 }
 

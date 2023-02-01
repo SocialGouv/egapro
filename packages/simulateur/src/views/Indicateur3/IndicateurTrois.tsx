@@ -1,8 +1,6 @@
-import { Text } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
 import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
-import { messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
@@ -27,13 +25,7 @@ const IndicateurTrois: FunctionComponent = () => {
 
   const calculsIndicateurTrois = calculerIndicateurTrois(state)
 
-  const {
-    effectifsIndicateurCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurCalculable,
-    indicateurSexeSurRepresente,
-    correctionMeasure,
-  } = calculsIndicateurTrois
+  const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurTrois
 
   const readOnly = state.indicateurTrois.formValidated === "Valid"
 
@@ -67,7 +59,7 @@ const IndicateurTrois: FunctionComponent = () => {
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (state.indicateurTrois.formValidated === "Valid" && !indicateurCalculable) {
+  if (readOnly && !indicateurCalculable) {
     return (
       <PageIndicateurTrois>
         <InfoBlock
@@ -90,17 +82,8 @@ const IndicateurTrois: FunctionComponent = () => {
   return (
     <PageIndicateurTrois>
       <LayoutFormAndResult
-        form={
-          <>
-            <IndicateurTroisForm ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe} readOnly={readOnly} />
-            {readOnly && correctionMeasure && (
-              <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
-                {messageMesureCorrection(indicateurSexeSurRepresente, "de promotions", "15/15")}
-              </Text>
-            )}
-          </>
-        }
-        result={readOnly && <IndicateurTroisResult calculsIndicateurTrois={calculsIndicateurTrois} />}
+        form={<IndicateurTroisForm calculsIndicateurTrois={calculsIndicateurTrois} />}
+        result={<IndicateurTroisResult calculsIndicateurTrois={calculsIndicateurTrois} />}
       />
     </PageIndicateurTrois>
   )
