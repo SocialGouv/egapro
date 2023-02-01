@@ -138,21 +138,6 @@ const Recapitulatif: FunctionComponent = () => {
 
         <ActionBar>
           <ButtonSimulatorLink to="/informations-entreprise" label="Poursuivre vers la déclaration" />
-          <Box>
-            <Tooltip
-              label="Possible d'enregistrer en PDF depuis la fenêtre d'impression"
-              hasArrow
-              sx={{
-                "@media print": {
-                  display: "none",
-                },
-              }}
-            >
-              <Button size="lg" variant="outline" onClick={() => window.print()}>
-                Imprimer
-              </Button>
-            </Tooltip>
-          </Box>
         </ActionBar>
       </Box>
     </Page>
