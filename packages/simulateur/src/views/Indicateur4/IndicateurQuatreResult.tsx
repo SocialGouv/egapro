@@ -1,22 +1,25 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import { displayPercent } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 
 interface IndicateurQuatreResultProps {
-  indicateurEcartNombreSalarieesAugmentees: number | undefined
-  noteIndicateurQuatre: number | undefined
-  validateIndicateurQuatre: (valid: FormState) => void
+  calculsIndicateurQuatre: Pick<
+    ReturnType<typeof calculerIndicateurQuatre>,
+    "indicateurEcartNombreSalarieesAugmentees" | "noteIndicateurQuatre"
+  >
 }
 
-const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = ({
-  indicateurEcartNombreSalarieesAugmentees,
-  noteIndicateurQuatre,
-  validateIndicateurQuatre,
-}) => {
+const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = ({ calculsIndicateurQuatre }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const { indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre } = calculsIndicateurQuatre
+
   return (
     <ResultSummary
       firstLineLabel="votre résultat final est"
@@ -28,7 +31,7 @@ const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = (
       secondLineLabel="votre note obtenue est"
       secondLineData={(noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15"}
       indicateurSexeSurRepresente="femmes"
-      onEdit={() => validateIndicateurQuatre("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}
     />
   )
 }

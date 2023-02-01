@@ -36,7 +36,7 @@ export const calculNote = (indicateurEcartNombreSalarieesAugmentees: number | un
 // ALL //
 /////////
 
-export default function calculIndicateurQuatre(state: AppState) {
+export default function calculerIndicateurQuatre(state: AppState) {
   const indicateurCalculable = calculIndicateurCalculable(
     state.indicateurQuatre.presenceCongeMat,
     state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,

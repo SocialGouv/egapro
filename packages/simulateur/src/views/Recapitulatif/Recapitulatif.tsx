@@ -10,7 +10,7 @@ import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
@@ -88,7 +88,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
+  } = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,

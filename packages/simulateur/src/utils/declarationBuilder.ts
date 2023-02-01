@@ -17,7 +17,7 @@ import { calculNoteIndex } from "./calculsEgaProIndex"
 import calculIndicateurCinq from "./calculsEgaProIndicateurCinq"
 import calculIndicateurDeux from "./calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
+import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
 import calculIndicateurTrois from "./calculsEgaProIndicateurTrois"
 import calculIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
@@ -480,7 +480,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
+  } = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,

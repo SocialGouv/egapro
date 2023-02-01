@@ -25,7 +25,7 @@ import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
 import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
@@ -88,7 +88,7 @@ function buildHelpers(state: AppState) {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
+  } = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
