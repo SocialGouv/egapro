@@ -1,3 +1,10 @@
+## [2.81.1](https://github.com/SocialGouv/egapro/compare/v2.81.0...v2.81.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* refused ownership-resquest must not add ownership ([#1547](https://github.com/SocialGouv/egapro/issues/1547)) ([6476fc9](https://github.com/SocialGouv/egapro/commit/6476fc9f64a14ac76d9fec6b9d844df096724547))
+
 # [2.81.0](https://github.com/SocialGouv/egapro/compare/v2.80.0...v2.81.0) (2023-01-30)
 
 
