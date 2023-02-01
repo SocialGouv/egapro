@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
 import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
 
@@ -33,6 +33,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import InfoBlock from "../../components/ds/InfoBlock"
 
 const validateForm = ({
   nomEntreprise,
@@ -71,7 +72,7 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
   <InputDateGroup
     fieldName="finPeriodeReference"
     isReadOnly={readOnly}
-    label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
+    label="Date de fin de la période de référence choisie pour le calcul des indicateurs (jj/mm/aaaa)"
   >
     <Button mt={2} onClick={onClick} disabled={readOnly} variant="solid" size="sm" px="8" py="5" colorScheme="primary">
       Sélectionner la fin
@@ -236,21 +237,30 @@ const InformationsSimulationForm: FunctionComponent = () => {
             )}
           </FormStack>
           {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink
-                to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
-                label="Suivant"
-              />
-              {isFormValid(informations) && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
-                  variant="link"
-                  size="sm"
+            <>
+              <ActionBar>
+                <ButtonSimulatorLink
+                  to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
+                  label="Suivant"
                 />
-              )}
-            </ActionBar>
+                {isFormValid(informations) && (
+                  <ButtonAction
+                    leftIcon={<IconEdit />}
+                    label="Modifier les données saisies"
+                    onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
+                    variant="link"
+                    size="sm"
+                  />
+                )}
+              </ActionBar>
+              <InfoBlock
+                mt={2}
+                type="info"
+                text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
+                  +values.anneeDeclaration + 1
+                } au titre des données de ${values.anneeDeclaration}.`}
+              />
+            </>
           ) : (
             <ActionBar>
               <FormSubmit />
