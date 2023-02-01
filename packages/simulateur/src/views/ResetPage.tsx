@@ -27,15 +27,17 @@ function ResetPage(): null {
   }, [])
 
   useEffect(() => {
+    const runEffect = async () => {
+      try {
+        const { jsonBody } = await postSimulation({})
+        history.push(`/simulateur/${jsonBody?.id}`, location.state ? location.state : {})
+      } catch (error: any) {
+        const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
+        console.error(errorMessage)
+      }
+    }
     if (state === undefined) {
-      postSimulation({})
-        .then(({ jsonBody: { id } }) => {
-          history.push(`/simulateur/${id}`, location.state ? location.state : {})
-        })
-        .catch((error) => {
-          const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
-          console.error(errorMessage)
-        })
+      runEffect()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to subscribe to history and location.state changes.
   }, [state])

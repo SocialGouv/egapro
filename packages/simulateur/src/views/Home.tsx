@@ -17,22 +17,21 @@ const Home: FunctionComponent<RouteComponentProps> = ({ history, location }) => 
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
 
-  const onClick = () => {
+  const onClick = async () => {
     setLoading(true)
     dispatch({ type: "resetState" })
 
-    postSimulation({})
-      .then(({ jsonBody: { id } }) => {
-        setLoading(false)
+    try {
+      const { jsonBody } = await postSimulation({})
+      setLoading(false)
 
-        history.push(`/simulateur/${id}`, location.state ? location.state : {})
-      })
-      .catch((error) => {
-        setLoading(false)
-        const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
-        setErrorMessage(errorMessage)
-        logToSentry(error, undefined)
-      })
+      history.push(`/simulateur/${jsonBody?.id}`, location.state ? location.state : {})
+    } catch (error: any) {
+      setLoading(false)
+      const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
+      setErrorMessage(errorMessage)
+      logToSentry(error, undefined)
+    }
   }
 
   if (!loading && errorMessage) {
