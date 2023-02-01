@@ -1,34 +1,34 @@
 import React, { FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
 
-import { AppState, ActionType } from "../../globals"
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
-import InfoBlock from "../../components/ds/InfoBlock"
-import FormStack from "../../components/ds/FormStack"
-import Page from "../../components/Page"
 import ActionBar from "../../components/ActionBar"
-import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
-import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
-import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
+import FormStack from "../../components/ds/FormStack"
+import InfoBlock from "../../components/ds/InfoBlock"
+import Page from "../../components/Page"
+import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
-
-interface IndicateurUnProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
+import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
+import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de rémunération"
 
-const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch }) => {
+const IndicateurUn: FunctionComponent = () => {
   useTitle(title)
 
-  const { csp, coef, autre } = state.indicateurUn
-  const readOnly = state.indicateurUn.formValidated === "Valid"
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const { csp } = state.indicateurUn
+
+  const readOnly = isFormValid(state.indicateurUn)
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurUn>
         <InfoBlock
@@ -40,7 +40,7 @@ const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch })
     )
   }
 
-  const { effectifsIndicateurCalculable } = calculIndicateurUn(state)
+  const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
   // les effectifs ne permettent pas de calculer l'indicateur
   if (!effectifsIndicateurCalculable && state.indicateurUn.csp) {
@@ -63,12 +63,8 @@ const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch })
 
   return (
     <PageIndicateurUn>
-      <IndicateurUnTypeForm csp={csp} coef={coef} autre={autre} readOnly={readOnly} dispatch={dispatch} />
-      {csp ? (
-        <IndicateurUnCsp state={state} dispatch={dispatch} />
-      ) : (
-        <IndicateurUnCoef state={state} dispatch={dispatch} />
-      )}
+      <IndicateurUnTypeForm readOnly={readOnly} />
+      {csp ? <IndicateurUnCsp /> : <IndicateurUnCoef state={state} dispatch={dispatch} />}
     </PageIndicateurUn>
   )
 }

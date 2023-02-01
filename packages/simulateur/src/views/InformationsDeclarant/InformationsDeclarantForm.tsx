@@ -1,22 +1,24 @@
-import React, { FunctionComponent } from "react"
 import { Box, Flex, Text } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 import { Field, Form } from "react-final-form"
 import { Link } from "react-router-dom"
 import { z } from "zod"
 
-import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
+import { ActionInformationsDeclarantData } from "../../globals"
 
-import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import { formValidator } from "../../components/ds/form-lib"
+import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
 import InputGroup from "../../components/ds/InputGroup"
-import FormStack from "../../components/ds/FormStack"
-import { formValidator } from "../../components/ds/form-lib"
-import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import FormError from "../../components/FormError"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 
 const FormInputs = z.object({
   nom: z
@@ -40,19 +42,14 @@ const FormInputs = z.object({
   }),
 })
 
-interface InformationsDeclarantFormProps {
-  informationsDeclarant: AppState["informationsDeclarant"]
-  readOnly: boolean
-  updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void
-  validateInformationsDeclarant: (valid: FormState) => void
-}
+const InformationsDeclarantForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProps> = ({
-  informationsDeclarant,
-  readOnly,
-  updateInformationsDeclarant,
-  validateInformationsDeclarant,
-}) => {
+  if (!state) return null
+
+  const informationsDeclarant = state.informationsDeclarant
+  const readOnly = isFormValid(state.informationsDeclarant)
+
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
@@ -61,21 +58,16 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
     acceptationCGU: informationsDeclarant.acceptationCGU,
   }
 
-  const saveForm = (formData: any) => {
-    const { nom, prenom, tel, email, acceptationCGU } = formData
-
-    updateInformationsDeclarant({
-      nom,
-      prenom,
-      tel,
-      email,
-      acceptationCGU,
+  const saveForm = (data: ActionInformationsDeclarantData) => {
+    dispatch({
+      type: "updateInformationsDeclarant",
+      data,
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateInformationsDeclarant("Valid")
+    dispatch({ type: "validateInformationsDeclarant", valid: "Valid" })
   }
 
   return (
@@ -138,11 +130,11 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
             <ActionBar>
               <ButtonSimulatorLink to="/declaration" label="Suivant" />
               &emsp;
-              {informationsDeclarant.formValidated === "Valid" && (
+              {isFormValid(informationsDeclarant) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
-                  onClick={() => validateInformationsDeclarant("None")}
+                  onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
                   variant="link"
                   size="sm"
                 />

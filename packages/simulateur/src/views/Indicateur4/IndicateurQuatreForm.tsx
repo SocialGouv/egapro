@@ -1,30 +1,30 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
-import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals"
-
 import {
-  parseIntFormValue,
-  parseIntStateValue,
+  composeValidators,
+  isFormValid,
+  maxNumber,
+  minNumber,
+  mustBeInteger,
+  mustBeNumber,
   parseBooleanFormValue,
   parseBooleanStateValue,
+  parseIntFormValue,
+  parseIntStateValue,
   required,
-  mustBeNumber,
-  maxNumber,
-  composeValidators,
-  minNumber,
   ValidatorFunction,
-  mustBeInteger,
 } from "../../utils/formHelpers"
 
+import ActionBar from "../../components/ActionBar"
 import FormStack from "../../components/ds/FormStack"
 import InputGroup from "../../components/ds/InputGroup"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -35,19 +35,15 @@ const lessThanPreviousField: (previousField: string) => ValidatorFunction = (pre
     ? "ce champ ne peut être supérieur au précédent"
     : undefined
 
-interface IndicateurQuatreFormProps {
-  indicateurQuatre: AppState["indicateurQuatre"]
-  readOnly: boolean
-  updateIndicateurQuatre: (data: ActionIndicateurQuatreData) => void
-  validateIndicateurQuatre: (valid: FormState) => void
-}
+const IndicateurQuatreForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
-  indicateurQuatre,
-  readOnly,
-  updateIndicateurQuatre,
-  validateIndicateurQuatre,
-}) => {
+  if (!state) return null
+
+  const indicateurQuatre = state.indicateurQuatre
+
+  const readOnly = isFormValid(state.indicateurQuatre)
+
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(indicateurQuatre.nombreSalarieesPeriodeAugmentation),
@@ -57,16 +53,19 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
   const saveForm = (formData: any) => {
     const { presenceCongeMat, nombreSalarieesPeriodeAugmentation, nombreSalarieesAugmentees } = formData
 
-    updateIndicateurQuatre({
-      presenceCongeMat: parseBooleanFormValue(presenceCongeMat),
-      nombreSalarieesPeriodeAugmentation: parseIntFormValue(nombreSalarieesPeriodeAugmentation),
-      nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees),
+    dispatch({
+      type: "updateIndicateurQuatre",
+      data: {
+        presenceCongeMat: parseBooleanFormValue(presenceCongeMat),
+        nombreSalarieesPeriodeAugmentation: parseIntFormValue(nombreSalarieesPeriodeAugmentation),
+        nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees),
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurQuatre("Valid")
+    dispatch({ type: "validateIndicateurQuatre", valid: "Valid" })
   }
 
   return (

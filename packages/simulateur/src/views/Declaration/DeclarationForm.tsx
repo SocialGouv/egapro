@@ -3,16 +3,18 @@ import React, { FunctionComponent, useState } from "react"
 import { Form } from "react-final-form"
 import { useHistory } from "react-router-dom"
 
-import { ActionDeclarationData, AppState, FormState } from "../../globals"
+import { FormState } from "../../globals"
 import { resendReceipt } from "../../utils/api"
 import { parseDate } from "../../utils/date"
 import { isFormValid, parseBooleanFormValue, parseBooleanStateValue } from "../../utils/formHelpers"
 import { logToSentry } from "../../utils/sentry"
 
+import { getYear } from "date-fns"
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
+import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import InputGroup from "../../components/ds/InputGroup"
 import LegalText from "../../components/ds/LegalText"
@@ -23,11 +25,10 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
-import { estCalculable } from "../../utils/helpers"
-import InfoBlock from "../../components/ds/InfoBlock"
-import { getYear } from "date-fns"
-import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
 import RequiredRadiosBoolean from "../../components/RequiredRadiosBoolean"
+import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { estCalculable } from "../../utils/helpers"
 
 // NB : some fields (like RadioButton Oui/Non) are only validated at field-level.
 const validateForm = ({
@@ -82,27 +83,19 @@ function buildWordings(index: number | undefined) {
 }
 
 interface DeclarationFormProps {
-  state: AppState
   noteIndex: number | undefined
-  updateDeclaration: (data: ActionDeclarationData) => void
-  resetDeclaration: () => void
   validateDeclaration: (valid: FormState) => void
-  apiError: string | undefined
   declaring: boolean
 }
 
-const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
-  state,
-  noteIndex,
-  updateDeclaration,
-  resetDeclaration,
-  validateDeclaration,
-  apiError,
-  declaring,
-}) => {
+const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, validateDeclaration, declaring }) => {
   const history = useHistory()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
+
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
 
   const declaration = state.declaration
   const estCalculableIndex = estCalculable(noteIndex)
@@ -114,6 +107,10 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
   const displayNC = !estCalculableIndex && after2020 ? " aux indicateurs calculables" : ""
   const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
+
+  const resetDeclaration = () => {
+    history.push(`/nouvelle-simulation`)
+  }
 
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
@@ -142,16 +139,19 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     modalitesPublication,
     planRelance,
   }: typeof initialValues) {
-    updateDeclaration({
-      mesuresCorrection,
-      cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
-      dateConsultationCSE,
-      datePublication,
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
-      lienPublication,
-      modalitesPublication,
-      planRelance: parseBooleanFormValue(planRelance),
+    dispatch({
+      type: "updateDeclaration",
+      data: {
+        mesuresCorrection,
+        cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
+        dateConsultationCSE,
+        datePublication,
+        publicationSurSiteInternet:
+          publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
+        lienPublication,
+        modalitesPublication,
+        planRelance: parseBooleanFormValue(planRelance),
+      },
     })
   }
 
@@ -164,7 +164,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     setLoading(true)
 
     try {
-      // TODO : state.informations.anneeDeclaration may be undefined in TS. That seems not good because the endpoint expects a year.
+      if (!state) throw new Error("State is undefined")
+
       await resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
       setLoading(false)
     } catch (error: any) {
@@ -196,7 +197,6 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
 
             {periodeSuffisante && (
               <>
@@ -303,7 +303,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
           </FormStack>
           {readOnly ? (
             <>
-              {declaration.formValidated === "Valid" && (
+              {isFormValid(declaration) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"

@@ -1,7 +1,7 @@
 import flow from "lodash/fp/flow"
 
 import { ActionType } from "../globals"
-import { currifiedReducer as reducer } from "../AppReducer"
+import { currifiedReducer as reducer } from "../app-reducer"
 import stateComplete from "./stateComplete"
 
 const actionValidateInformationsSimulation: ActionType = {

@@ -1,73 +1,30 @@
 import { Box } from "@chakra-ui/react"
-import React, { PropsWithChildren, useCallback } from "react"
-import { useParams } from "react-router-dom"
+import React from "react"
 
-import { ActionInformationsSimulationData, ActionType, AppState, FormState } from "../../globals"
-
-import { useDeclaration } from "../../hooks/useDeclaration"
 import { useTitle } from "../../utils/hooks"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import InformationsSimulationForm from "./InformationsSimulationForm"
+import { isFormValid } from "../../utils/formHelpers"
 
-interface InformationsSimulationProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
+const title = "Informations calcul et période de référence"
 
-type Params = {
-  code: string
-}
+const InformationsSimulation = () => {
+  useTitle(title)
+  const { state } = useAppStateContextProvider()
+  if (!state) return null
 
-const PageInformationsSimulation = ({ children }: PropsWithChildren) => {
   return (
     <Page
       title={title}
       tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
-      {children}
-    </Page>
-  )
-}
+      <LayoutFormAndResult form={<InformationsSimulationForm />} />
 
-const title = "Informations calcul et période de référence"
-
-const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps) => {
-  useTitle(title)
-  const { code } = useParams<Params>()
-
-  const updateInformationsSimulation = useCallback(
-    (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
-    [dispatch],
-  )
-
-  const validateInformationsSimulation = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformationsSimulation", valid }),
-    [dispatch],
-  )
-
-  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
-
-  const alreadyDeclared = declaration?.data?.id === code
-
-  return (
-    <PageInformationsSimulation>
-      <LayoutFormAndResult
-        childrenForm={
-          <InformationsSimulationForm
-            informations={state.informations}
-            readOnly={state.informations.formValidated === "Valid"}
-            updateInformationsSimulation={updateInformationsSimulation}
-            validateInformationsSimulation={validateInformationsSimulation}
-            alreadyDeclared={alreadyDeclared}
-          />
-        }
-        childrenResult={null}
-      />
-
-      {state.informations.formValidated === "Valid" &&
+      {isFormValid(state.informations) &&
         (state.effectif.formValidated === "Invalid" ||
           state.indicateurUn.formValidated === "Invalid" ||
           (state.informations.trancheEffectifs !== "50 à 250" &&
@@ -84,7 +41,7 @@ const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps
             />
           </Box>
         )}
-    </PageInformationsSimulation>
+    </Page>
   )
 }
 

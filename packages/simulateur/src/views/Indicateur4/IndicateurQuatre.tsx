@@ -1,46 +1,37 @@
-import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
-
-import { AppState, FormState, ActionType, ActionIndicateurQuatreData } from "../../globals"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 
 import { useTitle } from "../../utils/hooks"
 
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 
-import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
+import InfoBlock from "../../components/ds/InfoBlock"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
-
-interface IndicateurQuatreProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur retour congé maternité"
 
-const IndicateurQuatre: FunctionComponent<IndicateurQuatreProps> = ({ state, dispatch }) => {
+const IndicateurQuatre: FunctionComponent = () => {
   useTitle(title)
 
-  const updateIndicateurQuatre = useCallback(
-    (data: ActionIndicateurQuatreData) => dispatch({ type: "updateIndicateurQuatre", data }),
-    [dispatch],
-  )
+  const { state, dispatch } = useAppStateContextProvider()
 
-  const validateIndicateurQuatre = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurQuatre", valid }),
-    [dispatch],
-  )
+  if (!state) return null
 
-  const { indicateurCalculable, indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre } =
-    calculIndicateurQuatre(state)
+  const calculsIndicateurQuatre = calculerIndicateurQuatre(state)
+
+  const { indicateurCalculable } = calculsIndicateurQuatre
+
+  const readOnly = isFormValid(state.indicateurQuatre)
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (state.indicateurQuatre.formValidated === "Valid" && !indicateurCalculable) {
+  if (readOnly && !indicateurCalculable) {
     const messageNonCalculable =
       state.indicateurQuatre.presenceCongeMat &&
       state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
@@ -49,19 +40,19 @@ const IndicateurQuatre: FunctionComponent<IndicateurQuatreProps> = ({ state, dis
         : "Il n’y a pas eu de retour de congé maternité pendant la période de référence."
     return (
       <PageIndicateurQuatre>
-        <div>
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text={messageNonCalculable}
-          />
-          <ActionBar>
-            <ActionLink onClick={() => validateIndicateurQuatre("None")}>Modifier les données saisies</ActionLink>
-          </ActionBar>
-          <ActionBar>
-            <ButtonSimulatorLink to="/indicateur5" label="Suivant" />
-          </ActionBar>
-        </div>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text={messageNonCalculable}
+        />
+        <ActionBar>
+          <ActionLink onClick={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}>
+            Modifier les données saisies
+          </ActionLink>
+        </ActionBar>
+        <ActionBar>
+          <ButtonSimulatorLink to="/indicateur5" label="Suivant" />
+        </ActionBar>
       </PageIndicateurQuatre>
     )
   }
@@ -69,23 +60,8 @@ const IndicateurQuatre: FunctionComponent<IndicateurQuatreProps> = ({ state, dis
   return (
     <PageIndicateurQuatre>
       <LayoutFormAndResult
-        childrenForm={
-          <IndicateurQuatreForm
-            indicateurQuatre={state.indicateurQuatre}
-            readOnly={state.indicateurQuatre.formValidated === "Valid"}
-            updateIndicateurQuatre={updateIndicateurQuatre}
-            validateIndicateurQuatre={validateIndicateurQuatre}
-          />
-        }
-        childrenResult={
-          state.indicateurQuatre.formValidated === "Valid" && (
-            <IndicateurQuatreResult
-              indicateurEcartNombreSalarieesAugmentees={indicateurEcartNombreSalarieesAugmentees}
-              noteIndicateurQuatre={noteIndicateurQuatre}
-              validateIndicateurQuatre={validateIndicateurQuatre}
-            />
-          )
-        }
+        form={<IndicateurQuatreForm />}
+        result={<IndicateurQuatreResult calculsIndicateurQuatre={calculsIndicateurQuatre} />}
       />
     </PageIndicateurQuatre>
   )

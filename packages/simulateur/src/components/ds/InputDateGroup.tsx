@@ -6,7 +6,7 @@ import { Input, FormControl, FormErrorMessage, FormLabel, Stack } from "@chakra-
 import { Field } from "react-final-form"
 
 import { isFieldHasError, validateDate } from "../../utils/formHelpers"
-import { dateToString, parseDate } from "../../utils/date"
+import { dateToFrString, parseDate } from "../../utils/date"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 registerLocale("fr", fr)
@@ -44,7 +44,7 @@ const InputDateGroup = ({
               selected={parseDate(input.value)}
               onChange={(date) => {
                 // @ts-ignore
-                if (date) input.onChange(dateToString(date))
+                if (date) input.onChange(dateToFrString(date))
               }}
               // required to see the input as touched and trigger the validation if Final form is set as validateOnBlur.
               onCalendarClose={() => input.onBlur()}

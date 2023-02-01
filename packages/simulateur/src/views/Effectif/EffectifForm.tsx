@@ -1,26 +1,20 @@
-import React, { useMemo, useCallback, FunctionComponent } from "react"
-import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } from "../../globals"
+import React, { FunctionComponent, useMemo } from "react"
+import { FormState, GroupTranchesAgesEffectif } from "../../globals"
 
-import { displayNameCategorieSocioPro } from "../../utils/helpers"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { displayNameCategorieSocioPro } from "../../utils/helpers"
 import EffectifFormRaw from "./EffectifFormRaw"
+import { isFormValid } from "../../utils/formHelpers"
 
-interface EffectifFormProps {
-  effectif: AppState["effectif"]
-  readOnly: boolean
-  updateEffectif: (data: ActionEffectifData) => void
-  validateEffectif: (valid: FormState) => void
-}
+const EffectifForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const EffectifForm: FunctionComponent<EffectifFormProps> = ({
-  effectif,
-  readOnly,
-  updateEffectif,
-  validateEffectif,
-}) => {
+  const effectif = state?.effectif
+
   const effectifRaw = useMemo(
     () =>
-      effectif.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
+      effectif?.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
         id: categorieSocioPro,
         name: displayNameCategorieSocioPro(categorieSocioPro),
         tranchesAges,
@@ -28,22 +22,26 @@ const EffectifForm: FunctionComponent<EffectifFormProps> = ({
     [effectif],
   )
 
-  const updateEffectifRaw = useCallback(
-    (
-      data: Array<{
-        id: any
-        name: string
-        tranchesAges: Array<GroupTranchesAgesEffectif>
-      }>,
-    ) => {
-      const nombreSalaries = data.map(({ id, tranchesAges }) => ({
-        categorieSocioPro: id,
-        tranchesAges,
-      }))
-      updateEffectif({ nombreSalaries })
-    },
-    [updateEffectif],
-  )
+  const validateEffectif = (valid: FormState) => dispatch({ type: "validateEffectif", valid })
+
+  const updateEffectifRaw = (
+    data: Array<{
+      id: any
+      name: string
+      tranchesAges: Array<GroupTranchesAgesEffectif>
+    }>,
+  ) => {
+    const nombreSalaries = data.map(({ id, tranchesAges }) => ({
+      categorieSocioPro: id,
+      tranchesAges,
+    }))
+
+    dispatch({ type: "updateEffectif", data: { nombreSalaries } })
+  }
+
+  if (!state || !effectifRaw) return null
+
+  const readOnly = isFormValid(state.effectif)
 
   return (
     <EffectifFormRaw

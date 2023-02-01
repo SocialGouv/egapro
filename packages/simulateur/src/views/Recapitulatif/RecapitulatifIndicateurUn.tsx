@@ -1,8 +1,8 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState, TranchesAges } from "../../globals"
-import { effectifEtEcartRemuGroupCoef, effectifEtEcartRemuGroupCsp } from "../../utils/calculsEgaProIndicateurUn"
+import { TranchesAges } from "../../globals"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import {
   displayFractionPercentWithEmptyData,
@@ -15,31 +15,33 @@ import {
 import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurUnProps {
-  isEffectifsFilled: boolean
-  indicateurUnFormValidated: FormState
-  effectifsIndicateurUnCalculable: boolean
-  effectifEtEcartRemuParTranche: Array<effectifEtEcartRemuGroupCsp> | Array<effectifEtEcartRemuGroupCoef>
-  indicateurEcartRemuneration: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  indicateurUnParCSP: boolean
-  noteIndicateurUn: number | undefined
+  calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn>
 }
 
-const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({
-  isEffectifsFilled,
-  indicateurUnFormValidated,
-  effectifsIndicateurUnCalculable,
-  effectifEtEcartRemuParTranche,
-  indicateurEcartRemuneration,
-  indicateurSexeSurRepresente,
-  indicateurUnParCSP,
-  noteIndicateurUn,
-}) => {
-  if (!isEffectifsFilled) {
+const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({ calculsIndicateurUn }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const indicateurUnFormValidated = state.indicateurUn.formValidated
+  const indicateurUnParCSP = state.indicateurUn.csp
+  const isEffectifsFilled = isFormValid(state.effectif)
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
+    effectifEtEcartRemuParTranche,
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente,
+    noteIndicateurUn,
+  } = calculsIndicateurUn
+
+  if (!isEffectifsFilled || indicateurUnFormValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
@@ -56,10 +58,6 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
       />
     )
-  }
-
-  if (indicateurUnFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
   // @ts-ignore

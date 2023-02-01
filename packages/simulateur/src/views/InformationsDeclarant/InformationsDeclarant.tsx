@@ -1,47 +1,19 @@
-import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
-
-import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 
 import { useTitle } from "../../utils/hooks"
 
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
-
-interface InformationsDeclarantProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
 
 const title = "Informations déclarant"
 
-const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ state, dispatch }) => {
+const InformationsDeclarant: FunctionComponent = () => {
   useTitle(title)
-
-  const updateInformationsDeclarant = useCallback(
-    (data: ActionInformationsDeclarantData) => dispatch({ type: "updateInformationsDeclarant", data }),
-    [dispatch],
-  )
-
-  const validateInformationsDeclarant = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformationsDeclarant", valid }),
-    [dispatch],
-  )
 
   return (
     <PageInformationsDeclarant>
-      <LayoutFormAndResult
-        childrenForm={
-          <InformationsDeclarantForm
-            informationsDeclarant={state.informationsDeclarant}
-            readOnly={state.informationsDeclarant.formValidated === "Valid"}
-            updateInformationsDeclarant={updateInformationsDeclarant}
-            validateInformationsDeclarant={validateInformationsDeclarant}
-          />
-        }
-        childrenResult={null}
-      />
+      <LayoutFormAndResult form={<InformationsDeclarantForm />} />
     </PageInformationsDeclarant>
   )
 }

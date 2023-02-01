@@ -3,9 +3,8 @@ import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-
 import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
 
-import { ActionInformationsSimulationData, AppState, FormState } from "../../globals"
-
 import {
+  isFormValid,
   parseBooleanFormValue,
   parseBooleanStateValue,
   parseIntFormValue,
@@ -25,11 +24,15 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { hasFieldError } from "../../components/Input"
 
+import { useParams } from "react-router-dom"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormError from "../../components/FormError"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const validateForm = ({
   nomEntreprise,
@@ -101,21 +104,25 @@ const FieldPeriodeSuffisante = ({ readOnly }: { readOnly: boolean }) => {
   )
 }
 
-interface InformationsSimulationFormProps {
-  informations: AppState["informations"]
-  readOnly: boolean
-  updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
-  validateInformationsSimulation: (valid: FormState) => void
-  alreadyDeclared: boolean
+type Params = {
+  code: string
 }
 
-const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormProps> = ({
-  informations,
-  readOnly,
-  updateInformationsSimulation,
-  validateInformationsSimulation,
-  alreadyDeclared,
-}) => {
+const InformationsSimulationForm: FunctionComponent = () => {
+  const { code } = useParams<Params>()
+  const { state, dispatch } = useAppStateContextProvider()
+
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+  if (!state) return null
+
+  const alreadyDeclared = declaration?.data?.id === code
+
+  const readOnly = frozenDeclaration || isFormValid(state.informations)
+
+  const informations = state.informations
+
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
@@ -133,18 +140,21 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
   const saveForm = (formData: typeof initialValues) => {
     const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = formData
 
-    updateInformationsSimulation({
-      nomEntreprise,
-      trancheEffectifs,
-      anneeDeclaration: parseIntFormValue(anneeDeclaration),
-      ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
-      periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
+    dispatch({
+      type: "updateInformationsSimulation",
+      data: {
+        nomEntreprise,
+        trancheEffectifs,
+        anneeDeclaration: parseIntFormValue(anneeDeclaration),
+        ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
+        periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
+      },
     })
   }
 
   const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
-    validateInformationsSimulation("Valid")
+    dispatch({ type: "validateInformationsSimulation", valid: "Valid" })
   }
 
   return (
@@ -219,12 +229,10 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
             </FormControl>
             <FieldPeriodeSuffisante readOnly={readOnly} />
             {values.periodeSuffisante === "true" && (
-              <>
-                <FieldPeriodeReference
-                  readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
-                  onClick={form.mutators.selectEndOfYear}
-                />
-              </>
+              <FieldPeriodeReference
+                readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
+                onClick={form.mutators.selectEndOfYear}
+              />
             )}
           </FormStack>
           {readOnly ? (
@@ -233,11 +241,11 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
                 to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
                 label="Suivant"
               />
-              {informations.formValidated === "Valid" && (
+              {isFormValid(informations) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
-                  onClick={() => validateInformationsSimulation("None")}
+                  onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
                   variant="link"
                   size="sm"
                 />

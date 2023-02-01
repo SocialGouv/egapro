@@ -1,59 +1,49 @@
-import React, { FunctionComponent, useState } from "react"
 import { Box, List, ListItem, Text } from "@chakra-ui/react"
-import { Form } from "react-final-form"
 import arrayMutators from "final-form-arrays"
+import React, { FunctionComponent, useState } from "react"
+import { Form } from "react-final-form"
 import { FieldArray } from "react-final-form-arrays"
 
-import { ActionIndicateurUnCoefData, FormState, AppState } from "../../../globals"
-
-import InfoBlock from "../../../components/ds/InfoBlock"
+import ActionBar from "../../../components/ActionBar"
 import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ds/ButtonAction"
-import ActionBar from "../../../components/ActionBar"
+import InfoBlock from "../../../components/ds/InfoBlock"
+import Modal from "../../../components/ds/Modal"
 import FormAutoSave from "../../../components/FormAutoSave"
 import FormSubmit from "../../../components/FormSubmit"
-import Modal from "../../../components/ds/Modal"
 
-import InputField from "./components/CoefGroupInputField"
-import FormError from "../../../components/FormError"
 import FormStack from "../../../components/ds/FormStack"
 import { IconDelete, IconPlusCircle } from "../../../components/ds/Icons"
+import FormError from "../../../components/FormError"
+import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
+import InputField from "./components/CoefGroupInputField"
+import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefGroupFormProps {
-  state: AppState
-  updateIndicateurUnCoefAddGroup: () => void
-  updateIndicateurUnCoefDeleteGroup: (index: number) => void
-  updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void
-  validateIndicateurUnCoefGroup: (valid: FormState) => void
-  navigateToEffectif: () => void
-  navigateToRemuneration: () => void
+  navigateTo: (tab: TabIndicateurUnCoef) => void
 }
 
-const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProps> = ({
-  state,
-  updateIndicateurUnCoefAddGroup,
-  updateIndicateurUnCoefDeleteGroup,
-  updateIndicateurUnCoef,
-  validateIndicateurUnCoefGroup,
-  navigateToEffectif,
-  navigateToRemuneration,
-}) => {
+const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProps> = ({ navigateTo }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+  const [indexGroupToDelete, setIndexGroupToDelete] = useState<number | undefined>(undefined)
+
+  if (!state) return null
+
   const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
     state.indicateurUn
+
   const readOnly = coefficientGroupFormValidated === "Valid"
 
   const initialValues = { groupes: coefficient }
 
-  const saveForm = (formData: any) => {
-    updateIndicateurUnCoef({ coefficient: formData.groupes })
-  }
+  const saveForm = (formData: any) =>
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient: formData.groupes } })
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurUnCoefGroup("Valid")
+    dispatch({ type: "validateIndicateurUnCoefGroup", valid: "Valid" })
   }
 
-  const [indexGroupToDelete, setIndexGroupToDelete] = useState<number | undefined>(undefined)
   const confirmGroupToDelete = (index: number) => setIndexGroupToDelete(index)
   const closeModal = () => setIndexGroupToDelete(undefined)
 
@@ -93,7 +83,7 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                           name={`${name}.name`}
                           index={index}
                           deleteGroup={confirmGroupToDelete}
-                          editGroup={() => validateIndicateurUnCoefGroup("None")}
+                          editGroup={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
                           readOnly={readOnly}
                         />
                       ))
@@ -107,7 +97,7 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                     size="sm"
                     variant="outline"
                     label="Ajouter un niveau ou coefficient hiérarchique"
-                    onClick={updateIndicateurUnCoefAddGroup}
+                    onClick={() => dispatch({ type: "updateIndicateurUnCoefAddGroup" })}
                     leftIcon={<IconPlusCircle />}
                   />
                 </Box>
@@ -116,9 +106,9 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
 
             {readOnly ? (
               <ActionBar borderTop="1px solid" borderColor="gray.200" pt={4}>
-                <ButtonAction onClick={navigateToEffectif} label="Suivant" size="lg" />
+                <ButtonAction onClick={() => navigateTo("Effectif")} label="Suivant" size="lg" />
                 <ButtonAction
-                  onClick={() => validateIndicateurUnCoefGroup("None")}
+                  onClick={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
                   label="Modifier les groupes"
                   variant="link"
                 />
@@ -148,12 +138,14 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                 <List mt={1}>
                   {coefficientEffectifFormValidated === "Invalid" && (
                     <ListItem>
-                      <ActionLink onClick={navigateToEffectif}>Aller à l'étape 2&nbsp;: effectifs</ActionLink>
+                      <ActionLink onClick={() => navigateTo("Effectif")}>Aller à l'étape 2&nbsp;: effectifs</ActionLink>
                     </ListItem>
                   )}
                   {formValidated === "Invalid" && (
                     <ListItem>
-                      <ActionLink onClick={navigateToRemuneration}>Aller à l'étape 3&nbsp;: rémunérations</ActionLink>
+                      <ActionLink onClick={() => navigateTo("Remuneration")}>
+                        Aller à l'étape 3&nbsp;: rémunérations
+                      </ActionLink>
                     </ListItem>
                   )}
                 </List>
@@ -172,7 +164,8 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
               colorScheme="red"
               leftIcon={<IconDelete />}
               onClick={() => {
-                indexGroupToDelete !== undefined && updateIndicateurUnCoefDeleteGroup(indexGroupToDelete)
+                indexGroupToDelete !== undefined &&
+                  dispatch({ type: "updateIndicateurUnCoefDeleteGroup", index: indexGroupToDelete })
                 closeModal()
               }}
               label="Supprimer"

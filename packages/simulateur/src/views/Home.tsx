@@ -1,41 +1,37 @@
+import { Heading, SimpleGrid } from "@chakra-ui/react"
 import React, { FunctionComponent, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
-import { Heading, SimpleGrid } from "@chakra-ui/react"
 
-import { ActionType } from "../globals"
 import { postSimulation } from "../utils/api"
 
 import ButtonAction from "../components/ds/ButtonAction"
 import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"
 import Card from "../components/ds/Card"
-import Page from "../components/Page"
 import ErrorMessage from "../components/ErrorMessage"
+import Page from "../components/Page"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { logToSentry } from "../utils/sentry"
 
-interface HomeProps extends RouteComponentProps {
-  dispatch: (action: ActionType) => void
-}
-
-const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => {
+const Home: FunctionComponent<RouteComponentProps> = ({ history, location }) => {
+  const { dispatch } = useAppStateContextProvider()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
 
-  const onClick = () => {
+  const onClick = async () => {
     setLoading(true)
     dispatch({ type: "resetState" })
 
-    postSimulation({})
-      .then(({ jsonBody: { id } }) => {
-        setLoading(false)
+    try {
+      const { jsonBody } = await postSimulation({})
+      setLoading(false)
 
-        history.push(`/simulateur/${id}`, location.state ? location.state : {})
-      })
-      .catch((error) => {
-        setLoading(false)
-        const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
-        setErrorMessage(errorMessage)
-        logToSentry(error, undefined)
-      })
+      history.push(`/simulateur/${jsonBody?.id}`, location.state ? location.state : {})
+    } catch (error: any) {
+      setLoading(false)
+      const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
+      setErrorMessage(errorMessage)
+      logToSentry(error, undefined)
+    }
   }
 
   if (!loading && errorMessage) {

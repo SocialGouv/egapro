@@ -1,23 +1,22 @@
-import React, { useReducer, useCallback, FunctionComponent } from "react"
-import { Router } from "react-router-dom"
-import "@fontsource/gabriela"
 import "@fontsource/cabin"
+import "@fontsource/gabriela"
+import React, { FunctionComponent } from "react"
 import ReactPiwik from "react-piwik"
+import { Router } from "react-router-dom"
 
 // @ts-ignore TS doesn't find the type definition of history. No error before.
+import { Box, ChakraProvider } from "@chakra-ui/react"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
-import { Box, ChakraProvider } from "@chakra-ui/react"
 
-import theme from "./theme"
-import { ActionType } from "./globals"
-import AppReducer from "./AppReducer"
-import GridProvider from "./components/GridContext"
-import AppLayout from "./containers/AppLayout"
-import InfoBlock from "./components/ds/InfoBlock"
-import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ds/ButtonAction"
+import InfoBlock from "./components/ds/InfoBlock"
+import GridProvider from "./components/GridContext"
+import Page from "./components/Page"
+import AppLayout from "./containers/AppLayout"
+import theme from "./theme"
+import { AppStateContextProvider } from "./hooks/useAppStateContextProvider"
 
 interface ErrorFallbackProps {
   error: Error
@@ -49,24 +48,6 @@ const piwik: any = new ReactPiwik({
 ReactPiwik.push(["trackPageView"])
 
 const App = () => {
-  const [state, dispatchReducer] = useReducer(AppReducer, undefined)
-
-  const dispatch = useCallback(
-    (action: ActionType) => {
-      if (
-        action.type.startsWith("validate") &&
-        // @ts-ignore
-        action.valid &&
-        // @ts-ignore
-        action.valid === "Valid"
-      ) {
-        ReactPiwik.push(["trackEvent", "validateForm", action.type])
-      }
-      dispatchReducer(action)
-    },
-    [dispatchReducer],
-  )
-
   return (
     <ChakraProvider theme={theme}>
       <ErrorBoundary
@@ -88,7 +69,9 @@ const App = () => {
               </Box>
             )}
 
-            <AppLayout state={state} dispatch={dispatch} />
+            <AppStateContextProvider>
+              <AppLayout />
+            </AppStateContextProvider>
           </GridProvider>
         </Router>
       </ErrorBoundary>

@@ -1,29 +1,27 @@
 /** @jsxImportSource @emotion/react */
-import { useCallback } from "react"
 
-import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndicateurUn } from "../../../globals"
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
-import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
+import InfoBlock from "../../../components/ds/InfoBlock"
+import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
+import { GroupTranchesAgesIndicateurUn } from "../../../globals"
+import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
+import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
+import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
 
 interface Props {
-  state: AppState
-  updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void
-  validateIndicateurUn: (valid: FormState) => void
-  navigateToEffectif: () => void
+  navigateTo: (tab: TabIndicateurUnCoef) => void
 }
 
-function IndicateurUnCoefEffectifForm({
-  state,
-  updateIndicateurUnCoef,
-  validateIndicateurUn,
-  navigateToEffectif,
-}: Props) {
-  const { coefficientEffectifFormValidated, formValidated } = state.indicateurUn
+function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const { coefficientEffectifFormValidated } = state.indicateurUn
 
   const {
     effectifsIndicateurCalculable,
@@ -31,22 +29,19 @@ function IndicateurUnCoefEffectifForm({
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
-  const updateIndicateurUn = useCallback(
-    (
-      data: Array<{
-        id: any
-        tranchesAges: Array<GroupTranchesAgesIndicateurUn>
-      }>,
-    ) => {
-      const coefficient = data.map(({ tranchesAges }) => ({
-        tranchesAges,
-      }))
-      updateIndicateurUnCoef({ coefficient })
-    },
-    [updateIndicateurUnCoef],
-  )
+  const updateIndicateurUn = (
+    data: Array<{
+      id: any
+      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+    }>,
+  ) => {
+    const coefficient = data.map(({ tranchesAges }) => ({
+      tranchesAges,
+    }))
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+  }
 
   // le formulaire d'effectif n'est pas validé
   if (coefficientEffectifFormValidated !== "Valid") {
@@ -54,7 +49,7 @@ function IndicateurUnCoefEffectifForm({
       <InfoBlock
         type="warning"
         title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-        text={<ActionLink onClick={navigateToEffectif}>Renseigner les effectifs</ActionLink>}
+        text={<ActionLink onClick={() => navigateTo("Effectif")}>Renseigner les effectifs</ActionLink>}
       />
     )
   }
@@ -74,16 +69,16 @@ function IndicateurUnCoefEffectifForm({
     )
   }
 
-  const readOnly = formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurUn)
 
   return (
     <LayoutFormAndResult
-      childrenForm={
+      form={
         <IndicateurUnFormRaw
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
           updateIndicateurUn={updateIndicateurUn}
-          validateIndicateurUn={validateIndicateurUn}
+          validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
           nextLink={
             <ButtonSimulatorLink
               to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
@@ -92,13 +87,13 @@ function IndicateurUnCoefEffectifForm({
           }
         />
       }
-      childrenResult={
+      result={
         readOnly && (
           <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}
             noteIndicateurUn={noteIndicateurUn}
-            validateIndicateurUn={validateIndicateurUn}
+            validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
           />
         )
       }

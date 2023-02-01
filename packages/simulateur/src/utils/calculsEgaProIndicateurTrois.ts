@@ -17,7 +17,7 @@ import {
   calculIndicateurSexeSurRepresente,
   calculIndicateurEcartAugmentationAbsolute,
 } from "../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
 
 const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0]
@@ -155,7 +155,7 @@ export const calculNote = (
 // ALL //
 /////////
 
-export default function calculIndicateurTrois(state: AppState) {
+export default function calculerIndicateurTrois(state: AppState) {
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
     state.effectif.nombreSalaries,
     state.indicateurTrois.tauxPromotion,
@@ -192,7 +192,7 @@ export default function calculIndicateurTrois(state: AppState) {
   const indicateurTroisSexeSurRepresente = calculIndicateurSexeSurRepresente(indicateurEcartPromotion)
 
   // Mesures correction indicateur 1
-  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculIndicateurUn(state)
+  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculerIndicateurUn(state)
 
   // NOTE
   const { note: noteIndicateurTrois, correctionMeasure } = calculNote(

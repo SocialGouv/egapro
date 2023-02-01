@@ -35,20 +35,20 @@ const AskEmail = ({ tagLine, children }: PropsWithChildren<AskEmailProps>) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const [submitted, setSubmitted] = useState(false)
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = async (formData: z.infer<typeof FormInput>) => {
     setLoading(true)
     setErrorMessage(undefined)
-    sendValidationEmail(formData.email)
-      .then(() => {
-        setLoading(false)
-        setSubmitted(true)
-      })
-      .catch((error: Error) => {
-        console.error(error)
-        setLoading(false)
-        setSubmitted(false)
-        setErrorMessage("Erreur lors de l'envoi de l'email de validation, est-ce que l'email est valide ?")
-      })
+
+    try {
+      await sendValidationEmail(formData.email)
+      setSubmitted(true)
+    } catch (error) {
+      console.error(error)
+      setSubmitted(false)
+      setErrorMessage("Erreur lors de l'envoi de l'email de validation, est-ce que l'email est valide ?")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

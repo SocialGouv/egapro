@@ -1,5 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { Fragment } from "react"
 import { css } from "@emotion/react"
 import { Field } from "react-final-form"
 
@@ -20,7 +19,7 @@ function CodeNaf({ name, label, readOnly }: { name: string; label: string; readO
               <div css={styles.fakeInput}>{input.value}</div>
             </div>
           ) : (
-            <Fragment>
+            <>
               <div css={styles.fieldRow}>
                 <select {...input}>
                   {listeCodeNaf.map((codeNaf: string) => (
@@ -31,7 +30,7 @@ function CodeNaf({ name, label, readOnly }: { name: string; label: string; readO
                 </select>
               </div>
               {meta.error && meta.touched && <p css={styles.error}>veuillez sélectionner un code NAF dans la liste</p>}
-            </Fragment>
+            </>
           )}
         </div>
       )}

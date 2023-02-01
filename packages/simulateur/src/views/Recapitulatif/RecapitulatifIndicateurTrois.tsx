@@ -1,8 +1,6 @@
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { CategorieSocioPro, FormState } from "../../globals"
-
 import {
   displayFractionPercentWithEmptyData,
   displayNameCategorieSocioPro,
@@ -11,41 +9,42 @@ import {
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
+import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { indicateursInfo } from "../../config"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurTroisProps {
-  isEffectifsFilled: boolean
-  indicateurTroisFormValidated: FormState
-  effectifsIndicateurTroisCalculable: boolean
-  indicateurTroisCalculable: boolean
-  effectifEtEcartPromoParGroupe: Array<{
-    categorieSocioPro: CategorieSocioPro
-    ecartTauxPromotion: number | undefined
-  }>
-  indicateurEcartPromotion: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurTrois: number | undefined
-  correctionMeasure: boolean
+  calculsIndicateurTrois: ReturnType<typeof calculerIndicateurTrois>
 }
 
 const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTroisProps> = ({
-  isEffectifsFilled,
-  indicateurTroisFormValidated,
-  effectifsIndicateurTroisCalculable,
-  indicateurTroisCalculable,
-  effectifEtEcartPromoParGroupe,
-  indicateurEcartPromotion,
-  indicateurSexeSurRepresente,
-  noteIndicateurTrois,
-  correctionMeasure,
+  calculsIndicateurTrois,
 }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const isEffectifsFilled = isFormValid(state.effectif)
+  const indicateurTroisFormValidated = state.indicateurTrois.formValidated
+
+  const {
+    effectifsIndicateurCalculable,
+    indicateurCalculable,
+    effectifEtEcartPromoParGroupe,
+    indicateurEcartPromotion,
+    indicateurSexeSurRepresente,
+    noteIndicateurTrois,
+    correctionMeasure,
+  } = calculsIndicateurTrois
+
   if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
-  if (!effectifsIndicateurTroisCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -55,7 +54,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
     )
   }
 
-  if (!indicateurTroisCalculable) {
+  if (!indicateurCalculable) {
     return (
       <InfoBlock
         type="warning"

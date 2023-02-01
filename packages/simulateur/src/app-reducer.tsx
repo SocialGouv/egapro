@@ -1,11 +1,12 @@
 import deepmerge from "deepmerge"
-import { format } from "date-fns"
 
-import type { AppState, ActionType, PeriodeDeclaration } from "./globals"
+import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
 
 import { CategorieSocioPro, TranchesAges } from "./globals"
+import { datetimeToFrString } from "./utils/date"
+import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
-import { overwriteMerge, combineMerge } from "./utils/merge"
+import { combineMerge, overwriteMerge } from "./utils/merge"
 
 const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
   categorieSocioPro,
@@ -144,7 +145,7 @@ const defaultState: AppState = {
   },
 }
 
-function AppReducer(state: AppState | undefined, action: ActionType): AppState | undefined {
+function appReducer(state: AppState | undefined, action: ActionType): AppState | undefined {
   if (action.type === "resetState") {
     return undefined
   }
@@ -172,46 +173,37 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
           },
           effectif:
             // We set invalid for all forms because we want the user to revalidate the form because prerequisites may have changed.
-            state.effectif.formValidated === "Valid" ? { ...state.effectif, formValidated: "Invalid" } : state.effectif,
-          indicateurUn:
-            state.indicateurUn.formValidated === "Valid"
-              ? { ...state.indicateurUn, formValidated: "Invalid" }
-              : state.indicateurUn,
-          indicateurDeux:
-            state.indicateurDeux.formValidated === "Valid"
-              ? { ...state.indicateurDeux, formValidated: "Invalid" }
-              : state.indicateurDeux,
-          indicateurTrois:
-            state.indicateurTrois.formValidated === "Valid"
-              ? { ...state.indicateurTrois, formValidated: "Invalid" }
-              : state.indicateurTrois,
-          indicateurDeuxTrois:
-            state.indicateurDeuxTrois.formValidated === "Valid"
-              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-              : state.indicateurDeuxTrois,
-          indicateurQuatre:
-            state.indicateurQuatre.formValidated === "Valid"
-              ? { ...state.indicateurQuatre, formValidated: "Invalid" }
-              : state.indicateurQuatre,
-          indicateurCinq:
-            state.indicateurCinq.formValidated === "Valid"
-              ? { ...state.indicateurCinq, formValidated: "Invalid" }
-              : state.indicateurCinq,
-          informationsEntreprise:
-            state.informationsEntreprise.formValidated === "Valid"
-              ? { ...state.informationsEntreprise, formValidated: "Invalid" }
-              : state.informationsEntreprise,
-          informationsDeclarant:
-            state.informationsDeclarant.formValidated === "Valid"
-              ? { ...state.informationsDeclarant, formValidated: "Invalid" }
-              : state.informationsDeclarant,
-          declaration:
-            state.declaration.formValidated === "Valid"
-              ? {
-                  ...state.declaration,
-                  formValidated: "Invalid",
-                }
-              : state.declaration,
+            isFormValid(state.effectif) ? { ...state.effectif, formValidated: "Invalid" } : state.effectif,
+          indicateurUn: isFormValid(state.indicateurUn)
+            ? { ...state.indicateurUn, formValidated: "Invalid" }
+            : state.indicateurUn,
+          indicateurDeux: isFormValid(state.indicateurDeux)
+            ? { ...state.indicateurDeux, formValidated: "Invalid" }
+            : state.indicateurDeux,
+          indicateurTrois: isFormValid(state.indicateurTrois)
+            ? { ...state.indicateurTrois, formValidated: "Invalid" }
+            : state.indicateurTrois,
+          indicateurDeuxTrois: isFormValid(state.indicateurDeuxTrois)
+            ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+            : state.indicateurDeuxTrois,
+          indicateurQuatre: isFormValid(state.indicateurQuatre)
+            ? { ...state.indicateurQuatre, formValidated: "Invalid" }
+            : state.indicateurQuatre,
+          indicateurCinq: isFormValid(state.indicateurCinq)
+            ? { ...state.indicateurCinq, formValidated: "Invalid" }
+            : state.indicateurCinq,
+          informationsEntreprise: isFormValid(state.informationsEntreprise)
+            ? { ...state.informationsEntreprise, formValidated: "Invalid" }
+            : state.informationsEntreprise,
+          informationsDeclarant: isFormValid(state.informationsDeclarant)
+            ? { ...state.informationsDeclarant, formValidated: "Invalid" }
+            : state.informationsDeclarant,
+          declaration: isFormValid(state.declaration)
+            ? {
+                ...state.declaration,
+                formValidated: "Invalid",
+              }
+            : state.declaration,
         }
       }
 
@@ -263,30 +255,25 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
         return {
           ...state,
           effectif: { ...state.effectif, formValidated: "None" },
-          indicateurUn:
-            state.indicateurUn.formValidated === "Valid"
-              ? {
-                  ...state.indicateurUn,
-                  formValidated: "Invalid",
-                  coefficientEffectifFormValidated: "Invalid",
-                }
-              : state.indicateurUn,
-          indicateurDeux:
-            state.indicateurDeux.formValidated === "Valid"
-              ? { ...state.indicateurDeux, formValidated: "Invalid" }
-              : state.indicateurDeux,
-          indicateurTrois:
-            state.indicateurTrois.formValidated === "Valid"
-              ? { ...state.indicateurTrois, formValidated: "Invalid" }
-              : state.indicateurTrois,
-          indicateurDeuxTrois:
-            state.indicateurDeuxTrois.formValidated === "Valid"
-              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-              : state.indicateurDeuxTrois,
-          declaration:
-            state.declaration.formValidated === "Valid"
-              ? { ...state.declaration, formValidated: "Invalid" }
-              : state.declaration,
+          indicateurUn: isFormValid(state.indicateurUn)
+            ? {
+                ...state.indicateurUn,
+                formValidated: "Invalid",
+                coefficientEffectifFormValidated: "Invalid",
+              }
+            : state.indicateurUn,
+          indicateurDeux: isFormValid(state.indicateurDeux)
+            ? { ...state.indicateurDeux, formValidated: "Invalid" }
+            : state.indicateurDeux,
+          indicateurTrois: isFormValid(state.indicateurTrois)
+            ? { ...state.indicateurTrois, formValidated: "Invalid" }
+            : state.indicateurTrois,
+          indicateurDeuxTrois: isFormValid(state.indicateurDeuxTrois)
+            ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+            : state.indicateurDeuxTrois,
+          declaration: isFormValid(state.declaration)
+            ? { ...state.declaration, formValidated: "Invalid" }
+            : state.declaration,
         }
       }
       return {
@@ -352,9 +339,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
               ? "Invalid"
               : state.indicateurUn.coefficientEffectifFormValidated,
           formValidated:
-            action.valid === "None" && state.indicateurUn.formValidated === "Valid"
-              ? "Invalid"
-              : state.indicateurUn.formValidated,
+            action.valid === "None" && isFormValid(state.indicateurUn) ? "Invalid" : state.indicateurUn.formValidated,
         },
         declaration: {
           ...state.declaration,
@@ -369,9 +354,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
           ...state.indicateurUn,
           coefficientEffectifFormValidated: action.valid,
           formValidated:
-            action.valid === "None" && state.indicateurUn.formValidated === "Valid"
-              ? "Invalid"
-              : state.indicateurUn.formValidated,
+            action.valid === "None" && isFormValid(state.indicateurUn) ? "Invalid" : state.indicateurUn.formValidated,
         },
         declaration: {
           ...state.declaration,
@@ -566,7 +549,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "validateDeclaration": {
-      const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm")
+      const dateDeclaration = datetimeToFrString(new Date())
       return {
         ...state,
         effectif:
@@ -645,6 +628,6 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
   }
 }
 
-export const currifiedReducer = (action: ActionType) => (state: AppState | undefined) => AppReducer(state, action)
+export const currifiedReducer = (action: ActionType) => (state: AppState | undefined) => appReducer(state, action)
 
-export default AppReducer
+export default appReducer

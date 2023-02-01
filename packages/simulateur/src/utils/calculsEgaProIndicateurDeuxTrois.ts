@@ -1,6 +1,6 @@
 import { AppState } from "../globals"
 
-import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import totalNombreSalaries from "./totalNombreSalaries"
 
 import {
@@ -140,7 +140,7 @@ export const calculNote = (
 // ALL //
 /////////
 
-export default function calculIndicateurDeuxTrois(state: AppState) {
+export default function calculerIndicateurDeuxTrois(state: AppState) {
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(state.effectif.nombreSalaries)
 
@@ -190,7 +190,7 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
   )
 
   // Mesures correction indicateur 1
-  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculIndicateurUn(state)
+  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculerIndicateurUn(state)
 
   // // NOTE
   const {

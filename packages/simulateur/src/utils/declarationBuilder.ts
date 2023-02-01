@@ -13,16 +13,17 @@ import type {
 import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
 import { departementCode, regionCode } from "../components/RegionsDepartements"
-import { calculNoteIndex } from "./calculsEgaProIndex"
-import calculIndicateurCinq from "./calculsEgaProIndicateurCinq"
-import calculIndicateurDeux from "./calculsEgaProIndicateurDeux"
-import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
-import calculIndicateurTrois from "./calculsEgaProIndicateurTrois"
-import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import { calculerNoteIndex } from "./calculsEgaProIndex"
+import calculerIndicateurCinq from "./calculsEgaProIndicateurCinq"
+import calculerIndicateurDeux from "./calculsEgaProIndicateurDeux"
+import calculerIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
+import calculerIndicateurTrois from "./calculsEgaProIndicateurTrois"
+import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
 import totalNombreSalaries from "./totalNombreSalaries"
+import { isFormValid } from "./formHelpers"
 
 export type DeclarationAPI = {
   siren: string
@@ -439,7 +440,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
@@ -449,7 +450,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux,
-  } = calculIndicateurDeux(state)
+  } = calculerIndicateurDeux(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
@@ -459,7 +460,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois,
-  } = calculIndicateurTrois(state)
+  } = calculerIndicateurTrois(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
@@ -474,32 +475,32 @@ export function computeValuesFromState(state: AppState) {
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
     plusPetitNombreSalaries,
-  } = calculIndicateurDeuxTrois(state)
+  } = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
+  } = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  } = calculerIndicateurCinq(state)
 
   const allIndicateurValid =
-    (state.indicateurUn.formValidated === "Valid" ||
+    (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
-      ? (state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable) &&
-        (state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable)
-      : state.indicateurDeuxTrois.formValidated === "Valid" || !effectifsIndicateurDeuxTroisCalculable) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
+      ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
+        (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
+      : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
+    isFormValid(state.indicateurQuatre) &&
+    isFormValid(state.indicateurCinq)
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,

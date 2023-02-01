@@ -2,13 +2,13 @@ import React, { FunctionComponent } from "react"
 import { Text } from "@chakra-ui/react"
 
 import InfoBlock from "../../components/ds/InfoBlock"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 interface RecapitulatifIndexProps {
   allIndicateurValid: boolean
   noteIndex: number | undefined
   totalPoint: number
   totalPointCalculable: number
-  anneeDeclaration: number
 }
 
 const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
@@ -16,8 +16,13 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
   noteIndex,
   totalPoint,
   totalPointCalculable,
-  anneeDeclaration,
 }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const anneeDeclaration = Number(state.informations.anneeDeclaration)
+
   const title = `Index égalité femmes-hommes en ${anneeDeclaration + 1} (au titre des données ${anneeDeclaration})`
   return (
     <>

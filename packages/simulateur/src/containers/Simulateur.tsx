@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { Fragment, ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { Redirect, Route, Switch, useParams } from "react-router-dom"
-
-import { ActionType, AppState } from "../globals"
 
 import { getSimulation, putSimulation } from "../utils/api"
 import globalStyles from "../utils/globalStyles"
@@ -15,6 +13,8 @@ import ErrorMessage from "../components/ErrorMessage"
 
 import { Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import TextLink from "../components/ds/TextLink"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"
 import AskEmail from "../views/AskEmail"
@@ -31,22 +31,18 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
-import TextLink from "../components/ds/TextLink"
-
-interface Props {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
+import { isFormValid } from "../utils/formHelpers"
 
 type Params = {
   code: string
 }
 
-function Simulateur({ state, dispatch }: Props): JSX.Element {
+function Simulateur(): JSX.Element {
   const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined | ReactNode>(undefined)
   const { email, isAuthenticated, loading: isLoadingAuth } = useUser()
+  const { state, dispatch } = useAppStateContextProvider()
 
   // useEffect de récupération des données de la déclaration.
   useEffect(() => {
@@ -59,8 +55,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
 
         const simuData = simulation?.jsonBody?.data
 
-        const siren =
-          simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
+        const siren = isFormValid(simuData?.informationsEntreprise) ? simuData?.informationsEntreprise?.siren : null
 
         if (siren) {
           if (!isAuthenticated) {
@@ -174,79 +169,66 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
         <HomeSimulateur />
       </Route>
       <Route path="/simulateur/:code/informations">
-        <InformationsSimulation state={state} dispatch={dispatch} />
+        <InformationsSimulation />
       </Route>
 
       {/*  We ensure to have the informations page always filleds before allowing to go to other form pages.  */}
-      {state?.informations?.formValidated !== "Valid" ? (
+      {!isFormValid(state.informations) ? (
         <Redirect to={`/simulateur/${code}/informations`} />
       ) : (
-        <Fragment>
-          <Switch>
-            <Route
-              path="/simulateur/:code/effectifs"
-              render={(props) => <Effectif {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur1"
-              render={(props) => <IndicateurUn {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur2"
-              render={(props) => <IndicateurDeux {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur3"
-              render={(props) => <IndicateurTrois {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur2et3"
-              render={(props) => <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur4"
-              render={(props) => <IndicateurQuatre {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/indicateur5"
-              render={(props) => <IndicateurCinq {...props} state={state} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code/recapitulatif"
-              render={(props) => <Recapitulatif {...props} state={state} />}
-            />
-            {!isAuthenticated ? (
-              <Route>
-                <AskEmail>
-                  <Text>
-                    L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du
-                    travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de
-                    déclaration.
-                  </Text>
-                  <Text mt={2}>
-                    <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire de
-                    déclaration.
-                  </Text>
-                </AskEmail>
+        <Switch>
+          <Route path="/simulateur/:code/effectifs">
+            <Effectif />
+          </Route>
+          <Route path="/simulateur/:code/indicateur1">
+            <IndicateurUn />
+          </Route>
+          <Route path="/simulateur/:code/indicateur2">
+            <IndicateurDeux />
+          </Route>
+          <Route path="/simulateur/:code/indicateur3">
+            <IndicateurTrois />
+          </Route>
+          <Route path="/simulateur/:code/indicateur2et3">
+            <IndicateurDeuxTrois />
+          </Route>
+          <Route path="/simulateur/:code/indicateur4">
+            <IndicateurQuatre />
+          </Route>
+          <Route path="/simulateur/:code/indicateur5">
+            <IndicateurCinq />
+          </Route>
+          <Route path="/simulateur/:code/recapitulatif">
+            <Recapitulatif />
+          </Route>
+          {!isAuthenticated ? (
+            <Route>
+              <AskEmail>
+                <Text>
+                  L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du
+                  travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de
+                  déclaration.
+                </Text>
+                <Text mt={2}>
+                  <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire de
+                  déclaration.
+                </Text>
+              </AskEmail>
+            </Route>
+          ) : (
+            <>
+              <Route path="/simulateur/:code/informations-entreprise">
+                <InformationsEntreprise />
               </Route>
-            ) : (
-              <Fragment>
-                <Route
-                  path="/simulateur/:code/informations-entreprise"
-                  render={(props) => <InformationsEntreprise {...props} state={state} dispatch={dispatch} />}
-                />
-                <Route
-                  path="/simulateur/:code/informations-declarant"
-                  render={(props) => <InformationsDeclarant {...props} state={state} dispatch={dispatch} />}
-                />
-                <Route
-                  path="/simulateur/:code/declaration"
-                  render={(props) => <Declaration {...props} code={code} state={state} dispatch={dispatch} />}
-                />
-              </Fragment>
-            )}
-          </Switch>
-        </Fragment>
+              <Route path="/simulateur/:code/informations-declarant">
+                <InformationsDeclarant />
+              </Route>
+              <Route path="/simulateur/:code/declaration">
+                <Declaration code={code} />
+              </Route>
+            </>
+          )}
+        </Switch>
       )}
     </Switch>
   )

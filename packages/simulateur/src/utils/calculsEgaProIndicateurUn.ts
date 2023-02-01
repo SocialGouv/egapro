@@ -265,7 +265,7 @@ export const calculNote = (indicateurEcartRemuneration: number | undefined): num
 // ALL //
 /////////
 
-export default function calculIndicateurUn(state: AppState) {
+export default function calculerIndicateurUn(state: AppState) {
   const effectifEtEcartRemuParTrancheCsp = calculEffectifsEtEcartRemuParTrancheAgeCsp(
     state.effectif.nombreSalaries,
     state.indicateurUn.remunerationAnnuelle,

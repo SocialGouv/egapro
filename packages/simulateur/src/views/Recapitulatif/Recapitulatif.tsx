@@ -1,133 +1,90 @@
+import { Box, Button, Text, Tooltip, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
-import { Box, VStack, Text, Tooltip, Button } from "@chakra-ui/react"
-import { RouteComponentProps } from "react-router-dom"
-
-import { AppState } from "../../globals"
 
 import { useTitle } from "../../utils/hooks"
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
+import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-import Page from "../../components/Page"
 import ActionBar from "../../components/ActionBar"
+import Page from "../../components/Page"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import RecapitulatifIndex from "./RecapitulatifIndex"
-import RecapitulatifInformations from "./RecapitulatifInformations"
-import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
+import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux"
-import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois"
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
-import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
-
-interface RecapitulatifProps extends RouteComponentProps {
-  state: AppState
-}
+import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
+import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
+import RecapitulatifInformations from "./RecapitulatifInformations"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Récapitulatif"
 
-const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
+const Recapitulatif: FunctionComponent = () => {
   useTitle(title)
+
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
 
   const trancheEffectifs = state.informations.trancheEffectifs
 
-  const periodeSuffisante = state.informations.periodeSuffisante as boolean
+  const periodeSuffisante = state.informations.periodeSuffisante || true // For old simulations-declarations, we assume that the periodSuffisante is true.
 
-  const isEffectifsFilled = state.effectif.formValidated === "Valid"
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
-    effectifEtEcartRemuParTranche,
-    indicateurEcartRemuneration,
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn,
-  } = calculIndicateurUn(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
-    indicateurCalculable: indicateurDeuxCalculable,
-    effectifEtEcartAugmentParGroupe,
-    indicateurEcartAugmentation,
-    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
-    noteIndicateurDeux,
-    correctionMeasure: correctionMeasureIndicateurDeux,
-  } = calculIndicateurDeux(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
-    indicateurCalculable: indicateurTroisCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois,
-  } = calculIndicateurTrois(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
-    indicateurCalculable: indicateurDeuxTroisCalculable,
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-    noteIndicateurDeuxTrois,
-    correctionMeasure: correctionMeasureIndicateurDeuxTrois,
-    tauxAugmentationPromotionHommes,
-    tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries,
-  } = calculIndicateurDeuxTrois(state)
-
-  const {
-    indicateurCalculable: indicateurQuatreCalculable,
-    indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
-
-  const {
-    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  const calculsIndicateurUn = calculerIndicateurUn(state)
+  const calculsIndicateurDeux = calculerIndicateurDeux(state)
+  const calculsIndicateurTrois = calculerIndicateurTrois(state)
+  const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
+  const calculsIndicateurQuatre = calculerIndicateurQuatre(state)
+  const calculsIndicateurCinq = calculerIndicateurCinq(state)
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
-  const indicateurUnValid =
-    state.indicateurUn.formValidated === "Valid" ||
+  const indicateurUnCompliant =
+    isFormValid(state.indicateurUn) ||
     // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-    (!effectifsIndicateurUnCalculable && state.indicateurUn.csp) ||
-    !effectifsIndicateurUnCalculable
+    (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.csp) ||
+    !calculsIndicateurUn.effectifsIndicateurCalculable
 
-  const indicateurDeuxTroisValid =
-    state.indicateurDeuxTrois.formValidated === "Valid" ||
-    !effectifsIndicateurDeuxTroisCalculable ||
-    !indicateurDeuxTroisCalculable
+  const indicateurDeuxCompliant =
+    isFormValid(state.indicateurDeux) ||
+    !calculsIndicateurDeux.effectifsIndicateurCalculable ||
+    !calculsIndicateurDeux.indicateurCalculable
 
-  const indicateurDeuxValid =
-    state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable || !indicateurDeuxCalculable
+  const indicateurTroisCompliant =
+    isFormValid(state.indicateurTrois) ||
+    !calculsIndicateurTrois.effectifsIndicateurCalculable ||
+    !calculsIndicateurTrois.indicateurCalculable
 
-  const indicateurTroisValid =
-    state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable || !indicateurTroisCalculable
+  const indicateurDeuxTroisCompliant =
+    isFormValid(state.indicateurDeuxTrois) ||
+    !calculsIndicateurDeuxTrois.effectifsIndicateurCalculable ||
+    !calculsIndicateurDeuxTrois.indicateurCalculable
 
-  const allIndicateurValid =
-    indicateurUnValid &&
-    (trancheEffectifs === "50 à 250" ? indicateurDeuxTroisValid : indicateurDeuxValid && indicateurTroisValid) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
+  const allIndicateursCompliant =
+    indicateurUnCompliant &&
+    (trancheEffectifs === "50 à 250"
+      ? indicateurDeuxTroisCompliant
+      : indicateurDeuxCompliant && indicateurTroisCompliant) &&
+    isFormValid(state.indicateurQuatre) &&
+    isFormValid(state.indicateurCinq)
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
-    noteIndicateurUn,
-    noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
-    noteIndicateurCinq,
+    calculsIndicateurUn.noteIndicateurUn,
+    calculsIndicateurDeux.noteIndicateurDeux,
+    calculsIndicateurTrois.noteIndicateurTrois,
+    calculsIndicateurDeuxTrois.noteIndicateurDeuxTrois,
+    calculsIndicateurQuatre.noteIndicateurQuatre,
+    calculsIndicateurCinq.noteIndicateurCinq,
   )
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
@@ -136,87 +93,32 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     <Page title="Récapitulatif des résultats de vos indicateurs">
       <VStack spacing={6} align="stretch">
         <RecapitulatifInformations
-          informationsFormValidated={state.informations.formValidated}
-          trancheEffectifs={state.informations.trancheEffectifs}
-          anneeDeclaration={state.informations.anneeDeclaration}
-          finPeriodeReference={state.informations.finPeriodeReference}
           nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
           periodeSuffisante={periodeSuffisante}
         />
         {periodeSuffisante && (
           <>
             <RecapitulatifIndex
-              allIndicateurValid={allIndicateurValid}
+              allIndicateurValid={allIndicateursCompliant}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
-              anneeDeclaration={Number(state.informations.anneeDeclaration)}
             />
-            <RecapitulatifIndicateurUn
-              isEffectifsFilled={isEffectifsFilled}
-              indicateurUnFormValidated={state.indicateurUn.formValidated}
-              effectifsIndicateurUnCalculable={effectifsIndicateurUnCalculable}
-              effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
-              indicateurEcartRemuneration={indicateurEcartRemuneration}
-              indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
-              indicateurUnParCSP={state.indicateurUn.csp}
-              noteIndicateurUn={noteIndicateurUn}
-            />
-            {(trancheEffectifs !== "50 à 250" && (
+            <RecapitulatifIndicateurUn calculsIndicateurUn={calculsIndicateurUn} />
+
+            {trancheEffectifs !== "50 à 250" ? (
               <>
-                <RecapitulatifIndicateurDeux
-                  isEffectifsFilled={isEffectifsFilled}
-                  indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
-                  effectifsIndicateurDeuxCalculable={effectifsIndicateurDeuxCalculable}
-                  indicateurDeuxCalculable={indicateurDeuxCalculable}
-                  effectifEtEcartAugmentParGroupe={effectifEtEcartAugmentParGroupe}
-                  indicateurEcartAugmentation={indicateurEcartAugmentation}
-                  indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
-                  noteIndicateurDeux={noteIndicateurDeux}
-                  correctionMeasure={correctionMeasureIndicateurDeux}
-                />
-                <RecapitulatifIndicateurTrois
-                  isEffectifsFilled={isEffectifsFilled}
-                  indicateurTroisFormValidated={state.indicateurTrois.formValidated}
-                  effectifsIndicateurTroisCalculable={effectifsIndicateurTroisCalculable}
-                  indicateurTroisCalculable={indicateurTroisCalculable}
-                  effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
-                  indicateurEcartPromotion={indicateurEcartPromotion}
-                  indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
-                  noteIndicateurTrois={noteIndicateurTrois}
-                  correctionMeasure={correctionMeasureIndicateurTrois}
-                />
+                <RecapitulatifIndicateurDeux calculsIndicateurDeux={calculsIndicateurDeux} />
+
+                <RecapitulatifIndicateurTrois calculsIndicateurTrois={calculsIndicateurTrois} />
               </>
-            )) || (
-              <RecapitulatifIndicateurDeuxTrois
-                isEffectifsFilled={isEffectifsFilled}
-                indicateurDeuxTroisFormValidated={state.indicateurDeuxTrois.formValidated}
-                effectifsIndicateurDeuxTroisCalculable={effectifsIndicateurDeuxTroisCalculable}
-                indicateurDeuxTroisCalculable={indicateurDeuxTroisCalculable}
-                indicateurEcartAugmentationPromotion={indicateurEcartAugmentationPromotion}
-                indicateurEcartNombreEquivalentSalaries={indicateurEcartNombreEquivalentSalaries}
-                indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
-                noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
-                correctionMeasure={correctionMeasureIndicateurDeuxTrois}
-                tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
-                tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
-                plusPetitNombreSalaries={plusPetitNombreSalaries}
-              />
+            ) : (
+              <RecapitulatifIndicateurDeuxTrois calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />
             )}
-            <RecapitulatifIndicateurQuatre
-              indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
-              indicateurQuatreCalculable={indicateurQuatreCalculable}
-              indicateurEcartNombreSalarieesAugmentees={indicateurEcartNombreSalarieesAugmentees}
-              presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
-              nombreSalarieesPeriodeAugmentation={state.indicateurQuatre.nombreSalarieesPeriodeAugmentation}
-              noteIndicateurQuatre={noteIndicateurQuatre}
-            />
-            <RecapitulatifIndicateurCinq
-              indicateurCinqFormValidated={state.indicateurCinq.formValidated}
-              indicateurSexeSousRepresente={indicateurCinqSexeSousRepresente}
-              indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
-              noteIndicateurCinq={noteIndicateurCinq}
-            />
+
+            <RecapitulatifIndicateurQuatre calculsIndicateurQuatre={calculsIndicateurQuatre} />
+
+            <RecapitulatifIndicateurCinq calculsIndicateurCinq={calculsIndicateurCinq} />
           </>
         )}
       </VStack>

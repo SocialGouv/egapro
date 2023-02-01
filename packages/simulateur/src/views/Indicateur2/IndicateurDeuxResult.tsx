@@ -1,26 +1,31 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface IndicateurDeuxResultProps {
-  indicateurEcartAugmentation: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeux: number | undefined
-  correctionMeasure: boolean
-  validateIndicateurDeux: (valid: FormState) => void
+  calculsIndicateurDeux: Pick<
+    ReturnType<typeof calculerIndicateurDeux>,
+    "indicateurEcartAugmentation" | "indicateurSexeSurRepresente" | "noteIndicateurDeux" | "correctionMeasure"
+  >
 }
 
-const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({
-  indicateurEcartAugmentation,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeux,
-  correctionMeasure,
-  validateIndicateurDeux,
-}) => {
+const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ calculsIndicateurDeux }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  const { indicateurEcartAugmentation, indicateurSexeSurRepresente, noteIndicateurDeux, correctionMeasure } =
+    calculsIndicateurDeux
+
+  if (!state) return null
+
+  const readOnly = isFormValid(state.indicateurDeux)
+
+  if (readOnly) return null
+
   return (
     <ResultSummary
       firstLineLabel="votre résultat final est"
@@ -30,7 +35,7 @@ const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({
       secondLineData={(noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"}
       secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      onEdit={() => validateIndicateurDeux("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}
     />
   )
 }

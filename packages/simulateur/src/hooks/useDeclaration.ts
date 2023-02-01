@@ -7,7 +7,7 @@ import { fetcher } from "../utils/fetcher"
 import { genericErrorMessage } from "../utils/makeMessage"
 
 export function useDeclaration(
-  siren: string,
+  siren: string | undefined,
   year: number | undefined,
 ): FetcherReturn & { declaration: DeclarationAPI | undefined } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined

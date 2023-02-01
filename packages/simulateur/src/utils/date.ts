@@ -3,6 +3,7 @@ import { addYears, addDays, format, parse, parseISO, fromUnixTime } from "date-f
 /* Dates */
 
 export const FR_DATE_FORMAT = "dd/MM/yyyy"
+export const FR_DATETIME_FORMAT = "dd/MM/yyyy HH:mm"
 
 export const parseFrDate = (stringDate: string): Date => parse(stringDate, FR_DATE_FORMAT, new Date())
 
@@ -23,9 +24,11 @@ export function parseDate(stringDate: string): Date | undefined {
   return date
 }
 
-export function dateToString(date: Date | undefined): string {
-  return date !== undefined ? format(date, FR_DATE_FORMAT) : ""
-}
+export const dateToFrString = (date: Date | undefined): string =>
+  date !== undefined ? format(date, FR_DATE_FORMAT) : ""
+
+export const datetimeToFrString = (date: Date | undefined): string =>
+  date !== undefined ? format(date, FR_DATETIME_FORMAT) : ""
 
 export enum Year {
   Add,
@@ -48,7 +51,7 @@ export function calendarYear(dateStr: string, operation: Year, numYears: number)
   return format(dayAdded, FR_DATE_FORMAT)
 }
 
-// Format the data from the AppReducer to be compatible with the API new format
+// Format the data from the appReducer to be compatible with the API new format
 
 export const toISOString = (date: string): string | undefined => {
   const parsed = parseDate(date)

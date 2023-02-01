@@ -35,7 +35,7 @@ import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
-import { dateToString, parseDate } from "../../utils/date"
+import { dateToFrString, parseDate } from "../../utils/date"
 import { updateDeclarationWithObjectifsMesures } from "../../utils/declarationBuilder"
 import { useToastMessage } from "../../utils/hooks"
 
@@ -84,7 +84,7 @@ const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) 
         return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
       },
       {
-        message: `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${dateToString(
+        message: `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${dateToFrString(
           finPeriodeReference,
         )})`,
       },
