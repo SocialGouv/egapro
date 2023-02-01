@@ -23,7 +23,7 @@ import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
@@ -63,7 +63,7 @@ function buildHelpers(state: AppState) {
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux,
-  } = calculIndicateurDeux(state)
+  } = calculerIndicateurDeux(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,

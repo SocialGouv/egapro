@@ -1,8 +1,6 @@
-import { Text } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
 import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
-import { messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
@@ -27,15 +25,7 @@ const IndicateurDeux: FunctionComponent = () => {
 
   const calculsIndicateurDeux = calculerIndicateurDeux(state)
 
-  const {
-    effectifsIndicateurCalculable,
-    effectifEtEcartAugmentParGroupe,
-    indicateurCalculable,
-    indicateurSexeSurRepresente,
-    correctionMeasure,
-  } = calculsIndicateurDeux
-
-  const readOnly = state.indicateurDeux.formValidated === "Valid"
+  const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurDeux
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
@@ -90,20 +80,8 @@ const IndicateurDeux: FunctionComponent = () => {
   return (
     <PageIndicateurDeux>
       <LayoutFormAndResult
-        form={
-          <>
-            <IndicateurDeuxForm
-              ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
-              readOnly={readOnly}
-            />
-            {readOnly && correctionMeasure && (
-              <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
-                {messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}
-              </Text>
-            )}
-          </>
-        }
-        result={readOnly && <IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
+        form={<IndicateurDeuxForm calculsIndicateurDeux={calculsIndicateurDeux} />}
+        result={<IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
       />
     </PageIndicateurDeux>
   )

@@ -4,11 +4,11 @@ import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
 interface IndicateurDeuxResultProps {
   calculsIndicateurDeux: Pick<
-    ReturnType<typeof calculIndicateurDeux>,
+    ReturnType<typeof calculerIndicateurDeux>,
     "indicateurEcartAugmentation" | "indicateurSexeSurRepresente" | "noteIndicateurDeux" | "correctionMeasure"
   >
 }
@@ -20,6 +20,10 @@ const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ ca
     calculsIndicateurDeux
 
   if (!state) return null
+
+  const readOnly = state.indicateurDeux.formValidated === "Valid"
+
+  if (readOnly) return null
 
   return (
     <ResultSummary

@@ -7,7 +7,7 @@ import { AppState } from "../../globals"
 import { useTitle } from "../../utils/hooks"
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
@@ -59,7 +59,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux,
     correctionMeasure: correctionMeasureIndicateurDeux,
-  } = calculIndicateurDeux(state)
+  } = calculerIndicateurDeux(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,

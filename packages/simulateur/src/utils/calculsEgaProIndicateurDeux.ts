@@ -192,7 +192,7 @@ export const calculNote = (
 // ALL //
 /////////
 
-export default function calculIndicateurDeux(state: AppState) {
+export default function calculerIndicateurDeux(state: AppState) {
   const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
     state.effectif.nombreSalaries,
     state.indicateurDeux.tauxAugmentation,
