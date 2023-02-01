@@ -20,7 +20,7 @@ const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = (
 
   const readOnly = state.indicateurQuatre.formValidated === "Valid"
 
-  if (readOnly) return null
+  if (!readOnly) return null
 
   const { indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre } = calculsIndicateurQuatre
 

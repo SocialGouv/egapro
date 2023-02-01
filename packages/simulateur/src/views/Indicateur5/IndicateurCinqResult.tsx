@@ -11,7 +11,7 @@ const IndicateurCinqResult: FunctionComponent = () => {
 
   const readOnly = state.indicateurCinq.formValidated === "Valid"
 
-  if (readOnly) return null
+  if (!readOnly) return null
 
   const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
     calculerIndicateurCinq(state)
