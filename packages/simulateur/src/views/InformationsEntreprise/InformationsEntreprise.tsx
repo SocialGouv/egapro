@@ -1,17 +1,9 @@
-import React, { PropsWithChildren, useCallback } from "react"
-import { RouteComponentProps, useParams } from "react-router-dom"
+import React, { PropsWithChildren } from "react"
+import { useParams } from "react-router-dom"
 
-import { ActionInformationsEntrepriseData, ActionType, AppState, FormState } from "../../globals"
-
-import { useDeclaration } from "../../hooks/useDeclaration"
-import { useTitle } from "../../utils/hooks"
 import Page from "../../components/Page"
+import { useTitle } from "../../utils/hooks"
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
-
-interface InformationsEntrepriseProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
 
 const PageInformationsEntreprise = ({ children }: PropsWithChildren) => {
   return (
@@ -33,32 +25,13 @@ type Params = {
 
 const title = "Informations entreprise/UES"
 
-const InformationsEntreprise = ({ state, dispatch }: InformationsEntrepriseProps) => {
+const InformationsEntreprise = () => {
   useTitle(title)
   const { code } = useParams<Params>()
 
-  const updateInformationsEntreprise = useCallback(
-    (data: ActionInformationsEntrepriseData) => dispatch({ type: "updateInformationsEntreprise", data }),
-    [dispatch],
-  )
-
-  const validateInformationsEntreprise = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformationsEntreprise", valid }),
-    [dispatch],
-  )
-
-  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
-
-  const alreadyDeclared = declaration?.data?.id === code
-
   return (
     <PageInformationsEntreprise>
-      <InformationsEntrepriseForm
-        state={state}
-        update={updateInformationsEntreprise}
-        validate={validateInformationsEntreprise}
-        alreadyDeclared={alreadyDeclared}
-      />
+      <InformationsEntrepriseForm code={code} />
     </PageInformationsEntreprise>
   )
 }

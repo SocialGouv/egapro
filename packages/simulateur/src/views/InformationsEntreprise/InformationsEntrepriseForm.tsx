@@ -20,21 +20,17 @@ import FormSubmit from "../../components/FormSubmit"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
-import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
+import { EntrepriseType, Structure } from "../../globals"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { timestampToFrDate } from "../../utils/date"
 import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
-const validate = (value: string) => {
+const isRequired = (value: string) => {
   const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
+
+  return requiredError ? { required: requiredError } : undefined
 }
 
 const validateForm = ({
@@ -50,11 +46,11 @@ const validateForm = ({
   structure: Structure
   nomUES: string
 }) => ({
-  nomEntreprise: validate(nomEntreprise),
-  siren: validate(siren),
-  codeNaf: validate(codeNaf),
-  structure: validate(structure),
-  nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
+  nomEntreprise: isRequired(nomEntreprise),
+  siren: isRequired(siren),
+  codeNaf: isRequired(codeNaf),
+  structure: isRequired(structure),
+  nomUES: structure === "Unité Economique et Sociale (UES)" ? isRequired(nomUES) : undefined,
 })
 
 // Update state when change on nombreEntreprises is made.
@@ -68,22 +64,22 @@ const updateNombreEntreprises = createDecorator({
 })
 
 interface InformationsEntrepriseFormProps {
-  state: AppState
-  update: (data: ActionInformationsEntrepriseData) => void
-  validate: (valid: FormState) => void
-  alreadyDeclared: boolean
+  code: string
 }
 
-const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
-  state,
-  update,
-  validate,
-  alreadyDeclared,
-}) => {
-  const informationsEntreprise = state.informationsEntreprise
-  const readOnly = state.informationsEntreprise.formValidated === "Valid"
+const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({ code }) => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  if (!state) return null
+
+  const alreadyDeclared = declaration?.data?.id === code
+
+  const informationsEntreprise = state.informationsEntreprise
+  const year = state.informations.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
+  const readOnly = state.informationsEntreprise.formValidated === "Valid"
 
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -108,45 +104,19 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
         ],
   }
 
-  const { declaration } = useDeclaration(informationsEntreprise.siren, year)
-
-  const saveForm = (formData: any) => {
-    const {
-      nomEntreprise,
-      siren,
-      codeNaf,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      codePays,
-      commune,
-      structure,
-      nomUES,
-      nombreEntreprises,
-      entreprisesUES,
-    } = formData
-
-    update({
-      nomEntreprise: nomEntreprise,
-      siren: siren,
-      codeNaf: codeNaf,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      codePays,
-      commune,
-      structure,
-      nomUES,
-      nombreEntreprises: parseIntFormValue(nombreEntreprises),
-      entreprisesUES,
+  const saveForm = (formData: typeof initialValues) => {
+    dispatch({
+      type: "updateInformationsEntreprise",
+      data: {
+        ...formData,
+        nombreEntreprises: parseIntFormValue(formData.nombreEntreprises),
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validate("Valid")
+    dispatch({ type: "validateInformationsEntreprise", valid: "Valid" })
   }
 
   return (
@@ -314,16 +284,15 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink to="/informations-declarant" label="Suivant" />
-              &emsp;
-              {informationsEntreprise.formValidated === "Valid" && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => validate("None")}
-                  variant="link"
-                  size="sm"
-                />
-              )}
+              &emsp;(
+              <ButtonAction
+                leftIcon={<IconEdit />}
+                label="Modifier les données saisies"
+                onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
+                variant="link"
+                size="sm"
+              />
+              )
             </ActionBar>
           ) : (
             <ActionBar>

@@ -202,10 +202,7 @@ function Simulateur(): JSX.Element {
               </Route>
             ) : (
               <Fragment>
-                <Route
-                  path="/simulateur/:code/informations-entreprise"
-                  render={(props) => <InformationsEntreprise {...props} state={state} dispatch={dispatch} />}
-                />
+                <Route path="/simulateur/:code/informations-entreprise" render={() => <InformationsEntreprise />} />
                 <Route
                   path="/simulateur/:code/informations-declarant"
                   render={(props) => <InformationsDeclarant {...props} state={state} dispatch={dispatch} />}
