@@ -2,6 +2,7 @@ import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { SQLCount } from "@common/shared-domain";
@@ -106,16 +107,19 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public async updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void> {
     await this.sql.begin(async transac => {
-      const ownerships = items.map(
-        item =>
-          new Ownership({
-            email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-            siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-          }),
-      );
+      const ownerships = items
+        .filter(element => element.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED)
+        .map(
+          item =>
+            new Ownership({
+              email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+              siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+            }),
+        );
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
-      await ownershipRepo.saveBulk(...ownerships);
+
+      if (ownerships.length) await ownershipRepo.saveBulk(...ownerships);
       await thisRepo.updateBulk(...items);
     });
   }
