@@ -1,3 +1,10 @@
+# [2.82.0](https://github.com/SocialGouv/egapro/compare/v2.81.1...v2.82.0) (2023-02-01)
+
+
+### Features
+
+* refactor simulateur with context for AppState ([bb1c2e7](https://github.com/SocialGouv/egapro/commit/bb1c2e75980aa63074560f0d1c4c4c5f1c0d612a))
+
 ## [2.81.1](https://github.com/SocialGouv/egapro/compare/v2.81.0...v2.81.1) (2023-02-01)
 
 
