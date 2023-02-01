@@ -264,28 +264,23 @@ const Declaration = ({ code }: DeclarationProps) => {
   } = buildHelpers(state)
 
   const validateDeclaration = (formState: FormState) => {
-    if (formState === "Valid") {
-      // Triggers the effect to send the declaration.
-      setDeclaring(true)
-    } else {
-      setDeclaring(false)
-    }
-    if (!apiError) {
-      return dispatch({
-        type: "validateDeclaration",
-        valid: formState,
-        effectifData,
-        indicateurUnData,
-        indicateurDeuxData,
-        indicateurTroisData,
-        indicateurDeuxTroisData,
-        indicateurQuatreData,
-        indicateurCinqData,
-        noteIndex,
-        totalPoint,
-        totalPointCalculable,
-      })
-    }
+    // Triggers the effect to send the declaration.
+    setDeclaring(formState === "Valid")
+
+    return dispatch({
+      type: "validateDeclaration",
+      valid: formState,
+      effectifData,
+      indicateurUnData,
+      indicateurDeuxData,
+      indicateurTroisData,
+      indicateurDeuxTroisData,
+      indicateurQuatreData,
+      indicateurCinqData,
+      noteIndex,
+      totalPoint,
+      totalPointCalculable,
+    })
   }
 
   async function sendDeclaration(code: string, state: AppState) {
@@ -301,11 +296,9 @@ const Declaration = ({ code }: DeclarationProps) => {
         await resendReceipt(data.entreprise.siren, data.déclaration.année_indicateurs)
       }
       setApiError(undefined)
-      setDeclaring(false)
       // Refresh authentification infos because the user may get another ownership now.
       refreshAuth()
     } catch (error: any) {
-      setDeclaring(false)
       const message = error.jsonBody?.error
         ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
         : "Erreur lors de la sauvegarde des données"
@@ -316,6 +309,8 @@ const Declaration = ({ code }: DeclarationProps) => {
         // Don't log on 403 because it's an expected error: "Votre déclaration ne peut être validée : Cette déclaration a déjà été créée par un autre utilisateur".
         logToSentry(error, data)
       }
+    } finally {
+      setDeclaring(false)
     }
   }
 
@@ -340,7 +335,6 @@ const Declaration = ({ code }: DeclarationProps) => {
                 <DeclarationForm
                   noteIndex={noteIndex}
                   validateDeclaration={validateDeclaration}
-                  apiError={apiError}
                   declaring={declaring}
                 />
               ) : (
@@ -454,18 +448,21 @@ const Declaration = ({ code }: DeclarationProps) => {
       <LayoutFormAndResult
         form={
           <>
+            {apiError && (
+              <InfoBlock
+                mb="4"
+                type="error"
+                title={"Erreur"}
+                text="Erreur lors de la sauvegarde des données. Veuillez réessayer ultérieurement."
+              />
+            )}
             <RecapitulatifIndex
               allIndicateurValid={allIndicateursCompliant}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
             />
-            <DeclarationForm
-              noteIndex={noteIndex}
-              validateDeclaration={validateDeclaration}
-              apiError={apiError}
-              declaring={declaring}
-            />
+            <DeclarationForm noteIndex={noteIndex} validateDeclaration={validateDeclaration} declaring={declaring} />
           </>
         }
       />

@@ -85,16 +85,10 @@ function buildWordings(index: number | undefined) {
 interface DeclarationFormProps {
   noteIndex: number | undefined
   validateDeclaration: (valid: FormState) => void
-  apiError: string | undefined
   declaring: boolean
 }
 
-const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
-  noteIndex,
-  validateDeclaration,
-  apiError,
-  declaring,
-}) => {
+const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, validateDeclaration, declaring }) => {
   const history = useHistory()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
@@ -203,7 +197,6 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
 
             {periodeSuffisante && (
               <>
