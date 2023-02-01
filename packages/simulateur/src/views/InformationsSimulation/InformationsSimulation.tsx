@@ -21,7 +21,7 @@ const InformationsSimulation = () => {
       title={title}
       tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
-      <LayoutFormAndResult form={<InformationsSimulationForm />} result={null} />
+      <LayoutFormAndResult form={<InformationsSimulationForm />} />
 
       {state.informations.formValidated === "Valid" &&
         (state.effectif.formValidated === "Invalid" ||

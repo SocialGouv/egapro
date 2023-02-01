@@ -378,7 +378,6 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
               )}
             </>
           }
-          result={null}
         />
       </PageDeclaration>
     )
@@ -486,7 +485,6 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
             />
           </>
         }
-        result={null}
       />
     </PageDeclaration>
   )
