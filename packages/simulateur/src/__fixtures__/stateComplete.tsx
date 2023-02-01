@@ -1,7 +1,7 @@
 import flow from "lodash/fp/flow"
 
 import { CategorieSocioPro, TranchesAges, ActionType } from "../globals"
-import { currifiedReducer as reducer } from "../AppReducer"
+import { currifiedReducer as reducer } from "../app-reducer"
 
 const actionInitiateState: ActionType = {
   type: "initiateState",

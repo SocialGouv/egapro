@@ -1,7 +1,7 @@
 import React from "react"
 import { createContext, PropsWithChildren, useCallback, useContext, useReducer } from "react"
 import ReactPiwik from "react-piwik"
-import AppReducer from "../AppReducer"
+import appReducer from "../app-reducer"
 import { ActionType, AppState } from "../globals"
 
 type AppStateContextType = { state: AppState | undefined; dispatch: React.Dispatch<ActionType> }
@@ -9,7 +9,7 @@ type AppStateContextType = { state: AppState | undefined; dispatch: React.Dispat
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined)
 
 export const AppStateContextProvider = ({ children }: PropsWithChildren) => {
-  const [state, dispatchReducer] = useReducer(AppReducer, undefined)
+  const [state, dispatchReducer] = useReducer(appReducer, undefined)
   const dispatch = useCallback(
     (action: ActionType) => {
       if (

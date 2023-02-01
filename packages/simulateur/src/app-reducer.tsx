@@ -144,7 +144,7 @@ const defaultState: AppState = {
   },
 }
 
-function AppReducer(state: AppState | undefined, action: ActionType): AppState | undefined {
+function appReducer(state: AppState | undefined, action: ActionType): AppState | undefined {
   if (action.type === "resetState") {
     return undefined
   }
@@ -645,6 +645,6 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
   }
 }
 
-export const currifiedReducer = (action: ActionType) => (state: AppState | undefined) => AppReducer(state, action)
+export const currifiedReducer = (action: ActionType) => (state: AppState | undefined) => appReducer(state, action)
 
-export default AppReducer
+export default appReducer
