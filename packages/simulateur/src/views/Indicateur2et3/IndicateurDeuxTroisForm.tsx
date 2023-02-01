@@ -30,7 +30,7 @@ import FormSubmit from "../../components/FormSubmit"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import { calendarYear, dateToString, parseDate, Year } from "../../utils/date"
+import { calendarYear, dateToFrString, parseDate, Year } from "../../utils/date"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -110,10 +110,10 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
     dispatch({ type: "validateIndicateurDeuxTrois", valid: "Valid" })
   }
 
-  const oneYear = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1)))
-  const twoYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2)))
-  const threeYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3)))
-  const dateFinPeriodeReference = dateToString(parseDate(finPeriodeReference))
+  const oneYear = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1)))
+  const twoYears = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2)))
+  const threeYears = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3)))
+  const dateFinPeriodeReference = dateToFrString(parseDate(finPeriodeReference))
 
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(nombreSalaries)
