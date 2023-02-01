@@ -39,33 +39,10 @@ const Recapitulatif: FunctionComponent = () => {
 
   const periodeSuffisante = state.informations.periodeSuffisante || true // For old simulation-declaration, we assume that the periodSuffisante is true.
 
-  const isEffectifsFilled = state.effectif.formValidated === "Valid"
-
   const calculsIndicateurUn = calculerIndicateurUn(state)
   const calculsIndicateurDeux = calculerIndicateurDeux(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
-    indicateurCalculable: indicateurTroisCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois,
-  } = calculerIndicateurTrois(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
-    indicateurCalculable: indicateurDeuxTroisCalculable,
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-    noteIndicateurDeuxTrois,
-    correctionMeasure: correctionMeasureIndicateurDeuxTrois,
-    tauxAugmentationPromotionHommes,
-    tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries,
-  } = calculerIndicateurDeuxTrois(state)
+  const calculsIndicateurTrois = calculerIndicateurTrois(state)
+  const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
@@ -88,8 +65,8 @@ const Recapitulatif: FunctionComponent = () => {
 
   const indicateurDeuxTroisValid =
     state.indicateurDeuxTrois.formValidated === "Valid" ||
-    !effectifsIndicateurDeuxTroisCalculable ||
-    !indicateurDeuxTroisCalculable
+    !calculsIndicateurDeuxTrois.effectifsIndicateurCalculable ||
+    !calculsIndicateurDeuxTrois.indicateurCalculable
 
   const indicateurDeuxValid =
     state.indicateurDeux.formValidated === "Valid" ||
@@ -97,7 +74,9 @@ const Recapitulatif: FunctionComponent = () => {
     !calculsIndicateurDeux.indicateurCalculable
 
   const indicateurTroisValid =
-    state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable || !indicateurTroisCalculable
+    state.indicateurTrois.formValidated === "Valid" ||
+    !calculsIndicateurTrois.effectifsIndicateurCalculable ||
+    !calculsIndicateurTrois.indicateurCalculable
 
   const allIndicateursValid =
     indicateurUnValid &&
@@ -109,8 +88,8 @@ const Recapitulatif: FunctionComponent = () => {
     trancheEffectifs,
     calculsIndicateurUn.noteIndicateurUn,
     calculsIndicateurDeux.noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
+    calculsIndicateurTrois.noteIndicateurTrois,
+    calculsIndicateurDeuxTrois.noteIndicateurDeuxTrois,
     noteIndicateurQuatre,
     noteIndicateurCinq,
   )
@@ -139,34 +118,9 @@ const Recapitulatif: FunctionComponent = () => {
               <>
                 <RecapitulatifIndicateurDeux calculsIndicateurDeux={calculsIndicateurDeux} />
 
-                <RecapitulatifIndicateurTrois
-                  isEffectifsFilled={isEffectifsFilled}
-                  indicateurTroisFormValidated={state.indicateurTrois.formValidated}
-                  effectifsIndicateurTroisCalculable={effectifsIndicateurTroisCalculable}
-                  indicateurTroisCalculable={indicateurTroisCalculable}
-                  effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
-                  indicateurEcartPromotion={indicateurEcartPromotion}
-                  indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
-                  noteIndicateurTrois={noteIndicateurTrois}
-                  correctionMeasure={correctionMeasureIndicateurTrois}
-                />
+                <RecapitulatifIndicateurTrois calculsIndicateurTrois={calculsIndicateurTrois} />
               </>
-            )) || (
-              <RecapitulatifIndicateurDeuxTrois
-                isEffectifsFilled={isEffectifsFilled}
-                indicateurDeuxTroisFormValidated={state.indicateurDeuxTrois.formValidated}
-                effectifsIndicateurDeuxTroisCalculable={effectifsIndicateurDeuxTroisCalculable}
-                indicateurDeuxTroisCalculable={indicateurDeuxTroisCalculable}
-                indicateurEcartAugmentationPromotion={indicateurEcartAugmentationPromotion}
-                indicateurEcartNombreEquivalentSalaries={indicateurEcartNombreEquivalentSalaries}
-                indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
-                noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
-                correctionMeasure={correctionMeasureIndicateurDeuxTrois}
-                tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
-                tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
-                plusPetitNombreSalaries={plusPetitNombreSalaries}
-              />
-            )}
+            )) || <RecapitulatifIndicateurDeuxTrois calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />}
             <RecapitulatifIndicateurQuatre
               indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
               indicateurQuatreCalculable={indicateurQuatreCalculable}

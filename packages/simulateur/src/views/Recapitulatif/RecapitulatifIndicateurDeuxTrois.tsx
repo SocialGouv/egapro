@@ -1,49 +1,48 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
 import { displayFractionPercentWithEmptyData, displaySexeSurRepresente } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import { calculerResultats } from "../Indicateur2et3/IndicateurDeuxTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
-  isEffectifsFilled: boolean
-  indicateurDeuxTroisFormValidated: FormState
-  effectifsIndicateurDeuxTroisCalculable: boolean
-  indicateurDeuxTroisCalculable: boolean
-  indicateurEcartAugmentationPromotion: number | undefined
-  indicateurEcartNombreEquivalentSalaries: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeuxTrois: number | undefined
-  correctionMeasure: boolean
-  tauxAugmentationPromotionFemmes: number | undefined
-  tauxAugmentationPromotionHommes: number | undefined
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
+  calculsIndicateurDeuxTrois: ReturnType<typeof calculerIndicateurDeuxTrois>
 }
 
 const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateurDeuxTroisProps> = ({
-  isEffectifsFilled,
-  indicateurDeuxTroisFormValidated,
-  effectifsIndicateurDeuxTroisCalculable,
-  indicateurDeuxTroisCalculable,
-  indicateurEcartAugmentationPromotion,
-  indicateurEcartNombreEquivalentSalaries,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeuxTrois,
-  correctionMeasure,
-  tauxAugmentationPromotionFemmes,
-  tauxAugmentationPromotionHommes,
+  calculsIndicateurDeuxTrois,
 }) => {
-  if (!isEffectifsFilled) {
+  const { state } = useAppStateContextProvider()
+  if (!state) return null
+
+  const isEffectifsFilled = state.effectif.formValidated === "Valid"
+
+  const indicateurDeuxTroisFormValidated = state.indicateurDeuxTrois.formValidated
+
+  const {
+    effectifsIndicateurCalculable,
+    indicateurCalculable,
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeuxTrois,
+    correctionMeasure,
+    tauxAugmentationPromotionHommes,
+    tauxAugmentationPromotionFemmes,
+  } = calculsIndicateurDeuxTrois
+
+  if (!isEffectifsFilled || indicateurDeuxTroisFormValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
-  if (!effectifsIndicateurDeuxTroisCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -53,7 +52,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     )
   }
 
-  if (!indicateurDeuxTroisCalculable) {
+  if (!indicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -61,10 +60,6 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"
       />
     )
-  }
-
-  if (indicateurDeuxTroisFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
   const results = calculerResultats(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
