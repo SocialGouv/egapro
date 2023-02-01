@@ -28,7 +28,7 @@ const IndicateurUn: FunctionComponent = () => {
   const readOnly = isFormValid(state.indicateurUn)
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurUn>
         <InfoBlock

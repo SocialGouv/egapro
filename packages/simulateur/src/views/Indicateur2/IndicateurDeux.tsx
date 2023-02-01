@@ -29,7 +29,7 @@ const IndicateurDeux: FunctionComponent = () => {
   const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurDeux
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurDeux>
         <InfoBlock

@@ -41,7 +41,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
   const readOnly = isFormValid(state.indicateurDeuxTrois)
 
   // le formulaire d'informations n'est pas validé
-  if (state.informations.formValidated !== "Valid") {
+  if (!isFormValid(state.informations)) {
     return (
       <PageIndicateurDeuxTrois>
         <InfoBlock
@@ -54,7 +54,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
   }
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurDeuxTrois>
         <InfoBlock

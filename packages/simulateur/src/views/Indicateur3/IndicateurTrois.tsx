@@ -31,7 +31,7 @@ const IndicateurTrois: FunctionComponent = () => {
   const readOnly = isFormValid(state.indicateurTrois)
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurTrois>
         <InfoBlock

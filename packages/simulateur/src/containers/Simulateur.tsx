@@ -173,64 +173,62 @@ function Simulateur(): JSX.Element {
       </Route>
 
       {/*  We ensure to have the informations page always filleds before allowing to go to other form pages.  */}
-      {state?.informations?.formValidated !== "Valid" ? (
+      {!isFormValid(state.informations) ? (
         <Redirect to={`/simulateur/${code}/informations`} />
       ) : (
-        <>
-          <Switch>
-            <Route path="/simulateur/:code/effectifs">
-              <Effectif />
+        <Switch>
+          <Route path="/simulateur/:code/effectifs">
+            <Effectif />
+          </Route>
+          <Route path="/simulateur/:code/indicateur1">
+            <IndicateurUn />
+          </Route>
+          <Route path="/simulateur/:code/indicateur2">
+            <IndicateurDeux />
+          </Route>
+          <Route path="/simulateur/:code/indicateur3">
+            <IndicateurTrois />
+          </Route>
+          <Route path="/simulateur/:code/indicateur2et3">
+            <IndicateurDeuxTrois />
+          </Route>
+          <Route path="/simulateur/:code/indicateur4">
+            <IndicateurQuatre />
+          </Route>
+          <Route path="/simulateur/:code/indicateur5">
+            <IndicateurCinq />
+          </Route>
+          <Route path="/simulateur/:code/recapitulatif">
+            <Recapitulatif />
+          </Route>
+          {!isAuthenticated ? (
+            <Route>
+              <AskEmail>
+                <Text>
+                  L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du
+                  travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de
+                  déclaration.
+                </Text>
+                <Text mt={2}>
+                  <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire de
+                  déclaration.
+                </Text>
+              </AskEmail>
             </Route>
-            <Route path="/simulateur/:code/indicateur1">
-              <IndicateurUn />
-            </Route>
-            <Route path="/simulateur/:code/indicateur2">
-              <IndicateurDeux />
-            </Route>
-            <Route path="/simulateur/:code/indicateur3">
-              <IndicateurTrois />
-            </Route>
-            <Route path="/simulateur/:code/indicateur2et3">
-              <IndicateurDeuxTrois />
-            </Route>
-            <Route path="/simulateur/:code/indicateur4">
-              <IndicateurQuatre />
-            </Route>
-            <Route path="/simulateur/:code/indicateur5">
-              <IndicateurCinq />
-            </Route>
-            <Route path="/simulateur/:code/recapitulatif">
-              <Recapitulatif />
-            </Route>
-            {!isAuthenticated ? (
-              <Route>
-                <AskEmail>
-                  <Text>
-                    L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du
-                    travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de
-                    déclaration.
-                  </Text>
-                  <Text mt={2}>
-                    <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire de
-                    déclaration.
-                  </Text>
-                </AskEmail>
+          ) : (
+            <>
+              <Route path="/simulateur/:code/informations-entreprise">
+                <InformationsEntreprise />
               </Route>
-            ) : (
-              <>
-                <Route path="/simulateur/:code/informations-entreprise">
-                  <InformationsEntreprise />
-                </Route>
-                <Route path="/simulateur/:code/informations-declarant">
-                  <InformationsDeclarant />
-                </Route>
-                <Route path="/simulateur/:code/declaration">
-                  <Declaration code={code} />
-                </Route>
-              </>
-            )}
-          </Switch>
-        </>
+              <Route path="/simulateur/:code/informations-declarant">
+                <InformationsDeclarant />
+              </Route>
+              <Route path="/simulateur/:code/declaration">
+                <Declaration code={code} />
+              </Route>
+            </>
+          )}
+        </Switch>
       )}
     </Switch>
   )

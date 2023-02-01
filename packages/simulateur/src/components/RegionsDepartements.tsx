@@ -149,6 +149,7 @@ const styles = {
 
 export default RegionsDepartements
 
+// TODO: refactor en utilisant le endpoint GET /config qui contient déjà les informations régions et départements.
 const regionsDepartements: { [key: string]: Array<string> } = {
   "Auvergne-Rhône-Alpes": [
     "Ain",
