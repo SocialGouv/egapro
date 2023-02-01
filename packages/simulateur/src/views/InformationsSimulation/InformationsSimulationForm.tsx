@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
+import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
 import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
 
@@ -254,7 +254,7 @@ const InformationsSimulationForm: FunctionComponent = () => {
                 )}
               </ActionBar>
               <InfoBlock
-                mt={2}
+                mt={12}
                 type="info"
                 text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
                   +values.anneeDeclaration + 1

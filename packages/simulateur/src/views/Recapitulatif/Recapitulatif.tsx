@@ -1,4 +1,4 @@
-import { Box, Button, Text, Tooltip, VStack } from "@chakra-ui/react"
+import { Box, Text, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
 import { useTitle } from "../../utils/hooks"
