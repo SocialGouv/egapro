@@ -4,6 +4,7 @@ import { Form } from "react-final-form"
 
 import {
   composeValidators,
+  isFormValid,
   maxNumber,
   minNumber,
   mustBeInteger,
@@ -39,7 +40,7 @@ const IndicateurCinqForm: FunctionComponent = () => {
 
   if (!state) return null
 
-  const readOnly = state.indicateurCinq.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurCinq)
 
   const indicateurCinq = state.indicateurCinq
 

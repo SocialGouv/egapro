@@ -14,6 +14,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurDeuxProps {
   calculsIndicateurDeux: ReturnType<typeof calculerIndicateurDeux>
@@ -28,7 +29,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
 
   const indicateurDeuxFormValidated = state.indicateurDeux.formValidated
 
-  const isEffectifsFilled = state.effectif.formValidated === "Valid"
+  const isEffectifsFilled = isFormValid(state.effectif)
 
   const {
     effectifsIndicateurCalculable,

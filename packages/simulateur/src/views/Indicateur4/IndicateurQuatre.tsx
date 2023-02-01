@@ -13,6 +13,7 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur retour congé maternité"
 
@@ -27,7 +28,7 @@ const IndicateurQuatre: FunctionComponent = () => {
 
   const { indicateurCalculable } = calculsIndicateurQuatre
 
-  const readOnly = state.indicateurQuatre.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurQuatre)
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (readOnly && !indicateurCalculable) {

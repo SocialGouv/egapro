@@ -4,6 +4,7 @@ import { Form } from "react-final-form"
 import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import {
   composeValidators,
+  isFormValid,
   minNumber,
   mustBeNumber,
   parseBooleanFormValue,
@@ -75,7 +76,7 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({ calc
 
   const presencePromotion = state.indicateurTrois.presencePromotion
 
-  const readOnly = state.indicateurTrois.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurTrois)
 
   const {
     effectifEtEcartPromoParGroupe: ecartPromoParCategorieSocioPro,

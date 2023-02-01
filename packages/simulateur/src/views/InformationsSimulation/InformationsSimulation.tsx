@@ -8,6 +8,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import InformationsSimulationForm from "./InformationsSimulationForm"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Informations calcul et période de référence"
 
@@ -23,7 +24,7 @@ const InformationsSimulation = () => {
     >
       <LayoutFormAndResult form={<InformationsSimulationForm />} />
 
-      {state.informations.formValidated === "Valid" &&
+      {isFormValid(state.informations) &&
         (state.effectif.formValidated === "Invalid" ||
           state.indicateurUn.formValidated === "Invalid" ||
           (state.informations.trancheEffectifs !== "50 à 250" &&

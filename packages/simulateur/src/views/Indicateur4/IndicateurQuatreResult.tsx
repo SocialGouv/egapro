@@ -5,6 +5,7 @@ import { displayPercent } from "../../utils/helpers"
 import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface IndicateurQuatreResultProps {
   calculsIndicateurQuatre: Pick<
@@ -18,7 +19,7 @@ const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = (
 
   if (!state) return null
 
-  const readOnly = state.indicateurQuatre.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurQuatre)
 
   if (!readOnly) return null
 

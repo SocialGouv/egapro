@@ -4,6 +4,7 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { FormState } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnResult from "../IndicateurUnResult"
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
 
@@ -26,12 +27,12 @@ const IndicateurUnCsp: FunctionComponent = () => {
       form={
         <IndicateurUnCspForm
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
-          readOnly={state.indicateurUn.formValidated === "Valid"}
+          readOnly={isFormValid(state.indicateurUn)}
           validateIndicateurUn={validateIndicateurUn}
         />
       }
       result={
-        state.indicateurUn.formValidated === "Valid" && (
+        isFormValid(state.indicateurUn) && (
           <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}

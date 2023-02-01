@@ -12,6 +12,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de rémunération"
 
@@ -24,7 +25,7 @@ const IndicateurUn: FunctionComponent = () => {
 
   const { csp } = state.indicateurUn
 
-  const readOnly = state.indicateurUn.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurUn)
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {

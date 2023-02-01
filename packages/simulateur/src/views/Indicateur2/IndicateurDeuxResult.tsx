@@ -5,6 +5,7 @@ import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface IndicateurDeuxResultProps {
   calculsIndicateurDeux: Pick<
@@ -21,7 +22,7 @@ const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ ca
 
   if (!state) return null
 
-  const readOnly = state.indicateurDeux.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurDeux)
 
   if (readOnly) return null
 

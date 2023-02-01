@@ -13,6 +13,7 @@ import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/Simulat
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurDeuxForm from "./IndicateurDeuxForm"
 import IndicateurDeuxResult from "./IndicateurDeuxResult"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de taux d’augmentation individuelle hors promotion"
 
@@ -57,7 +58,7 @@ const IndicateurDeux: FunctionComponent = () => {
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (state.indicateurDeux.formValidated === "Valid" && !indicateurCalculable) {
+  if (isFormValid(state.indicateurDeux) && !indicateurCalculable) {
     return (
       <PageIndicateurDeux>
         <InfoBlock

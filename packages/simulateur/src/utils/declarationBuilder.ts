@@ -23,6 +23,7 @@ import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
 import totalNombreSalaries from "./totalNombreSalaries"
+import { isFormValid } from "./formHelpers"
 
 export type DeclarationAPI = {
   siren: string
@@ -489,15 +490,15 @@ export function computeValuesFromState(state: AppState) {
   } = calculerIndicateurCinq(state)
 
   const allIndicateurValid =
-    (state.indicateurUn.formValidated === "Valid" ||
+    (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
-      ? (state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable) &&
-        (state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable)
-      : state.indicateurDeuxTrois.formValidated === "Valid" || !effectifsIndicateurDeuxTroisCalculable) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
+      ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
+        (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
+      : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
+    isFormValid(state.indicateurQuatre) &&
+    isFormValid(state.indicateurCinq)
 
   const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,

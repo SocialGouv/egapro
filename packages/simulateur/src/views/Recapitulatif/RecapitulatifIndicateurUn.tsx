@@ -18,6 +18,7 @@ import { indicateursInfo } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurUnProps {
   calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn>
@@ -30,7 +31,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
 
   const indicateurUnFormValidated = state.indicateurUn.formValidated
   const indicateurUnParCSP = state.indicateurUn.csp
-  const isEffectifsFilled = state.effectif.formValidated === "Valid"
+  const isEffectifsFilled = isFormValid(state.effectif)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,

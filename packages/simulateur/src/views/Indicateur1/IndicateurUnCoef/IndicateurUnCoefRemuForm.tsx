@@ -7,6 +7,7 @@ import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { GroupTranchesAgesIndicateurUn } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
 import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
@@ -20,7 +21,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   if (!state) return null
 
-  const { coefficientEffectifFormValidated, formValidated } = state.indicateurUn
+  const { coefficientEffectifFormValidated } = state.indicateurUn
 
   const {
     effectifsIndicateurCalculable,
@@ -68,7 +69,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     )
   }
 
-  const readOnly = formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurUn)
 
   return (
     <LayoutFormAndResult

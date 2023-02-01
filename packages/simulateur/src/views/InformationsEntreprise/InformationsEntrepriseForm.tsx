@@ -24,7 +24,7 @@ import { EntrepriseType, Structure } from "../../globals"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { timestampToFrDate } from "../../utils/date"
-import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import { isFormValid, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 const isRequired = (value: string) => {
@@ -79,7 +79,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
   const informationsEntreprise = state.informationsEntreprise
   const year = state.informations.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
 
-  const readOnly = state.informationsEntreprise.formValidated === "Valid"
+  const readOnly = isFormValid(state.informationsEntreprise)
 
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,

@@ -12,6 +12,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import { useTitle } from "../../utils/hooks"
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Effectifs pris en compte"
 
@@ -39,7 +40,7 @@ const Effectif: FunctionComponent = () => {
         <LayoutFormAndResult
           form={<EffectifForm />}
           result={
-            state.effectif.formValidated === "Valid" && (
+            isFormValid(state.effectif) && (
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
                 totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
@@ -49,7 +50,7 @@ const Effectif: FunctionComponent = () => {
           }
         />
         <VStack spacing={6} align="stretch">
-          {state.effectif.formValidated === "Valid" &&
+          {isFormValid(state.effectif) &&
             (state.indicateurUn.formValidated === "Invalid" ||
               (state.informations.trancheEffectifs !== "50 à 250" &&
                 (state.indicateurDeux.formValidated === "Invalid" ||
@@ -104,8 +105,8 @@ const Effectif: FunctionComponent = () => {
               />
             )}
           {/* This should never happen, as modifying the effectif will invalidate the indicateur form */}
-          {state.effectif.formValidated === "Valid" &&
-            state.indicateurUn.formValidated === "Valid" &&
+          {isFormValid(state.effectif) &&
+            isFormValid(state.indicateurUn) &&
             state.indicateurUn.coef &&
             (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
               totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
@@ -124,8 +125,8 @@ const Effectif: FunctionComponent = () => {
               />
             )}
 
-          {state.informations.formValidated === "Valid" &&
-            state.effectif.formValidated === "Valid" &&
+          {isFormValid(state.informations) &&
+            isFormValid(state.effectif) &&
             totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
             state.informations.trancheEffectifs === "50 à 250" && (
               <InfoBlock

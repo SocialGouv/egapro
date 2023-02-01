@@ -17,6 +17,7 @@ import FormError from "../../components/FormError"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import {
   composeValidators,
+  isFormValid,
   minNumber,
   mustBeNumber,
   parseBooleanFormValue,
@@ -72,7 +73,7 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({ calcul
 
   if (!state) return null
 
-  const readOnly = state.indicateurDeux.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurDeux)
 
   const presenceAugmentation = state.indicateurDeux.presenceAugmentation
 

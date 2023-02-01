@@ -13,6 +13,7 @@ import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/Simulat
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de taux de promotion"
 
@@ -27,7 +28,7 @@ const IndicateurTrois: FunctionComponent = () => {
 
   const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurTrois
 
-  const readOnly = state.indicateurTrois.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurTrois)
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {

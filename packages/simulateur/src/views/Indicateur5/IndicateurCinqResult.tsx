@@ -3,13 +3,14 @@ import React, { FunctionComponent } from "react"
 import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import { isFormValid } from "../../utils/formHelpers"
 
 const IndicateurCinqResult: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
 
-  const readOnly = state.indicateurCinq.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurCinq)
 
   if (!readOnly) return null
 

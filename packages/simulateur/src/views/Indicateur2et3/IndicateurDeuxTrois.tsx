@@ -19,6 +19,7 @@ import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/Simulat
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de taux d'augmentation"
 
@@ -37,7 +38,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
     indicateurEcartNombreEquivalentSalaries,
   } = calculsIndicateurDeuxTrois
 
-  const readOnly = state.indicateurDeuxTrois.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurDeuxTrois)
 
   // le formulaire d'informations n'est pas validé
   if (state.informations.formValidated !== "Valid") {

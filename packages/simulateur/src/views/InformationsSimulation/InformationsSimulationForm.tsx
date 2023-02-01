@@ -6,6 +6,7 @@ import { Form, useField } from "react-final-form"
 import { ActionInformationsSimulationData, FormState } from "../../globals"
 
 import {
+  isFormValid,
   parseBooleanFormValue,
   parseBooleanStateValue,
   parseIntFormValue,
@@ -130,7 +131,7 @@ const InformationsSimulationForm: FunctionComponent = () => {
 
   const alreadyDeclared = declaration?.data?.id === code
 
-  const readOnly = frozenDeclaration || state.informations.formValidated === "Valid"
+  const readOnly = frozenDeclaration || isFormValid(state.informations)
 
   const informations = state.informations
 
@@ -251,7 +252,7 @@ const InformationsSimulationForm: FunctionComponent = () => {
                 to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
                 label="Suivant"
               />
-              {informations.formValidated === "Valid" && (
+              {isFormValid(informations) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"

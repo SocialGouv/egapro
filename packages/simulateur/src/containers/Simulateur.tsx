@@ -31,6 +31,7 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
+import { isFormValid } from "../utils/formHelpers"
 
 type Params = {
   code: string
@@ -54,8 +55,7 @@ function Simulateur(): JSX.Element {
 
         const simuData = simulation?.jsonBody?.data
 
-        const siren =
-          simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
+        const siren = isFormValid(simuData?.informationsEntreprise) ? simuData?.informationsEntreprise?.siren : null
 
         if (siren) {
           if (!isAuthenticated) {

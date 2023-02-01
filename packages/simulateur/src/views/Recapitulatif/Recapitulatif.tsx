@@ -25,6 +25,7 @@ import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
 import RecapitulatifInformations from "./RecapitulatifInformations"
+import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Récapitulatif"
 
@@ -48,23 +49,23 @@ const Recapitulatif: FunctionComponent = () => {
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
   const indicateurUnCompliant =
-    state.indicateurUn.formValidated === "Valid" ||
+    isFormValid(state.indicateurUn) ||
     // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
     (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.csp) ||
     !calculsIndicateurUn.effectifsIndicateurCalculable
 
   const indicateurDeuxCompliant =
-    state.indicateurDeux.formValidated === "Valid" ||
+    isFormValid(state.indicateurDeux) ||
     !calculsIndicateurDeux.effectifsIndicateurCalculable ||
     !calculsIndicateurDeux.indicateurCalculable
 
   const indicateurTroisCompliant =
-    state.indicateurTrois.formValidated === "Valid" ||
+    isFormValid(state.indicateurTrois) ||
     !calculsIndicateurTrois.effectifsIndicateurCalculable ||
     !calculsIndicateurTrois.indicateurCalculable
 
   const indicateurDeuxTroisCompliant =
-    state.indicateurDeuxTrois.formValidated === "Valid" ||
+    isFormValid(state.indicateurDeuxTrois) ||
     !calculsIndicateurDeuxTrois.effectifsIndicateurCalculable ||
     !calculsIndicateurDeuxTrois.indicateurCalculable
 
@@ -73,8 +74,8 @@ const Recapitulatif: FunctionComponent = () => {
     (trancheEffectifs === "50 à 250"
       ? indicateurDeuxTroisCompliant
       : indicateurDeuxCompliant && indicateurTroisCompliant) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
+    isFormValid(state.indicateurQuatre) &&
+    isFormValid(state.indicateurCinq)
 
   const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,

@@ -3,6 +3,7 @@ import { Form } from "react-final-form"
 
 import {
   composeValidators,
+  isFormValid,
   maxNumber,
   minNumber,
   mustBeInteger,
@@ -41,7 +42,7 @@ const IndicateurQuatreForm: FunctionComponent = () => {
 
   const indicateurQuatre = state.indicateurQuatre
 
-  const readOnly = state.indicateurQuatre.formValidated === "Valid"
+  const readOnly = isFormValid(state.indicateurQuatre)
 
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),

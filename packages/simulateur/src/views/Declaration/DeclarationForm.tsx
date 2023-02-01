@@ -303,7 +303,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
           </FormStack>
           {readOnly ? (
             <>
-              {declaration.formValidated === "Valid" && (
+              {isFormValid(declaration) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"

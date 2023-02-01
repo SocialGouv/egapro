@@ -5,6 +5,7 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
 import EffectifFormRaw from "./EffectifFormRaw"
+import { isFormValid } from "../../utils/formHelpers"
 
 const EffectifForm: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
@@ -40,7 +41,7 @@ const EffectifForm: FunctionComponent = () => {
 
   if (!state || !effectifRaw) return null
 
-  const readOnly = state.effectif.formValidated === "Valid"
+  const readOnly = isFormValid(state.effectif)
 
   return (
     <EffectifFormRaw

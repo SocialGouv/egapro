@@ -18,6 +18,7 @@ import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 
 const FormInputs = z.object({
   nom: z
@@ -47,7 +48,7 @@ const InformationsDeclarantForm: FunctionComponent = () => {
   if (!state) return null
 
   const informationsDeclarant = state.informationsDeclarant
-  const readOnly = state.informationsDeclarant.formValidated === "Valid"
+  const readOnly = isFormValid(state.informationsDeclarant)
 
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
@@ -129,7 +130,7 @@ const InformationsDeclarantForm: FunctionComponent = () => {
             <ActionBar>
               <ButtonSimulatorLink to="/declaration" label="Suivant" />
               &emsp;
-              {informationsDeclarant.formValidated === "Valid" && (
+              {isFormValid(informationsDeclarant) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
