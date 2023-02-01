@@ -1,10 +1,8 @@
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
-import React, { PropsWithChildren, useCallback, useEffect, useState } from "react"
-import { RouteComponentProps, useHistory } from "react-router-dom"
+import React, { PropsWithChildren, useEffect, useState } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
 import type {
-  ActionDeclarationData,
-  ActionType,
   AppState,
   DeclarationEffectifData,
   DeclarationIndicateurCinqData,
@@ -16,10 +14,13 @@ import type {
   FormState,
 } from "../../globals"
 
+import { useUser } from "../../components/AuthContext"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
@@ -38,8 +39,6 @@ import { logToSentry } from "../../utils/sentry"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import DeclarationForm from "./DeclarationForm"
-import { useUser } from "../../components/AuthContext"
-import { useDeclaration } from "../../hooks/useDeclaration"
 
 function buildHelpers(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
@@ -96,7 +95,7 @@ function buildHelpers(state: AppState) {
     noteIndicateurCinq,
   } = calculerIndicateurCinq(state)
 
-  const allIndicateurValid =
+  const allIndicateursCompliant =
     (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
@@ -196,7 +195,7 @@ function buildHelpers(state: AppState) {
 
   return {
     trancheEffectifs,
-    allIndicateurValid,
+    allIndicateursCompliant,
     effectifData,
     indicateurUnData,
     indicateurDeuxData,
@@ -221,37 +220,34 @@ const PageDeclaration = ({ children }: PropsWithChildren) => {
   )
 }
 
-interface DeclarationProps extends RouteComponentProps {
+interface DeclarationProps {
   code: string
-  state: AppState
-  dispatch: (action: ActionType) => void
 }
 
 const title = "Déclaration"
 
-const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
+const Declaration = ({ code }: DeclarationProps) => {
   useTitle(title)
-  const history = useHistory()
   const { refreshAuth } = useUser()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
+  const { state, dispatch } = useAppStateContextProvider()
+
   const { declaration: previousDeclaration } = useDeclaration(
-    state.informationsEntreprise.siren,
-    state.informations.anneeDeclaration,
+    state?.informationsEntreprise.siren,
+    state?.informations.anneeDeclaration,
   )
 
-  const updateDeclaration = useCallback(
-    (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
-    [dispatch],
-  )
+  useEffect(() => {
+    if (declaring && state) {
+      sendDeclaration(code, state)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.
+  }, [code, declaring, state])
 
-  const resetDeclaration = useCallback(() => {
-    history.push(`/nouvelle-simulation`)
-  }, [history])
-
-  const helpers = buildHelpers(state)
+  if (!state) return null
 
   const {
     indicateurUnData,
@@ -261,15 +257,16 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     indicateurQuatreData,
     indicateurCinqData,
     trancheEffectifs,
-    allIndicateurValid,
+    allIndicateursCompliant,
     effectifData,
     noteIndex,
     totalPoint,
     totalPointCalculable,
-  } = helpers
+  } = buildHelpers(state)
 
-  const validateDeclaration = (valid: FormState) => {
-    if (valid === "Valid") {
+  const validateDeclaration = (formState: FormState) => {
+    if (formState === "Valid") {
+      // Triggers the effect to send the declaration.
       setDeclaring(true)
     } else {
       setDeclaring(false)
@@ -277,7 +274,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     if (!apiError) {
       return dispatch({
         type: "validateDeclaration",
-        valid,
+        valid: formState,
         effectifData,
         indicateurUnData,
         indicateurDeuxData,
@@ -323,13 +320,6 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     }
   }
 
-  useEffect(() => {
-    if (declaring) {
-      sendDeclaration(code, state)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.
-  }, [code, declaring, state])
-
   if (!state.informations.periodeSuffisante) {
     const allFormsFilled = isFormValid(state.informationsEntreprise) && isFormValid(state.informationsDeclarant)
 
@@ -349,10 +339,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
 
               {allFormsFilled ? (
                 <DeclarationForm
-                  state={state}
                   noteIndex={noteIndex}
-                  updateDeclaration={updateDeclaration}
-                  resetDeclaration={resetDeclaration}
                   validateDeclaration={validateDeclaration}
                   apiError={apiError}
                   declaring={declaring}
@@ -385,7 +372,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
 
   // tous les formulaires ne sont pas encore validés
   if (
-    !allIndicateurValid ||
+    !allIndicateursCompliant ||
     !isFormValid(state.informations) ||
     !isFormValid(state.effectif) ||
     !isFormValid(state.informationsEntreprise) ||
@@ -469,16 +456,13 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
         form={
           <>
             <RecapitulatifIndex
-              allIndicateurValid={allIndicateurValid}
+              allIndicateurValid={allIndicateursCompliant}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
             />
             <DeclarationForm
-              state={state}
               noteIndex={noteIndex}
-              updateDeclaration={updateDeclaration}
-              resetDeclaration={resetDeclaration}
               validateDeclaration={validateDeclaration}
               apiError={apiError}
               declaring={declaring}
