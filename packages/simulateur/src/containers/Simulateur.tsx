@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { Fragment, ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
 import { getSimulation, putSimulation } from "../utils/api"
@@ -176,16 +176,32 @@ function Simulateur(): JSX.Element {
       {state?.informations?.formValidated !== "Valid" ? (
         <Redirect to={`/simulateur/${code}/informations`} />
       ) : (
-        <Fragment>
+        <>
           <Switch>
-            <Route path="/simulateur/:code/effectifs" render={() => <Effectif />} />
-            <Route path="/simulateur/:code/indicateur1" render={() => <IndicateurUn />} />
-            <Route path="/simulateur/:code/indicateur2" render={() => <IndicateurDeux />} />
-            <Route path="/simulateur/:code/indicateur3" render={() => <IndicateurTrois />} />
-            <Route path="/simulateur/:code/indicateur2et3" render={() => <IndicateurDeuxTrois />} />
-            <Route path="/simulateur/:code/indicateur4" render={() => <IndicateurQuatre />} />
-            <Route path="/simulateur/:code/indicateur5" render={() => <IndicateurCinq />} />
-            <Route path="/simulateur/:code/recapitulatif" render={() => <Recapitulatif />} />
+            <Route path="/simulateur/:code/effectifs">
+              <Effectif />
+            </Route>
+            <Route path="/simulateur/:code/indicateur1">
+              <IndicateurUn />
+            </Route>
+            <Route path="/simulateur/:code/indicateur2">
+              <IndicateurDeux />
+            </Route>
+            <Route path="/simulateur/:code/indicateur3">
+              <IndicateurTrois />
+            </Route>
+            <Route path="/simulateur/:code/indicateur2et3">
+              <IndicateurDeuxTrois />
+            </Route>
+            <Route path="/simulateur/:code/indicateur4">
+              <IndicateurQuatre />
+            </Route>
+            <Route path="/simulateur/:code/indicateur5">
+              <IndicateurCinq />
+            </Route>
+            <Route path="/simulateur/:code/recapitulatif">
+              <Recapitulatif />
+            </Route>
             {!isAuthenticated ? (
               <Route>
                 <AskEmail>
@@ -201,14 +217,20 @@ function Simulateur(): JSX.Element {
                 </AskEmail>
               </Route>
             ) : (
-              <Fragment>
-                <Route path="/simulateur/:code/informations-entreprise" render={() => <InformationsEntreprise />} />
-                <Route path="/simulateur/:code/informations-declarant" render={() => <InformationsDeclarant />} />
-                <Route path="/simulateur/:code/declaration" render={() => <Declaration code={code} />} />
-              </Fragment>
+              <>
+                <Route path="/simulateur/:code/informations-entreprise">
+                  <InformationsEntreprise />
+                </Route>
+                <Route path="/simulateur/:code/informations-declarant">
+                  <InformationsDeclarant />
+                </Route>
+                <Route path="/simulateur/:code/declaration">
+                  <Declaration code={code} />
+                </Route>
+              </>
             )}
           </Switch>
-        </Fragment>
+        </>
       )}
     </Switch>
   )
