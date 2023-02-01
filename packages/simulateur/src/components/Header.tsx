@@ -169,14 +169,14 @@ const Header = () => {
                 <ButtonGroup gap="0">
                   {isMobile && (
                     <>
-                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
+                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Se connecter"} size="xs" variant="ghost" />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
-                        label={"Me connecter"}
+                        label={"Se connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
@@ -186,7 +186,7 @@ const Header = () => {
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
-                        label={"Me connecter"}
+                        label={"Se connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
