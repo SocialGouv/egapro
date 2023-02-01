@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import {
   composeValidators,
   minNumber,
@@ -63,7 +63,7 @@ const validateForm = ({
 
 interface IndicateurTroisFormProps {
   calculsIndicateurTrois: Pick<
-    ReturnType<typeof calculIndicateurTrois>,
+    ReturnType<typeof calculerIndicateurTrois>,
     "effectifEtEcartPromoParGroupe" | "correctionMeasure" | "indicateurSexeSurRepresente"
   >
 }

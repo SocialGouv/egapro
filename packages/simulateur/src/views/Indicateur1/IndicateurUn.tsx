@@ -1,6 +1,6 @@
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
@@ -39,7 +39,7 @@ const IndicateurUn: FunctionComponent = () => {
     )
   }
 
-  const { effectifsIndicateurCalculable } = calculIndicateurUn(state)
+  const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
   // les effectifs ne permettent pas de calculer l'indicateur
   if (!effectifsIndicateurCalculable && state.indicateurUn.csp) {

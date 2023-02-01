@@ -21,13 +21,13 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
+import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculerIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurUn, {
+import calculerIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
   calculEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn"
@@ -55,7 +55,7 @@ function buildHelpers(state: AppState) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
@@ -71,7 +71,7 @@ function buildHelpers(state: AppState) {
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois,
-  } = calculIndicateurTrois(state)
+  } = calculerIndicateurTrois(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
@@ -184,7 +184,7 @@ function buildHelpers(state: AppState) {
     noteFinale: noteIndicateurCinq,
   }
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,

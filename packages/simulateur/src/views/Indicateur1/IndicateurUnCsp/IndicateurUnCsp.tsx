@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { FormState } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import IndicateurUnResult from "../IndicateurUnResult"
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
 
@@ -19,7 +19,7 @@ const IndicateurUnCsp: FunctionComponent = () => {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   return (
     <LayoutFormAndResult

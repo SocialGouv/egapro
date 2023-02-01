@@ -13,13 +13,13 @@ import type {
 import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
 import { departementCode, regionCode } from "../components/RegionsDepartements"
-import { calculNoteIndex } from "./calculsEgaProIndex"
+import { calculerNoteIndex } from "./calculsEgaProIndex"
 import calculerIndicateurCinq from "./calculsEgaProIndicateurCinq"
 import calculerIndicateurDeux from "./calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
-import calculIndicateurTrois from "./calculsEgaProIndicateurTrois"
-import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import calculerIndicateurTrois from "./calculsEgaProIndicateurTrois"
+import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
 import totalNombreSalaries from "./totalNombreSalaries"
@@ -439,7 +439,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
@@ -459,7 +459,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois,
-  } = calculIndicateurTrois(state)
+  } = calculerIndicateurTrois(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
@@ -499,7 +499,7 @@ export function computeValuesFromState(state: AppState) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid"
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,

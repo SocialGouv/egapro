@@ -13,7 +13,7 @@ export const MAX_NOTES_INDICATEURS = {
   indicateurCinq: 10, // Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
 }
 
-export const calculNoteIndex = (
+export const calculerNoteIndex = (
   trancheEffectifs: TrancheEffectifs,
   noteIndicateurUn: number | undefined,
   noteIndicateurDeux: number | undefined,

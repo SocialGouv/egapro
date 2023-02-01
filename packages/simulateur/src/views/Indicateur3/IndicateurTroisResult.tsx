@@ -4,11 +4,11 @@ import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 
 interface IndicateurTroisResultProps {
   calculsIndicateurTrois: Pick<
-    ReturnType<typeof calculIndicateurTrois>,
+    ReturnType<typeof calculerIndicateurTrois>,
     "indicateurEcartPromotion" | "indicateurSexeSurRepresente" | "noteIndicateurTrois" | "correctionMeasure"
   >
 }

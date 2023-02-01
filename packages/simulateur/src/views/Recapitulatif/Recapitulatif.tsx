@@ -1,41 +1,39 @@
+import { Box, Button, Text, Tooltip, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
-import { Box, VStack, Text, Tooltip, Button } from "@chakra-ui/react"
-import { RouteComponentProps } from "react-router-dom"
-
-import { AppState } from "../../globals"
 
 import { useTitle } from "../../utils/hooks"
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
-import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-import Page from "../../components/Page"
 import ActionBar from "../../components/ActionBar"
+import Page from "../../components/Page"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import RecapitulatifIndex from "./RecapitulatifIndex"
-import RecapitulatifInformations from "./RecapitulatifInformations"
-import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
+import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux"
-import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois"
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
-import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
-
-interface RecapitulatifProps extends RouteComponentProps {
-  state: AppState
-}
+import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
+import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
+import RecapitulatifInformations from "./RecapitulatifInformations"
 
 const title = "Récapitulatif"
 
-const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
+const Recapitulatif: FunctionComponent = () => {
   useTitle(title)
+
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
 
   const trancheEffectifs = state.informations.trancheEffectifs
 
@@ -49,7 +47,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
@@ -69,7 +67,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois,
     correctionMeasure: correctionMeasureIndicateurTrois,
-  } = calculIndicateurTrois(state)
+  } = calculerIndicateurTrois(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
@@ -82,7 +80,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
     plusPetitNombreSalaries,
-  } = calculIndicateurDeuxTrois(state)
+  } = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
@@ -114,13 +112,13 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
   const indicateurTroisValid =
     state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable || !indicateurTroisCalculable
 
-  const allIndicateurValid =
+  const allIndicateursValid =
     indicateurUnValid &&
     (trancheEffectifs === "50 à 250" ? indicateurDeuxTroisValid : indicateurDeuxValid && indicateurTroisValid) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid"
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -136,17 +134,13 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     <Page title="Récapitulatif des résultats de vos indicateurs">
       <VStack spacing={6} align="stretch">
         <RecapitulatifInformations
-          informationsFormValidated={state.informations.formValidated}
-          trancheEffectifs={state.informations.trancheEffectifs}
-          anneeDeclaration={state.informations.anneeDeclaration}
-          finPeriodeReference={state.informations.finPeriodeReference}
           nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
           periodeSuffisante={periodeSuffisante}
         />
         {periodeSuffisante && (
           <>
             <RecapitulatifIndex
-              allIndicateurValid={allIndicateurValid}
+              allIndicateurValid={allIndicateursValid}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}

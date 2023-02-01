@@ -6,7 +6,7 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { GroupTranchesAgesIndicateurUn } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
 import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
@@ -28,7 +28,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const updateIndicateurUn = (
     data: Array<{

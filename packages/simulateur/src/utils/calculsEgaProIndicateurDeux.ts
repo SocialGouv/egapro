@@ -8,7 +8,7 @@ import {
   EffectifGroup,
   calculEffectifsIndicateurCalculable,
 } from "./calculsEgaPro"
-import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0]
@@ -229,7 +229,7 @@ export default function calculerIndicateurDeux(state: AppState) {
   const indicateurDeuxSexeSurRepresente = calculIndicateurSexeSurRepresente(indicateurEcartAugmentation)
 
   // Mesures correction indicateur 1
-  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculIndicateurUn(state)
+  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculerIndicateurUn(state)
 
   // NOTE
   const { note: noteIndicateurDeux, correctionMeasure } = calculNote(
