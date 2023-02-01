@@ -44,12 +44,7 @@ const Recapitulatif: FunctionComponent = () => {
   const calculsIndicateurTrois = calculerIndicateurTrois(state)
   const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
   const calculsIndicateurQuatre = calculerIndicateurQuatre(state)
-
-  const {
-    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq,
-  } = calculerIndicateurCinq(state)
+  const calculsIndicateurCinq = calculerIndicateurCinq(state)
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
   const indicateurUnValid =
@@ -86,7 +81,7 @@ const Recapitulatif: FunctionComponent = () => {
     calculsIndicateurTrois.noteIndicateurTrois,
     calculsIndicateurDeuxTrois.noteIndicateurDeuxTrois,
     calculsIndicateurQuatre.noteIndicateurQuatre,
-    noteIndicateurCinq,
+    calculsIndicateurCinq.noteIndicateurCinq,
   )
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
@@ -119,12 +114,7 @@ const Recapitulatif: FunctionComponent = () => {
 
             <RecapitulatifIndicateurQuatre calculsIndicateurQuatre={calculsIndicateurQuatre} />
 
-            <RecapitulatifIndicateurCinq
-              indicateurCinqFormValidated={state.indicateurCinq.formValidated}
-              indicateurSexeSousRepresente={indicateurCinqSexeSousRepresente}
-              indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
-              noteIndicateurCinq={noteIndicateurCinq}
-            />
+            <RecapitulatifIndicateurCinq calculsIndicateurCinq={calculsIndicateurCinq} />
           </>
         )}
       </VStack>
