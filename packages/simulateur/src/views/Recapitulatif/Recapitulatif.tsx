@@ -11,7 +11,7 @@ import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
@@ -94,7 +94,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  } = calculerIndicateurCinq(state)
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
   const indicateurUnValid =

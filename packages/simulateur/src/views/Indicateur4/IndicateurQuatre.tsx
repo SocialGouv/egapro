@@ -59,8 +59,8 @@ const IndicateurQuatre: FunctionComponent = () => {
   return (
     <PageIndicateurQuatre>
       <LayoutFormAndResult
-        childrenForm={<IndicateurQuatreForm readOnly={readOnly} />}
-        childrenResult={readOnly && <IndicateurQuatreResult calculsIndicateurQuatre={calculsIndicateurQuatre} />}
+        form={<IndicateurQuatreForm readOnly={readOnly} />}
+        result={readOnly && <IndicateurQuatreResult calculsIndicateurQuatre={calculsIndicateurQuatre} />}
       />
     </PageIndicateurQuatre>
   )

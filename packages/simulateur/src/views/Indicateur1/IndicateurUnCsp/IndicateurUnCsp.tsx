@@ -23,14 +23,14 @@ const IndicateurUnCsp: FunctionComponent = () => {
 
   return (
     <LayoutFormAndResult
-      childrenForm={
+      form={
         <IndicateurUnCspForm
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
           readOnly={state.indicateurUn.formValidated === "Valid"}
           validateIndicateurUn={validateIndicateurUn}
         />
       }
-      childrenResult={
+      result={
         state.indicateurUn.formValidated === "Valid" && (
           <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}

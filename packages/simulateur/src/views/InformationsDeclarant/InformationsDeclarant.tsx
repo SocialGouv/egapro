@@ -32,7 +32,7 @@ const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ 
   return (
     <PageInformationsDeclarant>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <InformationsDeclarantForm
             informationsDeclarant={state.informationsDeclarant}
             readOnly={state.informationsDeclarant.formValidated === "Valid"}
@@ -40,7 +40,7 @@ const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ 
             validateInformationsDeclarant={validateInformationsDeclarant}
           />
         }
-        childrenResult={null}
+        result={null}
       />
     </PageInformationsDeclarant>
   )

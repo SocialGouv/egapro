@@ -76,7 +76,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
   return (
     <>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <EffectifFormRaw
             effectifRaw={effectifRaw}
             readOnly={readOnly}
@@ -86,7 +86,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
             formValidator={formValidator}
           />
         }
-        childrenResult={
+        result={
           readOnly && (
             <EffectifResult
               totalNombreSalariesFemme={totalNombreSalariesFemmeCoef}

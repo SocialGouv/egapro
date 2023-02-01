@@ -90,7 +90,7 @@ const IndicateurDeux: FunctionComponent = () => {
   return (
     <PageIndicateurDeux>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <>
             <IndicateurDeuxForm
               ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
@@ -103,7 +103,7 @@ const IndicateurDeux: FunctionComponent = () => {
             )}
           </>
         }
-        childrenResult={readOnly && <IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
+        result={readOnly && <IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
       />
     </PageIndicateurDeux>
   )

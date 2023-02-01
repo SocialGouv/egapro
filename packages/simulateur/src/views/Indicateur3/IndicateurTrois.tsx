@@ -1,8 +1,6 @@
 import { Text } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import { FormState } from "../../globals"
-
 import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import { messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
@@ -92,7 +90,7 @@ const IndicateurTrois: FunctionComponent = () => {
   return (
     <PageIndicateurTrois>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <>
             <IndicateurTroisForm ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe} readOnly={readOnly} />
             {readOnly && correctionMeasure && (
@@ -102,7 +100,7 @@ const IndicateurTrois: FunctionComponent = () => {
             )}
           </>
         }
-        childrenResult={readOnly && <IndicateurTroisResult calculsIndicateurTrois={calculsIndicateurTrois} />}
+        result={readOnly && <IndicateurTroisResult calculsIndicateurTrois={calculsIndicateurTrois} />}
       />
     </PageIndicateurTrois>
   )

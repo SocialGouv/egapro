@@ -1,60 +1,25 @@
-import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import { AppState, FormState, ActionType, ActionIndicateurCinqData } from "../../globals"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import { useTitle } from "../../utils/hooks"
 
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import IndicateurCinqForm from "./IndicateurCinqForm"
 import IndicateurCinqResult from "./IndicateurCinqResult"
 
-interface IndicateurCinqProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
-
 const title = "Indicateur hautes rémunérations"
 
-const IndicateurCinq: FunctionComponent<IndicateurCinqProps> = ({ state, dispatch }) => {
+const IndicateurCinq: FunctionComponent = () => {
   useTitle(title)
 
-  const updateIndicateurCinq = useCallback(
-    (data: ActionIndicateurCinqData) => dispatch({ type: "updateIndicateurCinq", data }),
-    [dispatch],
-  )
+  const { state } = useAppStateContextProvider()
 
-  const validateIndicateurCinq = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurCinq", valid }),
-    [dispatch],
-  )
-
-  const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
-    calculIndicateurCinq(state)
+  if (!state) return null
 
   return (
     <PageIndicateurCinq>
-      <LayoutFormAndResult
-        childrenForm={
-          <IndicateurCinqForm
-            indicateurCinq={state.indicateurCinq}
-            readOnly={state.indicateurCinq.formValidated === "Valid"}
-            updateIndicateurCinq={updateIndicateurCinq}
-            validateIndicateurCinq={validateIndicateurCinq}
-          />
-        }
-        childrenResult={
-          state.indicateurCinq.formValidated === "Valid" && (
-            <IndicateurCinqResult
-              indicateurSexeSousRepresente={indicateurSexeSousRepresente}
-              indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
-              noteIndicateurCinq={noteIndicateurCinq}
-              validateIndicateurCinq={validateIndicateurCinq}
-            />
-          )
-        }
-      />
+      <LayoutFormAndResult form={<IndicateurCinqForm />} result={<IndicateurCinqResult />} />
     </PageIndicateurCinq>
   )
 }

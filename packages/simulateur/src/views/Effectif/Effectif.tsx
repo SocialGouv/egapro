@@ -37,8 +37,8 @@ const Effectif: FunctionComponent = () => {
     >
       <VStack spacing={8} align="stretch">
         <LayoutFormAndResult
-          childrenForm={<EffectifForm />}
-          childrenResult={
+          form={<EffectifForm />}
+          result={
             state.effectif.formValidated === "Valid" && (
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}

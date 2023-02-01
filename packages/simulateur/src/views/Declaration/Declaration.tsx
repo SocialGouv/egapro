@@ -22,7 +22,7 @@ import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
@@ -94,7 +94,7 @@ function buildHelpers(state: AppState) {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  } = calculerIndicateurCinq(state)
 
   const allIndicateurValid =
     (isFormValid(state.indicateurUn) ||
@@ -336,7 +336,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     return (
       <PageDeclaration>
         <LayoutFormAndResult
-          childrenForm={
+          form={
             <>
               <InfoBlock
                 type="warning"
@@ -378,7 +378,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
               )}
             </>
           }
-          childrenResult={null}
+          result={null}
         />
       </PageDeclaration>
     )
@@ -467,7 +467,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
   return (
     <PageDeclaration>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <>
             <RecapitulatifIndex
               allIndicateurValid={allIndicateurValid}
@@ -487,7 +487,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
             />
           </>
         }
-        childrenResult={null}
+        result={null}
       />
     </PageDeclaration>
   )

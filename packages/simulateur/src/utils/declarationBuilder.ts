@@ -14,7 +14,7 @@ import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPag
 
 import { departementCode, regionCode } from "../components/RegionsDepartements"
 import { calculNoteIndex } from "./calculsEgaProIndex"
-import calculIndicateurCinq from "./calculsEgaProIndicateurCinq"
+import calculerIndicateurCinq from "./calculsEgaProIndicateurCinq"
 import calculIndicateurDeux from "./calculsEgaProIndicateurDeux"
 import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
@@ -486,7 +486,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  } = calculerIndicateurCinq(state)
 
   const allIndicateurValid =
     (state.indicateurUn.formValidated === "Valid" ||

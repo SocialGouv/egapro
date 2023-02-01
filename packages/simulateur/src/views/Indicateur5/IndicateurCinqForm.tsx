@@ -1,27 +1,26 @@
+import createDecorator from "final-form-calculate"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import createDecorator from "final-form-calculate"
-
-import { AppState, FormState, ActionIndicateurCinqData } from "../../globals"
 
 import {
+  composeValidators,
+  maxNumber,
+  minNumber,
+  mustBeInteger,
+  mustBeNumber,
   parseIntFormValue,
   parseIntStateValue,
   required,
-  mustBeNumber,
-  minNumber,
-  maxNumber,
-  composeValidators,
-  mustBeInteger,
 } from "../../utils/formHelpers"
 
+import ActionBar from "../../components/ActionBar"
 import FormStack from "../../components/ds/FormStack"
 import InputGroup from "../../components/ds/InputGroup"
-import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import FormError from "../../components/FormError"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 
@@ -35,19 +34,15 @@ const calculator = createDecorator({
   },
 })
 
-interface IndicateurCinqFormProps {
-  indicateurCinq: AppState["indicateurCinq"]
-  readOnly: boolean
-  updateIndicateurCinq: (data: ActionIndicateurCinqData) => void
-  validateIndicateurCinq: (valid: FormState) => void
-}
+const IndicateurCinqForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
-  indicateurCinq,
-  readOnly,
-  updateIndicateurCinq,
-  validateIndicateurCinq,
-}) => {
+  if (!state) return null
+
+  const readOnly = state.indicateurCinq.formValidated === "Valid"
+
+  const indicateurCinq = state.indicateurCinq
+
   const initialValues = {
     nombreSalariesHommes: parseIntStateValue(indicateurCinq.nombreSalariesHommes),
     nombreSalariesFemmes: parseIntStateValue(indicateurCinq.nombreSalariesFemmes),
@@ -56,15 +51,18 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
   const saveForm = (formData: any) => {
     const { nombreSalariesHommes, nombreSalariesFemmes } = formData
 
-    updateIndicateurCinq({
-      nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
-      nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
+    dispatch({
+      type: "updateIndicateurCinq",
+      data: {
+        nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
+        nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurCinq("Valid")
+    dispatch({ type: "validateIndicateurCinq", valid: "Valid" })
   }
 
   return (

@@ -1,22 +1,21 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import ResultSummary from "../../components/ResultSummary"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 
-interface IndicateurCinqResultProps {
-  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
-  indicateurNombreSalariesSexeSousRepresente: number | undefined
-  noteIndicateurCinq: number | undefined
-  validateIndicateurCinq: (valid: FormState) => void
-}
+const IndicateurCinqResult: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
-  indicateurSexeSousRepresente,
-  indicateurNombreSalariesSexeSousRepresente,
-  noteIndicateurCinq,
-  validateIndicateurCinq,
-}) => {
+  if (!state) return null
+
+  const readOnly = state.indicateurCinq.formValidated === "Valid"
+
+  if (readOnly) return null
+
+  const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
+    calculerIndicateurCinq(state)
+
   const firstLineInfo =
     indicateurSexeSousRepresente === undefined
       ? undefined
@@ -43,7 +42,7 @@ const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
           ? "femmes"
           : "hommes"
       }
-      onEdit={() => validateIndicateurCinq("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurCinq", valid: "None" })}
     />
   )
 }

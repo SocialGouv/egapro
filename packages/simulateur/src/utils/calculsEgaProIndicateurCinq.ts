@@ -40,7 +40,7 @@ export const calculNote = (indicateurNombreSalariesSexeSousRepresente: number | 
 // ALL //
 /////////
 
-export default function calculIndicateurCinq(state: AppState) {
+export default function calculerIndicateurCinq(state: AppState) {
   const indicateurSexeSousRepresente = calculIndicateurSexeSousRepresente(
     state.indicateurCinq.nombreSalariesHommes,
     state.indicateurCinq.nombreSalariesFemmes,

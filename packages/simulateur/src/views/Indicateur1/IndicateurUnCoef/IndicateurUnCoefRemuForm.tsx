@@ -72,7 +72,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   return (
     <LayoutFormAndResult
-      childrenForm={
+      form={
         <IndicateurUnFormRaw
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
@@ -86,7 +86,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
           }
         />
       }
-      childrenResult={
+      result={
         readOnly && (
           <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}
