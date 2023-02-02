@@ -71,6 +71,14 @@ export const EntrepriseFooter = () => {
             <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
+        <FooterBottomItem>
+          <FooterBottomLink
+            href="https://ara.numerique.gouv.fr/rapports/_YKXqg3aJMpFGmPh1tA0d/resultats"
+            target="_blank"
+          >
+            Accessibilité : partiellement conforme
+          </FooterBottomLink>
+        </FooterBottomItem>
       </FooterBottom>
     </Footer>
   );
