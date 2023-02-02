@@ -2,7 +2,7 @@ import { EntrepriseFooter } from "@components/Footers";
 import { ButtonAsLink, FormButton, Logo, SkipLinks, SkipLinksItem } from "@design-system";
 import type { TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import Head from "next/head";
 import NextLink from "next/link";
 import { useRouter } from "next/router";

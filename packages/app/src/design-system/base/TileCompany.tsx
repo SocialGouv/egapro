@@ -1,5 +1,5 @@
 import type { Any } from "@common/utils/types";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
 import { FormButton } from "./FormButton";

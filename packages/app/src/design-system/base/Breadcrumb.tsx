@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { clsx } from "clsx";
 import NextLink from "next/link";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";

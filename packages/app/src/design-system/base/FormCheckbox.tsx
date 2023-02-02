@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { PropsWithChildren, ReactElement } from "react";
 import { Children, cloneElement, forwardRef } from "react";
 
