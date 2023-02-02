@@ -13,10 +13,11 @@ import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import ActionBar from "../../components/ActionBar"
-import Page from "../../components/Page"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import RecapitulatifIndex from "./RecapitulatifIndex"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux"
@@ -25,8 +26,6 @@ import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
 import RecapitulatifInformations from "./RecapitulatifInformations"
-import { isFormValid } from "../../utils/formHelpers"
-import SimulateurPage from "../../components/SimulateurPage"
 
 const title = "Récapitulatif"
 
