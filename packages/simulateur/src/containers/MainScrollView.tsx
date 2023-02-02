@@ -1,25 +1,25 @@
-import React, { useEffect, PropsWithChildren } from "react"
 import {
-  Container,
   Box,
-  Flex,
-  Grid,
-  useMediaQuery,
-  useDisclosure,
+  Container,
   Drawer,
+  DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  DrawerCloseButton,
-  DrawerBody,
+  Flex,
+  Grid,
+  useDisclosure,
+  useMediaQuery,
 } from "@chakra-ui/react"
-import { withRouter, RouteComponentProps, Route } from "react-router-dom"
+import React, { PropsWithChildren, useEffect } from "react"
+import { Route, RouteComponentProps, withRouter } from "react-router-dom"
 
 import { AppState } from "../globals"
 
-import Menu from "../components/Menu"
 import ButtonAction from "../components/ds/ButtonAction"
 import { IconMenu } from "../components/ds/Icons"
+import Menu from "../components/Menu"
 
 export type ContentProps = PropsWithChildren<{ pathname: string }>
 
@@ -56,24 +56,7 @@ const MainScrollView = ({ children, state, location }: MainScrollViewProps) => {
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isSmallerThan1279] = useMediaQuery("(max-width: 1279px)")
 
-  const menu = (
-    <Menu
-      onClose={onClose}
-      trancheEffectifs={state ? state.informations.trancheEffectifs : "50 à 250"}
-      periodeSuffisante={state ? state.informations.periodeSuffisante : undefined}
-      informationsFormValidated={state ? state.informations.formValidated : "None"}
-      effectifFormValidated={state ? state.effectif.formValidated : "None"}
-      indicateurUnFormValidated={state ? state.indicateurUn.formValidated : "None"}
-      indicateurDeuxFormValidated={state ? state.indicateurDeux.formValidated : "None"}
-      indicateurTroisFormValidated={state ? state.indicateurTrois.formValidated : "None"}
-      indicateurDeuxTroisFormValidated={state ? state.indicateurDeuxTrois.formValidated : "None"}
-      indicateurQuatreFormValidated={state ? state.indicateurQuatre.formValidated : "None"}
-      indicateurCinqFormValidated={state ? state.indicateurCinq.formValidated : "None"}
-      informationsEntrepriseFormValidated={state ? state.informationsEntreprise.formValidated : "None"}
-      informationsDeclarantFormValidated={state ? state.informationsDeclarant.formValidated : "None"}
-      declarationFormValidated={state ? state.declaration.formValidated : "None"}
-    />
-  )
+  const menu = <Menu onClose={onClose} />
 
   return (
     <>

@@ -3,7 +3,8 @@ import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { isFrozenDeclaration } from "../utils/isFrozenDeclaration"
 import InfoBlock from "./ds/InfoBlock"
 
-export const frozenDeclarationMessage = "Cette simulation n'est plus modifiable car le délai d'un an est écoulé."
+export const frozenDeclarationMessage =
+  "Cette simulation-déclaration n'est plus modifiable car le délai d'un an est écoulé."
 
 export const MessageForFrozenDeclaration = () => {
   const { state } = useAppStateContextProvider()
