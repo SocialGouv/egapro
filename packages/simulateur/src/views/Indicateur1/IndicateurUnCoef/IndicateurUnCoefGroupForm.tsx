@@ -18,6 +18,8 @@ import FormError from "../../../components/FormError"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import InputField from "./components/CoefGroupInputField"
 import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
+import { isFrozenDeclaration } from "../../../utils/isFrozenDeclaration"
+import { frozenDeclarationMessage } from "../../../components/MessageForFrozenDeclaration"
 
 interface IndicateurUnCoefGroupFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -28,6 +30,8 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
   const [indexGroupToDelete, setIndexGroupToDelete] = useState<number | undefined>(undefined)
 
   if (!state) return null
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
     state.indicateurUn
@@ -111,6 +115,8 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                   onClick={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
                   label="Modifier les groupes"
                   variant="link"
+                  disabled={frozenDeclaration}
+                  title={frozenDeclaration ? frozenDeclarationMessage : undefined}
                 />
               </ActionBar>
             ) : (

@@ -1,7 +1,8 @@
 import { Box, Heading, Link, List, ListItem } from "@chakra-ui/react"
 import React from "react"
 import { Link as ReachLink, Route, Switch } from "react-router-dom"
-import { FormState, TrancheEffectifs } from "../globals"
+import { FormState } from "../globals"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import globalStyles from "../utils/globalStyles"
 import ButtonLink from "./ds/ButtonLink"
 import { IconInvalid, IconQuestionMarkCircle, IconValid } from "./ds/Icons"
@@ -104,38 +105,27 @@ function CustomNavLink({
 }
 
 interface Props {
-  trancheEffectifs: TrancheEffectifs
-  periodeSuffisante: boolean | undefined
-  informationsFormValidated: FormState
-  effectifFormValidated: FormState
-  indicateurUnFormValidated: FormState
-  indicateurDeuxFormValidated: FormState
-  indicateurTroisFormValidated: FormState
-  indicateurDeuxTroisFormValidated: FormState
-  indicateurQuatreFormValidated: FormState
-  indicateurCinqFormValidated: FormState
-  informationsEntrepriseFormValidated: FormState
-  informationsDeclarantFormValidated: FormState
-  declarationFormValidated: FormState
   onClose?: () => void
 }
 
-function Menu({
-  trancheEffectifs,
-  periodeSuffisante,
-  informationsFormValidated,
-  effectifFormValidated,
-  indicateurUnFormValidated,
-  indicateurDeuxFormValidated,
-  indicateurDeuxTroisFormValidated,
-  indicateurTroisFormValidated,
-  indicateurQuatreFormValidated,
-  indicateurCinqFormValidated,
-  informationsEntrepriseFormValidated,
-  informationsDeclarantFormValidated,
-  declarationFormValidated,
-  onClose,
-}: Props) {
+function Menu({ onClose }: Props) {
+  const { state } = useAppStateContextProvider()
+
+  const trancheEffectifs = state?.informations.trancheEffectifs || "50 à 250"
+  // On considère que la période est suffisante si elle n'est pas explicitement définie à false. Cela permet de gérer le cas d'anciennes simu-décla où ce champ n'était pas géré.
+  const periodeSuffisante = state?.informations.periodeSuffisante !== false
+  const informationsFormValidated = state?.informations.formValidated || "None"
+  const effectifFormValidated = state?.effectif.formValidated || "None"
+  const indicateurUnFormValidated = state?.indicateurUn.formValidated || "None"
+  const indicateurDeuxFormValidated = state?.indicateurDeux.formValidated || "None"
+  const indicateurTroisFormValidated = state?.indicateurTrois.formValidated || "None"
+  const indicateurDeuxTroisFormValidated = state?.indicateurDeuxTrois.formValidated || "None"
+  const indicateurQuatreFormValidated = state?.indicateurQuatre.formValidated || "None"
+  const indicateurCinqFormValidated = state?.indicateurCinq.formValidated || "None"
+  const informationsEntrepriseFormValidated = state?.informationsEntreprise.formValidated || "None"
+  const informationsDeclarantFormValidated = state?.informationsDeclarant.formValidated || "None"
+  const declarationFormValidated = state?.declaration.formValidated || "None"
+
   const listStyles = {
     "@media (max-width: 1279px)": {
       li: {

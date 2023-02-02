@@ -16,7 +16,7 @@ import type {
 import { useUser } from "../../components/AuthContext"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
+import SimulateurPage from "../../components/SimulateurPage"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { useDeclaration } from "../../hooks/useDeclaration"
@@ -34,6 +34,7 @@ import calculerIndicateurUn, {
 import { buildDeclarationFromSimulation } from "../../utils/declarationBuilder"
 import { isFormValid } from "../../utils/formHelpers"
 import { useTitle } from "../../utils/hooks"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import { logToSentry } from "../../utils/sentry"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
@@ -210,12 +211,12 @@ function buildHelpers(state: AppState) {
 
 const PageDeclaration = ({ children }: PropsWithChildren) => {
   return (
-    <Page
+    <SimulateurPage
       title={title}
       tagline="Une fois les informations renseignées, cliquez sur le bouton “Déclarer” en bas de page."
     >
       {children}
-    </Page>
+    </SimulateurPage>
   )
 }
 
@@ -240,7 +241,8 @@ const Declaration = ({ code }: DeclarationProps) => {
   )
 
   useEffect(() => {
-    if (declaring && state) {
+    // On ne permet plus de modifier la déclaration si la déclaration initiale date de plus d'un an.
+    if (declaring && state && !isFrozenDeclaration(state)) {
       sendDeclaration(code, state)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.

@@ -7,13 +7,15 @@ import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import { frozenDeclarationMessage, MessageForFrozenDeclaration } from "../../components/MessageForFrozenDeclaration"
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import IndicateurDeuxForm from "./IndicateurDeuxForm"
 import IndicateurDeuxResult from "./IndicateurDeuxResult"
-import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const title = "Indicateur écart de taux d’augmentation individuelle hors promotion"
 
@@ -25,6 +27,8 @@ const IndicateurDeux: FunctionComponent = () => {
   if (!state) return null
 
   const calculsIndicateurDeux = calculerIndicateurDeux(state)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurDeux
 
@@ -67,7 +71,11 @@ const IndicateurDeux: FunctionComponent = () => {
           text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
         />
         <ActionBar>
-          <ActionLink onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}>
+          <ActionLink
+            onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}
+            disabled={frozenDeclaration}
+            title={frozenDeclaration ? frozenDeclarationMessage : ""}
+          >
             Modifier les données saisies
           </ActionLink>
         </ActionBar>
@@ -80,6 +88,8 @@ const IndicateurDeux: FunctionComponent = () => {
 
   return (
     <PageIndicateurDeux>
+      <MessageForFrozenDeclaration />
+
       <LayoutFormAndResult
         form={<IndicateurDeuxForm calculsIndicateurDeux={calculsIndicateurDeux} />}
         result={<IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
@@ -89,12 +99,12 @@ const IndicateurDeux: FunctionComponent = () => {
 }
 
 const PageIndicateurDeux = ({ children }: PropsWithChildren) => (
-  <Page
+  <SimulateurPage
     title={title}
     tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
   >
     {children}
-  </Page>
+  </SimulateurPage>
 )
 
 export default IndicateurDeux

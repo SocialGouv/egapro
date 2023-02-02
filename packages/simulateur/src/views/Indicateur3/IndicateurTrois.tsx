@@ -7,13 +7,15 @@ import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
-import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 const title = "Indicateur écart de taux de promotion"
 
@@ -25,6 +27,8 @@ const IndicateurTrois: FunctionComponent = () => {
   if (!state) return null
 
   const calculsIndicateurTrois = calculerIndicateurTrois(state)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurTrois
 
@@ -69,7 +73,11 @@ const IndicateurTrois: FunctionComponent = () => {
           text="Il n’y a pas eu de promotion durant la période de référence."
         />
         <ActionBar>
-          <ActionLink onClick={() => dispatch({ type: "validateIndicateurTrois", valid: "None" })}>
+          <ActionLink
+            onClick={() => dispatch({ type: "validateIndicateurTrois", valid: "None" })}
+            disabled={frozenDeclaration}
+            title={frozenDeclaration ? frozenDeclarationMessage : ""}
+          >
             Modifier les données saisies
           </ActionLink>
         </ActionBar>
@@ -92,12 +100,12 @@ const IndicateurTrois: FunctionComponent = () => {
 
 const PageIndicateurTrois = ({ children }: PropsWithChildren) => {
   return (
-    <Page
+    <SimulateurPage
       title={title}
       tagline="Le pourcentage de femmes et d’hommes ayant été promus durant la période de référence, doit être renseigné par CSP."
     >
       {children}
-    </Page>
+    </SimulateurPage>
   )
 }
 

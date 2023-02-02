@@ -6,13 +6,13 @@ import { useTitle } from "../../utils/hooks"
 import ActionBar from "../../components/ActionBar"
 import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
+import SimulateurPage from "../../components/SimulateurPage"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
-import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Indicateur écart de rémunération"
 
@@ -70,14 +70,14 @@ const IndicateurUn: FunctionComponent = () => {
 }
 
 const PageIndicateurUn = ({ children }: PropsWithChildren) => (
-  <Page
+  <SimulateurPage
     title={title}
     tagline={[
       "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge.",
     ]}
   >
     <FormStack>{children}</FormStack>
-  </Page>
+  </SimulateurPage>
 )
 
 export default IndicateurUn

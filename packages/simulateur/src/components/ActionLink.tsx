@@ -5,11 +5,13 @@ import { PropsWithChildren } from "react"
 export type ActionLinkProps = PropsWithChildren<{
   onClick: () => void
   style?: any
+  disabled?: boolean
+  title?: string
 }>
 
-const ActionLink = ({ children, onClick, style }: ActionLinkProps) => {
+const ActionLink = ({ children, onClick, style, disabled = false, title = "" }: ActionLinkProps) => {
   return (
-    <button type="button" css={[styles.button, style]} onClick={onClick}>
+    <button type="button" css={[styles.button, style]} onClick={onClick} disabled={disabled} title={title}>
       {children}
     </button>
   )

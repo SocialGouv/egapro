@@ -19,6 +19,8 @@ import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const FormInputs = z.object({
   nom: z
@@ -49,6 +51,7 @@ const InformationsDeclarantForm: FunctionComponent = () => {
 
   const informationsDeclarant = state.informationsDeclarant
   const readOnly = isFormValid(state.informationsDeclarant)
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
@@ -137,6 +140,8 @@ const InformationsDeclarantForm: FunctionComponent = () => {
                   onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
                   variant="link"
                   size="sm"
+                  disabled={frozenDeclaration}
+                  title={frozenDeclaration ? frozenDeclarationMessage : ""}
                 />
               )}
             </ActionBar>

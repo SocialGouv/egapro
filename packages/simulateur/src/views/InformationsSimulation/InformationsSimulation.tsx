@@ -5,10 +5,10 @@ import { useTitle } from "../../utils/hooks"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import InformationsSimulationForm from "./InformationsSimulationForm"
 import { isFormValid } from "../../utils/formHelpers"
+import InformationsSimulationForm from "./InformationsSimulationForm"
 
 const title = "Informations calcul et période de référence"
 
@@ -18,7 +18,7 @@ const InformationsSimulation = () => {
   if (!state) return null
 
   return (
-    <Page
+    <SimulateurPage
       title={title}
       tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
@@ -41,7 +41,7 @@ const InformationsSimulation = () => {
             />
           </Box>
         )}
-    </Page>
+    </SimulateurPage>
   )
 }
 

@@ -8,12 +8,14 @@ import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
+import SimulateurPage from "../../components/SimulateurPage"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
-import { isFormValid } from "../../utils/formHelpers"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const title = "Indicateur retour congé maternité"
 
@@ -25,6 +27,8 @@ const IndicateurQuatre: FunctionComponent = () => {
   if (!state) return null
 
   const calculsIndicateurQuatre = calculerIndicateurQuatre(state)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const { indicateurCalculable } = calculsIndicateurQuatre
 
@@ -46,7 +50,11 @@ const IndicateurQuatre: FunctionComponent = () => {
           text={messageNonCalculable}
         />
         <ActionBar>
-          <ActionLink onClick={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}>
+          <ActionLink
+            onClick={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}
+            disabled={frozenDeclaration}
+            title={frozenDeclaration ? frozenDeclarationMessage : ""}
+          >
             Modifier les données saisies
           </ActionLink>
         </ActionBar>
@@ -68,12 +76,12 @@ const IndicateurQuatre: FunctionComponent = () => {
 }
 
 const PageIndicateurQuatre = ({ children }: PropsWithChildren) => (
-  <Page
+  <SimulateurPage
     title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
     tagline="Renseignez le nombre de salariées en congé maternité durant la période de référence et ayant reçu une augmentation à leur retour."
   >
     {children}
-  </Page>
+  </SimulateurPage>
 )
 
 export default IndicateurQuatre

@@ -13,10 +13,11 @@ import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import ActionBar from "../../components/ActionBar"
-import Page from "../../components/Page"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import RecapitulatifIndex from "./RecapitulatifIndex"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux"
@@ -25,7 +26,6 @@ import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn"
 import RecapitulatifInformations from "./RecapitulatifInformations"
-import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Récapitulatif"
 
@@ -90,7 +90,7 @@ const Recapitulatif: FunctionComponent = () => {
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
 
   return (
-    <Page title="Récapitulatif des résultats de vos indicateurs">
+    <SimulateurPage title="Récapitulatif des résultats de vos indicateurs">
       <VStack spacing={6} align="stretch">
         <RecapitulatifInformations
           nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
@@ -140,7 +140,7 @@ const Recapitulatif: FunctionComponent = () => {
           <ButtonSimulatorLink to="/informations-entreprise" label="Poursuivre vers la déclaration" />
         </ActionBar>
       </Box>
-    </Page>
+    </SimulateurPage>
   )
 }
 
