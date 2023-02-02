@@ -27,14 +27,14 @@ const IndicateurCinqResult: FunctionComponent = () => {
       : "les hommes sont sur-représentés"
   return (
     <ResultSummary
-      firstLineLabel="votre résultat final est"
+      firstLineLabel="Votre résultat final est"
       firstLineData={
         indicateurNombreSalariesSexeSousRepresente !== undefined
           ? String(indicateurNombreSalariesSexeSousRepresente)
           : "--"
       }
       firstLineInfo={firstLineInfo}
-      secondLineLabel="votre note obtenue est"
+      secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"}
       indicateurSexeSurRepresente={
         indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"

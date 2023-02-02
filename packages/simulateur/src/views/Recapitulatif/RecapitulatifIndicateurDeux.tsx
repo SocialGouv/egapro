@@ -69,10 +69,10 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     <RecapBloc
       indicateur="indicateur2"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData: indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20",
         secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
         indicateurSexeSurRepresente,

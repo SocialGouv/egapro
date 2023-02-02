@@ -27,13 +27,13 @@ const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = (
 
   return (
     <ResultSummary
-      firstLineLabel="votre résultat final est"
+      firstLineLabel="Votre résultat final est"
       firstLineData={
         indicateurEcartNombreSalarieesAugmentees !== undefined
           ? displayPercent(indicateurEcartNombreSalarieesAugmentees, 1)
           : "--"
       }
-      secondLineLabel="votre note obtenue est"
+      secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15"}
       indicateurSexeSurRepresente="femmes"
       onEdit={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}

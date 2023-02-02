@@ -28,10 +28,10 @@ const IndicateurTroisResult: FunctionComponent<IndicateurTroisResultProps> = ({ 
 
   return (
     <ResultSummary
-      firstLineLabel="votre résultat final est"
+      firstLineLabel="Votre résultat final est"
       firstLineData={indicateurEcartPromotion !== undefined ? displayPercent(indicateurEcartPromotion) : "--"}
       firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
-      secondLineLabel="votre note obtenue est"
+      secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") + "/15"}
       secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}

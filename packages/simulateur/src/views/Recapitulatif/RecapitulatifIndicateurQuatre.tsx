@@ -47,12 +47,12 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
     <RecapBloc
       indicateur="indicateur4"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData:
           indicateurEcartNombreSalarieesAugmentees !== undefined
             ? displayPercent(indicateurEcartNombreSalarieesAugmentees)
             : "--",
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15",
         indicateurSexeSurRepresente: "femmes",
       }}

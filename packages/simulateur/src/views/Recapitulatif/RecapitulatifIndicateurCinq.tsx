@@ -39,13 +39,13 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
     <RecapBloc
       indicateur="indicateur5"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData:
           indicateurNombreSalariesSexeSousRepresente !== undefined
             ? String(indicateurNombreSalariesSexeSousRepresente)
             : "--",
         firstLineInfo,
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10",
         indicateurSexeSurRepresente:
           indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"

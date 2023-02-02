@@ -73,7 +73,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
           firstLineLabel: results.best.label,
           firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-          secondLineLabel: "votre note obtenue est",
+          secondLineLabel: "Votre note obtenue est",
           secondLineData: (noteIndicateurDeuxTrois !== undefined ? noteIndicateurDeuxTrois : "--") + "/35",
           secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
           indicateurSexeSurRepresente,

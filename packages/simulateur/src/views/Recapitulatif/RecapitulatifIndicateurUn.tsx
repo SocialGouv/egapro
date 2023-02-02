@@ -82,10 +82,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     <RecapBloc
       indicateur="indicateur1"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData: indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
         indicateurSexeSurRepresente,
       }}
