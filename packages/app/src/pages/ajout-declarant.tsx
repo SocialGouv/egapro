@@ -1,6 +1,8 @@
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import {
+  Alert,
+  Box,
   Container,
   FormButton,
   FormGroup,
@@ -93,6 +95,18 @@ const AddDeclarer: NextPageWithLayout = () => {
                   Si vous ne recevez pas ce mail, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre
                   dossier de courriers indésirables.
                 </p>
+                <Alert>
+                  <p>
+                    Le déclarant rattaché au numéro Siren de l'entreprise pourra ainsi ajouter ou supprimer un ou des
+                    déclarants en se connectant à son espace avec son email. Vous trouverez ci-après la documentation
+                    pour le faire.
+                  </p>
+                  <Box mt="2w">
+                    <a href="/Procedure.pour.ajouter.ou.supprimer.declarants.pdf" target="_blank" rel="noreferrer">
+                      Guide ajout déclarant (pdf)
+                    </a>
+                  </Box>
+                </Alert>
               </>
             ) : (
               <>

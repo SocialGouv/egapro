@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { HTMLInputTypeAttribute } from "react";
 import { forwardRef } from "react";
 

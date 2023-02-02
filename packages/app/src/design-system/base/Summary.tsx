@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
 export const Summary = ({ children, className }: PropsWithChildren<{ className?: string }>) => (
