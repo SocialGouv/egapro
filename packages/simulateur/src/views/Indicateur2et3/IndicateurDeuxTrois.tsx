@@ -149,13 +149,13 @@ export const calculerResultats = (
   indicateurEcartNombreEquivalentSalaries: number | undefined,
 ): Results => {
   const ecartTaux = {
-    label: "Votre résultaten pourcentage est de",
+    label: "Votre résultat en pourcentage est de",
     result:
       indicateurEcartAugmentationPromotion !== undefined ? displayPercent(indicateurEcartAugmentationPromotion) : "--",
     note: indicateurEcartAugmentationPromotion !== undefined ? calculBarem(indicateurEcartAugmentationPromotion) : 0,
   }
   const ecartNbSalaries = {
-    label: "Votre résultaten nombre équivalent de salariés* est",
+    label: "Votre résultat en nombre équivalent de salariés* est",
     result: indicateurEcartNombreEquivalentSalaries !== undefined ? `${indicateurEcartNombreEquivalentSalaries}` : "--",
     note:
       indicateurEcartNombreEquivalentSalaries !== undefined ? calculBarem(indicateurEcartNombreEquivalentSalaries) : 0,
