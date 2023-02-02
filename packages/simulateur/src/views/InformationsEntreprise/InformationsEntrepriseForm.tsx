@@ -17,6 +17,7 @@ import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
@@ -25,6 +26,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { timestampToFrDate } from "../../utils/date"
 import { isFormValid, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 const isRequired = (value: string) => {
@@ -80,6 +82,8 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
   const year = state.informations.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
 
   const readOnly = isFormValid(state.informationsEntreprise)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -291,6 +295,8 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
                 variant="link"
                 size="sm"
+                disabled={frozenDeclaration}
+                title={frozenDeclaration ? frozenDeclarationMessage : ""}
               />
               )
             </ActionBar>

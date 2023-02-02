@@ -29,6 +29,8 @@ import RequiredRadiosBoolean from "../../components/RequiredRadiosBoolean"
 import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { estCalculable } from "../../utils/helpers"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 // NB : some fields (like RadioButton Oui/Non) are only validated at field-level.
 const validateForm = ({
@@ -107,6 +109,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
   const displayNC = !estCalculableIndex && after2020 ? " aux indicateurs calculables" : ""
   const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const resetDeclaration = () => {
     history.push(`/nouvelle-simulation`)
@@ -311,6 +315,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
                   variant="link"
                   size="sm"
                   mt="4"
+                  disabled={frozenDeclaration}
+                  title={frozenDeclaration ? frozenDeclarationMessage : ""}
                 />
               )}
 

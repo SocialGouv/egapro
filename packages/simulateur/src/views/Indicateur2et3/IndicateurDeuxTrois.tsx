@@ -13,13 +13,15 @@ import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
-import { isFormValid } from "../../utils/formHelpers"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const title = "Indicateur écart de taux d'augmentation"
 
@@ -31,6 +33,8 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
   if (!state) return null
 
   const calculsIndicateurDeuxTrois = calculerIndicateurDeuxTrois(state)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const {
     effectifsIndicateurCalculable,
@@ -92,7 +96,11 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
           text="Il n'y a pas eu d'augmentation durant la période de référence."
         />
         <ActionBar>
-          <ActionLink onClick={() => dispatch({ type: "validateIndicateurDeuxTrois", valid: "None" })}>
+          <ActionLink
+            onClick={() => dispatch({ type: "validateIndicateurDeuxTrois", valid: "None" })}
+            disabled={frozenDeclaration}
+            title={frozenDeclaration ? frozenDeclarationMessage : ""}
+          >
             Modifier les données saisies
           </ActionLink>
         </ActionBar>
@@ -125,12 +133,12 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
 }
 
 const PageIndicateurDeuxTrois = ({ children }: PropsWithChildren) => (
-  <Page
+  <SimulateurPage
     title={title}
     tagline="Le nombre de femmes et d'hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
   >
     {children}
-  </Page>
+  </SimulateurPage>
 )
 
 export type Result = { label: string; result: string; note: number }

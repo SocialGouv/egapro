@@ -7,6 +7,9 @@ import Summary from "../../components/Summary"
 import { FunctionComponent } from "react"
 import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 interface EffectifResultProps {
   totalNombreSalariesHomme: number
@@ -19,6 +22,12 @@ const EffectifResult: FunctionComponent<EffectifResultProps> = ({
   totalNombreSalariesFemme,
   validateEffectif,
 }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+
   return (
     <Summary
       footer={
@@ -29,6 +38,8 @@ const EffectifResult: FunctionComponent<EffectifResultProps> = ({
           size="sm"
           variant="outline"
           colorScheme="primary"
+          disabled={frozenDeclaration}
+          title={frozenDeclaration ? frozenDeclarationMessage : ""}
         />
       }
     >

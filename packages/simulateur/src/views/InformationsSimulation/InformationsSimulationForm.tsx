@@ -34,6 +34,7 @@ import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import InfoBlock from "../../components/ds/InfoBlock"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 const validateForm = ({
   nomEntreprise,
@@ -115,14 +116,12 @@ const InformationsSimulationForm: FunctionComponent = () => {
 
   const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
 
-  const frozenDeclaration = isFrozenDeclaration(state)
   if (!state) return null
 
   const alreadyDeclared = declaration?.data?.id === code
-
-  const readOnly = frozenDeclaration || isFormValid(state.informations)
-
   const informations = state.informations
+  const readOnly = isFrozenDeclaration(state) || isFormValid(state.informations)
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
@@ -250,6 +249,8 @@ const InformationsSimulationForm: FunctionComponent = () => {
                     onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
                     variant="link"
                     size="sm"
+                    disabled={frozenDeclaration}
+                    title={frozenDeclaration ? frozenDeclarationMessage : ""}
                   />
                 )}
               </ActionBar>

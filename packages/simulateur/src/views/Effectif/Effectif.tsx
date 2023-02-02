@@ -6,13 +6,13 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
+import SimulateurPage from "../../components/SimulateurPage"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import { useTitle } from "../../utils/hooks"
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
-import { isFormValid } from "../../utils/formHelpers"
 
 const title = "Effectifs pris en compte"
 
@@ -32,7 +32,7 @@ const Effectif: FunctionComponent = () => {
   } = totalNombreSalaries(state.indicateurUn.coefficient)
 
   return (
-    <Page
+    <SimulateurPage
       title="Indication des effectifs"
       tagline="Les effectifs pris en compte pour le calcul doivent être renseignés en effectif physique par catégorie socio-professionnelle (CSP) et tranche d’âge."
     >
@@ -137,7 +137,7 @@ const Effectif: FunctionComponent = () => {
             )}
         </VStack>
       </VStack>
-    </Page>
+    </SimulateurPage>
   )
 }
 

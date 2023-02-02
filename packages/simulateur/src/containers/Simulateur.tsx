@@ -15,6 +15,8 @@ import { Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 import TextLink from "../components/ds/TextLink"
 import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
+import { isFormValid } from "../utils/formHelpers"
+import { isFrozenDeclaration } from "../utils/isFrozenDeclaration"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"
 import AskEmail from "../views/AskEmail"
@@ -31,7 +33,6 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
-import { isFormValid } from "../utils/formHelpers"
 
 type Params = {
   code: string
@@ -116,7 +117,8 @@ function Simulateur(): JSX.Element {
     state,
     2000,
     (debouncedState) => {
-      if (debouncedState) {
+      // On ne sauvegarde plus automatiquement si la déclaration date de plus d'un an.
+      if (debouncedState && !isFrozenDeclaration(debouncedState)) {
         putSimulation(code, debouncedState).catch((error) => {
           setLoading(false)
           const message =
