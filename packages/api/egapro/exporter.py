@@ -14,6 +14,9 @@ import ujson as json
 
 from egapro import constants, db, models, sql, utils
 
+def truthy(val):
+    return False if val is False else True
+
 
 async def dump(path: Path):
     """Export des données Egapro.
@@ -194,15 +197,32 @@ async def public_data_as_xlsx(debug=False):
                     constants.PAYS_ISO_TO_LIB.get(
                         data.path("entreprise.code_pays"), "FRANCE"
                     ),
-                    data.naf,
-                    data.path("indicateurs.rémunérations.note") or "NC",
-                    "" if lt_250 else data.path("indicateurs.augmentations.note") or "NC",
-                    "" if lt_250 else data.path("indicateurs.promotions.note") or "NC",
-                    "" if not lt_250 else data.path("indicateurs.augmentations_et_promotions.note") or "NC",
-                    data.path("indicateurs.congés_maternité.note") or "NC",
-                    data.path("indicateurs.hautes_rémunérations.note") or "NC",
-                    data.grade or "NC",
-                ]
+                    data.naf
+                ] + get_note_lines(data)
             ]
         )
     return workbook
+
+def get_note_lines(data: models.Data):
+    lt_250 = data.path("entreprise.effectif.tranche") == "50:250"
+    periode_suffisante = truthy(data.path("déclaration.période_suffisante"))
+    if periode_suffisante:
+        return [
+            data.path("indicateurs.rémunérations.note") or "NC",
+            "" if lt_250 else data.path("indicateurs.augmentations.note") or "NC",
+            "" if lt_250 else data.path("indicateurs.promotions.note") or "NC",
+            "" if not lt_250 else data.path("indicateurs.augmentations_et_promotions.note") or "NC",
+            data.path("indicateurs.congés_maternité.note") or "NC",
+            data.path("indicateurs.hautes_rémunérations.note"),
+            data.grade
+        ]
+    else:
+        return [
+            "NC",
+            "" if lt_250 else "NC",
+            "" if lt_250 else "NC",
+            "" if not lt_250 else "NC",
+            "NC",
+            "NC",
+            "NC"
+        ]
