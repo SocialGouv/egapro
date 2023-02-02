@@ -15,7 +15,7 @@ import type {
 
 import { useUser } from "../../components/AuthContext"
 import InfoBlock from "../../components/ds/InfoBlock"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import LayoutForm from "../../components/LayoutForm"
 import SimulateurPage from "../../components/SimulateurPage"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
@@ -321,7 +321,7 @@ const Declaration = ({ code }: DeclarationProps) => {
 
     return (
       <PageDeclaration>
-        <LayoutFormAndResult
+        <LayoutForm
           form={
             <>
               <InfoBlock
@@ -447,7 +447,7 @@ const Declaration = ({ code }: DeclarationProps) => {
 
   return (
     <PageDeclaration>
-      <LayoutFormAndResult
+      <LayoutForm
         form={
           <>
             {apiError && (

@@ -4,7 +4,7 @@ import React from "react"
 import { useTitle } from "../../utils/hooks"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import LayoutForm from "../../components/LayoutForm"
 import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
@@ -22,7 +22,7 @@ const InformationsSimulation = () => {
       title={title}
       tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
-      <LayoutFormAndResult form={<InformationsSimulationForm />} />
+      <LayoutForm form={<InformationsSimulationForm />} />
 
       {isFormValid(state.informations) &&
         (state.effectif.formValidated === "Invalid" ||

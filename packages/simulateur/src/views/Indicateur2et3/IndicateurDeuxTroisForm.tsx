@@ -4,6 +4,7 @@ import { Form } from "react-final-form"
 
 import {
   composeValidators,
+  isFormValid,
   maxNumber,
   minNumber,
   mustBeInteger,
@@ -64,11 +65,7 @@ const validateForm = ({
   return
 }
 
-interface IndicateurDeuxTroisForProps {
-  readOnly: boolean
-}
-
-const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = ({ readOnly }) => {
+const IndicateurDeuxTroisForm: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
@@ -80,6 +77,8 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
   const nombreAugmentationPromotionHommes = state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
   const periodeDeclaration = state.indicateurDeuxTrois.periodeDeclaration
   const nombreSalaries = state.effectif.nombreSalaries
+
+  const readOnly = isFormValid(state.indicateurDeuxTrois)
 
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(presenceAugmentationPromotion),

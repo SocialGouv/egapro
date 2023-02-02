@@ -118,15 +118,11 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
       <LayoutFormAndResult
         form={
           <>
-            <IndicateurDeuxTroisForm readOnly={readOnly} />
+            <IndicateurDeuxTroisForm />
             {readOnly && <AdditionalInfo results={results} calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />}
           </>
         }
-        result={
-          readOnly && (
-            <IndicateurDeuxTroisResult results={results} calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />
-          )
-        }
+        result={<IndicateurDeuxTroisResult results={results} calculsIndicateurDeuxTrois={calculsIndicateurDeuxTrois} />}
       />
     </PageIndicateurDeuxTrois>
   )

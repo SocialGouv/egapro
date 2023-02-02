@@ -24,7 +24,7 @@ const IndicateurTroisResult: FunctionComponent<IndicateurTroisResultProps> = ({ 
 
   const readOnly = isFormValid(state.indicateurTrois)
 
-  if (readOnly) return null
+  if (!readOnly) return null
 
   return (
     <ResultSummary

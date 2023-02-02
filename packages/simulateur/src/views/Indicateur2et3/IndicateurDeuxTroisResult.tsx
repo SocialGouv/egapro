@@ -7,6 +7,7 @@ import ResultSummary from "../../components/ResultSummary"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { Results } from "./IndicateurDeuxTrois"
 import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface IndicateurDeuxTroisResultProps {
   results: Results
@@ -23,6 +24,10 @@ const IndicateurDeuxTroisResult: FunctionComponent<IndicateurDeuxTroisResultProp
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
+
+  const readOnly = isFormValid(state.indicateurDeuxTrois)
+
+  if (!readOnly) return null
 
   const { indicateurSexeSurRepresente, noteIndicateurDeuxTrois, correctionMeasure } = calculsIndicateurDeuxTrois
 

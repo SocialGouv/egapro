@@ -24,7 +24,7 @@ const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({ ca
 
   const readOnly = isFormValid(state.indicateurDeux)
 
-  if (readOnly) return null
+  if (!readOnly) return null
 
   return (
     <ResultSummary

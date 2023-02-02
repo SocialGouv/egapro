@@ -24,12 +24,12 @@ import FieldPlanRelance from "../../components/FieldPlanRelance"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import RequiredRadiosBoolean from "../../components/RequiredRadiosBoolean"
 import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { estCalculable } from "../../utils/helpers"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 // NB : some fields (like RadioButton Oui/Non) are only validated at field-level.

@@ -15,6 +15,8 @@ const IndicateurUnCsp: FunctionComponent = () => {
 
   const validateIndicateurUn = (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid })
 
+  const readOnly = isFormValid(state.indicateurUn)
+
   const {
     effectifEtEcartRemuParTrancheCsp,
     indicateurEcartRemuneration,
@@ -27,12 +29,12 @@ const IndicateurUnCsp: FunctionComponent = () => {
       form={
         <IndicateurUnCspForm
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
-          readOnly={isFormValid(state.indicateurUn)}
+          readOnly={readOnly}
           validateIndicateurUn={validateIndicateurUn}
         />
       }
       result={
-        isFormValid(state.indicateurUn) && (
+        readOnly && (
           <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}
