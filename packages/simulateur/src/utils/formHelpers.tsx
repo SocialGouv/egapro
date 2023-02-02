@@ -95,8 +95,8 @@ export const composeFormValidators =
       undefined,
     )
 
-export function isFormValid(formState: { formValidated: string }) {
-  return formState.formValidated === "Valid"
+export function isFormValid(formState: { formValidated: string } | undefined) {
+  return formState?.formValidated === "Valid"
 }
 
 export const isFieldHasError = (meta: FieldMetaState<string>): boolean =>
