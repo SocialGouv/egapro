@@ -103,7 +103,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
   const estCalculableIndex = estCalculable(noteIndex)
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
-  const periodeSuffisante = state.informations.periodeSuffisante
+  const periodeSuffisante = state.informations.periodeSuffisante !== false
   const readOnly = isFormValid(state.declaration) && !declaring
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
