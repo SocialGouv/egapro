@@ -39,7 +39,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     tauxAugmentationPromotionFemmes,
   } = calculsIndicateurDeuxTrois
 
-  if (!isEffectifsFilled || indicateurDeuxTroisFormValidated === "None") {
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
@@ -61,6 +61,10 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"
       />
     )
+  }
+
+  if (indicateurDeuxTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
   const results = calculerResultats(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
