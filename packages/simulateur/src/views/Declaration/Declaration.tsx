@@ -316,7 +316,7 @@ const Declaration = ({ code }: DeclarationProps) => {
     }
   }
 
-  if (!state.informations.periodeSuffisante) {
+  if (state.informations.periodeSuffisante === false) {
     const allFormsFilled = isFormValid(state.informationsEntreprise) && isFormValid(state.informationsDeclarant)
 
     return (

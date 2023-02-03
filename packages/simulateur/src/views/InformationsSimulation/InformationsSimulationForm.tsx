@@ -13,28 +13,23 @@ import {
 } from "../../utils/formHelpers"
 
 import { Input as InputChakra } from "@chakra-ui/input"
-import ActionBar from "../../components/ActionBar"
 import AnneeDeclaration from "../../components/AnneeDeclaration"
-import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
-import { IconEdit } from "../../components/ds/Icons"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
 import { hasFieldError } from "../../components/Input"
 
 import { useParams } from "react-router-dom"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
+import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormError from "../../components/FormError"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
-import InfoBlock from "../../components/ds/InfoBlock"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 const validateForm = ({
   nomEntreprise,
@@ -120,7 +115,7 @@ const InformationsSimulationForm: FunctionComponent = () => {
 
   const alreadyDeclared = declaration?.data?.id === code
   const informations = state.informations
-  const readOnly = isFrozenDeclaration(state) || isFormValid(state.informations)
+  const readOnly = isFormValid(informations)
   const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues = {
@@ -235,38 +230,21 @@ const InformationsSimulationForm: FunctionComponent = () => {
               />
             )}
           </FormStack>
-          {readOnly ? (
-            <>
-              <ActionBar>
-                <ButtonSimulatorLink
-                  to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
-                  label="Suivant"
-                />
-                {isFormValid(informations) && (
-                  <ButtonAction
-                    leftIcon={<IconEdit />}
-                    label="Modifier les données saisies"
-                    onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
-                    variant="link"
-                    size="sm"
-                    disabled={frozenDeclaration}
-                    title={frozenDeclaration ? frozenDeclarationMessage : ""}
-                  />
-                )}
-              </ActionBar>
-              <InfoBlock
-                mt={12}
-                type="info"
-                text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
-                  +values.anneeDeclaration + 1
-                } au titre des données de ${values.anneeDeclaration}.`}
-              />
-            </>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
+
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
+            onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
+          />
+
+          <InfoBlock
+            mt={12}
+            type="info"
+            text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
+              +values.anneeDeclaration + 1
+            } au titre des données de ${values.anneeDeclaration}.`}
+          />
         </form>
       )}
     </Form>

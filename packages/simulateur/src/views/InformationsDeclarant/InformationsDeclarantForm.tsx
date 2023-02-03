@@ -6,20 +6,15 @@ import { z } from "zod"
 
 import { ActionInformationsDeclarantData } from "../../globals"
 
-import ActionBar from "../../components/ActionBar"
-import ButtonAction from "../../components/ds/ButtonAction"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import { formValidator } from "../../components/ds/form-lib"
 import FormStack from "../../components/ds/FormStack"
-import { IconEdit } from "../../components/ds/Icons"
 import InputGroup from "../../components/ds/InputGroup"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const FormInputs = z.object({
@@ -50,7 +45,7 @@ const InformationsDeclarantForm: FunctionComponent = () => {
   if (!state) return null
 
   const informationsDeclarant = state.informationsDeclarant
-  const readOnly = isFormValid(state.informationsDeclarant)
+  const readOnly = isFormValid(informationsDeclarant)
   const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues: ActionInformationsDeclarantData = {
@@ -129,27 +124,13 @@ const InformationsDeclarantForm: FunctionComponent = () => {
               )}
             </Field>
           </FormStack>
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/declaration" label="Suivant" />
-              &emsp;
-              {isFormValid(informationsDeclarant) && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
-                  variant="link"
-                  size="sm"
-                  disabled={frozenDeclaration}
-                  title={frozenDeclaration ? frozenDeclarationMessage : ""}
-                />
-              )}
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
+
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to="/declaration"
+            onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
+          />
         </form>
       )}
     </Form>

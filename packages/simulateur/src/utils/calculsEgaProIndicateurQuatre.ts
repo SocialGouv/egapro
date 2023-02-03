@@ -50,9 +50,17 @@ export default function calculerIndicateurQuatre(state: AppState) {
 
   const noteIndicateurQuatre = calculNote(indicateurEcartNombreSalarieesAugmentees)
 
+  const messageNonCalculable =
+    state.indicateurQuatre.presenceCongeMat &&
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
+      ? "Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
+      : "Il n’y a pas eu de retour de congé maternité pendant la période de référence."
+
   return {
     indicateurCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
+    messageNonCalculable,
   }
 }

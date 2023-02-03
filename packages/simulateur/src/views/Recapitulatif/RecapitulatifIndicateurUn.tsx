@@ -41,7 +41,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     noteIndicateurUn,
   } = calculsIndicateurUn
 
-  if (!isEffectifsFilled || indicateurUnFormValidated === "None") {
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
@@ -58,6 +58,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
       />
     )
+  }
+
+  if (indicateurUnFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
   // @ts-ignore

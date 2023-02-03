@@ -5,21 +5,18 @@ import React, { FunctionComponent } from "react"
 import { Field, Form } from "react-final-form"
 import { FieldArray } from "react-final-form-arrays"
 
-import ActionBar from "../../components/ActionBar"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import { codeNafFromCode } from "../../components/CodeNaf"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import FormStack from "../../components/ds/FormStack"
-import { IconEdit, IconPlusCircle, IconWarning } from "../../components/ds/Icons"
+import { IconPlusCircle, IconWarning } from "../../components/ds/Icons"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
-import FormSubmit from "../../components/FormSubmit"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
 import { EntrepriseType, Structure } from "../../globals"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
@@ -285,26 +282,12 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             )}
           </FormStack>
 
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/informations-declarant" label="Suivant" />
-              &emsp;(
-              <ButtonAction
-                leftIcon={<IconEdit />}
-                label="Modifier les données saisies"
-                onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
-                variant="link"
-                size="sm"
-                disabled={frozenDeclaration}
-                title={frozenDeclaration ? frozenDeclarationMessage : ""}
-              />
-              )
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to="/informations-declarant"
+            onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
+          />
         </form>
       )}
     </Form>

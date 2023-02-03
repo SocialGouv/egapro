@@ -4,18 +4,15 @@ import { useTitle } from "../../utils/hooks"
 
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 
-import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import SimulateurPage from "../../components/SimulateurPage"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
-import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const title = "Indicateur retour congé maternité"
 
@@ -30,18 +27,12 @@ const IndicateurQuatre: FunctionComponent = () => {
 
   const frozenDeclaration = isFrozenDeclaration(state)
 
-  const { indicateurCalculable } = calculsIndicateurQuatre
+  const { indicateurCalculable, messageNonCalculable } = calculsIndicateurQuatre
 
   const readOnly = isFormValid(state.indicateurQuatre)
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (readOnly && !indicateurCalculable) {
-    const messageNonCalculable =
-      state.indicateurQuatre.presenceCongeMat &&
-      state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
-      state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
-        ? "Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
-        : "Il n’y a pas eu de retour de congé maternité pendant la période de référence."
     return (
       <PageIndicateurQuatre>
         <InfoBlock
@@ -49,18 +40,13 @@ const IndicateurQuatre: FunctionComponent = () => {
           title="Malheureusement votre indicateur n’est pas calculable"
           text={messageNonCalculable}
         />
-        <ActionBar>
-          <ActionLink
-            onClick={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}
-            disabled={frozenDeclaration}
-            title={frozenDeclaration ? frozenDeclarationMessage : ""}
-          >
-            Modifier les données saisies
-          </ActionLink>
-        </ActionBar>
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur5" label="Suivant" />
-        </ActionBar>
+
+        <ActionBarSingleForm
+          readOnly={readOnly}
+          frozenDeclaration={frozenDeclaration}
+          to="/indicateur5"
+          onClick={() => dispatch({ type: "validateIndicateurQuatre", valid: "None" })}
+        />
       </PageIndicateurQuatre>
     )
   }

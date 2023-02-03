@@ -4,18 +4,17 @@ import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
-import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 const title = "Indicateur écart de taux de promotion"
 
@@ -72,18 +71,13 @@ const IndicateurTrois: FunctionComponent = () => {
           title="Malheureusement votre indicateur n’est pas calculable"
           text="Il n’y a pas eu de promotion durant la période de référence."
         />
-        <ActionBar>
-          <ActionLink
-            onClick={() => dispatch({ type: "validateIndicateurTrois", valid: "None" })}
-            disabled={frozenDeclaration}
-            title={frozenDeclaration ? frozenDeclarationMessage : ""}
-          >
-            Modifier les données saisies
-          </ActionLink>
-        </ActionBar>
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
-        </ActionBar>
+
+        <ActionBarSingleForm
+          readOnly={readOnly}
+          frozenDeclaration={frozenDeclaration}
+          to="/indicateur4"
+          onClick={() => dispatch({ type: "validateIndicateurTrois", valid: "None" })}
+        />
       </PageIndicateurTrois>
     )
   }
