@@ -203,16 +203,19 @@ async def public_data_as_xlsx(debug=False):
         )
     return workbook
 
+def value_or_NC(value):
+    return "NC" if isinstance(value, type(None)) else value
+
 def get_note_lines(data: models.Data):
     lt_250 = data.path("entreprise.effectif.tranche") == "50:250"
     periode_suffisante = truthy(data.path("déclaration.période_suffisante"))
     if periode_suffisante:
         return [
-            data.path("indicateurs.rémunérations.note") or "NC",
-            "" if lt_250 else data.path("indicateurs.augmentations.note") or "NC",
-            "" if lt_250 else data.path("indicateurs.promotions.note") or "NC",
-            "" if not lt_250 else data.path("indicateurs.augmentations_et_promotions.note") or "NC",
-            data.path("indicateurs.congés_maternité.note") or "NC",
+            value_or_NC(data.path("indicateurs.rémunérations.note")),
+            "" if lt_250 else value_or_NC(data.path("indicateurs.augmentations.note")),
+            "" if lt_250 else value_or_NC(data.path("indicateurs.promotions.note")),
+            "" if not lt_250 else value_or_NC(data.path("indicateurs.augmentations_et_promotions.note")),
+            value_or_NC(data.path("indicateurs.congés_maternité.note")),
             data.path("indicateurs.hautes_rémunérations.note"),
             data.grade
         ]
