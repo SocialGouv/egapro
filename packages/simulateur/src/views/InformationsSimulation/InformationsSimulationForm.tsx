@@ -230,12 +230,14 @@ const InformationsSimulationForm: FunctionComponent = () => {
               />
             )}
           </FormStack>
+
           <ActionBarSingleForm
             readOnly={readOnly}
             frozenDeclaration={frozenDeclaration}
             to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
             onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
           />
+
           <InfoBlock
             mt={12}
             type="info"

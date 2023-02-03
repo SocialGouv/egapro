@@ -124,10 +124,11 @@ const InformationsDeclarantForm: FunctionComponent = () => {
               )}
             </Field>
           </FormStack>
+
           <ActionBarSingleForm
             readOnly={readOnly}
             frozenDeclaration={frozenDeclaration}
-            to={"/declaration"}
+            to="/declaration"
             onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
           />
         </form>

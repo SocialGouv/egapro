@@ -4,18 +4,18 @@ import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
-import { frozenDeclarationMessage, MessageForFrozenDeclaration } from "../../components/MessageForFrozenDeclaration"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
+import { MessageForFrozenDeclaration } from "../../components/MessageForFrozenDeclaration"
 import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurDeuxForm from "./IndicateurDeuxForm"
 import IndicateurDeuxResult from "./IndicateurDeuxResult"
-import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const title = "Indicateur écart de taux d’augmentation individuelle hors promotion"
 
@@ -31,6 +31,8 @@ const IndicateurDeux: FunctionComponent = () => {
   const frozenDeclaration = isFrozenDeclaration(state)
 
   const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurDeux
+
+  const readOnly = isFormValid(state.indicateurDeux)
 
   // le formulaire d'effectif n'est pas validé
   if (!isFormValid(state.effectif)) {
@@ -62,7 +64,7 @@ const IndicateurDeux: FunctionComponent = () => {
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (isFormValid(state.indicateurDeux) && !indicateurCalculable) {
+  if (readOnly && !indicateurCalculable) {
     return (
       <PageIndicateurDeux>
         <InfoBlock
@@ -70,18 +72,13 @@ const IndicateurDeux: FunctionComponent = () => {
           title="Malheureusement votre indicateur n’est pas calculable"
           text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
         />
-        <ActionBar>
-          <ActionLink
-            onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}
-            disabled={frozenDeclaration}
-            title={frozenDeclaration ? frozenDeclarationMessage : ""}
-          >
-            Modifier les données saisies
-          </ActionLink>
-        </ActionBar>
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
-        </ActionBar>
+
+        <ActionBarSingleForm
+          readOnly={readOnly}
+          frozenDeclaration={frozenDeclaration}
+          to="/indicateur3"
+          onClick={() => dispatch({ type: "validateIndicateurDeux", valid: "None" })}
+        />
       </PageIndicateurDeux>
     )
   }

@@ -285,7 +285,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
           <ActionBarSingleForm
             readOnly={readOnly}
             frozenDeclaration={frozenDeclaration}
-            to={"/informations-declarant"}
+            to="/informations-declarant"
             onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
           />
         </form>
