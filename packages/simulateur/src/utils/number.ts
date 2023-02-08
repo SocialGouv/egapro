@@ -1,4 +1,4 @@
-export const asPercentage = (value: number | undefined): number | undefined => {
+export const asPercentage = (value?: number): number | undefined => {
   // Return `33` for "33%" (which is passed in as a value of 0.33)
   if (value !== undefined) {
     return value * 100

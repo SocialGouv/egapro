@@ -9,7 +9,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import { calendarYear, Year } from "../../utils/date"
 
 interface RecapitulatifInformationsProps {
-  nombreSalaries: number | undefined
+  nombreSalaries?: number
   periodeSuffisante: boolean
 }
 

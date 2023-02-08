@@ -1,7 +1,7 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { TranchesAges } from "../../globals"
+import { TrancheAge } from "../../globals"
 import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import {
@@ -105,10 +105,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         <Thead textTransform="inherit" fontSize=".5rem">
           <Tr>
             <Th />
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.MoinsDe30ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De30a39ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De40a49ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.PlusDe50ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.MoinsDe30ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De30a39ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De40a49ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.PlusDe50ans)}</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -117,7 +117,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
               effectifEtEcartRemuParTranche: Array<{
                 id: any
                 name: string
-                ecartRemunerationMoyenne: number | undefined
+                ecartRemunerationMoyenne?: number
               }>,
             ) => (
               <Tr key={effectifEtEcartRemuParTranche[0].id}>

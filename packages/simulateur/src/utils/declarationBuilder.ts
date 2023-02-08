@@ -7,6 +7,7 @@ import type {
   DeclarationIndicateurQuatreData,
   DeclarationIndicateurTroisData,
   DeclarationIndicateurUnData,
+  SexeType,
   TrancheEffectifs,
   TrancheEffectifsAPI,
 } from "../globals"
@@ -39,7 +40,7 @@ export type DeclarationDataField = {
   déclarant: Declarant
   entreprise: Entreprise
   déclaration: Declaration
-  indicateurs?: Indicateurs | undefined
+  indicateurs?: Indicateurs
 }
 
 /*
@@ -71,20 +72,20 @@ export const buildDeclarationFromSimulation = ({
 export type Declaration = {
   date?: string
   brouillon?: boolean
-  index?: number | undefined
-  mesures_correctives?: string | undefined
-  points_calculables?: number | undefined
-  points?: number | undefined
-  fin_période_référence?: string | undefined // undefined si période_suffisante est à false.
-  année_indicateurs: number | undefined
-  période_suffisante: boolean | undefined
+  index?: number
+  mesures_correctives?: string
+  points_calculables?: number
+  points?: number
+  fin_période_référence?: string // undefined si période_suffisante est à false.
+  année_indicateurs?: number
+  période_suffisante?: boolean
   publication?: {
-    date_publication_mesures?: string | undefined
-    date_publication_objectifs?: string | undefined
-    modalités_objectifs_mesures?: string | undefined
-    modalités?: string | undefined
-    url?: string | undefined
-    date?: string | undefined
+    date_publication_mesures?: string
+    date_publication_objectifs?: string
+    modalités_objectifs_mesures?: string
+    modalités?: string
+    url?: string
+    date?: string
   }
 }
 
@@ -144,24 +145,22 @@ type Entreprise = {
     tranche: TrancheEffectifsAPI
     total?: any
   }
-  code_pays?: string | undefined
-  code_postal?: string | undefined
+  code_pays?: string
+  code_postal?: string
   raison_sociale: string
   siren: string
   région: string
   département: string
   adresse: string
   commune: string
-  ues?:
-    | {
-        nom: string
-        entreprises: Array<{
-          raison_sociale: string
-          siren: string
-        }>
-      }
-    | undefined
-  plan_relance?: boolean | undefined
+  ues?: {
+    nom: string
+    entreprises: Array<{
+      raison_sociale: string
+      siren: string
+    }>
+  }
+  plan_relance?: boolean
 }
 
 const trancheFromFormToApi = (tranche: TrancheEffectifs): TrancheEffectifsAPI =>
@@ -235,17 +234,17 @@ export type IndicateurNonCalculable = { non_calculable: string }
 
 export type Indicateur1Calculable = {
   mode: string
-  résultat: number | undefined
-  note: number | undefined
-  population_favorable?: "hommes" | "femmes" | undefined
-  date_consultation_cse?: string | undefined
+  résultat?: number
+  note?: number
+  date_consultation_cse?: string
+  population_favorable?: SexeType
   catégories?: Array<{
     nom: string
     tranches?: {
-      ":29"?: number | undefined
-      "30:39"?: number | undefined
-      "40:49"?: number | undefined
-      "50:"?: number | undefined
+      ":29"?: number
+      "30:39"?: number
+      "40:49"?: number
+      "50:"?: number
     }
   }>
   objectif_de_progression?: string
@@ -295,10 +294,10 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
 }
 
 export type Indicateur2Calculable = {
-  résultat: number | undefined
-  note: number | undefined
+  résultat?: number
+  note?: number
   catégories: (number | undefined)[]
-  population_favorable?: "hommes" | "femmes"
+  population_favorable?: SexeType
   objectif_de_progression?: string
 }
 
@@ -322,10 +321,10 @@ const buildIndicateur2 = (state: AppState): Indicateur2 => {
 }
 
 export type Indicateur3Calculable = {
-  résultat: number | undefined
-  note: number | undefined
+  résultat?: number
+  note?: number
   catégories: (number | undefined)[]
-  population_favorable?: "hommes" | "femmes"
+  population_favorable?: SexeType
   objectif_de_progression?: string
 }
 
@@ -349,12 +348,12 @@ const buildIndicateur3 = (state: AppState): Indicateur3 => {
 }
 
 export type Indicateur2et3Calculable = {
-  résultat: number | undefined
-  note_en_pourcentage: number | undefined
-  résultat_nombre_salariés: number | undefined
-  note_nombre_salariés: number | undefined
-  note: number | undefined
-  population_favorable?: "femmes" | "hommes" | undefined
+  résultat?: number
+  note_en_pourcentage?: number
+  résultat_nombre_salariés?: number
+  note_nombre_salariés?: number
+  note?: number
+  population_favorable?: SexeType
   objectif_de_progression?: string
 }
 
@@ -382,8 +381,8 @@ const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
 }
 
 export type Indicateur4Calculable = {
-  résultat: number | undefined
-  note: number | undefined
+  résultat?: number
+  note?: number
   objectif_de_progression?: string
 }
 
@@ -406,9 +405,9 @@ const buildIndicateur4 = (state: AppState): Indicateur4 => {
 }
 
 export type Indicateur5 = {
-  population_favorable?: "femmes" | "hommes" | undefined
-  résultat: number | undefined
-  note: number | undefined
+  population_favorable?: SexeType
+  résultat?: number
+  note?: number
   objectif_de_progression?: string
 }
 
@@ -577,7 +576,7 @@ export function computeValuesFromState(state: AppState) {
   }
 }
 
-type MappingType = { [key: string]: { path: string; value?: string | undefined } }
+type MappingType = { [key: string]: { path: string; value?: string } }
 
 /*
  * Build mapping between flat data in ObjectifsMesures and a nested declaration.

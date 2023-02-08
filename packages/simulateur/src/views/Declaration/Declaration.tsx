@@ -23,7 +23,7 @@ import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import calculerIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeux, { calculerEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculerIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
@@ -124,7 +124,7 @@ function buildHelpers(state: AppState) {
       : state.indicateurDeux.presenceAugmentation
       ? ""
       : "absaugi",
-    tauxAugmentation: calculEcartTauxAugmentationParCSP(state.indicateurDeux.tauxAugmentation),
+    tauxAugmentation: calculerEcartTauxAugmentationParCSP(state.indicateurDeux.tauxAugmentation),
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteFinale: noteIndicateurDeux,

@@ -2,6 +2,8 @@
 //Generated with generateModelsFromSchema.
 //DO NOT EDIT.
 
+import { SexeType } from "./globals";
+
 export type AnneeIndicateur = 2018 | 2019 | 2020 | 2021;
 export type Region =
   | "01"
@@ -1087,7 +1089,7 @@ export type Remunerations = WithPopulationFavorable & {
 export type WithPopulationFavorable = BaseIndicateurNote & {
   population_favorable?: PopulationFavorable;
 };
-export type PopulationFavorable = "femmes" | "hommes" | "egalite";
+export type PopulationFavorable = SexeType | "egalite";
 /**
  * Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les homme
  */

@@ -11,7 +11,7 @@ import { buildHelpersObjectifsMesures } from "../views/private/ObjectifsMesuresP
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { formatDate } from "../utils/date"
 
-const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string => {
+const trancheFromApiToForm = (declaration?: DeclarationAPI): string => {
   const tranche = declaration?.data.entreprise.effectif?.tranche
   if (!tranche) return ""
   return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"

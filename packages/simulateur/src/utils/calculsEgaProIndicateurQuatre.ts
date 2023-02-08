@@ -25,7 +25,7 @@ export const calculIndicateurEcartNombreSalarieesAugmentees = (
     : undefined
 
 // NOTE
-export const calculNote = (indicateurEcartNombreSalarieesAugmentees: number | undefined): number | undefined =>
+export const calculNote = (indicateurEcartNombreSalarieesAugmentees?: number): number | undefined =>
   indicateurEcartNombreSalarieesAugmentees !== undefined
     ? indicateurEcartNombreSalarieesAugmentees < 100
       ? 0

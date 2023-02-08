@@ -1,4 +1,4 @@
-import { CategorieSocioPro, TranchesAges, ActionType, AppState } from "./globals"
+import { CategorieSocioPro, TrancheAge, ActionType, AppState } from "./globals"
 
 import appReducer, { dataIndicateurUnCoefGroup } from "./app-reducer"
 
@@ -101,22 +101,22 @@ describe("updateEffectif", () => {
           categorieSocioPro: CategorieSocioPro.Ouvriers,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 24,
               nombreSalariesHommes: 33,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 13,
               nombreSalariesHommes: 14,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 35,
               nombreSalariesHommes: 8,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 22,
             },
@@ -126,22 +126,22 @@ describe("updateEffectif", () => {
           categorieSocioPro: CategorieSocioPro.Employes,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 64,
               nombreSalariesHommes: 26,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 53,
               nombreSalariesHommes: 63,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 17,
               nombreSalariesHommes: 19,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 28,
               nombreSalariesHommes: 20,
             },
@@ -151,22 +151,22 @@ describe("updateEffectif", () => {
           categorieSocioPro: CategorieSocioPro.Techniciens,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 15,
               nombreSalariesHommes: 16,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 7,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 3,
               nombreSalariesHommes: 4,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 5,
               nombreSalariesHommes: 6,
             },
@@ -176,22 +176,22 @@ describe("updateEffectif", () => {
           categorieSocioPro: CategorieSocioPro.Cadres,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 4,
               nombreSalariesHommes: 9,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 20,
               nombreSalariesHommes: 18,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 3,
               nombreSalariesHommes: 3,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 9,
             },
@@ -258,22 +258,22 @@ describe("updateIndicateurUnCsp", () => {
           categorieSocioPro: CategorieSocioPro.Ouvriers,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 23500,
               remunerationAnnuelleBrutHommes: 25500,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 24500,
               remunerationAnnuelleBrutHommes: 26500,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 25600,
               remunerationAnnuelleBrutHommes: 26500,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 27600,
               remunerationAnnuelleBrutHommes: 28500,
             },
@@ -283,22 +283,22 @@ describe("updateIndicateurUnCsp", () => {
           categorieSocioPro: CategorieSocioPro.Employes,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 23400,
               remunerationAnnuelleBrutHommes: 25400,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 24400,
               remunerationAnnuelleBrutHommes: 26400,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 31400,
               remunerationAnnuelleBrutHommes: 33400,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 39400,
               remunerationAnnuelleBrutHommes: 43400,
             },
@@ -308,22 +308,22 @@ describe("updateIndicateurUnCsp", () => {
           categorieSocioPro: CategorieSocioPro.Techniciens,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 26650,
               remunerationAnnuelleBrutHommes: 28650,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 27650,
               remunerationAnnuelleBrutHommes: 29650,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 34650,
               remunerationAnnuelleBrutHommes: 36650,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 42650,
               remunerationAnnuelleBrutHommes: 46650,
             },
@@ -333,22 +333,22 @@ describe("updateIndicateurUnCsp", () => {
           categorieSocioPro: CategorieSocioPro.Cadres,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 36700,
               remunerationAnnuelleBrutHommes: 38700,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 37700,
               remunerationAnnuelleBrutHommes: 39700,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 44700,
               remunerationAnnuelleBrutHommes: 46700,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 52700,
               remunerationAnnuelleBrutHommes: 56700,
             },
@@ -510,22 +510,22 @@ describe("updateIndicateurUnCoef", () => {
           {
             tranchesAges: [
               {
-                trancheAge: TranchesAges.MoinsDe30ans,
+                trancheAge: TrancheAge.MoinsDe30ans,
                 nombreSalariesFemmes: 3,
                 nombreSalariesHommes: 2,
               },
               {
-                trancheAge: TranchesAges.De30a39ans,
+                trancheAge: TrancheAge.De30a39ans,
                 nombreSalariesFemmes: 0,
                 nombreSalariesHommes: 8,
               },
               {
-                trancheAge: TranchesAges.De40a49ans,
+                trancheAge: TrancheAge.De40a49ans,
                 nombreSalariesFemmes: 10,
                 nombreSalariesHommes: 13,
               },
               {
-                trancheAge: TranchesAges.PlusDe50ans,
+                trancheAge: TrancheAge.PlusDe50ans,
                 nombreSalariesFemmes: 4,
                 nombreSalariesHommes: 19,
               },
@@ -584,22 +584,22 @@ describe("updateIndicateurUnCoef", () => {
           {
             tranchesAges: [
               {
-                trancheAge: TranchesAges.MoinsDe30ans,
+                trancheAge: TrancheAge.MoinsDe30ans,
                 remunerationAnnuelleBrutFemmes: 25820,
                 remunerationAnnuelleBrutHommes: 24820,
               },
               {
-                trancheAge: TranchesAges.De30a39ans,
+                trancheAge: TrancheAge.De30a39ans,
                 remunerationAnnuelleBrutFemmes: 32820,
                 remunerationAnnuelleBrutHommes: 32820,
               },
               {
-                trancheAge: TranchesAges.De40a49ans,
+                trancheAge: TrancheAge.De40a49ans,
                 remunerationAnnuelleBrutFemmes: 41820,
                 remunerationAnnuelleBrutHommes: 43820,
               },
               {
-                trancheAge: TranchesAges.PlusDe50ans,
+                trancheAge: TrancheAge.PlusDe50ans,
                 remunerationAnnuelleBrutFemmes: 49820,
                 remunerationAnnuelleBrutHommes: 53550,
               },

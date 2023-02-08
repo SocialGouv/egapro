@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { FormState, GroupTranchesAgesIndicateurUn } from "../../../globals"
 
-import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
+import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 import { displayNameCategorieSocioPro } from "../../../utils/helpers"
 
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
 interface IndicateurUnCspFormProps {
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>
+  ecartRemuParTrancheAge: Array<EffectifEtEcartRemuGroupCsp>
   readOnly: boolean
   validateIndicateurUn: (valid: FormState) => void
 }

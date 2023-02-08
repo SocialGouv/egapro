@@ -1,14 +1,14 @@
-import { CategorieSocioPro, TranchesAges } from "../globals"
+import { CategorieSocioPro, SexeType, TrancheAge } from "../globals"
 
-export function displayNameTranchesAges(trancheAge: TranchesAges): string {
+export function displayNameTranchesAges(trancheAge: TrancheAge): string {
   switch (trancheAge) {
-    case TranchesAges.MoinsDe30ans:
+    case TrancheAge.MoinsDe30ans:
       return "moins de 30 ans"
-    case TranchesAges.De30a39ans:
+    case TrancheAge.De30a39ans:
       return "30 à 39 ans"
-    case TranchesAges.De40a49ans:
+    case TrancheAge.De40a49ans:
       return "40 à 49 ans"
-    case TranchesAges.PlusDe50ans:
+    case TrancheAge.PlusDe50ans:
       return "50 ans et plus"
     default:
       return "ERROR"
@@ -64,15 +64,15 @@ export function displayInt(num: number): string {
   return num.toLocaleString("fr-FR")
 }
 
-export function displaySexeSurRepresente(indicateurSexeSurRepresente: "hommes" | "femmes" | undefined): string {
+export function displaySexeSurRepresente(indicateurSexeSurRepresente?: SexeType): string {
   return indicateurSexeSurRepresente !== undefined
     ? `écart favorable aux ${indicateurSexeSurRepresente}`
     : "les femmes et les hommes sont à égalité"
 }
 
 export const messageEcartNombreEquivalentSalaries = (
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined,
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined,
+  indicateurSexeSurRepresente?: SexeType,
+  plusPetitNombreSalaries?: SexeType,
 ): string => {
   if (indicateurSexeSurRepresente === "hommes" && plusPetitNombreSalaries === "femmes") {
     return "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
@@ -92,7 +92,7 @@ export const messageEcartNombreEquivalentSalaries = (
 }
 
 export const messageMesureCorrection = (
-  sexeSurRepresente: undefined | "femmes" | "hommes",
+  sexeSurRepresente: undefined | SexeType,
   ecartDe: string,
   noteMax: string,
 ): string => {
@@ -110,6 +110,6 @@ export const messageMesureCorrection = (
  * @param noteIndex
  * @returns number only
  */
-export const estCalculable = (noteIndex: number | undefined): noteIndex is number => {
+export const estCalculable = (noteIndex?: number): noteIndex is number => {
   return noteIndex !== undefined
 }

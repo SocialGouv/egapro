@@ -2,7 +2,7 @@ import deepmerge from "deepmerge"
 
 import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
 
-import { CategorieSocioPro, TranchesAges } from "./globals"
+import { CategorieSocioPro, TrancheAge } from "./globals"
 import { datetimeToFrString } from "./utils/date"
 import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
@@ -10,7 +10,7 @@ import { combineMerge, overwriteMerge } from "./utils/merge"
 
 const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
   categorieSocioPro,
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
@@ -19,7 +19,7 @@ const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSoc
 
 const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
   categorieSocioPro,
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     remunerationAnnuelleBrutFemmes: undefined,
     remunerationAnnuelleBrutHommes: undefined,
@@ -29,7 +29,7 @@ const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: Categ
 
 export const dataIndicateurUnCoefGroup = {
   name: "",
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
@@ -279,6 +279,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       return {
         ...state,
         effectif: { ...state.effectif, formValidated: action.valid },
+        // TODO: si les nouveaux effectifs, rendent non calculables les indicateurs 2, 3 ou 2&3, alors on les met à Valid.
       }
     }
     case "updateIndicateurUnType": {

@@ -1,96 +1,3 @@
-// AppState is like a store which represents the state of the wizard in the simulation. Declaration has another shape (see DeclarationTotale).
-export type AppState = {
-  informations: {
-    formValidated: FormState
-    nomEntreprise: string
-    trancheEffectifs: TrancheEffectifs
-    anneeDeclaration: number | undefined // uniquement un number quand une déclaration est valide
-    finPeriodeReference?: string
-    periodeSuffisante: boolean | undefined // uniquement un boolean quand une déclaration est valide
-  }
-  effectif: {
-    formValidated: FormState
-    nombreSalaries: Array<GroupeEffectif>
-  } & Partial<DeclarationEffectifData>
-  indicateurUn: {
-    formValidated: FormState
-    csp: boolean
-    coef: boolean
-    autre: boolean
-    remunerationAnnuelle: Array<GroupeIndicateurUn>
-    coefficientGroupFormValidated: FormState
-    coefficientEffectifFormValidated: FormState
-    coefficient: Array<GroupeCoefficient>
-  } & Partial<DeclarationIndicateurUnData>
-  indicateurDeux: {
-    formValidated: FormState
-    presenceAugmentation: boolean
-    tauxAugmentation: Array<GroupeIndicateurDeux>
-  } & Partial<DeclarationIndicateurDeuxData>
-  indicateurTrois: {
-    formValidated: FormState
-    presencePromotion: boolean
-    tauxPromotion: Array<GroupeIndicateurTrois>
-  } & Partial<DeclarationIndicateurTroisData>
-  indicateurDeuxTrois: {
-    formValidated: FormState
-    presenceAugmentationPromotion: boolean
-    nombreAugmentationPromotionFemmes?: number | undefined
-    nombreAugmentationPromotionHommes?: number | undefined
-    periodeDeclaration: PeriodeDeclaration
-  } & Partial<DeclarationIndicateurDeuxTroisData>
-  indicateurQuatre: {
-    formValidated: FormState
-    presenceCongeMat: boolean
-    nombreSalarieesPeriodeAugmentation?: number | undefined
-    nombreSalarieesAugmentees?: number | undefined
-  } & Partial<DeclarationIndicateurQuatreData>
-  indicateurCinq: {
-    formValidated: FormState
-    nombreSalariesHommes?: number | undefined
-    nombreSalariesFemmes?: number | undefined
-  } & Partial<DeclarationIndicateurCinqData>
-  informationsEntreprise: {
-    formValidated: FormState
-    nomEntreprise: string
-    siren: string
-    codeNaf: string
-    region: string
-    departement: string
-    adresse: string
-    codePostal: string
-    codePays: string
-    commune: string
-    structure: Structure
-    nomUES: string
-    nombreEntreprises?: number | undefined
-    entreprisesUES: Array<EntrepriseUES>
-  }
-  informationsDeclarant: {
-    formValidated: FormState
-    nom: string
-    prenom: string
-    tel: string
-    email: string
-    acceptationCGU: boolean
-  }
-  declaration: {
-    formValidated: FormState
-    mesuresCorrection: string
-    cseMisEnPlace?: boolean | undefined
-    dateConsultationCSE: string
-    datePublication: string
-    publicationSurSiteInternet?: boolean | undefined // uniquement un boolean quand une déclaration est valide
-    lienPublication: string
-    planRelance: boolean | undefined // uniquement un boolean quand une déclaration est valide
-    modalitesPublication: string
-    dateDeclaration: string
-    noteIndex?: number | undefined
-    totalPoint: number
-    totalPointCalculable: number
-  }
-}
-
 export type PeriodeDeclaration = "unePeriodeReference" | "deuxPeriodesReference" | "troisPeriodesReference"
 
 // TrancheEffectifs uniquement utilisé par les Forms. Pour le retour d'API, on a un autre format (ex: "1000:")
@@ -108,7 +15,102 @@ export type FormState = "None" | "Valid" | "Invalid"
 
 export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)"
 
-export interface EntrepriseUES {
+export type SexeType = "hommes" | "femmes"
+
+// AppState is like a store which represents the state of the wizard in the simulation. Declaration has another shape (see DeclarationTotale).
+export type AppState = {
+  informations: {
+    formValidated: FormState
+    nomEntreprise: string
+    trancheEffectifs: TrancheEffectifs
+    anneeDeclaration?: number // uniquement un number quand une déclaration est valide
+    finPeriodeReference?: string
+    periodeSuffisante?: boolean // uniquement un boolean quand une déclaration est valide
+  }
+  effectif: {
+    formValidated: FormState
+    nombreSalaries: Array<EffectifsCategorie>
+  } & Partial<DeclarationEffectifData>
+  indicateurUn: {
+    formValidated: FormState
+    csp: boolean
+    coef: boolean
+    autre: boolean
+    remunerationAnnuelle: Array<GroupeIndicateurUn>
+    coefficientGroupFormValidated: FormState
+    coefficientEffectifFormValidated: FormState
+    coefficient: Array<GroupeCoefficient>
+  } & Partial<DeclarationIndicateurUnData>
+  indicateurDeux: {
+    formValidated: FormState
+    presenceAugmentation: boolean
+    tauxAugmentation: Array<TauxAugmentationParCSP>
+  } & Partial<DeclarationIndicateurDeuxData>
+  indicateurTrois: {
+    formValidated: FormState
+    presencePromotion: boolean
+    tauxPromotion: Array<GroupeIndicateurTrois>
+  } & Partial<DeclarationIndicateurTroisData>
+  indicateurDeuxTrois: {
+    formValidated: FormState
+    presenceAugmentationPromotion: boolean
+    nombreAugmentationPromotionFemmes?: number
+    nombreAugmentationPromotionHommes?: number
+    periodeDeclaration: PeriodeDeclaration
+  } & Partial<DeclarationIndicateurDeuxTroisData>
+  indicateurQuatre: {
+    formValidated: FormState
+    presenceCongeMat: boolean
+    nombreSalarieesPeriodeAugmentation?: number
+    nombreSalarieesAugmentees?: number
+  } & Partial<DeclarationIndicateurQuatreData>
+  indicateurCinq: {
+    formValidated: FormState
+    nombreSalariesHommes?: number
+    nombreSalariesFemmes?: number
+  } & Partial<DeclarationIndicateurCinqData>
+  informationsEntreprise: {
+    formValidated: FormState
+    nomEntreprise: string
+    siren: string
+    codeNaf: string
+    region: string
+    departement: string
+    adresse: string
+    codePostal: string
+    codePays: string
+    commune: string
+    structure: Structure
+    nomUES: string
+    nombreEntreprises?: number
+    entreprisesUES: Array<EntrepriseUES>
+  }
+  informationsDeclarant: {
+    formValidated: FormState
+    nom: string
+    prenom: string
+    tel: string
+    email: string
+    acceptationCGU: boolean
+  }
+  declaration: {
+    formValidated: FormState
+    mesuresCorrection: string
+    cseMisEnPlace?: boolean
+    dateConsultationCSE: string
+    datePublication: string
+    publicationSurSiteInternet?: boolean // uniquement un boolean quand une déclaration est valide
+    lienPublication: string
+    planRelance?: boolean // uniquement un boolean quand une déclaration est valide
+    modalitesPublication: string
+    dateDeclaration: string
+    noteIndex?: number
+    totalPoint: number
+    totalPointCalculable: number
+  }
+}
+
+export type EntrepriseUES = {
   nom: string
   siren: string
 }
@@ -238,7 +240,7 @@ export type ActionType =
       indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData
       indicateurQuatreData: DeclarationIndicateurQuatreData
       indicateurCinqData: DeclarationIndicateurCinqData
-      noteIndex: number | undefined
+      noteIndex?: number
       totalPoint: number
       totalPointCalculable: number
     }
@@ -250,13 +252,13 @@ export type ActionType =
 export type ActionInformationsSimulationData = {
   nomEntreprise: string
   trancheEffectifs: TrancheEffectifs
-  anneeDeclaration: number | undefined
+  anneeDeclaration?: number
   finPeriodeReference?: string
-  periodeSuffisante: boolean | undefined
+  periodeSuffisante?: boolean
 }
 
 export type ActionEffectifData = {
-  nombreSalaries: Array<GroupeEffectif>
+  nombreSalaries: Array<EffectifsCategorie>
 }
 
 export type DeclarationEffectifData = {
@@ -285,29 +287,29 @@ export type ActionIndicateurUnCoefData = {
 }
 
 export type DeclarationIndicateurUnData = {
-  nombreCoefficients: number | undefined
+  nombreCoefficients?: number
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet"
   remunerationAnnuelle: Array<GroupeIndicateurUn>
   coefficient: Array<GroupeCoefficient>
-  resultatFinal: number | undefined
-  sexeSurRepresente: undefined | "femmes" | "hommes"
-  noteFinale: number | undefined
+  resultatFinal?: number
+  sexeSurRepresente?: SexeType
+  noteFinale?: number
 }
 
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean
-  tauxAugmentation: Array<GroupeIndicateurDeux>
+  tauxAugmentation: Array<TauxAugmentationParCSP>
 }
 
 export type DeclarationIndicateurDeuxData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet" | "absaugi"
 
-  tauxAugmentation: Array<GroupeIndicateurDeux>
-  resultatFinal: number | undefined
-  sexeSurRepresente: undefined | "femmes" | "hommes"
-  noteFinale: number | undefined
+  tauxAugmentation: Array<TauxAugmentationParCSP>
+  resultatFinal?: number
+  sexeSurRepresente?: SexeType
+  noteFinale?: number
   mesuresCorrection: boolean
 }
 
@@ -321,16 +323,16 @@ export type DeclarationIndicateurTroisData = {
   motifNonCalculable: "" | "egvi40pcet" | "absprom"
 
   tauxPromotion: Array<GroupeIndicateurTrois>
-  resultatFinal: number | undefined
-  sexeSurRepresente: undefined | "femmes" | "hommes"
-  noteFinale: number | undefined
+  resultatFinal?: number
+  sexeSurRepresente?: SexeType
+  noteFinale?: number
   mesuresCorrection: boolean
 }
 
 export type ActionIndicateurDeuxTroisData = {
   presenceAugmentationPromotion: boolean
-  nombreAugmentationPromotionFemmes: number | undefined
-  nombreAugmentationPromotionHommes: number | undefined
+  nombreAugmentationPromotionFemmes?: number
+  nombreAugmentationPromotionHommes?: number
   periodeDeclaration: PeriodeDeclaration
 }
 
@@ -338,12 +340,12 @@ export type DeclarationIndicateurDeuxTroisData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "etsno5f5h" | "absaugi"
 
-  resultatFinalEcart: number | undefined
-  resultatFinalNombreSalaries: number | undefined
-  sexeSurRepresente: undefined | "femmes" | "hommes"
-  noteEcart: number | undefined
-  noteNombreSalaries: number | undefined
-  noteFinale: number | undefined
+  resultatFinalEcart?: number
+  resultatFinalNombreSalaries?: number
+  sexeSurRepresente?: SexeType
+  noteEcart?: number
+  noteNombreSalaries?: number
+  noteFinale?: number
   mesuresCorrection: boolean
 }
 
@@ -354,27 +356,27 @@ export type DateInterval = {
 
 export type ActionIndicateurQuatreData = {
   presenceCongeMat: boolean
-  nombreSalarieesPeriodeAugmentation: number | undefined
-  nombreSalarieesAugmentees: number | undefined
+  nombreSalarieesPeriodeAugmentation?: number
+  nombreSalarieesAugmentees?: number
 }
 
 export type DeclarationIndicateurQuatreData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "absaugpdtcm" | "absretcm"
 
-  resultatFinal: number | undefined
-  noteFinale: number | undefined
+  resultatFinal?: number
+  noteFinale?: number
 }
 
 export type ActionIndicateurCinqData = {
-  nombreSalariesHommes: number | undefined
-  nombreSalariesFemmes: number | undefined
+  nombreSalariesHommes?: number
+  nombreSalariesFemmes?: number
 }
 
 export type DeclarationIndicateurCinqData = {
-  resultatFinal: number | undefined
-  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes"
-  noteFinale: number | undefined
+  resultatFinal?: number
+  sexeSurRepresente?: "egalite" | SexeType
+  noteFinale?: number
 }
 
 export type ActionInformationsEntrepriseData = {
@@ -389,7 +391,7 @@ export type ActionInformationsEntrepriseData = {
   commune: string
   structure: Structure
   nomUES: string
-  nombreEntreprises: number | undefined
+  nombreEntreprises?: number
   entreprisesUES: Array<EntrepriseUES>
 }
 
@@ -403,13 +405,13 @@ export type ActionInformationsDeclarantData = {
 
 export type ActionDeclarationData = {
   mesuresCorrection: string
-  cseMisEnPlace?: boolean | undefined
+  cseMisEnPlace?: boolean
   dateConsultationCSE: string
   datePublication: string
-  publicationSurSiteInternet?: boolean | undefined
+  publicationSurSiteInternet?: boolean
   lienPublication: string
   modalitesPublication: string
-  planRelance: boolean | undefined
+  planRelance?: boolean
 }
 
 export type ActionEmailDeclarantData = {
@@ -418,7 +420,7 @@ export type ActionEmailDeclarantData = {
 
 ////
 
-export enum TranchesAges {
+export enum TrancheAge {
   MoinsDe30ans,
   De30a39ans,
   De40a49ans,
@@ -433,21 +435,21 @@ export enum CategorieSocioPro {
 }
 
 export interface GroupTranchesAgesEffectif {
-  trancheAge: TranchesAges
-  nombreSalariesFemmes?: number | undefined
-  nombreSalariesHommes?: number | undefined
+  trancheAge: TrancheAge
+  nombreSalariesFemmes?: number
+  nombreSalariesHommes?: number
 }
 
-export interface GroupeEffectif {
+export type EffectifsCategorie = {
   categorieSocioPro: CategorieSocioPro
   tranchesAges: Array<GroupTranchesAgesEffectif>
 }
 
 export interface GroupTranchesAgesIndicateurUn {
-  trancheAge: TranchesAges
-  remunerationAnnuelleBrutFemmes?: number | undefined
-  remunerationAnnuelleBrutHommes?: number | undefined
-  ecartTauxRemuneration?: number | undefined
+  trancheAge: TrancheAge
+  remunerationAnnuelleBrutFemmes?: number
+  remunerationAnnuelleBrutHommes?: number
+  ecartTauxRemuneration?: number
 }
 
 export interface GroupeIndicateurUn {
@@ -455,32 +457,32 @@ export interface GroupeIndicateurUn {
   tranchesAges: Array<GroupTranchesAgesIndicateurUn>
 }
 
-export interface GroupTranchesAgesCoefficient {
-  trancheAge: TranchesAges
-  nombreSalariesFemmes: number | undefined
-  nombreSalariesHommes: number | undefined
-  remunerationAnnuelleBrutFemmes: number | undefined
-  remunerationAnnuelleBrutHommes: number | undefined
-  ecartTauxRemuneration: number | undefined
+export type GroupTranchesAgesCoefficient = {
+  trancheAge: TrancheAge
+  nombreSalariesFemmes?: number
+  nombreSalariesHommes?: number
+  remunerationAnnuelleBrutFemmes?: number
+  remunerationAnnuelleBrutHommes?: number
+  ecartTauxRemuneration?: number
 }
 
-export interface GroupeCoefficient {
+export type GroupeCoefficient = {
   name: string
   tranchesAges: Array<GroupTranchesAgesCoefficient>
 }
 
-export interface GroupeIndicateurDeux {
+export type TauxAugmentationParCSP = {
   categorieSocioPro: CategorieSocioPro
-  tauxAugmentationFemmes?: number | undefined
-  tauxAugmentationHommes?: number | undefined
-  ecartTauxAugmentation?: number | undefined
+  tauxAugmentationFemmes?: number
+  tauxAugmentationHommes?: number
+  ecartTauxAugmentation?: number
 }
 
-export interface GroupeIndicateurTrois {
+export type GroupeIndicateurTrois = {
   categorieSocioPro: CategorieSocioPro
-  tauxPromotionFemmes?: number | undefined
-  tauxPromotionHommes?: number | undefined
-  ecartTauxPromotion?: number | undefined
+  tauxPromotionFemmes?: number
+  tauxPromotionHommes?: number
+  ecartTauxPromotion?: number
 }
 
 ////////////
