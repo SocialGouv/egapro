@@ -49,7 +49,7 @@ interface IndicateurUnFormRawProps {
   nextLink: ReactNode
 }
 
-const groupByCategorieSocioPro = (
+const groupByCSP = (
   ecartRemuParTrancheAge: Array<remunerationGroup>,
 ): Array<{
   id: any
@@ -94,20 +94,18 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   nextLink,
 }) => {
   const initialValues = {
-    remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
-      ({ tranchesAges, ...otherPropGroupe }: any) => ({
-        ...otherPropGroupe,
-        tranchesAges: tranchesAges.map(
-          ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
-            return {
-              ...otherPropsTrancheAge,
-              remunerationAnnuelleBrutFemmes: parseFloatStateValue(remunerationAnnuelleBrutFemmes),
-              remunerationAnnuelleBrutHommes: parseFloatStateValue(remunerationAnnuelleBrutHommes),
-            }
-          },
-        ),
-      }),
-    ),
+    remunerationAnnuelle: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+      ...otherPropGroupe,
+      tranchesAges: tranchesAges.map(
+        ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
+          return {
+            ...otherPropsTrancheAge,
+            remunerationAnnuelleBrutFemmes: parseFloatStateValue(remunerationAnnuelleBrutFemmes),
+            remunerationAnnuelleBrutHommes: parseFloatStateValue(remunerationAnnuelleBrutHommes),
+          }
+        },
+      ),
+    })),
   }
 
   const saveForm = (formData: any) => {

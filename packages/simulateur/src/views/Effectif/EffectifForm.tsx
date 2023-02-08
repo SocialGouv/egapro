@@ -3,7 +3,7 @@ import { FormState, GroupTranchesAgesEffectif } from "../../globals"
 
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import { displayNameCategorieSocioPro } from "../../utils/helpers"
+import { displayNameCSP } from "../../utils/helpers"
 import EffectifFormRaw from "./EffectifFormRaw"
 import { isFormValid } from "../../utils/formHelpers"
 
@@ -16,7 +16,7 @@ const EffectifForm: FunctionComponent = () => {
     () =>
       effectif?.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
         id: categorieSocioPro,
-        name: displayNameCategorieSocioPro(categorieSocioPro),
+        name: displayNameCSP(categorieSocioPro),
         tranchesAges,
       })),
     [effectif],

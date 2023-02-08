@@ -6,7 +6,7 @@ import {
   calculerTotalEcartPondere,
   calculerTotalEffectifs,
   EffectifGroup,
-  rowEffectifsParCategorieSocioPro,
+  calculerEffectifsParCSP,
 } from "./calculsEgaPro"
 import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
@@ -63,7 +63,7 @@ export const calculerEffectifsEtEcartAugmentationParCSP = (
   return effectifs.map((categorie: EffectifsCategorie) => {
     const { categorieSocioPro } = categorie
 
-    const effectifs = rowEffectifsParCategorieSocioPro(categorie, estValideGroupe)
+    const effectifs = calculerEffectifsParCSP(categorie, estValideGroupe)
 
     const tauxAugmentation = tauxAugmentationParCSP.find(
       ({ categorieSocioPro }) => categorieSocioPro === categorie.categorieSocioPro,

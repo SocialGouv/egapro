@@ -6,7 +6,7 @@ import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import {
   displayFractionPercentWithEmptyData,
-  displayNameCategorieSocioPro,
+  displayNameCSP,
   displayNameTranchesAges,
   displayPercent,
   displaySexeSurRepresente,
@@ -70,7 +70,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
       el.categorieSocioPro !== undefined
         ? {
             id: el.categorieSocioPro,
-            name: displayNameCategorieSocioPro(el.categorieSocioPro),
+            name: displayNameCSP(el.categorieSocioPro),
             ...el,
           }
         : el

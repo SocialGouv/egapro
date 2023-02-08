@@ -84,13 +84,11 @@ export const rowEffectifsParTrancheAge = (
   }
 }
 
-export const rowEffectifsParCategorieSocioPro = (
+export const calculerEffectifsParCSP = (
   categorie: EffectifsCategorie,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
 ): EffectifGroup => {
-  const effectifsCategorie = categorie.tranchesAges
-
-  const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = effectifsCategorie.reduce(
+  const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = categorie.tranchesAges.reduce(
     ({ nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe }, { nombreSalariesFemmes, nombreSalariesHommes }) => ({
       nombreSalariesFemmesGroupe: nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
       nombreSalariesHommesGroupe: nombreSalariesHommesGroupe + (nombreSalariesHommes || 0),

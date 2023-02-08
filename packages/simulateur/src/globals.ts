@@ -427,7 +427,7 @@ export enum TrancheAge {
   PlusDe50ans,
 }
 
-export enum CategorieSocioPro {
+export enum CSP {
   Ouvriers,
   Employes,
   Techniciens,
@@ -441,7 +441,7 @@ export interface GroupTranchesAgesEffectif {
 }
 
 export type EffectifsCategorie = {
-  categorieSocioPro: CategorieSocioPro
+  categorieSocioPro: CSP
   tranchesAges: Array<GroupTranchesAgesEffectif>
 }
 
@@ -453,7 +453,7 @@ export interface GroupTranchesAgesIndicateurUn {
 }
 
 export interface GroupeIndicateurUn {
-  categorieSocioPro: CategorieSocioPro
+  categorieSocioPro: CSP
   tranchesAges: Array<GroupTranchesAgesIndicateurUn>
 }
 
@@ -472,14 +472,14 @@ export type GroupeCoefficient = {
 }
 
 export type TauxAugmentationParCSP = {
-  categorieSocioPro: CategorieSocioPro
+  categorieSocioPro: CSP
   tauxAugmentationFemmes?: number
   tauxAugmentationHommes?: number
   ecartTauxAugmentation?: number
 }
 
 export type GroupeIndicateurTrois = {
-  categorieSocioPro: CategorieSocioPro
+  categorieSocioPro: CSP
   tauxPromotionFemmes?: number
   tauxPromotionHommes?: number
   ecartTauxPromotion?: number

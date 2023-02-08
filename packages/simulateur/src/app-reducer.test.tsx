@@ -1,4 +1,4 @@
-import { CategorieSocioPro, TrancheAge, ActionType, AppState } from "./globals"
+import { CSP, TrancheAge, ActionType, AppState } from "./globals"
 
 import appReducer, { dataIndicateurUnCoefGroup } from "./app-reducer"
 
@@ -98,7 +98,7 @@ describe("updateEffectif", () => {
     data: {
       nombreSalaries: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -123,7 +123,7 @@ describe("updateEffectif", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -148,7 +148,7 @@ describe("updateEffectif", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -173,7 +173,7 @@ describe("updateEffectif", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -255,7 +255,7 @@ describe("updateIndicateurUnCsp", () => {
     data: {
       remunerationAnnuelle: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -280,7 +280,7 @@ describe("updateIndicateurUnCsp", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -305,7 +305,7 @@ describe("updateIndicateurUnCsp", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -330,7 +330,7 @@ describe("updateIndicateurUnCsp", () => {
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tranchesAges: [
             {
               trancheAge: TrancheAge.MoinsDe30ans,
@@ -658,22 +658,22 @@ describe("updateIndicateurDeux", () => {
       presenceAugmentation: true,
       tauxAugmentation: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tauxAugmentationFemmes: 2.4,
           tauxAugmentationHommes: 3,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tauxAugmentationFemmes: 1.7,
           tauxAugmentationHommes: 2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tauxAugmentationFemmes: 9.4,
           tauxAugmentationHommes: 5.2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tauxAugmentationFemmes: 10.05,
           tauxAugmentationHommes: 10.06,
         },
@@ -717,22 +717,22 @@ describe("updateIndicateurTrois", () => {
       presencePromotion: true,
       tauxPromotion: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tauxPromotionFemmes: 1,
           tauxPromotionHommes: 2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tauxPromotionFemmes: 0,
           tauxPromotionHommes: 0,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tauxPromotionFemmes: 1,
           tauxPromotionHommes: 1.5,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tauxPromotionFemmes: 2,
           tauxPromotionHommes: 2.57,
         },

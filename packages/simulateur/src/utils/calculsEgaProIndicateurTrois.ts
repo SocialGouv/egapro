@@ -6,7 +6,7 @@ import {
   calculerTotalEcartPondere,
   calculerTotalEffectifs,
   EffectifGroup,
-  rowEffectifsParCategorieSocioPro,
+  calculerEffectifsParCSP,
 } from "./calculsEgaPro"
 
 import {
@@ -51,14 +51,14 @@ export const calculEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndica
     }
   })
 
-export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
+export const calculerEffectifsEtEcartPromoParCSP = (
   dataEffectif: Array<EffectifsCategorie>,
   dataIndicateurTrois: Array<GroupeIndicateurTrois>,
 ): Array<EffectifEtEcartPromoGroup> => {
   return dataEffectif.map((categorie: EffectifsCategorie) => {
     const { categorieSocioPro } = categorie
 
-    const effectifs = rowEffectifsParCategorieSocioPro(categorie, estValideGroupe)
+    const effectifs = calculerEffectifsParCSP(categorie, estValideGroupe)
 
     const dataPromo = dataIndicateurTrois.find(
       ({ categorieSocioPro }) => categorieSocioPro === categorie.categorieSocioPro,
@@ -116,9 +116,7 @@ export const calculTotalEffectifsEtTauxPromotion = (groupEffectifEtEcartAugment:
   }
 }
 
-export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParGroupe(
-  ({ ecartTauxPromotion }) => ecartTauxPromotion,
-)
+export const calculEcartsPonderesParCSP = calculEcartsPonderesParGroupe(({ ecartTauxPromotion }) => ecartTauxPromotion)
 
 // IEP
 export const calculIndicateurEcartPromotion = ecartAugmentation
@@ -155,7 +153,7 @@ export const calculNote = (
 /////////
 
 export default function calculerIndicateurTrois(state: AppState) {
-  const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
+  const effectifEtEcartPromoParGroupe = calculerEffectifsEtEcartPromoParCSP(
     state.effectif.nombreSalaries,
     state.indicateurTrois.tauxPromotion,
   )
@@ -163,10 +161,7 @@ export default function calculerIndicateurTrois(state: AppState) {
   const { totalNombreSalaries, totalEffectifsValides, totalTauxPromotionFemmes, totalTauxPromotionHommes } =
     calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe)
 
-  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
-    effectifEtEcartPromoParGroupe,
-    totalEffectifsValides,
-  )
+  const ecartsPonderesByRow = calculEcartsPonderesParCSP(effectifEtEcartPromoParGroupe, totalEffectifsValides)
 
   // TEP
   const totalEcartPondere = calculerTotalEcartPondere(ecartsPonderesByRow)

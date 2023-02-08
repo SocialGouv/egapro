@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react"
 
 import {
   displayFractionPercentWithEmptyData,
-  displayNameCategorieSocioPro,
+  displayNameCSP,
   displayPercent,
   displaySexeSurRepresente,
 } from "../../utils/helpers"
@@ -87,7 +87,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         <Tbody>
           {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
             <Tr key={categorieSocioPro}>
-              <Td>{displayNameCategorieSocioPro(categorieSocioPro)}</Td>
+              <Td>{displayNameCSP(categorieSocioPro)}</Td>
               <Td isNumeric>{displayFractionPercentWithEmptyData(ecartTauxAugmentation, 1)}</Td>
             </Tr>
           ))}

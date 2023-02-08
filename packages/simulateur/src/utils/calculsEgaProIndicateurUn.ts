@@ -1,7 +1,7 @@
 import {
   AppState,
   TrancheAge,
-  CategorieSocioPro,
+  CSP,
   EffectifsCategorie,
   GroupeIndicateurUn,
   GroupeCoefficient,
@@ -77,7 +77,7 @@ export const calculEcartApresApplicationSeuilPertinenceCoef = (ecartRemuneration
   calculEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCoef)
 
 export interface EffectifEtEcartRemuGroupCsp extends EffectifGroup {
-  categorieSocioPro: CategorieSocioPro
+  categorieSocioPro: CSP
   trancheAge: TrancheAge
   remunerationAnnuelleBrutFemmes?: number
   remunerationAnnuelleBrutHommes?: number
@@ -128,7 +128,7 @@ export const calculEcartTauxRemunerationParTrancheAgeCoef = (coefficient: Array<
     }
   })
 
-export type FlatGroupTranchesAgesCsp = GroupTranchesAgesEffectif & { categorieSocioPro: CategorieSocioPro }
+export type FlatGroupTranchesAgesCsp = GroupTranchesAgesEffectif & { categorieSocioPro: CSP }
 
 export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
   dataEffectif: Array<EffectifsCategorie>,

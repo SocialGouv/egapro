@@ -2,13 +2,13 @@ import deepmerge from "deepmerge"
 
 import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
 
-import { CategorieSocioPro, TrancheAge } from "./globals"
+import { CSP, TrancheAge } from "./globals"
 import { datetimeToFrString } from "./utils/date"
 import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
 import { combineMerge, overwriteMerge } from "./utils/merge"
 
-const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
@@ -17,7 +17,7 @@ const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSoc
   })),
 }))
 
-const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurUnCsp = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
@@ -39,14 +39,14 @@ export const dataIndicateurUnCoefGroup = {
   })),
 }
 
-const dataIndicateurDeux = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxAugmentationFemmes: undefined,
   tauxAugmentationHommes: undefined,
   ecartTauxAugmentation: undefined,
 }))
 
-const dataIndicateurTrois = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxPromotionFemmes: undefined,
   tauxPromotionHommes: undefined,

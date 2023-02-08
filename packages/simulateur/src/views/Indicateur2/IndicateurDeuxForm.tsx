@@ -26,7 +26,7 @@ import {
   parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
-import { displayNameCategorieSocioPro, messageMesureCorrection } from "../../utils/helpers"
+import { displayNameCSP, messageMesureCorrection } from "../../utils/helpers"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -78,14 +78,14 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({ calcul
   const presenceAugmentation = state.indicateurDeux.presenceAugmentation
 
   const {
-    effectifEtEcartAugmentParGroupe: ecartAugmentParCategorieSocioPro,
+    effectifEtEcartAugmentParGroupe: ecartAugmentParCSP,
     correctionMeasure,
     indicateurSexeSurRepresente,
   } = calculsIndicateurDeux
 
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
-    tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
+    tauxAugmentation: ecartAugmentParCSP.map(
       ({ tauxAugmentationFemmes, tauxAugmentationHommes, ...otherProps }: any) => ({
         ...otherProps,
         tauxAugmentationFemmes: parseFloatStateValue(tauxAugmentationFemmes),
@@ -190,16 +190,16 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({ calcul
                   //   displayFractionPercent(totalTauxAugmentationHommes)
                   // ]}
                 >
-                  {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  {ecartAugmentParCSP.map(({ categorieSocioPro, validiteGroupe }, index) => {
                     return (
                       <FieldInputsMenWomen
                         key={categorieSocioPro}
                         legend="% de salariés augmentés"
                         label={{
-                          women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} augmentées`,
-                          men: `Pourcentage d'hommes' ${displayNameCategorieSocioPro(categorieSocioPro)} augmentés`,
+                          women: `Pourcentage de femmes ${displayNameCSP(categorieSocioPro)} augmentées`,
+                          men: `Pourcentage d'hommes' ${displayNameCSP(categorieSocioPro)} augmentés`,
                         }}
-                        title={displayNameCategorieSocioPro(categorieSocioPro)}
+                        title={displayNameCSP(categorieSocioPro)}
                         readOnly={readOnly}
                         calculable={validiteGroupe}
                         calculableNumber={10}

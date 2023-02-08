@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react"
 import { FormState, GroupTranchesAgesIndicateurUn } from "../../../globals"
 
 import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
-import { displayNameCategorieSocioPro } from "../../../utils/helpers"
+import { displayNameCSP } from "../../../utils/helpers"
 
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
@@ -24,7 +24,7 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
 
   const ecartRemuParTrancheAgeRaw = ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
     id: categorieSocioPro,
-    name: displayNameCategorieSocioPro(categorieSocioPro),
+    name: displayNameCSP(categorieSocioPro),
     ...otherAttr,
   }))
 

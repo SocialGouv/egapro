@@ -1,4 +1,4 @@
-import { CategorieSocioPro, SexeType, TrancheAge } from "../globals"
+import { CSP, SexeType, TrancheAge } from "../globals"
 
 export function displayNameTranchesAges(trancheAge: TrancheAge): string {
   switch (trancheAge) {
@@ -15,15 +15,15 @@ export function displayNameTranchesAges(trancheAge: TrancheAge): string {
   }
 }
 
-export function displayNameCategorieSocioPro(categorieSocioPro: CategorieSocioPro): string {
+export function displayNameCSP(categorieSocioPro: CSP): string {
   switch (categorieSocioPro) {
-    case CategorieSocioPro.Ouvriers:
+    case CSP.Ouvriers:
       return "ouvriers"
-    case CategorieSocioPro.Employes:
+    case CSP.Employes:
       return "employés"
-    case CategorieSocioPro.Techniciens:
+    case CSP.Techniciens:
       return "techniciens et agents de maîtrise"
-    case CategorieSocioPro.Cadres:
+    case CSP.Cadres:
       return "ingénieurs et cadres"
     default:
       return "ERROR"
