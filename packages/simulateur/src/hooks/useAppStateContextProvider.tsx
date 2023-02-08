@@ -4,7 +4,7 @@ import ReactPiwik from "react-piwik"
 import appReducer from "../app-reducer"
 import { ActionType, AppState } from "../globals"
 
-type AppStateContextType = { state: AppState | undefined; dispatch: React.Dispatch<ActionType> }
+type AppStateContextType = { state?: AppState; dispatch: React.Dispatch<ActionType> }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined)
 

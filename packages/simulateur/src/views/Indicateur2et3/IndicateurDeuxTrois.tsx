@@ -1,10 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculerIndicateurDeuxTrois, {
-  calculBarem,
-  calculPlusPetitNombreSalaries,
-} from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois, { calculerBareme } from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import { displayPercent, messageEcartNombreEquivalentSalaries, messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
@@ -21,6 +18,7 @@ import { isFormValid } from "../../utils/formHelpers"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
+import { calculerPlusPetitNbSalaries } from "../../utils/calculsEgaPro"
 
 const title = "Indicateur écart de taux d'augmentation"
 
@@ -143,13 +141,15 @@ export const calculerResultats = (
     label: "Votre résultat en pourcentage est de",
     result:
       indicateurEcartAugmentationPromotion !== undefined ? displayPercent(indicateurEcartAugmentationPromotion) : "--",
-    note: indicateurEcartAugmentationPromotion !== undefined ? calculBarem(indicateurEcartAugmentationPromotion) : 0,
+    note: indicateurEcartAugmentationPromotion !== undefined ? calculerBareme(indicateurEcartAugmentationPromotion) : 0,
   }
   const ecartNbSalaries = {
     label: "Votre résultat en nombre équivalent de salariés* est",
     result: indicateurEcartNombreEquivalentSalaries !== undefined ? `${indicateurEcartNombreEquivalentSalaries}` : "--",
     note:
-      indicateurEcartNombreEquivalentSalaries !== undefined ? calculBarem(indicateurEcartNombreEquivalentSalaries) : 0,
+      indicateurEcartNombreEquivalentSalaries !== undefined
+        ? calculerBareme(indicateurEcartNombreEquivalentSalaries)
+        : 0,
   }
   const results =
     indicateurEcartNombreEquivalentSalaries !== undefined &&
@@ -178,7 +178,7 @@ export function AdditionalInfo({ results, calculsIndicateurDeuxTrois }: Addition
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(state.effectif.nombreSalaries)
 
-  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
+  const plusPetitNombreSalaries = calculerPlusPetitNbSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
 
   return (
     <VStack spacing={4} mt={6}>

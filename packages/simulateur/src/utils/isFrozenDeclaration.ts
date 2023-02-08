@@ -2,7 +2,7 @@ import { isBefore, sub } from "date-fns"
 import { AppState } from "../globals"
 import { parseFrDate } from "./date"
 
-export const isFrozenDeclaration = (state: AppState | undefined) => {
+export const isFrozenDeclaration = (state?: AppState) => {
   if (!state || !state.declaration.dateDeclaration) return false
 
   const [date] = state.declaration.dateDeclaration.split(" ")

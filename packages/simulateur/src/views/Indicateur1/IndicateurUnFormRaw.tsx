@@ -1,7 +1,7 @@
 import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 
-import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
+import { TrancheAge, RemunerationPourTrancheAge, FormState } from "../../globals"
 
 import {
   composeValidators,
@@ -30,10 +30,10 @@ const validator = composeValidators(required, mustBeNumber, aboveZero)
 interface remunerationGroup {
   id: any
   name: string
-  trancheAge: TranchesAges
+  trancheAge: TrancheAge
   validiteGroupe: boolean
-  remunerationAnnuelleBrutFemmes: number | undefined
-  remunerationAnnuelleBrutHommes: number | undefined
+  remunerationAnnuelleBrutFemmes?: number
+  remunerationAnnuelleBrutHommes?: number
 }
 
 interface IndicateurUnFormRawProps {
@@ -42,14 +42,14 @@ interface IndicateurUnFormRawProps {
   updateIndicateurUn: (
     data: Array<{
       id: any
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => void
   validateIndicateurUn: (valid: FormState) => void
   nextLink: ReactNode
 }
 
-const groupByCategorieSocioPro = (
+const groupByCSP = (
   ecartRemuParTrancheAge: Array<remunerationGroup>,
 ): Array<{
   id: any
@@ -94,20 +94,18 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   nextLink,
 }) => {
   const initialValues = {
-    remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
-      ({ tranchesAges, ...otherPropGroupe }: any) => ({
-        ...otherPropGroupe,
-        tranchesAges: tranchesAges.map(
-          ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
-            return {
-              ...otherPropsTrancheAge,
-              remunerationAnnuelleBrutFemmes: parseFloatStateValue(remunerationAnnuelleBrutFemmes),
-              remunerationAnnuelleBrutHommes: parseFloatStateValue(remunerationAnnuelleBrutHommes),
-            }
-          },
-        ),
-      }),
-    ),
+    remunerationAnnuelle: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+      ...otherPropGroupe,
+      tranchesAges: tranchesAges.map(
+        ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
+          return {
+            ...otherPropsTrancheAge,
+            remunerationAnnuelleBrutFemmes: parseFloatStateValue(remunerationAnnuelleBrutFemmes),
+            remunerationAnnuelleBrutHommes: parseFloatStateValue(remunerationAnnuelleBrutHommes),
+          }
+        },
+      ),
+    })),
   }
 
   const saveForm = (formData: any) => {
@@ -157,7 +155,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
                   id: any
                   name: string
                   tranchesAges: Array<{
-                    trancheAge: TranchesAges
+                    trancheAge: TrancheAge
                     validiteGroupe: boolean
                   }>
                 },

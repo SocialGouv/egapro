@@ -1,8 +1,8 @@
 function totalNombreSalaries(
   nombreSalaries: Array<{
     tranchesAges: Array<{
-      nombreSalariesHommes?: number | undefined
-      nombreSalariesFemmes?: number | undefined
+      nombreSalariesHommes?: number
+      nombreSalariesFemmes?: number
     }>
   }>,
 ) {

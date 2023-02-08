@@ -49,7 +49,7 @@ interface CellInputProps {
   label?: string
   placeholder?: string
   field: FieldRenderProps<string, HTMLInputElement>
-  mask?: "number" | "percent" | undefined
+  mask?: "number" | "percent"
 }
 
 const CellInput: FunctionComponent<CellInputProps> = ({

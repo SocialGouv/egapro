@@ -13,7 +13,7 @@ import {
   parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
-import { displayNameCategorieSocioPro, messageMesureCorrection } from "../../utils/helpers"
+import { displayNameCSP, messageMesureCorrection } from "../../utils/helpers"
 
 import { Text } from "@chakra-ui/react"
 import ActionBar from "../../components/ActionBar"
@@ -79,20 +79,18 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({ calc
   const readOnly = isFormValid(state.indicateurTrois)
 
   const {
-    effectifEtEcartPromoParGroupe: ecartPromoParCategorieSocioPro,
+    effectifEtEcartPromoParGroupe: ecartPromoParCSP,
     correctionMeasure,
     indicateurSexeSurRepresente,
   } = calculsIndicateurTrois
 
   const initialValues = {
     presencePromotion: parseBooleanStateValue(presencePromotion),
-    tauxPromotion: ecartPromoParCategorieSocioPro.map(
-      ({ tauxPromotionFemmes, tauxPromotionHommes, ...otherProps }: any) => ({
-        ...otherProps,
-        tauxPromotionFemmes: parseFloatStateValue(tauxPromotionFemmes),
-        tauxPromotionHommes: parseFloatStateValue(tauxPromotionHommes),
-      }),
-    ),
+    tauxPromotion: ecartPromoParCSP.map(({ tauxPromotionFemmes, tauxPromotionHommes, ...otherProps }: any) => ({
+      ...otherProps,
+      tauxPromotionFemmes: parseFloatStateValue(tauxPromotionFemmes),
+      tauxPromotionHommes: parseFloatStateValue(tauxPromotionHommes),
+    })),
   }
 
   const saveForm = (formData: any) => {
@@ -187,15 +185,15 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({ calc
                   //   displayFractionPercent(totalTauxPromotionHommes)
                   // ]}
                 >
-                  {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  {ecartPromoParCSP.map(({ categorieSocioPro, validiteGroupe }, index) => {
                     return (
                       <FieldInputsMenWomen
                         key={categorieSocioPro}
                         legend="% de salariés promus"
-                        title={displayNameCategorieSocioPro(categorieSocioPro)}
+                        title={displayNameCSP(categorieSocioPro)}
                         label={{
-                          women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} promues`,
-                          men: `Pourcentage d'hommes ${displayNameCategorieSocioPro(categorieSocioPro)} promus`,
+                          women: `Pourcentage de femmes ${displayNameCSP(categorieSocioPro)} promues`,
+                          men: `Pourcentage d'hommes ${displayNameCSP(categorieSocioPro)} promus`,
                         }}
                         readOnly={readOnly}
                         calculable={validiteGroupe}

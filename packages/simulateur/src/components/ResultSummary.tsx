@@ -7,6 +7,7 @@ import Summary from "./Summary"
 import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { isFrozenDeclaration } from "../utils/isFrozenDeclaration"
 import { frozenDeclarationMessage } from "./MessageForFrozenDeclaration"
+import { SexeType } from "../globals"
 
 export interface ResultSummaryProps {
   firstLineLabel: string
@@ -15,7 +16,7 @@ export interface ResultSummaryProps {
   secondLineLabel: string
   secondLineData: string
   secondLineInfo?: string
-  indicateurSexeSurRepresente?: "hommes" | "femmes" | undefined
+  indicateurSexeSurRepresente?: SexeType
   onEdit?: () => void
 }
 

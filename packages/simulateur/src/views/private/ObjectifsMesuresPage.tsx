@@ -73,7 +73,7 @@ export const objectifValidator = (
 /**
  * Zod validator in relation to the publication dates and the end of reference period.
  */
-const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) =>
+const isDateBeforeFinPeriodeReference = (finPeriodeReference?: Date) =>
   z
     .string({ required_error })
     .min(1, { message: required_error })
@@ -151,15 +151,15 @@ type Params = {
 }
 
 export type ObjectifsMesuresFormSchema = {
-  objectifIndicateurUn?: string | undefined
-  objectifIndicateurDeux?: string | undefined
-  objectifIndicateurTrois?: string | undefined
-  objectifIndicateurDeuxTrois?: string | undefined
-  objectifIndicateurQuatre?: string | undefined
-  objectifIndicateurCinq?: string | undefined
-  datePublicationMesures?: string | undefined
-  datePublicationObjectifs?: string | undefined
-  modalitesPublicationObjectifsMesures: string | undefined
+  objectifIndicateurUn?: string
+  objectifIndicateurDeux?: string
+  objectifIndicateurTrois?: string
+  objectifIndicateurDeuxTrois?: string
+  objectifIndicateurQuatre?: string
+  objectifIndicateurCinq?: string
+  datePublicationMesures?: string
+  datePublicationObjectifs?: string
+  modalitesPublicationObjectifsMesures?: string
 }
 
 function buildWordings(index: number | undefined, publicationSurSiteInternet: boolean) {
@@ -221,7 +221,7 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
  *
  * These helpers are used by UI and by DeclarationListe to reuse the zod validation.
  */
-export function buildHelpersObjectifsMesures(declaration: DeclarationAPI | undefined) {
+export function buildHelpersObjectifsMesures(declaration?: DeclarationAPI) {
   const index = declaration?.data.déclaration.index
   const publicationSurSiteInternet = Boolean(declaration?.data.déclaration?.publication?.url)
 

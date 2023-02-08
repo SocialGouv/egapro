@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useMemo } from "react"
-import { FormState, GroupTranchesAgesEffectif } from "../../globals"
+import { FormState, EffectifPourTrancheAge } from "../../globals"
 
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import { displayNameCategorieSocioPro } from "../../utils/helpers"
+import { displayNameCSP } from "../../utils/helpers"
 import EffectifFormRaw from "./EffectifFormRaw"
 import { isFormValid } from "../../utils/formHelpers"
 
@@ -16,7 +16,7 @@ const EffectifForm: FunctionComponent = () => {
     () =>
       effectif?.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
         id: categorieSocioPro,
-        name: displayNameCategorieSocioPro(categorieSocioPro),
+        name: displayNameCSP(categorieSocioPro),
         tranchesAges,
       })),
     [effectif],
@@ -28,7 +28,7 @@ const EffectifForm: FunctionComponent = () => {
     data: Array<{
       id: any
       name: string
-      tranchesAges: Array<GroupTranchesAgesEffectif>
+      tranchesAges: EffectifPourTrancheAge[]
     }>,
   ) => {
     const nombreSalaries = data.map(({ id, tranchesAges }) => ({

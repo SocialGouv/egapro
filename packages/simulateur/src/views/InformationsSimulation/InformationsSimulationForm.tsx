@@ -39,8 +39,8 @@ const validateForm = ({
 }: {
   nomEntreprise: string
   anneeDeclaration: string
-  finPeriodeReference: string | undefined
-  periodeSuffisante: string | undefined
+  finPeriodeReference?: string
+  periodeSuffisante?: string
 }) => {
   const isFilledPeriodeSuffisante = periodeSuffisante !== undefined
 

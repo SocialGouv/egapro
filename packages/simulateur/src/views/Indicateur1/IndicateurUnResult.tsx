@@ -1,15 +1,15 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
+import { FormState, SexeType } from "../../globals"
 
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
 
 interface IndicateurUnResultProps {
-  indicateurEcartRemuneration: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurUn: number | undefined
+  indicateurEcartRemuneration?: number
+  indicateurSexeSurRepresente?: SexeType
+  noteIndicateurUn?: number
   validateIndicateurUn: (valid: FormState) => void
 }
 
