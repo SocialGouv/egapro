@@ -65,7 +65,7 @@ export type EffectifGroup = {
   effectifsValides: number
 }
 
-export const rowEffectifsParTrancheAge = (
+export const calculerEffectifsParTrancheAge = (
   { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAgesEffectif,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
 ): EffectifGroup => {

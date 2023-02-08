@@ -1,73 +1,73 @@
 import {
-  calculIndicateurSexeSousRepresente,
-  calculIndicateurNombreSalariesSexeSousRepresente,
-  calculNote,
+  calculerSexeSousRepresente,
+  calculerNbSalariesSexeSousRepresente,
+  calculerNote,
 } from "../utils/calculsEgaProIndicateurCinq"
 
 describe("calculIndicateurSexeSousRepresente", () => {
   test("men and women shoulnt be undefined", () => {
-    expect(calculIndicateurSexeSousRepresente(undefined, undefined)).toEqual(undefined)
-    expect(calculIndicateurSexeSousRepresente(1, undefined)).toEqual(undefined)
-    expect(calculIndicateurSexeSousRepresente(undefined, 1)).toEqual(undefined)
+    expect(calculerSexeSousRepresente(undefined, undefined)).toEqual(undefined)
+    expect(calculerSexeSousRepresente(1, undefined)).toEqual(undefined)
+    expect(calculerSexeSousRepresente(undefined, 1)).toEqual(undefined)
   })
 
   test("test some incoherent data", () => {
-    expect(calculIndicateurSexeSousRepresente(-2, -2)).toEqual("egalite")
-    expect(calculIndicateurSexeSousRepresente(1, 1)).toEqual("egalite")
-    expect(calculIndicateurSexeSousRepresente(10, 10)).toEqual("egalite")
+    expect(calculerSexeSousRepresente(-2, -2)).toEqual("egalite")
+    expect(calculerSexeSousRepresente(1, 1)).toEqual("egalite")
+    expect(calculerSexeSousRepresente(10, 10)).toEqual("egalite")
   })
 
   test("test some valid data", () => {
-    expect(calculIndicateurSexeSousRepresente(5, 5)).toEqual("egalite")
-    expect(calculIndicateurSexeSousRepresente(0, 10)).toEqual("hommes")
-    expect(calculIndicateurSexeSousRepresente(10, 0)).toEqual("femmes")
-    expect(calculIndicateurSexeSousRepresente(4, 6)).toEqual("hommes")
-    expect(calculIndicateurSexeSousRepresente(6, 4)).toEqual("femmes")
-    expect(calculIndicateurSexeSousRepresente(1, 9)).toEqual("hommes")
-    expect(calculIndicateurSexeSousRepresente(9, 1)).toEqual("femmes")
+    expect(calculerSexeSousRepresente(5, 5)).toEqual("egalite")
+    expect(calculerSexeSousRepresente(0, 10)).toEqual("hommes")
+    expect(calculerSexeSousRepresente(10, 0)).toEqual("femmes")
+    expect(calculerSexeSousRepresente(4, 6)).toEqual("hommes")
+    expect(calculerSexeSousRepresente(6, 4)).toEqual("femmes")
+    expect(calculerSexeSousRepresente(1, 9)).toEqual("hommes")
+    expect(calculerSexeSousRepresente(9, 1)).toEqual("femmes")
   })
 })
 
 describe("calculIndicateurNombreSalariesSexeSousRepresente", () => {
   test("men and women shoulnt be undefined", () => {
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(undefined, undefined)).toEqual(undefined)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(1, undefined)).toEqual(undefined)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(undefined, 1)).toEqual(undefined)
+    expect(calculerNbSalariesSexeSousRepresente(undefined, undefined)).toEqual(undefined)
+    expect(calculerNbSalariesSexeSousRepresente(1, undefined)).toEqual(undefined)
+    expect(calculerNbSalariesSexeSousRepresente(undefined, 1)).toEqual(undefined)
   })
 
   test("test some incoherent data", () => {
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(-2, -2)).toEqual(-2)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(1, 1)).toEqual(1)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(10, 10)).toEqual(10)
+    expect(calculerNbSalariesSexeSousRepresente(-2, -2)).toEqual(-2)
+    expect(calculerNbSalariesSexeSousRepresente(1, 1)).toEqual(1)
+    expect(calculerNbSalariesSexeSousRepresente(10, 10)).toEqual(10)
   })
 
   test("test some valid data", () => {
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(5, 5)).toEqual(5)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(0, 10)).toEqual(0)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(10, 0)).toEqual(0)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(4, 6)).toEqual(4)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(6, 4)).toEqual(4)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(1, 9)).toEqual(1)
-    expect(calculIndicateurNombreSalariesSexeSousRepresente(9, 1)).toEqual(1)
+    expect(calculerNbSalariesSexeSousRepresente(5, 5)).toEqual(5)
+    expect(calculerNbSalariesSexeSousRepresente(0, 10)).toEqual(0)
+    expect(calculerNbSalariesSexeSousRepresente(10, 0)).toEqual(0)
+    expect(calculerNbSalariesSexeSousRepresente(4, 6)).toEqual(4)
+    expect(calculerNbSalariesSexeSousRepresente(6, 4)).toEqual(4)
+    expect(calculerNbSalariesSexeSousRepresente(1, 9)).toEqual(1)
+    expect(calculerNbSalariesSexeSousRepresente(9, 1)).toEqual(1)
   })
 })
 
 describe("calculNote", () => {
   test("indicateurNombreSalariesSexeSousRepresente shouldnt be undefined", () => {
-    expect(calculNote(undefined)).toEqual(undefined)
+    expect(calculerNote(undefined)).toEqual(undefined)
   })
 
   test("test some incoherent data", () => {
-    expect(calculNote(-1)).toEqual(0)
-    expect(calculNote(6)).toEqual(10)
+    expect(calculerNote(-1)).toEqual(0)
+    expect(calculerNote(6)).toEqual(10)
   })
 
   test("test some valid data", () => {
-    expect(calculNote(0)).toEqual(0)
-    expect(calculNote(1)).toEqual(0)
-    expect(calculNote(2)).toEqual(5)
-    expect(calculNote(3)).toEqual(5)
-    expect(calculNote(4)).toEqual(10)
-    expect(calculNote(5)).toEqual(10)
+    expect(calculerNote(0)).toEqual(0)
+    expect(calculerNote(1)).toEqual(0)
+    expect(calculerNote(2)).toEqual(5)
+    expect(calculerNote(3)).toEqual(5)
+    expect(calculerNote(4)).toEqual(10)
+    expect(calculerNote(5)).toEqual(10)
   })
 })

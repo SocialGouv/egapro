@@ -5,14 +5,11 @@ import { roundDecimal } from "./number"
 // INDICATEUR 4 //
 //////////////////
 
-export const calculIndicateurCalculable = (
-  presenceCongeMat: boolean,
-  nombreSalarieesPeriodeAugmentation: number | undefined,
-) => {
+export const estCalculable = (presenceCongeMat: boolean, nombreSalarieesPeriodeAugmentation: number | undefined) => {
   return presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation > 0
 }
 
-export const calculIndicateurEcartNombreSalarieesAugmentees = (
+export const calculerEcartNbSalarieesAugmentees = (
   indicateurCalculable: boolean,
   nombreSalarieesPeriodeAugmentation: number | undefined,
   nombreSalarieesAugmentees: number | undefined,
@@ -25,7 +22,7 @@ export const calculIndicateurEcartNombreSalarieesAugmentees = (
     : undefined
 
 // NOTE
-export const calculNote = (indicateurEcartNombreSalarieesAugmentees?: number): number | undefined =>
+export const calculerNote = (indicateurEcartNombreSalarieesAugmentees?: number): number | undefined =>
   indicateurEcartNombreSalarieesAugmentees !== undefined
     ? indicateurEcartNombreSalarieesAugmentees < 100
       ? 0
@@ -37,18 +34,18 @@ export const calculNote = (indicateurEcartNombreSalarieesAugmentees?: number): n
 /////////
 
 export default function calculerIndicateurQuatre(state: AppState) {
-  const indicateurCalculable = calculIndicateurCalculable(
+  const indicateurCalculable = estCalculable(
     state.indicateurQuatre.presenceCongeMat,
     state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
   )
 
-  const indicateurEcartNombreSalarieesAugmentees = calculIndicateurEcartNombreSalarieesAugmentees(
+  const indicateurEcartNombreSalarieesAugmentees = calculerEcartNbSalarieesAugmentees(
     indicateurCalculable,
     state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
     state.indicateurQuatre.nombreSalarieesAugmentees,
   )
 
-  const noteIndicateurQuatre = calculNote(indicateurEcartNombreSalarieesAugmentees)
+  const noteIndicateurQuatre = calculerNote(indicateurEcartNombreSalarieesAugmentees)
 
   const messageNonCalculable =
     state.indicateurQuatre.presenceCongeMat &&

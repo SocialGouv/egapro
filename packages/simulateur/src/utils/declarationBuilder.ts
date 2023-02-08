@@ -14,17 +14,8 @@ import type {
 import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
 import { departementCode, regionCode } from "../components/RegionsDepartements"
-import { calculerNoteIndex } from "./calculsEgaProIndex"
-import calculerIndicateurCinq from "./calculsEgaProIndicateurCinq"
-import calculerIndicateurDeux from "./calculsEgaProIndicateurDeux"
-import calculerIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
-import calculerIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
-import calculerIndicateurTrois from "./calculsEgaProIndicateurTrois"
-import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
-import totalNombreSalaries from "./totalNombreSalaries"
-import { isFormValid } from "./formHelpers"
 
 export type DeclarationAPI = {
   siren: string
@@ -424,7 +415,7 @@ const buildIndicateur5 = (state: AppState): Indicateur5 => {
 
   return indicateur5
 }
-
+/*
 // Compute and gather all useful data from state, like noteIndex, note of each indicateur, effectifs, etc.
 export function computeValuesFromState(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
@@ -486,7 +477,7 @@ export function computeValuesFromState(state: AppState) {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculerIndicateurCinq(state)
+  } = z(state)
 
   const allIndicateurValid =
     (isFormValid(state.indicateurUn) ||
@@ -575,6 +566,7 @@ export function computeValuesFromState(state: AppState) {
     },
   }
 }
+*/
 
 type MappingType = { [key: string]: { path: string; value?: string } }
 

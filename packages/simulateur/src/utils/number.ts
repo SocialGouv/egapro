@@ -13,3 +13,6 @@ export const roundDecimal = (num: number, decimal: number): number => {
 export const fractionToPercentage = (num: number): number => roundDecimal(num * 100, 5)
 
 export const percentageToFraction = (num: number): number => roundDecimal(num / 100, 5)
+
+// TODO: use clamp from lodash
+export const clamp = (num: number, min: number, max: number) => Math.min(max, Math.max(min, num))

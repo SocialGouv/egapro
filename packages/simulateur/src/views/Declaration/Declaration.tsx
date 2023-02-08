@@ -26,10 +26,10 @@ import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculerIndicateurDeux, { calculerEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
 import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculerIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurTrois, { calculerEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
 import calculerIndicateurUn, {
-  calculEcartTauxRemunerationParTrancheAgeCoef,
-  calculEcartTauxRemunerationParTrancheAgeCSP,
+  calculerEcartTauxRemunerationParTrancheAgeCoef,
+  calculerEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn"
 import { buildDeclarationFromSimulation } from "../../utils/declarationBuilder"
 import { isFormValid } from "../../utils/formHelpers"
@@ -110,8 +110,8 @@ function buildHelpers(state: AppState) {
     nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
-    remunerationAnnuelle: calculEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
-    coefficient: calculEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
+    remunerationAnnuelle: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
+    coefficient: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn,
@@ -138,7 +138,7 @@ function buildHelpers(state: AppState) {
       : state.indicateurTrois.presencePromotion
       ? ""
       : "absprom",
-    tauxPromotion: calculEcartTauxPromotionParCSP(state.indicateurTrois.tauxPromotion),
+    tauxPromotion: calculerEcartTauxPromotionParCSP(state.indicateurTrois.tauxPromotion),
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteFinale: noteIndicateurTrois,

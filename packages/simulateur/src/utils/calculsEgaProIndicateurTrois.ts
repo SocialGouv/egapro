@@ -15,7 +15,7 @@ import {
   ecartAugmentation,
   ecartAugmentationAbsolu,
   sexeSurRepresente,
-  estValideGroupe,
+  calculerValiditeGroupe,
 } from "../utils/calculsEgaProIndicateurDeux"
 import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
@@ -27,10 +27,10 @@ const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 //////////////////
 
 export {
-  estValideGroupe as calculValiditeGroupe,
-  calculerTotalEcartPondere as calculTotalEcartPondere,
-  effectifEstCalculable as calculEffectifsIndicateurCalculable,
-  estCalculable as calculIndicateurCalculable, // IC
+  calculerValiditeGroupe,
+  calculerTotalEcartPondere,
+  effectifEstCalculable,
+  estCalculable, // IC
 }
 
 //////////////////
@@ -38,16 +38,16 @@ export {
 //////////////////
 
 // ETP
-export const calculEcartTauxPromotion = calculerEcartTauxAugmentation
+export const calculerEcartTauxPromotion = calculerEcartTauxAugmentation
 
 export type EffectifEtEcartPromoGroup = EffectifGroup & GroupeIndicateurTrois
 
 // Ajout de l'écart de promotion dans les données par CSP
-export const calculEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndicateurTrois>) =>
+export const calculerEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndicateurTrois>) =>
   tauxPromotion.map((categorie) => {
     return {
       ...categorie,
-      ecartTauxPromotion: calculEcartTauxPromotion(categorie.tauxPromotionFemmes, categorie.tauxPromotionHommes),
+      ecartTauxPromotion: calculerEcartTauxPromotion(categorie.tauxPromotionFemmes, categorie.tauxPromotionHommes),
     }
   })
 
@@ -58,7 +58,7 @@ export const calculerEffectifsEtEcartPromoParCSP = (
   return dataEffectif.map((categorie: EffectifsCategorie) => {
     const { categorieSocioPro } = categorie
 
-    const effectifs = calculerEffectifsParCSP(categorie, estValideGroupe)
+    const effectifs = calculerEffectifsParCSP(categorie, calculerValiditeGroupe)
 
     const dataPromo = dataIndicateurTrois.find(
       ({ categorieSocioPro }) => categorieSocioPro === categorie.categorieSocioPro,
@@ -68,7 +68,7 @@ export const calculerEffectifsEtEcartPromoParCSP = (
     const tauxPromotionHommes = dataPromo?.tauxPromotionHommes
 
     // ETA
-    const ecartTauxPromotion = calculEcartTauxPromotion(tauxPromotionFemmes, tauxPromotionHommes)
+    const ecartTauxPromotion = calculerEcartTauxPromotion(tauxPromotionFemmes, tauxPromotionHommes)
 
     return {
       ...effectifs,
@@ -80,7 +80,7 @@ export const calculerEffectifsEtEcartPromoParCSP = (
   })
 }
 
-export const calculTotalEffectifsEtTauxPromotion = (groupEffectifEtEcartAugment: Array<EffectifEtEcartPromoGroup>) => {
+export const calculerTotalEffectifsEtTauxPromotion = (groupEffectifEtEcartAugment: EffectifEtEcartPromoGroup[]) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes, totalNombreSalaries, totalEffectifsValides } =
     calculerTotalEffectifs(groupEffectifEtEcartAugment)
 
@@ -116,15 +116,17 @@ export const calculTotalEffectifsEtTauxPromotion = (groupEffectifEtEcartAugment:
   }
 }
 
-export const calculEcartsPonderesParCSP = calculEcartsPonderesParGroupe(({ ecartTauxPromotion }) => ecartTauxPromotion)
+export const calculerEcartsPonderesParCSP = calculEcartsPonderesParGroupe(
+  ({ ecartTauxPromotion }) => ecartTauxPromotion,
+)
 
 // IEP
-export const calculIndicateurEcartPromotion = ecartAugmentation
+export const calculerEcartPromotion = ecartAugmentation
 
-export const calculIndicateurEcartPromotionAbsolute = ecartAugmentationAbsolu
+export const calculerEcartPromotionAbsolu = ecartAugmentationAbsolu
 
 // NOTE
-export const calculNote = (
+export const calculerNote = (
   indicateurEcartPromotion: number | undefined,
   noteIndicateurUn: number | undefined,
   indicateurUnSexeSurRepresente?: SexeType,
@@ -159,9 +161,9 @@ export default function calculerIndicateurTrois(state: AppState) {
   )
 
   const { totalNombreSalaries, totalEffectifsValides, totalTauxPromotionFemmes, totalTauxPromotionHommes } =
-    calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe)
+    calculerTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe)
 
-  const ecartsPonderesByRow = calculEcartsPonderesParCSP(effectifEtEcartPromoParGroupe, totalEffectifsValides)
+  const ecartsPonderesByRow = calculerEcartsPonderesParCSP(effectifEtEcartPromoParGroupe, totalEffectifsValides)
 
   // TEP
   const totalEcartPondere = calculerTotalEcartPondere(ecartsPonderesByRow)
@@ -179,9 +181,9 @@ export default function calculerIndicateurTrois(state: AppState) {
   )
 
   // IEA
-  const indicateurEcartPromotion = calculIndicateurEcartPromotion(indicateurCalculable, totalEcartPondere)
+  const indicateurEcartPromotion = calculerEcartPromotion(indicateurCalculable, totalEcartPondere)
 
-  const indicateurEcartPromotionAbsolute = calculIndicateurEcartPromotionAbsolute(indicateurEcartPromotion)
+  const indicateurEcartPromotionAbsolute = calculerEcartPromotionAbsolu(indicateurEcartPromotion)
 
   const indicateurTroisSexeSurRepresente = sexeSurRepresente(indicateurEcartPromotion)
 
@@ -189,7 +191,7 @@ export default function calculerIndicateurTrois(state: AppState) {
   const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculerIndicateurUn(state)
 
   // NOTE
-  const { note: noteIndicateurTrois, correctionMeasure } = calculNote(
+  const { note: noteIndicateurTrois, correctionMeasure } = calculerNote(
     indicateurEcartPromotionAbsolute,
     noteIndicateurUn,
     indicateurUnSexeSurRepresente,
