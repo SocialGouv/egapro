@@ -11,21 +11,21 @@ import {
 } from "../utils/calculsEgaProIndicateurDeux"
 import { roundDecimal } from "./number"
 
+/*
+ * Indicateur 2Et3: écart de taux d’augmentation (50 à 250 salariés)
+ */
+
 const baremeAugmentationPromotion = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0]
 
-///////////////////////
-// INDICATEUR 2 ET 3 //
-///////////////////////
-
-// // ETP
+// ETP
 export const calculerEcartTauxAugmentationPromotion = calculerEcartTauxAugmentation
 
-// // IEP
+// IEP
 export const calculerEcartAugmentationPromotion = ecartAugmentation
 
 export const calculerEcartAugmentationPromotionAbsolu = ecartAugmentationAbsolu
 
-// // IC
+// IC
 export const calculerEffectifsIndicateurCalculable = (
   totalNombreSalariesHommes: number | undefined,
   totalNombreSalariesFemmes: number | undefined,
@@ -67,7 +67,7 @@ export const calculerEcartNbEquivalentSalaries = (
     : undefined
 }
 
-// // NOTE
+// NOTE
 
 export const calculerBareme = (indicateur: number): number => {
   return baremeAugmentationPromotion[

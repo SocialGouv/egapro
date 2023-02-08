@@ -11,20 +11,11 @@ import {
 import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
 
+/*
+ * Indicateur 2: écart de taux d’augmentation (plus de 250 salariés)
+ */
+
 const baremeEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0]
-
-//////////////////
-// COMMON ////////
-//////////////////
-
-// export {
-//   calculTotalEcartPondere,
-//   calculEffectifsIndicateurCalculable, // IC
-// }
-
-//////////////////
-// INDICATEUR 2 //
-//////////////////
 
 // VG
 export const calculerValiditeGroupe = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>

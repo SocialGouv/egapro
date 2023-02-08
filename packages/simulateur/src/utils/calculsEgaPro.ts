@@ -1,8 +1,6 @@
 import { EffectifsCategorie, GroupTranchesAgesEffectif, SexeType } from "../globals"
 import { roundDecimal } from "./number"
 
-/* EFFECTIF CONST */
-
 export const tauxEffectifValide = 40 / 100
 
 //////////////////

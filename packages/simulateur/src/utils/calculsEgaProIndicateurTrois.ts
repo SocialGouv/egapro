@@ -22,16 +22,9 @@ import { roundDecimal } from "./number"
 
 const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 
-//////////////////
-// COMMON ////////
-//////////////////
-
-export {
-  calculerValiditeGroupe,
-  calculerTotalEcartPondere,
-  effectifEstCalculable,
-  estCalculable, // IC
-}
+/*
+ * Indicateur 3: écart de taux de promotion (plus de 250 salariés)
+ */
 
 //////////////////
 // INDICATEUR 3 //

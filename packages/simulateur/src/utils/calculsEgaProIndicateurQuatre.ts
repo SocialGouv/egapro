@@ -1,9 +1,9 @@
 import { AppState } from "../globals"
 import { roundDecimal } from "./number"
 
-//////////////////
-// INDICATEUR 4 //
-//////////////////
+/*
+ * Indicateur 4: pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
+ */
 
 export const estCalculable = (presenceCongeMat: boolean, nombreSalarieesPeriodeAugmentation: number | undefined) => {
   return presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation > 0

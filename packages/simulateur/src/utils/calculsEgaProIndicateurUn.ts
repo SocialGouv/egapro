@@ -21,26 +21,14 @@ import {
 } from "./calculsEgaPro"
 import { roundDecimal } from "./number"
 
-/* INDICATEUR 1 CONST */
+/*
+ * Indicateur 1: écart de rémunération
+ */
 
 const seuilPertinenceCsp = 5 / 100
 const seuilPertinenceCoef = 2 / 100
 
 const baremeEcartRemuneration = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0]
-
-//////////////////
-// COMMON ////////
-//////////////////
-
-export {
-  calculerTotalEffectifs,
-  calculerTotalEcartPondere, // TEV
-  effectifEstCalculable, // IC
-}
-
-//////////////////
-// INDICATEUR 1 //
-//////////////////
 
 // VG
 export const calculerValiditeGroupe = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
