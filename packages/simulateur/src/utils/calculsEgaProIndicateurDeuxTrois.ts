@@ -6,8 +6,8 @@ import totalNombreSalaries from "./totalNombreSalaries"
 import {
   calculerEcartTauxAugmentation,
   ecartAugmentation,
-  sexeSurRepresente,
   ecartAugmentationAbsolu,
+  sexeSurRepresente,
 } from "../utils/calculsEgaProIndicateurDeux"
 import { roundDecimal } from "./number"
 
@@ -50,20 +50,6 @@ export const calculerTaux = (nombreSalaries?: number, totalNombreSalaries?: numb
     ? nombreSalaries / totalNombreSalaries
     : undefined
 
-export const calculerPlusPetitNbSalaries = (
-  totalNombreSalariesHommes?: number,
-  totalNombreSalariesFemmes?: number,
-): SexeType | undefined => {
-  if (
-    totalNombreSalariesFemmes === totalNombreSalariesHommes ||
-    totalNombreSalariesFemmes === undefined ||
-    totalNombreSalariesHommes === undefined
-  ) {
-    return undefined
-  }
-  return totalNombreSalariesHommes > totalNombreSalariesFemmes ? "femmes" : "hommes"
-}
-
 export const calculerEcartNbEquivalentSalaries = (
   indicateurEcartAugmentationPromotionAbsolute: number | undefined,
   totalNombreSalariesHommes: number | undefined,
@@ -89,20 +75,24 @@ export const calculerBareme = (indicateur: number): number => {
   ]
 }
 
-export const calculerNote = (
-  ecartTaux: number | undefined,
-  ecartNombreSalaries: number | undefined,
-  noteIndicateurUn: number | undefined,
-  indicateurUnSexeSurRepresente?: SexeType,
-  indicateurDeuxTroisSexeSurRepresente?: SexeType,
-): {
+type CalculerNoteResult = {
   note: number | undefined
   correctionMeasure: boolean
   noteEcartTaux: number | undefined
   noteEcartNombreSalaries: number | undefined
-} => {
+}
+
+export const calculerNote = (
+  ecartTaux: number | undefined, // pourcentage
+  ecartNombreEquivalentSalaries: number | undefined,
+  noteIndicateurUn: number | undefined,
+  indicateurUnSexeSurRepresente?: SexeType,
+  indicateurDeuxTroisSexeSurRepresente?: SexeType,
+): CalculerNoteResult => {
   const noteEcartTaux = ecartTaux !== undefined ? calculerBareme(ecartTaux) : undefined
-  const noteEcartNombreSalaries = ecartNombreSalaries !== undefined ? calculerBareme(ecartNombreSalaries) : undefined
+  const noteEcartNombreSalaries =
+    ecartNombreEquivalentSalaries !== undefined ? calculerBareme(ecartNombreEquivalentSalaries) : undefined
+
   if (
     noteIndicateurUn !== undefined &&
     noteIndicateurUn < 40 &&
@@ -110,6 +100,8 @@ export const calculerNote = (
     indicateurDeuxTroisSexeSurRepresente &&
     indicateurUnSexeSurRepresente !== indicateurDeuxTroisSexeSurRepresente
   ) {
+    // Si l’écart de taux d'augmentation joue en faveur du sexe le moins bien rémunéré (indicateur 1), on considère qu'un rattrapage est en cours.
+    // La note maximale sera attribuée à l’entreprise pour cet indicateur.
     return {
       note: baremeAugmentationPromotion[0],
       correctionMeasure: true,
@@ -126,9 +118,9 @@ export const calculerNote = (
     }
   }
 
-  const note = Math.max(noteEcartTaux, noteEcartNombreSalaries)
   return {
-    note,
+    // On prend la note qui favorise l'entreprise.
+    note: Math.max(noteEcartTaux, noteEcartNombreSalaries),
     correctionMeasure: false,
     noteEcartTaux,
     noteEcartNombreSalaries,
@@ -143,60 +135,67 @@ export default function calculerIndicateurDeuxTrois(state: AppState) {
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(state.effectif.nombreSalaries)
 
-  const plusPetitNombreSalaries = calculerPlusPetitNbSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
-
+  // Vérification du nombre minimum de salariés pour cet indicateur.
   const effectifsIndicateurCalculable = calculerEffectifsIndicateurCalculable(
     totalNombreSalariesHommes,
     totalNombreSalariesFemmes,
   )
 
+  // L'indicateure n'est pas calculable si l'entreprise n'a pas eu d'augmentation (et il faut aussi qu'il y ait le nombre minimum de salariés, bizarrerie de cet indicateur).
   const indicateurCalculable = estCalculable(
     state.indicateurDeuxTrois.presenceAugmentationPromotion,
     effectifsIndicateurCalculable,
   )
 
+  // Calcul du ratio entre nombre d'augmentation hommes / nombre de salariés hommes. Nombre entre 0 et 1.
   const tauxAugmentationPromotionHommes = calculerTaux(
     state.indicateurDeuxTrois.nombreAugmentationPromotionHommes,
     totalNombreSalariesHommes,
   )
+
+  // Calcul du ratio entre nombre d'augmentation femmes / nombre de salariés femmes. Nombre entre 0 et 1.
   const tauxAugmentationPromotionFemmes = calculerTaux(
     state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes,
     totalNombreSalariesFemmes,
   )
 
-  // // IEA
+  // IEA
+  // Différence entre les taux d'augmentation hommes et femmes, arrondie à la 6ème décimale.
   const ecartTauxAugmentationPromotion = calculerEcartTauxAugmentationPromotion(
     tauxAugmentationPromotionFemmes,
     tauxAugmentationPromotionHommes,
   )
 
+  // Écart en pourcentage. Undefined si l'indicateur n'est pas calculable.
   const indicateurEcartAugmentationPromotion = calculerEcartAugmentationPromotion(
     indicateurCalculable,
     ecartTauxAugmentationPromotion,
   )
 
+  // Pourcentage en valeur absolue de l'écart précédent. Undefined si l'indicateur n'est pas calculable.
   const indicateurEcartAugmentationPromotionAbsolu = calculerEcartAugmentationPromotionAbsolu(
     indicateurEcartAugmentationPromotion,
   )
 
+  // "hommes" ou "femmes" selon le sexe le moins bien représenté. Undefined si l'indicateur n'est pas calculable.
   const indicateurSexeSurRepresente = sexeSurRepresente(indicateurEcartAugmentationPromotion)
 
-  // // Ecart en nombre équivalent de salariés
+  // Écart en nombre équivalent de salariés, en prenant le minimum des salariés entre les hommes et les femmes.
   const indicateurEcartNombreEquivalentSalaries = calculerEcartNbEquivalentSalaries(
     indicateurEcartAugmentationPromotionAbsolu,
     totalNombreSalariesHommes,
     totalNombreSalariesFemmes,
   )
 
-  // Mesures correction indicateur 1
+  // Récupération de données de l'indicateur 1 pour vérifier ensuite si une opération de rattrappage est en cours.
   const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculerIndicateurUn(state)
 
-  // // NOTE
+  // Calcul de la note et ses informations.
   const {
     note: noteIndicateurDeuxTrois,
-    correctionMeasure,
-    noteEcartTaux,
-    noteEcartNombreSalaries,
+    correctionMeasure, // Précise que la note est maximale car une opération de rattrappage est en cours par l'entreprise.
+    noteEcartTaux, // Note en prenant en compte l'écart en pourcentage.
+    noteEcartNombreSalaries, // Note en prenant en compte l'écart en nombre équivalent de salariés.
   } = calculerNote(
     indicateurEcartAugmentationPromotionAbsolu,
     indicateurEcartNombreEquivalentSalaries,
@@ -206,17 +205,16 @@ export default function calculerIndicateurDeuxTrois(state: AppState) {
   )
 
   return {
-    effectifsIndicateurCalculable,
-    indicateurCalculable,
-    indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolu,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente,
-    noteEcartTaux,
-    noteEcartNombreSalaries,
-    noteIndicateurDeuxTrois,
-    correctionMeasure,
-    tauxAugmentationPromotionHommes,
-    tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries,
+    effectifsIndicateurCalculable, // Vrai si l'indicateur est calculable via le nombre de salariés.
+    indicateurCalculable, // Vrai si l'indicateur est calculable via le nombre de salariés et la présence d'augmentation.
+    indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolu, // Écart en pourcentage, nombre positif.
+    indicateurEcartNombreEquivalentSalaries, // Écart en nombre équivalent de salariés.
+    indicateurSexeSurRepresente, // "hommes" ou "femmes" (ou undefined) selon le sexe le moins bien représenté.
+    noteEcartTaux, // Note en prenant en compte l'écart en pourcentage.
+    noteEcartNombreSalaries, // Note en prenant en compte l'écart en nombre équivalent de salariés.
+    noteIndicateurDeuxTrois, // Note réelle de l'indicateur.
+    correctionMeasure, // Vrai si la note est maximale car une opération de rattrappage est en cours par l'entreprise.
+    tauxAugmentationPromotionHommes, // Ratio entre nombre d'augmentation hommes / nombre de salariés hommes. Nombre entre 0 et 1.
+    tauxAugmentationPromotionFemmes, // Ratio entre nombre d'augmentation femmes / nombre de salariés femmes. Nombre entre 0 et 1.
   }
 }

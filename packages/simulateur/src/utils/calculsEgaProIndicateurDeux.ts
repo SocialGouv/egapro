@@ -165,6 +165,8 @@ export const calculerNote = (
     indicateurDeuxSexeSurRepresente &&
     indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
   ) {
+    // Si l’écart de taux d'augmentation joue en faveur du sexe le moins bien rémunéré (indicateur 1), on considère qu'un rattrapage est en cours.
+    // La note maximale sera attribuée à l’entreprise pour cet indicateur.
     return { note: baremeEcartAugmentation[0], mesureCorrection: true }
   }
   const note =

@@ -1,4 +1,4 @@
-import { EffectifsCategorie, GroupTranchesAgesEffectif } from "../globals"
+import { EffectifsCategorie, GroupTranchesAgesEffectif, SexeType } from "../globals"
 import { roundDecimal } from "./number"
 
 /* EFFECTIF CONST */
@@ -144,3 +144,17 @@ export const calculerTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
  */
 export const effectifEstCalculable = (totalNombreSalaries: number, totalEffectifsValides: number): boolean =>
   totalNombreSalaries > 0 && totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide
+
+export const calculerPlusPetitNbSalaries = (
+  totalNombreSalariesHommes?: number,
+  totalNombreSalariesFemmes?: number,
+): SexeType | undefined => {
+  if (
+    totalNombreSalariesFemmes === totalNombreSalariesHommes ||
+    totalNombreSalariesFemmes === undefined ||
+    totalNombreSalariesHommes === undefined
+  ) {
+    return undefined
+  }
+  return totalNombreSalariesHommes > totalNombreSalariesFemmes ? "femmes" : "hommes"
+}

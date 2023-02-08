@@ -1,10 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculerIndicateurDeuxTrois, {
-  calculerBareme,
-  calculerPlusPetitNbSalaries,
-} from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois, { calculerBareme } from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import { displayPercent, messageEcartNombreEquivalentSalaries, messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
@@ -21,6 +18,7 @@ import { isFormValid } from "../../utils/formHelpers"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
+import { calculerPlusPetitNbSalaries } from "../../utils/calculsEgaPro"
 
 const title = "Indicateur écart de taux d'augmentation"
 
