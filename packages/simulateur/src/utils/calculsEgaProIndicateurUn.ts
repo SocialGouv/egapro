@@ -2,13 +2,13 @@ import {
   AppState,
   TrancheAge,
   CSP,
-  EffectifsCategorie,
-  GroupeIndicateurUn,
-  GroupeCoefficient,
-  GroupTranchesAgesIndicateurUn,
-  GroupTranchesAgesEffectif,
+  EffectifsPourCSP,
+  RemunerationsPourCSP,
+  CoefficientGroupe,
+  RemunerationPourTrancheAge,
+  EffectifPourTrancheAge,
   SexeType,
-  GroupTranchesAgesCoefficient,
+  CoefficientPourTrancheAge,
 } from "../globals"
 
 import {
@@ -86,7 +86,7 @@ export type EffectifEtEcartRemuGroupCoef = EffectifGroup & {
 }
 
 // Ajout de l'écart de rémunération moyenne dans les données "par niveau" (CSP ou coefficient) de l'indicateur
-export const calculerEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuelle: GroupeIndicateurUn[]) =>
+export const calculerEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuelle: RemunerationsPourCSP[]) =>
   remunerationAnnuelle.map((categorie) => {
     return {
       ...categorie,
@@ -102,7 +102,7 @@ export const calculerEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuel
     }
   })
 
-export const calculerEcartTauxRemunerationParTrancheAgeCoef = (coefficient: GroupeCoefficient[]) =>
+export const calculerEcartTauxRemunerationParTrancheAgeCoef = (coefficient: CoefficientGroupe[]) =>
   coefficient.map((niveau) => {
     return {
       ...niveau,
@@ -118,11 +118,11 @@ export const calculerEcartTauxRemunerationParTrancheAgeCoef = (coefficient: Grou
     }
   })
 
-export type FlatGroupTranchesAgesCsp = GroupTranchesAgesEffectif & { categorieSocioPro: CSP }
+export type FlatGroupTranchesAgesCsp = EffectifPourTrancheAge & { categorieSocioPro: CSP }
 
 export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
-  dataEffectif: EffectifsCategorie[],
-  dataIndicateurUn: GroupeIndicateurUn[],
+  dataEffectif: EffectifsPourCSP[],
+  dataIndicateurUn: RemunerationsPourCSP[],
 ): EffectifEtEcartRemuGroupCsp[] => {
   const dataEffectifByRow = dataEffectif.reduce(
     (acc: Array<FlatGroupTranchesAgesCsp>, { categorieSocioPro, tranchesAges }) =>
@@ -130,7 +130,7 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
     [],
   )
   const dataIndicateurUnByRow = dataIndicateurUn.reduce(
-    (acc: Array<GroupTranchesAgesIndicateurUn>, group) => acc.concat(group.tranchesAges),
+    (acc: Array<RemunerationPourTrancheAge>, group) => acc.concat(group.tranchesAges),
     [],
   )
 
@@ -168,9 +168,9 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
 }
 
 export const calculerEffectifsEtEcartRemuParTrancheAgeCoef = (
-  coefficient: GroupeCoefficient[],
+  coefficient: CoefficientGroupe[],
 ): EffectifEtEcartRemuGroupCoef[] => {
-  const dataCoefficientByRow = coefficient.reduce<Array<GroupTranchesAgesCoefficient & { name: string; id: number }>>(
+  const dataCoefficientByRow = coefficient.reduce<Array<CoefficientPourTrancheAge & { name: string; id: number }>>(
     (acc, { name, tranchesAges }, id) => acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, name, id }))),
     [],
   )

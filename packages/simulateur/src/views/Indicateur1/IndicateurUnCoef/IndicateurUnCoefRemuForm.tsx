@@ -4,7 +4,7 @@ import ActionLink from "../../../components/ActionLink"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
-import { GroupTranchesAgesIndicateurUn } from "../../../globals"
+import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import { isFormValid } from "../../../utils/formHelpers"
@@ -34,7 +34,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
   const updateIndicateurUn = (
     data: Array<{
       id: any
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
     const coefficient = data.map(({ tranchesAges }) => ({

@@ -1,4 +1,4 @@
-import { AppState, EffectifsCategorie, SexeType, TauxAugmentationParCSP } from "../globals"
+import { AppState, EffectifsPourCSP, SexeType, TauxAugmentationPourCSP } from "../globals"
 
 import {
   calculEcartsPonderesParGroupe,
@@ -33,10 +33,10 @@ export const calculerEcartTauxAugmentation = (
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 6)
     : undefined
 
-type EffectifEtEcartAugmentGroup = EffectifGroup & TauxAugmentationParCSP
+type EffectifEtEcartAugmentGroup = EffectifGroup & TauxAugmentationPourCSP
 
 // Ajout de l'écart d'augmentation dans les données par CSP
-export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: Array<TauxAugmentationParCSP>) =>
+export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: Array<TauxAugmentationPourCSP>) =>
   tauxAugmentation.map((categorie) => {
     return {
       ...categorie,
@@ -48,10 +48,10 @@ export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: Array<Taux
   })
 
 export const calculerEffectifsEtEcartAugmentationParCSP = (
-  effectifs: Array<EffectifsCategorie>,
-  tauxAugmentationParCSP: Array<TauxAugmentationParCSP>,
+  effectifs: Array<EffectifsPourCSP>,
+  tauxAugmentationParCSP: Array<TauxAugmentationPourCSP>,
 ): Array<EffectifEtEcartAugmentGroup> => {
-  return effectifs.map((categorie: EffectifsCategorie) => {
+  return effectifs.map((categorie: EffectifsPourCSP) => {
     const { categorieSocioPro } = categorie
 
     const effectifs = calculerEffectifsParCSP(categorie, calculerValiditeGroupe)

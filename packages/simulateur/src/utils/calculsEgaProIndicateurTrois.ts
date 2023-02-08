@@ -1,4 +1,4 @@
-import { AppState, EffectifsCategorie, GroupeIndicateurTrois, SexeType } from "../globals"
+import { AppState, EffectifsPourCSP, TauxPromotionsPourCSP, SexeType } from "../globals"
 
 import {
   calculEcartsPonderesParGroupe,
@@ -33,10 +33,10 @@ const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 // ETP
 export const calculerEcartTauxPromotion = calculerEcartTauxAugmentation
 
-export type EffectifEtEcartPromoGroup = EffectifGroup & GroupeIndicateurTrois
+export type EffectifEtEcartPromoGroup = EffectifGroup & TauxPromotionsPourCSP
 
 // Ajout de l'écart de promotion dans les données par CSP
-export const calculerEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndicateurTrois>) =>
+export const calculerEcartTauxPromotionParCSP = (tauxPromotion: Array<TauxPromotionsPourCSP>) =>
   tauxPromotion.map((categorie) => {
     return {
       ...categorie,
@@ -45,10 +45,10 @@ export const calculerEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndi
   })
 
 export const calculerEffectifsEtEcartPromoParCSP = (
-  dataEffectif: Array<EffectifsCategorie>,
-  dataIndicateurTrois: Array<GroupeIndicateurTrois>,
+  dataEffectif: Array<EffectifsPourCSP>,
+  dataIndicateurTrois: Array<TauxPromotionsPourCSP>,
 ): Array<EffectifEtEcartPromoGroup> => {
-  return dataEffectif.map((categorie: EffectifsCategorie) => {
+  return dataEffectif.map((categorie: EffectifsPourCSP) => {
     const { categorieSocioPro } = categorie
 
     const effectifs = calculerEffectifsParCSP(categorie, calculerValiditeGroupe)

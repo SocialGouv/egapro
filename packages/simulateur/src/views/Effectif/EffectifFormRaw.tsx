@@ -2,7 +2,7 @@ import React, { FunctionComponent, ReactNode } from "react"
 import { Grid, GridItem, Text } from "@chakra-ui/react"
 import { Form } from "react-final-form"
 
-import { FormState, GroupTranchesAgesEffectif } from "../../globals"
+import { FormState, EffectifPourTrancheAge } from "../../globals"
 
 import {
   composeFormValidators,
@@ -29,7 +29,7 @@ import FormError from "../../components/FormError"
 type Effectif = Array<{
   id: any
   name: string
-  tranchesAges: Array<GroupTranchesAgesEffectif>
+  tranchesAges: Array<EffectifPourTrancheAge>
 }>
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
@@ -43,7 +43,7 @@ interface EffectifFormRawProps {
   formValidator?: FormValidatorFunction
 }
 
-const getTotalGroupNbSalarie = (tranchesAges: Array<GroupTranchesAgesEffectif>) =>
+const getTotalGroupNbSalarie = (tranchesAges: Array<EffectifPourTrancheAge>) =>
   tranchesAges.reduce(
     (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
       return {

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 
-import { TrancheAge, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
+import { TrancheAge, RemunerationPourTrancheAge, FormState } from "../../globals"
 
 import {
   composeValidators,
@@ -42,7 +42,7 @@ interface IndicateurUnFormRawProps {
   updateIndicateurUn: (
     data: Array<{
       id: any
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => void
   validateIndicateurUn: (valid: FormState) => void

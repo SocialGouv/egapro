@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react"
-import { FormState, GroupTranchesAgesEffectif } from "../../globals"
+import { FormState, EffectifPourTrancheAge } from "../../globals"
 
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
@@ -28,7 +28,7 @@ const EffectifForm: FunctionComponent = () => {
     data: Array<{
       id: any
       name: string
-      tranchesAges: Array<GroupTranchesAgesEffectif>
+      tranchesAges: EffectifPourTrancheAge[]
     }>,
   ) => {
     const nombreSalaries = data.map(({ id, tranchesAges }) => ({

@@ -1,4 +1,4 @@
-import { EffectifsCategorie, GroupTranchesAgesEffectif, SexeType } from "../globals"
+import { EffectifsPourCSP, EffectifPourTrancheAge, SexeType } from "../globals"
 import { roundDecimal } from "./number"
 
 export const tauxEffectifValide = 40 / 100
@@ -64,7 +64,7 @@ export type EffectifGroup = {
 }
 
 export const calculerEffectifsParTrancheAge = (
-  { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAgesEffectif,
+  { nombreSalariesFemmes, nombreSalariesHommes }: EffectifPourTrancheAge,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
 ): EffectifGroup => {
   nombreSalariesFemmes = nombreSalariesFemmes || 0
@@ -83,7 +83,7 @@ export const calculerEffectifsParTrancheAge = (
 }
 
 export const calculerEffectifsParCSP = (
-  categorie: EffectifsCategorie,
+  categorie: EffectifsPourCSP,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
 ): EffectifGroup => {
   const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = categorie.tranchesAges.reduce(

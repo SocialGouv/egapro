@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { FormState, GroupTranchesAgesIndicateurUn } from "../../../globals"
+import { FormState, RemunerationPourTrancheAge } from "../../../globals"
 
 import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 import { displayNameCSP } from "../../../utils/helpers"
@@ -31,7 +31,7 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
   const updateIndicateurUnRaw = (
     data: Array<{
       id: any
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
     const remunerationAnnuelle = data.map(({ id, tranchesAges }) => ({

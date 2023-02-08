@@ -29,27 +29,27 @@ export type AppState = {
   }
   effectif: {
     formValidated: FormState
-    nombreSalaries: Array<EffectifsCategorie>
+    nombreSalaries: EffectifsPourCSP[]
   } & Partial<DeclarationEffectifData>
   indicateurUn: {
     formValidated: FormState
     csp: boolean
     coef: boolean
     autre: boolean
-    remunerationAnnuelle: Array<GroupeIndicateurUn>
+    remunerationAnnuelle: RemunerationsPourCSP[]
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
-    coefficient: Array<GroupeCoefficient>
+    coefficient: CoefficientGroupe[]
   } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
     presenceAugmentation: boolean
-    tauxAugmentation: Array<TauxAugmentationParCSP>
+    tauxAugmentation: TauxAugmentationPourCSP[]
   } & Partial<DeclarationIndicateurDeuxData>
   indicateurTrois: {
     formValidated: FormState
     presencePromotion: boolean
-    tauxPromotion: Array<GroupeIndicateurTrois>
+    tauxPromotion: TauxPromotionsPourCSP[]
   } & Partial<DeclarationIndicateurTroisData>
   indicateurDeuxTrois: {
     formValidated: FormState
@@ -83,7 +83,7 @@ export type AppState = {
     structure: Structure
     nomUES: string
     nombreEntreprises?: number
-    entreprisesUES: Array<EntrepriseUES>
+    entreprisesUES: EntrepriseUES[]
   }
   informationsDeclarant: {
     formValidated: FormState
@@ -258,7 +258,7 @@ export type ActionInformationsSimulationData = {
 }
 
 export type ActionEffectifData = {
-  nombreSalaries: Array<EffectifsCategorie>
+  nombreSalaries: EffectifsPourCSP[]
 }
 
 export type DeclarationEffectifData = {
@@ -272,17 +272,17 @@ export type ActionIndicateurUnTypeData = {
 }
 
 export type ActionIndicateurUnCspData = {
-  remunerationAnnuelle: Array<GroupeIndicateurUn>
+  remunerationAnnuelle: RemunerationsPourCSP[]
 }
 
 export type ActionIndicateurUnCoefData = {
   coefficient:
     | Array<{ name: string }>
     | Array<{
-        tranchesAges: Array<GroupTranchesAgesEffectif>
+        tranchesAges: EffectifPourTrancheAge[]
       }>
     | Array<{
-        tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+        tranchesAges: RemunerationPourTrancheAge[]
       }>
 }
 
@@ -290,8 +290,8 @@ export type DeclarationIndicateurUnData = {
   nombreCoefficients?: number
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet"
-  remunerationAnnuelle: Array<GroupeIndicateurUn>
-  coefficient: Array<GroupeCoefficient>
+  remunerationAnnuelle: RemunerationsPourCSP[]
+  coefficient: CoefficientGroupe[]
   resultatFinal?: number
   sexeSurRepresente?: SexeType
   noteFinale?: number
@@ -299,14 +299,13 @@ export type DeclarationIndicateurUnData = {
 
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean
-  tauxAugmentation: Array<TauxAugmentationParCSP>
+  tauxAugmentation: TauxAugmentationPourCSP[]
 }
 
 export type DeclarationIndicateurDeuxData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet" | "absaugi"
-
-  tauxAugmentation: Array<TauxAugmentationParCSP>
+  tauxAugmentation: TauxAugmentationPourCSP[]
   resultatFinal?: number
   sexeSurRepresente?: SexeType
   noteFinale?: number
@@ -315,14 +314,13 @@ export type DeclarationIndicateurDeuxData = {
 
 export type ActionIndicateurTroisData = {
   presencePromotion: boolean
-  tauxPromotion: Array<GroupeIndicateurTrois>
+  tauxPromotion: TauxPromotionsPourCSP[]
 }
 
 export type DeclarationIndicateurTroisData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet" | "absprom"
-
-  tauxPromotion: Array<GroupeIndicateurTrois>
+  tauxPromotion: TauxPromotionsPourCSP[]
   resultatFinal?: number
   sexeSurRepresente?: SexeType
   noteFinale?: number
@@ -392,7 +390,7 @@ export type ActionInformationsEntrepriseData = {
   structure: Structure
   nomUES: string
   nombreEntreprises?: number
-  entreprisesUES: Array<EntrepriseUES>
+  entreprisesUES: EntrepriseUES[]
 }
 
 export type ActionInformationsDeclarantData = {
@@ -418,8 +416,6 @@ export type ActionEmailDeclarantData = {
   email: string
 }
 
-////
-
 export enum TrancheAge {
   MoinsDe30ans,
   De30a39ans,
@@ -434,30 +430,30 @@ export enum CSP {
   Cadres,
 }
 
-export interface GroupTranchesAgesEffectif {
+export type EffectifPourTrancheAge = {
   trancheAge: TrancheAge
   nombreSalariesFemmes?: number
   nombreSalariesHommes?: number
 }
 
-export type EffectifsCategorie = {
+export type EffectifsPourCSP = {
   categorieSocioPro: CSP
-  tranchesAges: Array<GroupTranchesAgesEffectif>
+  tranchesAges: EffectifPourTrancheAge[]
 }
 
-export interface GroupTranchesAgesIndicateurUn {
+export type RemunerationPourTrancheAge = {
   trancheAge: TrancheAge
   remunerationAnnuelleBrutFemmes?: number
   remunerationAnnuelleBrutHommes?: number
   ecartTauxRemuneration?: number
 }
 
-export interface GroupeIndicateurUn {
+export type RemunerationsPourCSP = {
   categorieSocioPro: CSP
-  tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+  tranchesAges: RemunerationPourTrancheAge[]
 }
 
-export type GroupTranchesAgesCoefficient = {
+export type CoefficientPourTrancheAge = {
   trancheAge: TrancheAge
   nombreSalariesFemmes?: number
   nombreSalariesHommes?: number
@@ -466,26 +462,24 @@ export type GroupTranchesAgesCoefficient = {
   ecartTauxRemuneration?: number
 }
 
-export type GroupeCoefficient = {
+export type CoefficientGroupe = {
   name: string
-  tranchesAges: Array<GroupTranchesAgesCoefficient>
+  tranchesAges: CoefficientPourTrancheAge[]
 }
 
-export type TauxAugmentationParCSP = {
+export type TauxAugmentationPourCSP = {
   categorieSocioPro: CSP
   tauxAugmentationFemmes?: number
   tauxAugmentationHommes?: number
   ecartTauxAugmentation?: number
 }
 
-export type GroupeIndicateurTrois = {
+export type TauxPromotionsPourCSP = {
   categorieSocioPro: CSP
   tauxPromotionFemmes?: number
   tauxPromotionHommes?: number
   ecartTauxPromotion?: number
 }
-
-////////////
 
 export type FAQPartType =
   | "champApplication"
