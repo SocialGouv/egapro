@@ -283,21 +283,21 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
           newIndicateurUn.formValidated = "Invalid"
         } // else we let the state unchanged
 
-        if (!calculerIndicateurDeux(state).indicateurCalculable) {
+        if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
           newIndicateurDeux = defaultState.indicateurDeux
           newIndicateurDeux.formValidated = "Valid"
         } else if (newIndicateurDeux.formValidated === "Valid") {
           newIndicateurDeux.formValidated = "Invalid"
         } // else we let the state unchanged
 
-        if (!calculerIndicateurTrois(state).indicateurCalculable) {
+        if (!calculerIndicateurTrois(state).effectifsIndicateurCalculable) {
           newIndicateurTrois = defaultState.indicateurTrois
           newIndicateurTrois.formValidated = "Valid"
         } else if (newIndicateurTrois.formValidated === "Valid") {
           newIndicateurTrois.formValidated = "Invalid"
         } // else we let the state unchanged
 
-        if (!calculerIndicateurDeuxTrois(state).indicateurCalculable) {
+        if (!calculerIndicateurDeuxTrois(state).effectifsIndicateurCalculable) {
           newIndicateurDeuxTrois = defaultState.indicateurDeuxTrois
           newIndicateurDeuxTrois.formValidated = "Valid"
         } else if (newIndicateurDeuxTrois.formValidated === "Valid") {
