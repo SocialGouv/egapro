@@ -1,4 +1,5 @@
-import { EffectifsPourCSP, EffectifPourTrancheAge, SexeType } from "../globals"
+import { EffectifsPourCSP, SexeType } from "../globals"
+import { calculerValiditeGroupe10 } from "./calculsEgaProIndicateurDeux"
 import { roundDecimal } from "./number"
 
 export const tauxEffectifValide = 40 / 100
@@ -63,29 +64,7 @@ export type EffectifGroup = {
   effectifsValides: number
 }
 
-export const calculerEffectifsParTrancheAge = (
-  { nombreSalariesFemmes, nombreSalariesHommes }: EffectifPourTrancheAge,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
-  nombreSalariesFemmes = nombreSalariesFemmes || 0
-  nombreSalariesHommes = nombreSalariesHommes || 0
-
-  // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmes, nombreSalariesHommes)
-
-  return {
-    nombreSalariesFemmes,
-    nombreSalariesHommes,
-    validiteGroupe,
-    // EV
-    effectifsValides: nombreEffectifsValides(validiteGroupe, nombreSalariesFemmes, nombreSalariesHommes),
-  }
-}
-
-export const calculerEffectifsParCSP = (
-  categorie: EffectifsPourCSP,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
+export const calculerEffectifsParCSP = (categorie: EffectifsPourCSP): EffectifGroup => {
   const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = categorie.tranchesAges.reduce(
     ({ nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe }, { nombreSalariesFemmes, nombreSalariesHommes }) => ({
       nombreSalariesFemmesGroupe: nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
@@ -95,7 +74,7 @@ export const calculerEffectifsParCSP = (
   )
 
   // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
+  const validiteGroupe = calculerValiditeGroupe10(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
 
   return {
     nombreSalariesFemmes: nombreSalariesFemmesGroupe,

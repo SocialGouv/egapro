@@ -1,6 +1,6 @@
 import {
   // Indicateur 1
-  calculerValiditeGroupe,
+  calculerValiditeGroupe3,
   calculerEcartRemunerationMoyenne,
   calculerEcartApresApplicationSeuilPertinenceCsp,
   calculerEcartApresApplicationSeuilPertinenceCoef,
@@ -14,22 +14,22 @@ import {
 
 describe("calculValiditeGroupe", () => {
   test("incoherent data", () => {
-    expect(calculerValiditeGroupe(-1, -2)).toEqual(false)
-    expect(calculerValiditeGroupe(4, -2)).toEqual(false)
+    expect(calculerValiditeGroupe3(-1, -2)).toEqual(false)
+    expect(calculerValiditeGroupe3(4, -2)).toEqual(false)
   })
 
   test("men or women are under 3", () => {
-    expect(calculerValiditeGroupe(0, 0)).toEqual(false)
-    expect(calculerValiditeGroupe(1, 1)).toEqual(false)
-    expect(calculerValiditeGroupe(2, 1)).toEqual(false)
-    expect(calculerValiditeGroupe(2, 3)).toEqual(false)
-    expect(calculerValiditeGroupe(4, 2)).toEqual(false)
+    expect(calculerValiditeGroupe3(0, 0)).toEqual(false)
+    expect(calculerValiditeGroupe3(1, 1)).toEqual(false)
+    expect(calculerValiditeGroupe3(2, 1)).toEqual(false)
+    expect(calculerValiditeGroupe3(2, 3)).toEqual(false)
+    expect(calculerValiditeGroupe3(4, 2)).toEqual(false)
   })
 
   test("valid groupe", () => {
-    expect(calculerValiditeGroupe(3, 3)).toEqual(true)
-    expect(calculerValiditeGroupe(4, 3)).toEqual(true)
-    expect(calculerValiditeGroupe(4, 21)).toEqual(true)
+    expect(calculerValiditeGroupe3(3, 3)).toEqual(true)
+    expect(calculerValiditeGroupe3(4, 3)).toEqual(true)
+    expect(calculerValiditeGroupe3(4, 21)).toEqual(true)
   })
 })
 

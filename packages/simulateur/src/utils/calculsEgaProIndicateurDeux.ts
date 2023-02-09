@@ -18,7 +18,7 @@ import { roundDecimal } from "./number"
 const baremeEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 
 // VG
-export const calculerValiditeGroupe = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+export const calculerValiditeGroupe10 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
   nombreSalariesFemmes >= 10 && nombreSalariesHommes >= 10
 
 // ETA
@@ -54,7 +54,7 @@ export const calculerEffectifsEtEcartAugmentationParCSP = (
   return effectifs.map((categorie: EffectifsPourCSP) => {
     const { categorieSocioPro } = categorie
 
-    const effectifs = calculerEffectifsParCSP(categorie, calculerValiditeGroupe)
+    const effectifs = calculerEffectifsParCSP(categorie)
 
     const tauxAugmentation = tauxAugmentationParCSP.find(
       ({ categorieSocioPro }) => categorieSocioPro === categorie.categorieSocioPro,

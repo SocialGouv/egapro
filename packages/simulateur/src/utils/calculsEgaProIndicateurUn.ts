@@ -1,23 +1,23 @@
 import {
   AppState,
-  TrancheAge,
-  CSP,
-  EffectifsPourCSP,
-  RemunerationsPourCSP,
   CoefficientGroupe,
-  RemunerationPourTrancheAge,
-  EffectifPourTrancheAge,
-  SexeType,
   CoefficientPourTrancheAge,
+  CSP,
+  EffectifPourTrancheAge,
+  EffectifsPourCSP,
+  RemunerationPourTrancheAge,
+  RemunerationsPourCSP,
+  SexeType,
+  TrancheAge,
 } from "../globals"
 
 import {
   calculEcartsPonderesParGroupe,
   calculerTotalEcartPondere,
   calculerTotalEffectifs,
-  calculerEffectifsParTrancheAge,
-  EffectifGroup,
   effectifEstCalculable,
+  EffectifGroup,
+  nombreEffectifsValides,
 } from "./calculsEgaPro"
 import { roundDecimal } from "./number"
 
@@ -31,7 +31,7 @@ const seuilPertinenceCoef = 2 / 100
 const baremeEcartRemuneration = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0]
 
 // VG
-export const calculerValiditeGroupe = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+export const calculerValiditeGroupe3 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
   nombreSalariesFemmes >= 3 && nombreSalariesHommes >= 3
 
 // ERM
@@ -118,6 +118,25 @@ export const calculerEcartTauxRemunerationParTrancheAgeCoef = (coefficient: Coef
     }
   })
 
+export const calculerEffectifsParTrancheAge = ({
+  nombreSalariesFemmes,
+  nombreSalariesHommes,
+}: EffectifPourTrancheAge): EffectifGroup => {
+  nombreSalariesFemmes = nombreSalariesFemmes || 0
+  nombreSalariesHommes = nombreSalariesHommes || 0
+
+  // VG
+  const validiteGroupe = calculerValiditeGroupe3(nombreSalariesFemmes, nombreSalariesHommes)
+
+  return {
+    nombreSalariesFemmes,
+    nombreSalariesHommes,
+    validiteGroupe,
+    // EV
+    effectifsValides: nombreEffectifsValides(validiteGroupe, nombreSalariesFemmes, nombreSalariesHommes),
+  }
+}
+
 export type FlatGroupTranchesAgesCsp = EffectifPourTrancheAge & { categorieSocioPro: CSP }
 
 export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
@@ -142,7 +161,7 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
     const remunerationAnnuelleBrutHommes =
       groupTrancheAgeIndicateurUn && groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutHommes
 
-    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeEffectif, calculerValiditeGroupe)
+    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeEffectif)
 
     // ERM
     const ecartRemunerationMoyenne = calculerEcartRemunerationMoyenne(
@@ -179,7 +198,7 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCoef = (
     const remunerationAnnuelleBrutFemmes = groupTrancheAgeCoef.remunerationAnnuelleBrutFemmes
     const remunerationAnnuelleBrutHommes = groupTrancheAgeCoef.remunerationAnnuelleBrutHommes
 
-    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeCoef, calculerValiditeGroupe)
+    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeCoef)
 
     // ERM
     const ecartRemunerationMoyenne = calculerEcartRemunerationMoyenne(

@@ -1,5 +1,5 @@
 import {
-  calculerValiditeGroupe,
+  calculerValiditeGroupe10,
   calculerEcartTauxAugmentation,
   estCalculable,
   ecartAugmentation,
@@ -13,22 +13,22 @@ import {
 
 describe("calculValiditeGroupe", () => {
   test("incoherent data", () => {
-    expect(calculerValiditeGroupe(-1, -2)).toEqual(false)
-    expect(calculerValiditeGroupe(4, -2)).toEqual(false)
+    expect(calculerValiditeGroupe10(-1, -2)).toEqual(false)
+    expect(calculerValiditeGroupe10(4, -2)).toEqual(false)
   })
 
   test("men or women are under 10", () => {
-    expect(calculerValiditeGroupe(0, 0)).toEqual(false)
-    expect(calculerValiditeGroupe(1, 1)).toEqual(false)
-    expect(calculerValiditeGroupe(4, 6)).toEqual(false)
-    expect(calculerValiditeGroupe(9, 10)).toEqual(false)
-    expect(calculerValiditeGroupe(11, 8)).toEqual(false)
+    expect(calculerValiditeGroupe10(0, 0)).toEqual(false)
+    expect(calculerValiditeGroupe10(1, 1)).toEqual(false)
+    expect(calculerValiditeGroupe10(4, 6)).toEqual(false)
+    expect(calculerValiditeGroupe10(9, 10)).toEqual(false)
+    expect(calculerValiditeGroupe10(11, 8)).toEqual(false)
   })
 
   test("valid groupe", () => {
-    expect(calculerValiditeGroupe(10, 10)).toEqual(true)
-    expect(calculerValiditeGroupe(11, 10)).toEqual(true)
-    expect(calculerValiditeGroupe(11, 21)).toEqual(true)
+    expect(calculerValiditeGroupe10(10, 10)).toEqual(true)
+    expect(calculerValiditeGroupe10(11, 10)).toEqual(true)
+    expect(calculerValiditeGroupe10(11, 21)).toEqual(true)
   })
 })
 

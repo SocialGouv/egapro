@@ -1,21 +1,20 @@
-import { AppState, EffectifsPourCSP, TauxPromotionsPourCSP, SexeType } from "../globals"
+import { AppState, EffectifsPourCSP, SexeType, TauxPromotionsPourCSP } from "../globals"
 
 import {
   calculEcartsPonderesParGroupe,
-  effectifEstCalculable,
+  calculerEffectifsParCSP,
   calculerTotalEcartPondere,
   calculerTotalEffectifs,
+  effectifEstCalculable,
   EffectifGroup,
-  calculerEffectifsParCSP,
 } from "./calculsEgaPro"
 
 import {
   calculerEcartTauxAugmentation,
-  estCalculable,
   ecartAugmentation,
   ecartAugmentationAbsolu,
+  estCalculable,
   sexeSurRepresente,
-  calculerValiditeGroupe,
 } from "../utils/calculsEgaProIndicateurDeux"
 import calculerIndicateurUn from "./calculsEgaProIndicateurUn"
 import { roundDecimal } from "./number"
@@ -51,7 +50,7 @@ export const calculerEffectifsEtEcartPromoParCSP = (
   return dataEffectif.map((categorie: EffectifsPourCSP) => {
     const { categorieSocioPro } = categorie
 
-    const effectifs = calculerEffectifsParCSP(categorie, calculerValiditeGroupe)
+    const effectifs = calculerEffectifsParCSP(categorie)
 
     const dataPromo = dataIndicateurTrois.find(
       ({ categorieSocioPro }) => categorieSocioPro === categorie.categorieSocioPro,
