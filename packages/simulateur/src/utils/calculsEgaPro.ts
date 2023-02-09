@@ -36,13 +36,15 @@ type EffectifEtEcart = {
 
 type FindEcartFn = (effectifEtEcart: EffectifEtEcart) => number | undefined
 
+// Utilisé pour les indicateurs 1, 2 et 3. Sert à calculer des moyennes en ne prenant pas en compte les groupes non valides.
 export const calculEcartsPonderesParGroupe =
   (findEcartPourcentage: FindEcartFn) => (groupEffectifEtEcart: EffectifEtEcart[], totalEffectifsValides: number) =>
     groupEffectifEtEcart
       .filter(({ validiteGroupe }) => validiteGroupe)
       .map((effectifEtEcart) => {
-        const ecartPourcentage = findEcartPourcentage(effectifEtEcart)
         const { effectifsValides } = effectifEtEcart
+        const ecartPourcentage = findEcartPourcentage(effectifEtEcart)
+
         // EP
         return calculEcartPondere(ecartPourcentage, effectifsValides, totalEffectifsValides)
       })
@@ -87,10 +89,10 @@ export const calculerEffectifsParCSP = (categorie: EffectifsPourCSP): EffectifGr
 
 export const calculerTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes } = groupEffectif.reduce(
-    ({ totalNombreSalariesFemmes, totalNombreSalariesHommes }, { nombreSalariesFemmes, nombreSalariesHommes }) => {
+    (acc, { nombreSalariesFemmes, nombreSalariesHommes }) => {
       return {
-        totalNombreSalariesFemmes: totalNombreSalariesFemmes + nombreSalariesFemmes,
-        totalNombreSalariesHommes: totalNombreSalariesHommes + nombreSalariesHommes,
+        totalNombreSalariesFemmes: acc.totalNombreSalariesFemmes + nombreSalariesFemmes,
+        totalNombreSalariesHommes: acc.totalNombreSalariesHommes + nombreSalariesHommes,
       }
     },
     {

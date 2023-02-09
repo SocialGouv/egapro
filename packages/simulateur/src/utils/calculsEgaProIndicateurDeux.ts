@@ -33,10 +33,10 @@ export const calculerEcartTauxAugmentation = (
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 6)
     : undefined
 
-type EffectifEtEcartAugmentGroup = EffectifGroup & TauxAugmentationPourCSP
+type EffectifsEtTauxAugmentationPourCSP = EffectifGroup & TauxAugmentationPourCSP
 
 // Ajout de l'écart d'augmentation dans les données par CSP
-export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: Array<TauxAugmentationPourCSP>) =>
+export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: TauxAugmentationPourCSP[]) =>
   tauxAugmentation.map((categorie) => {
     return {
       ...categorie,
@@ -48,9 +48,9 @@ export const calculerEcartTauxAugmentationParCSP = (tauxAugmentation: Array<Taux
   })
 
 export const calculerEffectifsEtEcartAugmentationParCSP = (
-  effectifs: Array<EffectifsPourCSP>,
-  tauxAugmentationParCSP: Array<TauxAugmentationPourCSP>,
-): Array<EffectifEtEcartAugmentGroup> => {
+  effectifs: EffectifsPourCSP[],
+  tauxAugmentationParCSP: TauxAugmentationPourCSP[],
+): EffectifsEtTauxAugmentationPourCSP[] => {
   return effectifs.map((categorie: EffectifsPourCSP) => {
     const { categorieSocioPro } = categorie
 
@@ -64,8 +64,8 @@ export const calculerEffectifsEtEcartAugmentationParCSP = (
     const tauxAugmentationHommes = tauxAugmentation?.tauxAugmentationHommes
 
     return {
-      ...effectifs,
       categorieSocioPro,
+      ...effectifs,
       tauxAugmentationFemmes,
       tauxAugmentationHommes,
       // ETA
@@ -75,39 +75,39 @@ export const calculerEffectifsEtEcartAugmentationParCSP = (
 }
 
 export const calculerTotalEffectifsEtTauxAugmentation = (
-  groupEffectifEtEcartAugment: Array<EffectifEtEcartAugmentGroup>,
+  groupEffectifEtEcartAugment: EffectifsEtTauxAugmentationPourCSP[],
 ) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes, totalNombreSalaries, totalEffectifsValides } =
     calculerTotalEffectifs(groupEffectifEtEcartAugment)
 
-  const { sommeProduitTauxAugmentationFemmes, sommeProduitTauxAugmentationHommes } = groupEffectifEtEcartAugment.reduce(
-    (
-      { sommeProduitTauxAugmentationFemmes, sommeProduitTauxAugmentationHommes },
-      { nombreSalariesFemmes, nombreSalariesHommes, tauxAugmentationFemmes, tauxAugmentationHommes },
-    ) => {
+  // On parcourt la liste des CSP et on fait la multiplication des salariés par leur pourcentage d'augmentation.
+  // Plus tard, on divisera par le nombre total de salarié pour avoir la moyenne des augmentations.
+  const { nbFemmesAugmentees, nbHommesAugmentes } = groupEffectifEtEcartAugment.reduce(
+    (acc, { nombreSalariesFemmes, nombreSalariesHommes, tauxAugmentationFemmes = 0, tauxAugmentationHommes = 0 }) => {
       return {
-        sommeProduitTauxAugmentationFemmes:
-          sommeProduitTauxAugmentationFemmes + (tauxAugmentationFemmes || 0) * nombreSalariesFemmes,
-        sommeProduitTauxAugmentationHommes:
-          sommeProduitTauxAugmentationHommes + (tauxAugmentationHommes || 0) * nombreSalariesHommes,
+        nbFemmesAugmentees: acc.nbFemmesAugmentees + tauxAugmentationFemmes * nombreSalariesFemmes,
+        nbHommesAugmentes: acc.nbHommesAugmentes + tauxAugmentationHommes * nombreSalariesHommes,
       }
     },
     {
-      sommeProduitTauxAugmentationFemmes: 0,
-      sommeProduitTauxAugmentationHommes: 0,
+      nbFemmesAugmentees: 0,
+      nbHommesAugmentes: 0,
     },
   )
 
+  // Moyennes des augmentations
   // TTAF
-  const totalTauxAugmentationFemmes = sommeProduitTauxAugmentationFemmes / totalNombreSalariesFemmes
+  const totalTauxAugmentationFemmes = nbFemmesAugmentees / totalNombreSalariesFemmes
 
   // TTAH
-  const totalTauxAugmentationHommes = sommeProduitTauxAugmentationHommes / totalNombreSalariesHommes
+  const totalTauxAugmentationHommes = nbHommesAugmentes / totalNombreSalariesHommes
 
   return {
     totalNombreSalaries,
     totalEffectifsValides,
+    // TODO: devrait s'appeler moyenneFemmesAugmentees
     totalTauxAugmentationFemmes,
+    // TODO: devrait s'appeler moyenneHommesAugmentees
     totalTauxAugmentationHommes,
   }
 }
@@ -194,6 +194,7 @@ export default function calculerIndicateurDeux(state: AppState) {
   const effectifsIndicateurCalculable = effectifEstCalculable(totalNombreSalaries, totalEffectifsValides)
 
   // IC
+  // Attention: rend false si effectifIndicateurCalculable est false.
   const indicateurCalculable = estCalculable(
     state.indicateurDeux.presenceAugmentation,
     totalNombreSalaries,
@@ -221,9 +222,9 @@ export default function calculerIndicateurDeux(state: AppState) {
   )
 
   return {
-    effectifsIndicateurCalculable,
-    effectifEtEcartAugmentParGroupe,
+    effectifsIndicateurCalculable, // Pourquoi rendre cette information ici? C'est une information sur les effectifs et pas liée spécifiquement à l'indicateur 2.
     indicateurCalculable,
+    effectifEtEcartAugmentParGroupe,
     indicateurEcartAugmentation: indicateurEcartAugmentationAbsolute,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux,
