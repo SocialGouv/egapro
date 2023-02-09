@@ -56,13 +56,21 @@ export default function calculerIndicateurCinq(state: AppState) {
     noteIndicateurCinq,
   }
 }
+
+// ---------------------------------------------------------------------
 // TODO: Refactor les calculs d'indicateur en mode OOP, comme ci-dessous.
-/*
+
+type IndicateurCinquParams = Required<Pick<AppState["indicateurCinq"], "nombreSalariesHommes" | "nombreSalariesFemmes">>
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class IndicateurCinq {
   private nombreSalariesFemmes: number
   private nombreSalariesHommes: number
 
-  constructor(nombreSalariesHommes: number, nombreSalariesFemmes: number) {
+  constructor({ nombreSalariesHommes, nombreSalariesFemmes }: IndicateurCinquParams) {
+    if (nombreSalariesHommes === undefined || nombreSalariesFemmes === undefined)
+      throw new Error("Not compliant data to build IndicateurCinq.")
+
     this.nombreSalariesHommes = nombreSalariesHommes
     this.nombreSalariesFemmes = nombreSalariesFemmes
   }
@@ -82,12 +90,11 @@ class IndicateurCinq {
   }
 }
 
-const indicateur5 = new IndicateurCinq(10, 20)
+// Usage:
+// const indicateur5 = new IndicateurCinq({ nombreSalariesHommes: 10, nombreSalariesFemmes: 5 })
+// const {
+//   note,
+//   sexeSousRepresente: { ecart, sexe },
+// } = indicateur5
 
-const {
-  note,
-  sexeSousRepresente: { ecart, sexe },
-} = indicateur5
-
-console.log(note, ecart, sexe)
-*/
+// console.log(note, ecart, sexe)
