@@ -145,42 +145,42 @@ def _cross_validate(data):
                 if index is not None:
                     if index >= 85:
                         msg = "Les modalités des objectifs et mesures ne doivent pas être définies si l'index est supérieur à 85."
-                        # rule 4
+                        # rule 3 (same but with more error info)
                         assert not modalites_obj_mesures, msg
                 if date_pub_mesures is not None:
                     msg = "La date de publication des mesures doit être postérieure à la fin de la période de référence."
-                    # rule 5
+                    # rule 4
                     assert date_pub_mesures > periode_reference, msg
                 if date_pub_objectifs is not None:
                     msg = "La date de publication des objectifs doit être postérieure à la fin de la période de référence."
-                    # rule 6
+                    # rule 5
                     assert date_pub_objectifs > periode_reference, msg
 
             if data.year >= 2020 or index is not None:
                 msg = "La date de publication doit être définie"
-                # rule 7.a
+                # rule 6.a
                 assert data.path("déclaration.publication.date"), msg
                 msg = (
                     "Les modalités de publication ou le site Internet doit être défini"
                 )
-                # rule 7.b
+                # rule 6.b
                 assert data.path("déclaration.publication.modalités") or data.path(
                     "déclaration.publication.url"
                 ), msg
             if index is None:
                 msg = "Les mesures correctives ne doivent pas être définies si l'index n'est pas calculable"
-                # rule 8
+                # rule 7
                 assert not mesures_correctives, msg
             elif index >= 75:
                 msg = "Les mesures correctives ne doivent pas être définies pour un index de 75 ou plus"
-                # rule 9
+                # rule 8
                 assert not mesures_correctives, msg
             else:
                 msg = "Les mesures correctives doivent être définies pour un index inférieur à 75"
-                # rule 10
+                # rule 9
                 assert mesures_correctives, msg
             periode_reference = data.path("déclaration.fin_période_référence")
-            # rule 11.a
+            # rule 10.a
             assert (
                 periode_reference
             ), "Le champ déclaration.fin_période_référence doit être défini"
@@ -188,7 +188,7 @@ def _cross_validate(data):
                 annee_periode_reference = date.fromisoformat(periode_reference).year
             except ValueError:
                 annee_periode_reference = None
-            # rule 11.b
+            # rule 10.b
             assert (
                 annee_periode_reference == data.year
             ), "L'année de la date de fin de période ne peut pas être différente de l'année au titre de laquelle les indicateurs sont calculés."
@@ -199,36 +199,36 @@ def _cross_validate(data):
             if tranche == "50:250":
                 for path in indicateurs_gt_250:
                     msg = f"L'indicateur {path} ne doit pas être défini pour la tranche 50 à 250"
-                    # rule 12.a
+                    # rule 11.a
                     assert not data.path(path), msg
                 msg = f"L'indicateur {indicateurs_lt_250} doit être défini pour la tranche 50 à 250"
 
-                # rule 12.b
+                # rule 11.b
                 assert data.path(indicateurs_lt_250), msg
             else:
                 msg = f"L'indicateur {indicateurs_lt_250} ne peut être défini que pour la tranche 50 à 250"
-                # rule 13.a
+                # rule 12.a
                 assert not data.path(indicateurs_lt_250), msg
                 for path in indicateurs_gt_250:
                     msg = f"L'indicateur {path} doit être défini"
-                    # rule 13.b
+                    # rule 12.b
                     assert data.path(path), msg
 
             # l'année 2021 ne bouge pas pour le plan de relance (année mise en oeuvre du plan du relance)
             if data.year >= 2021:
                 msg = "data.entreprise.plan_relance doit être défini"
-                # rule 14
+                # rule 13
                 assert data.path("entreprise.plan_relance") is not None, msg
 
     for key in SCHEMA.indicateurs_keys:
         path = f"indicateurs.{key}"
         if data.path(f"{path}.non_calculable"):
             msg = f"L'indicateur {path} doit être vide s'il n'est pas calculable"
-            # rule 15
+            # rule 14
             assert list(data.path(path).keys()) == ["non_calculable"], msg
         elif data.path(path) is not None:
             resultat = data.path(f"{path}.résultat")
-            # rule 16
+            # rule 15
             msg = f"{path}.résultat doit être défini si l'indicateur est calculable"
             if key != "rémunérations" or data.path(f"{path}.population_favorable"):
                 # The "rémunérations" indicator is sent through several steps
@@ -236,7 +236,7 @@ def _cross_validate(data):
                 # sent all its data is if there's a `population_favorable`
                 # field. However, this latter field is only provided if the
                 # `résultat` is not `0`.
-                # rule 17
+                # rule 16
                 assert resultat is not None, msg
 
     keys = ["rémunérations", "augmentations", "promotions"]
@@ -533,5 +533,6 @@ class Schema:
     def indicateurs_keys(self):
         return list(self["properties"]["indicateurs"]["properties"].keys())
 
+SCHEMA: Schema
 
 init()
