@@ -1,7 +1,11 @@
-import { EffectifsPourCSP, EffectifPourTrancheAge, SexeType } from "../globals"
+import { EffectifsPourCSP, SexeType } from "../globals"
 import { roundDecimal } from "./number"
 
 export const tauxEffectifValide = 40 / 100
+
+// VG (pour indicateurs 2 et 3). Doit se trouver ici pour éviter les imports circulaires.
+export const calculerValiditeGroupe10 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+  nombreSalariesFemmes >= 10 && nombreSalariesHommes >= 10
 
 //////////////////
 // COMMON ////////
@@ -35,13 +39,15 @@ type EffectifEtEcart = {
 
 type FindEcartFn = (effectifEtEcart: EffectifEtEcart) => number | undefined
 
+// Utilisé pour les indicateurs 1, 2 et 3. Sert à calculer des moyennes en ne prenant pas en compte les groupes non valides.
 export const calculEcartsPonderesParGroupe =
   (findEcartPourcentage: FindEcartFn) => (groupEffectifEtEcart: EffectifEtEcart[], totalEffectifsValides: number) =>
     groupEffectifEtEcart
       .filter(({ validiteGroupe }) => validiteGroupe)
       .map((effectifEtEcart) => {
-        const ecartPourcentage = findEcartPourcentage(effectifEtEcart)
         const { effectifsValides } = effectifEtEcart
+        const ecartPourcentage = findEcartPourcentage(effectifEtEcart)
+
         // EP
         return calculEcartPondere(ecartPourcentage, effectifsValides, totalEffectifsValides)
       })
@@ -63,29 +69,7 @@ export type EffectifGroup = {
   effectifsValides: number
 }
 
-export const calculerEffectifsParTrancheAge = (
-  { nombreSalariesFemmes, nombreSalariesHommes }: EffectifPourTrancheAge,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
-  nombreSalariesFemmes = nombreSalariesFemmes || 0
-  nombreSalariesHommes = nombreSalariesHommes || 0
-
-  // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmes, nombreSalariesHommes)
-
-  return {
-    nombreSalariesFemmes,
-    nombreSalariesHommes,
-    validiteGroupe,
-    // EV
-    effectifsValides: nombreEffectifsValides(validiteGroupe, nombreSalariesFemmes, nombreSalariesHommes),
-  }
-}
-
-export const calculerEffectifsParCSP = (
-  categorie: EffectifsPourCSP,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
+export const calculerEffectifsParCSP = (categorie: EffectifsPourCSP): EffectifGroup => {
   const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = categorie.tranchesAges.reduce(
     ({ nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe }, { nombreSalariesFemmes, nombreSalariesHommes }) => ({
       nombreSalariesFemmesGroupe: nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
@@ -95,7 +79,7 @@ export const calculerEffectifsParCSP = (
   )
 
   // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
+  const validiteGroupe = calculerValiditeGroupe10(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
 
   return {
     nombreSalariesFemmes: nombreSalariesFemmesGroupe,
@@ -108,10 +92,10 @@ export const calculerEffectifsParCSP = (
 
 export const calculerTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes } = groupEffectif.reduce(
-    ({ totalNombreSalariesFemmes, totalNombreSalariesHommes }, { nombreSalariesFemmes, nombreSalariesHommes }) => {
+    (acc, { nombreSalariesFemmes, nombreSalariesHommes }) => {
       return {
-        totalNombreSalariesFemmes: totalNombreSalariesFemmes + nombreSalariesFemmes,
-        totalNombreSalariesHommes: totalNombreSalariesHommes + nombreSalariesHommes,
+        totalNombreSalariesFemmes: acc.totalNombreSalariesFemmes + nombreSalariesFemmes,
+        totalNombreSalariesHommes: acc.totalNombreSalariesHommes + nombreSalariesHommes,
       }
     },
     {
