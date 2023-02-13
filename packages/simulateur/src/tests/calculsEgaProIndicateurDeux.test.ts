@@ -1,5 +1,5 @@
+import { calculerValiditeGroupe10 } from "../utils/calculsEgaPro"
 import {
-  calculerValiditeGroupe10,
   calculerEcartTauxAugmentation,
   estCalculable,
   ecartAugmentation,

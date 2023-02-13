@@ -7,6 +7,7 @@ import stateComplete from "./__fixtures__/stateComplete"
 import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate"
 import deepmerge from "deepmerge"
 import { combineMerge } from "./utils/merge"
+import produce from "immer"
 
 const stateUndefined = undefined
 
@@ -1080,15 +1081,18 @@ describe("validateEffectif", () => {
     })
 
     test("change default state", () => {
-      const { effectif, ...rest } = appReducer(stateDefault, action) as AppState
-      const { effectif: effectifInitial, ...restInitial } = stateDefault as AppState
+      const newState = appReducer(stateDefault, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "Valid",
+      const expectedState = produce(stateDefault as AppState, (draft) => {
+        draft.effectif.formValidated = "Valid"
+        draft.indicateurUn.formValidated = "Valid"
+        draft.indicateurUn.coefficientEffectifFormValidated = "Valid"
+        draft.indicateurDeux.formValidated = "Valid"
+        draft.indicateurTrois.formValidated = "Valid"
+        draft.indicateurDeuxTrois.formValidated = "Valid"
       })
 
-      expect(rest).toStrictEqual(restInitial)
+      expect(newState).toStrictEqual(expectedState)
     })
 
     test("change complete state", () => {
@@ -1111,42 +1115,13 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
-        appReducer(stateCompleteAndValidate, action) as AppState
-      const {
-        effectif: effectifInitial,
-        indicateurUn: indicateurUnInitial,
-        indicateurDeux: indicateurDeuxInitial,
-        indicateurTrois: indicateurTroisInitial,
-        indicateurDeuxTrois: indicateurDeuxTroisInitial,
-        declaration: declarationInitial,
-        ...restInitial
-      } = stateCompleteAndValidate as AppState
+      const { effectif, ...rest } = appReducer(stateCompleteAndValidate, action) as AppState
+
+      const { effectif: effectifInitial, ...restInitial } = stateCompleteAndValidate as AppState
 
       expect(effectif).toStrictEqual({
         ...effectifInitial,
         formValidated: "None",
-      })
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        formValidated: "Invalid",
-        coefficientEffectifFormValidated: "Invalid",
-      })
-      expect(indicateurDeux).toStrictEqual({
-        ...indicateurDeuxInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurTrois).toStrictEqual({
-        ...indicateurTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurDeuxTrois).toStrictEqual({
-        ...indicateurDeuxTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: "Invalid",
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1180,44 +1155,13 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
-        appReducer(stateCompleteAndValidateCoef, action) as AppState
-      const {
-        effectif: effectifInitial,
-        indicateurUn: indicateurUnInitial,
-        indicateurDeux: indicateurDeuxInitial,
-        indicateurTrois: indicateurTroisInitial,
-        indicateurDeuxTrois: indicateurDeuxTroisInitial,
-        declaration: declarationInitial,
-        ...restInitial
-      } = stateCompleteAndValidateCoef as AppState
+      const newState = appReducer(stateCompleteAndValidateCoef, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "None",
+      const expectedState = produce(stateCompleteAndValidateCoef as AppState, (draft) => {
+        draft.effectif.formValidated = "None"
       })
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        formValidated: "Invalid",
-        coefficientEffectifFormValidated: "Invalid",
-      })
-      expect(indicateurDeux).toStrictEqual({
-        ...indicateurDeuxInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurTrois).toStrictEqual({
-        ...indicateurTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurDeuxTrois).toStrictEqual({
-        ...indicateurDeuxTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: "Invalid",
-      })
-      expect(rest).toStrictEqual(restInitial)
+
+      expect(newState).toStrictEqual(expectedState)
     })
   })
 })

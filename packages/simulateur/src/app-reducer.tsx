@@ -161,6 +161,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
   if (!state) {
     return state
   }
+
   switch (action.type) {
     case "updateInformationsSimulation": {
       const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = action.data
@@ -249,6 +250,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
     }
     case "updateEffectif": {
       const { nombreSalaries } = action.data
+
       return {
         ...state,
         effectif: { ...state.effectif, nombreSalaries },
@@ -279,8 +281,10 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
           newIndicateurUn = defaultState.indicateurUn
           newIndicateurUn.formValidated = "Valid"
+          newIndicateurUn.coefficientEffectifFormValidated = "Valid"
         } else if (newIndicateurUn.formValidated === "Valid") {
           newIndicateurUn.formValidated = "Invalid"
+          newIndicateurUn.coefficientEffectifFormValidated = "Invalid"
         } // else we let the state unchanged
 
         if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {

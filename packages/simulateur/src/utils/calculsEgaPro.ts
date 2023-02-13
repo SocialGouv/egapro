@@ -1,8 +1,11 @@
 import { EffectifsPourCSP, SexeType } from "../globals"
-import { calculerValiditeGroupe10 } from "./calculsEgaProIndicateurDeux"
 import { roundDecimal } from "./number"
 
 export const tauxEffectifValide = 40 / 100
+
+// VG (pour indicateurs 2 et 3). Doit se trouver ici pour éviter les imports circulaires.
+export const calculerValiditeGroupe10 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+  nombreSalariesFemmes >= 10 && nombreSalariesHommes >= 10
 
 //////////////////
 // COMMON ////////
