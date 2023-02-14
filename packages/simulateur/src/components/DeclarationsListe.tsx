@@ -7,7 +7,7 @@ import { Link as RouterLink } from "react-router-dom"
 import type { DeclarationAPI } from "../utils/declarationBuilder"
 
 import { useDeclarations } from "../hooks/useDeclaration"
-import { buildHelpersObjectifsMesures } from "../views/private/ObjectifsMesuresPage"
+import { buildHelpersObjectifsMesures, isFrozenDeclarationForOPMC } from "../views/private/ObjectifsMesuresPage"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { formatDate } from "../utils/date"
 
@@ -72,14 +72,20 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       )}
                     </Td>
                     <Td>
-                      {statusDeclaration(declarations[annee]) === "À renseigner" ? (
+                      {statusDeclaration(declarations[annee]) === "À renseigner" ||
+                      statusDeclaration(declarations[annee]) ===
+                        "Déclaration non modifiable sur données incorrectes" ? (
                         <>
                           <IconInvalid mr="2" color="red.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
-                            À renseigner
+                            {statusDeclaration(declarations[annee]) === "À renseigner"
+                              ? "À renseigner"
+                              : "Déclaration non modifiable"}
                           </Link>
                         </>
-                      ) : statusDeclaration(declarations[annee]) === "Renseignés" ? (
+                      ) : statusDeclaration(declarations[annee]) === "Renseignés" ||
+                        statusDeclaration(declarations[annee]) ===
+                          "Déclaration non modifiable sur données correctes" ? (
                         <>
                           <IconValid mr="2" color="green.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
@@ -112,6 +118,8 @@ type StatusObjectifsMesures =
   | "Index supérieur à 85"
   | "Renseignés"
   | "Année non applicable"
+  | "Déclaration non modifiable sur données correctes"
+  | "Déclaration non modifiable sur données incorrectes"
 
 /**
  * Return the status of the declaration, OP MC wise.
@@ -126,7 +134,9 @@ export function statusDeclaration(declaration: DeclarationAPI): StatusObjectifsM
 
   try {
     objectifsMesuresSchema.parse(initialValuesObjectifsMesures)
+    if (isFrozenDeclarationForOPMC(declaration)) return "Déclaration non modifiable sur données correctes"
   } catch (e) {
+    if (isFrozenDeclarationForOPMC(declaration)) return "Déclaration non modifiable sur données incorrectes"
     return "À renseigner"
   }
   return "Renseignés"

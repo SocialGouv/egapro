@@ -1,4 +1,4 @@
-import { addYears, addDays, format, parse, parseISO, fromUnixTime } from "date-fns"
+import { addYears, addDays, format, parse, parseISO, fromUnixTime, isBefore, sub } from "date-fns"
 
 /* Dates */
 
@@ -66,3 +66,13 @@ export function formatDate(stringDate?: string): string | undefined {
 }
 
 export const timestampToFrDate = (timestamp: number): string => format(fromUnixTime(timestamp), FR_DATE_FORMAT)
+
+/**
+ * True if the date is older than the current date minus the duration.
+ *
+ * @param date
+ * @param duration Duration from date-fns
+ */
+export const isOlderThanTimeAgo = (date: Date, duration: Duration) => {
+  return isBefore(date, sub(new Date(), duration))
+}
