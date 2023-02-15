@@ -15,17 +15,25 @@ app:
         name: "egapro-secret"
     - secretRef:
         name: smtp-app
-
+  autoscale:
+    enabled: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 640M
+    limits:
+      cpu: 125m
+      memory: 1G
 
 api:
   autoscale:
     enabled: true
   resources:
     requests:
-      cpu: 1
+      cpu: 100m
       memory: 640M
     limits:
-      cpu: 2
+      cpu: 200m
       memory: 1G
   vars:
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"

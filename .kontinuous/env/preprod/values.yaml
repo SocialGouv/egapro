@@ -6,6 +6,15 @@ api:
     EGAPRO_SMTP_LOGIN: ""
     EGAPRO_SMTP_PASSWORD: ""
     EGAPRO_SMTP_SSL: ""
+  autoscale:
+    enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 640M
+    limits:
+      cpu: 200m
+      memory: 1G
 
 app:
   vars:
@@ -15,5 +24,14 @@ app:
     MAILER_SMTP_LOGIN: ""
     MAILER_SMTP_PASSWORD: ""
     MAILER_SMTP_SSL: "False"
+  autoscale:
+    enabled: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 640M
+    limits:
+      cpu: 125m
+      memory: 1G
 
 maildev: {}
