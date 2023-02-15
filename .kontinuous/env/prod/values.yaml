@@ -20,7 +20,7 @@ app:
   resources:
     requests:
       cpu: 20m
-      memory: 640M
+      memory: 196M
     limits:
       cpu: 125m
       memory: 1G
