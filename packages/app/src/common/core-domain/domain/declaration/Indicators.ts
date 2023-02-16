@@ -51,6 +51,7 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
     return [
       this.remunerations,
       this.salaryRaises,
+      this.promotions,
       this.salaryRaisesAndPromotions,
       this.maternityLeaves,
       this.highRemunerations,

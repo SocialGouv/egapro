@@ -20,7 +20,7 @@ export interface CompanyProps {
   city?: string;
   countryCode?: CountryCode;
   county?: County;
-  hasRecoveryPlan: boolean;
+  hasRecoveryPlan?: boolean;
   nafCode?: NafCode;
   name?: string;
   postalCode?: FrenchPostalCode;
@@ -52,7 +52,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
   }
 
   /** `plan_relance` */
-  get hasRecoveryPlan(): boolean {
+  get hasRecoveryPlan(): boolean | undefined {
     return this.props.hasRecoveryPlan;
   }
 
