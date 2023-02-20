@@ -370,7 +370,7 @@ export class DeclarationSpecification extends AbstractSpecification<DeclarationD
 
     if (duplicates.length) {
       throw new DeclarationBadFieldError(
-        `La liste des entreprises de l'UES comporte des Siren en double : ${duplicates.join(",")}`,
+        `La liste des entreprises de l'UES comporte des Siren en double : ${duplicates.join(", ")}`,
       );
     }
 

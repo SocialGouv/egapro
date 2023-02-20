@@ -1,9 +1,7 @@
 import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { declarationRepo } from "@api/core-domain/repo";
-import {
-  GetDeclarationBySirenAndYear,
-  GetDeclarationBySirenAndYearError,
-} from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
+import { CreateDeclarationBySirenAndYear } from "@api/core-domain/useCases/CreateDeclarationBySirenAndYear";
+import { GetDeclarationBySirenAndYearError } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
@@ -17,7 +15,7 @@ type Res = NextController.Res<BaseController>;
 export default class DeclarationSirenYearController implements BaseController {
   @LegacyTokenRequire({ ensureOwner: true })
   public async get(req: Req, res: Res) {
-    const useCase = new GetDeclarationBySirenAndYear(declarationRepo);
+    const useCase = new CreateDeclarationBySirenAndYear(declarationRepo);
     const { siren, year } = req.params;
 
     try {
@@ -36,4 +34,7 @@ export default class DeclarationSirenYearController implements BaseController {
       }
     }
   }
+
+  @LegacyTokenRequire({ ensureOwner: true })
+  public async put(req: Req, res: Res) {}
 }
