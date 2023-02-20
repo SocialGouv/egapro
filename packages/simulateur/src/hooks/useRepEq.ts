@@ -13,10 +13,7 @@ export type RepresentationEquilibreeAPI = {
   siren: string
   year: number
 }
-export function useRepEq(
-  siren: string,
-  year: number | undefined,
-): FetcherReturn & { repEq: RepresentationEquilibreeAPI | undefined } {
+export function useRepEq(siren: string, year?: number): FetcherReturn & { repEq?: RepresentationEquilibreeAPI } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
   const { data, error, mutate } = useSWR<RepresentationEquilibreeAPI>(

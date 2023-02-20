@@ -1,27 +1,24 @@
 import { Text, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculerIndicateurDeuxTrois, {
-  calculBarem,
-  calculPlusPetitNombreSalaries,
-} from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois, { calculerBareme } from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import { displayPercent, messageEcartNombreEquivalentSalaries, messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
-import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import { calculerPlusPetitNbSalaries } from "../../utils/calculsEgaPro"
 
 const title = "Indicateur écart de taux d'augmentation"
 
@@ -40,6 +37,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
     effectifsIndicateurCalculable,
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
+    indicateurCalculable,
   } = calculsIndicateurDeuxTrois
 
   const readOnly = isFormValid(state.indicateurDeuxTrois)
@@ -87,7 +85,7 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (readOnly && !state.indicateurDeuxTrois.presenceAugmentationPromotion) {
+  if (readOnly && !indicateurCalculable) {
     return (
       <PageIndicateurDeuxTrois>
         <InfoBlock
@@ -95,18 +93,13 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
           title="Malheureusement votre indicateur n'est pas calculable"
           text="Il n'y a pas eu d'augmentation durant la période de référence."
         />
-        <ActionBar>
-          <ActionLink
-            onClick={() => dispatch({ type: "validateIndicateurDeuxTrois", valid: "None" })}
-            disabled={frozenDeclaration}
-            title={frozenDeclaration ? frozenDeclarationMessage : ""}
-          >
-            Modifier les données saisies
-          </ActionLink>
-        </ActionBar>
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
-        </ActionBar>
+
+        <ActionBarSingleForm
+          readOnly={readOnly}
+          frozenDeclaration={frozenDeclaration}
+          to="/indicateur4"
+          onClick={() => dispatch({ type: "validateIndicateurDeuxTrois", valid: "None" })}
+        />
       </PageIndicateurDeuxTrois>
     )
   }
@@ -148,13 +141,15 @@ export const calculerResultats = (
     label: "Votre résultat en pourcentage est de",
     result:
       indicateurEcartAugmentationPromotion !== undefined ? displayPercent(indicateurEcartAugmentationPromotion) : "--",
-    note: indicateurEcartAugmentationPromotion !== undefined ? calculBarem(indicateurEcartAugmentationPromotion) : 0,
+    note: indicateurEcartAugmentationPromotion !== undefined ? calculerBareme(indicateurEcartAugmentationPromotion) : 0,
   }
   const ecartNbSalaries = {
     label: "Votre résultat en nombre équivalent de salariés* est",
     result: indicateurEcartNombreEquivalentSalaries !== undefined ? `${indicateurEcartNombreEquivalentSalaries}` : "--",
     note:
-      indicateurEcartNombreEquivalentSalaries !== undefined ? calculBarem(indicateurEcartNombreEquivalentSalaries) : 0,
+      indicateurEcartNombreEquivalentSalaries !== undefined
+        ? calculerBareme(indicateurEcartNombreEquivalentSalaries)
+        : 0,
   }
   const results =
     indicateurEcartNombreEquivalentSalaries !== undefined &&
@@ -183,7 +178,7 @@ export function AdditionalInfo({ results, calculsIndicateurDeuxTrois }: Addition
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(state.effectif.nombreSalaries)
 
-  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
+  const plusPetitNombreSalaries = calculerPlusPetitNbSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
 
   return (
     <VStack spacing={4} mt={6}>

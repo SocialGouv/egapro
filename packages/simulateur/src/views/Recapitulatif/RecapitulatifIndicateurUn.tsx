@@ -1,12 +1,12 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { TranchesAges } from "../../globals"
+import { TrancheAge } from "../../globals"
 import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import {
   displayFractionPercentWithEmptyData,
-  displayNameCategorieSocioPro,
+  displayNameCSP,
   displayNameTranchesAges,
   displayPercent,
   displaySexeSurRepresente,
@@ -41,7 +41,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     noteIndicateurUn,
   } = calculsIndicateurUn
 
-  if (!isEffectifsFilled || indicateurUnFormValidated === "None") {
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
@@ -60,13 +60,17 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     )
   }
 
+  if (indicateurUnFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur1" />
+  }
+
   // @ts-ignore
   const groupEffectifEtEcartRemuParTranche = effectifEtEcartRemuParTranche.reduce((acc, el, index) => {
     const newEl =
       el.categorieSocioPro !== undefined
         ? {
             id: el.categorieSocioPro,
-            name: displayNameCategorieSocioPro(el.categorieSocioPro),
+            name: displayNameCSP(el.categorieSocioPro),
             ...el,
           }
         : el
@@ -101,10 +105,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         <Thead textTransform="inherit" fontSize=".5rem">
           <Tr>
             <Th />
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.MoinsDe30ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De30a39ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De40a49ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.PlusDe50ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.MoinsDe30ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De30a39ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De40a49ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.PlusDe50ans)}</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -113,7 +117,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
               effectifEtEcartRemuParTranche: Array<{
                 id: any
                 name: string
-                ecartRemunerationMoyenne: number | undefined
+                ecartRemunerationMoyenne?: number
               }>,
             ) => (
               <Tr key={effectifEtEcartRemuParTranche[0].id}>

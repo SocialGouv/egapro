@@ -6,10 +6,7 @@ import type { FetcherReturn } from "./types"
 import { fetcher } from "../utils/fetcher"
 import { genericErrorMessage } from "../utils/makeMessage"
 
-export function useDeclaration(
-  siren: string | undefined,
-  year: number | undefined,
-): FetcherReturn & { declaration: DeclarationAPI | undefined } {
+export function useDeclaration(siren?: string, year?: number): FetcherReturn & { declaration?: DeclarationAPI } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
   const { data, error, mutate } = useSWR<DeclarationAPI>(

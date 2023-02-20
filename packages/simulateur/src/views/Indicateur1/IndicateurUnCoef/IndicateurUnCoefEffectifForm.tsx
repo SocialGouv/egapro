@@ -5,7 +5,7 @@ import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ds/ButtonAction"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import { GroupTranchesAgesEffectif } from "../../../globals"
+import { EffectifPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
@@ -34,7 +34,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
     data: Array<{
       id: any
       name: string
-      tranchesAges: Array<GroupTranchesAgesEffectif>
+      tranchesAges: Array<EffectifPourTrancheAge>
     }>,
   ) => {
     const coefficient = data.map(({ tranchesAges }) => ({

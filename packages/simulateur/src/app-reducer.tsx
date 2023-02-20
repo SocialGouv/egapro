@@ -2,24 +2,28 @@ import deepmerge from "deepmerge"
 
 import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
 
-import { CategorieSocioPro, TranchesAges } from "./globals"
+import { CSP, TrancheAge } from "./globals"
+import calculerIndicateurDeux from "./utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeuxTrois from "./utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurTrois from "./utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurUn from "./utils/calculsEgaProIndicateurUn"
 import { datetimeToFrString } from "./utils/date"
 import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
 import { combineMerge, overwriteMerge } from "./utils/merge"
 
-const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
   })),
 }))
 
-const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurUnCsp = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     remunerationAnnuelleBrutFemmes: undefined,
     remunerationAnnuelleBrutHommes: undefined,
@@ -29,7 +33,7 @@ const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: Categ
 
 export const dataIndicateurUnCoefGroup = {
   name: "",
-  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
@@ -39,14 +43,14 @@ export const dataIndicateurUnCoefGroup = {
   })),
 }
 
-const dataIndicateurDeux = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxAugmentationFemmes: undefined,
   tauxAugmentationHommes: undefined,
   ecartTauxAugmentation: undefined,
 }))
 
-const dataIndicateurTrois = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+const dataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxPromotionFemmes: undefined,
   tauxPromotionHommes: undefined,
@@ -157,6 +161,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
   if (!state) {
     return state
   }
+
   switch (action.type) {
     case "updateInformationsSimulation": {
       const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = action.data
@@ -245,6 +250,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
     }
     case "updateEffectif": {
       const { nombreSalaries } = action.data
+
       return {
         ...state,
         effectif: { ...state.effectif, nombreSalaries },
@@ -255,25 +261,61 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         return {
           ...state,
           effectif: { ...state.effectif, formValidated: "None" },
-          indicateurUn: isFormValid(state.indicateurUn)
-            ? {
-                ...state.indicateurUn,
-                formValidated: "Invalid",
-                coefficientEffectifFormValidated: "Invalid",
-              }
-            : state.indicateurUn,
-          indicateurDeux: isFormValid(state.indicateurDeux)
-            ? { ...state.indicateurDeux, formValidated: "Invalid" }
-            : state.indicateurDeux,
-          indicateurTrois: isFormValid(state.indicateurTrois)
-            ? { ...state.indicateurTrois, formValidated: "Invalid" }
-            : state.indicateurTrois,
-          indicateurDeuxTrois: isFormValid(state.indicateurDeuxTrois)
-            ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-            : state.indicateurDeuxTrois,
-          declaration: isFormValid(state.declaration)
-            ? { ...state.declaration, formValidated: "Invalid" }
-            : state.declaration,
+        }
+      } else if (action.valid === "Valid") {
+        /* Recalcul sur les indicateurs dépendants des effectifs.
+
+        Logique:
+        Pour le calculsIndicateurX
+          => si non calculable, on reset l'indicateurX + formValidated = "Valid", c'est à dire qu'il devient OK et la coche doit être verte.
+          => si calculable
+            => si state.indicateurX.formValidated === "Valid" => formValidated = "Invalid"
+            => sinon (donc Invalid ou None) copier tel quel
+        */
+
+        let newIndicateurUn = state.indicateurUn
+        let newIndicateurDeux = state.indicateurDeux
+        let newIndicateurTrois = state.indicateurTrois
+        let newIndicateurDeuxTrois = state.indicateurDeuxTrois
+
+        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+          newIndicateurUn = defaultState.indicateurUn
+          newIndicateurUn.formValidated = "Valid"
+          newIndicateurUn.coefficientEffectifFormValidated = "Valid"
+        } else if (newIndicateurUn.formValidated === "Valid") {
+          newIndicateurUn.formValidated = "Invalid"
+          newIndicateurUn.coefficientEffectifFormValidated = "Invalid"
+        } // else we let the state unchanged
+
+        if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
+          newIndicateurDeux = defaultState.indicateurDeux
+          newIndicateurDeux.formValidated = "Valid"
+        } else if (newIndicateurDeux.formValidated === "Valid") {
+          newIndicateurDeux.formValidated = "Invalid"
+        } // else we let the state unchanged
+
+        if (!calculerIndicateurTrois(state).effectifsIndicateurCalculable) {
+          newIndicateurTrois = defaultState.indicateurTrois
+          newIndicateurTrois.formValidated = "Valid"
+        } else if (newIndicateurTrois.formValidated === "Valid") {
+          newIndicateurTrois.formValidated = "Invalid"
+        } // else we let the state unchanged
+
+        if (!calculerIndicateurDeuxTrois(state).effectifsIndicateurCalculable) {
+          newIndicateurDeuxTrois = defaultState.indicateurDeuxTrois
+          newIndicateurDeuxTrois.formValidated = "Valid"
+        } else if (newIndicateurDeuxTrois.formValidated === "Valid") {
+          newIndicateurDeuxTrois.formValidated = "Invalid"
+        } // else we let the state unchanged
+
+        return {
+          ...state,
+          effectif: { ...state.effectif, formValidated: action.valid },
+          // Si les nouveaux effectifs, rendent non calculables les indicateurs 2, 3 ou 2&3, alors on les met à Valid.
+          indicateurUn: newIndicateurUn,
+          indicateurDeux: newIndicateurDeux,
+          indicateurTrois: newIndicateurTrois,
+          indicateurDeuxTrois: newIndicateurDeuxTrois,
         }
       }
       return {

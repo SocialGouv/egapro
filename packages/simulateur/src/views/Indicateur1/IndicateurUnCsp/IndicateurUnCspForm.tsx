@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react"
-import { FormState, GroupTranchesAgesIndicateurUn } from "../../../globals"
+import { FormState, RemunerationPourTrancheAge } from "../../../globals"
 
-import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
-import { displayNameCategorieSocioPro } from "../../../utils/helpers"
+import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
+import { displayNameCSP } from "../../../utils/helpers"
 
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
 interface IndicateurUnCspFormProps {
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>
+  ecartRemuParTrancheAge: Array<EffectifEtEcartRemuGroupCsp>
   readOnly: boolean
   validateIndicateurUn: (valid: FormState) => void
 }
@@ -24,14 +24,14 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
 
   const ecartRemuParTrancheAgeRaw = ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
     id: categorieSocioPro,
-    name: displayNameCategorieSocioPro(categorieSocioPro),
+    name: displayNameCSP(categorieSocioPro),
     ...otherAttr,
   }))
 
   const updateIndicateurUnRaw = (
     data: Array<{
       id: any
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
     const remunerationAnnuelle = data.map(({ id, tranchesAges }) => ({

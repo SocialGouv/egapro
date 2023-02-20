@@ -16,6 +16,7 @@ import type {
   IndicateurNonCalculable,
 } from "../../utils/declarationBuilder"
 
+import { fromUnixTime } from "date-fns"
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
 import ButtonLink from "../../components/ds/ButtonLink"
@@ -25,8 +26,8 @@ import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import InputGroup from "../../components/ds/InputGroup"
-import TextareaCounter from "../../components/ds/TextareaCounter"
 import LegalText from "../../components/ds/LegalText"
+import TextareaCounter from "../../components/ds/TextareaCounter"
 import TextareaGroup from "../../components/ds/TextareaGroup"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
@@ -35,7 +36,7 @@ import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
-import { dateToFrString, parseDate } from "../../utils/date"
+import { dateToFrString, isOlderThanTimeAgo, parseDate } from "../../utils/date"
 import { updateDeclarationWithObjectifsMesures } from "../../utils/declarationBuilder"
 import { useToastMessage } from "../../utils/hooks"
 
@@ -73,7 +74,7 @@ export const objectifValidator = (
 /**
  * Zod validator in relation to the publication dates and the end of reference period.
  */
-const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) =>
+const isDateBeforeFinPeriodeReference = (finPeriodeReference?: Date) =>
   z
     .string({ required_error })
     .min(1, { message: required_error })
@@ -151,15 +152,15 @@ type Params = {
 }
 
 export type ObjectifsMesuresFormSchema = {
-  objectifIndicateurUn?: string | undefined
-  objectifIndicateurDeux?: string | undefined
-  objectifIndicateurTrois?: string | undefined
-  objectifIndicateurDeuxTrois?: string | undefined
-  objectifIndicateurQuatre?: string | undefined
-  objectifIndicateurCinq?: string | undefined
-  datePublicationMesures?: string | undefined
-  datePublicationObjectifs?: string | undefined
-  modalitesPublicationObjectifsMesures: string | undefined
+  objectifIndicateurUn?: string
+  objectifIndicateurDeux?: string
+  objectifIndicateurTrois?: string
+  objectifIndicateurDeuxTrois?: string
+  objectifIndicateurQuatre?: string
+  objectifIndicateurCinq?: string
+  datePublicationMesures?: string
+  datePublicationObjectifs?: string
+  modalitesPublicationObjectifsMesures?: string
 }
 
 function buildWordings(index: number | undefined, publicationSurSiteInternet: boolean) {
@@ -221,7 +222,7 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
  *
  * These helpers are used by UI and by DeclarationListe to reuse the zod validation.
  */
-export function buildHelpersObjectifsMesures(declaration: DeclarationAPI | undefined) {
+export function buildHelpersObjectifsMesures(declaration?: DeclarationAPI) {
   const index = declaration?.data.déclaration.index
   const publicationSurSiteInternet = Boolean(declaration?.data.déclaration?.publication?.url)
 
@@ -399,11 +400,19 @@ export function buildHelpersObjectifsMesures(declaration: DeclarationAPI | undef
   }
 }
 
+//Note: For 2022, first year of OPMC, we consider that the duration to be frozen is 2 years, but for next years, it will be 1 year like isFrozenDeclaration.
+const OPMC_FROZEN_DURATION = { years: 2 }
+
+export const isFrozenDeclarationForOPMC = (declaration?: DeclarationAPI) =>
+  declaration?.declared_at ? isOlderThanTimeAgo(fromUnixTime(declaration.declared_at), OPMC_FROZEN_DURATION) : false
+
 const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   const history = useHistory()
   const { siren, year } = useParams<Params>()
 
   const { declaration, isLoading, isError } = useDeclaration(siren, Number(year))
+
+  const isFrozenObjectifsMesures = isFrozenDeclarationForOPMC(declaration)
 
   const { toastSuccess, toastError } = useToastMessage({ duration: 10000 })
 
@@ -471,6 +480,14 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   return (
     <SinglePageLayout>
       <Page title={title}>
+        {isFrozenObjectifsMesures && (
+          <InfoBlock
+            type="warning"
+            title="Vos objectifs de progression et mesures de correction ne sont plus modifiables."
+            text="Vos objectifs de progression et mesures de correction ne sont plus modifiables car le délai est écoulé."
+            my="6"
+          />
+        )}
         <Form
           onSubmit={onSubmit}
           initialValues={initialValuesObjectifsMesures}
@@ -506,7 +523,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                             : String(noteIndicateurUn) + "/" + MAX_NOTES_INDICATEURS["indicateurUn"]
                         }
                         fieldName="objectifIndicateurUn"
-                        isReadOnly={indicateurUnNonCalculable}
+                        isReadOnly={indicateurUnNonCalculable || isFrozenObjectifsMesures}
                         isDisabled={
                           indicateurUnNonCalculable || noteIndicateurUn === MAX_NOTES_INDICATEURS["indicateurUn"]
                         }
@@ -528,7 +545,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                                 : String(noteIndicateurDeuxTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
                             }
                             fieldName="objectifIndicateurDeuxTrois"
-                            isReadOnly={indicateurDeuxTroisNonCalculable}
+                            isReadOnly={indicateurDeuxTroisNonCalculable || isFrozenObjectifsMesures}
                             isDisabled={
                               indicateurDeuxTroisNonCalculable ||
                               noteIndicateurDeuxTrois === MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
@@ -546,7 +563,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                                 : String(noteIndicateurDeux) + "/" + MAX_NOTES_INDICATEURS["indicateurDeux"]
                             }
                             fieldName="objectifIndicateurDeux"
-                            isReadOnly={indicateurDeuxNonCalculable}
+                            isReadOnly={indicateurDeuxNonCalculable || isFrozenObjectifsMesures}
                             isDisabled={
                               indicateurDeuxNonCalculable ||
                               noteIndicateurDeux === MAX_NOTES_INDICATEURS["indicateurDeux"]
@@ -562,7 +579,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                                 : String(noteIndicateurTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurTrois"]
                             }
                             fieldName="objectifIndicateurTrois"
-                            isReadOnly={indicateurTroisNonCalculable}
+                            isReadOnly={indicateurTroisNonCalculable || isFrozenObjectifsMesures}
                             isDisabled={
                               indicateurTroisNonCalculable ||
                               noteIndicateurTrois === MAX_NOTES_INDICATEURS["indicateurTrois"]
@@ -580,7 +597,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                               : String(noteIndicateurQuatre) + "/" + MAX_NOTES_INDICATEURS["indicateurQuatre"]
                           }
                           fieldName="objectifIndicateurQuatre"
-                          isReadOnly={indicateurQuatreNonCalculable}
+                          isReadOnly={indicateurQuatreNonCalculable || isFrozenObjectifsMesures}
                           isDisabled={
                             indicateurQuatreNonCalculable ||
                             noteIndicateurQuatre === MAX_NOTES_INDICATEURS["indicateurQuatre"]
@@ -593,7 +610,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         <RowProgression
                           valueOrigin={String(noteIndicateurCinq) + "/" + MAX_NOTES_INDICATEURS["indicateurCinq"]}
                           fieldName="objectifIndicateurCinq"
-                          isReadOnly={false}
+                          isReadOnly={isFrozenObjectifsMesures}
                           isDisabled={noteIndicateurCinq === MAX_NOTES_INDICATEURS["indicateurCinq"]}
                         >
                           Dix plus hautes rémunérations
@@ -606,7 +623,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                     <InputDateGroup
                       fieldName="datePublicationObjectifs"
                       label="Date de publication des objectifs de progression"
-                      isReadOnly={false}
+                      isReadOnly={isFrozenObjectifsMesures}
                     />
 
                     {index < 75 && (
@@ -614,7 +631,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         <InputDateGroup
                           fieldName="datePublicationMesures"
                           label="Date de publication des mesures de correction"
-                          isReadOnly={false}
+                          isReadOnly={isFrozenObjectifsMesures}
                         />
                       </>
                     )}
@@ -637,7 +654,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                       <TextareaGroup
                         label={modalite}
                         fieldName="modalitesPublicationObjectifsMesures"
-                        isReadOnly={false}
+                        isReadOnly={isFrozenObjectifsMesures}
                       />
                     )}
                   </>
@@ -645,7 +662,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               </FormStack>
 
               <ActionBar>
-                <FormSubmit label="Déclarer" loading={submitting} />
+                <FormSubmit label="Déclarer" loading={submitting} disabled={isFrozenObjectifsMesures} />
                 <ButtonLink
                   to={`/tableauDeBord/mes-declarations/${siren}`}
                   label="Retour"

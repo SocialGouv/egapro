@@ -1,51 +1,41 @@
 import {
   AppState,
-  TranchesAges,
-  CategorieSocioPro,
-  GroupeEffectif,
-  GroupeIndicateurUn,
-  GroupeCoefficient,
-  GroupTranchesAgesIndicateurUn,
-  GroupTranchesAgesEffectif,
+  CoefficientGroupe,
+  CoefficientPourTrancheAge,
+  CSP,
+  EffectifPourTrancheAge,
+  EffectifsPourCSP,
+  RemunerationPourTrancheAge,
+  RemunerationsPourCSP,
+  SexeType,
+  TrancheAge,
 } from "../globals"
 
 import {
   calculEcartsPonderesParGroupe,
-  calculTotalEcartPondere,
-  calculTotalEffectifs,
-  rowEffectifsParTrancheAge,
+  calculerTotalEcartPondere,
+  calculerTotalEffectifs,
+  effectifEstCalculable,
   EffectifGroup,
-  calculEffectifsIndicateurCalculable,
+  nombreEffectifsValides,
 } from "./calculsEgaPro"
 import { roundDecimal } from "./number"
 
-/* INDICATEUR 1 CONST */
+/*
+ * Indicateur 1: écart de rémunération
+ */
 
 const seuilPertinenceCsp = 5 / 100
 const seuilPertinenceCoef = 2 / 100
 
 const baremeEcartRemuneration = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0]
 
-//////////////////
-// COMMON ////////
-//////////////////
-
-export {
-  calculTotalEffectifs,
-  calculTotalEcartPondere, // TEV
-  calculEffectifsIndicateurCalculable, // IC
-}
-
-//////////////////
-// INDICATEUR 1 //
-//////////////////
-
 // VG
-export const calculValiditeGroupe = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+export const calculerValiditeGroupe3 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
   nombreSalariesFemmes >= 3 && nombreSalariesHommes >= 3
 
 // ERM
-export const calculEcartRemunerationMoyenne = (
+export const calculerEcartRemunerationMoyenne = (
   remunerationAnnuelleBrutFemmes: number,
   remunerationAnnuelleBrutHommes: number,
 ): number | undefined =>
@@ -57,7 +47,7 @@ export const calculEcartRemunerationMoyenne = (
     : undefined
 
 // ESP
-const calculEcartApresApplicationSeuilPertinence = (
+const calculerEcartApresApplicationSeuilPertinence = (
   ecartRemunerationMoyenne: number | undefined,
   seuilPertinence: number,
 ): number | undefined =>
@@ -68,52 +58,42 @@ const calculEcartApresApplicationSeuilPertinence = (
       )
     : undefined
 
-export const calculEcartApresApplicationSeuilPertinenceCsp = (
-  ecartRemunerationMoyenne: number | undefined,
-): number | undefined => calculEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCsp)
+export const calculerEcartApresApplicationSeuilPertinenceCsp = (
+  ecartRemunerationMoyenne?: number,
+): number | undefined => calculerEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCsp)
 
-export const calculEcartApresApplicationSeuilPertinenceCoef = (
-  ecartRemunerationMoyenne: number | undefined,
-): number | undefined => calculEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCoef)
+export const calculerEcartApresApplicationSeuilPertinenceCoef = (
+  ecartRemunerationMoyenne?: number,
+): number | undefined => calculerEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCoef)
 
-export interface effectifEtEcartRemuGroupCsp extends EffectifGroup {
-  categorieSocioPro: CategorieSocioPro
-  trancheAge: TranchesAges
-  remunerationAnnuelleBrutFemmes: number | undefined
-  remunerationAnnuelleBrutHommes: number | undefined
-  ecartRemunerationMoyenne: number | undefined
-  ecartApresApplicationSeuilPertinence: number | undefined
+export type EffectifEtEcartRemuGroupCsp = EffectifGroup & {
+  categorieSocioPro: CSP
+  trancheAge: TrancheAge
+  remunerationAnnuelleBrutFemmes?: number
+  remunerationAnnuelleBrutHommes?: number
+  ecartRemunerationMoyenne?: number
+  ecartApresApplicationSeuilPertinence?: number
 }
 
-export interface effectifEtEcartRemuGroupCoef extends EffectifGroup {
+export type EffectifEtEcartRemuGroupCoef = EffectifGroup & {
   id: any
   name: string
-  trancheAge: TranchesAges
-  remunerationAnnuelleBrutFemmes: number | undefined
-  remunerationAnnuelleBrutHommes: number | undefined
-  ecartRemunerationMoyenne: number | undefined
-  ecartApresApplicationSeuilPertinence: number | undefined
-}
-
-export interface tmpGroupTranchesAgesCoef {
-  id: any
-  name: string
-  trancheAge: TranchesAges
-  nombreSalariesFemmes: number | undefined
-  nombreSalariesHommes: number | undefined
-  remunerationAnnuelleBrutFemmes: number | undefined
-  remunerationAnnuelleBrutHommes: number | undefined
+  trancheAge: TrancheAge
+  remunerationAnnuelleBrutFemmes?: number
+  remunerationAnnuelleBrutHommes?: number
+  ecartRemunerationMoyenne?: number
+  ecartApresApplicationSeuilPertinence?: number
 }
 
 // Ajout de l'écart de rémunération moyenne dans les données "par niveau" (CSP ou coefficient) de l'indicateur
-export const calculEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuelle: Array<GroupeIndicateurUn>) =>
+export const calculerEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuelle: RemunerationsPourCSP[]) =>
   remunerationAnnuelle.map((categorie) => {
     return {
       ...categorie,
       tranchesAges: categorie.tranchesAges.map((trancheAge) => {
         return {
           ...trancheAge,
-          ecartTauxRemuneration: calculEcartRemunerationMoyenne(
+          ecartTauxRemuneration: calculerEcartRemunerationMoyenne(
             trancheAge.remunerationAnnuelleBrutFemmes || 0,
             trancheAge.remunerationAnnuelleBrutHommes || 0,
           ),
@@ -122,14 +102,14 @@ export const calculEcartTauxRemunerationParTrancheAgeCSP = (remunerationAnnuelle
     }
   })
 
-export const calculEcartTauxRemunerationParTrancheAgeCoef = (coefficient: Array<GroupeCoefficient>) =>
+export const calculerEcartTauxRemunerationParTrancheAgeCoef = (coefficient: CoefficientGroupe[]) =>
   coefficient.map((niveau) => {
     return {
       ...niveau,
       tranchesAges: niveau.tranchesAges.map((trancheAge) => {
         return {
           ...trancheAge,
-          ecartTauxRemuneration: calculEcartRemunerationMoyenne(
+          ecartTauxRemuneration: calculerEcartRemunerationMoyenne(
             trancheAge.remunerationAnnuelleBrutFemmes || 0,
             trancheAge.remunerationAnnuelleBrutHommes || 0,
           ),
@@ -138,19 +118,38 @@ export const calculEcartTauxRemunerationParTrancheAgeCoef = (coefficient: Array<
     }
   })
 
-export type FlatGroupTranchesAgesCsp = GroupTranchesAgesEffectif & { categorieSocioPro: CategorieSocioPro }
+export const calculerEffectifsParTrancheAge = ({
+  nombreSalariesFemmes,
+  nombreSalariesHommes,
+}: EffectifPourTrancheAge): EffectifGroup => {
+  nombreSalariesFemmes = nombreSalariesFemmes || 0
+  nombreSalariesHommes = nombreSalariesHommes || 0
 
-export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
-  dataEffectif: Array<GroupeEffectif>,
-  dataIndicateurUn: Array<GroupeIndicateurUn>,
-): Array<effectifEtEcartRemuGroupCsp> => {
+  // VG
+  const validiteGroupe = calculerValiditeGroupe3(nombreSalariesFemmes, nombreSalariesHommes)
+
+  return {
+    nombreSalariesFemmes,
+    nombreSalariesHommes,
+    validiteGroupe,
+    // EV
+    effectifsValides: nombreEffectifsValides(validiteGroupe, nombreSalariesFemmes, nombreSalariesHommes),
+  }
+}
+
+export type FlatGroupTranchesAgesCsp = EffectifPourTrancheAge & { categorieSocioPro: CSP }
+
+export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
+  dataEffectif: EffectifsPourCSP[],
+  dataIndicateurUn: RemunerationsPourCSP[],
+): EffectifEtEcartRemuGroupCsp[] => {
   const dataEffectifByRow = dataEffectif.reduce(
     (acc: Array<FlatGroupTranchesAgesCsp>, { categorieSocioPro, tranchesAges }) =>
       acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, categorieSocioPro }))),
     [],
   )
   const dataIndicateurUnByRow = dataIndicateurUn.reduce(
-    (acc: Array<GroupTranchesAgesIndicateurUn>, group) => acc.concat(group.tranchesAges),
+    (acc: Array<RemunerationPourTrancheAge>, group) => acc.concat(group.tranchesAges),
     [],
   )
 
@@ -162,15 +161,16 @@ export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
     const remunerationAnnuelleBrutHommes =
       groupTrancheAgeIndicateurUn && groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutHommes
 
-    const effectifs = rowEffectifsParTrancheAge(groupTrancheAgeEffectif, calculValiditeGroupe)
+    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeEffectif)
 
     // ERM
-    const ecartRemunerationMoyenne = calculEcartRemunerationMoyenne(
+    const ecartRemunerationMoyenne = calculerEcartRemunerationMoyenne(
       remunerationAnnuelleBrutFemmes || 0,
       remunerationAnnuelleBrutHommes || 0,
     )
     // ESP
-    const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinenceCsp(ecartRemunerationMoyenne)
+    const ecartApresApplicationSeuilPertinence =
+      calculerEcartApresApplicationSeuilPertinenceCsp(ecartRemunerationMoyenne)
 
     return {
       ...effectifs,
@@ -186,29 +186,28 @@ export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
   return computedDataByRow
 }
 
-export const calculEffectifsEtEcartRemuParTrancheAgeCoef = (
-  coefficient: Array<GroupeCoefficient>,
-): Array<effectifEtEcartRemuGroupCoef> => {
-  const dataCoefficientByRow = coefficient.reduce(
-    (acc: Array<tmpGroupTranchesAgesCoef>, { name, tranchesAges }, index) =>
-      acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, name, id: index }))),
+export const calculerEffectifsEtEcartRemuParTrancheAgeCoef = (
+  coefficient: CoefficientGroupe[],
+): EffectifEtEcartRemuGroupCoef[] => {
+  const dataCoefficientByRow = coefficient.reduce<Array<CoefficientPourTrancheAge & { name: string; id: number }>>(
+    (acc, { name, tranchesAges }, id) => acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, name, id }))),
     [],
   )
 
-  const computedDataByRow = dataCoefficientByRow.map((groupTrancheAgeCoef: tmpGroupTranchesAgesCoef) => {
-    const remunerationAnnuelleBrutFemmes = groupTrancheAgeCoef && groupTrancheAgeCoef.remunerationAnnuelleBrutFemmes
-    const remunerationAnnuelleBrutHommes = groupTrancheAgeCoef && groupTrancheAgeCoef.remunerationAnnuelleBrutHommes
+  const computedDataByRow = dataCoefficientByRow.map((groupTrancheAgeCoef) => {
+    const remunerationAnnuelleBrutFemmes = groupTrancheAgeCoef.remunerationAnnuelleBrutFemmes
+    const remunerationAnnuelleBrutHommes = groupTrancheAgeCoef.remunerationAnnuelleBrutHommes
 
-    const effectifs = rowEffectifsParTrancheAge(groupTrancheAgeCoef, calculValiditeGroupe)
+    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeCoef)
 
     // ERM
-    const ecartRemunerationMoyenne = calculEcartRemunerationMoyenne(
+    const ecartRemunerationMoyenne = calculerEcartRemunerationMoyenne(
       remunerationAnnuelleBrutFemmes || 0,
       remunerationAnnuelleBrutHommes || 0,
     )
     // ESP
     const ecartApresApplicationSeuilPertinence =
-      calculEcartApresApplicationSeuilPertinenceCoef(ecartRemunerationMoyenne)
+      calculerEcartApresApplicationSeuilPertinenceCoef(ecartRemunerationMoyenne)
 
     return {
       ...effectifs,
@@ -226,32 +225,29 @@ export const calculEffectifsEtEcartRemuParTrancheAgeCoef = (
   return computedDataByRow
 }
 
-export const calculEcartsPonderesParTrancheAge = calculEcartsPonderesParGroupe(
+export const calculerEcartsPonderesParTrancheAge = calculEcartsPonderesParGroupe(
   ({ ecartApresApplicationSeuilPertinence }) => ecartApresApplicationSeuilPertinence,
 )
 
 // IER
-export const calculIndicateurEcartRemuneration = (
+export const calculerEcartRemuneration = (
   indicateurCalculable: boolean,
-  totalEcartPondere: number | undefined,
+  totalEcartPondere?: number,
 ): number | undefined =>
   indicateurCalculable && totalEcartPondere !== undefined ? roundDecimal(100 * totalEcartPondere, 6) : undefined
 
-export const calculIndicateurSexeSousRepresente = (
-  indicateurEcartRemuneration: number | undefined,
-): "hommes" | "femmes" | undefined => {
+export const calculerSexeSousRepresente = (indicateurEcartRemuneration?: number): SexeType | undefined => {
   if (indicateurEcartRemuneration === undefined || indicateurEcartRemuneration === 0) {
     return undefined
   }
   return Math.sign(indicateurEcartRemuneration) < 0 ? "femmes" : "hommes"
 }
 
-export const calculIndicateurEcartRemunerationAbsolute = (
-  indicateurEcartRemuneration: number | undefined,
-): number | undefined => (indicateurEcartRemuneration !== undefined ? Math.abs(indicateurEcartRemuneration) : undefined)
+export const calculerEcartRemunerationAbsolu = (indicateurEcartRemuneration?: number): number | undefined =>
+  indicateurEcartRemuneration !== undefined ? Math.abs(indicateurEcartRemuneration) : undefined
 
 // NOTE
-export const calculNote = (indicateurEcartRemuneration: number | undefined): number | undefined =>
+export const calculerNote = (indicateurEcartRemuneration?: number): number | undefined =>
   indicateurEcartRemuneration !== undefined
     ? baremeEcartRemuneration[
         Math.min(
@@ -266,46 +262,45 @@ export const calculNote = (indicateurEcartRemuneration: number | undefined): num
 /////////
 
 export default function calculerIndicateurUn(state: AppState) {
-  const effectifEtEcartRemuParTrancheCsp = calculEffectifsEtEcartRemuParTrancheAgeCsp(
+  const effectifEtEcartRemuParTrancheCsp = calculerEffectifsEtEcartRemuParTrancheAgeCsp(
     state.effectif.nombreSalaries,
     state.indicateurUn.remunerationAnnuelle,
   )
 
-  const effectifEtEcartRemuParTrancheCoef = calculEffectifsEtEcartRemuParTrancheAgeCoef(state.indicateurUn.coefficient)
+  const effectifEtEcartRemuParTrancheCoef = calculerEffectifsEtEcartRemuParTrancheAgeCoef(
+    state.indicateurUn.coefficient,
+  )
 
   const effectifEtEcartRemuParTranche = state.indicateurUn.csp
     ? effectifEtEcartRemuParTrancheCsp
     : effectifEtEcartRemuParTrancheCoef
 
-  const { totalNombreSalaries, totalEffectifsValides } = calculTotalEffectifs(effectifEtEcartRemuParTranche)
+  const { totalNombreSalaries, totalEffectifsValides } = calculerTotalEffectifs(effectifEtEcartRemuParTranche)
 
-  const ecartsPonderesByRow = calculEcartsPonderesParTrancheAge(effectifEtEcartRemuParTranche, totalEffectifsValides)
+  const ecartsPonderesByRow = calculerEcartsPonderesParTrancheAge(effectifEtEcartRemuParTranche, totalEffectifsValides)
 
   // TEP
-  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow)
+  const totalEcartPondere = calculerTotalEcartPondere(ecartsPonderesByRow)
 
   // IC
-  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(totalNombreSalaries, totalEffectifsValides)
+  const effectifsIndicateurCalculable = effectifEstCalculable(totalNombreSalaries, totalEffectifsValides)
 
   // IER
-  const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
-    effectifsIndicateurCalculable,
-    totalEcartPondere,
-  )
+  const indicateurEcartRemuneration = calculerEcartRemuneration(effectifsIndicateurCalculable, totalEcartPondere)
 
-  const indicateurEcartRemunerationAbsolute = calculIndicateurEcartRemunerationAbsolute(indicateurEcartRemuneration)
+  const indicateurEcartRemunerationAbsolu = calculerEcartRemunerationAbsolu(indicateurEcartRemuneration)
 
-  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(indicateurEcartRemuneration)
+  const indicateurSexeSurRepresente = calculerSexeSousRepresente(indicateurEcartRemuneration)
 
   // NOTE
-  const noteIndicateurUn = calculNote(indicateurEcartRemunerationAbsolute)
+  const noteIndicateurUn = calculerNote(indicateurEcartRemunerationAbsolu)
 
   return {
     effectifEtEcartRemuParTrancheCsp,
     effectifEtEcartRemuParTrancheCoef,
     effectifEtEcartRemuParTranche,
     effectifsIndicateurCalculable,
-    indicateurEcartRemuneration: indicateurEcartRemunerationAbsolute,
+    indicateurEcartRemuneration: indicateurEcartRemunerationAbsolu,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
   }

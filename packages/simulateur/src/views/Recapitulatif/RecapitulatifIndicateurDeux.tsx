@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react"
 
 import {
   displayFractionPercentWithEmptyData,
-  displayNameCategorieSocioPro,
+  displayNameCSP,
   displayPercent,
   displaySexeSurRepresente,
 } from "../../utils/helpers"
@@ -41,7 +41,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     correctionMeasure,
   } = calculsIndicateurDeux
 
-  if (!isEffectifsFilled || indicateurDeuxFormValidated === "None") {
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
@@ -65,6 +65,10 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
+  if (indicateurDeuxFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
   return (
     <RecapBloc
       indicateur="indicateur2"
@@ -83,7 +87,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         <Tbody>
           {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
             <Tr key={categorieSocioPro}>
-              <Td>{displayNameCategorieSocioPro(categorieSocioPro)}</Td>
+              <Td>{displayNameCSP(categorieSocioPro)}</Td>
               <Td isNumeric>{displayFractionPercentWithEmptyData(ecartTauxAugmentation, 1)}</Td>
             </Tr>
           ))}

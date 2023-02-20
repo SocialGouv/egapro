@@ -38,7 +38,7 @@ const Recapitulatif: FunctionComponent = () => {
 
   const trancheEffectifs = state.informations.trancheEffectifs
 
-  const periodeSuffisante = state.informations.periodeSuffisante || true // For old simulations-declarations, we assume that the periodSuffisante is true.
+  const periodeSuffisante = state.informations.periodeSuffisante !== false // For old simulations-declarations, we assume that the periodSuffisante is true.
 
   const calculsIndicateurUn = calculerIndicateurUn(state)
   const calculsIndicateurDeux = calculerIndicateurDeux(state)

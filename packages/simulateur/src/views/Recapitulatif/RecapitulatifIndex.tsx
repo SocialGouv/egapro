@@ -6,7 +6,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 
 interface RecapitulatifIndexProps {
   allIndicateurValid: boolean
-  noteIndex: number | undefined
+  noteIndex?: number
   totalPoint: number
   totalPointCalculable: number
 }

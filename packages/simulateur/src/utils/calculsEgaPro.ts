@@ -1,16 +1,18 @@
-import { GroupTranchesAgesEffectif } from "../globals"
+import { EffectifsPourCSP, SexeType } from "../globals"
 import { roundDecimal } from "./number"
 
-/* EFFECTIF CONST */
-
 export const tauxEffectifValide = 40 / 100
+
+// VG (pour indicateurs 2 et 3). Doit se trouver ici pour éviter les imports circulaires.
+export const calculerValiditeGroupe10 = (nombreSalariesFemmes: number, nombreSalariesHommes: number): boolean =>
+  nombreSalariesFemmes >= 10 && nombreSalariesHommes >= 10
 
 //////////////////
 // COMMON ////////
 //////////////////
 
 // EV
-export const calculEffectifsValides = (
+export const nombreEffectifsValides = (
   validiteGroupe: boolean,
   nombreSalariesFemmes: number,
   nombreSalariesHommes: number,
@@ -18,55 +20,40 @@ export const calculEffectifsValides = (
 
 // EP
 export const calculEcartPondere = (
-  validiteGroupe: boolean,
   ecartPourcentage: number | undefined,
   effectifsValides: number,
   totalEffectifsValides: number,
 ): number | undefined =>
-  validiteGroupe && totalEffectifsValides > 0 && ecartPourcentage !== undefined
+  totalEffectifsValides > 0 && ecartPourcentage !== undefined
     ? roundDecimal((ecartPourcentage * effectifsValides) / totalEffectifsValides, 6)
     : undefined
 
+type EffectifEtEcart = {
+  validiteGroupe: boolean
+  effectifsValides: number
+  ecartApresApplicationSeuilPertinence?: number
+  ecartTauxAugmentation?: number
+  ecartTauxPromotion?: number
+  ecartTauxAugmentationPromotion?: number
+}
+
+type FindEcartFn = (effectifEtEcart: EffectifEtEcart) => number | undefined
+
+// Utilisé pour les indicateurs 1, 2 et 3. Sert à calculer des moyennes en ne prenant pas en compte les groupes non valides.
 export const calculEcartsPonderesParGroupe =
-  (
-    findEcartPourcentage: (groupEffectifEtEcartAugment: {
-      validiteGroupe: boolean
-      effectifsValides: number
-      ecartApresApplicationSeuilPertinence?: number | undefined
-      ecartTauxAugmentation?: number | undefined
-      ecartTauxPromotion?: number | undefined
-      ecartTauxAugmentationPromotion?: number | undefined
-    }) => number | undefined,
-  ) =>
-  (
-    groupEffectifEtEcart: Array<{
-      validiteGroupe: boolean
-      effectifsValides: number
-      ecartApresApplicationSeuilPertinence?: number | undefined
-      ecartTauxAugmentation?: number | undefined
-      ecartTauxPromotion?: number | undefined
-      ecartTauxAugmentationPromotion?: number | undefined
-    }>,
-    totalEffectifsValides: number,
-  ) =>
+  (findEcartPourcentage: FindEcartFn) => (groupEffectifEtEcart: EffectifEtEcart[], totalEffectifsValides: number) =>
     groupEffectifEtEcart
       .filter(({ validiteGroupe }) => validiteGroupe)
       .map((effectifEtEcart) => {
-        const { validiteGroupe, effectifsValides } = effectifEtEcart
+        const { effectifsValides } = effectifEtEcart
         const ecartPourcentage = findEcartPourcentage(effectifEtEcart)
-        // EP
-        const ecartPondere = calculEcartPondere(
-          validiteGroupe,
-          ecartPourcentage,
-          effectifsValides,
-          totalEffectifsValides,
-        )
 
-        return ecartPondere
+        // EP
+        return calculEcartPondere(ecartPourcentage, effectifsValides, totalEffectifsValides)
       })
 
 // TEP
-export const calculTotalEcartPondere = (tableauEcartsPonderes: Array<number | undefined>): number | undefined =>
+export const calculerTotalEcartPondere = (tableauEcartsPonderes: Array<number | undefined>): number | undefined =>
   tableauEcartsPonderes.length === 0 || tableauEcartsPonderes.includes(undefined)
     ? undefined
     : roundDecimal((tableauEcartsPonderes as number[]).reduce((acc, val) => acc + val, 0) || 0, 6)
@@ -75,38 +62,15 @@ export const calculTotalEcartPondere = (tableauEcartsPonderes: Array<number | un
 // EFFECTIFS /////
 //////////////////
 
-export interface EffectifGroup {
+export type EffectifGroup = {
   nombreSalariesFemmes: number
   nombreSalariesHommes: number
   validiteGroupe: boolean
   effectifsValides: number
 }
 
-export const rowEffectifsParTrancheAge = (
-  { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAgesEffectif,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
-  nombreSalariesFemmes = nombreSalariesFemmes || 0
-  nombreSalariesHommes = nombreSalariesHommes || 0
-
-  // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmes, nombreSalariesHommes)
-  // EV
-  const effectifsValides = calculEffectifsValides(validiteGroupe, nombreSalariesFemmes, nombreSalariesHommes)
-
-  return {
-    nombreSalariesFemmes,
-    nombreSalariesHommes,
-    validiteGroupe,
-    effectifsValides,
-  }
-}
-
-export const rowEffectifsParCategorieSocioPro = (
-  tranchesAges: Array<GroupTranchesAgesEffectif>,
-  calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): EffectifGroup => {
-  const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = tranchesAges.reduce(
+export const calculerEffectifsParCSP = (categorie: EffectifsPourCSP): EffectifGroup => {
+  const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = categorie.tranchesAges.reduce(
     ({ nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe }, { nombreSalariesFemmes, nombreSalariesHommes }) => ({
       nombreSalariesFemmesGroupe: nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
       nombreSalariesHommesGroupe: nombreSalariesHommesGroupe + (nombreSalariesHommes || 0),
@@ -115,28 +79,23 @@ export const rowEffectifsParCategorieSocioPro = (
   )
 
   // VG
-  const validiteGroupe = calculValiditeGroupe(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
-  // EV
-  const effectifsValides = calculEffectifsValides(
-    validiteGroupe,
-    nombreSalariesFemmesGroupe,
-    nombreSalariesHommesGroupe,
-  )
+  const validiteGroupe = calculerValiditeGroupe10(nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe)
 
   return {
     nombreSalariesFemmes: nombreSalariesFemmesGroupe,
     nombreSalariesHommes: nombreSalariesHommesGroupe,
     validiteGroupe,
-    effectifsValides,
+    // EV
+    effectifsValides: nombreEffectifsValides(validiteGroupe, nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe),
   }
 }
 
-export const calculTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
+export const calculerTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes } = groupEffectif.reduce(
-    ({ totalNombreSalariesFemmes, totalNombreSalariesHommes }, { nombreSalariesFemmes, nombreSalariesHommes }) => {
+    (acc, { nombreSalariesFemmes, nombreSalariesHommes }) => {
       return {
-        totalNombreSalariesFemmes: totalNombreSalariesFemmes + nombreSalariesFemmes,
-        totalNombreSalariesHommes: totalNombreSalariesHommes + nombreSalariesHommes,
+        totalNombreSalariesFemmes: acc.totalNombreSalariesFemmes + nombreSalariesFemmes,
+        totalNombreSalariesHommes: acc.totalNombreSalariesHommes + nombreSalariesHommes,
       }
     },
     {
@@ -159,8 +118,25 @@ export const calculTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
   }
 }
 
-// IC
-export const calculEffectifsIndicateurCalculable = (
-  totalNombreSalaries: number,
-  totalEffectifsValides: number,
-): boolean => totalNombreSalaries > 0 && totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide
+/**
+ * IC
+ *
+ * Vrai si le nombre de salariés est supérieur à 0 et que le nombre d'effectifs valides est supérieur à 40% du nombre de salariés.
+ *
+ */
+export const effectifEstCalculable = (totalNombreSalaries: number, totalEffectifsValides: number): boolean =>
+  totalNombreSalaries > 0 && totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide
+
+export const calculerPlusPetitNbSalaries = (
+  totalNombreSalariesHommes?: number,
+  totalNombreSalariesFemmes?: number,
+): SexeType | undefined => {
+  if (
+    totalNombreSalariesFemmes === totalNombreSalariesHommes ||
+    totalNombreSalariesFemmes === undefined ||
+    totalNombreSalariesHommes === undefined
+  ) {
+    return undefined
+  }
+  return totalNombreSalariesHommes > totalNombreSalariesFemmes ? "femmes" : "hommes"
+}

@@ -1,4 +1,4 @@
-import { CategorieSocioPro, TranchesAges, ActionType, AppState } from "./globals"
+import { CSP, TrancheAge, ActionType, AppState } from "./globals"
 
 import appReducer, { dataIndicateurUnCoefGroup } from "./app-reducer"
 
@@ -7,6 +7,7 @@ import stateComplete from "./__fixtures__/stateComplete"
 import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate"
 import deepmerge from "deepmerge"
 import { combineMerge } from "./utils/merge"
+import produce from "immer"
 
 const stateUndefined = undefined
 
@@ -98,100 +99,100 @@ describe("updateEffectif", () => {
     data: {
       nombreSalaries: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 24,
               nombreSalariesHommes: 33,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 13,
               nombreSalariesHommes: 14,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 35,
               nombreSalariesHommes: 8,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 22,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 64,
               nombreSalariesHommes: 26,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 53,
               nombreSalariesHommes: 63,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 17,
               nombreSalariesHommes: 19,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 28,
               nombreSalariesHommes: 20,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 15,
               nombreSalariesHommes: 16,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 7,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 3,
               nombreSalariesHommes: 4,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 5,
               nombreSalariesHommes: 6,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               nombreSalariesFemmes: 4,
               nombreSalariesHommes: 9,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               nombreSalariesFemmes: 20,
               nombreSalariesHommes: 18,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               nombreSalariesFemmes: 3,
               nombreSalariesHommes: 3,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               nombreSalariesFemmes: 6,
               nombreSalariesHommes: 9,
             },
@@ -255,100 +256,100 @@ describe("updateIndicateurUnCsp", () => {
     data: {
       remunerationAnnuelle: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 23500,
               remunerationAnnuelleBrutHommes: 25500,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 24500,
               remunerationAnnuelleBrutHommes: 26500,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 25600,
               remunerationAnnuelleBrutHommes: 26500,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 27600,
               remunerationAnnuelleBrutHommes: 28500,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 23400,
               remunerationAnnuelleBrutHommes: 25400,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 24400,
               remunerationAnnuelleBrutHommes: 26400,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 31400,
               remunerationAnnuelleBrutHommes: 33400,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 39400,
               remunerationAnnuelleBrutHommes: 43400,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 26650,
               remunerationAnnuelleBrutHommes: 28650,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 27650,
               remunerationAnnuelleBrutHommes: 29650,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 34650,
               remunerationAnnuelleBrutHommes: 36650,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 42650,
               remunerationAnnuelleBrutHommes: 46650,
             },
           ],
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tranchesAges: [
             {
-              trancheAge: TranchesAges.MoinsDe30ans,
+              trancheAge: TrancheAge.MoinsDe30ans,
               remunerationAnnuelleBrutFemmes: 36700,
               remunerationAnnuelleBrutHommes: 38700,
             },
             {
-              trancheAge: TranchesAges.De30a39ans,
+              trancheAge: TrancheAge.De30a39ans,
               remunerationAnnuelleBrutFemmes: 37700,
               remunerationAnnuelleBrutHommes: 39700,
             },
             {
-              trancheAge: TranchesAges.De40a49ans,
+              trancheAge: TrancheAge.De40a49ans,
               remunerationAnnuelleBrutFemmes: 44700,
               remunerationAnnuelleBrutHommes: 46700,
             },
             {
-              trancheAge: TranchesAges.PlusDe50ans,
+              trancheAge: TrancheAge.PlusDe50ans,
               remunerationAnnuelleBrutFemmes: 52700,
               remunerationAnnuelleBrutHommes: 56700,
             },
@@ -510,22 +511,22 @@ describe("updateIndicateurUnCoef", () => {
           {
             tranchesAges: [
               {
-                trancheAge: TranchesAges.MoinsDe30ans,
+                trancheAge: TrancheAge.MoinsDe30ans,
                 nombreSalariesFemmes: 3,
                 nombreSalariesHommes: 2,
               },
               {
-                trancheAge: TranchesAges.De30a39ans,
+                trancheAge: TrancheAge.De30a39ans,
                 nombreSalariesFemmes: 0,
                 nombreSalariesHommes: 8,
               },
               {
-                trancheAge: TranchesAges.De40a49ans,
+                trancheAge: TrancheAge.De40a49ans,
                 nombreSalariesFemmes: 10,
                 nombreSalariesHommes: 13,
               },
               {
-                trancheAge: TranchesAges.PlusDe50ans,
+                trancheAge: TrancheAge.PlusDe50ans,
                 nombreSalariesFemmes: 4,
                 nombreSalariesHommes: 19,
               },
@@ -584,22 +585,22 @@ describe("updateIndicateurUnCoef", () => {
           {
             tranchesAges: [
               {
-                trancheAge: TranchesAges.MoinsDe30ans,
+                trancheAge: TrancheAge.MoinsDe30ans,
                 remunerationAnnuelleBrutFemmes: 25820,
                 remunerationAnnuelleBrutHommes: 24820,
               },
               {
-                trancheAge: TranchesAges.De30a39ans,
+                trancheAge: TrancheAge.De30a39ans,
                 remunerationAnnuelleBrutFemmes: 32820,
                 remunerationAnnuelleBrutHommes: 32820,
               },
               {
-                trancheAge: TranchesAges.De40a49ans,
+                trancheAge: TrancheAge.De40a49ans,
                 remunerationAnnuelleBrutFemmes: 41820,
                 remunerationAnnuelleBrutHommes: 43820,
               },
               {
-                trancheAge: TranchesAges.PlusDe50ans,
+                trancheAge: TrancheAge.PlusDe50ans,
                 remunerationAnnuelleBrutFemmes: 49820,
                 remunerationAnnuelleBrutHommes: 53550,
               },
@@ -658,22 +659,22 @@ describe("updateIndicateurDeux", () => {
       presenceAugmentation: true,
       tauxAugmentation: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tauxAugmentationFemmes: 2.4,
           tauxAugmentationHommes: 3,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tauxAugmentationFemmes: 1.7,
           tauxAugmentationHommes: 2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tauxAugmentationFemmes: 9.4,
           tauxAugmentationHommes: 5.2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tauxAugmentationFemmes: 10.05,
           tauxAugmentationHommes: 10.06,
         },
@@ -717,22 +718,22 @@ describe("updateIndicateurTrois", () => {
       presencePromotion: true,
       tauxPromotion: [
         {
-          categorieSocioPro: CategorieSocioPro.Ouvriers,
+          categorieSocioPro: CSP.Ouvriers,
           tauxPromotionFemmes: 1,
           tauxPromotionHommes: 2,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Employes,
+          categorieSocioPro: CSP.Employes,
           tauxPromotionFemmes: 0,
           tauxPromotionHommes: 0,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Techniciens,
+          categorieSocioPro: CSP.Techniciens,
           tauxPromotionFemmes: 1,
           tauxPromotionHommes: 1.5,
         },
         {
-          categorieSocioPro: CategorieSocioPro.Cadres,
+          categorieSocioPro: CSP.Cadres,
           tauxPromotionFemmes: 2,
           tauxPromotionHommes: 2.57,
         },
@@ -1080,15 +1081,18 @@ describe("validateEffectif", () => {
     })
 
     test("change default state", () => {
-      const { effectif, ...rest } = appReducer(stateDefault, action) as AppState
-      const { effectif: effectifInitial, ...restInitial } = stateDefault as AppState
+      const newState = appReducer(stateDefault, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "Valid",
+      const expectedState = produce(stateDefault as AppState, (draft) => {
+        draft.effectif.formValidated = "Valid"
+        draft.indicateurUn.formValidated = "Valid"
+        draft.indicateurUn.coefficientEffectifFormValidated = "Valid"
+        draft.indicateurDeux.formValidated = "Valid"
+        draft.indicateurTrois.formValidated = "Valid"
+        draft.indicateurDeuxTrois.formValidated = "Valid"
       })
 
-      expect(rest).toStrictEqual(restInitial)
+      expect(newState).toStrictEqual(expectedState)
     })
 
     test("change complete state", () => {
@@ -1111,42 +1115,13 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
-        appReducer(stateCompleteAndValidate, action) as AppState
-      const {
-        effectif: effectifInitial,
-        indicateurUn: indicateurUnInitial,
-        indicateurDeux: indicateurDeuxInitial,
-        indicateurTrois: indicateurTroisInitial,
-        indicateurDeuxTrois: indicateurDeuxTroisInitial,
-        declaration: declarationInitial,
-        ...restInitial
-      } = stateCompleteAndValidate as AppState
+      const { effectif, ...rest } = appReducer(stateCompleteAndValidate, action) as AppState
+
+      const { effectif: effectifInitial, ...restInitial } = stateCompleteAndValidate as AppState
 
       expect(effectif).toStrictEqual({
         ...effectifInitial,
         formValidated: "None",
-      })
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        formValidated: "Invalid",
-        coefficientEffectifFormValidated: "Invalid",
-      })
-      expect(indicateurDeux).toStrictEqual({
-        ...indicateurDeuxInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurTrois).toStrictEqual({
-        ...indicateurTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurDeuxTrois).toStrictEqual({
-        ...indicateurDeuxTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: "Invalid",
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1180,44 +1155,13 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
-        appReducer(stateCompleteAndValidateCoef, action) as AppState
-      const {
-        effectif: effectifInitial,
-        indicateurUn: indicateurUnInitial,
-        indicateurDeux: indicateurDeuxInitial,
-        indicateurTrois: indicateurTroisInitial,
-        indicateurDeuxTrois: indicateurDeuxTroisInitial,
-        declaration: declarationInitial,
-        ...restInitial
-      } = stateCompleteAndValidateCoef as AppState
+      const newState = appReducer(stateCompleteAndValidateCoef, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "None",
+      const expectedState = produce(stateCompleteAndValidateCoef as AppState, (draft) => {
+        draft.effectif.formValidated = "None"
       })
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        formValidated: "Invalid",
-        coefficientEffectifFormValidated: "Invalid",
-      })
-      expect(indicateurDeux).toStrictEqual({
-        ...indicateurDeuxInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurTrois).toStrictEqual({
-        ...indicateurTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(indicateurDeuxTrois).toStrictEqual({
-        ...indicateurDeuxTroisInitial,
-        formValidated: "Invalid",
-      })
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: "Invalid",
-      })
-      expect(rest).toStrictEqual(restInitial)
+
+      expect(newState).toStrictEqual(expectedState)
     })
   })
 })

@@ -37,8 +37,8 @@ const validateForm = ({
   finPeriodeReference,
   periodeSuffisante,
 }: {
-  finPeriodeReference: string | undefined
-  periodeSuffisante: boolean | undefined
+  finPeriodeReference?: string
+  periodeSuffisante?: boolean
 }) => {
   return ({ datePublication, dateConsultationCSE }: { datePublication: string; dateConsultationCSE: string }) => {
     // No validation at all, if periodeSuffisante is false.
@@ -66,7 +66,7 @@ const validateForm = ({
   }
 }
 
-function buildWordings(index: number | undefined) {
+function buildWordings(index?: number) {
   const legalText =
     !estCalculable(index) || index > 85
       ? ""
@@ -85,7 +85,7 @@ function buildWordings(index: number | undefined) {
 }
 
 interface DeclarationFormProps {
-  noteIndex: number | undefined
+  noteIndex?: number
   validateDeclaration: (valid: FormState) => void
   declaring: boolean
 }
@@ -103,7 +103,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
   const estCalculableIndex = estCalculable(noteIndex)
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
-  const periodeSuffisante = state.informations.periodeSuffisante
+  const periodeSuffisante = state.informations.periodeSuffisante !== false
   const readOnly = isFormValid(state.declaration) && !declaring
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
