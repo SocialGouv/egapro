@@ -1,5 +1,9 @@
 import { Declaration } from "@common/core-domain/domain/Declaration";
 import { DeclarationData } from "@common/core-domain/domain/DeclarationData";
+import {
+  DeclarationSpecification,
+  DeclarationSpecificationError,
+} from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { YEARS } from "@common/dict";
@@ -152,6 +156,18 @@ export class CreateDeclarationBySirenAndYear implements UseCase<Input, void> {
             : void 0,
         },
       });
+
+      const specification = new DeclarationSpecification();
+      try {
+        specification.isSatisfiedBy(declarationData);
+      } catch (error: unknown) {
+        if (error instanceof DeclarationSpecificationError) {
+          throw new CreateDeclarationBySirenAndYearInvalidData("Invalid declaration", error);
+        }
+
+        throw error;
+      }
+
       const declaration = new Declaration({
         declarant: new Email(data.déclarant.email),
         declaredAt: now,
@@ -161,7 +177,7 @@ export class CreateDeclarationBySirenAndYear implements UseCase<Input, void> {
         [data.déclaration.brouillon ? "draft" : "data"]: declarationData,
       });
 
-      //   const declaration = await this.declarationRepo.getOne([validatedSiren, validatedYear]);
+      await this.declarationRepo.save(declaration);
     } catch (error: unknown) {
       throw new CreateDeclarationBySirenAndYearError("Cannot get declaration", error as Error);
     }
@@ -170,3 +186,4 @@ export class CreateDeclarationBySirenAndYear implements UseCase<Input, void> {
 
 export class CreateDeclarationBySirenAndYearError extends AppError {}
 export class CreateDeclarationBySirenAndYearInvalidYearError extends CreateDeclarationBySirenAndYearError {}
+export class CreateDeclarationBySirenAndYearInvalidData extends CreateDeclarationBySirenAndYearError {}
