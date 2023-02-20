@@ -413,7 +413,7 @@ async def put_owner(request, response, siren, email):
 @ensure_owner
 async def delete_owner(request, response, siren, email):
     owners = await db.ownership.emails(siren)
-    if len(owners) == 1:
+    if len(owners) == 1 and not request["staff"]:
         raise HttpError(403, "Impossible de supprimer le dernier propriétaire.")
     await db.ownership.delete(siren, email)
     response.status = 204
