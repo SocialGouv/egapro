@@ -2,70 +2,57 @@ import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import type { CodeNaf } from "@common/models/generated";
 import type { Service } from "@common/shared-domain";
+import { AppError } from "@common/shared-domain";
 
-export interface Entreprise {
-  activitePrincipale: string;
+type EtatAdministratif = "A" | "C" | "F";
+export interface Convention {
+  etat: string;
+  id: string;
+  idcc: number;
+  mtime: number;
+  shortTitle: string;
+  texte_de_base: string;
+  title: string;
+  url: string;
+}
+
+export interface BaseInfo {
+  activitePrincipale?: string;
   activitePrincipaleUniteLegale: CodeNaf;
-  allMatchingEtablissements: [
-    {
-      activitePrincipaleEtablissement: CodeNaf;
-      address: string;
-      codeCommuneEtablissement: string;
-      codePostalEtablissement: string;
-      etablissementSiege: true;
-      libelleCommuneEtablissement: string;
-      siret: string;
-    },
-  ];
-  caractereEmployeurUniteLegale: "N";
-  categorieJuridiqueUniteLegale: "1000";
-  conventions: [];
+  caractereEmployeurUniteLegale: string; // "N";
+  categorieJuridiqueUniteLegale: string; // "1000";
+  codeCommuneEtablissement: string;
+  codePostalEtablissement: string;
+  conventions: Convention[];
+  dateCessation?: string;
   dateCreationUniteLegale: string;
   dateDebut: string;
-  etablissements: 1;
-  etatAdministratifUniteLegale: "A";
-  firstMatchingEtablissement: {
-    activitePrincipaleEtablissement: CodeNaf;
-    address: string;
-    codeCommuneEtablissement: string;
-    codePostalEtablissement: string;
-    etablissementSiege: true;
-    etatAdministratifEtablissement: "A";
-    idccs: [];
-    libelleCommuneEtablissement: string;
-    siret: string;
-  };
+  etablissements: number;
+  etatAdministratifUniteLegale: EtatAdministratif;
   highlightLabel: string;
   label: string;
-  matching: 1;
+  libelleCommuneEtablissement: string;
+  matching: number;
   simpleLabel: string;
   siren: string;
 }
 
-export interface Etablissement {
-  activitePrincipale: string;
+export interface Entreprise extends BaseInfo {
+  allMatchingEtablissements: ShortEtablissement[];
+  firstMatchingEtablissement?: ShortEtablissement;
+}
+
+export interface ShortEtablissement {
   activitePrincipaleEtablissement: CodeNaf;
-  activitePrincipaleUniteLegale: CodeNaf;
   address: string;
-  caractereEmployeurUniteLegale: "N";
-  categorieJuridiqueUniteLegale: "1000";
-  codeCommuneEtablissement: string;
-  codePostalEtablissement: string;
-  conventions: [];
-  dateCreationUniteLegale: string;
-  dateDebut: string;
-  etablissementSiege: true;
-  etablissements: 1;
-  etatAdministratifEtablissement: "A";
-  etatAdministratifUniteLegale: "A";
-  highlightLabel: string;
-  idccs: [];
-  label: string;
-  libelleCommuneEtablissement: string;
-  matching: 1;
-  simpleLabel: string;
-  siren: string;
+  categorieEntreprise?: string;
+  etablissementSiege: boolean;
+  idccs?: number[];
   siret: string;
+}
+
+export interface Etablissement extends BaseInfo, ShortEtablissement {
+  etatAdministratifEtablissement: EtatAdministratif;
 }
 
 export interface SearchParameters {
@@ -111,8 +98,13 @@ export interface SearchParameters {
   ranked?: boolean;
 }
 
-export class RechercheEntrepriseService implements Service {
-  search(parameters: SearchParameters) {}
-  siren(siren: Siren) {}
-  siret(siret: Siret) {}
+export interface IEntrepriseService extends Service {
+  search(parameters: SearchParameters): Promise<Entreprise[]>;
+
+  siren(siren: Siren): Promise<Entreprise>;
+
+  siret(siret: Siret): Promise<Etablissement>;
 }
+
+export class EntrepriseServiceError extends AppError {}
+export class EntrepriseServiceNotFoundError extends AppError {}
