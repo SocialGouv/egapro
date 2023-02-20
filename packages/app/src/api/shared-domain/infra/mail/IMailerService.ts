@@ -1,3 +1,4 @@
+import type { Service } from "@common/shared-domain";
 import type { SimpleObject } from "@common/utils/types";
 import type { SendMailOptions } from "nodemailer";
 
@@ -10,7 +11,7 @@ export type Templates = SimpleObject<MailTemplateFunction>;
  *
  * A mailer service should always relies on a group of domain's {@link Templates} to offer auto complete.
  */
-export interface IMailerService<TTemplate extends Templates> {
+export interface IMailerService<TTemplate extends Templates> extends Service {
   /**
    * Prepare the service. e.g. Preload the internal mailer lib.
    */
