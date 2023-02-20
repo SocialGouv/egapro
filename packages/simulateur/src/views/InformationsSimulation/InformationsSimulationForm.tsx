@@ -230,7 +230,6 @@ const InformationsSimulationForm: FunctionComponent = () => {
               />
             )}
           </FormStack>
-
           <ActionBarSingleForm
             readOnly={readOnly}
             frozenDeclaration={frozenDeclaration}
@@ -238,13 +237,15 @@ const InformationsSimulationForm: FunctionComponent = () => {
             onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
           />
 
-          <InfoBlock
-            mt={12}
-            type="info"
-            text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
-              +values.anneeDeclaration + 1
-            } au titre des données de ${values.anneeDeclaration}.`}
-          />
+          {isFormValid(informations) && (
+            <InfoBlock
+              mt={12}
+              type="info"
+              text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
+                +values.anneeDeclaration + 1
+              } au titre des données de ${values.anneeDeclaration}.`}
+            />
+          )}
         </form>
       )}
     </Form>
