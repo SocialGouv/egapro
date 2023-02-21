@@ -141,6 +141,7 @@ const OwnershipRequestList = () => {
               <TableAdminBodyRowCol>{formatIsoToFr(item.createdAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{formatIsoToFr(item.modifiedAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
+              <TableAdminBodyRowCol>{item.name}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
 
               <TableAdminBodyRowCol>

@@ -10,10 +10,10 @@ const RECHERCHE_ENTREPRISE_URL = "https://api.recherche-entreprises.fabrique.soc
 
 export class RechercheEntrepriseService implements IEntrepriseService {
   public async search(parameters: SearchParameters): Promise<Entreprise[]> {
-    // TODO wrap in decorator
+    // TODO try/catch wrap in decorator
     try {
       const stringifiedParams = stringify(parameters);
-      const url = new URL(`/search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
+      const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
       const response = await fetch(url, {
         headers: {
@@ -40,7 +40,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
   public async siren(siren: Siren): Promise<Entreprise> {
     try {
       const validatedSiren = siren.getValue();
-      const url = new URL(`/entreprise/${validatedSiren}`, RECHERCHE_ENTREPRISE_URL);
+      const url = new URL(`entreprise/${validatedSiren}`, RECHERCHE_ENTREPRISE_URL);
 
       const response = await fetch(url, {
         headers: {
@@ -67,7 +67,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
   public async siret(siret: Siret): Promise<Etablissement> {
     try {
       const validatedSiret = siret.getValue();
-      const url = new URL(`/etablissement/${validatedSiret}`, RECHERCHE_ENTREPRISE_URL);
+      const url = new URL(`etablissement/${validatedSiret}`, RECHERCHE_ENTREPRISE_URL);
 
       const response = await fetch(url, {
         headers: {
