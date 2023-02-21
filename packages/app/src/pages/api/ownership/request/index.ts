@@ -14,6 +14,11 @@ export default class OwnershipRequestController implements NextController {
   public async put(req: Req, res: Res) {
     type Input = UseCaseParameters<CreateOwnershipRequest>[0];
     const useCase = new CreateOwnershipRequest(ownershipRequestRepo);
+
+    if (!req.body) {
+      throw new ValidationError("Empty body.");
+    }
+
     const { sirens, emails, askerEmail } = req.body as unknown as Input;
 
     try {

@@ -50,6 +50,11 @@ export default class AdminOwnershipRequestController implements NextController {
   public async post(req: TokenReq, res: Res) {
     type Input = UseCaseParameters<UpdateOwnershipRequestStatus>[0];
     const useCase = new UpdateOwnershipRequestStatus(ownershipRequestRepo, globalMailerService);
+
+    if (!req.body) {
+      throw new ValidationError("Empty body.");
+    }
+
     const { uuids, action } = req.body as unknown as Input;
 
     try {
