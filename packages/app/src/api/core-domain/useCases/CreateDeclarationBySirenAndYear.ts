@@ -179,7 +179,7 @@ export class CreateDeclarationBySirenAndYear implements UseCase<Input, void> {
 
       await this.declarationRepo.save(declaration);
     } catch (error: unknown) {
-      throw new CreateDeclarationBySirenAndYearError("Cannot get declaration", error as Error);
+      throw new CreateDeclarationBySirenAndYearError("Cannot create declaration", error as Error);
     }
   }
 }

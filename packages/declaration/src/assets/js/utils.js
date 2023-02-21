@@ -22,6 +22,30 @@ async function request(method, uri, body, options = {}) {
   return response
 }
 
+async function requestV2(method, uri, body, options = {}) {
+  if(!['get', 'head'].includes(method.toLowerCase()))
+    options.body = body ? JSON.stringify(body) : ""
+  options.method = method
+  options.headers = {
+    'API-KEY': localStorage.token,
+  }
+  const response = await fetch(`${app.apiV2Url}${uri}`, options)
+
+  try {
+    response.data = await response.json()
+  }
+  catch (e) {
+    response.data = null
+  }
+  if(response.status == 401) {
+    if(response.data.error) notify.error(response.data.error)
+    delete localStorage.token
+    redirect('./')
+  }
+  // if(!response.ok && response.data) notify.error(response.data.error)
+  return response
+}
+
 function redirect(url) {
   location.replace(url)
 }
@@ -319,12 +343,20 @@ class AppStorage {
       ? 'http://localhost:2626'
       : `${location.origin}/api`;
 
+    this.apiV2Url = ['localhost', '127.0.0.1'].includes(location.hostname)
+      ? 'http://localhost:3000/api'
+      : `${location.origin}/api`;
+
     this.simuUrl = ['localhost', '127.0.0.1'].includes(location.hostname)
       ? 'http://localhost:3001'
       : `${location.origin}/index-egapro`;
 
     if (window.EGAPRO_API_URL) {
       this.apiUrl = EGAPRO_API_URL
+    }
+
+    if (window.EGAPRO_API_V2_URL) {
+      this.apiV2Url = EGAPRO_API_V2_URL
     }
 
     if (window.EGAPRO_SIMU_URL) {
@@ -550,7 +582,8 @@ class AppStorage {
   async save(data, event) {
     data = Object.assign(this.data, data)
     const schemaData = this.filterSchemaData(data)
-    const response = await request('PUT', `/declaration/${this.siren}/${this.annee}`, schemaData)
+    const response = await requestV2('PUT', `/declaration/${this.siren}/${this.annee}`, schemaData)
+    // const response = await request('PUT', `/declaration/${this.siren}/${this.annee}`, schemaData)
     if(response.ok) {
       Object.assign(this.data, schemaData)
       this.dataToLocalStorage()
