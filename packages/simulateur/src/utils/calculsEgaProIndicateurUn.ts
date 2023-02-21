@@ -23,6 +23,12 @@ import { roundDecimal } from "./number"
 
 /*
  * Indicateur 1: écart de rémunération
+ *
+ * Cet indicateur est lié aux effectifs renseignés dans la page Effectif.
+ * Soit l'utilisateur utilise les 4 groupes CSP prédéfinis (choix CSP), soit il choisit de créer ses propres groupes (les 2 choix par coefficient).
+ *
+ * Les 2 modes par coefficients n'ont pas de différences de règles par la suite.
+ *
  */
 
 const seuilPertinenceCsp = 5 / 100
@@ -140,28 +146,26 @@ export const calculerEffectifsParTrancheAge = ({
 export type FlatGroupTranchesAgesCsp = EffectifPourTrancheAge & { categorieSocioPro: CSP }
 
 export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
-  dataEffectif: EffectifsPourCSP[],
-  dataIndicateurUn: RemunerationsPourCSP[],
+  effectifs: EffectifsPourCSP[],
+  remunerations: RemunerationsPourCSP[],
 ): EffectifEtEcartRemuGroupCsp[] => {
-  const dataEffectifByRow = dataEffectif.reduce(
+  const flatEffectifs = effectifs.reduce(
     (acc: Array<FlatGroupTranchesAgesCsp>, { categorieSocioPro, tranchesAges }) =>
       acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, categorieSocioPro }))),
     [],
   )
-  const dataIndicateurUnByRow = dataIndicateurUn.reduce(
+  const flatRemunerations = remunerations.reduce(
     (acc: Array<RemunerationPourTrancheAge>, group) => acc.concat(group.tranchesAges),
     [],
   )
 
-  const computedDataByRow = dataEffectifByRow.map((groupTrancheAgeEffectif, index: number) => {
-    const groupTrancheAgeIndicateurUn = dataIndicateurUnByRow[index]
+  const computedDataByRow = flatEffectifs.map((effectif, index: number) => {
+    const remuneration = flatRemunerations[index]
 
-    const remunerationAnnuelleBrutFemmes =
-      groupTrancheAgeIndicateurUn && groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutFemmes
-    const remunerationAnnuelleBrutHommes =
-      groupTrancheAgeIndicateurUn && groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutHommes
+    const remunerationAnnuelleBrutFemmes = remuneration?.remunerationAnnuelleBrutFemmes
+    const remunerationAnnuelleBrutHommes = remuneration?.remunerationAnnuelleBrutHommes
 
-    const effectifs = calculerEffectifsParTrancheAge(groupTrancheAgeEffectif)
+    const effectifsParTrancheAge = calculerEffectifsParTrancheAge(effectif)
 
     // ERM
     const ecartRemunerationMoyenne = calculerEcartRemunerationMoyenne(
@@ -173,9 +177,9 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
       calculerEcartApresApplicationSeuilPertinenceCsp(ecartRemunerationMoyenne)
 
     return {
-      ...effectifs,
-      trancheAge: groupTrancheAgeEffectif.trancheAge,
-      categorieSocioPro: groupTrancheAgeEffectif.categorieSocioPro,
+      ...effectifsParTrancheAge,
+      trancheAge: effectif.trancheAge,
+      categorieSocioPro: effectif.categorieSocioPro,
       remunerationAnnuelleBrutFemmes,
       remunerationAnnuelleBrutHommes,
       ecartRemunerationMoyenne,
