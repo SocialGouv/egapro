@@ -1,7 +1,7 @@
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import type {
+  GetOwnershipRequestDbOrderBy,
   GetOwnershipRequestInputDTO,
-  GetOwnershipRequestInputOrderBy,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import type { BulkRepo } from "@common/shared-domain";
 
@@ -12,9 +12,11 @@ export const OWNERSHIP_REQUEST_SORTABLE_COLS = [
   "email",
   "status",
   "modifiedAt",
-] as const satisfies readonly GetOwnershipRequestInputOrderBy[];
+] as const satisfies readonly GetOwnershipRequestDbOrderBy[];
 
-export type OwnershipSearchCriteria = GetOwnershipRequestInputDTO;
+export type OwnershipSearchCriteria = Omit<GetOwnershipRequestInputDTO, "orderBy"> & {
+  orderBy?: GetOwnershipRequestDbOrderBy;
+};
 
 export interface IOwnershipRequestRepo extends BulkRepo<OwnershipRequest> {
   countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number>;

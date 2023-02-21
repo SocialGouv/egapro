@@ -46,12 +46,13 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
   [OwnershipRequestStatus.Enum.ERROR]: "warning",
 };
 
-const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
+const columnsMap: Map<GetOwnershipRequestInputOrderBy | "name", string> = new Map([
   ["status", "Status"],
   ["askerEmail", "Demandeur"],
   ["createdAt", "Date de la demande"],
   ["modifiedAt", "Date de traitement"],
   ["siren", "Siren"],
+  ["name", "Raison Sociale"],
   ["email", "Email"],
 ]);
 

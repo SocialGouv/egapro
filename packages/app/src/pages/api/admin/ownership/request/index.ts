@@ -1,5 +1,6 @@
 import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { globalMailerService } from "@api/core-domain/infra/mail";
+import { entrepriseService } from "@api/core-domain/infra/services";
 import { ownershipRequestRepo } from "@api/core-domain/repo";
 import { GetOwnershipRequest, GetOwnershipRequestError } from "@api/core-domain/useCases/GetOwnershipRequest";
 import {
@@ -25,7 +26,7 @@ export default class AdminOwnershipRequestController implements NextController {
     const params = req.query as GetOwnershipRequestInputDTO;
 
     try {
-      const useCase = new GetOwnershipRequest(ownershipRequestRepo);
+      const useCase = new GetOwnershipRequest(ownershipRequestRepo, entrepriseService);
       const ownershipRequests = await useCase.execute(params);
       res.status(StatusCodes.OK).json(ownershipRequests);
     } catch (error: unknown) {
