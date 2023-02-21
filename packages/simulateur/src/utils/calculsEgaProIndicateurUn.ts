@@ -275,9 +275,8 @@ export default function calculerIndicateurUn(state: AppState) {
     state.indicateurUn.coefficient,
   )
 
-  const effectifEtEcartRemuParTranche = state.indicateurUn.csp
-    ? effectifEtEcartRemuParTrancheCsp
-    : effectifEtEcartRemuParTrancheCoef
+  const effectifEtEcartRemuParTranche =
+    state.indicateurUn.modaliteCalcul === "csp" ? effectifEtEcartRemuParTrancheCsp : effectifEtEcartRemuParTrancheCoef
 
   const { totalNombreSalaries, totalEffectifsValides } = calculerTotalEffectifs(effectifEtEcartRemuParTranche)
 

@@ -33,9 +33,7 @@ export type AppState = {
   } & Partial<DeclarationEffectifData>
   indicateurUn: {
     formValidated: FormState
-    csp: boolean
-    coef: boolean
-    autre: boolean
+    modaliteCalcul?: "csp" | "coef" | "autre"
     remunerationAnnuelle: RemunerationsPourCSP[]
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
@@ -266,9 +264,7 @@ export type DeclarationEffectifData = {
 }
 
 export type ActionIndicateurUnTypeData = {
-  csp: boolean
-  coef: boolean
-  autre: boolean
+  modaliteCalcul: AppState["indicateurUn"]["modaliteCalcul"]
 }
 
 export type ActionIndicateurUnCspData = {

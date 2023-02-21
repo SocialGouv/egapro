@@ -251,7 +251,12 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
     return { non_calculable: indicateurUn.motifNonCalculable }
   }
   const indicateur1: Indicateur1Calculable = {
-    mode: state.indicateurUn.csp ? "csp" : state.indicateurUn.coef ? "niveau_branche" : "niveau_autre",
+    mode:
+      state.indicateurUn.modaliteCalcul === "csp"
+        ? "csp"
+        : state.indicateurUn.modaliteCalcul === "coef"
+        ? "niveau_branche"
+        : "niveau_autre",
     résultat: indicateurUn.resultatFinal,
     note: indicateurUn.noteFinale,
     ...(indicateurUn.sexeSurRepresente && { population_favorable: indicateurUn.sexeSurRepresente }),

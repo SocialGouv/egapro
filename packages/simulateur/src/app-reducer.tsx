@@ -72,9 +72,7 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    csp: true,
-    coef: false,
-    autre: false,
+    modaliteCalcul: "csp",
     remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",
@@ -324,10 +322,10 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "updateIndicateurUnType": {
-      const { csp, coef, autre } = action.data
+      const { modaliteCalcul } = action.data
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, csp, coef, autre },
+        indicateurUn: { ...state.indicateurUn, modaliteCalcul },
       }
     }
     case "updateIndicateurUnCsp": {

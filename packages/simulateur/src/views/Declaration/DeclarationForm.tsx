@@ -99,16 +99,16 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
 
   if (!state) return null
 
-  const declaration = state.declaration
+  const { declaration, informations, informationsEntreprise } = state
+
   const estCalculableIndex = estCalculable(noteIndex)
-  const indicateurUnParCSP = state.indicateurUn.csp
-  const finPeriodeReference = state.informations.finPeriodeReference
-  const periodeSuffisante = state.informations.periodeSuffisante !== false
-  const readOnly = isFormValid(state.declaration) && !declaring
-  const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
-  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
+  const finPeriodeReference = informations.finPeriodeReference
+  const periodeSuffisante = informations.periodeSuffisante !== false
+  const readOnly = isFormValid(declaration) && !declaring
+  const after2020 = Boolean(informations.anneeDeclaration && informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(informations.anneeDeclaration && informations.anneeDeclaration >= 2021)
   const displayNC = !estCalculableIndex && after2020 ? " aux indicateurs calculables" : ""
-  const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
+  const isUES = Boolean(informationsEntreprise.structure !== "Entreprise")
 
   const frozenDeclaration = isFrozenDeclaration(state)
 
@@ -170,7 +170,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
     try {
       if (!state) throw new Error("State is undefined")
 
-      await resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
+      await resendReceipt(informationsEntreprise.siren, informations.anneeDeclaration)
       setLoading(false)
     } catch (error: any) {
       setLoading(false)
@@ -208,9 +208,9 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
                   // MesuresCorrection has its own validation at the component level.
                   <MesuresCorrection readOnly={readOnly} />
                 )}
-                {!indicateurUnParCSP && (
+                {state.indicateurUn.modaliteCalcul !== "csp" && (
                   <>
-                    {state.informationsEntreprise.structure === "Entreprise" && (
+                    {informationsEntreprise.structure === "Entreprise" && (
                       <RequiredRadiosBoolean
                         fieldName="cseMisEnPlace"
                         readOnly={readOnly}
@@ -218,7 +218,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
                         label="Un CSE a-t-il été mis en place&nbsp;?"
                       />
                     )}
-                    {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
+                    {(informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
                       //  InputDateGroup has its own validation at the component level.
                       <InputDateGroup
                         fieldName="dateConsultationCSE"
@@ -328,9 +328,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
 
                   <ButtonAction
                     label={buttonLabel}
-                    onClick={() =>
-                      history.push(`/tableauDeBord/mes-declarations/${state.informationsEntreprise.siren}`)
-                    }
+                    onClick={() => history.push(`/tableauDeBord/mes-declarations/${informationsEntreprise.siren}`)}
                     mt="8"
                   />
                   <Text mt="8">

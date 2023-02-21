@@ -30,7 +30,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   if (!state) return null
 
   const indicateurUnFormValidated = state.indicateurUn.formValidated
-  const indicateurUnParCSP = state.indicateurUn.csp
+  const indicateurUnParCSP = state.indicateurUn.modaliteCalcul === "csp"
   const isEffectifsFilled = isFormValid(state.effectif)
 
   const {

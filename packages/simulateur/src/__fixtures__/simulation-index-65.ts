@@ -55,9 +55,7 @@ export const simulationWithIndex65: { id: string; data: AppState } = {
     },
     indicateurUn: {
       formValidated: "Valid",
-      csp: true,
-      coef: false,
-      autre: false,
+      modaliteCalcul: "csp",
       remunerationAnnuelle: [
         {
           categorieSocioPro: 0,
