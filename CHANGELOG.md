@@ -1,3 +1,11 @@
+## [2.83.1](https://github.com/SocialGouv/egapro/compare/v2.83.0...v2.83.1) (2023-02-21)
+
+
+### Bug Fixes
+
+* change logo text ([c450f7a](https://github.com/SocialGouv/egapro/commit/c450f7a5888ab571772826713c252066f4e1a9a6))
+* update reply to reference ([467dea2](https://github.com/SocialGouv/egapro/commit/467dea271925b6f15cec483f6b534d01bc5bdaed))
+
 # [2.83.0](https://github.com/SocialGouv/egapro/compare/v2.82.1...v2.83.0) (2023-02-20)
 
 
