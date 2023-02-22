@@ -11,23 +11,26 @@ import { immer } from "zustand/middleware/immer";
 
 export const ITEMS_PER_PAGE = 10;
 
+export interface OwnershipRequestSearchParam {
+  /** siren or email */
+  query: string;
+  status: OwnershipRequestStatus.Enum;
+}
 // Limit and offset are low level. They are replaced by pageSize and pageNumber for convenience.
 export type OwnershipRequestListStoreType = {
   firstPage: () => void;
-  formState: {
+  formState: Partial<OwnershipRequestSearchParam> & {
     checkedItems: string[];
     globalCheck: boolean;
     orderBy?: GetOwnershipRequestInputSchemaDTO["orderBy"];
     orderDirection?: GetOwnershipRequestInputSchemaDTO["orderDirection"];
     pageNumber: number;
     pageSize: number;
-    siren?: string;
-    status?: OwnershipRequestStatus.Enum;
   };
   nextPage: () => void;
   previousPage: () => void;
   reset: () => void;
-  submit: ({ siren, status }: { siren: string; status: OwnershipRequestStatus.Enum }) => void;
+  submit: (param: OwnershipRequestSearchParam) => void;
   toggleAll: (requests: GetOwnershipRequestDTO | undefined) => void;
   toggleItem: ({ id, checked }: { checked: boolean; id: string }) => void;
   togglerOrderColumn: (columnValue: GetOwnershipRequestInputOrderBy) => void;
@@ -39,7 +42,7 @@ export const initialStore: OwnershipRequestListStoreType["formState"] = {
   orderDirection: "desc",
   orderBy: "createdAt",
   status: OwnershipRequestStatus.Enum.TO_PROCESS,
-  siren: "",
+  query: "",
   checkedItems: [],
   globalCheck: false,
 };
@@ -52,10 +55,10 @@ export const useOwnershipRequestListStore = create<OwnershipRequestListStoreType
         set(state => {
           state.formState = initialStore;
         }),
-      submit: ({ siren, status }: { siren: string; status: OwnershipRequestStatus.Enum }) =>
+      submit: ({ query, status }: OwnershipRequestSearchParam) =>
         set(state => {
-          if (siren !== state.formState.siren || status !== state.formState.status) {
-            state.formState.siren = siren;
+          if (query !== state.formState.query || status !== state.formState.status) {
+            state.formState.query = query;
             state.formState.status = status;
             state.formState.pageNumber = 0;
             state.formState.checkedItems = [];

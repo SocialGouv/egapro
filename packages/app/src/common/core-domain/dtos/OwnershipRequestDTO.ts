@@ -39,6 +39,6 @@ export const getOwnershipRequestInputDTOSchema = z.object({
       z.literal("status"),
     ])
     .optional(),
-  siren: z.string().optional(),
+  query: z.string().optional(),
   status: z.nativeEnum(OwnershipRequestStatus.Enum).optional(),
 });
