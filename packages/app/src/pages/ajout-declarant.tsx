@@ -191,7 +191,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                     <FormGroup isError={Boolean(errors.sirens)}>
                       <FormGroupLabel
                         htmlFor="sirens"
-                        hint="Le numéro Siren se compose de 9 chiffres sans espace, il est possible d’ajouter plusieurs Siren séparés par des virgules sans espace."
+                        hint="Le numéro Siren se compose de 9 chiffres sans espace, il est possible d’ajouter plusieurs Siren séparés par des virgules."
                       >
                         Numéro(s) Siren
                       </FormGroupLabel>
@@ -214,7 +214,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                     <FormGroup isError={Boolean(errors.emails)}>
                       <FormGroupLabel
                         htmlFor="emails"
-                        hint="Il est possible d’ajouter plusieurs emails séparés par des virgules sans espace."
+                        hint="Il est possible d’ajouter plusieurs emails séparés par des virgules."
                       >
                         Email(s) déclarant(s)
                       </FormGroupLabel>
