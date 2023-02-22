@@ -17,9 +17,9 @@ export const OWNERSHIP_REQUEST_SORTABLE_COLS = [
 export type OwnershipSearchCriteria = GetOwnershipRequestInputDTO;
 
 export interface IOwnershipRequestRepo extends BulkRepo<OwnershipRequest> {
-  countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number>;
+  countSearch({ query, status }: OwnershipSearchCriteria): Promise<number>;
   search({
-    siren,
+    query,
     status,
     limit,
     offset,
