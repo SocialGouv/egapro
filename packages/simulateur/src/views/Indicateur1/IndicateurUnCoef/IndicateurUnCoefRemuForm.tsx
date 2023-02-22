@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
+import ActionBar from "../../../components/ActionBar"
 import ActionLink from "../../../components/ActionLink"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
@@ -65,6 +66,12 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
               moins 3 femmes et 3 hommes), représentent moins de 40% des
               effectifs. Vous devez calculer par CSP."
         />
+        <ActionBar>
+          <ButtonSimulatorLink
+            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
+            label="Suivant"
+          />
+        </ActionBar>
       </div>
     )
   }

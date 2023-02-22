@@ -271,16 +271,14 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
             => sinon (donc Invalid ou None) copier tel quel
         */
 
-        let newIndicateurUn = state.indicateurUn
+        const newIndicateurUn = state.indicateurUn
         let newIndicateurDeux = state.indicateurDeux
         let newIndicateurTrois = state.indicateurTrois
         let newIndicateurDeuxTrois = state.indicateurDeuxTrois
 
-        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
-          newIndicateurUn = defaultState.indicateurUn
-          newIndicateurUn.formValidated = "Valid"
-          newIndicateurUn.coefficientEffectifFormValidated = "Valid"
-        } else if (newIndicateurUn.formValidated === "Valid") {
+        if (newIndicateurUn.formValidated === "Valid") {
+          // For this indicator, we let the previous data and we just set the formValidated to "Invalid" to force user to confirm its data.
+          // The reason is that indicator 1 has a mini wizard in it with coefficient.
           newIndicateurUn.formValidated = "Invalid"
           newIndicateurUn.coefficientEffectifFormValidated = "Invalid"
         } // else we let the state unchanged
