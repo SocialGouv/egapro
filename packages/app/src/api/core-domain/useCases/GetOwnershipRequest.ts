@@ -9,7 +9,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
   constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
 
   public async execute({
-    siren,
+    query,
     status,
     limit: limitQuery = 10,
     offset: offsetQuery = 0,
@@ -20,13 +20,13 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
     const offset = Math.max(offsetQuery, 0);
 
     const totalCount = await this.ownershipRequestRepo.countSearch({
-      siren,
+      query,
       status,
     });
 
     try {
       const ownershipRequests = await this.ownershipRequestRepo.search({
-        siren,
+        query,
         status,
         limit,
         offset,
@@ -35,7 +35,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
       });
       return {
         params: {
-          siren,
+          query,
           status,
           limit,
           offset,

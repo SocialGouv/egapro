@@ -23,6 +23,8 @@ const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderB
   modifiedAt: "modified_at",
 };
 
+const QUERYABLE_COLS: Array<keyof OwnershipRequestRaw> = ["asker_email", "siren", "email"];
+
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   private table = sql("ownership_request");
   private sql = sql<OwnershipRequestRaw[]>;
@@ -161,7 +163,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async search({
-    siren,
+    query,
     status,
     limit,
     offset,
@@ -176,24 +178,27 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
         : sql``;
     const sqlLimit = limit ? sql`limit ${limit}` : sql``;
     const sqlOffset = offset ? sql`offset ${offset}` : sql``;
-    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
 
     const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
 
     return rows.map(ownershipRequestMap.toDomain);
   }
 
-  public async countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number> {
-    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+  public async countSearch({ query, status }: OwnershipSearchCriteria): Promise<number> {
+    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
     const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
 
     return Number(count);
   }
 
-  private buildSearchWhereClause({ siren = "", status }: OwnershipSearchCriteria) {
-    const sqlSiren = sql`siren like ${siren + "%"}`;
+  private buildSearchWhereClause({ query = "", status }: OwnershipSearchCriteria) {
+    const sqlQuery = sql`(${QUERYABLE_COLS.reduce(
+      (prev, col, idx) => sql`${prev} ${idx === 0 ? sql`` : sql`or`} ${sql(col)} ilike ${"%" + query + "%"}`,
+      sql``,
+    )})`;
     const sqlStatus = status ? sql`and status=${status}` : sql``;
 
-    return sql`where ${sqlSiren} ${sqlStatus}`;
+    return sql`where ${sqlQuery} ${sqlStatus}`;
   }
 }
