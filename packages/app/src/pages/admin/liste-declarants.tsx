@@ -253,7 +253,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
               <FormGroup>
                 <FormInput
                   id="query-param"
-                  placeholder="Rechercher par Siren ou Email"
+                  placeholder="Rechercher par Siren ou email"
                   autoComplete="off"
                   {...register("query")}
                 />
