@@ -6,7 +6,6 @@ import type {
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
   DeclarationIndicateurTroisData,
-  DeclarationIndicateurUnData,
   SexeType,
   TrancheEffectifs,
   TrancheEffectifsAPI,
@@ -245,7 +244,7 @@ type Indicateur1 = IndicateurNonCalculable | Indicateur1Calculable
 
 // Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
 const buildIndicateur1 = (state: AppState): Indicateur1 => {
-  const indicateurUn = state.indicateurUn as AppState["indicateurUn"] & DeclarationIndicateurUnData
+  const indicateurUn = state.indicateurUn
 
   if (indicateurUn.motifNonCalculable) {
     return { non_calculable: indicateurUn.motifNonCalculable }
@@ -420,158 +419,6 @@ const buildIndicateur5 = (state: AppState): Indicateur5 => {
 
   return indicateur5
 }
-/*
-// Compute and gather all useful data from state, like noteIndex, note of each indicateur, effectifs, etc.
-export function computeValuesFromState(state: AppState) {
-  const trancheEffectifs = state.informations.trancheEffectifs
-
-  const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
-
-  const periodeSuffisante = state.informations.periodeSuffisante as boolean
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
-    effectifEtEcartRemuParTranche,
-    indicateurEcartRemuneration,
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn,
-  } = calculerIndicateurUn(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
-    indicateurCalculable: indicateurDeuxCalculable,
-    effectifEtEcartAugmentParGroupe,
-    indicateurEcartAugmentation,
-    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
-    correctionMeasure: indicateurDeuxCorrectionMeasure,
-    noteIndicateurDeux,
-  } = calculerIndicateurDeux(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
-    indicateurCalculable: indicateurTroisCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    correctionMeasure: indicateurTroisCorrectionMeasure,
-    noteIndicateurTrois,
-  } = calculerIndicateurTrois(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
-    indicateurCalculable: indicateurDeuxTroisCalculable,
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-    noteEcartTaux: noteEcart,
-    noteEcartNombreSalaries: noteNombreSalaries,
-    correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
-    noteIndicateurDeuxTrois,
-    tauxAugmentationPromotionHommes,
-    tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries,
-  } = calculerIndicateurDeuxTrois(state)
-
-  const {
-    indicateurCalculable: indicateurQuatreCalculable,
-    indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre,
-  } = calculerIndicateurQuatre(state)
-
-  const {
-    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq,
-  } = z(state)
-
-  const allIndicateurValid =
-    (isFormValid(state.indicateurUn) ||
-      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
-    (trancheEffectifs !== "50 à 250"
-      ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
-        (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
-      : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
-    isFormValid(state.indicateurQuatre) &&
-    isFormValid(state.indicateurCinq)
-
-  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
-    trancheEffectifs,
-    noteIndicateurUn,
-    noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
-    noteIndicateurCinq,
-  )
-
-  return {
-    trancheEffectifs,
-    periodeSuffisante,
-    allIndicateurValid,
-    noteIndex,
-    totalPoint,
-    totalPointCalculable,
-    totalNombreSalariesHomme,
-    totalNombreSalariesFemme,
-
-    indicateurUn: {
-      effectifsIndicateurUnCalculable,
-      effectifEtEcartRemuParTranche,
-      indicateurEcartRemuneration,
-      indicateurUnSexeSurRepresente,
-      noteIndicateurUn,
-    },
-
-    indicateurDeux: {
-      effectifsIndicateurDeuxCalculable,
-      indicateurDeuxCalculable,
-      effectifEtEcartAugmentParGroupe,
-      indicateurEcartAugmentation,
-      indicateurDeuxSexeSurRepresente,
-      noteIndicateurDeux,
-      indicateurDeuxCorrectionMeasure,
-    },
-
-    indicateurTrois: {
-      effectifsIndicateurTroisCalculable,
-      indicateurTroisCalculable,
-      effectifEtEcartPromoParGroupe,
-      indicateurEcartPromotion,
-      indicateurTroisSexeSurRepresente,
-      noteIndicateurTrois,
-      indicateurTroisCorrectionMeasure,
-    },
-
-    indicateurDeuxTrois: {
-      effectifsIndicateurDeuxTroisCalculable,
-      indicateurDeuxTroisCalculable,
-      indicateurEcartAugmentationPromotion,
-      indicateurEcartNombreEquivalentSalaries,
-      indicateurDeuxTroisSexeSurRepresente,
-      noteIndicateurDeuxTrois,
-      indicateurDeuxTroisCorrectionMeasure,
-      noteEcart,
-      noteNombreSalaries,
-      tauxAugmentationPromotionHommes,
-      tauxAugmentationPromotionFemmes,
-      plusPetitNombreSalaries,
-    },
-
-    indicateurQuatre: {
-      indicateurQuatreCalculable,
-      indicateurEcartNombreSalarieesAugmentees,
-      noteIndicateurQuatre,
-    },
-
-    indicateurCinq: {
-      indicateurCinqSexeSousRepresente,
-      indicateurNombreSalariesSexeSousRepresente,
-      noteIndicateurCinq,
-    },
-  }
-}
-*/
 
 type MappingType = { [key: string]: { path: string; value?: string } }
 
