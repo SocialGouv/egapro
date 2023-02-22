@@ -51,7 +51,7 @@ const zodUniqueEmailArray = z.string().transform((val, ctx) => {
   if (duplicates.length) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: duplicates.map(dup => `Le Siren "${dup}" ne doit pas être dupliqué dans la liste.`).join("\n"),
+      message: duplicates.map(dup => `L'email "${dup}" ne doit pas être dupliqué dans la liste.`).join("\n"),
     });
     return z.NEVER;
   }
