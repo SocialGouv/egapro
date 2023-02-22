@@ -5,8 +5,7 @@ import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
 import type { UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
-import { ValidationError } from "@common/shared-domain/domain";
+import { AppError, ValidationError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";

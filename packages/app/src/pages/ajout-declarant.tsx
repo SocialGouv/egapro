@@ -1,5 +1,6 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
+import type { ValidationError } from "@common/shared-domain";
 import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
@@ -21,7 +22,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@services/apiClient";
 import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
-import type { ValidationError } from "json-schema-to-typescript";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
