@@ -115,7 +115,7 @@ const AddDeclarer: NextPageWithLayout = () => {
   useEffect(() => {
     reset({
       askerEmail: user?.email,
-      emails: user?.email,
+      emails: user?.email ? [user?.email] : [],
     });
   }, [reset, user?.email]);
 
