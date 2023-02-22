@@ -6,10 +6,12 @@ export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus"
 export type TrancheEffectifsAPI = "50:250" | "251:999" | "1000:"
 
 /**
- * Explication :
- * None    => l'utilisateur n'a pas encore soumis ce formulaire qui était en écriture.
- * Valid   => l'utilisateur a soumis ce formulaire et le formulaire devient read-only.
- * Invalid => ce formulaire précédemment soumis est devenu invalide suite à une modification d'un autre formulaire.
+ * État de chacune des pages de formulaire
+ *
+ * - None    : le formulaire est en écriture (mode par défaut quand on rentre dans un formulaire).
+ * - Valid   : l'utilisateur a soumis ce formulaire et la vérification des données s'est bien passée. Le formulaire devient read only.
+ * Attention: les règles de non calculabilité pourront être détectées plus tard alors même que le formulaire est valide.
+ * - Invalid : ce formulaire précédemment soumis est devenu désynchronisé suite à une modification d'un autre formulaire. Il n'est pas forcément invalide en tant que tel.
  */
 export type FormState = "None" | "Valid" | "Invalid"
 
