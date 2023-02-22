@@ -3,7 +3,7 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import type { GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
@@ -14,7 +14,7 @@ import { ensureRequired } from "@common/utils/types";
 import type { IOwnershipRequestRepo, OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
-const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderBy, keyof OwnershipRequestRaw> = {
+const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestDbOrderBy, keyof OwnershipRequestRaw> = {
   createdAt: "created_at",
   siren: "siren",
   askerEmail: "asker_email",

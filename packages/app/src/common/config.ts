@@ -63,6 +63,7 @@ if (typeof window !== "undefined") {
 }
 
 interface ServicesConfig {
+  apiEntreprise: "api.gouv" | "data.gouv" | "fabrique";
   db: "mock" | "postgres" | "prisma";
   mailer: "nodemailer";
 }
@@ -70,4 +71,5 @@ interface ServicesConfig {
 export const services: ServicesConfig = {
   db: "postgres",
   mailer: "nodemailer",
+  apiEntreprise: "fabrique",
 };
