@@ -1,13 +1,9 @@
 import {
+  Badge,
   Box,
   Button,
   ButtonGroup,
   Container,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerOverlay,
   Flex,
   HStack,
   Link,
@@ -21,32 +17,18 @@ import {
   MenuList,
   Spacer,
   Text,
-  useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react"
 import React from "react"
 import { Link as RouterLink, useHistory } from "react-router-dom"
 
 import { LinkIcon } from "@chakra-ui/icons"
-import FAQ from "../views/FAQ"
 import { useUser } from "./AuthContext"
-import ButtonAction from "./ds/ButtonAction"
 import ButtonLink from "./ds/ButtonLink"
-import {
-  IconEdit,
-  IconLogout,
-  IconMenu,
-  IconOfficeBuilding,
-  IconPeople,
-  IconPeopleCircle,
-  IconQuestionMarkCircle,
-  IconUserGroup,
-} from "./ds/Icons"
+import { IconEdit, IconLogout, IconMenu, IconOfficeBuilding, IconPeopleCircle, IconUserGroup } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
 const Header = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
@@ -109,7 +91,7 @@ const Header = () => {
                 <Link
                   href="https://travail-emploi.gouv.fr/"
                   isExternal
-                  width={isMobile ? 16 : 20}
+                  width={isMobile ? 16 : "fit-content"}
                   sx={{
                     display: "block",
                   }}
@@ -118,12 +100,12 @@ const Header = () => {
                 </Link>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
-                  Index Egapro
+                <Link href="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
+                  Egapro
                 </Link>
                 {!isMobile && (
                   <Text fontSize="xs">
-                    L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                    Index de l’égalité professionnelle et représentation équilibrée femmes – hommes
                   </Text>
                 )}
               </Box>
@@ -133,17 +115,15 @@ const Header = () => {
               {email ? (
                 <Menu>
                   <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
-                    Menu
+                    {email}
+                    {staff && (
+                      <Badge ml={2} colorScheme="green">
+                        Staff
+                      </Badge>
+                    )}
                   </MenuButton>
                   <MenuList zIndex={400}>
                     <MenuGroup title="Mon compte">
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mon-profil"
-                        icon={<IconPeople boxSize={5} color="gray.400" />}
-                      >
-                        Mon Profil
-                      </MenuItem>
                       <MenuItem
                         as={RouterLink}
                         to="/tableauDeBord/mes-entreprises"
@@ -183,37 +163,20 @@ const Header = () => {
                         </MenuGroup>
                       </>
                     )}
-                    {isSmallerThan1280 && (
-                      <>
-                        <MenuDivider />
-                        <MenuGroup title="Informations">
-                          <MenuItem onClick={onOpen} icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}>
-                            Consulter l'aide
-                          </MenuItem>
-                        </MenuGroup>
-                      </>
-                    )}
                   </MenuList>
                 </Menu>
               ) : (
                 <ButtonGroup gap="0">
                   {isMobile && (
                     <>
-                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
-                      <ButtonAction onClick={onOpen} label={"Consulter l'aide"} variant="ghost" size="xs" />
+                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Se connecter"} size="xs" variant="ghost" />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
-                        label={"Me connecter"}
-                        leftIcon={<IconPeopleCircle />}
-                        variant="ghost"
-                      />
-                      <ButtonAction
-                        onClick={onOpen}
-                        label={"Consulter l'aide"}
+                        label={"Se connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
@@ -223,7 +186,7 @@ const Header = () => {
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
-                        label={"Me connecter"}
+                        label={"Se connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
@@ -235,19 +198,6 @@ const Header = () => {
           </Flex>
         </Container>
       </Box>
-      {isSmallerThan1280 && (
-        <>
-          <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton sx={{ zIndex: 20 }} />
-              <DrawerBody p={0}>
-                <FAQ />
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        </>
-      )}
     </>
   )
 }

@@ -1,10 +1,7 @@
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
-import React, { PropsWithChildren, useCallback, useEffect, useState } from "react"
-import { RouteComponentProps, useHistory } from "react-router-dom"
+import React, { PropsWithChildren, useEffect, useState } from "react"
 
 import type {
-  ActionDeclarationData,
-  ActionType,
   AppState,
   DeclarationEffectifData,
   DeclarationIndicateurCinqData,
@@ -16,30 +13,32 @@ import type {
   FormState,
 } from "../../globals"
 
+import { useUser } from "../../components/AuthContext"
 import InfoBlock from "../../components/ds/InfoBlock"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import Page from "../../components/Page"
+import LayoutForm from "../../components/LayoutForm"
+import SimulateurPage from "../../components/SimulateurPage"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurUn, {
-  calculEcartTauxRemunerationParTrancheAgeCoef,
-  calculEcartTauxRemunerationParTrancheAgeCSP,
+import { calculerNoteIndex } from "../../utils/calculsEgaProIndex"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import calculerIndicateurDeux, { calculerEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculerIndicateurTrois, { calculerEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
+import calculerIndicateurUn, {
+  calculerEcartTauxRemunerationParTrancheAgeCoef,
+  calculerEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn"
 import { buildDeclarationFromSimulation } from "../../utils/declarationBuilder"
 import { isFormValid } from "../../utils/formHelpers"
 import { useTitle } from "../../utils/hooks"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import { logToSentry } from "../../utils/sentry"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import DeclarationForm from "./DeclarationForm"
-import { useUser } from "../../components/AuthContext"
-import { useDeclaration } from "../../hooks/useDeclaration"
 
 function buildHelpers(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
@@ -55,7 +54,7 @@ function buildHelpers(state: AppState) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn,
-  } = calculIndicateurUn(state)
+  } = calculerIndicateurUn(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
@@ -63,7 +62,7 @@ function buildHelpers(state: AppState) {
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux,
-  } = calculIndicateurDeux(state)
+  } = calculerIndicateurDeux(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
@@ -71,7 +70,7 @@ function buildHelpers(state: AppState) {
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois,
-  } = calculIndicateurTrois(state)
+  } = calculerIndicateurTrois(state)
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
@@ -82,21 +81,21 @@ function buildHelpers(state: AppState) {
     noteEcartNombreSalaries: noteNombreSalaries,
     correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois,
-  } = calculIndicateurDeuxTrois(state)
+  } = calculerIndicateurDeuxTrois(state)
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
+  } = calculerIndicateurQuatre(state)
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
     noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
+  } = calculerIndicateurCinq(state)
 
-  const allIndicateurValid =
+  const allIndicateursCompliant =
     (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
@@ -111,8 +110,8 @@ function buildHelpers(state: AppState) {
     nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
-    remunerationAnnuelle: calculEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
-    coefficient: calculEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
+    remunerationAnnuelle: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
+    coefficient: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn,
@@ -125,7 +124,7 @@ function buildHelpers(state: AppState) {
       : state.indicateurDeux.presenceAugmentation
       ? ""
       : "absaugi",
-    tauxAugmentation: calculEcartTauxAugmentationParCSP(state.indicateurDeux.tauxAugmentation),
+    tauxAugmentation: calculerEcartTauxAugmentationParCSP(state.indicateurDeux.tauxAugmentation),
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteFinale: noteIndicateurDeux,
@@ -139,7 +138,7 @@ function buildHelpers(state: AppState) {
       : state.indicateurTrois.presencePromotion
       ? ""
       : "absprom",
-    tauxPromotion: calculEcartTauxPromotionParCSP(state.indicateurTrois.tauxPromotion),
+    tauxPromotion: calculerEcartTauxPromotionParCSP(state.indicateurTrois.tauxPromotion),
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteFinale: noteIndicateurTrois,
@@ -184,7 +183,7 @@ function buildHelpers(state: AppState) {
     noteFinale: noteIndicateurCinq,
   }
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculerNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -196,7 +195,7 @@ function buildHelpers(state: AppState) {
 
   return {
     trancheEffectifs,
-    allIndicateurValid,
+    allIndicateursCompliant,
     effectifData,
     indicateurUnData,
     indicateurDeuxData,
@@ -212,46 +211,44 @@ function buildHelpers(state: AppState) {
 
 const PageDeclaration = ({ children }: PropsWithChildren) => {
   return (
-    <Page
+    <SimulateurPage
       title={title}
-      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
+      tagline="Une fois les informations renseignées, cliquez sur le bouton “Déclarer” en bas de page."
     >
       {children}
-    </Page>
+    </SimulateurPage>
   )
 }
 
-interface DeclarationProps extends RouteComponentProps {
+interface DeclarationProps {
   code: string
-  state: AppState
-  dispatch: (action: ActionType) => void
 }
 
 const title = "Déclaration"
 
-const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
+const Declaration = ({ code }: DeclarationProps) => {
   useTitle(title)
-  const history = useHistory()
   const { refreshAuth } = useUser()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
+  const { state, dispatch } = useAppStateContextProvider()
+
   const { declaration: previousDeclaration } = useDeclaration(
-    state.informationsEntreprise.siren,
-    state.informations.anneeDeclaration,
+    state?.informationsEntreprise.siren,
+    state?.informations.anneeDeclaration,
   )
 
-  const updateDeclaration = useCallback(
-    (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
-    [dispatch],
-  )
+  useEffect(() => {
+    // On ne permet plus de modifier la déclaration si la déclaration initiale date de plus d'un an.
+    if (declaring && state && !isFrozenDeclaration(state)) {
+      sendDeclaration(code, state)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.
+  }, [code, declaring, state])
 
-  const resetDeclaration = useCallback(() => {
-    history.push(`/nouvelle-simulation`)
-  }, [history])
-
-  const helpers = buildHelpers(state)
+  if (!state) return null
 
   const {
     indicateurUnData,
@@ -261,35 +258,31 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     indicateurQuatreData,
     indicateurCinqData,
     trancheEffectifs,
-    allIndicateurValid,
+    allIndicateursCompliant,
     effectifData,
     noteIndex,
     totalPoint,
     totalPointCalculable,
-  } = helpers
+  } = buildHelpers(state)
 
-  const validateDeclaration = (valid: FormState) => {
-    if (valid === "Valid") {
-      setDeclaring(true)
-    } else {
-      setDeclaring(false)
-    }
-    if (!apiError) {
-      return dispatch({
-        type: "validateDeclaration",
-        valid,
-        effectifData,
-        indicateurUnData,
-        indicateurDeuxData,
-        indicateurTroisData,
-        indicateurDeuxTroisData,
-        indicateurQuatreData,
-        indicateurCinqData,
-        noteIndex,
-        totalPoint,
-        totalPointCalculable,
-      })
-    }
+  const validateDeclaration = (formState: FormState) => {
+    // Triggers the effect to send the declaration.
+    setDeclaring(formState === "Valid")
+
+    return dispatch({
+      type: "validateDeclaration",
+      valid: formState,
+      effectifData,
+      indicateurUnData,
+      indicateurDeuxData,
+      indicateurTroisData,
+      indicateurDeuxTroisData,
+      indicateurQuatreData,
+      indicateurCinqData,
+      noteIndex,
+      totalPoint,
+      totalPointCalculable,
+    })
   }
 
   async function sendDeclaration(code: string, state: AppState) {
@@ -305,11 +298,9 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
         await resendReceipt(data.entreprise.siren, data.déclaration.année_indicateurs)
       }
       setApiError(undefined)
-      setDeclaring(false)
       // Refresh authentification infos because the user may get another ownership now.
       refreshAuth()
     } catch (error: any) {
-      setDeclaring(false)
       const message = error.jsonBody?.error
         ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
         : "Erreur lors de la sauvegarde des données"
@@ -320,23 +311,18 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
         // Don't log on 403 because it's an expected error: "Votre déclaration ne peut être validée : Cette déclaration a déjà été créée par un autre utilisateur".
         logToSentry(error, data)
       }
+    } finally {
+      setDeclaring(false)
     }
   }
 
-  useEffect(() => {
-    if (declaring) {
-      sendDeclaration(code, state)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.
-  }, [code, declaring, state])
-
-  if (!state.informations.periodeSuffisante) {
+  if (state.informations.periodeSuffisante === false) {
     const allFormsFilled = isFormValid(state.informationsEntreprise) && isFormValid(state.informationsDeclarant)
 
     return (
       <PageDeclaration>
-        <LayoutFormAndResult
-          childrenForm={
+        <LayoutForm
+          form={
             <>
               <InfoBlock
                 type="warning"
@@ -349,12 +335,8 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
 
               {allFormsFilled ? (
                 <DeclarationForm
-                  state={state}
                   noteIndex={noteIndex}
-                  updateDeclaration={updateDeclaration}
-                  resetDeclaration={resetDeclaration}
                   validateDeclaration={validateDeclaration}
-                  apiError={apiError}
                   declaring={declaring}
                 />
               ) : (
@@ -378,7 +360,6 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
               )}
             </>
           }
-          childrenResult={null}
         />
       </PageDeclaration>
     )
@@ -386,7 +367,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
 
   // tous les formulaires ne sont pas encore validés
   if (
-    !allIndicateurValid ||
+    !allIndicateursCompliant ||
     !isFormValid(state.informations) ||
     !isFormValid(state.effectif) ||
     !isFormValid(state.informationsEntreprise) ||
@@ -418,11 +399,13 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
                 <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
               </ListItem>
             )}
-          {trancheEffectifs !== "50 à 250" && !isFormValid(state.indicateurDeux) && !indicateurDeuxData.nonCalculable && (
-            <ListItem>
-              <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
-            </ListItem>
-          )}
+          {trancheEffectifs !== "50 à 250" &&
+            !isFormValid(state.indicateurDeux) &&
+            !indicateurDeuxData.nonCalculable && (
+              <ListItem>
+                <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
+              </ListItem>
+            )}
           {trancheEffectifs !== "50 à 250" &&
             !isFormValid(state.indicateurTrois) &&
             !indicateurTroisData.nonCalculable && (
@@ -464,27 +447,26 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
 
   return (
     <PageDeclaration>
-      <LayoutFormAndResult
-        childrenForm={
+      <LayoutForm
+        form={
           <>
+            {apiError && (
+              <InfoBlock
+                mb="4"
+                type="error"
+                title={"Erreur"}
+                text="Erreur lors de la sauvegarde des données. Veuillez réessayer ultérieurement."
+              />
+            )}
             <RecapitulatifIndex
-              allIndicateurValid={allIndicateurValid}
+              allIndicateurValid={allIndicateursCompliant}
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
             />
-            <DeclarationForm
-              state={state}
-              noteIndex={noteIndex}
-              updateDeclaration={updateDeclaration}
-              resetDeclaration={resetDeclaration}
-              validateDeclaration={validateDeclaration}
-              apiError={apiError}
-              declaring={declaring}
-            />
+            <DeclarationForm noteIndex={noteIndex} validateDeclaration={validateDeclaration} declaring={declaring} />
           </>
         }
-        childrenResult={null}
       />
     </PageDeclaration>
   )

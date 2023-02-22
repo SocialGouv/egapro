@@ -1,49 +1,51 @@
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { CategorieSocioPro, FormState } from "../../globals"
-
 import {
   displayFractionPercentWithEmptyData,
-  displayNameCategorieSocioPro,
+  displayNameCSP,
   displayPercent,
   displaySexeSurRepresente,
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurDeuxProps {
-  indicateurDeuxFormValidated: FormState
-  effectifsIndicateurDeuxCalculable: boolean
-  indicateurDeuxCalculable: boolean
-  effectifEtEcartAugmentParGroupe: Array<{
-    categorieSocioPro: CategorieSocioPro
-    ecartTauxAugmentation: number | undefined
-  }>
-  indicateurEcartAugmentation: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeux: number | undefined
-  correctionMeasure: boolean
+  calculsIndicateurDeux: ReturnType<typeof calculerIndicateurDeux>
 }
 
 const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeuxProps> = ({
-  indicateurDeuxFormValidated,
-  effectifsIndicateurDeuxCalculable,
-  indicateurDeuxCalculable,
-  effectifEtEcartAugmentParGroupe,
-  indicateurEcartAugmentation,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeux,
-  correctionMeasure,
+  calculsIndicateurDeux,
 }) => {
-  if (indicateurDeuxFormValidated !== "Valid") {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const indicateurDeuxFormValidated = state.indicateurDeux.formValidated
+
+  const isEffectifsFilled = isFormValid(state.effectif)
+
+  const {
+    effectifsIndicateurCalculable,
+    indicateurCalculable,
+    effectifEtEcartAugmentParGroupe,
+    indicateurEcartAugmentation,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeux,
+    correctionMeasure,
+  } = calculsIndicateurDeux
+
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
-  if (!effectifsIndicateurDeuxCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -53,7 +55,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
-  if (!indicateurDeuxCalculable) {
+  if (!indicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -63,14 +65,18 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
+  if (indicateurDeuxFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
   return (
     <RecapBloc
       indicateur="indicateur2"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData: indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20",
         secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
         indicateurSexeSurRepresente,
@@ -81,7 +87,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         <Tbody>
           {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
             <Tr key={categorieSocioPro}>
-              <Td>{displayNameCategorieSocioPro(categorieSocioPro)}</Td>
+              <Td>{displayNameCSP(categorieSocioPro)}</Td>
               <Td isNumeric>{displayFractionPercentWithEmptyData(ecartTauxAugmentation, 1)}</Td>
             </Tr>
           ))}

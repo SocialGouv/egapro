@@ -1,3 +1,4 @@
+import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
@@ -29,16 +30,14 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const informationMessage =
-  "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
-
 const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { user } = useUser();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
+  const defaultRedirectTo = "/representation-equilibree/commencer";
+  const { redirectTo } = normalizeRouterQuery(router.query);
 
-  // Si la personne est authentifiée, on reroute sur commencer.
-  if (user) router.push("/representation-equilibree/commencer");
+  if (user) router.push(redirectTo || defaultRedirectTo);
 
   const {
     register,
@@ -57,7 +56,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${window.location.origin}/representation-equilibree/commencer?token=`);
+      await requestEmailForToken(email, `${new URL(redirectTo || defaultRedirectTo, window.location.origin)}?token=`);
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
@@ -72,13 +71,6 @@ const EmailPage: NextPageWithLayout = () => {
       <h1>{title}</h1>
 
       <ClientOnly>
-        {featureStatus.type !== "success" && (
-          <Alert type="info" mb="4w">
-            <AlertTitle>Information</AlertTitle>
-            <p>{informationMessage}</p>
-          </Alert>
-        )}
-
         <AlertFeatureStatus title="Erreur" type="error" />
 
         {featureStatus.type === "success" && (
@@ -102,14 +94,17 @@ const EmailPage: NextPageWithLayout = () => {
 
         {featureStatus.type !== "success" && (
           <>
-            <p>
-              L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail
-              en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
-            </p>
-            <p>
-              Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé
-              pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
-            </p>
+            <Alert type="info" mb="4w">
+              <AlertTitle>Dans le cadre d'une déclaration</AlertTitle>
+              <p>
+                L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail
+                en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
+              </p>
+              <p>
+                Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email
+                utilisé pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
+              </p>
+            </Alert>
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <FormLayout>
                 <FormGroup>

@@ -9,13 +9,7 @@ import * as serviceWorker from "./serviceWorker"
 if (process.env.REACT_APP_SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
-    release: process.env.REACT_APP_VERSION,
-  })
-}
-
-if (process.env.NODE_ENV !== "production") {
-  import("@axe-core/react").then((axe) => {
-    axe.default(React, ReactDOM, 1000)
+    release: process.env.REACT_APP_GITHUB_SHA,
   })
 }
 

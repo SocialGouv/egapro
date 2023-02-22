@@ -85,7 +85,7 @@ export const faqData: FAQPart = {
         question:
           "Les effectifs qui ont quitté l’entreprise avant la fin de la période de référence mais qui ont été présents plus de 6 mois doivent-ils être pris en compte pour le calcul des indicateurs ?",
         reponse: [
-          "Oui, ils doivent être pris en compte. Leurs caractéristiques individuelles sont alors appréciées au dernier jour de présence dans l’entreprise. Par caractéristiques individuelles on entend l’âge, le niveau ou coefficient hiérarchique en application de la classification de branche, du niveau selon la méthode de cotation des postes de l’entreprise, ou de la catégorie socioprofessionnelle (CSP). Par exemple s’ils ont quitté l’entreprise au 1er septembre, ce sont leurs caractéristiques au 31 août qui seront prises en compte.",
+          "Oui, ils doivent être pris en compte. Leurs caractéristiques individuelles sont alors appréciées au dernier jour de présence dans l’entreprise. Par caractéristiques individuelles on entend l’âge, le niveau ou coefficient hiérarchique en application de la classification de branche, du niveau selon la méthode de cotation des postes de l’entreprise, ou de la catégorie socio-professionnelle (CSP). Par exemple s’ils ont quitté l’entreprise au 1er septembre, ce sont leurs caractéristiques au 31 août qui seront prises en compte.",
           "Un salarié promu avec un changement de catégorie socio-professionnelle en cours d’année sera pris en compte dans la CSP effective au 31 décembre (ou au dernier jour) de l’année étudiée.",
         ],
       },
@@ -152,7 +152,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question: "Quelle est la définition des 4 catégories socioprofessionnelles (CSP) retenue dans le décret ?",
+        question: "Quelle est la définition des 4 catégories socio-professionnelles (CSP) retenue dans le décret ?",
         reponse: [
           "La définition des quatre CSP retenues dans le décret correspond à la nomenclature de l’INSEE. Les 4 CSP prévues par le décret du 8 janvier 2019 étant les suivantes : Ouvriers / Employés / Techniciens et agents de maîtrise/ Ingénieurs et cadres.",
         ],
@@ -348,7 +348,7 @@ export const faqData: FAQPart = {
           "Pour l’indicateur relatif à l’écart de taux d'augmentations, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
         reponse: [
           "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d'une autre méthode de cotation des postes n'est possible que pour le calcul du 1er indicateur relatif à l'écart de rémunération.",
-          "Pour le calcul de l'indicateurs relatif à l'écart de taux d'augmentations, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres).",
+          "Pour le calcul de l'indicateurs relatif à l'écart de taux d'augmentations, les salariés sont répartis selon les 4 catégories socio-professionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres).",
         ],
       },
     ],
@@ -384,7 +384,7 @@ export const faqData: FAQPart = {
           "Pour l’indicateur relatif à l’écart de taux de promotions, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
         reponse: [
           "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d'une autre méthode de cotation des postes n'est possible que pour le calcul du 1er indicateur relatif à l'écart de rémunération.",
-          "Pour le calcul de l'indicateurs relatif à l'écart de taux de promotions, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres).",
+          "Pour le calcul de l'indicateurs relatif à l'écart de taux de promotions, les salariés sont répartis selon les 4 catégories socio-professionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres).",
         ],
       },
     ],
@@ -511,7 +511,7 @@ export const faqData: FAQPart = {
       {
         question: "Quelles sont les informations à transmettre au comité social et économique (CSE) ? ",
         reponse: [
-          "Les indicateurs ainsi que la note globale sont mis à la disposition du comité social et économique (CSE), via la base de données économiques et sociales. Les résultats sont présentés, pour le premier indicateur relatif à l’écart de rémunération entre les femmes et les hommes, par catégorie socioprofessionnelle, niveau ou coefficient hiérarchique ou selon les niveaux de la méthode de cotation des postes de l’entreprise, ainsi que par tranches d’âge. Les résultats des indicateurs relatifs au écarts de taux d’augmentations sont présentés par catégorie socioprofessionnelle. Le CSE est destinataire a minima de toutes les informations transmises à la DIRECCTE.",
+          "Les indicateurs ainsi que la note globale sont mis à la disposition du comité social et économique (CSE), via la base de données économiques et sociales. Les résultats sont présentés, pour le premier indicateur relatif à l’écart de rémunération entre les femmes et les hommes, par catégorie socio-professionnelle, niveau ou coefficient hiérarchique ou selon les niveaux de la méthode de cotation des postes de l’entreprise, ainsi que par tranches d’âge. Les résultats des indicateurs relatifs au écarts de taux d’augmentations sont présentés par catégorie socio-professionnelle. Le CSE est destinataire a minima de toutes les informations transmises à la DIRECCTE.",
           "Conformément à l’article D. 1142-5 du code du travail, les informations mentionnées ci-dessus sont accompagnées de toutes les précisions utiles à leur compréhension, notamment relatives à la méthodologie appliquée, la répartition des salariés par catégorie socio-professionnelle ou selon les niveaux de la méthode de cotation des postes de l’entreprise et, le cas échéant, des mesures de correction envisagées ou déjà mises en œuvre.",
           "Dans le cas où certains indicateurs ne peuvent pas être calculés, l’information du CSE sur les indicateurs doit quand même être assurée et est accompagnée de toutes les précisions expliquant les raisons pour lesquelles les indicateurs n’ont pas pu être calculés.",
         ],

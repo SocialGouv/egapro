@@ -3,16 +3,18 @@ import React, { FunctionComponent, useState } from "react"
 import { Form } from "react-final-form"
 import { useHistory } from "react-router-dom"
 
-import { ActionDeclarationData, AppState, FormState } from "../../globals"
+import { FormState } from "../../globals"
 import { resendReceipt } from "../../utils/api"
 import { parseDate } from "../../utils/date"
 import { isFormValid, parseBooleanFormValue, parseBooleanStateValue } from "../../utils/formHelpers"
 import { logToSentry } from "../../utils/sentry"
 
+import { getYear } from "date-fns"
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
+import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import InputGroup from "../../components/ds/InputGroup"
 import LegalText from "../../components/ds/LegalText"
@@ -22,33 +24,28 @@ import FieldPlanRelance from "../../components/FieldPlanRelance"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 import MesuresCorrection from "../../components/MesuresCorrection"
-import RadiosBoolean from "../../components/RadiosBoolean"
+import RequiredRadiosBoolean from "../../components/RequiredRadiosBoolean"
+import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { estCalculable } from "../../utils/helpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
+// NB : some fields (like RadioButton Oui/Non) are only validated at field-level.
 const validateForm = ({
   finPeriodeReference,
-  anneeDeclaration,
   periodeSuffisante,
 }: {
-  finPeriodeReference: string | undefined
-  anneeDeclaration: number | undefined
-  periodeSuffisante: boolean | undefined
+  finPeriodeReference?: string
+  periodeSuffisante?: boolean
 }) => {
-  return ({
-    datePublication,
-    publicationSurSiteInternet,
-    planRelance,
-  }: {
-    datePublication: string
-    publicationSurSiteInternet?: string
-    planRelance: string | undefined
-  }) => {
-    // Make sure we don't invalidate the form if the field `datePublication`
-    // isn't present on the form (because the index can't be calculated).
-    if (!datePublication || !periodeSuffisante) return
+  return ({ datePublication, dateConsultationCSE }: { datePublication: string; dateConsultationCSE: string }) => {
+    // No validation at all, if periodeSuffisante is false.
+    if (!periodeSuffisante) return
     const parsedDatePublication = parseDate(datePublication)
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
+    const parsedDateCSE = parseDate(dateConsultationCSE) ? parseDate(dateConsultationCSE) : undefined
 
     return {
       datePublication:
@@ -59,17 +56,17 @@ const validateForm = ({
           : {
               correspondanceFinPeriodeReference: `La date ne peut précéder la date de fin de la période de référence (${finPeriodeReference})`,
             },
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
-      planRelance:
-        anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
-          ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
+      dateConsultationCSE:
+        parsedDateCSE && getYear(parsedDateCSE) < FIRST_YEAR_FOR_DECLARATION
+          ? {
+              invalidDate: `La date de consultation du CSE doit être postérieure ou égale à ${FIRST_YEAR_FOR_DECLARATION}`,
+            }
           : undefined,
     }
   }
 }
 
-function buildWordings(index: number | undefined) {
+function buildWordings(index?: number) {
   const legalText =
     !estCalculable(index) || index > 85
       ? ""
@@ -88,38 +85,36 @@ function buildWordings(index: number | undefined) {
 }
 
 interface DeclarationFormProps {
-  state: AppState
-  noteIndex: number | undefined
-  updateDeclaration: (data: ActionDeclarationData) => void
-  resetDeclaration: () => void
+  noteIndex?: number
   validateDeclaration: (valid: FormState) => void
-  apiError: string | undefined
   declaring: boolean
 }
 
-const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
-  state,
-  noteIndex,
-  updateDeclaration,
-  resetDeclaration,
-  validateDeclaration,
-  apiError,
-  declaring,
-}) => {
+const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, validateDeclaration, declaring }) => {
   const history = useHistory()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
 
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
   const declaration = state.declaration
+  const estCalculableIndex = estCalculable(noteIndex)
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
-  const periodeSuffisante = state.informations.periodeSuffisante
-  const anneeDeclaration = state.informations.anneeDeclaration
+  const periodeSuffisante = state.informations.periodeSuffisante !== false
   const readOnly = isFormValid(state.declaration) && !declaring
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
-  const displayNC = !estCalculable(noteIndex) && after2020 ? " aux indicateurs calculables" : ""
+  const displayNC = !estCalculableIndex && after2020 ? " aux indicateurs calculables" : ""
   const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+
+  const resetDeclaration = () => {
+    history.push(`/nouvelle-simulation`)
+  }
 
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
@@ -148,16 +143,19 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     modalitesPublication,
     planRelance,
   }: typeof initialValues) {
-    updateDeclaration({
-      mesuresCorrection,
-      cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
-      dateConsultationCSE,
-      datePublication,
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
-      lienPublication,
-      modalitesPublication,
-      planRelance: parseBooleanFormValue(planRelance),
+    dispatch({
+      type: "updateDeclaration",
+      data: {
+        mesuresCorrection,
+        cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
+        dateConsultationCSE,
+        datePublication,
+        publicationSurSiteInternet:
+          publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
+        lienPublication,
+        modalitesPublication,
+        planRelance: parseBooleanFormValue(planRelance),
+      },
     })
   }
 
@@ -170,7 +168,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     setLoading(true)
 
     try {
-      // TODO : state.informations.anneeDeclaration may be undefined in TS. That seems not good because the endpoint expects a year.
+      if (!state) throw new Error("State is undefined")
+
       await resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
       setLoading(false)
     } catch (error: any) {
@@ -188,7 +187,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm({ finPeriodeReference, anneeDeclaration, periodeSuffisante })}
+      validate={validateForm({ finPeriodeReference, periodeSuffisante })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -202,38 +201,35 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
 
             {periodeSuffisante && (
               <>
-                {estCalculable(noteIndex) && noteIndex < 75 && (
-                  <MesuresCorrection
-                    label="Mesures de correction prévues à l'article D. 1142-6"
-                    name="mesuresCorrection"
-                    readOnly={readOnly}
-                  />
+                {estCalculableIndex && noteIndex < 75 && (
+                  // MesuresCorrection has its own validation at the component level.
+                  <MesuresCorrection readOnly={readOnly} />
                 )}
                 {!indicateurUnParCSP && (
                   <>
                     {state.informationsEntreprise.structure === "Entreprise" && (
-                      <RadiosBoolean
+                      <RequiredRadiosBoolean
                         fieldName="cseMisEnPlace"
-                        value={values.cseMisEnPlace}
                         readOnly={readOnly}
-                        label={<>Un CSE a-t-il été mis en place&nbsp;?</>}
+                        value={values.cseMisEnPlace}
+                        label="Un CSE a-t-il été mis en place&nbsp;?"
                       />
                     )}
                     {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
+                      //  InputDateGroup has its own validation at the component level.
                       <InputDateGroup
                         fieldName="dateConsultationCSE"
-                        label="Date de consultation du CSE pour l'indicateur relatif à l'écart de rémunération"
+                        label="Date de consultation du CSE pour le choix de la modalité de calcul de l’indicateur Ecart de rémunération"
                         isReadOnly={readOnly}
                       />
                     )}
                   </>
                 )}
                 {/* Show publication data only if if index is calculable for cases before 2020 and for all index (even non calculable) after. */}
-                {(estCalculable(noteIndex) || after2020) && (
+                {(estCalculableIndex || after2020) && (
                   <>
                     <InputDateGroup
                       fieldName="datePublication"
@@ -244,7 +240,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       }
                       isReadOnly={readOnly}
                     />
-                    <RadiosBoolean
+                    <RequiredRadiosBoolean
                       fieldName="publicationSurSiteInternet"
                       value={values.publicationSurSiteInternet}
                       readOnly={readOnly}
@@ -284,19 +280,34 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     )}
                   </>
                 )}
+                {/* FieldPlanRelance has its own validation at the component level. */}
                 {after2021 && <FieldPlanRelance readOnly={readOnly} isUES={isUES} />}
               </>
             )}
 
             {readOnly && (
-              <Text fontWeight="bold">
-                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}.
-              </Text>
+              <InfoBlock
+                type="info"
+                title="Vous venez de transmettre aux services du ministre chargé du travail vos indicateurs et votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes conformément aux dispositions de l’article D.1142-5 du code du travail."
+                text={
+                  <>
+                    <Text mt={2}>
+                      Vous allez recevoir un accusé de réception de votre transmission sur l'email que vous avez déclaré
+                      et validé précédemment. Cet accusé de réception contient un lien vous permettant de revenir sur
+                      votre simulation et déclaration.
+                    </Text>
+                    <Text mt={2}>
+                      Si vous ne recevez pas cet accusé de réception, merci de bien vérifier que celui-ci n'a pas été
+                      déplacé dans votre dossier de courriers indésirables.
+                    </Text>
+                  </>
+                }
+              />
             )}
           </FormStack>
           {readOnly ? (
             <>
-              {declaration.formValidated === "Valid" && (
+              {isFormValid(declaration) && (
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
@@ -304,11 +315,13 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   variant="link"
                   size="sm"
                   mt="4"
+                  disabled={frozenDeclaration}
+                  title={frozenDeclaration ? frozenDeclarationMessage : ""}
                 />
               )}
 
               {/* Objectifs de progression et mesures de correction */}
-              {after2021 && periodeSuffisante && estCalculable(noteIndex) && noteIndex < 85 && (
+              {after2021 && periodeSuffisante && estCalculableIndex && noteIndex < 85 && (
                 <Box my="4">
                   <Divider mt="8" mb="4" />
                   <LegalText>{legalText}</LegalText>
@@ -342,6 +355,14 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   loading={loading}
                 />
               </ActionBar>
+              <Divider my="8" />
+              <Box>
+                <Text fontWeight="bold">Aidez-nous à améliorer cette démarche</Text>
+                <Text mb="4">Donnez-nous votre avis, cela ne prend que 2 minutes.</Text>
+                <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-calcul-declaration&key=73366ddb13d498f4c77d01c2983bab48">
+                  <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+                </a>
+              </Box>
             </>
           ) : (
             <ActionBar>

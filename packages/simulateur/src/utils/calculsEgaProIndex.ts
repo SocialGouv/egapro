@@ -1,9 +1,5 @@
 import { TrancheEffectifs } from "../globals"
 
-///////////
-// Index //
-///////////
-
 export const MAX_NOTES_INDICATEURS = {
   indicateurUn: 40, // Indicateur écart de rémunération
   indicateurDeux: 20, // Indicateur écart de taux d'augmentation individuelle hors promotion
@@ -13,7 +9,13 @@ export const MAX_NOTES_INDICATEURS = {
   indicateurCinq: 10, // Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
 }
 
-export const calculNoteIndex = (
+type CalculerNoteIndexResult = {
+  noteIndex: number | undefined
+  totalPoint: number
+  totalPointCalculable: number
+}
+
+export const calculerNoteIndex = (
   trancheEffectifs: TrancheEffectifs,
   noteIndicateurUn: number | undefined,
   noteIndicateurDeux: number | undefined,
@@ -21,17 +23,15 @@ export const calculNoteIndex = (
   noteIndicateurDeuxTrois: number | undefined,
   noteIndicateurQuatre: number | undefined,
   noteIndicateurCinq: number | undefined,
-): {
-  noteIndex: number | undefined
-  totalPoint: number
-  totalPointCalculable: number
-} => {
-  const noteIndicateurUnPointCalculable = noteIndicateurUn !== undefined ? 40 : 0
-  const noteIndicateurDeuxPointCalculable = noteIndicateurDeux !== undefined ? 20 : 0
-  const noteIndicateurTroisPointCalculable = noteIndicateurTrois !== undefined ? 15 : 0
-  const noteIndicateurDeuxTroisPointCalculable = noteIndicateurDeuxTrois !== undefined ? 35 : 0
-  const noteIndicateurQuatrePointCalculable = noteIndicateurQuatre !== undefined ? 15 : 0
-  const noteIndicateurCinqPointCalculable = noteIndicateurCinq !== undefined ? 10 : 0
+): CalculerNoteIndexResult => {
+  const indicateurUnPointsCalculables = noteIndicateurUn !== undefined ? MAX_NOTES_INDICATEURS.indicateurUn : 0
+  const indicateurDeuxPointsCalculables = noteIndicateurDeux !== undefined ? MAX_NOTES_INDICATEURS.indicateurDeux : 0
+  const indicateurTroisPointsCalculables = noteIndicateurTrois !== undefined ? MAX_NOTES_INDICATEURS.indicateurTrois : 0
+  const indicateurDeuxTroisPointsCalculables =
+    noteIndicateurDeuxTrois !== undefined ? MAX_NOTES_INDICATEURS.indicateurDeuxTrois : 0
+  const indicateurQuatrePointsCalculables =
+    noteIndicateurQuatre !== undefined ? MAX_NOTES_INDICATEURS.indicateurQuatre : 0
+  const indicateurCinqPointsCalculables = noteIndicateurCinq !== undefined ? MAX_NOTES_INDICATEURS.indicateurCinq : 0
 
   const totalPoint =
     (noteIndicateurUn || 0) +
@@ -42,25 +42,15 @@ export const calculNoteIndex = (
     (noteIndicateurCinq || 0)
 
   const totalPointCalculable =
-    noteIndicateurUnPointCalculable +
+    indicateurUnPointsCalculables +
     (trancheEffectifs !== "50 à 250"
-      ? noteIndicateurDeuxPointCalculable + noteIndicateurTroisPointCalculable
-      : noteIndicateurDeuxTroisPointCalculable) +
-    noteIndicateurQuatrePointCalculable +
-    noteIndicateurCinqPointCalculable
-
-  if (totalPointCalculable < 75) {
-    return {
-      noteIndex: undefined,
-      totalPoint,
-      totalPointCalculable,
-    }
-  }
-
-  const noteIndex = Math.round((totalPoint * 100) / totalPointCalculable)
+      ? indicateurDeuxPointsCalculables + indicateurTroisPointsCalculables
+      : indicateurDeuxTroisPointsCalculables) +
+    indicateurQuatrePointsCalculables +
+    indicateurCinqPointsCalculables
 
   return {
-    noteIndex,
+    noteIndex: totalPointCalculable < 75 ? undefined : Math.round((totalPoint * 100) / totalPointCalculable),
     totalPoint,
     totalPointCalculable,
   }

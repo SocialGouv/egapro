@@ -7,7 +7,7 @@ import { ValidatorFunction } from "../utils/formHelpers"
 
 import CellInput from "./CellInput"
 
-const displayReadOnlyValue = (value: string, mask?: "number" | "percent" | undefined) => {
+const displayReadOnlyValue = (value: string, mask?: "number" | "percent") => {
   if (!mask || !value) {
     return value
   }
@@ -21,7 +21,7 @@ interface FieldInputsMenWomenProps {
   label: { men: string; women: string }
   calculable: boolean
   calculableNumber: number
-  mask?: "number" | "percent" | undefined
+  mask?: "number" | "percent"
   femmeFieldName: string
   hommeFieldName: string
   validatorFemmes?: ValidatorFunction

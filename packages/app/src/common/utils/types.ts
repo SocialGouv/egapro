@@ -1,4 +1,5 @@
 import type { EventEmitter } from "stream";
+import type { ZodLiteral } from "zod";
 
 /**
  * Use it to simplify void function that can be a promise.
@@ -155,6 +156,18 @@ export interface FixedLengthArray<T, TLength extends number> extends Array<T> {
 }
 
 export type IsTuple<T extends Any[]> = number extends T["length"] ? false : true;
+export type Tuple<T, N extends number> = N extends N ? (number extends N ? T[] : _TupleOf<T, N, []>) : never;
+type _TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N ? R : _TupleOf<T, N, [T, ...R]>;
+
+export type ZodSizedTupleFromUnion<
+  T,
+  N extends number = UnionLength<T> extends number ? UnionLength<T> : number,
+> = Tuple<ZodLiteral<T>, N>;
+
+/** @deprecated - Dangerous as unions can be moved by linters */
+export type ZodTupleFromUnion<T, TTuple = TuplifyUnion<T>> = {
+  [K in keyof TTuple]: ZodLiteral<TTuple[K]>;
+};
 
 /**
  * When using abstract class, return a simulated extended class type without having to target a "real" sub class.
@@ -173,6 +186,15 @@ export type UnionToIntersection<TUnion> = (TUnion extends Any ? (k: TUnion) => v
   : never;
 type UnionToOverloads<TUnion> = UnionToIntersection<TUnion extends Any ? (f: TUnion) => void : never>;
 export type PopUnion<TUnion> = UnionToOverloads<TUnion> extends (a: infer A) => void ? A : never;
+
+export type PushToArray<T extends Any[], V> = [...T, V];
+
+/** @deprecated - Dangerous as unions can be moved by linters */
+export type TuplifyUnion<T, L = PopUnion<T>, N = [T] extends [never] ? true : false> = true extends N
+  ? []
+  : PushToArray<TuplifyUnion<Exclude<T, L>>, L>;
+
+export type UnionLength<T> = TuplifyUnion<T>["length"];
 
 export type UnionConcat<TUnion extends string, TSep extends string = ","> = PopUnion<TUnion> extends infer Self
   ? Self extends string
@@ -233,3 +255,5 @@ export const unreadonly = <T>(value: T): UnReadOnly<T> => value;
  * All props are now considered set and not null nor undefined.
  */
 export const ensureRequired = <T>(value: T) => value as Required<NonNullableProps<T>>;
+
+export const defined = <T>(value: Nothing | T) => value as T;

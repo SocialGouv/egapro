@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from egapro import db
+from egapro import db, constants
 
 pytestmark = pytest.mark.asyncio
 
@@ -99,7 +99,7 @@ async def test_search_endpoint(client):
 async def test_search_representation_equilibree_endpoint(client):
     await db.representation_equilibree.put(
         "12345671",
-        2020,
+        2021,
         {
             "déclaration": {"année_indicateurs": 2020},
             "entreprise": {
@@ -108,6 +108,7 @@ async def test_search_representation_equilibree_endpoint(client):
         },
     )
     resp = await client.get("/representation-equilibree/search?q=bio")
+    print("weqsh", resp.body)
     assert resp.status == 200
     assert json.loads(resp.body) == {
         "data": [
@@ -120,7 +121,7 @@ async def test_search_representation_equilibree_endpoint(client):
                     "siren": "12345671",
                 },
                 "représentation_équilibrée": {
-                    "2020": {
+                    "2021": {
                         "pourcentage_femmes_cadres": None,
                         "pourcentage_hommes_cadres": None,
                         "pourcentage_femmes_membres": None,
@@ -203,7 +204,7 @@ async def test_config_endpoint(client):
         "SECTIONS_NAF",
         "READONLY",
     ]
-    assert json.loads(resp.body)["YEARS"] == [2018, 2019, 2020, 2021]
+    assert json.loads(resp.body)["YEARS"] == constants.YEARS
     resp = await client.get("/config?key=YEARS&key=REGIONS")
     assert resp.status == 200
     assert list(json.loads(resp.body).keys()) == [

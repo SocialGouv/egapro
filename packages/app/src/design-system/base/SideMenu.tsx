@@ -1,5 +1,5 @@
 import { Disclosure } from "@headlessui/react";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useState } from "react";
 

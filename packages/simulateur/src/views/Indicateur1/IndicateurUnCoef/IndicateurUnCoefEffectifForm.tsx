@@ -1,58 +1,47 @@
-import React, { FunctionComponent, useMemo, useCallback } from "react"
 import { Text } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 
-import { AppState, FormState, GroupTranchesAgesEffectif, ActionIndicateurUnCoefData } from "../../../globals"
-import totalNombreSalaries from "../../../utils/totalNombreSalaries"
-import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
+import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ds/ButtonAction"
 import InfoBlock from "../../../components/ds/InfoBlock"
-import ActionLink from "../../../components/ActionLink"
+import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
+import { EffectifPourTrancheAge } from "../../../globals"
+import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
+import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
+import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefEffectifFormProps {
-  state: AppState
-  updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void
-  validateIndicateurUnCoefEffectif: (valid: FormState) => void
-  navigateToRemuneration: () => void
-  navigateToGroupe: () => void
+  navigateTo: (tab: TabIndicateurUnCoef) => void
 }
 
-const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({
-  state,
-  updateIndicateurUnCoef,
-  validateIndicateurUnCoefEffectif,
-  navigateToRemuneration,
-  navigateToGroupe,
-}) => {
+const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({ navigateTo }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
   const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
     state.indicateurUn
 
-  const effectifRaw = useMemo(
-    () =>
-      coefficient.map(({ name, tranchesAges }, index) => ({
-        id: index,
-        name,
-        tranchesAges,
-      })),
-    [coefficient],
-  )
+  const effectifRaw = coefficient.map(({ name, tranchesAges }, index) => ({
+    id: index,
+    name,
+    tranchesAges,
+  }))
 
-  const updateEffectifRaw = useCallback(
-    (
-      data: Array<{
-        id: any
-        name: string
-        tranchesAges: Array<GroupTranchesAgesEffectif>
-      }>,
-    ) => {
-      const coefficient = data.map(({ tranchesAges }) => ({
-        tranchesAges,
-      }))
-      updateIndicateurUnCoef({ coefficient })
-    },
-    [updateIndicateurUnCoef],
-  )
+  const updateEffectifRaw = (
+    data: Array<{
+      id: any
+      name: string
+      tranchesAges: Array<EffectifPourTrancheAge>
+    }>,
+  ) => {
+    const coefficient = data.map(({ tranchesAges }) => ({
+      tranchesAges,
+    }))
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+  }
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
@@ -68,12 +57,13 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
     return (
       <InfoBlock
         title="Vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
-        text={<ActionLink onClick={navigateToGroupe}>Renseigner les groupes</ActionLink>}
+        text={<ActionLink onClick={() => navigateTo("Groupe")}>Renseigner les groupes</ActionLink>}
       />
     )
   }
 
   const readOnly = coefficientEffectifFormValidated === "Valid"
+
   const formValidator = ({ effectif }: any) => {
     const { totalNbSalarieHomme: totalNombreSalariesHommeCoef, totalNbSalarieFemme: totalNombreSalariesFemmeCoef } =
       getTotalNbSalarie(effectif)
@@ -86,22 +76,22 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
   return (
     <>
       <LayoutFormAndResult
-        childrenForm={
+        form={
           <EffectifFormRaw
             effectifRaw={effectifRaw}
             readOnly={readOnly}
             updateEffectif={updateEffectifRaw}
-            validateEffectif={validateIndicateurUnCoefEffectif}
-            nextLink={<ButtonAction onClick={navigateToRemuneration} label="Suivant" size={"lg"} />}
+            validateEffectif={(valid) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid })}
+            nextLink={<ButtonAction onClick={() => navigateTo("Remuneration")} label="Suivant" size={"lg"} />}
             formValidator={formValidator}
           />
         }
-        childrenResult={
+        result={
           readOnly && (
             <EffectifResult
               totalNombreSalariesFemme={totalNombreSalariesFemmeCoef}
               totalNombreSalariesHomme={totalNombreSalariesHommeCoef}
-              validateEffectif={validateIndicateurUnCoefEffectif}
+              validateEffectif={(valid) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid })}
             />
           )
         }
@@ -119,7 +109,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
               </Text>
               {formValidated === "Invalid" && (
                 <Text mt={1}>
-                  <ActionLink onClick={navigateToRemuneration}>Aller à l'étape 3 : rémunérations</ActionLink>
+                  <ActionLink onClick={() => navigateTo("Remuneration")}>Aller à l'étape 3 : rémunérations</ActionLink>
                 </Text>
               )}
             </>

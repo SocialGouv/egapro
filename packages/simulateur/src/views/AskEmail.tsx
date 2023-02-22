@@ -1,19 +1,19 @@
-import React, { FunctionComponent, ReactNode, useState } from "react"
+import { Box, Heading, Image, Text } from "@chakra-ui/react"
+import React, { PropsWithChildren, useState } from "react"
 import { Form } from "react-final-form"
 import { z } from "zod"
-import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
-import { useTitle } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
+import { useTitle } from "../utils/hooks"
 
+import ActionBar from "../components/ActionBar"
 import ButtonAction from "../components/ds/ButtonAction"
-import InputGroup from "../components/ds/InputGroup"
 import { formValidator } from "../components/ds/form-lib"
 import FormStack from "../components/ds/FormStack"
-import Page from "../components/Page"
-import ActionBar from "../components/ActionBar"
+import InputGroup from "../components/ds/InputGroup"
 import FormError from "../components/FormError"
 import FormSubmit from "../components/FormSubmit"
+import Page from "../components/Page"
 
 const FormInput = z.object({
   email: z
@@ -24,32 +24,31 @@ const FormInput = z.object({
 
 interface AskEmailProps {
   tagLine?: string
-  reason?: string | ReactNode
 }
 
 const title = "Validation de l'email"
 
-const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
+const AskEmail = ({ tagLine, children }: PropsWithChildren<AskEmailProps>) => {
   useTitle(title)
 
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const [submitted, setSubmitted] = useState(false)
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = async (formData: z.infer<typeof FormInput>) => {
     setLoading(true)
     setErrorMessage(undefined)
-    sendValidationEmail(formData.email)
-      .then(() => {
-        setLoading(false)
-        setSubmitted(true)
-      })
-      .catch((error: Error) => {
-        console.error(error)
-        setLoading(false)
-        setSubmitted(false)
-        setErrorMessage("Erreur lors de l'envoi de l'email de validation, est-ce que l'email est valide ?")
-      })
+
+    try {
+      await sendValidationEmail(formData.email)
+      setSubmitted(true)
+    } catch (error) {
+      console.error(error)
+      setSubmitted(false)
+      setErrorMessage("Erreur lors de l'envoi de l'email de validation, est-ce que l'email est valide ?")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -78,20 +77,12 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
             </>
           ) : (
             <>
-              {reason && <Text mt={2}>{reason}</Text>}
-              <Text>
-                L’email saisi doit être valide. Il sera celui sur lequel sera adressé l’accusé de réception en fin de
-                procédure et celui qui vous permettra d'accéder à votre déclaration une fois validée et transmise.
-              </Text>
-              <Text mt={2}>
-                <strong>Attention&nbsp;:</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire ou
-                accéder à votre déclaration déjà transmise.
-              </Text>
+              {children}
               <Box mt={6} maxW="lg">
                 <form onSubmit={handleSubmit}>
                   <FormStack>
                     {errorMessage && submitFailed && hasValidationErrors && <FormError message={errorMessage} />}
-                    <InputGroup fieldName="email" label="Votre Email" type="email" />
+                    <InputGroup fieldName="email" label="Adresse email" type="email" />
                   </FormStack>
                   <ActionBar>
                     <FormSubmit loading={loading} label="Envoyer" />

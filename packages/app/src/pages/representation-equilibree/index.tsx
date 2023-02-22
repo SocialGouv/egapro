@@ -1,7 +1,5 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutEntreprise } from "@components/layouts/BasicLayoutEntreprise";
 import {
-  Alert,
-  AlertTitle,
   Box,
   ButtonAsLink,
   Callout,
@@ -102,16 +100,6 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
           </GridCol>
         </Grid>
         <Box mt="9w">
-          <Alert type="warning">
-            <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
-            <p>
-              Pour la première année d'application, les entreprises ont eu jusqu’au 1er septembre pour publier leurs
-              résultats sur leur site internet, ou auprès de leurs salariés à défaut de site internet, et les
-              transmettre au CSE.
-            </p>
-          </Alert>
-        </Box>
-        <Box mt="9w">
           <Callout>
             <CalloutContent>
               <ul>
@@ -145,9 +133,9 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
 
 RepresentationEquilibree.getLayout = ({ children }) => {
   return (
-    <BasicLayout title="Déclaration des écarts de représentation F/H dans les postes de direction">
+    <BasicLayoutEntreprise title="Déclaration des écarts de représentation F/H dans les postes de direction">
       {children}
-    </BasicLayout>
+    </BasicLayoutEntreprise>
   );
 };
 

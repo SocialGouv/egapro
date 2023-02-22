@@ -1,5 +1,4 @@
-import { EnsureOwner } from "@api/core-domain/infra/db/http/next/decorator/EnsureOwner";
-import { LegacyTokenRequire } from "@api/core-domain/infra/db/http/next/decorator/LegacyTokenRequire";
+import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { representationEquilibreeRepo } from "@api/core-domain/repo";
 import {
   GetRepresentationEquilibreeBySirenAndYear,
@@ -11,13 +10,12 @@ import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
 type BaseController = NextController<"siren" | "year">;
-type Req = EnsureOwner.Wrap<LegacyTokenRequire.Wrap<NextController.Req<BaseController>>>;
+type Req = LegacyTokenRequire.Wrap<NextController.Req<BaseController>>;
 type Res = NextController.Res<BaseController>;
 
 @Handler
 export default class RepEqSirenYearController implements BaseController {
-  @LegacyTokenRequire
-  @EnsureOwner
+  @LegacyTokenRequire({ ensureOwner: true })
   public async get(req: Req, res: Res) {
     const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
     const { siren, year } = req.params;
@@ -27,13 +25,13 @@ export default class RepEqSirenYearController implements BaseController {
       if (ret) res.status(StatusCodes.OK).json(ret);
       else res.status(StatusCodes.NOT_FOUND).send(null);
     } catch (error: unknown) {
+      console.error(error);
       if (error instanceof GetRepresentationEquilibreeBySirenAndYearError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
         }
         res.status(StatusCodes.BAD_REQUEST).send(error.appErrorList().map(e => e.message));
       } else {
-        console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }
     }

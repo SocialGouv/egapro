@@ -1,93 +1,92 @@
-'01': Audrey CHAHINE <audrey.chahine@direccte.gouv.fr>
-'02': Vincent LEMOINE <hdf-ud02.ega-pro@direccte.gouv.fr>
-'03': Stéphane  QUINSAT <stephane.quinsat@direccte.gouv.fr>
-'07': Rémy LE PERRON <ara-ud07.direction@direccte.gouv.fr>
-08: Laurence GRENIER <ge-ud08.ega-pro@direccte.gouv.fr>
-09: Chloé PETER Anne MORANDEIRA <oc-ud09.ega-pro@direccte.gouv.fr>
-'10': Chantal BOURCIER <ge-ud10.ega-pro@direccte.gouv.fr>
-'11': Valérie ALES <oc-ud11.ega-pro@direccte.gouv.fr>
-'12': Jean-Pierre LAGUETTE <oc-ud12.ega-pro@direccte.gouv.fr>
-'14': Marie-France HUE <norm-ud14.ega-pro@direccte.gouv.fr>
-'15': Nathalie ANGELIER <nathalie.angelier@direccte.gouv.fr>
-'16': Pascale ROUSSELY <na-ud16.ega-pro@direccte.gouv.fr>
-'17': Serge SILO <na-ud17.ega-pro@direccte.gouv.fr>
-'18': Martine DEGAY <cvl-ud18.ega-pro@direccte.gouv.fr>
-'19': Jean-Paul LEGROS <na-ud19.ega-pro@direccte.gouv.fr>
-'21': Angele AUTIER <bfc-ud21.ega-pro@direccte.gouv.fr>
-'22': Benoit LE MASSON <bret-ud22.ega-pro@direccte.gouv.fr>
-'23': Martine MIMON <na-ud23.ega-pro@direccte.gouv.fr>
-'24': Emmanuel DREAN <na-ud24.ega-pro@direccte.gouv.fr>
-'25': Rémy MOUCHARD <bfc-ud25.ega-pro@direccte.gouv.fr>
-'26': Brigitte CUNIN <ara-ud026.polet@direccte.gouv.fr >
-'27': Véronique ALIES <norm-ud27.ega-pro@direccte.gouv.fr>
-'28': Dorothée GAILLARD <cvl-ud28.ega-pro@direccte.gouv.fr>
-'29': Katya BOSSER <bret-ud29.ega-pro@direccte.gouv.fr>
-'30': Corine BONICEL <oc-ud30.ega-pro@direccte.gouv.fr>
-'31': Emeline GALABRUN <oc-ud31.ega-pro@direccte.gouv.fr>
-'32': Nathalie BACCARINO <oc-ud32.ega-pro@direccte.gouv.fr>
-'33': Corinne COULON <na-ud33.ega-pro@direccte.gouv.fr>
-'34': Pierre SAMPIETRO <oc-ud34.ega-pro@direccte.gouv.fr>
-'35': Anne-Laure COULMEAU <bret-ud35.ega-pro@direccte.gouv.fr>
-'36': Laure-Clemence PORCHEREL <cvl-ud36.ega-pro@direccte.gouv.fr>
-'37': Stève BILLAUD <cvl-ud37.ega-pro@direccte.gouv.fr>
-'38': Lysiane DUPREZ-COLLIGNON <lysiane.duprez-collignon@direccte.gouv.fr>
-'39': Guilène AILLARD <bfc-ud39.ega-pro@direccte.gouv.fr>
-'40': Patrick LASSERE-CATHALA <na-ud40.ega-pro@direccte.gouv.fr>
-'41': Thierry GROSSIN-MOTTI <cvl-ud41.ega-pro@direccte.gouv.fr>
-'42': Marie Cécile CHAMPEIL <marie-cecile.champeil@direccte.gouv.fr>
-'43': Isabelle ESTIER-PORTE <isabelle.estier-porte@direccte.gouv.fr>
-'44': Noémie MOUTON <pdl-ud44.ega-pro@direccte.gouv.fr>
-'45': Laurent TRIVALEU <cvl-ud45.ega-pro@direccte.gouv.fr>
-'46': Ingrid LE FEVRE Bertrand VIDAL <oc-ud46.ega-pro@direccte.gouv.fr>
-'47': Catherine KUENTZ <na-ud47.ega-pro@direccte.gouv.fr>
-'48': Egapro Lozère <oc-ud48.ega-pro@direccte.gouv.fr>
-'49': Claire SCHWEITZER <pdl-ud49.ega-pro@direccte.gouv.fr>
-'50': Nathalie PLAZA-PETIT <norm-ud50.ega-pro@direccte.gouv.fr>
-'51': Rosine MONTEMONT <ge-ud51.ega-pro@direccte.gouv.fr>
-'52': Aurélie CORNIAUX <ge-ud52.ega-pro@direccte.gouv.fr>
-'53': Marie-Claire PERIGOIS <pdl-ud53.ega-pro@direccte.gouv.fr>
-'54': Mickaël MAROT <ge-ud54.ega-pro@direccte.gouv.fr>
-'55': Sylvie LORPHELIN <ge-ud55.ega-pro@direccte.gouv.fr>
-'56': Joel GRISONI <bret-ud56.ega-pro@direccte.gouv.fr>
-'57': Angélique ALBERTI <ge-ud57.ega-pro@direccte.gouv.fr>
-'58': Sarah GRIZARD <bfc-ud58.ega-pro@direccte.gouv.fr>
-'59': François VOET Isabelle FAJFROWSKI <hdf-ud59.ega-pro@direccte.gouv.fr>
-'60': Emilie BARBET <hdf-ud60.ega-pro@direccte.gouv.fr>
-'61': Catherine BREARD <norm-ud61.ega-pro@direccte.gouv.fr>
-'62': Charlotte COO <hdf-ud62.ega-pro@direccte.gouv.fr>
-'63': Estelle PARAYRE <estelle.parayre@direccte.gouv.fr>
-'64': Marianne PLANQUES <na-ud64.ega-pro@direccte.gouv.fr>
-'65': Fabien JAUZION <oc-ud65.ega-pro@direccte.gouv.fr>
-'66': Mina HANNA-TICHADOU <oc-ud66.ega-pro@direccte.gouv.fr>
-'67': Agnès GRUSS <ge-ud67.ega-pro@direccte.gouv.fr>
-'68': Oriane JEANNIARD <ge-ud68.ega-pro@direccte.gouv.fr>
-'69': Fabienne COLLET <fabienne.collet@direccte.gouv.fr>
-'70': Laurent DUDNIK <bfc-ud70.ega-pro@direccte.gouv.fr>
-'71': Gisèle GARRIGUET <bfc-ud71.ega-pro@direccte.gouv.fr>
-'72': Isabelle LAUNAY <pdl-ud72.ega-pro@direccte.gouv.fr>
-'73': Delphine MICHAUD <delphine.michaud@direccte.gouv.fr>
-'74': Marie WODLI <marie.wodli@direccte.gouv.fr>
-'75': Chantal COIFFE Alexandra MUSY <idf-ud75.ega-pro@direccte.gouv.fr>
-'76': Mathilde MENELLE <norm-ud76.ega-pro@direccte.gouv.fr>
-'77': Brigitte BOU <idf-ud77.ega-pro@direccte.gouv.fr>
-'78': Dorothée BAREL <idf-ud78.ega-pro@direccte.gouv.fr>
-'79': Morgane CHARLET <na-ud79.ega-pro@direccte.gouv.fr>
-'80': Agnès DUBOS-DITTARO <hdf-ud80.ega-pro@direccte.gouv.fr>
-'81': Anne CHAMFRAULT Françoise LOISEAU <oc-ud81.ega-pro@direccte.gouv.fr>
-'82': Richard BLANCO <oc-ud82.ega-pro@direccte.gouv.fr>
-'85': Brigitte COMBRET <pdl-ud85.ega-pro@direccte.gouv.fr>
-'86': Alexandra BOILDIEU <na-ud86.ega-pro@direccte.gouv.fr>
-'87': Christophe SALOMON <na-ud87.ega-pro@direccte.gouv.fr>
-'88': Tobias KENMEGNE <ge-ud88.ega-pro@direccte.gouv.fr>
-'89': Florence LAMESA <bfc-ud89.ega-pro@direccte.gouv.fr>
-'90': Magdalena BARRAL <bfc-ud90.ega-pro@direccte.gouv.fr>
-'91': Stéphane ROUXEL <idf-ud91.ega-pro@direccte.gouv.fr>
-'92': Brigitte MAUVE <idf-ud92.ega-pro@direccte.gouv.fr>
-'93': KaevinTALON <idf-ud93.ega-pro@direccte.gouv.fr>
-'94': Grégory BONNET <idf-ud94.ega-pro@direccte.gouv.fr>
-'95': Nadège LENOIR <idf-ud95.ega-pro@direccte.gouv.fr>
-'971': Agnès LAUTONE <agnes.lautone@dieccte.gouv.fr>
-'972': Marie-Louise MIREILLE <mireille.marie-louise@dieccte.gouv.fr >
-'973': France-Lise ARISTARQUE <france-lise.aristarque@dieccte.gouv.fr>
-'974': Pierre MERCADER <pierre.mercader@dieccte.gouv.fr>
-'976': Jean-François PENNEL <976.uc1@dieccte.gouv.fr>
+'01': Caroline MANDY <caroline.mandy@ain.gouv.fr>
+'02': Vincent LEMOINE <ddets-sct@aisne.gouv.fr>
+'03': Marie-Jeanne FANELLI <ddetspp-ega-pro@allier.gouv.fr>
+'07': Rémy LE PERRON <ddetspp-directeur@ardeche.gouv.fr>
+08: Laurence GRENIER <ddetspp-ega-pro@ardennes.gouv.fr>
+09: Sandra ROUCH <ddetspp-ega-pro@ariege.gouv.fr>
+'10': Adeline LEGRAND <ddetspp-ega-pro@aube.gouv.fr>
+'11': Valérie ALES <ddetspp-ega-pro@aude.gouv.fr>
+'12': Christine DURAND <ddetspp-ega-pro@aveyron.gouv.fr>
+'14': Marie-France HUE <ddets-ega-pro@calvados.gouv.fr>
+'15': Nathalie ANGELIER <nathalie.angelier@cantal.gouv.fr>
+'16': Pascale ROUSSELY <ddetspp-ega-pro@charente.gouv.fr>
+'17': Serge SILO <ddets-ega-pro@charente-maritime.gouv.fr>
+'18': Fabienne MIRAMOND SCARDIA <ddetspp-ega-pro@cher.gouv.fr>
+'19': Jean-Paul LEGROS <ddetspp-ega-pro@correze.gouv.fr>
+'21': Christophe BIOT <christophe.biot@cote-dor.gouv.fr>
+'22': Egapro Côtes d'Armor <ddets-ega-pro@cotes-darmor.gouv.fr>
+'23': Martine MIMON <ddetspp.ega-pro@creuse.gouv.fr>
+'24': Stéphane ALONSO <ddetspp-uc1@dordogne.gouv.fr>
+'25': Ghislaine FLORENTZ <ghislaine.florentz@doubs.gouv.fr>
+'26': Brigitte CUNIN <ddets@drome.gouv.fr>
+'27': Martine TERRIER <ddets-ega-pro@eure.gouv.fr>
+'28': Dorothée GAILLARD <ddetspp-ega-pro@eure-et-loir.gouv.fr>
+'29': Katya BOSSER <ddets-ega-pro@finistere.gouv.fr>
+'30': Paula NUNES <ddets-ega-pro@gard.gouv.fr>
+'31': Jennifer ABADIE <ddets-ega-pro@haute-garonne.gouv.fr>
+'32': Nathalie BACCARINO <ddetspp-ega-pro@gers.gouv.fr>
+'33': Corinne COULON <ddets-ega-pro@gironde.gouv.fr>
+'34': Pierre SAMPIETRO <ddets-ega-pro@herault.gouv.fr>
+'35': Laurence MOUHOU <ddets-ega-pro@ille-et-vilaine.gouv.fr>
+'36': Laure-Clemence PORCHEREL <ddetspp-ega-pro@indre.gouv.fr>
+'37': Fabienne MIRAMOND SCARDIA <ddets-ega-pro@indre-et-loire.gouv.fr>
+'38': Lysiane DUPREZ-COLLIGNON <lysiane.duprez-collignon@isere.gouv.fr>
+'39': Guilène AILLARD <ddetspp-ega-pro@jura.gouv.fr>
+'40': Patrick LASSERE-CATHALA <ddetspp-ega-pro@landes.gouv.fr>
+'41': Fabienne MIRAMOND SCARDIA <ddetspp-ega-pro@loir-et-cher.gouv.fr>
+'42': Marie Cécile CHAMPEIL <marie-cecile.champeil@loire.gouv.fr>
+'43': Isabelle ESTIER-PORTE <isabelle.estier-porte@haute-loire.gouv.fr>
+'44': Noémie MOUTON <ddets-ega-pro@loire-atlantique.gouv.fr>
+'45': Aurore LAPORTE <ddets-egalite-professionnelle@loiret.gouv.fr>
+'46': Ingrid LE FEVRE <ddetspp-ega-pro@lot.gouv.fr>
+'47': Catherine KUENTZ <ddtespp-ega-pro@lot-et-garonne.gouv.fr>
+'49': Stéphanie SEGRETIN <ddets-ega-pro@maine-et-loire.gouv.fr>
+'50': Nathalie PLAZA-PETIT <ddets-ega-pro@manche.gouv.fr>
+'51': Jéröme LEFONDEUR <ddetspp-ega-pro@marne.gouv.fr>
+'52': Aurélie CORNIAUX <ddetspp-ega-pro@haute-marne.gouv.fr>
+'53': Marie-Claire PERIGOIS <ddetspp-ega-pro@mayenne.gouv.fr>
+'54': Mickaël MAROT <ddets-ega-pro@meurthe-et-moselle.gouv.fr>
+'55': Jocelyne HOFBAUER <ddetspp-egapro@meuse.gouv.fr>
+'56': Joel GRISONI <ddets-ega-pro@morbihan.gouv.fr>
+'57': Marie-Christine STIEN <ddets-ega-pro@moselle.gouv.fr>
+'58': Alexandra BUONO <ddetspp-ega-pro@nievre.gouv.fr>
+'59': François VOET <ddets-59-ega-pro@nord.gouv.fr>
+'60': Emilie BARBET <ddets-ega-pro@oise.gouv.fr>
+'61': Mélisande MALLET-RADEMACHER <ddets-ega-pro@orne.gouv.fr>
+'62': Christophe FAIDHERBE <ddets-ega-pro@pas-de-calais.gouv.fr>
+'63': Estelle PARAYRE <estelle.parayre@puy-de-dome.gouv.fr>
+'64': Angélique ITHURBURRU <ddets-ega-pro@pyrenees-atlantiques.gouv.fr>
+'65': Fabien JAUZION <ddetspp-ega-pro@hautes-pyrenees.gouv.fr>
+'66': Mina HANNA-TICHADOU <ddets-ega-pro@pyrenees-orientales.gouv.fr>
+'67': Heloïse CLAUDEL <ddets-ega-pro@bas-rhin.gouv.fr>
+'68': Oriane JEANNIARD <ddetspp-egal-pro@haut-rhin.gouv.fr>
+'69': Céline AURET <ddets-ega-pro@rhone.gouv.fr>
+'70': Laurent DUDNIK <laurent.dudnik@haute-saone.gouv.fr>
+'71': Anne FERNANDEZ <anne.fernandez@saone-et-loire.gouv.fr>
+'72': Isabelle LAUNAY <ddets-ega-pro@sarthe.gouv.fr>
+'73': Hubert GUIRIMAND <hubert.guirimand@savoie.gouv.fr>
+'74': Marie WODLI <marie.wodli@haute-savoie.gouv.fr>
+'75': Alexandra MUSY <drieets-idf-ud75.ega-pro@drieets.gouv.fr>
+'76': Mathilde MENELLE <DDETS-accord-entreprise@seine-maritime.gouv.fr>
+'77': Armelle LE LAY <ddets77-ega-pro@seine-et-marne.gouv.fr>
+'78': Dorothée BAREL <idf-ud78.ega-pro@yvelines.gouv.fr>
+'79': François MISTROT <ddetspp-it@deux-sevres.gouv.fr>
+'80': Agnès DUBOS-DITTARO <ddets-ega-pro@somme.gouv.fr>
+'81': Françoise LOISEAU <ddetspp-ega-pro@tarn.gouv.fr>
+'82': Richard BLANCO <ddetspp-ega-pro@tarn-et-garonne.gouv.fr>
+'85': Brigitte COMBRET <ddets-ega-pro@vendee.gouv.fr>
+'86': Alexandra BOILDIEU <ddets-ega-pro@vienne.gouv.fr>
+'87': Christine CANIZARES <ddetsp-ega-pro@haute-vienne.gouv.fr>
+'88': Tobias KENMEGNE <ddetspp-ega-pro@vosges.gouv.fr>
+'89': Florence LAMESA <florence.lamesa@yonne.gouv.fr>
+'90': Magdalena BARRAL <magdalena.barral@territoire-de-belfort.gouv.fr>
+'91': Stéphane ROUXEL <ddets-ega-pro@essonne.gouv.fr>
+'92': Lolita REINA-RICO <drieets-idf-ud92.ega-pro@drieets.gouv.fr>
+'93': Sami ALLAG <sami.allag@drieets.gouv.fr>
+'94': Nimira HASSANALY <drieets-idf-ud94.ega-pro@drieets.gouv.fr>
+'95': Egapro Val d'Oise <idf-ud95.ega-pro@val-doise.gouv.fr>
+'971': Agnès LAUTONE <agnes.lautone@deets.gouv.fr>
+'972': Marie-Louise MIREILLE <mireille.marie-louise@deets.gouv.fr>
+'973': Emmanuel LOISEAU <emmanuel.loiseau@guyane.pref.gouv.fr>
+'974': Pierre MERCADER <pierre.mercader@deets.gouv.fr>
+'976': Jean-François PENNEL <DEETS-976.UC@deets.gouv.fr>

@@ -71,7 +71,7 @@ select siren, email, exists (
   public async saveBulk(...items: Ownership[]): Promise<void> {
     const raws = items.map(ownershipMap.toPersistence);
 
-    await this.sql`insert into ${this.table} ${_sql(raws)}`;
+    await this.sql`insert into ${this.table} ${_sql(raws)} on conflict do nothing returning true`;
   }
 
   public updateBulk(...items: Ownership[]): Promise<void> {
@@ -93,7 +93,7 @@ select siren, email, exists (
   public async save(item: Ownership): Promise<void> {
     const raw = ownershipMap.toPersistence(item);
 
-    await this.sql`insert into ${this.table} ${_sql(raw)}`;
+    await this.sql`insert into ${this.table} ${_sql(raw)} on conflict do nothing returning true`;
   }
 
   public update(item: Ownership): Promise<void> {

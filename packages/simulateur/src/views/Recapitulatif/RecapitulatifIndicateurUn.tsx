@@ -1,11 +1,12 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState, TranchesAges } from "../../globals"
-import { effectifEtEcartRemuGroupCoef, effectifEtEcartRemuGroupCsp } from "../../utils/calculsEgaProIndicateurUn"
+import { TrancheAge } from "../../globals"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import {
-  displayNameCategorieSocioPro,
+  displayFractionPercentWithEmptyData,
+  displayNameCSP,
   displayNameTranchesAges,
   displayPercent,
   displaySexeSurRepresente,
@@ -14,29 +15,33 @@ import {
 import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { indicateursInfo } from "../../config"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurUnProps {
-  indicateurUnFormValidated: FormState
-  effectifsIndicateurUnCalculable: boolean
-  effectifEtEcartRemuParTranche: Array<effectifEtEcartRemuGroupCsp> | Array<effectifEtEcartRemuGroupCoef>
-  indicateurEcartRemuneration: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  indicateurUnParCSP: boolean
-  noteIndicateurUn: number | undefined
+  calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn>
 }
 
-const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({
-  indicateurUnFormValidated,
-  effectifsIndicateurUnCalculable,
-  effectifEtEcartRemuParTranche,
-  indicateurEcartRemuneration,
-  indicateurSexeSurRepresente,
-  indicateurUnParCSP,
-  noteIndicateurUn,
-}) => {
-  if (indicateurUnFormValidated !== "Valid") {
+const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({ calculsIndicateurUn }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const indicateurUnFormValidated = state.indicateurUn.formValidated
+  const indicateurUnParCSP = state.indicateurUn.csp
+  const isEffectifsFilled = isFormValid(state.effectif)
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
+    effectifEtEcartRemuParTranche,
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente,
+    noteIndicateurUn,
+  } = calculsIndicateurUn
+
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
@@ -55,13 +60,17 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     )
   }
 
+  if (indicateurUnFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur1" />
+  }
+
   // @ts-ignore
   const groupEffectifEtEcartRemuParTranche = effectifEtEcartRemuParTranche.reduce((acc, el, index) => {
     const newEl =
       el.categorieSocioPro !== undefined
         ? {
             id: el.categorieSocioPro,
-            name: displayNameCategorieSocioPro(el.categorieSocioPro),
+            name: displayNameCSP(el.categorieSocioPro),
             ...el,
           }
         : el
@@ -77,10 +86,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     <RecapBloc
       indicateur="indicateur1"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData: indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
         indicateurSexeSurRepresente,
       }}
@@ -96,10 +105,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         <Thead textTransform="inherit" fontSize=".5rem">
           <Tr>
             <Th />
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.MoinsDe30ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De30a39ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De40a49ans)}</Th>
-            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.PlusDe50ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.MoinsDe30ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De30a39ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.De40a49ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TrancheAge.PlusDe50ans)}</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -108,30 +117,22 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
               effectifEtEcartRemuParTranche: Array<{
                 id: any
                 name: string
-                ecartRemunerationMoyenne: number | undefined
+                ecartRemunerationMoyenne?: number
               }>,
             ) => (
               <Tr key={effectifEtEcartRemuParTranche[0].id}>
                 <Td>{effectifEtEcartRemuParTranche[0].name}</Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne)}
                 </Td>
               </Tr>
             ),

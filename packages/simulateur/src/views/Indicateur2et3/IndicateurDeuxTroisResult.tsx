@@ -1,38 +1,46 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import { displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
 
-import { Result } from "./IndicateurDeuxTrois"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { Results } from "./IndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface IndicateurDeuxTroisResultProps {
-  bestResult: Result
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeuxTrois: number | undefined
-  correctionMeasure: boolean
-  validateIndicateurDeuxTrois: (valid: FormState) => void
+  results: Results
+  calculsIndicateurDeuxTrois: Pick<
+    ReturnType<typeof calculerIndicateurDeuxTrois>,
+    "indicateurSexeSurRepresente" | "noteIndicateurDeuxTrois" | "correctionMeasure"
+  >
 }
 
 const IndicateurDeuxTroisResult: FunctionComponent<IndicateurDeuxTroisResultProps> = ({
-  bestResult,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeuxTrois,
-  correctionMeasure,
-  validateIndicateurDeuxTrois,
+  results,
+  calculsIndicateurDeuxTrois,
 }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const readOnly = isFormValid(state.indicateurDeuxTrois)
+
+  if (!readOnly) return null
+
+  const { indicateurSexeSurRepresente, noteIndicateurDeuxTrois, correctionMeasure } = calculsIndicateurDeuxTrois
+
   return (
     <ResultSummary
-      firstLineLabel={bestResult.label}
-      firstLineData={bestResult.result}
+      firstLineLabel={results.best.label}
+      firstLineData={results.best.result}
       firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
-      secondLineLabel="votre note obtenue est"
+      secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurDeuxTrois !== undefined ? noteIndicateurDeuxTrois : "--") + "/35"}
       secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      onEdit={() => validateIndicateurDeuxTrois("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurDeuxTrois", valid: "None" })}
     />
   )
 }

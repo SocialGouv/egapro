@@ -31,7 +31,7 @@ class PDF(fpdf.FPDF):
         return self.output(path)
 
     def header(self):
-        self.image(Path(__file__).parent / "logo.png", 9, 8.7, 33)
+        self.image(Path(__file__).parent / "logo.jpeg", 9, 8.7, 33)
         self.set_font("Marianne", "B", 15)
         # Move to the right
         self.cell(35)

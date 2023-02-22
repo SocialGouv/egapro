@@ -1,4 +1,5 @@
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { config } from "@common/config";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import {
   Box,
   ButtonAsLink,
@@ -13,12 +14,18 @@ import {
   GridCol,
   ImgHome,
 } from "@design-system";
+import type { GetStaticProps } from "next";
 import NextLink from "next/link";
 
 import type { NextPageWithLayout } from "./_app";
 import styles from "./index.module.css";
 
-const Home: NextPageWithLayout = () => {
+interface HomeProps {
+  /** Feature flags */
+  ff: typeof config.ff;
+}
+
+const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
   return (
     <section>
       <Box pt="9w" pb="4w" className={styles.hero}>
@@ -67,7 +74,10 @@ const Home: NextPageWithLayout = () => {
                 </CardBodyContent>
                 <CardBodyFooter>
                   <NextLink href="/index-egapro" passHref>
-                    <ButtonAsLink>Calculer - Déclarer mon Index</ButtonAsLink>
+                    <ButtonAsLink className="fr-mr-4w">Calculer - Déclarer mon Index</ButtonAsLink>
+                  </NextLink>
+                  <NextLink href="/consulter-index" passHref>
+                    <a>Consulter l'Index</a>
                   </NextLink>
                 </CardBodyFooter>
               </CardBody>
@@ -93,8 +103,13 @@ const Home: NextPageWithLayout = () => {
                 </CardBodyContent>
                 <CardBodyFooter>
                   <NextLink href="/representation-equilibree" passHref>
-                    <ButtonAsLink>Déclarer mes Écarts</ButtonAsLink>
+                    <ButtonAsLink className="fr-mr-4w">Déclarer mes Écarts</ButtonAsLink>
                   </NextLink>
+                  {ff["repeq-search"] && (
+                    <NextLink href="/representation-equilibree/recherche" passHref>
+                      <a>Consulter les Écarts</a>
+                    </NextLink>
+                  )}
                 </CardBodyFooter>
               </CardBody>
             </Card>
@@ -105,8 +120,14 @@ const Home: NextPageWithLayout = () => {
   );
 };
 
+export const getStaticProps: GetStaticProps<HomeProps> = _ctx => {
+  return {
+    props: { ff: config.ff },
+  };
+};
+
 Home.getLayout = ({ children }) => {
-  return <BasicLayout>{children}</BasicLayout>;
+  return <BasicLayoutPublic>{children}</BasicLayoutPublic>;
 };
 
 export default Home;

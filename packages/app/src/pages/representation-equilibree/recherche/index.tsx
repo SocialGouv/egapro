@@ -1,5 +1,5 @@
 import { capitalize } from "@common/utils/string";
-import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { ConsultationRepeqLayout } from "@components/layouts/ConsultationRepeqLayout";
 import {
   Alert,
   AlertTitle,
@@ -13,6 +13,7 @@ import {
   FormSelect,
   TileCompanyRepeqs,
 } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { filterDepartements, useConfig } from "@services/apiClient";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
@@ -47,7 +48,8 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQueryInput) {
 }
 
 const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading: boolean; repeqs: RepeqsType }) => {
-  if (isLoading) return <Alert type="info">Recherche en cours</Alert>;
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  if (isLoading) return null;
 
   if (error) {
     return (
@@ -78,7 +80,7 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
           {repeqs?.count > 1 ? "s" : ""}
         </p>
       )}
-      <div className="fr-grid-row fr-grid-row--gutters">
+      <div className="fr-grid-row fr-grid-row--gutters" ref={animationParent}>
         {repeqs.data.map(repeq => (
           <div key={repeq.entreprise.siren} className="fr-col-12">
             <TileCompanyRepeqs {...repeq} />
@@ -97,6 +99,7 @@ function FormSearchSiren() {
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
   const isFirstRender = useIsFirstRender();
   const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(isFirstRender ? undefined : params);
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const {
     formState: { errors },
@@ -220,15 +223,17 @@ function FormSearchSiren() {
         </div>
       </form>
 
-      {!isFirstRender && <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />}
+      <div ref={animationParent}>
+        {!isFirstRender && <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />}
 
-      {repeqs?.data?.length < repeqs?.count && (
-        <div className="fr-mt-3w">
-          <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
-            Voir les résultats suivants
-          </FormButton>
-        </div>
-      )}
+        {repeqs?.data?.length < repeqs?.count && (
+          <div className="fr-mt-3w">
+            <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
+              Voir les résultats suivants
+            </FormButton>
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -262,7 +267,7 @@ const HomePage: NextPageWithLayout = () => {
 };
 
 HomePage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
+  return <ConsultationRepeqLayout>{children}</ConsultationRepeqLayout>;
 };
 
 export default HomePage;

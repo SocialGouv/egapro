@@ -13,8 +13,16 @@ export type NextController<TParamKeys extends string = string> = Controller<
 >;
 
 export namespace NextController {
-  export type Req<TController extends NextController> = Parameters<NonNullable<TController["get"]>>[0];
-  export type Res<TController extends NextController> = Parameters<NonNullable<TController["get"]>>[1];
+  export type Req<TController extends NextController> = Parameters<
+    NonNullable<TController["get"]>
+  >[0] extends ControllerRequest<infer RParams, NextApiRequest>
+    ? NextControllerRequest<RParams>
+    : never;
+  export type Res<TController extends NextController> = Parameters<
+    NonNullable<TController["get"]>
+  >[1] extends ControllerResponse<NextApiResponse>
+    ? NextControllerResponse
+    : never;
 }
 
 /**

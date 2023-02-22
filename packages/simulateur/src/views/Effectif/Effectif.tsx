@@ -1,34 +1,26 @@
-import React, { FunctionComponent, useCallback } from "react"
-import { Text, VStack, UnorderedList, ListItem } from "@chakra-ui/react"
-import { RouteComponentProps } from "react-router-dom"
+import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 
-import { AppState, ActionType, FormState, ActionEffectifData } from "../../globals"
+import { FormState } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import SimulateurPage from "../../components/SimulateurPage"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
+import { useTitle } from "../../utils/hooks"
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
-import { useTitle } from "../../utils/hooks"
-
-interface EffectifProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
 
 const title = "Effectifs pris en compte"
 
-const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
+const Effectif: FunctionComponent = () => {
   useTitle(title)
+  const { state, dispatch } = useAppStateContextProvider()
 
-  const updateEffectif = useCallback(
-    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
-    [dispatch],
-  )
-
-  const validateEffectif = useCallback((valid: FormState) => dispatch({ type: "validateEffectif", valid }), [dispatch])
+  if (!state) return null
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
@@ -40,32 +32,25 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
   } = totalNombreSalaries(state.indicateurUn.coefficient)
 
   return (
-    <Page
+    <SimulateurPage
       title="Indication des effectifs"
       tagline="Les effectifs pris en compte pour le calcul doivent être renseignés en effectif physique par catégorie socio-professionnelle (CSP) et tranche d’âge."
     >
       <VStack spacing={8} align="stretch">
         <LayoutFormAndResult
-          childrenForm={
-            <EffectifForm
-              effectif={state.effectif}
-              readOnly={state.effectif.formValidated === "Valid"}
-              updateEffectif={updateEffectif}
-              validateEffectif={validateEffectif}
-            />
-          }
-          childrenResult={
-            state.effectif.formValidated === "Valid" && (
+          form={<EffectifForm />}
+          result={
+            isFormValid(state.effectif) && (
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
                 totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
-                validateEffectif={validateEffectif}
+                validateEffectif={(valid: FormState) => dispatch({ type: "validateEffectif", valid })}
               />
             )
           }
         />
         <VStack spacing={6} align="stretch">
-          {state.effectif.formValidated === "Valid" &&
+          {isFormValid(state.effectif) &&
             (state.indicateurUn.formValidated === "Invalid" ||
               (state.informations.trancheEffectifs !== "50 à 250" &&
                 (state.indicateurDeux.formValidated === "Invalid" ||
@@ -120,8 +105,8 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
               />
             )}
           {/* This should never happen, as modifying the effectif will invalidate the indicateur form */}
-          {state.effectif.formValidated === "Valid" &&
-            state.indicateurUn.formValidated === "Valid" &&
+          {isFormValid(state.effectif) &&
+            isFormValid(state.indicateurUn) &&
             state.indicateurUn.coef &&
             (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
               totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
@@ -140,8 +125,8 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
               />
             )}
 
-          {state.informations.formValidated === "Valid" &&
-            state.effectif.formValidated === "Valid" &&
+          {isFormValid(state.informations) &&
+            isFormValid(state.effectif) &&
             totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
             state.informations.trancheEffectifs === "50 à 250" && (
               <InfoBlock
@@ -152,7 +137,7 @@ const Effectif: FunctionComponent<EffectifProps> = ({ state, dispatch }) => {
             )}
         </VStack>
       </VStack>
-    </Page>
+    </SimulateurPage>
   )
 }
 

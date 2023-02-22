@@ -1,11 +1,10 @@
 /** @jsxImportSource @emotion/react */
+import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
 import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
-import { Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
-
-import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
 import {
+  isFormValid,
   parseBooleanFormValue,
   parseBooleanStateValue,
   parseIntFormValue,
@@ -13,22 +12,24 @@ import {
   required,
 } from "../../utils/formHelpers"
 
-import ButtonAction from "../../components/ds/ButtonAction"
-import FormStack from "../../components/ds/FormStack"
-import { IconEdit } from "../../components/ds/Icons"
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
-import InputRadio from "../../components/ds/InputRadio"
-import ActionBar from "../../components/ActionBar"
+import { Input as InputChakra } from "@chakra-ui/input"
 import AnneeDeclaration from "../../components/AnneeDeclaration"
+import FormStack from "../../components/ds/FormStack"
+import InputRadio from "../../components/ds/InputRadio"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import Input, { hasFieldError } from "../../components/Input"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import RadiosBoolean from "../../components/RadiosBoolean"
+import { hasFieldError } from "../../components/Input"
+
+import { useParams } from "react-router-dom"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
+import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
-import { displayMetaErrors } from "../../utils/form-error-helpers"
 import FormError from "../../components/FormError"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { parseDate } from "../../utils/date"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const validateForm = ({
   nomEntreprise,
@@ -38,8 +39,8 @@ const validateForm = ({
 }: {
   nomEntreprise: string
   anneeDeclaration: string
-  finPeriodeReference: string | undefined
-  periodeSuffisante: string | undefined
+  finPeriodeReference?: string
+  periodeSuffisante?: string
 }) => {
   const isFilledPeriodeSuffisante = periodeSuffisante !== undefined
 
@@ -67,7 +68,7 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
   <InputDateGroup
     fieldName="finPeriodeReference"
     isReadOnly={readOnly}
-    label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
+    label="Date de fin de la période de référence choisie pour le calcul des indicateurs (jj/mm/aaaa)"
   >
     <Button mt={2} onClick={onClick} disabled={readOnly} variant="solid" size="sm" px="8" py="5" colorScheme="primary">
       Sélectionner la fin
@@ -89,36 +90,34 @@ const validate = (value: string) => {
 
 const FieldPeriodeSuffisante = ({ readOnly }: { readOnly: boolean }) => {
   const field = useField("periodeSuffisante", { validate })
-  const error = hasFieldError(field.meta)
 
   return (
-    <>
-      <RadiosBoolean
-        fieldName="periodeSuffisante"
-        value={field.input.value}
-        readOnly={readOnly}
-        label="Disposez-vous d'une période de 12 mois consécutifs pour le calcul de vos indicateurs ?"
-      />
-      <p>{error && displayMetaErrors(field.meta.error)}</p>
-    </>
+    <RadiosBoolean
+      fieldName="periodeSuffisante"
+      value={field.input.value}
+      readOnly={readOnly}
+      label="Disposez-vous d'une période de 12 mois consécutifs pour le calcul de vos indicateurs ?"
+    />
   )
 }
 
-interface InformationsSimulationFormProps {
-  informations: AppState["informations"]
-  readOnly: boolean
-  updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
-  validateInformationsSimulation: (valid: FormState) => void
-  alreadyDeclared: boolean
+type Params = {
+  code: string
 }
 
-const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormProps> = ({
-  informations,
-  readOnly,
-  updateInformationsSimulation,
-  validateInformationsSimulation,
-  alreadyDeclared,
-}) => {
+const InformationsSimulationForm: FunctionComponent = () => {
+  const { code } = useParams<Params>()
+  const { state, dispatch } = useAppStateContextProvider()
+
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  if (!state) return null
+
+  const alreadyDeclared = declaration?.data?.id === code
+  const informations = state.informations
+  const readOnly = isFormValid(informations)
+  const frozenDeclaration = isFrozenDeclaration(state)
+
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
@@ -136,18 +135,21 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
   const saveForm = (formData: typeof initialValues) => {
     const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = formData
 
-    updateInformationsSimulation({
-      nomEntreprise,
-      trancheEffectifs,
-      anneeDeclaration: parseIntFormValue(anneeDeclaration),
-      ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
-      periodeSuffisante: parseBooleanFormValue(periodeSuffisante),
+    dispatch({
+      type: "updateInformationsSimulation",
+      data: {
+        nomEntreprise,
+        trancheEffectifs,
+        anneeDeclaration: parseIntFormValue(anneeDeclaration),
+        ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
+        periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
+      },
     })
   }
 
   const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
-    validateInformationsSimulation("Valid")
+    dispatch({ type: "validateInformationsSimulation", valid: "Valid" })
   }
 
   return (
@@ -170,7 +172,6 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
       {({ form, handleSubmit, hasValidationErrors, submitFailed, values }) => (
         <form onSubmit={handleSubmit}>
           <FormStack>
-            {" "}
             {/* pass `onlyWhenDirty={false}` because we want the form to always
           auto save, as we update the left menu depending on the "tranche
           d'effectifs". Otherwise it would not re-update the menu when
@@ -223,34 +224,27 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
             </FormControl>
             <FieldPeriodeSuffisante readOnly={readOnly} />
             {values.periodeSuffisante === "true" && (
-              <>
-                <FieldPeriodeReference
-                  readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
-                  onClick={form.mutators.selectEndOfYear}
-                />
-              </>
+              <FieldPeriodeReference
+                readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
+                onClick={form.mutators.selectEndOfYear}
+              />
             )}
           </FormStack>
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink
-                to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
-                label="Suivant"
-              />
-              {informations.formValidated === "Valid" && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => validateInformationsSimulation("None")}
-                  variant="link"
-                  size="sm"
-                />
-              )}
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to={values.periodeSuffisante === "true" ? "/effectifs" : "/recapitulatif"}
+            onClick={() => dispatch({ type: "validateInformationsSimulation", valid: "None" })}
+          />
+
+          {isFormValid(informations) && (
+            <InfoBlock
+              mt={12}
+              type="info"
+              text={`Vous allez procéder au calcul de vos indicateurs et de votre index de l’égalité professionnelle pour l’année ${
+                +values.anneeDeclaration + 1
+              } au titre des données de ${values.anneeDeclaration}.`}
+            />
           )}
         </form>
       )}
@@ -259,17 +253,16 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
 }
 
 function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate })
+  const label = "nomEntreprise"
+  const field = useField(label, { validate })
   const error = hasFieldError(field.meta)
 
   return (
-    <div>
-      <label htmlFor={field.input.name}>Nom de la simulation (ex : nom_entreprise_date)</label>
-      <div>
-        <Input field={field} isReadOnly={readOnly} />
-      </div>
-      <p>{error && "le nom n'est pas valide"}</p>
-    </div>
+    <FormControl isInvalid={error}>
+      <FormLabel htmlFor={label}>Nom de la simulation</FormLabel>
+      <InputChakra id={label} placeholder={"Ex : nom_entreprise_date"} isReadOnly={readOnly} {...field.input} />
+      <FormErrorMessage>{error && "Le nom n'est pas valide"}</FormErrorMessage>
+    </FormControl>
   )
 }
 

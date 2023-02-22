@@ -7,33 +7,32 @@ import { Link as RouterLink } from "react-router-dom"
 import type { DeclarationAPI } from "../utils/declarationBuilder"
 
 import { useDeclarations } from "../hooks/useDeclaration"
-import { buildHelpersObjectifsMesures } from "../views/private/ObjectifsMesuresPage"
+import { buildHelpersObjectifsMesures, isFrozenDeclarationForOPMC } from "../views/private/ObjectifsMesuresPage"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { formatDate } from "../utils/date"
 
-const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string => {
+const trancheFromApiToForm = (declaration?: DeclarationAPI): string => {
   const tranche = declaration?.data.entreprise.effectif?.tranche
   if (!tranche) return ""
   return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"
 }
 
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
-  const { declarations, isLoading } = useDeclarations(siren)
+  const { declarations, isLoading, message } = useDeclarations(siren)
 
   const yearsDeclarations = Object.keys(declarations).sort().reverse()
 
   return (
     <Box mt="4">
-      {isLoading ? (
-        <Box m="6">
+      <Box m="6">
+        <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
+          Liste des déclarations - Index Égalité Professionnelle
+        </Text>
+        {isLoading ? (
           <Spinner />
-        </Box>
-      ) : (
-        <Box m="6">
-          <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-            Liste des déclarations
-          </Text>
-
+        ) : message?.kind === "error" ? (
+          <Text>{message.text}</Text>
+        ) : (
           <TableContainer>
             <Table variant="simple" aria-label="Liste des déclarations">
               <Thead>
@@ -45,12 +44,22 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Th>Date de déclaration</Th>
                   <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
+                  <Th>Récap</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {yearsDeclarations.map((annee: string) => (
                   <Tr key={annee}>
-                    <Td>{siren}</Td>
+                    <Td>
+                      <Link
+                        href={`${
+                          process.env.REACT_APP_DECLARATION_URL || "/index-egapro/declaration/"
+                        }/?siren=${siren}&year=${annee}`}
+                        isExternal
+                      >
+                        {siren}
+                      </Link>
+                    </Td>
                     <Td>{annee}</Td>
                     <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
                     <Td>{trancheFromApiToForm(declarations[annee])}</Td>
@@ -63,14 +72,20 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       )}
                     </Td>
                     <Td>
-                      {statusDeclaration(declarations[annee]) === "À renseigner" ? (
+                      {statusDeclaration(declarations[annee]) === "À renseigner" ||
+                      statusDeclaration(declarations[annee]) ===
+                        "Déclaration non modifiable sur données incorrectes" ? (
                         <>
                           <IconInvalid mr="2" color="red.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
-                            À renseigner
+                            {statusDeclaration(declarations[annee]) === "À renseigner"
+                              ? "À renseigner"
+                              : "Déclaration non modifiable"}
                           </Link>
                         </>
-                      ) : statusDeclaration(declarations[annee]) === "Renseignés" ? (
+                      ) : statusDeclaration(declarations[annee]) === "Renseignés" ||
+                        statusDeclaration(declarations[annee]) ===
+                          "Déclaration non modifiable sur données correctes" ? (
                         <>
                           <IconValid mr="2" color="green.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
@@ -81,13 +96,18 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                         <Box>{statusDeclaration(declarations[annee])}</Box>
                       )}
                     </Td>
+                    <Td>
+                      <Link href={`/api/declaration/${siren}/${annee}/pdf`} isExternal>
+                        Télécharger
+                      </Link>
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
           </TableContainer>
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }
@@ -98,6 +118,8 @@ type StatusObjectifsMesures =
   | "Index supérieur à 85"
   | "Renseignés"
   | "Année non applicable"
+  | "Déclaration non modifiable sur données correctes"
+  | "Déclaration non modifiable sur données incorrectes"
 
 /**
  * Return the status of the declaration, OP MC wise.
@@ -112,7 +134,9 @@ export function statusDeclaration(declaration: DeclarationAPI): StatusObjectifsM
 
   try {
     objectifsMesuresSchema.parse(initialValuesObjectifsMesures)
+    if (isFrozenDeclarationForOPMC(declaration)) return "Déclaration non modifiable sur données correctes"
   } catch (e) {
+    if (isFrozenDeclarationForOPMC(declaration)) return "Déclaration non modifiable sur données incorrectes"
     return "À renseigner"
   }
   return "Renseignés"

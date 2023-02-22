@@ -1,20 +1,37 @@
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
-import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
+import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
+import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 import { ensureRequired } from "@common/utils/types";
 
-import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
+import type { IOwnershipRequestRepo, OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
-export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
-  private table = _sql("ownership_request");
+const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderBy, keyof OwnershipRequestRaw> = {
+  createdAt: "created_at",
+  siren: "siren",
+  askerEmail: "asker_email",
+  email: "email",
+  status: "status",
+  modifiedAt: "modified_at",
+};
 
-  constructor(private sql = _sql<OwnershipRequestRaw[]>) {}
+export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
+  private table = sql("ownership_request");
+  private sql = sql<OwnershipRequestRaw[]>;
+
+  constructor(sqlInstance?: typeof sql) {
+    if (sqlInstance) {
+      this.sql = sqlInstance;
+    }
+  }
 
   private nextRequestLimit = 0;
   public limit(limit = 10) {
@@ -30,7 +47,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   private get postgresLimit() {
     const limit = this.requestLimit;
-    return limit > 0 ? _sql`limit ${limit}` : _sql``;
+    return limit > 0 ? sql`limit ${limit}` : sql``;
   }
 
   public delete(item: OwnershipRequest): Promise<void> {
@@ -64,13 +81,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async save(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await _sql`insert into ${this.table} ${_sql(raw, "siren", "email", "asker_email", "status", "error_detail")}`;
+    await sql`insert into ${this.table} ${sql(raw, "siren", "email", "asker_email", "status", "error_detail")}`;
   }
 
   public async update(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await _sql`update ${this.table} set ${_sql(raw, "status", "error_detail")} where id = ${ensureRequired(
+    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${ensureRequired(
       item,
     ).id.getValue()}`;
   }
@@ -90,16 +107,19 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public async updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void> {
     await this.sql.begin(async transac => {
-      const ownerships = items.map(
-        item =>
-          new Ownership({
-            email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-            siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-          }),
-      );
+      const ownerships = items
+        .filter(element => element.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED)
+        .map(
+          item =>
+            new Ownership({
+              email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+              siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+            }),
+        );
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
-      await ownershipRepo.saveBulk(...ownerships);
+
+      if (ownerships.length) await ownershipRepo.saveBulk(...ownerships);
       await thisRepo.updateBulk(...items);
     });
   }
@@ -113,9 +133,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const [{ count }] = await _sql<[{ count: number }]>`select count(*) from ${this.table}`;
-    console.log({ count });
-    const raws = await this.sql`select * from ${this.table} where id in ${_sql(ids.map(id => id.getValue()))}`;
+    const [{ count }] = await sql<[{ count: number }]>`select count(*) from ${this.table}`;
+    const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
   }
@@ -136,8 +155,45 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     await this.sql`update ${
       this.table
     } set status = update_data.status, error_detail = cast(update_data.error_detail as jsonb)
-      from (values ${_sql(values)}) as update_data (id, status, error_detail)
+      from (values ${sql(values)}) as update_data (id, status, error_detail)
       where ${this.table}.id = cast(update_data.id as uuid)
     `;
+  }
+
+  public async search({
+    siren,
+    status,
+    limit,
+    offset,
+    orderBy,
+    orderDirection,
+  }: OwnershipSearchCriteria): Promise<OwnershipRequest[]> {
+    const sqlOrderBy =
+      orderBy && orderDirection
+        ? sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy])} ${
+            orderDirection === "desc" ? sql`desc` : sql`asc`
+          }`
+        : sql``;
+    const sqlLimit = limit ? sql`limit ${limit}` : sql``;
+    const sqlOffset = offset ? sql`offset ${offset}` : sql``;
+    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+
+    const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
+
+    return rows.map(ownershipRequestMap.toDomain);
+  }
+
+  public async countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number> {
+    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
+
+    return Number(count);
+  }
+
+  private buildSearchWhereClause({ siren = "", status }: OwnershipSearchCriteria) {
+    const sqlSiren = sql`siren like ${siren + "%"}`;
+    const sqlStatus = status ? sql`and status=${status}` : sql``;
+
+    return sql`where ${sqlSiren} ${sqlStatus}`;
   }
 }

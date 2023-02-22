@@ -13,4 +13,8 @@ const baseRef = path.resolve(__dirname, "../src/model.data/");
   });
 
   await fs.writeFile(path.resolve(__dirname, "../src/common/models/generated.ts"), content);
+
+  if (process.argv.includes("--simulateur")) {
+    await fs.writeFile(path.resolve(__dirname, "../../simulateur/src/app-models.d.ts"), content);
+  }
 })();

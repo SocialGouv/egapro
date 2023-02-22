@@ -1,55 +1,40 @@
-import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
-import { Text } from "@chakra-ui/react"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import { AppState, FormState, ActionType, ActionIndicateurTroisData } from "../../globals"
-
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
-import { messageMesureCorrection } from "../../utils/helpers"
+import calculerIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 import { useTitle } from "../../utils/hooks"
 
-import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
+import InfoBlock from "../../components/ds/InfoBlock"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
+import SimulateurPage from "../../components/SimulateurPage"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
 
-interface IndicateurTroisProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
-
 const title = "Indicateur écart de taux de promotion"
 
-const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispatch }) => {
+const IndicateurTrois: FunctionComponent = () => {
   useTitle(title)
 
-  const updateIndicateurTrois = useCallback(
-    (data: ActionIndicateurTroisData) => dispatch({ type: "updateIndicateurTrois", data }),
-    [dispatch],
-  )
+  const { state, dispatch } = useAppStateContextProvider()
 
-  const validateIndicateurTrois = useCallback(
-    (valid: FormState) => dispatch({ type: "validateIndicateurTrois", valid }),
-    [dispatch],
-  )
+  if (!state) return null
 
-  const {
-    effectifsIndicateurCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurCalculable,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente,
-    noteIndicateurTrois,
-    correctionMeasure,
-  } = calculIndicateurTrois(state)
+  const calculsIndicateurTrois = calculerIndicateurTrois(state)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+
+  const { effectifsIndicateurCalculable, indicateurCalculable } = calculsIndicateurTrois
+
+  const readOnly = isFormValid(state.indicateurTrois)
 
   // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
+  if (!isFormValid(state.effectif)) {
     return (
       <PageIndicateurTrois>
         <InfoBlock
@@ -65,37 +50,34 @@ const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispa
   if (!effectifsIndicateurCalculable) {
     return (
       <PageIndicateurTrois>
-        <div>
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
-          />
-          <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
-          </ActionBar>
-        </div>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+        />
+        <ActionBar>
+          <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
+        </ActionBar>
       </PageIndicateurTrois>
     )
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (state.indicateurTrois.formValidated === "Valid" && !indicateurCalculable) {
+  if (readOnly && !indicateurCalculable) {
     return (
       <PageIndicateurTrois>
-        <div>
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="Il n’y a pas eu de promotion durant la période de référence."
-          />
-          <ActionBar>
-            <ActionLink onClick={() => validateIndicateurTrois("None")}>Modifier les données saisies</ActionLink>
-          </ActionBar>
-          <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
-          </ActionBar>
-        </div>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="Il n’y a pas eu de promotion durant la période de référence."
+        />
+
+        <ActionBarSingleForm
+          readOnly={readOnly}
+          frozenDeclaration={frozenDeclaration}
+          to="/indicateur4"
+          onClick={() => dispatch({ type: "validateIndicateurTrois", valid: "None" })}
+        />
       </PageIndicateurTrois>
     )
   }
@@ -103,33 +85,8 @@ const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispa
   return (
     <PageIndicateurTrois>
       <LayoutFormAndResult
-        childrenForm={
-          <div>
-            <IndicateurTroisForm
-              ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
-              presencePromotion={state.indicateurTrois.presencePromotion}
-              readOnly={state.indicateurTrois.formValidated === "Valid"}
-              updateIndicateurTrois={updateIndicateurTrois}
-              validateIndicateurTrois={validateIndicateurTrois}
-            />
-            {state.indicateurTrois.formValidated === "Valid" && correctionMeasure && (
-              <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
-                {messageMesureCorrection(indicateurSexeSurRepresente, "de promotions", "15/15")}
-              </Text>
-            )}
-          </div>
-        }
-        childrenResult={
-          state.indicateurTrois.formValidated === "Valid" && (
-            <IndicateurTroisResult
-              indicateurEcartPromotion={indicateurEcartPromotion}
-              indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-              noteIndicateurTrois={noteIndicateurTrois}
-              correctionMeasure={correctionMeasure}
-              validateIndicateurTrois={validateIndicateurTrois}
-            />
-          )
-        }
+        form={<IndicateurTroisForm calculsIndicateurTrois={calculsIndicateurTrois} />}
+        result={<IndicateurTroisResult calculsIndicateurTrois={calculsIndicateurTrois} />}
       />
     </PageIndicateurTrois>
   )
@@ -137,12 +94,12 @@ const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispa
 
 const PageIndicateurTrois = ({ children }: PropsWithChildren) => {
   return (
-    <Page
+    <SimulateurPage
       title={title}
       tagline="Le pourcentage de femmes et d’hommes ayant été promus durant la période de référence, doit être renseigné par CSP."
     >
       {children}
-    </Page>
+    </SimulateurPage>
   )
 }
 

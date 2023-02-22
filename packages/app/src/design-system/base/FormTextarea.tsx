@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { forwardRef } from "react";
 
 export type FormTextareaProps = React.InputHTMLAttributes<HTMLTextAreaElement> & {

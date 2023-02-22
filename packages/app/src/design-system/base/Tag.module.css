@@ -1,0 +1,19 @@
+.info {
+    background-color: var(--text-action-high-blue-france);
+    color: var(--background-default-grey);
+}
+
+.success {
+    background-color: var(--background-flat-success);
+    color: var(--background-default-grey);
+}
+
+.error {
+    background-color: var(--background-flat-error);
+    color: var(--background-default-grey);
+}
+
+.warning {
+    background-color: var(--background-flat-warning);
+    color: var(--background-default-grey);
+}

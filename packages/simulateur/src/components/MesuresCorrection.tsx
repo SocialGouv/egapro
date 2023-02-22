@@ -1,8 +1,8 @@
-import React, { Fragment, FunctionComponent } from "react"
+import React, { FunctionComponent } from "react"
 import { Field } from "react-final-form"
 
+import { FormControl, FormErrorMessage, FormLabel, Select } from "@chakra-ui/react"
 import { required } from "../utils/formHelpers"
-import { FormControl, FormLabel, Select, FormErrorMessage } from "@chakra-ui/react"
 import FakeInputGroup from "./ds/FakeInputGroup"
 
 const choices: { [key: string]: string } = {
@@ -11,13 +11,15 @@ const choices: { [key: string]: string } = {
   mne: "Mesures non envisagées",
 }
 
-type MesuresCorrectionProps = { name: string; label: string; readOnly: boolean }
+type MesuresCorrectionProps = { readOnly: boolean }
 
-const MesuresCorrection: FunctionComponent<MesuresCorrectionProps> = ({ name, label, readOnly }) => {
+const MesuresCorrection: FunctionComponent<MesuresCorrectionProps> = ({ readOnly }) => {
+  const label = "Mesures de correction prévues à l'article D. 1142-6"
+
   return (
-    <Field name={name} validate={required} component="select">
+    <Field name="mesuresCorrection" validate={required} component="select">
       {({ input, meta }) => (
-        <Fragment>
+        <>
           {readOnly ? (
             <FakeInputGroup label={label}>{choices[input.value]}</FakeInputGroup>
           ) : (
@@ -34,7 +36,7 @@ const MesuresCorrection: FunctionComponent<MesuresCorrectionProps> = ({ name, la
               <FormErrorMessage>Veuillez sélectionner un choix dans la liste</FormErrorMessage>
             </FormControl>
           )}
-        </Fragment>
+        </>
       )}
     </Field>
   )

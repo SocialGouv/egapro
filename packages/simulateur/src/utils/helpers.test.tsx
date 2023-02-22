@@ -1,21 +1,21 @@
-import { calendarYear, dateToString, parseDate, Year } from "./date"
+import { calendarYear, dateToFrString, parseDate, Year } from "./date"
 import { displaySexeSurRepresente, messageEcartNombreEquivalentSalaries } from "./helpers"
 
 describe("parseDate", () => {
   test("parses date as ISO format", () => {
-    expect(dateToString(parseDate("2018-12-31"))).toEqual("31/12/2018")
+    expect(dateToFrString(parseDate("2018-12-31"))).toEqual("31/12/2018")
     expect(parseDate("2018-12-31a")).toBe(undefined)
-    expect(dateToString(parseDate("2018-12-31a"))).toEqual("")
+    expect(dateToFrString(parseDate("2018-12-31a"))).toEqual("")
     expect(parseDate("2018-31-12")).toBe(undefined)
-    expect(dateToString(parseDate("2018-31-12"))).toEqual("")
+    expect(dateToFrString(parseDate("2018-31-12"))).toEqual("")
   })
 
   test("parses date as french format", () => {
-    expect(dateToString(parseDate("31/12/2018"))).toEqual("31/12/2018")
+    expect(dateToFrString(parseDate("31/12/2018"))).toEqual("31/12/2018")
     expect(parseDate("31/12/2018a")).toBe(undefined)
-    expect(dateToString(parseDate("31/12/2018a"))).toEqual("")
+    expect(dateToFrString(parseDate("31/12/2018a"))).toEqual("")
     expect(parseDate("12/31/2018")).toBe(undefined)
-    expect(dateToString(parseDate("12/31/2018"))).toEqual("")
+    expect(dateToFrString(parseDate("12/31/2018"))).toEqual("")
   })
 })
 

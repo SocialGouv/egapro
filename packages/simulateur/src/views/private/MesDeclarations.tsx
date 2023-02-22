@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
+import { Box, Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
 import React from "react"
 import { useHistory, useParams } from "react-router-dom"
 
@@ -10,6 +10,7 @@ import InfoEntreprise from "../../components/InfoEntreprise"
 import NoSiren from "../../components/ds/NoSiren"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
+import RepEqsListe from "../../components/RepEqsListe"
 
 const title = "Mes déclarations"
 
@@ -31,24 +32,34 @@ const MesDeclarations = () => {
           <NoSiren />
         ) : (
           <>
-            <FormControl id="siren">
-              <FormLabel>SIREN</FormLabel>
-              <Select
-                onChange={(event) => history.push(`/tableauDeBord/mes-declarations/${event?.target?.value}`)}
-                defaultValue={siren}
-                aria-label="Liste des SIREN"
-              >
-                {orderedSirens.map((siren) => (
-                  <option key={siren} value={siren}>
-                    {siren}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
+            <Flex direction="column">
+              <FormControl id="siren">
+                <FormLabel>SIREN</FormLabel>
+                <Flex direction="row" gap="4">
+                  <Select
+                    w="fit-content"
+                    onChange={(event) => history.push(`/tableauDeBord/mes-declarations/${event?.target?.value}`)}
+                    defaultValue={siren}
+                    aria-label="Liste des SIREN"
+                  >
+                    {orderedSirens.map((siren) => (
+                      <option key={siren} value={siren}>
+                        {siren}
+                      </option>
+                    ))}
+                  </Select>
+                  <Box flex="auto">
+                    <InfoEntreprise siren={siren} />
+                  </Box>
+                </Flex>
+              </FormControl>
 
-            <Flex mt="6" direction="column">
-              <InfoEntreprise siren={siren} />
-              <DeclarationsListe siren={siren} />
+              <Box mt="6">
+                <DeclarationsListe siren={siren} />
+              </Box>
+              <Box mt="6">
+                <RepEqsListe siren={siren} />
+              </Box>
             </Flex>
           </>
         )}

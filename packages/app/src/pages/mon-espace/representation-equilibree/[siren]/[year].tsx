@@ -1,5 +1,5 @@
 import { formatTimestampToFr } from "@common/utils/date";
-import { normalizeQueryParam } from "@common/utils/router";
+import { normalizeRouterQuery } from "@common/utils/url";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { StaffOnly } from "@components/StaffOnly";
 import { Alert } from "@design-system";
@@ -19,8 +19,9 @@ const RepresentationEquilibreeDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
-  const siren = normalizeQueryParam(router.query.siren);
-  const year = Number(normalizeQueryParam(router.query.year));
+  const { siren, year: yearStr } = normalizeRouterQuery(router.query);
+
+  const year = Number(yearStr);
 
   const { repeq, error } = useRepresentationEquilibree(siren, year);
 

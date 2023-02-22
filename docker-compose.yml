@@ -48,16 +48,15 @@ services:
       dockerfile: Dockerfile.dev
       args:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+        EGAPRO_SIMU_URL: ${EGAPRO_SIMU_URL:-http://localhost:3001}
+        GITHUB_SHA: "<dev>"
+        BASE_URL: ${BASE_URL-""}
     volumes:
       - ./packages/declaration/_doc:/srv/jekyll/_doc
       - ./packages/declaration/src:/srv/jekyll/src
       - ./packages/declaration/favicon.ico:/srv/jekyll/_site/favicon.ico
-    # environment:
-    #   EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
     ports:
       - 4000:4000
-    depends_on:
-      - api
     restart: always
 
   db:
@@ -112,6 +111,13 @@ services:
       - apiv2_pgadmin:/var/lib/pgadmin
     networks:
       - apiv2
+
+  reverse_proxy:
+    image: nginx:alpine
+    volumes:
+      - ./reverse-proxy.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
 
 networks:
   apiv2:

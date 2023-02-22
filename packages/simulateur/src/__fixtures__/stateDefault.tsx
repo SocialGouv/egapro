@@ -1,5 +1,5 @@
-import AppReducer from "../AppReducer"
+import appReducer from "../app-reducer"
 
-const stateDefault = AppReducer(undefined, { type: "initiateState", data: {} })
+const stateDefault = appReducer(undefined, { type: "initiateState", data: {} })
 
 export default stateDefault

@@ -1,27 +1,23 @@
-import React, { FunctionComponent, useCallback } from "react"
+import { FormControl, FormLabel, Stack, Text } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { FormControl, FormLabel, Text, Stack } from "@chakra-ui/react"
 
-import { ActionIndicateurUnTypeData, ActionType } from "../../globals"
-
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
-import InputRadio from "../../components/ds/InputRadio"
 import FormStack from "../../components/ds/FormStack"
+import InputRadio from "../../components/ds/InputRadio"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FormAutoSave from "../../components/FormAutoSave"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 interface IndicateurUnTypeFormProps {
-  csp: boolean
-  coef: boolean
-  autre: boolean
   readOnly: boolean
-  dispatch: (action: ActionType) => void
 }
 
-const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ coef, autre, readOnly, dispatch }) => {
-  const updateIndicateurUnType = useCallback(
-    (data: ActionIndicateurUnTypeData) => dispatch({ type: "updateIndicateurUnType", data }),
-    [dispatch],
-  )
+const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ readOnly }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const { coef, autre } = state.indicateurUn
 
   const initialValues = {
     modaliteDeclaration: coef ? "coef" : autre ? "autre" : "csp",
@@ -38,7 +34,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ co
       csp = true
     }
 
-    updateIndicateurUnType({ csp, coef, autre })
+    dispatch({ type: "updateIndicateurUnType", data: { csp, coef, autre } })
   }
 
   return (

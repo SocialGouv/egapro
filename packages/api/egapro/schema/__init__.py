@@ -105,6 +105,7 @@ def _cross_validate(data):
             )
             periode_reference = data.path("déclaration.fin_période_référence")
 
+            # l'année 2021 ne bouge jamais pour les OP/MC
             if data.year < 2021 or index is None or index >= 85:
                 remunerations = data.path(
                     "indicateurs.rémunérations.objectif_de_progression"
@@ -213,6 +214,7 @@ def _cross_validate(data):
                     # rule 13.b
                     assert data.path(path), msg
 
+            # l'année 2021 ne bouge pas pour le plan de relance (année mise en oeuvre du plan du relance)
             if data.year >= 2021:
                 msg = "data.entreprise.plan_relance doit être défini"
                 # rule 14
@@ -293,7 +295,7 @@ def _cross_validate(data):
         assert not data.path(f"{base}.population_favorable"), msg
 
 
-def extrapolate(definition):
+def extrapolate(definition: str):
     # TODO: arbitrate between ?key: value and key: ?value
     if definition.startswith("?"):
         return {"oneOf": [{"type": "null"}, extrapolate(definition[1:])]}
@@ -313,7 +315,7 @@ def extrapolate(definition):
         type_ = float if "." in definition else int
         out = {"type": "number" if type_ is float else "integer"}
         min_ = max_ = None
-        minmax = definition.split(":")
+        minmax = [el for el in definition.split(":") if el != ""]
         if len(minmax) == 2:
             min_, max_ = minmax
         elif definition.startswith(":"):

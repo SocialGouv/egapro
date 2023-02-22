@@ -1,37 +1,37 @@
+import { FormControl, FormLabel, Stack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { FormControl, FormLabel, Stack } from "@chakra-ui/react"
-
-import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
 import {
-  parseIntFormValue,
-  parseIntStateValue,
-  parseBooleanFormValue,
-  parseBooleanStateValue,
-  parsePeriodeDeclarationFormValue,
-  ValidatorFunction,
-  maxNumber,
   composeValidators,
-  required,
+  isFormValid,
+  maxNumber,
   minNumber,
   mustBeInteger,
   mustBeNumber,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
+  parseIntFormValue,
+  parseIntStateValue,
+  parsePeriodeDeclarationFormValue,
+  required,
+  ValidatorFunction,
 } from "../../utils/formHelpers"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
 import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import FormError from "../../components/FormError"
+import BlocForm from "../../components/BlocForm"
 import FormStack from "../../components/ds/FormStack"
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
-import { calendarYear, dateToString, parseDate, Year } from "../../utils/date"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { calendarYear, dateToFrString, parseDate, Year } from "../../utils/date"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -59,35 +59,27 @@ const validateForm = ({
   }
   if (nombreFemmes + nombreHommes === 0) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+      notAll0: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
     }
   }
   return
 }
 
-interface IndicateurDeuxTroisForProps {
-  finPeriodeReference: string
-  presenceAugmentationPromotion: boolean
-  nombreAugmentationPromotionFemmes: number | undefined
-  nombreAugmentationPromotionHommes: number | undefined
-  periodeDeclaration: PeriodeDeclaration
-  nombreSalaries: GroupeEffectif[]
-  readOnly: boolean
-  updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void
-  validateIndicateurDeuxTrois: (valid: FormState) => void
-}
+const IndicateurDeuxTroisForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = ({
-  finPeriodeReference,
-  presenceAugmentationPromotion,
-  nombreAugmentationPromotionFemmes,
-  nombreAugmentationPromotionHommes,
-  periodeDeclaration,
-  nombreSalaries,
-  readOnly,
-  updateIndicateurDeuxTrois,
-  validateIndicateurDeuxTrois,
-}) => {
+  if (!state) return null
+
+  // la page ne sera visible que si periodeSuffisante est true et donc finPeriodeReference sera renseignée
+  const finPeriodeReference = state.informations.finPeriodeReference as string
+  const presenceAugmentationPromotion = state.indicateurDeuxTrois.presenceAugmentationPromotion
+  const nombreAugmentationPromotionFemmes = state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes
+  const nombreAugmentationPromotionHommes = state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
+  const periodeDeclaration = state.indicateurDeuxTrois.periodeDeclaration
+  const nombreSalaries = state.effectif.nombreSalaries
+
+  const readOnly = isFormValid(state.indicateurDeuxTrois)
+
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(presenceAugmentationPromotion),
     nombreAugmentationPromotionFemmes: parseIntStateValue(nombreAugmentationPromotionFemmes),
@@ -100,23 +92,27 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
     const nombreAugmentationPromotionFemmes = parseIntFormValue(formData.nombreAugmentationPromotionFemmes)
     const nombreAugmentationPromotionHommes = parseIntFormValue(formData.nombreAugmentationPromotionHommes)
     const periodeDeclaration = parsePeriodeDeclarationFormValue(formData.periodeDeclaration)
-    updateIndicateurDeuxTrois({
-      presenceAugmentationPromotion,
-      nombreAugmentationPromotionFemmes,
-      nombreAugmentationPromotionHommes,
-      periodeDeclaration,
+
+    dispatch({
+      type: "updateIndicateurDeuxTrois",
+      data: {
+        presenceAugmentationPromotion,
+        nombreAugmentationPromotionFemmes,
+        nombreAugmentationPromotionHommes,
+        periodeDeclaration,
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurDeuxTrois("Valid")
+    dispatch({ type: "validateIndicateurDeuxTrois", valid: "Valid" })
   }
 
-  const oneYear = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1)))
-  const twoYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2)))
-  const threeYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3)))
-  const dateFinPeriodeReference = dateToString(parseDate(finPeriodeReference))
+  const oneYear = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1)))
+  const twoYears = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2)))
+  const threeYears = dateToFrString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3)))
+  const dateFinPeriodeReference = dateToFrString(parseDate(finPeriodeReference))
 
   const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
     totalNombreSalaries(nombreSalaries)
@@ -148,7 +144,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               />
             )}
             <FormControl isReadOnly={readOnly}>
-              <FormLabel as="div">Sur quelle période souhaitez-vous calculer votre indicateur&nbsp;?</FormLabel>
+              <FormLabel as="div">Quelle est la période choisie pour le calcul de cet indicateur&nbsp;?</FormLabel>
               <InputRadioGroup defaultValue={values.periodeDeclaration}>
                 <Stack>
                   <InputRadio
@@ -183,7 +179,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               fieldName="presenceAugmentationPromotion"
               value={values.presenceAugmentationPromotion}
               readOnly={readOnly}
-              label={<>Il y a t'il eu des augmentations durant la période de déclaration&nbsp;?</>}
+              label={<>Y a-t-il eu des augmentations durant la période de référence&nbsp;?</>}
             />
 
             {values.presenceAugmentationPromotion === "true" && (

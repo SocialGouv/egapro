@@ -1,3 +1,674 @@
+## [2.83.1](https://github.com/SocialGouv/egapro/compare/v2.83.0...v2.83.1) (2023-02-21)
+
+
+### Bug Fixes
+
+* change logo text ([c450f7a](https://github.com/SocialGouv/egapro/commit/c450f7a5888ab571772826713c252066f4e1a9a6))
+* update reply to reference ([467dea2](https://github.com/SocialGouv/egapro/commit/467dea271925b6f15cec483f6b534d01bc5bdaed))
+
+# [2.83.0](https://github.com/SocialGouv/egapro/compare/v2.82.1...v2.83.0) (2023-02-20)
+
+
+### Bug Fixes
+
+* better NC value handling in public data (Fixes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([eb6a950](https://github.com/SocialGouv/egapro/commit/eb6a95032d429790dfb5502edf180877d402d24b))
+* bug for periodeSuffisante, just reason on false ([8bed6ec](https://github.com/SocialGouv/egapro/commit/8bed6ec0e7af3fc8a4e244a933d4c5dec9502878))
+* diff between 0 and None (Fixes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([0f4e163](https://github.com/SocialGouv/egapro/commit/0f4e163a1cc1d55ea361008419d12aba658e9dc8))
+* handle undefined case for isFormValid ([e690514](https://github.com/SocialGouv/egapro/commit/e690514adf3c4187ccf8fb81b831446bb883d17d))
+* readonly panel in simulation form ([4b391fc](https://github.com/SocialGouv/egapro/commit/4b391fcc640d048849b48d3090d94d841d210dc1)), closes [#1569](https://github.com/SocialGouv/egapro/issues/1569)
+* refactor simu ([#1553](https://github.com/SocialGouv/egapro/issues/1553)) ([b9125eb](https://github.com/SocialGouv/egapro/commit/b9125ebc52a2d0be0a4a8aea037886ff95e3af82))
+* right result not always well displayed ([85384c4](https://github.com/SocialGouv/egapro/commit/85384c4aa6409f817e614fcdca650cfbf9099d62))
+* sync forms and icon in menu when effectifs change ([#1559](https://github.com/SocialGouv/egapro/issues/1559)) ([bcc0798](https://github.com/SocialGouv/egapro/commit/bcc0798a6cb98887a92b4fd3a01c05967f9e167e))
+* wording spacing indic simu (Fixes [#1490](https://github.com/SocialGouv/egapro/issues/1490)) ([e14d103](https://github.com/SocialGouv/egapro/commit/e14d1030bf3c005a516ce200302009723532503b))
+
+
+### Features
+
+* disable buttons when simu are older than 1 year ([#1549](https://github.com/SocialGouv/egapro/issues/1549)) ([735cb07](https://github.com/SocialGouv/egapro/commit/735cb07d5b18750991403d6f0c413219836e7c55))
+* enable last owner deletion by staff ([#1567](https://github.com/SocialGouv/egapro/issues/1567)) ([d9dc01f](https://github.com/SocialGouv/egapro/commit/d9dc01fcd7a80e1bb326ff5537870db5e77040ad))
+* freeze objectifs and mesures when 2 years is passed ([#1561](https://github.com/SocialGouv/egapro/issues/1561)) ([9117bde](https://github.com/SocialGouv/egapro/commit/9117bde35ba29e7ea7783e519eb981933c77ba63))
+* new paragraph and pdf link for ajout-declarants ([#1550](https://github.com/SocialGouv/egapro/issues/1550)) ([627bdab](https://github.com/SocialGouv/egapro/commit/627bdaba22974c68db4efff99076bcef9a3b57ba))
+* refactor and add comment for calculs files ([#1558](https://github.com/SocialGouv/egapro/issues/1558)) ([6849896](https://github.com/SocialGouv/egapro/commit/6849896b89e64b663b3b5b49e1c77932b9a5ca29))
+
+## [2.82.1](https://github.com/SocialGouv/egapro/compare/v2.82.0...v2.82.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* remove print button (Fixes [#1342](https://github.com/SocialGouv/egapro/issues/1342)) ([9fa1bce](https://github.com/SocialGouv/egapro/commit/9fa1bce54675bfd370ddfc4d0b0b99ac43326efa))
+* wording info calcul simu (Fixes [#1361](https://github.com/SocialGouv/egapro/issues/1361)) ([3581e22](https://github.com/SocialGouv/egapro/commit/3581e22b3cb274a6465b745444bb38af4a18558b))
+* wording simu connect button (Fixes [#1539](https://github.com/SocialGouv/egapro/issues/1539)) ([ae50cec](https://github.com/SocialGouv/egapro/commit/ae50cec72e6d3726cb498bfc370b6d728af76fd9))
+
+# [2.82.0](https://github.com/SocialGouv/egapro/compare/v2.81.1...v2.82.0) (2023-02-01)
+
+
+### Features
+
+* refactor simulateur with context for AppState ([bb1c2e7](https://github.com/SocialGouv/egapro/commit/bb1c2e75980aa63074560f0d1c4c4c5f1c0d612a))
+
+## [2.81.1](https://github.com/SocialGouv/egapro/compare/v2.81.0...v2.81.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* refused ownership-resquest must not add ownership ([#1547](https://github.com/SocialGouv/egapro/issues/1547)) ([6476fc9](https://github.com/SocialGouv/egapro/commit/6476fc9f64a14ac76d9fec6b9d844df096724547))
+
+# [2.81.0](https://github.com/SocialGouv/egapro/compare/v2.80.0...v2.81.0) (2023-01-30)
+
+
+### Features
+
+* new layout ([#1545](https://github.com/SocialGouv/egapro/issues/1545)) ([ab0071f](https://github.com/SocialGouv/egapro/commit/ab0071fceb52f937b3935276f2dbd0d437a52aa0))
+
+# [2.80.0](https://github.com/SocialGouv/egapro/compare/v2.79.5...v2.80.0) (2023-01-30)
+
+
+### Features
+
+* freeze décla when time is passed ([#1540](https://github.com/SocialGouv/egapro/issues/1540)) ([01f897e](https://github.com/SocialGouv/egapro/commit/01f897e37608b0bf2dfbae0ce7a91e0a6b0530d3))
+
+## [2.79.5](https://github.com/SocialGouv/egapro/compare/v2.79.4...v2.79.5) (2023-01-27)
+
+
+### Bug Fixes
+
+* Revert "fix: Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541))" ([9c5d64c](https://github.com/SocialGouv/egapro/commit/9c5d64c5ed3a9140cd23082a5f98760e60e57d5e))
+* use redirects in new ingress instead of url rewrite ([7c39a35](https://github.com/SocialGouv/egapro/commit/7c39a3580d22f62033700cab37a7ed04f9584bb0))
+
+## [2.79.4](https://github.com/SocialGouv/egapro/compare/v2.79.3...v2.79.4) (2023-01-27)
+
+
+### Bug Fixes
+
+* Add redirect for simulateur old urls ([#1541](https://github.com/SocialGouv/egapro/issues/1541)) ([0e8f844](https://github.com/SocialGouv/egapro/commit/0e8f844f0c406d7525d04480a827c9ce27e2cd6d))
+* handle nc value in dgt file (Fixes [#1488](https://github.com/SocialGouv/egapro/issues/1488)) ([fd6d7e3](https://github.com/SocialGouv/egapro/commit/fd6d7e35f15537fa8945065c1bb19dbf7f072511))
+
+## [2.79.3](https://github.com/SocialGouv/egapro/compare/v2.79.2...v2.79.3) (2023-01-27)
+
+
+### Bug Fixes
+
+* adapt nav in decla direct with good data ([#1542](https://github.com/SocialGouv/egapro/issues/1542)) ([4029ed3](https://github.com/SocialGouv/egapro/commit/4029ed3e0c319d9fe37824ec884c896a8fabefc2))
+
+## [2.79.2](https://github.com/SocialGouv/egapro/compare/v2.79.1...v2.79.2) (2023-01-26)
+
+
+### Bug Fixes
+
+* **test:** update snap and make sur that they stay align ([5284790](https://github.com/SocialGouv/egapro/commit/52847903b2ac4a26202a5e3083bee56d633666be))
+
+## [2.79.1](https://github.com/SocialGouv/egapro/compare/v2.79.0...v2.79.1) (2023-01-26)
+
+
+### Bug Fixes
+
+* wording email recap (Fixes [#1538](https://github.com/SocialGouv/egapro/issues/1538)) ([af089f7](https://github.com/SocialGouv/egapro/commit/af089f78097460f3b43580e25ee94fc46307ac7a))
+
+# [2.79.0](https://github.com/SocialGouv/egapro/compare/v2.78.1...v2.79.0) (2023-01-25)
+
+
+### Features
+
+* switch index csv to xlsx (Closes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([7a19dc1](https://github.com/SocialGouv/egapro/commit/7a19dc1db8ca66e2f35de819ba34afd53e1764a4))
+
+## [2.78.1](https://github.com/SocialGouv/egapro/compare/v2.78.0...v2.78.1) (2023-01-25)
+
+
+### Bug Fixes
+
+* remove api from reverse_proxy config ([19d41b6](https://github.com/SocialGouv/egapro/commit/19d41b604b49635d99081eb2917ad8bad08de3c6))
+
+# [2.78.0](https://github.com/SocialGouv/egapro/compare/v2.77.0...v2.78.0) (2023-01-25)
+
+
+### Features
+
+* change docker conf + README ([b95af17](https://github.com/SocialGouv/egapro/commit/b95af17fd69c89867ee5b5f6117198780625143c))
+
+# [2.77.0](https://github.com/SocialGouv/egapro/compare/v2.76.1...v2.77.0) (2023-01-25)
+
+
+### Features
+
+* refactor with consistend footer wording ([e6ef7e3](https://github.com/SocialGouv/egapro/commit/e6ef7e36de4f870ef96a28d847c390425b229690))
+
+## [2.76.1](https://github.com/SocialGouv/egapro/compare/v2.76.0...v2.76.1) (2023-01-25)
+
+
+### Bug Fixes
+
+* **pytest:** fix pdf "snapshots" ([585e410](https://github.com/SocialGouv/egapro/commit/585e410f09b1ea311cbe2caa45779510a80d8cc4))
+
+# [2.76.0](https://github.com/SocialGouv/egapro/compare/v2.75.2...v2.76.0) (2023-01-25)
+
+
+### Features
+
+* footer-consultation ([#1536](https://github.com/SocialGouv/egapro/issues/1536)) ([327c40e](https://github.com/SocialGouv/egapro/commit/327c40e84d08aab05c2e141a724d1b91f904ed60)), closes [#1432](https://github.com/SocialGouv/egapro/issues/1432)
+
+## [2.75.2](https://github.com/SocialGouv/egapro/compare/v2.75.1...v2.75.2) (2023-01-25)
+
+
+### Bug Fixes
+
+* **declaration:** fix ues back button (Fixes [#1530](https://github.com/SocialGouv/egapro/issues/1530)) ([cf8490d](https://github.com/SocialGouv/egapro/commit/cf8490d2cc556282e0e86350879d7027e82f93dc))
+
+## [2.75.1](https://github.com/SocialGouv/egapro/compare/v2.75.0...v2.75.1) (2023-01-24)
+
+
+### Bug Fixes
+
+* change logo on recap pdf (Fixes: [#1294](https://github.com/SocialGouv/egapro/issues/1294)) ([a70cad1](https://github.com/SocialGouv/egapro/commit/a70cad1d9e34aa2a15518cced51f5628426981d8))
+* change wording on email in simu (Fixes [#1445](https://github.com/SocialGouv/egapro/issues/1445)) ([b987faf](https://github.com/SocialGouv/egapro/commit/b987faf190854552091dcabf2c36799beff46326))
+* order dgt repeq by date (Fixes [#1473](https://github.com/SocialGouv/egapro/issues/1473)) ([e2ef1e4](https://github.com/SocialGouv/egapro/commit/e2ef1e4a4efa27c4ed4ebe0102d7868e9b5c4736))
+* simu wording change left menu simu link (Fixes [#1526](https://github.com/SocialGouv/egapro/issues/1526)) ([0119139](https://github.com/SocialGouv/egapro/commit/0119139975519e520d30037450c4b49adc82ab84))
+* simu wording change login (Fixes [#1529](https://github.com/SocialGouv/egapro/issues/1529)) ([02f797b](https://github.com/SocialGouv/egapro/commit/02f797b62d5811e1fd90b410adb67fe913b986a3))
+* simu wording indic 2 question (Fixes [#1483](https://github.com/SocialGouv/egapro/issues/1483)) ([6618110](https://github.com/SocialGouv/egapro/commit/6618110820529c35e2d133b3c167ec28a61eb046))
+* simu wording indic 4 remove slash (Fixes [#1485](https://github.com/SocialGouv/egapro/issues/1485)) ([2f43e63](https://github.com/SocialGouv/egapro/commit/2f43e637d755f696697b5dddf7b22acd87b0e1fb))
+
+# [2.75.0](https://github.com/SocialGouv/egapro/compare/v2.74.0...v2.75.0) (2023-01-20)
+
+
+### Features
+
+* migration front lot 1 ([#1496](https://github.com/SocialGouv/egapro/issues/1496)) ([1aa0beb](https://github.com/SocialGouv/egapro/commit/1aa0bebe5f776d75b10e89b0a89020a112a4837c))
+
+# [2.74.0](https://github.com/SocialGouv/egapro/compare/v2.73.8...v2.74.0) (2023-01-19)
+
+
+### Bug Fixes
+
+* aide simu ol instead of ul ([f011caa](https://github.com/SocialGouv/egapro/commit/f011caa219605b819ea60b4ba26cc259c8f65c38))
+
+
+### Features
+
+* add jdma button to simu and decla (Closes [#1524](https://github.com/SocialGouv/egapro/issues/1524)) ([24ae47e](https://github.com/SocialGouv/egapro/commit/24ae47e70df18fbff2015afb7f6194afd151ca09))
+
+## [2.73.8](https://github.com/SocialGouv/egapro/compare/v2.73.7...v2.73.8) (2023-01-19)
+
+
+### Bug Fixes
+
+* enhance simu help page (Fixes [#1399](https://github.com/SocialGouv/egapro/issues/1399)) ([a957c88](https://github.com/SocialGouv/egapro/commit/a957c888200f64b03c3f74e920cf5a6625a2f90a))
+
+## [2.73.7](https://github.com/SocialGouv/egapro/compare/v2.73.6...v2.73.7) (2023-01-19)
+
+
+### Bug Fixes
+
+* bug ajout declarant. Regex allowed newlines and so add incorrect characters ([#1528](https://github.com/SocialGouv/egapro/issues/1528)) ([c38bc72](https://github.com/SocialGouv/egapro/commit/c38bc72b71bbaf447845b9c88a5a9342012ab1d3))
+
+## [2.73.6](https://github.com/SocialGouv/egapro/compare/v2.73.5...v2.73.6) (2023-01-19)
+
+
+### Bug Fixes
+
+* tests from header simu ([f17ade5](https://github.com/SocialGouv/egapro/commit/f17ade54708dd3470f53acba667e10bb6c2e0292))
+
+## [2.73.5](https://github.com/SocialGouv/egapro/compare/v2.73.4...v2.73.5) (2023-01-19)
+
+
+### Bug Fixes
+
+* menu authenticated + help simu ([e1b446f](https://github.com/SocialGouv/egapro/commit/e1b446f5b90d3a3794f008098f71f2aea1a1fe5b))
+
+## [2.73.4](https://github.com/SocialGouv/egapro/compare/v2.73.3...v2.73.4) (2023-01-18)
+
+
+### Bug Fixes
+
+* update staff emails ([2d4a4bd](https://github.com/SocialGouv/egapro/commit/2d4a4bd53539fc3f99bc7800201e73c71a4fe5fa))
+
+## [2.73.3](https://github.com/SocialGouv/egapro/compare/v2.73.2...v2.73.3) (2023-01-18)
+
+
+### Bug Fixes
+
+* feature flags only in dev ([4a7b6d6](https://github.com/SocialGouv/egapro/commit/4a7b6d6e79759bd4be854bb9d09330658a8d0605))
+
+## [2.73.2](https://github.com/SocialGouv/egapro/compare/v2.73.1...v2.73.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* aide simu type (Fixes [#1399](https://github.com/SocialGouv/egapro/issues/1399)) ([fbd15ca](https://github.com/SocialGouv/egapro/commit/fbd15ca18e2a782a0b9e2b75600630e7e2d9f06c))
+
+## [2.73.1](https://github.com/SocialGouv/egapro/compare/v2.73.0...v2.73.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* closes [#1505](https://github.com/SocialGouv/egapro/issues/1505) on periodeSuffisante ([db4eab1](https://github.com/SocialGouv/egapro/commit/db4eab142ffb5dde42c275f2082c72b2ed99ed7d))
+
+# [2.73.0](https://github.com/SocialGouv/egapro/compare/v2.72.1...v2.73.0) (2023-01-18)
+
+
+### Features
+
+* better ues management ([#1525](https://github.com/SocialGouv/egapro/issues/1525)) ([1467c21](https://github.com/SocialGouv/egapro/commit/1467c216878a3ee82026c71b77ea9d7e9b3374ef))
+
+## [2.72.1](https://github.com/SocialGouv/egapro/compare/v2.72.0...v2.72.1) (2023-01-17)
+
+
+### Bug Fixes
+
+* external button link in simu ([f19d796](https://github.com/SocialGouv/egapro/commit/f19d7968e0fd15233f1da809dfc426e4750686a7))
+
+# [2.72.0](https://github.com/SocialGouv/egapro/compare/v2.71.1...v2.72.0) (2023-01-17)
+
+
+### Features
+
+* add help page ([#1520](https://github.com/SocialGouv/egapro/issues/1520)) ([399f839](https://github.com/SocialGouv/egapro/commit/399f8392eeb1614307042df21d4d8d9972b10503))
+
+## [2.71.1](https://github.com/SocialGouv/egapro/compare/v2.71.0...v2.71.1) (2023-01-17)
+
+
+### Bug Fixes
+
+* not consistent error UI messages ([#1523](https://github.com/SocialGouv/egapro/issues/1523)) ([6bd7b05](https://github.com/SocialGouv/egapro/commit/6bd7b058ca8372af8690ceeab4eca1dca131ebe7))
+
+# [2.71.0](https://github.com/SocialGouv/egapro/compare/v2.70.9...v2.71.0) (2023-01-17)
+
+
+### Bug Fixes
+
+* repeq dgt export nc pct (Fixes [#1474](https://github.com/SocialGouv/egapro/issues/1474)) ([7932ef0](https://github.com/SocialGouv/egapro/commit/7932ef0bb647283d081b594d3c027f777237a506))
+
+
+### Features
+
+* **apiv1:** make search endpoints more accurate with public years ([#1522](https://github.com/SocialGouv/egapro/issues/1522)) ([3ec3a3b](https://github.com/SocialGouv/egapro/commit/3ec3a3bb3db3e3624191897363212a38ea6c1876))
+
+## [2.70.9](https://github.com/SocialGouv/egapro/compare/v2.70.8...v2.70.9) (2023-01-17)
+
+
+### Bug Fixes
+
+* repeq receipt with year (Fixes [#1515](https://github.com/SocialGouv/egapro/issues/1515)) ([23c16bb](https://github.com/SocialGouv/egapro/commit/23c16bb3efe7b9ab6d798af15c771b528ae9ef94))
+
+## [2.70.8](https://github.com/SocialGouv/egapro/compare/v2.70.7...v2.70.8) (2023-01-16)
+
+
+### Bug Fixes
+
+* **cd:** change github token for tag release ([f21cb79](https://github.com/SocialGouv/egapro/commit/f21cb791cd5ebaf09bd3a6b12b3f02c2f17d399a))
+* github release git commit ([e1e5aa4](https://github.com/SocialGouv/egapro/commit/e1e5aa4816c8049a48c01133458dc890b60f9ea6))
+
+## [2.70.7](https://github.com/SocialGouv/egapro/compare/v2.70.6...v2.70.7) (2023-01-16)
+
+
+### Bug Fixes
+
+* add ownership routes to apiv2 feature flag whitelist ([a530969](https://github.com/SocialGouv/egapro/commit/a5309695327cf4bfff5cea3d7a257d4217855cc4))
+
+## [2.70.6](https://github.com/SocialGouv/egapro/compare/v2.70.5...v2.70.6) (2023-01-16)
+
+
+### Bug Fixes
+
+* apiv1 pdf working again (Fixes [#1516](https://github.com/SocialGouv/egapro/issues/1516)) ([5f0bfdc](https://github.com/SocialGouv/egapro/commit/5f0bfdc745255c15f93c68dad9c817692a6e7311))
+* remove quote in ajout-declarant success message (Fixes [#1500](https://github.com/SocialGouv/egapro/issues/1500)) ([a2a8bb0](https://github.com/SocialGouv/egapro/commit/a2a8bb0f496761b08fa183ce543a7fb6ac5d1304))
+
+## [2.70.5](https://github.com/SocialGouv/egapro/compare/v2.70.4...v2.70.5) (2023-01-12)
+
+
+### Bug Fixes
+
+* **ci:** lint release workflow ([c448717](https://github.com/SocialGouv/egapro/commit/c44871783101eba46e872fe65357879cd8d82e80))
+* upgrade kontinuous workflows ([#1503](https://github.com/SocialGouv/egapro/issues/1503)) ([c6c62f4](https://github.com/SocialGouv/egapro/commit/c6c62f4bc1ddece4c42c77f5f2f9d78e200ddea5))
+
+## [2.70.4](https://github.com/SocialGouv/egapro/compare/v2.70.3...v2.70.4) (2023-01-12)
+
+
+### Bug Fixes
+
+* better feature flags ([0ef9aef](https://github.com/SocialGouv/egapro/commit/0ef9aeffd317ae41b8959c714667268241d5d387))
+
+## [2.70.3](https://github.com/SocialGouv/egapro/compare/v2.70.2...v2.70.3) (2023-01-12)
+
+
+### Bug Fixes
+
+* add proper env from globals in kontinuous config ([af18fcd](https://github.com/SocialGouv/egapro/commit/af18fcd56aefc14083e98151c40409051b8fe62f))
+
+## [2.70.2](https://github.com/SocialGouv/egapro/compare/v2.70.1...v2.70.2) (2023-01-12)
+
+
+### Bug Fixes
+
+* remove config logging ([73acdf1](https://github.com/SocialGouv/egapro/commit/73acdf1b0da9a7a3f17f8cebe215fac23f8a3ef5))
+
+## [2.70.1](https://github.com/SocialGouv/egapro/compare/v2.70.0...v2.70.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* smtp-app secret ([62b38c6](https://github.com/SocialGouv/egapro/commit/62b38c6d64e53e18600a5bf39cafb71b34190603))
+
+# [2.70.0](https://github.com/SocialGouv/egapro/compare/v2.69.0...v2.70.0) (2023-01-12)
+
+
+### Features
+
+* add 2022 as last year of decla ([#1509](https://github.com/SocialGouv/egapro/issues/1509)) ([57db291](https://github.com/SocialGouv/egapro/commit/57db291afdf756b6b308952029cc944f63f3ba09))
+
+# [2.69.0](https://github.com/SocialGouv/egapro/compare/v2.68.1...v2.69.0) (2023-01-12)
+
+
+### Features
+
+* wording recap ([5f791a8](https://github.com/SocialGouv/egapro/commit/5f791a8e7d560aee92f964db0b2a1c14b0cd2a0d))
+
+## [2.68.1](https://github.com/SocialGouv/egapro/compare/v2.68.0...v2.68.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* wording for recapitulatif page ([3c1d6cd](https://github.com/SocialGouv/egapro/commit/3c1d6cd02556d8ad178a848957f5515acbc5c455))
+
+# [2.68.0](https://github.com/SocialGouv/egapro/compare/v2.67.0...v2.68.0) (2023-01-12)
+
+
+### Features
+
+* date minus one day for error message ([908d001](https://github.com/SocialGouv/egapro/commit/908d0010f418f8bcbee89d15095c418ccec264b7))
+
+# [2.67.0](https://github.com/SocialGouv/egapro/compare/v2.66.0...v2.67.0) (2023-01-11)
+
+
+### Bug Fixes
+
+* error in previous refactor ([66b92df](https://github.com/SocialGouv/egapro/commit/66b92df011d718852e9bff89a30497868918801c))
+
+
+### Features
+
+* adapt wording for recap page ([#1512](https://github.com/SocialGouv/egapro/issues/1512)) ([458c27d](https://github.com/SocialGouv/egapro/commit/458c27d257c04e812927fbc6bde4124ea8c943bb))
+
+# [2.66.0](https://github.com/SocialGouv/egapro/compare/v2.65.0...v2.66.0) (2023-01-11)
+
+
+### Features
+
+* message recapitulatif when indicateur at None state ([#1511](https://github.com/SocialGouv/egapro/issues/1511)) ([7ab30a5](https://github.com/SocialGouv/egapro/commit/7ab30a5d7bfbb16038411a1a2747ee2b62edf774))
+
+# [2.65.0](https://github.com/SocialGouv/egapro/compare/v2.64.0...v2.65.0) (2023-01-11)
+
+
+### Features
+
+* allow percentage above 100 ([#1508](https://github.com/SocialGouv/egapro/issues/1508)) ([8874816](https://github.com/SocialGouv/egapro/commit/88748168ef4dccb74820a44b77b82a5eb997db8b))
+
+# [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
+
+
+### Features
+
+* wording (closes [#1339](https://github.com/SocialGouv/egapro/issues/1339)) ([6b324de](https://github.com/SocialGouv/egapro/commit/6b324dec496dc79a851a3d8d5bcf42bb4f33e5d5))
+
+# [2.63.0](https://github.com/SocialGouv/egapro/compare/v2.62.0...v2.63.0) (2023-01-11)
+
+
+### Features
+
+* format date in error message in french ([2705041](https://github.com/SocialGouv/egapro/commit/27050419e11f2f040e2f134d1477575567d0498f))
+
+# [2.62.0](https://github.com/SocialGouv/egapro/compare/v2.61.2...v2.62.0) (2023-01-11)
+
+
+### Features
+
+* closes Changer le contrôle sur la date de publication et le message d'erreur [#1339](https://github.com/SocialGouv/egapro/issues/1339) ([#1507](https://github.com/SocialGouv/egapro/issues/1507)) ([df3bb57](https://github.com/SocialGouv/egapro/commit/df3bb578df50bd45dd74ba9b85d590ee9b0a2d2e))
+
+## [2.61.2](https://github.com/SocialGouv/egapro/compare/v2.61.1...v2.61.2) (2023-01-11)
+
+
+### Bug Fixes
+
+* problem with declared_at date in page informations entreprise ([4ed6f49](https://github.com/SocialGouv/egapro/commit/4ed6f49e788a7671ac531405e69e0e09b7d09d25))
+
+## [2.61.1](https://github.com/SocialGouv/egapro/compare/v2.61.0...v2.61.1) (2023-01-10)
+
+
+### Bug Fixes
+
+* change ownership email titles (Fixes [#1424](https://github.com/SocialGouv/egapro/issues/1424)) ([698c317](https://github.com/SocialGouv/egapro/commit/698c3179d7d74ced72a7aa7485e985e52739e03a))
+* declaration wrong email wording (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([5e84782](https://github.com/SocialGouv/egapro/commit/5e84782749209f85c77bb5fbf2c9a3e9f1e3d449))
+* external link in simu for ajout declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([b226fa5](https://github.com/SocialGouv/egapro/commit/b226fa5980696c4c8944d7e2de63cd6897305727))
+
+# [2.61.0](https://github.com/SocialGouv/egapro/compare/v2.60.0...v2.61.0) (2023-01-10)
+
+
+### Features
+
+* check CSE date after or equals to 2018 ([#1504](https://github.com/SocialGouv/egapro/issues/1504)) ([d11edb0](https://github.com/SocialGouv/egapro/commit/d11edb05f151b8d70e928d24c0a162331499c12c))
+
+# [2.60.0](https://github.com/SocialGouv/egapro/compare/v2.59.0...v2.60.0) (2023-01-10)
+
+
+### Features
+
+* add error detail in liste-declarant ([#1498](https://github.com/SocialGouv/egapro/issues/1498)) ([1222aa1](https://github.com/SocialGouv/egapro/commit/1222aa126fae8fa40e431abee26c66361b500b5b))
+
+# [2.59.0](https://github.com/SocialGouv/egapro/compare/v2.58.0...v2.59.0) (2023-01-09)
+
+
+### Features
+
+* display NC for indicateur 1 on recapitulatif page ([#1502](https://github.com/SocialGouv/egapro/issues/1502)) ([2747c1f](https://github.com/SocialGouv/egapro/commit/2747c1ff14a2425b41da0cd72de9c2348c152a9c))
+
+# [2.58.0](https://github.com/SocialGouv/egapro/compare/v2.57.8...v2.58.0) (2023-01-09)
+
+
+### Features
+
+* prevents simu when exists a decla ([#1501](https://github.com/SocialGouv/egapro/issues/1501)) ([4bf36fe](https://github.com/SocialGouv/egapro/commit/4bf36fed325722103e5e138a0635fa1f0697ddb9)), closes [#1486](https://github.com/SocialGouv/egapro/issues/1486)
+
+## [2.57.8](https://github.com/SocialGouv/egapro/compare/v2.57.7...v2.57.8) (2023-01-09)
+
+
+### Bug Fixes
+
+* fix immer dependency ([8d63898](https://github.com/SocialGouv/egapro/commit/8d63898c69d84d293149778dcb52fab17a23e1ed))
+* fix python tests after better routes ([7dd12cd](https://github.com/SocialGouv/egapro/commit/7dd12cd0d7b7d34c893d981018bc324acd479806))
+
+## [2.57.7](https://github.com/SocialGouv/egapro/compare/v2.57.6...v2.57.7) (2023-01-06)
+
+
+### Bug Fixes
+
+* remove satisfies operator on compiled code ([c25f98e](https://github.com/SocialGouv/egapro/commit/c25f98e66eb813167aa4725f5d9431c1000bbc21))
+
+## [2.57.6](https://github.com/SocialGouv/egapro/compare/v2.57.5...v2.57.6) (2023-01-06)
+
+
+### Bug Fixes
+
+* fix default value env handling ([8cf22aa](https://github.com/SocialGouv/egapro/commit/8cf22aa43466691b45a7145fe3237b83bd77ffee))
+
+## [2.57.5](https://github.com/SocialGouv/egapro/compare/v2.57.4...v2.57.5) (2023-01-06)
+
+
+### Bug Fixes
+
+* **cd:** clean docker build and ff/env config usage ([69bb014](https://github.com/SocialGouv/egapro/commit/69bb0149ec874e2ff2e499ac2f872014f83191a7))
+
+## [2.57.4](https://github.com/SocialGouv/egapro/compare/v2.57.3...v2.57.4) (2023-01-06)
+
+
+### Bug Fixes
+
+* default value for sha env ([ff45ca5](https://github.com/SocialGouv/egapro/commit/ff45ca508277ac96032c9d35947a225f57d47fed))
+
+## [2.57.3](https://github.com/SocialGouv/egapro/compare/v2.57.2...v2.57.3) (2023-01-06)
+
+
+### Bug Fixes
+
+* do not use location object on server side ([479aa97](https://github.com/SocialGouv/egapro/commit/479aa975c6fed80b7fa2844ec094c0085fbd030c))
+
+## [2.57.2](https://github.com/SocialGouv/egapro/compare/v2.57.1...v2.57.2) (2023-01-06)
+
+
+### Bug Fixes
+
+* finally a good wording for no ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([d102144](https://github.com/SocialGouv/egapro/commit/d102144edbd7baa8c8a23d70e30a1f3ee3651fb9))
+* typo and external link for ajout-declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([fda9c55](https://github.com/SocialGouv/egapro/commit/fda9c55decfe270de21a4e90286a316593b9fa1a))
+
+## [2.57.1](https://github.com/SocialGouv/egapro/compare/v2.57.0...v2.57.1) (2023-01-06)
+
+
+### Bug Fixes
+
+* better apiv1 route handling ([d3d6168](https://github.com/SocialGouv/egapro/commit/d3d61683dd9b86bf584b89bacffd6d51c9478f3a))
+
+# [2.57.0](https://github.com/SocialGouv/egapro/compare/v2.56.0...v2.57.0) (2023-01-06)
+
+
+### Features
+
+* change orderDirection ([7cea84f](https://github.com/SocialGouv/egapro/commit/7cea84ffa9021eddf7982f3c50a01240113aa58e))
+
+# [2.56.0](https://github.com/SocialGouv/egapro/compare/v2.55.0...v2.56.0) (2023-01-06)
+
+
+### Features
+
+* Add listDeclarant page ([#1465](https://github.com/SocialGouv/egapro/issues/1465)) ([1abb643](https://github.com/SocialGouv/egapro/commit/1abb643d17d352d3b16eb257f60b5091ae24f9a1))
+
+# [2.55.0](https://github.com/SocialGouv/egapro/compare/v2.54.11...v2.55.0) (2023-01-05)
+
+
+### Features
+
+* add private repeq list route for [#1398](https://github.com/SocialGouv/egapro/issues/1398) ([c0cd641](https://github.com/SocialGouv/egapro/commit/c0cd6411d80cb0c67b92c957e4bf6b7dbf97b957))
+
+## [2.54.11](https://github.com/SocialGouv/egapro/compare/v2.54.10...v2.54.11) (2023-01-05)
+
+
+### Bug Fixes
+
+* wait for inputs error in declarant page test ([b24b14f](https://github.com/SocialGouv/egapro/commit/b24b14f27606e8ff241680b8fd5c5bc20399eb55))
+
+## [2.54.10](https://github.com/SocialGouv/egapro/compare/v2.54.9...v2.54.10) (2023-01-05)
+
+
+### Bug Fixes
+
+* remove merge tag on decla resultat page ([6db960c](https://github.com/SocialGouv/egapro/commit/6db960c1108959b1136936d5e31b5b7837179b41))
+
+## [2.54.9](https://github.com/SocialGouv/egapro/compare/v2.54.8...v2.54.9) (2023-01-05)
+
+
+### Bug Fixes
+
+* add missing clsx dep ([f6e58c5](https://github.com/SocialGouv/egapro/commit/f6e58c552c96e66499d993ae4ffe2aa807ede139))
+* fix ci for tests ([4819761](https://github.com/SocialGouv/egapro/commit/48197617f5f5d44fc4490a7dbc5c85daea238e0a))
+
+## [2.54.8](https://github.com/SocialGouv/egapro/compare/v2.54.7...v2.54.8) (2023-01-05)
+
+
+### Bug Fixes
+
+* fix tests ([ea4ad61](https://github.com/SocialGouv/egapro/commit/ea4ad614369dcefe2ae000cfd267ec6dbd7a13b1))
+
+## [2.54.7](https://github.com/SocialGouv/egapro/compare/v2.54.6...v2.54.7) (2023-01-05)
+
+
+### Bug Fixes
+
+* better logic for recap info wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([c7d687f](https://github.com/SocialGouv/egapro/commit/c7d687fc09aa3111dbd10a086f57aee8a2f54b1a))
+* better wording for siren ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([53d3a7b](https://github.com/SocialGouv/egapro/commit/53d3a7bf6686f96db16c2af434951f66b4d2d8bc))
+* change wording from déclaration to référence (Fixes [#1481](https://github.com/SocialGouv/egapro/issues/1481)) ([fe38486](https://github.com/SocialGouv/egapro/commit/fe38486a0d880b620ef9cb6e0df7da114b452a39))
+* titles wording in simu recap and decla (Fixes [#1447](https://github.com/SocialGouv/egapro/issues/1447)) (Fixes [#1448](https://github.com/SocialGouv/egapro/issues/1448)) ([dbaa51f](https://github.com/SocialGouv/egapro/commit/dbaa51f95804043500c849c2b298e8cdeafd3c90))
+
+## [2.54.6](https://github.com/SocialGouv/egapro/compare/v2.54.5...v2.54.6) (2023-01-05)
+
+
+### Bug Fixes
+
+* add real feature flags (Fixes [#1428](https://github.com/SocialGouv/egapro/issues/1428)) ([87ed079](https://github.com/SocialGouv/egapro/commit/87ed079af73ff151a5be9f1a13fd5b1a8f234f91))
+* wording on masculine siren/mail (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([a5eca3b](https://github.com/SocialGouv/egapro/commit/a5eca3b743b32060415237bcd8e7f0c3a509b671))
+
+## [2.54.5](https://github.com/SocialGouv/egapro/compare/v2.54.4...v2.54.5) (2023-01-04)
+
+
+### Bug Fixes
+
+* correct apiv2 url (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([1ac30b8](https://github.com/SocialGouv/egapro/commit/1ac30b8752e5ebea6c338f8dfc21fd0069cd04c1))
+
+## [2.54.4](https://github.com/SocialGouv/egapro/compare/v2.54.3...v2.54.4) (2023-01-03)
+
+
+### Bug Fixes
+
+* ci check all ([3075637](https://github.com/SocialGouv/egapro/commit/3075637a86282c3b014c5f738919ec7391c341b9))
+
+## [2.54.3](https://github.com/SocialGouv/egapro/compare/v2.54.2...v2.54.3) (2023-01-03)
+
+
+### Bug Fixes
+
+* simu decla recap wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([ab18830](https://github.com/SocialGouv/egapro/commit/ab18830b2effe9abd61c4164825ba90aac9442d2))
+
+## [2.54.2](https://github.com/SocialGouv/egapro/compare/v2.54.1...v2.54.2) (2023-01-02)
+
+
+### Bug Fixes
+
+* publication date ([#1475](https://github.com/SocialGouv/egapro/issues/1475)) ([14155de](https://github.com/SocialGouv/egapro/commit/14155de04fbf3c4d2cee5f1cd9310cd9ec31ba6b))
+
+## [2.54.1](https://github.com/SocialGouv/egapro/compare/v2.54.0...v2.54.1) (2023-01-02)
+
+
+### Bug Fixes
+
+* errors messages ([#1470](https://github.com/SocialGouv/egapro/issues/1470)) ([4068ec6](https://github.com/SocialGouv/egapro/commit/4068ec6f88cfbb46539737e4ce76fec10b449baf))
+
+# [2.54.0](https://github.com/SocialGouv/egapro/compare/v2.53.2...v2.54.0) (2022-12-26)
+
+
+### Features
+
+* simple token require + staffonly + ensureowner ([#1480](https://github.com/SocialGouv/egapro/issues/1480)) ([3899847](https://github.com/SocialGouv/egapro/commit/3899847acd41f3986beced0658b8a05531a71dea))
+
+## [2.53.2](https://github.com/SocialGouv/egapro/compare/v2.53.1...v2.53.2) (2022-12-23)
+
+
+### Bug Fixes
+
+* declaration jekyll ruby ([#1478](https://github.com/SocialGouv/egapro/issues/1478)) ([32c0e6b](https://github.com/SocialGouv/egapro/commit/32c0e6b47ba4514a776c91ba6a121f991a091391))
+
+## [2.53.1](https://github.com/SocialGouv/egapro/compare/v2.53.0...v2.53.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* wording ([#1468](https://github.com/SocialGouv/egapro/issues/1468)) ([dd148ab](https://github.com/SocialGouv/egapro/commit/dd148ab6e8437622bcf8d0b92d81fd20c874dcdc))
+
+# [2.53.0](https://github.com/SocialGouv/egapro/compare/v2.52.0...v2.53.0) (2022-12-22)
+
+
+### Features
+
+* add endpoint to list all ownership requests ([#1471](https://github.com/SocialGouv/egapro/issues/1471)) ([c019267](https://github.com/SocialGouv/egapro/commit/c019267105a6cd39d5c69daa03711d8363982345))
+
+# [2.52.0](https://github.com/SocialGouv/egapro/compare/v2.51.0...v2.52.0) (2022-12-22)
+
+
+### Features
+
+* exclude repeq recherche from prod ([1455b9d](https://github.com/SocialGouv/egapro/commit/1455b9d9c81520dcb1e8c9840caa45533284540a))
+
+# [2.51.0](https://github.com/SocialGouv/egapro/compare/v2.50.0...v2.51.0) (2022-12-22)
+
+
+### Features
+
+* add mailer config to deployement ([e9c9ddf](https://github.com/SocialGouv/egapro/commit/e9c9ddfa24c0be1b0054d182f8342e522f32dc88))
+
 # [2.50.0](https://github.com/SocialGouv/egapro/compare/v2.49.5...v2.50.0) (2022-12-22)
 
 

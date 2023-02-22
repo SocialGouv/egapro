@@ -1,7 +1,7 @@
 import { useEffect } from "react"
-import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
+import { useHistory, useLocation } from "react-router-dom"
 import { useCheckTokenInURL } from "../components/AuthContext"
-import { ActionType, AppState } from "../globals"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
 import { postSimulation } from "../utils/api"
 
 /**
@@ -13,14 +13,11 @@ import { postSimulation } from "../utils/api"
  *
  * So, in waiting for a better state management and route management, we decided to add this page.
  */
-interface ResetPageProps extends RouteComponentProps {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
 
-function ResetPage({ dispatch, state }: ResetPageProps): null {
+function ResetPage(): null {
   const history = useHistory()
   const location = useLocation()
+  const { state, dispatch } = useAppStateContextProvider()
 
   useCheckTokenInURL()
 
@@ -30,15 +27,17 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
   }, [])
 
   useEffect(() => {
+    const runEffect = async () => {
+      try {
+        const { jsonBody } = await postSimulation({})
+        history.push(`/simulateur/${jsonBody?.id}`, location.state ? location.state : {})
+      } catch (error: any) {
+        const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
+        console.error(errorMessage)
+      }
+    }
     if (state === undefined) {
-      postSimulation({})
-        .then(({ jsonBody: { id } }) => {
-          history.push(`/simulateur/${id}`, location.state ? location.state : {})
-        })
-        .catch((error) => {
-          const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
-          console.error(errorMessage)
-        })
+      runEffect()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to subscribe to history and location.state changes.
   }, [state])

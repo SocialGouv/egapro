@@ -6,105 +6,117 @@ title: "Ecart de taux d'augmentations individuelles (hors promotion) entre les f
 <h1>{{ page.title }}</h1>
 
 <fieldset>
-  <div class=row>
-    <div>
-      {% include radios.html
-        name="_indicateurs.augmentations.calculable"
-        label="L’indicateur sur les écarts de taux d’augmentations individuelles est-il calculable ?"
-        required="true"
-        options="oui=oui&non=non"
-        onchange="toggleFields()"
-        required="required" %}
+    <div class=row>
+        <div>
+            {% include radios.html
+            name="_indicateurs.augmentations.calculable"
+            label="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ?"
+            required="true"
+            options="oui=oui&non=non"
+            onchange="toggleFields()"
+            required="required" %}
+        </div>
     </div>
-  </div>
 </fieldset>
 
 <p>Ecarts de taux d’augmentations obtenus par CSP en %</p>
+<p class="msg">Les écarts de taux d’augmentations sont à renseigner uniquement pour les CSP pris en compte pour le
+    calcul (zéro
+    signifiant qu'il n'y a pas d'écart entre les femmes et les hommes). Un écart positif est à la faveur des hommes et
+    un
+    écart négatif est à la faveur des femmes.</p>
 
 <fieldset id="fieldset-resultat-ouv">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[0]" label="Ouvriers" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[0]" label="Ouvriers"
+        step="any" data-not-all-empty=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-emp">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[1]" label="Employés" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[1]" label="Employés"
+        step="any" data-not-all-empty=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-tam">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[2]" label="Techniciens et agents de maîtrise" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[2]" label="Techniciens
+        et agents de maîtrise" step="any" data-not-all-empty=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-ic">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[3]" label="Ingénieurs et cadres" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.catégories[3]" label="Ingénieurs
+        et cadres" step="any" data-not-all-empty=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-pourcentage">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.résultat" label="Résultat final en %" min=0 step="any" required=true onblur="notifyPercentage(event); maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.résultat" label="Résultat final
+        en %" min=0 step="any" required=true oninput="toggleFields()" %}</div>
 </fieldset>
 
 <fieldset id="fieldset-population-favorable">
-  <div class=row>
-    {% include select.html
-      name="indicateurs.augmentations.population_favorable"
-      label="Population envers laquelle l'écart est favorable"
-      empty="true"
-      required=true
-      onchange="maybeRefreshForm(event)"
-      options="femmes=Femmes&hommes=Hommes"
-    %}
-  </div>
+    <div class=row>
+        {% include select.html
+        name="indicateurs.augmentations.population_favorable"
+        label="Population envers laquelle l'écart est favorable"
+        empty="true"
+        required=true
+        onchange="maybeRefreshForm(event)"
+        options="femmes=Femmes&hommes=Hommes"
+        %}
+    </div>
 </fieldset>
 
 <fieldset id="fieldset-motif">
-  <div class=row>
-    {% include select.html
-      name="indicateurs.augmentations.non_calculable"
-      label="Précision du motif de non calculabilité de l'indicateur"
-      empty="true"
-      required=true
-      options="egvi40pcet=Effectif des groupes valides inférieur à 40% de l'effectif total&absaugi=Absence d'augmentations individuelles"
-    %}
-  </div>
+    <div class=row>
+        {% include select.html
+        name="indicateurs.augmentations.non_calculable"
+        label="Précision du motif de non calculabilité de l'indicateur"
+        empty="true"
+        required=true
+        options="egvi40pcet=Effectif des groupes valides inférieur à 40% de l'effectif total&absaugi=Absence
+        d'augmentations individuelles"
+        %}
+    </div>
 </fieldset>
 
 <fieldset id="fieldset-note" class=note>
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations.note" label="Nombre de points obtenus à l'indicateur" min=0 step="any" readonly=true data-always-readonly=true %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations.note" label="Nombre de points
+        obtenus à l'indicateur" min=0 step="any" readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
 <script>
-  const calculableField = selectField('_indicateurs.augmentations.calculable')
-  const resultatField = selectField("indicateurs.augmentations.résultat")
-  const populationFavorableField = selectField("indicateurs.augmentations.population_favorable")
+    const calculableField = selectField('_indicateurs.augmentations.calculable')
+    const resultatField = selectField("indicateurs.augmentations.résultat")
+    const populationFavorableField = selectField("indicateurs.augmentations.population_favorable")
 
-  document.onready = () => {
-    if (app.getItem('indicateurs.augmentations')) {
-      // We did already submit this current form, so we can infer the
-      // "_indicateurs.augmentations.calculable" data.
-      if (!app.data._indicateurs) app.data._indicateurs = {}
-      app.data._indicateurs.augmentations = {calculable: app.data.indicateurs.augmentations.non_calculable ? "non" : "oui"}
+    document.onready = () => {
+        if (app.getItem('indicateurs.augmentations')) {
+            // We did already submit this current form, so we can infer the
+            // "_indicateurs.augmentations.calculable" data.
+            if (!app.data._indicateurs) app.data._indicateurs = {}
+            app.data._indicateurs.augmentations = { calculable: app.data.indicateurs.augmentations.non_calculable ? "non" : "oui" }
+        }
     }
-  }
 
-  function maybeRefreshForm(event) {
-    if (resultatField.checkValidity() && populationFavorableField.checkValidity()) {
-      refreshForm(event)
+    function maybeRefreshForm(event) {
+        if (resultatField.checkValidity() && populationFavorableField.checkValidity()) {
+            refreshForm(event)
+        }
     }
-  }
 
-  function toggleFields() {
-    const isCalculableChosen = calculableField.querySelector(':checked')
-    const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
-    enableField('#fieldset-resultat-ouv', isCalculable)
-    enableField('#fieldset-resultat-emp', isCalculable)
-    enableField('#fieldset-resultat-tam', isCalculable)
-    enableField('#fieldset-resultat-ic', isCalculable)
-    enableField('#fieldset-resultat-pourcentage', isCalculable)
-    enableField('#fieldset-population-favorable', isCalculable && resultatField.value != "0")
-    enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
-    enableField('#fieldset-note', isCalculable)
-    document.preFormSubmit = isCalculable ? validateNotAllEmpty("Vous devez renseigner les écarts de taux d'augmentations pour les CSP concernées") : undefined
-  }
+    function toggleFields() {
+        const isCalculableChosen = calculableField.querySelector(':checked')
+        const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
+        enableField('#fieldset-resultat-ouv', isCalculable)
+        enableField('#fieldset-resultat-emp', isCalculable)
+        enableField('#fieldset-resultat-tam', isCalculable)
+        enableField('#fieldset-resultat-ic', isCalculable)
+        enableField('#fieldset-resultat-pourcentage', isCalculable)
+        enableField('#fieldset-population-favorable', isCalculable && resultatField.value != "0")
+        enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
+        enableField('#fieldset-note', isCalculable)
+        document.preFormSubmit = isCalculable ? validateNotAllEmpty("Vous devez renseigner les écarts de taux d'augmentations pour les CSP concernées") : undefined
+    }
 
-  document.onloaded = () => {
-    toggleFields()
-  }
+    document.onloaded = () => {
+        toggleFields()
+    }
 </script>

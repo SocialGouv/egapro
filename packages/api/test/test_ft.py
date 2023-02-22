@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from egapro import db
+from egapro import db, constants
 
 pytestmark = pytest.mark.asyncio
 
@@ -752,6 +752,33 @@ async def test_search_representation_equilibree_with_siren(representation_equili
     assert len(results) == 1
     assert results[0]["entreprise"]["siren"] == "987654321"
 
+async def test_search_should_not_return_non_public(declaration, monkeypatch):
+    monkeypatch.setattr("egapro.constants.PUBLIC_YEARS", [2018, 2019, 2020, 2021])
+    monkeypatch.setattr("egapro.constants.YEARS", [2018, 2019, 2020, 2021, 2022])
+    await declaration(
+        "123456712",
+        year=2022,
+        company="Zanzi Bar",
+        entreprise={"effectif": {"tranche": "1000:"}},
+    )
+    count = await db.search.count(year=tuple(constants.PUBLIC_YEARS))
+    assert count == 0
+    count = await db.search.count(query="bar", year=tuple(constants.PUBLIC_YEARS))
+    assert count == 0
+
+async def test_search_representation_equilibree_should_not_return_non_public(representation_equilibree, monkeypatch):
+    monkeypatch.setattr("egapro.constants.PUBLIC_YEARS_REPEQ", [2021])
+    monkeypatch.setattr("egapro.constants.YEARS_REPEQ", [2021, 2022])
+    await representation_equilibree(
+        "123456712",
+        year=2022,
+        company="Zanzi Bar",
+        entreprise={},
+    )
+    count = await db.search_representation_equilibree.count(year=tuple(constants.PUBLIC_YEARS_REPEQ))
+    assert count == 0
+    count = await db.search_representation_equilibree.count(query="bar", year=tuple(constants.PUBLIC_YEARS_REPEQ))
+    assert count == 0
 
 async def test_count_with_query(declaration):
     await declaration(

@@ -53,7 +53,7 @@ indicateurs:
   rémunérations:  # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
     mode: csp|niveau_branche|niveau_autre
     non_calculable: egvi40pcet|am # Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total
-    résultat: "0.0:100" # Résultat final en % après application du seuil de pertinence à chaque catégorie
+    résultat: "0.0:" # Résultat final en % après application du seuil de pertinence à chaque catégorie. Peut dépasser 100%
     population_favorable: femmes|hommes|egalite
     date_consultation_cse: date # Uniquement pour les modalités de calcul par niveau ou coefficient hiérarchique en application de la classification de branche ou d'une autre méthode de cotation des postes
     =note: integer # Nombre de points obtenus à l'indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
@@ -67,21 +67,21 @@ indicateurs:
           "50:": number
   augmentations:  # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes
     non_calculable: egvi40pcet|absaugi|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
-    résultat: "0.0:100"
+    résultat: "0.0:"
     population_favorable: femmes|hommes|egalite
     =note: integer
     objectif_de_progression: string
     catégories: [?number, ?number, ?number, ?number]
   promotions: # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
     non_calculable: egvi40pcet|absprom|am
-    résultat: "0.0:100"
+    résultat: "0.0:"
     population_favorable: femmes|hommes|egalite
     =note: integer
     objectif_de_progression: string
     catégories: [?number, ?number, ?number, ?number]
   augmentations_et_promotions:  # Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
     non_calculable: egvi40pcet|absaugi|etsno5f5h|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
-    résultat: "0.0:100"
+    résultat: "0.0:"
     =note: integer
     objectif_de_progression: string
     résultat_nombre_salariés: number # Résultat final en nombre équivalent de salariés

@@ -12,7 +12,7 @@ jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidData());
 
 describe("Periode reference page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -64,6 +64,8 @@ describe("Periode reference page", () => {
     // expected 1
     await waitFor(() => {
       expect(dateInput).toHaveValue("2021-12-31");
+    });
+    await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
 
@@ -73,9 +75,9 @@ describe("Periode reference page", () => {
     // expected step 2
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-cadres", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-cadres", {
+      shallow: false,
     });
   });
 
@@ -95,9 +97,9 @@ describe("Periode reference page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/entreprise", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/entreprise", {
+      shallow: false,
     });
   });
 });

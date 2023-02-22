@@ -1,47 +1,49 @@
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
 import { displayFractionPercentWithEmptyData, displaySexeSurRepresente } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 
 import { indicateursInfo } from "../../config"
-import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import { calculerResultats } from "../Indicateur2et3/IndicateurDeuxTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
-  indicateurDeuxTroisFormValidated: FormState
-  effectifsIndicateurDeuxTroisCalculable: boolean
-  indicateurDeuxTroisCalculable: boolean
-  indicateurEcartAugmentationPromotion: number | undefined
-  indicateurEcartNombreEquivalentSalaries: number | undefined
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
-  noteIndicateurDeuxTrois: number | undefined
-  correctionMeasure: boolean
-  tauxAugmentationPromotionFemmes: number | undefined
-  tauxAugmentationPromotionHommes: number | undefined
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
+  calculsIndicateurDeuxTrois: ReturnType<typeof calculerIndicateurDeuxTrois>
 }
 
 const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateurDeuxTroisProps> = ({
-  indicateurDeuxTroisFormValidated,
-  effectifsIndicateurDeuxTroisCalculable,
-  indicateurDeuxTroisCalculable,
-  indicateurEcartAugmentationPromotion,
-  indicateurEcartNombreEquivalentSalaries,
-  indicateurSexeSurRepresente,
-  noteIndicateurDeuxTrois,
-  correctionMeasure,
-  tauxAugmentationPromotionFemmes,
-  tauxAugmentationPromotionHommes,
+  calculsIndicateurDeuxTrois,
 }) => {
-  if (indicateurDeuxTroisFormValidated !== "Valid") {
+  const { state } = useAppStateContextProvider()
+  if (!state) return null
+
+  const isEffectifsFilled = isFormValid(state.effectif)
+
+  const indicateurDeuxTroisFormValidated = state.indicateurDeuxTrois.formValidated
+
+  const {
+    effectifsIndicateurCalculable,
+    indicateurCalculable,
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeuxTrois,
+    correctionMeasure,
+    tauxAugmentationPromotionHommes,
+    tauxAugmentationPromotionFemmes,
+  } = calculsIndicateurDeuxTrois
+
+  if (!isEffectifsFilled) {
     return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
-  if (!effectifsIndicateurDeuxTroisCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -51,7 +53,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     )
   }
 
-  if (!indicateurDeuxTroisCalculable) {
+  if (!indicateurCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -61,7 +63,11 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     )
   }
 
-  const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
+  if (indicateurDeuxTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
+  }
+
+  const results = calculerResultats(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
 
   return (
     <div>
@@ -71,7 +77,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
           firstLineLabel: results.best.label,
           firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
-          secondLineLabel: "votre note obtenue est",
+          secondLineLabel: "Votre note obtenue est",
           secondLineData: (noteIndicateurDeuxTrois !== undefined ? noteIndicateurDeuxTrois : "--") + "/35",
           secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
           indicateurSexeSurRepresente,

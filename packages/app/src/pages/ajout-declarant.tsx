@@ -2,8 +2,10 @@ import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
 import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import {
+  Alert,
+  Box,
   Container,
   FormButton,
   FormGroup,
@@ -113,6 +115,7 @@ const AddDeclarer: NextPageWithLayout = () => {
   useEffect(() => {
     reset({
       askerEmail: user?.email,
+      emails: user?.email,
     });
   }, [reset, user?.email]);
 
@@ -150,8 +153,20 @@ const AddDeclarer: NextPageWithLayout = () => {
                 </p>
                 <p>
                   Si vous ne recevez pas ce mail, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre
-                  dossier de courriers indésirables."
+                  dossier de courriers indésirables.
                 </p>
+                <Alert>
+                  <p>
+                    Le déclarant rattaché au numéro Siren de l'entreprise pourra ainsi ajouter ou supprimer un ou des
+                    déclarants en se connectant à son espace avec son email. Vous trouverez ci-après la documentation
+                    pour le faire.
+                  </p>
+                  <Box mt="2w">
+                    <a href="/Procedure.pour.ajouter.ou.supprimer.declarants.pdf" target="_blank" rel="noreferrer">
+                      Guide ajout déclarant (pdf)
+                    </a>
+                  </Box>
+                </Alert>
               </>
             ) : (
               <>
@@ -176,7 +191,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                     <FormGroup isError={Boolean(errors.sirens)}>
                       <FormGroupLabel
                         htmlFor="sirens"
-                        hint="Le numéro Siren se compose de 9 chiffres sans espace, il est possible d’ajouter plusieurs Siren séparées par des virgules sans espace."
+                        hint="Le numéro Siren se compose de 9 chiffres sans espace, il est possible d’ajouter plusieurs Siren séparés par des virgules sans espace."
                       >
                         Numéro(s) Siren
                       </FormGroupLabel>
@@ -199,7 +214,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                     <FormGroup isError={Boolean(errors.emails)}>
                       <FormGroupLabel
                         htmlFor="emails"
-                        hint="Il est possible d’ajouter plusieurs emails séparées par des virgules sans espace."
+                        hint="Il est possible d’ajouter plusieurs emails séparés par des virgules sans espace."
                       >
                         Email(s) déclarant(s)
                       </FormGroupLabel>
@@ -235,9 +250,9 @@ const AddDeclarer: NextPageWithLayout = () => {
 
 AddDeclarer.getLayout = ({ children }) => {
   return (
-    <BasicLayout title={title}>
+    <BasicLayoutPublic title={title}>
       <FeatureStatusProvider>{children}</FeatureStatusProvider>
-    </BasicLayout>
+    </BasicLayoutPublic>
   );
 };
 

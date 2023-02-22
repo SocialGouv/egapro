@@ -12,7 +12,6 @@ import type { Mapper } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import type { Any, Objectize } from "@common/utils/types";
 
-import type { DeclarationData } from "../domain/DeclarationData";
 import { RepresentationEquilibree } from "../domain/RepresentationEquilibree";
 import { RepresentationEquilibreeData } from "../domain/RepresentationEquilibreeData";
 import { Siren } from "../domain/valueObjects/Siren";
@@ -29,7 +28,7 @@ export const representationEquilibreeMap: Required<
       siren: new Siren(raw.siren),
       year: new PositiveNumber(raw.year),
       data: raw.data
-        ? RepresentationEquilibreeData.fromJson<RepresentationEquilibreeData>({
+        ? RepresentationEquilibreeData.fromJson({
             id: raw.data.id,
             company: {
               address: raw.data.entreprise.adresse,
@@ -125,7 +124,7 @@ export const representationEquilibreeMap: Required<
   },
 };
 
-function reprensentationEquilibreeDataToDTO(data: DeclarationData): DeclarationDTO {
+function reprensentationEquilibreeDataToDTO(data: RepresentationEquilibreeData): DeclarationDTO {
   type Entreprise = Entreprises[number];
   type Tranche = NonNullable<Effectif["tranche"]>;
 

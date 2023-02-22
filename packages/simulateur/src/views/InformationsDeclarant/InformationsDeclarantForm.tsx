@@ -1,22 +1,21 @@
-import React, { FunctionComponent } from "react"
 import { Box, Flex, Text } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 import { Field, Form } from "react-final-form"
 import { Link } from "react-router-dom"
 import { z } from "zod"
 
-import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
+import { ActionInformationsDeclarantData } from "../../globals"
 
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
-import ButtonAction from "../../components/ds/ButtonAction"
-import { IconEdit } from "../../components/ds/Icons"
-import InputGroup from "../../components/ds/InputGroup"
-import FormStack from "../../components/ds/FormStack"
 import { formValidator } from "../../components/ds/form-lib"
-import ActionBar from "../../components/ActionBar"
+import FormStack from "../../components/ds/FormStack"
+import InputGroup from "../../components/ds/InputGroup"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 
 const FormInputs = z.object({
   nom: z
@@ -40,19 +39,15 @@ const FormInputs = z.object({
   }),
 })
 
-interface InformationsDeclarantFormProps {
-  informationsDeclarant: AppState["informationsDeclarant"]
-  readOnly: boolean
-  updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void
-  validateInformationsDeclarant: (valid: FormState) => void
-}
+const InformationsDeclarantForm: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProps> = ({
-  informationsDeclarant,
-  readOnly,
-  updateInformationsDeclarant,
-  validateInformationsDeclarant,
-}) => {
+  if (!state) return null
+
+  const informationsDeclarant = state.informationsDeclarant
+  const readOnly = isFormValid(informationsDeclarant)
+  const frozenDeclaration = isFrozenDeclaration(state)
+
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
@@ -61,21 +56,16 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
     acceptationCGU: informationsDeclarant.acceptationCGU,
   }
 
-  const saveForm = (formData: any) => {
-    const { nom, prenom, tel, email, acceptationCGU } = formData
-
-    updateInformationsDeclarant({
-      nom,
-      prenom,
-      tel,
-      email,
-      acceptationCGU,
+  const saveForm = (data: ActionInformationsDeclarantData) => {
+    dispatch({
+      type: "updateInformationsDeclarant",
+      data,
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateInformationsDeclarant("Valid")
+    dispatch({ type: "validateInformationsDeclarant", valid: "Valid" })
   }
 
   return (
@@ -93,7 +83,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="Cette page ne peut être validée car tous les champs ne sont pas renseignés." />
             )}
             <InputGroup label="Nom du déclarant" fieldName="nom" isReadOnly={readOnly} autocomplete="family-name" />
             <InputGroup
@@ -109,7 +99,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
               autocomplete="tel-national"
               type="tel"
             />
-            <FakeInputGroup label="Email (fourni lors de la demande de validation de l'email)">
+            <FakeInputGroup label="Email (saisi lors de la validation de l'email)">
               {initialValues.email}
             </FakeInputGroup>
             <Field name="acceptationCGU" component="input" type="checkbox">
@@ -134,25 +124,13 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
               )}
             </Field>
           </FormStack>
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/declaration" label="Suivant" />
-              &emsp;
-              {informationsDeclarant.formValidated === "Valid" && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => validateInformationsDeclarant("None")}
-                  variant="link"
-                  size="sm"
-                />
-              )}
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
+
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to="/declaration"
+            onClick={() => dispatch({ type: "validateInformationsDeclarant", valid: "None" })}
+          />
         </form>
       )}
     </Form>

@@ -366,8 +366,17 @@ def ues_data(sheet, data):
     for row in rows:
         sheet.append(clean_cell(cell) for cell in row)
 
+# => "indicateur": (<250, 250+)
+indicateur_nc_or_not: dict[str, tuple] = {
+    "rémunérations": ("nc", "nc"),
+    "augmentations": ("", "nc"),
+    "promotions": ("", "nc"),
+    "augmentations_et_promotions": ("nc", ""),
+    "congés_maternité": ("nc", "nc"),
+    "hautes_rémunérations": ("nc", "nc"),
+}
 
-def prepare_record(data):
+def prepare_record(data: models.Data):
 
     # Before flattening.
     data["URL_declaration"] = f"'{config.DOMAIN}{data.uri}"
@@ -377,10 +386,10 @@ def prepare_record(data):
     periode_suffisante = data["déclaration"].get("période_suffisante") is not False
     if not periode_suffisante:
         data.setdefault("indicateurs", {})
-        for key in SCHEMA.indicateurs_keys:
+        for key, (value_eff_lt_250, value_eff_250_999) in indicateur_nc_or_not.items():
             if key not in data["indicateurs"]:
                 data["indicateurs"][key] = {}
-            data["indicateurs"][key]["note"] = "nc"
+            data["indicateurs"][key]["note"] = value_eff_lt_250 if effectif == "50:250" else value_eff_250_999
     elif "indicateurs" in data:
         prepare_remunerations(data["indicateurs"]["rémunérations"])
         prepare_conges_maternite(data["indicateurs"]["congés_maternité"])

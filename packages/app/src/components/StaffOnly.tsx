@@ -1,5 +1,6 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";
@@ -9,7 +10,10 @@ import { Alert, AlertTitle } from "../design-system/base/Alert";
  * It not renders children until the authorization check is completed.
  */
 export const StaffOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
-  const { user, loading } = useUser({ redirectTo: "/representation-equilibree/email" });
+  const router = useRouter();
+  const { user, loading } = useUser({
+    redirectTo: `/representation-equilibree/email?redirectTo=${encodeURI(router.pathname)}`,
+  });
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   if (loading || !user) return null;

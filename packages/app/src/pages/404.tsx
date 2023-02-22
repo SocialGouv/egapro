@@ -1,5 +1,5 @@
 import { Box, Text } from "@chakra-ui/react";
-import { BasicLayout } from "@components/layouts/BasicLayout";
+import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { push } from "@socialgouv/matomo-next";
 import { useEffect } from "react";
 
@@ -20,7 +20,7 @@ const NotFoundPage: NextPageWithLayout = () => {
 };
 
 NotFoundPage.getLayout = ({ children }) => {
-  return <BasicLayout title="Page non trouvée - Egapro">{children}</BasicLayout>;
+  return <BasicLayoutPublic title="Page non trouvée - Egapro">{children}</BasicLayoutPublic>;
 };
 
 export default NotFoundPage;

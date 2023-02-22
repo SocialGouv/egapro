@@ -1,9 +1,4 @@
-import "@gouvfr/dsfr/dist/dsfr.main.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-map/icons-map.min.css";
-
+import { DsfrScript } from "@components/DsfrScript";
 import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
 import NextLink from "next/link";
@@ -26,7 +21,7 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-const DEFAULT_TITLE = "Egapro";
+const DEFAULT_TITLE = "Représentation équilibrée Egapro";
 
 export const RepresentationEquilibreeStartLayout = ({
   children,
@@ -37,6 +32,8 @@ export const RepresentationEquilibreeStartLayout = ({
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
+
+      <DsfrScript />
 
       <Container py="6w">
         <Grid justifyCenter>

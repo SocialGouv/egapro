@@ -21,6 +21,9 @@
       ],
       "@design-system": [
         "packages/app/src/design-system/index"
+      ],
+      "@design-system/theme": [
+        "packages/app/src/design-system/theme"
       ]
     }
   },
@@ -33,6 +36,7 @@
   "include": [
     "next-env.d.ts",
     "env.d.ts",
+    "global.d.ts",
     "**/*.ts",
     "**/*.tsx",
   ],

@@ -11,7 +11,6 @@ Object {
   "noteEcartNombreSalaries": 25,
   "noteEcartTaux": 0,
   "noteIndicateurDeuxTrois": 25,
-  "plusPetitNombreSalaries": "hommes",
   "tauxAugmentationPromotionFemmes": 0.06666666666666667,
   "tauxAugmentationPromotionHommes": 0.17857142857142858,
 }

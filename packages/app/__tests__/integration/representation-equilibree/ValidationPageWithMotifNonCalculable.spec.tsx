@@ -12,7 +12,7 @@ jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidationPageDataNotCalculable());
 
 describe("Validation page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -48,9 +48,9 @@ describe("Validation page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
+      shallow: false,
     });
   });
 });

@@ -1,28 +1,32 @@
-import { addYears, addDays, format, parse as rootParse, parseISO } from "date-fns"
+import { addYears, addDays, format, parse, parseISO, fromUnixTime, isBefore, sub } from "date-fns"
 
 /* Dates */
+
+export const FR_DATE_FORMAT = "dd/MM/yyyy"
+export const FR_DATETIME_FORMAT = "dd/MM/yyyy HH:mm"
+
+export const parseFrDate = (stringDate: string): Date => parse(stringDate, FR_DATE_FORMAT, new Date())
 
 /**
  * Parse an ISO date or a french date.
  *
- * @param dateStr Date string to parse
+ * @param stringDate Date string to parse
  * @returns string
  */
-export function parseDate(dateStr: string): Date | undefined {
-  const parsed = parseISO(dateStr)
-  if (parsed.toString() === "Invalid Date") {
-    const rootParsed = rootParse(dateStr, "dd/MM/yyyy", new Date())
-    if (rootParsed.toString() === "Invalid Date") {
+export function parseDate(stringDate: string): Date | undefined {
+  let date = parseISO(stringDate)
+  if (date.toString() === "Invalid Date") {
+    date = parseFrDate(stringDate)
+    if (date.toString() === "Invalid Date") {
       return
     }
-    return rootParsed
   }
-  return parsed
+  return date
 }
 
-export function dateToString(date: Date | undefined): string {
-  return date !== undefined ? format(date, "dd/MM/yyyy") : ""
-}
+export const dateToFrString = (date?: Date): string => (date !== undefined ? format(date, FR_DATE_FORMAT) : "")
+
+export const datetimeToFrString = (date?: Date): string => (date !== undefined ? format(date, FR_DATETIME_FORMAT) : "")
 
 export enum Year {
   Add,
@@ -42,21 +46,33 @@ export function calendarYear(dateStr: string, operation: Year, numYears: number)
   }
   const yearsAdded = addYears(date, year)
   const dayAdded = addDays(yearsAdded, day)
-  return format(dayAdded, "dd/MM/yyyy")
+  return format(dayAdded, FR_DATE_FORMAT)
 }
 
-// Format the data from the AppReducer to be compatible with the API new format
+// Format the data from the appReducer to be compatible with the API new format
 
 export const toISOString = (date: string): string | undefined => {
   const parsed = parseDate(date)
   return parsed ? format(parsed, "yyyy-MM-dd") : undefined
 }
 
-export function formatDate(stringDate: string | undefined): string | undefined {
+export function formatDate(stringDate?: string): string | undefined {
   if (!stringDate) return ""
 
   const date = parseISO(stringDate)
   if (date.toString() === "Invalid Date") return
 
-  return format(date, "dd/MM/yyyy")
+  return format(date, FR_DATE_FORMAT)
+}
+
+export const timestampToFrDate = (timestamp: number): string => format(fromUnixTime(timestamp), FR_DATE_FORMAT)
+
+/**
+ * True if the date is older than the current date minus the duration.
+ *
+ * @param date
+ * @param duration Duration from date-fns
+ */
+export const isOlderThanTimeAgo = (date: Date, duration: Duration) => {
+  return isBefore(date, sub(new Date(), duration))
 }

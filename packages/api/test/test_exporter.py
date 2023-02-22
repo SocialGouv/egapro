@@ -267,11 +267,11 @@ async def test_dgt_dump_without_periode_suffisante(declaration):
     assert sheet["BP1"].value == "Indicateur_1_objectif"
     assert sheet["BP2"].value == None
     assert sheet["BQ1"].value == "Indicateur_2"
-    assert sheet["BQ2"].value == "nc"
+    assert sheet["BQ2"].value == ""
     assert sheet["BR1"].value == "Indicateur_2_objectif"
     assert sheet["BR2"].value == None
     assert sheet["BS1"].value == "Indicateur_3"
-    assert sheet["BS2"].value == "nc"
+    assert sheet["BS2"].value == ""
     assert sheet["BT1"].value == "Indicateur_3_objectif"
     assert sheet["BT2"].value == None
     assert sheet["BU1"].value == "Indicateur_2et3"

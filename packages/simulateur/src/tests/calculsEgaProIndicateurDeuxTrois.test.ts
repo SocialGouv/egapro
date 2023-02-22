@@ -1,6 +1,6 @@
 import stateComplete from "../__fixtures__/stateComplete"
-import { calculBarem, calculNote } from "../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
+import { calculerBareme, calculerNote } from "../utils/calculsEgaProIndicateurDeuxTrois"
+import calculerIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
 import { AppState, PeriodeDeclaration } from "../globals"
 
 ///////////////////////
@@ -9,30 +9,30 @@ import { AppState, PeriodeDeclaration } from "../globals"
 
 describe("calculBarem", () => {
   test("test barem", () => {
-    expect(calculBarem(0)).toEqual(35)
-    expect(calculBarem(2)).toEqual(35)
-    expect(calculBarem(2.1)).toEqual(25)
-    expect(calculBarem(5)).toEqual(25)
-    expect(calculBarem(5.1)).toEqual(15)
-    expect(calculBarem(10)).toEqual(15)
-    expect(calculBarem(10.1)).toEqual(0)
-    expect(calculBarem(100)).toEqual(0)
+    expect(calculerBareme(0)).toEqual(35)
+    expect(calculerBareme(2)).toEqual(35)
+    expect(calculerBareme(2.1)).toEqual(25)
+    expect(calculerBareme(5)).toEqual(25)
+    expect(calculerBareme(5.1)).toEqual(15)
+    expect(calculerBareme(10)).toEqual(15)
+    expect(calculerBareme(10.1)).toEqual(0)
+    expect(calculerBareme(100)).toEqual(0)
   })
 })
 
 describe("calculNote", () => {
   test("can't calcul note", () => {
-    expect(calculNote(undefined, undefined, undefined, undefined, undefined)).toEqual({
+    expect(calculerNote(undefined, undefined, undefined, undefined, undefined)).toEqual({
       node: undefined,
       correctionMeasure: false,
     })
-    expect(calculNote(1, undefined, undefined, undefined, undefined)).toEqual({
+    expect(calculerNote(1, undefined, undefined, undefined, undefined)).toEqual({
       note: undefined,
       correctionMeasure: false,
       noteEcartTaux: 35,
       noteEcartNombreSalaries: undefined,
     })
-    expect(calculNote(undefined, 1, undefined, undefined, undefined)).toEqual({
+    expect(calculerNote(undefined, 1, undefined, undefined, undefined)).toEqual({
       note: undefined,
       correctionMeasure: false,
       noteEcartTaux: undefined,
@@ -41,13 +41,13 @@ describe("calculNote", () => {
   })
 
   test("test max of both notes", () => {
-    expect(calculNote(15, 0, undefined, undefined, undefined)).toEqual({
+    expect(calculerNote(15, 0, undefined, undefined, undefined)).toEqual({
       note: 35,
       correctionMeasure: false,
       noteEcartTaux: 0,
       noteEcartNombreSalaries: 35,
     })
-    expect(calculNote(0, 15, undefined, undefined, undefined)).toEqual({
+    expect(calculerNote(0, 15, undefined, undefined, undefined)).toEqual({
       note: 35,
       correctionMeasure: false,
       noteEcartTaux: 35,
@@ -57,7 +57,7 @@ describe("calculNote", () => {
 
   describe("correction measure from indicateur 1", () => {
     test("note indicator 1 is 40 so no correction measure", () => {
-      expect(calculNote(2.1, 2.1, 40, "femmes", "hommes")).toEqual({
+      expect(calculerNote(2.1, 2.1, 40, "femmes", "hommes")).toEqual({
         note: 25,
         correctionMeasure: false,
         noteEcartTaux: 25,
@@ -66,7 +66,7 @@ describe("calculNote", () => {
     })
 
     test("overrepresented sex is same on indicator 1 & 2et3 so no correction measure", () => {
-      expect(calculNote(8.1, 8.1, 36, "hommes", "hommes")).toEqual({
+      expect(calculerNote(8.1, 8.1, 36, "hommes", "hommes")).toEqual({
         note: 15,
         correctionMeasure: false,
         noteEcartTaux: 15,
@@ -75,7 +75,7 @@ describe("calculNote", () => {
     })
 
     test("correction measure for men", () => {
-      expect(calculNote(2.1, 2.1, 39, "femmes", "hommes")).toEqual({
+      expect(calculerNote(2.1, 2.1, 39, "femmes", "hommes")).toEqual({
         note: 35,
         correctionMeasure: true,
         noteEcartTaux: 25,
@@ -84,7 +84,7 @@ describe("calculNote", () => {
     })
 
     test("correction measure for women", () => {
-      expect(calculNote(8.1, 8.1, 36, "hommes", "femmes")).toEqual({
+      expect(calculerNote(8.1, 8.1, 36, "hommes", "femmes")).toEqual({
         note: 35,
         correctionMeasure: true,
         noteEcartTaux: 15,
@@ -93,7 +93,7 @@ describe("calculNote", () => {
     })
 
     test("note indicator 1 is 0", () => {
-      expect(calculNote(8.1, 8.1, 0, "hommes", "femmes")).toEqual({
+      expect(calculerNote(8.1, 8.1, 0, "hommes", "femmes")).toEqual({
         note: 35,
         correctionMeasure: true,
         noteEcartTaux: 15,
@@ -220,6 +220,6 @@ describe("test calculIndicateurDeuxTrois", () => {
     },
   } as AppState
   test("test data", () => {
-    expect(calculIndicateurDeuxTrois(state)).toMatchSnapshot()
+    expect(calculerIndicateurDeuxTrois(state)).toMatchSnapshot()
   })
 })

@@ -1,34 +1,32 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
-import { FormState, ActionIndicateurDeuxData } from "../../globals"
+import calculerIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
-import { effectifEtEcartAugmentGroup } from "../../utils/calculsEgaProIndicateurDeux"
-
+import ActionBar from "../../components/ActionBar"
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
+import RadiosBoolean from "../../components/RadiosBoolean"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
+import { Text } from "@chakra-ui/react"
+import FormStack from "../../components/ds/FormStack"
+import FormError from "../../components/FormError"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import {
-  parseFloatFormValue,
-  parseFloatStateValue,
-  parseBooleanFormValue,
-  parseBooleanStateValue,
   composeValidators,
+  isFormValid,
   minNumber,
   mustBeNumber,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
+  parseFloatFormValue,
+  parseFloatStateValue,
   required,
 } from "../../utils/formHelpers"
-import {
-  displayNameCategorieSocioPro,
-  // displayFractionPercent
-} from "../../utils/helpers"
-import FormError from "../../components/FormError"
-import FormStack from "../../components/ds/FormStack"
+import { displayNameCSP, messageMesureCorrection } from "../../utils/helpers"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -37,6 +35,7 @@ const validateForm = ({
   presenceAugmentation,
 }: {
   tauxAugmentation: Array<{
+    validiteGroupe: boolean
     tauxAugmentationFemmes: string
     tauxAugmentationHommes: string
   }>
@@ -45,15 +44,17 @@ const validateForm = ({
   if (presenceAugmentation === "false") {
     return undefined
   }
-  const allInputs = tauxAugmentation.flatMap(({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [
-    tauxAugmentationFemmes,
-    tauxAugmentationHommes,
-  ])
+
+  const allInputs = tauxAugmentation
+    .filter((product) => product.validiteGroupe)
+    .flatMap(({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [tauxAugmentationFemmes, tauxAugmentationHommes])
+
   if (allInputs.every((input) => input === "0")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+      notAll0: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
     }
   }
+
   if (allInputs.every((input) => input === "")) {
     return {
       notAll0: "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés.",
@@ -64,23 +65,27 @@ const validateForm = ({
 }
 
 interface IndicateurDeuxFormProps {
-  ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>
-  presenceAugmentation: boolean
-  readOnly: boolean
-  updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void
-  validateIndicateurDeux: (valid: FormState) => void
+  calculsIndicateurDeux: ReturnType<typeof calculerIndicateurDeux>
 }
 
-const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
-  ecartAugmentParCategorieSocioPro,
-  presenceAugmentation,
-  readOnly,
-  updateIndicateurDeux,
-  validateIndicateurDeux,
-}) => {
+const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({ calculsIndicateurDeux }) => {
+  const { state, dispatch } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const readOnly = isFormValid(state.indicateurDeux)
+
+  const presenceAugmentation = state.indicateurDeux.presenceAugmentation
+
+  const {
+    effectifEtEcartAugmentParGroupe: ecartAugmentParCSP,
+    correctionMeasure,
+    indicateurSexeSurRepresente,
+  } = calculsIndicateurDeux
+
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
-    tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
+    tauxAugmentation: ecartAugmentParCSP.map(
       ({ tauxAugmentationFemmes, tauxAugmentationHommes, ...otherProps }: any) => ({
         ...otherProps,
         tauxAugmentationFemmes: parseFloatStateValue(tauxAugmentationFemmes),
@@ -98,15 +103,19 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
         tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes),
       }),
     )
-    updateIndicateurDeux({
-      tauxAugmentation,
-      presenceAugmentation,
+
+    dispatch({
+      type: "updateIndicateurDeux",
+      data: {
+        tauxAugmentation,
+        presenceAugmentation,
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurDeux("Valid")
+    dispatch({ type: "validateIndicateurDeux", valid: "Valid" })
   }
 
   // Only for Total with updated values
@@ -139,80 +148,91 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
   // );
 
   return (
-    <Form
-      onSubmit={onSubmit}
-      validate={validateForm}
-      initialValues={initialValues}
-      // mandatory to not change user inputs
-      // because we want to keep wrong string inside the input
-      // we don't want to block string value
-      initialValuesEqual={() => true}
-    >
-      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit}>
-          <FormAutoSave saveForm={saveForm} />
-          <FormStack>
-            {submitFailed && hasValidationErrors && (
-              <FormError
-                message={
-                  errors?.notAll0
-                    ? errors.notAll0
-                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+    <>
+      <Form
+        onSubmit={onSubmit}
+        validate={validateForm}
+        initialValues={initialValues}
+        // mandatory to not change user inputs
+        // because we want to keep wrong string inside the input
+        // we don't want to block string value
+        initialValuesEqual={() => true}
+      >
+        {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
+          <form onSubmit={handleSubmit}>
+            <FormAutoSave saveForm={saveForm} />
+            <FormStack>
+              {submitFailed && hasValidationErrors && (
+                <FormError
+                  message={
+                    errors?.notAll0
+                      ? errors.notAll0
+                      : "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés."
+                  }
+                />
+              )}
+              <RadiosBoolean
+                fieldName="presenceAugmentation"
+                value={values.presenceAugmentation}
+                readOnly={readOnly}
+                label={
+                  <>
+                    Y a-t-il eu des augmentations individuelles (hors promotions) durant la période de référence&nbsp;?
+                  </>
                 }
               />
-            )}
-            <RadiosBoolean
-              fieldName="presenceAugmentation"
-              value={values.presenceAugmentation}
-              readOnly={readOnly}
-              label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
-            />
 
-            {values.presenceAugmentation === "true" && (
-              <BlocForm
-                title="Pourcentage d'augmentations"
-                // footer={[
-                //   displayFractionPercent(totalTauxAugmentationFemmes),
-                //   displayFractionPercent(totalTauxAugmentationHommes)
-                // ]}
-              >
-                {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                  return (
-                    <FieldInputsMenWomen
-                      key={categorieSocioPro}
-                      legend="% de salariés augmentés"
-                      label={{
-                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} augmentées`,
-                        men: `Pourcentage d'hommes' ${displayNameCategorieSocioPro(categorieSocioPro)} augmentés`,
-                      }}
-                      title={displayNameCategorieSocioPro(categorieSocioPro)}
-                      readOnly={readOnly}
-                      calculable={validiteGroupe}
-                      calculableNumber={10}
-                      mask="percent"
-                      femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
-                      hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
-                      validatorFemmes={validator}
-                      validatorHommes={validator}
-                    />
-                  )
-                })}
-              </BlocForm>
-            )}
-          </FormStack>
+              {values.presenceAugmentation === "true" && (
+                <BlocForm
+                  title="Pourcentage d'augmentations"
+                  // footer={[
+                  //   displayFractionPercent(totalTauxAugmentationFemmes),
+                  //   displayFractionPercent(totalTauxAugmentationHommes)
+                  // ]}
+                >
+                  {ecartAugmentParCSP.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                    return (
+                      <FieldInputsMenWomen
+                        key={categorieSocioPro}
+                        legend="% de salariés augmentés"
+                        label={{
+                          women: `Pourcentage de femmes ${displayNameCSP(categorieSocioPro)} augmentées`,
+                          men: `Pourcentage d'hommes' ${displayNameCSP(categorieSocioPro)} augmentés`,
+                        }}
+                        title={displayNameCSP(categorieSocioPro)}
+                        readOnly={readOnly}
+                        calculable={validiteGroupe}
+                        calculableNumber={10}
+                        mask="percent"
+                        femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
+                        hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
+                        validatorFemmes={validator}
+                        validatorHommes={validator}
+                      />
+                    )
+                  })}
+                </BlocForm>
+              )}
+            </FormStack>
 
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
-        </form>
+            {readOnly ? (
+              <ActionBar>
+                <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
+              </ActionBar>
+            ) : (
+              <ActionBar>
+                <FormSubmit />
+              </ActionBar>
+            )}
+          </form>
+        )}
+      </Form>
+      {readOnly && correctionMeasure && (
+        <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
+          {messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}
+        </Text>
       )}
-    </Form>
+    </>
   )
 }
 

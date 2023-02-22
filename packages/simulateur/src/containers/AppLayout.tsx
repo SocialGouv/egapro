@@ -1,37 +1,31 @@
-import React from "react"
 import { Flex, Spinner } from "@chakra-ui/react"
+import React from "react"
 
-import { Route, Switch, Redirect, RouteProps } from "react-router-dom"
-
-import { AppState, ActionType } from "../globals"
+import { Redirect, Route, RouteProps, Switch } from "react-router-dom"
 
 import Header from "../components/Header"
 
 import CGU from "../views/CGU"
 import Home from "../views/Home"
 import MentionsLegales from "../views/MentionsLegales"
-import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 import PageNotFound from "../views/PageNotFound"
+import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 
-import Simulateur from "./Simulateur"
-import MainScrollView from "./MainScrollView"
-import { SinglePageLayout } from "./SinglePageLayout"
-import Accessibilite from "../views/Accessibilite"
-import MesEntreprises from "../views/private/MesEntreprises"
-import MonProfil from "../views/private/MonProfil"
-import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
-import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
-import ResetPage from "../views/ResetPage"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
+import Accessibilite from "../views/Accessibilite"
+import Mire from "../views/Mire"
 import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
+import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 import MesDeclarations from "../views/private/MesDeclarations"
+import MesEntreprises from "../views/private/MesEntreprises"
+import MonProfil from "../views/private/MonProfil"
 import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
-
-interface Props {
-  state: AppState | undefined
-  dispatch: (action: ActionType) => void
-}
+import ResetPage from "../views/ResetPage"
+import MainScrollView from "./MainScrollView"
+import Simulateur from "./Simulateur"
+import { SinglePageLayout } from "./SinglePageLayout"
 
 /**
  * A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
@@ -81,15 +75,13 @@ function DashboardRoutes() {
   )
 }
 
-function AppLayout({ state, dispatch }: Props) {
+function AppLayout() {
+  const { state } = useAppStateContextProvider()
+
   return (
     <AuthContextProvider>
       <Switch>
-        <Route
-          path="/nouvelle-simulation"
-          exact
-          render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
-        />
+        <Route path="/nouvelle-simulation" exact render={() => <ResetPage />} />
 
         <Route path="/tableauDeBord/">
           <DashboardRoutes />
@@ -124,9 +116,9 @@ function AppLayout({ state, dispatch }: Props) {
             <Header />
             <MainScrollView state={state}>
               <Switch>
-                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
+                <Route path="/" exact render={(props) => <Home {...props} />} />
                 <Route path="/simulateur/:code">
-                  <Simulateur state={state} dispatch={dispatch} />
+                  <Simulateur />
                 </Route>
                 <Route>
                   <PageNotFound />

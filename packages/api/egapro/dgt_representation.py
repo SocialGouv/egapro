@@ -92,7 +92,7 @@ async def as_xlsx(max_rows=None, debug=False):
     :debug:             Turn on debug to be able to read the generated Workbook
     """
     print("Reading from DB")
-    records = await db.representation_equilibree.all()
+    records = await db.representation_equilibree.allOrderByDate()
     print("Flattening JSON")
     if max_rows:
         records = records[:max_rows]
@@ -140,15 +140,14 @@ def translate_motif_enum(str):
     return enum[str] if str in enum else None
 
 def prepare_indicateurs(data):
-    pct_f_cadres, pct_h_cadres = data.get("pourcentage_femmes_cadres"), data.get("pourcentage_hommes_cadres")
-    pct_f_membres, pct_h_membres = data.get("pourcentage_femmes_membres"), data.get("pourcentage_hommes_membres")
-    motif_nc_cadres, motif_nc_membres = data.get("motif_non_calculabilité_cadres"), data.get("motif_non_calculabilité_membres")
-    motif_nc_cadres = translate_motif_enum(motif_nc_cadres)
-    motif_nc_membres = translate_motif_enum(motif_nc_membres)
-
-    data["pct_f_cadres"], data["pct_h_cadres"] = pct_f_cadres, pct_h_cadres
-    data["pct_f_membres"], data["pct_h_membres"] = pct_f_membres, pct_h_membres
+    motif_nc_cadres = translate_motif_enum(data.get("motif_non_calculabilité_cadres"))
     data["cadres_calculable"] = "Non" if motif_nc_cadres else "Oui"
-    data["membres_calculable"] = "Non" if motif_nc_membres else "Oui"
     data["motif_nc_cadres"] = motif_nc_cadres
+    data["pct_f_cadres"] = "NC" if motif_nc_cadres else data.get("pourcentage_femmes_cadres")
+    data["pct_h_cadres"] = "NC" if motif_nc_cadres else data.get("pourcentage_hommes_cadres")
+
+    motif_nc_membres = translate_motif_enum(data.get("motif_non_calculabilité_membres"))
+    data["membres_calculable"] = "Non" if motif_nc_membres else "Oui"
     data["motif_nc_membres"] = motif_nc_membres
+    data["pct_f_membres"] = "NC" if motif_nc_membres else data.get("pourcentage_femmes_membres")
+    data["pct_h_membres"] = "NC" if motif_nc_membres else data.get("pourcentage_hommes_membres")

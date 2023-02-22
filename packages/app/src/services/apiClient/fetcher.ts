@@ -1,10 +1,8 @@
+import { config } from "@common/config";
 import { ApiError } from "next/dist/server/api-utils";
 
 import type { Any } from "../../common/utils/types";
 import { useUserStore } from "./useUser";
-
-export const API_URL_V1 = process.env.NEXT_PUBLIC_API_URL;
-export const API_URL_V2 = process.env.NEXT_PUBLIC_API_V2_URL || "/apiv2";
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
 
@@ -12,13 +10,12 @@ export type FetcherReturn = {
   error: unknown;
   isError: boolean;
   isLoading: boolean;
-
   mutate: (data: Any) => void;
 };
 
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;
 
-export type FetcherInfiniteReturn = FetcherReturnImmutable & {
+export type FetcherInfiniteReturn = FetcherReturn & {
   setSize: (size: number) => void;
   size: number;
 };
@@ -60,7 +57,7 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
           apiMessage = EXPIRED_TOKEN_MESSAGE;
         }
       }
-    } catch (_ignoreError) {
+    } catch {
       // Ignore error, for API which doesn't return JSON.
     }
     throw new ApiError(response.status, apiMessage);
@@ -77,7 +74,7 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
  */
 export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
   // TODO: better typings relation with genericFetch
-  return genericFetch(API_URL_V1 + key, options);
+  return genericFetch(config.api_url + key, options);
 };
 
 /**
@@ -87,5 +84,5 @@ export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
  * @param options the request options (optional)
  */
 export const fetcherV2 = <T>(key: string, options?: RequestInit): Promise<T> => {
-  return genericFetch(API_URL_V2 + key, options);
+  return genericFetch(config.apiv2_url + key, options);
 };

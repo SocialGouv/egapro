@@ -30,6 +30,7 @@ app:
     POSTGRES_SSLMODE: "$(PGSSLMODE)"
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+    EGAPRO_ENV: "{{ .Values.global.env }}"
 
 storybook:
   ~chart: app
@@ -124,7 +125,7 @@ files:
 project:
   apiJobs:
     - name: export-public-data
-      command: egapro export-public-data /mnt/files/index-egalite-fh.csv
+      command: egapro export-public-data /mnt/files/index-egalite-fh.xlsx
     - name: dump-dgt
       command: egapro dump-dgt /mnt/files/dgt.xlsx
     - name: dump-dgt-representation
@@ -145,7 +146,7 @@ project:
     - "217.182.142.112"
   files:
     public:
-      - index-egalite-fh.csv
+      - index-egalite-fh.xlsx
       - dgt-export-representation.xlsx
     restricted:
       - dgt.xlsx
@@ -157,7 +158,7 @@ jobs:
   ~chart: jobs
   runs:
     build-app:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 14Gi
       memoryRequest: 2Gi
       with:
@@ -165,9 +166,12 @@ jobs:
         dockerfile: packages/app/Dockerfile
         buildArgs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
+          NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
+          NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.sha }}"
+          EGAPRO_ENV: "{{ .Values.global.env }}"
 
     build-storybook:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 8Gi
       memoryRequest: 2Gi
       with:
@@ -175,22 +179,24 @@ jobs:
         dockerfile: packages/app/.storybook/Dockerfile
 
     build-api:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       with:
         imagePackage: api
         context: packages/api
 
     build-declaration:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       with:
         imagePackage: declaration
         context: packages/declaration
         buildArgs:
           BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+          EGAPRO_SIMU_URL: "https://{{ .Values.global.host }}/index-egapro"
+          GITHUB_SHA: "{{ $.Values.global.sha }}"
 
     build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 10Gi
       memoryRequest: 2Gi
       with:
@@ -199,7 +205,7 @@ jobs:
         buildArgs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
-          REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+          REACT_APP_GITHUB_SHA: "{{ $.Values.global.sha }}"
           PUBLIC_URL: "/index-egapro"
 
 deactivate:
@@ -208,4 +214,3 @@ deactivate:
       deactivate:
         with:
           db: true
-          pgAdminSecretRefName: azure-pg-admin-user

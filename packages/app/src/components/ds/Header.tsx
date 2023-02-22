@@ -56,11 +56,9 @@ export const Header = () => {
           </Box>
           <Box fontFamily="gabriela">
             <NextLink href="/" passHref>
-              <Link fontSize="2xl">Index Egapro</Link>
+              <Link fontSize="2xl">Egapro</Link>
             </NextLink>
-            <Text fontSize="xs">
-              L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-            </Text>
+            <Text fontSize="xs">Index de l’égalité professionnelle et représentation équilibrée</Text>
           </Box>
           {isOpenFeature(process.env.NEXT_PUBLIC_FEATURE_DARK_MODE) && (
             <Box ml="auto">

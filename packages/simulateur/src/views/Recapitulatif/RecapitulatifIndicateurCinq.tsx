@@ -1,24 +1,28 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurCinqProps {
-  indicateurCinqFormValidated: FormState
-  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
-  indicateurNombreSalariesSexeSousRepresente: number | undefined
-  noteIndicateurCinq: number | undefined
+  calculsIndicateurCinq: ReturnType<typeof calculerIndicateurCinq>
 }
 
 const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinqProps> = ({
-  indicateurCinqFormValidated,
-  indicateurSexeSousRepresente,
-  indicateurNombreSalariesSexeSousRepresente,
-  noteIndicateurCinq,
+  calculsIndicateurCinq,
 }) => {
-  if (indicateurCinqFormValidated !== "Valid") {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const indicateurCinqFormValidated = state.indicateurCinq.formValidated
+
+  const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
+    calculsIndicateurCinq
+
+  if (indicateurCinqFormValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur5" />
   }
 
@@ -35,13 +39,13 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
     <RecapBloc
       indicateur="indicateur5"
       resultSummary={{
-        firstLineLabel: "votre résultat final est",
+        firstLineLabel: "Votre résultat final est",
         firstLineData:
           indicateurNombreSalariesSexeSousRepresente !== undefined
             ? String(indicateurNombreSalariesSexeSousRepresente)
             : "--",
         firstLineInfo,
-        secondLineLabel: "votre note obtenue est",
+        secondLineLabel: "Votre note obtenue est",
         secondLineData: (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10",
         indicateurSexeSurRepresente:
           indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"

@@ -3,20 +3,30 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         /**
-         * Dist: `https://egapro-preprod.dev.fabrique.social.gouv.fr/api`  
+         * Dist: `http://localhost:2626`  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_API_URL?: string;
         /**
-         * Dist: `<dev>`  
+         * Dist: `http://localhost:3000/api`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        NEXT_PUBLIC_API_V2_URL?: string;
+        /**
+         * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_URL?: string;
         /**
-         * Dist: `<dev>`  
+         * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_SITE_ID?: string;
+        /**
+         * No dist value.  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        NEXT_PUBLIC_GITHUB_SHA?: string;
         /**
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
@@ -53,7 +63,7 @@ declare namespace NodeJS {
          */
         MAILER_FROM_EMAIL?: string;
         /**
-         * Dist: `Egapro`  
+         * Dist: `L’équipe Egapro`  
          * {@link [Local Env Dist](.env.development)}
          */
         MAILER_EMAIL_SIGNATURE?: string;
@@ -176,8 +186,10 @@ declare namespace NodeJS {
 }
 declare type ProcessEnvCustomKeys = 
     | 'NEXT_PUBLIC_API_URL'
+    | 'NEXT_PUBLIC_API_V2_URL'
     | 'NEXT_PUBLIC_MATOMO_URL'
     | 'NEXT_PUBLIC_MATOMO_SITE_ID'
+    | 'NEXT_PUBLIC_GITHUB_SHA'
     | 'MAILER_ENABLE'
     | 'MAILER_SMTP_HOST'
     | 'MAILER_SMTP_PORT'

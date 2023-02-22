@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
 import {
@@ -10,14 +11,18 @@ import {
   CardBodyContentDetails,
   CardBodyContentEnd,
   CardBodyContentTitle,
+  CardHeader,
+  CardHeaderImg,
+  Container,
   FormButton,
   Grid,
   GridCol,
+  ImgHome,
   ImgJDMA,
   TileSuccess,
   TileSuccessTitle,
 } from "@design-system";
-import { API_URL_V1, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
+import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -47,87 +52,112 @@ const Transmission: NextPageWithLayout = () => {
   };
 
   return (
-    <TileSuccess>
-      <TileSuccessTitle titleAs="h1">{title}</TileSuccessTitle>
-      <p>
-        Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
-        femmes-hommes conformément aux dispositions de l’
-        <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000045669617" target="_blank" rel="noreferrer">
-          article D. 1142-19 du code du travail
-        </a>
-        .
-      </p>
-      <p>
-        Vous allez recevoir un accusé de réception de votre transmission sur l’email que vous avez déclaré et validé en
-        début de procédure. Cet accusé de réception contient un lien vous permettant de revenir sur votre déclaration.
-      </p>
-      <p>
-        Si vous ne recevez pas cet accusé, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre dossier de
-        courriers indésirables.
-      </p>
-      <p>Nous vous remercions de votre transmission.</p>
-      <Grid mt="6w" justifyCenter>
-        <GridCol md={10} lg={8}>
-          <form>
-            <ButtonGroup>
-              <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
-                {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
-              </FormButton>
-              <NextLink href="/representation-equilibree/assujetti/" passHref>
-                <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
-              </NextLink>
-            </ButtonGroup>
-          </form>
-        </GridCol>
-      </Grid>
-      {formData.entreprise?.siren && (
-        <Grid mt="6w" justifyCenter>
-          <GridCol md={10} lg={8}>
-            <Card size="sm" isEnlargeLink>
-              <CardBody>
-                <CardBodyContent>
-                  <CardBodyContentTitle>
-                    <a
-                      href={`${API_URL_V1}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}
-                    >
-                      Télécharger le récapitulatif
-                    </a>
-                  </CardBodyContentTitle>
-                  <CardBodyContentDescription>
-                    {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-                    Année {formData.year! + 1} au titre des données {formData.year}.
-                  </CardBodyContentDescription>
-                  <CardBodyContentEnd>
-                    <CardBodyContentDetails>PDF</CardBodyContentDetails>
-                  </CardBodyContentEnd>
-                </CardBodyContent>
-              </CardBody>
-            </Card>
-          </GridCol>
-        </Grid>
-      )}
-      <Grid mt="6w" justifyCenter haveGutters>
-        <GridCol md={10} lg={8} className="fr-enlarge-link">
+    <>
+      <TileSuccess>
+        <TileSuccessTitle titleAs="h1">{title}</TileSuccessTitle>
+        <p>
+          Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
+          femmes-hommes conformément aux dispositions de l’
           <a
-            // TODO: separate component with key as env
-            href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+            href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000045669617"
             target="_blank"
             rel="noreferrer"
           >
-            <ImgJDMA />
+            article D. 1142-19 du code du travail
           </a>
-        </GridCol>
-      </Grid>
-    </TileSuccess>
+          .
+        </p>
+        <p>
+          Vous allez recevoir un accusé de réception de votre transmission sur l’email que vous avez déclaré et validé
+          en début de procédure. Cet accusé de réception contient un lien vous permettant de revenir sur votre
+          déclaration.
+        </p>
+        <p>
+          Si vous ne recevez pas cet accusé, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre dossier
+          de courriers indésirables.
+        </p>
+        <p>Nous vous remercions de votre transmission.</p>
+        <Grid mt="6w" justifyCenter>
+          <GridCol md={10} lg={8}>
+            <form>
+              <ButtonGroup>
+                <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
+                  {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
+                </FormButton>
+                <NextLink href="/representation-equilibree/assujetti/" passHref>
+                  <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
+                </NextLink>
+              </ButtonGroup>
+            </form>
+          </GridCol>
+        </Grid>
+        {formData.entreprise?.siren && (
+          <Grid mt="6w" justifyCenter>
+            <GridCol md={10} lg={8}>
+              <Card size="sm" isEnlargeLink>
+                <CardBody>
+                  <CardBodyContent>
+                    <CardBodyContentTitle>
+                      <a
+                        href={`${config.api_url}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}
+                      >
+                        Télécharger le récapitulatif
+                      </a>
+                    </CardBodyContentTitle>
+                    <CardBodyContentDescription>
+                      {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                      Année {formData.year! + 1} au titre des données {formData.year}.
+                    </CardBodyContentDescription>
+                    <CardBodyContentEnd>
+                      <CardBodyContentDetails>PDF</CardBodyContentDetails>
+                    </CardBodyContentEnd>
+                  </CardBodyContent>
+                </CardBody>
+              </Card>
+            </GridCol>
+          </Grid>
+        )}
+        <Grid mt="6w" justifyCenter haveGutters>
+          <GridCol md={10} lg={8} className="fr-enlarge-link">
+            <a
+              // TODO: separate component with key as env
+              href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ImgJDMA />
+            </a>
+          </GridCol>
+        </Grid>
+      </TileSuccess>
+      <Container mt="12w">
+        <Card size="sm" isEnlargeLink noBorder isHorizontal>
+          <CardBody>
+            <CardBodyContent>
+              <CardBodyContentTitle>
+                <a href="https://egapro.travail.gouv.fr">
+                  Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
+                </a>
+              </CardBodyContentTitle>
+              <CardBodyContentDescription>
+                Toutes les entreprises d’au moins 50 salariés doivent calculer et publier leur Index de l’égalité
+                professionnelle entre les femmes et les hommes, chaque année au plus tard le 1er mars.
+              </CardBodyContentDescription>
+            </CardBodyContent>
+          </CardBody>
+          <CardHeader>
+            <CardHeaderImg>
+              <ImgHome />
+            </CardHeaderImg>
+          </CardHeader>
+        </Card>
+      </Container>
+    </>
   );
 };
 
 Transmission.getLayout = ({ children }) => {
-  return (
-    <RepresentationEquilibreeLayout haveBottomSection={true} title="Transmission">
-      {children}
-    </RepresentationEquilibreeLayout>
-  );
+  return <RepresentationEquilibreeLayout title="Transmission">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Transmission;

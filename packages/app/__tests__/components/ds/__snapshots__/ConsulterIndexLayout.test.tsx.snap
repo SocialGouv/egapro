@@ -77,12 +77,12 @@ exports[`should match snapshot 1`] = `
                   class="chakra-link css-1wvu6nm"
                   href="/"
                 >
-                  Index Egapro
+                  Egapro
                 </a>
                 <p
                   class="chakra-text css-dw5ttn"
                 >
-                  L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                  Index de l’égalité professionnelle et représentation équilibrée
                 </p>
               </div>
             </div>
@@ -134,22 +134,40 @@ exports[`should match snapshot 1`] = `
             <div
               class="css-1tqkm5s"
             >
-              <i
-                class="chakra-text css-itvw0n"
-              >
-                Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
-              </i>
               <p
-                class="chakra-text css-vc8k71"
+                class="chakra-text css-ltugf9"
               >
-                Contact : 
-                <a
-                  class="chakra-link css-18ktbam"
-                  href="mailto:index@travail.gouv.fr"
-                >
-                  index@travail.gouv.fr
-                </a>
+                Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.
               </p>
+              <div
+                class="chakra-stack css-14r7i8g"
+              >
+                <span
+                  class="chakra-text css-itvw0n"
+                >
+                  Contact: 
+                  <a
+                    class="chakra-link css-18ktbam"
+                    href="mailto:index@travail.gouv.fr"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    index@travail.gouv.fr
+                  </a>
+                </span>
+                <span
+                  class="chakra-text css-itvw0n"
+                >
+                  <a
+                    class="chakra-link css-18ktbam"
+                    href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Contribuer sur GitHub
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </footer>
@@ -271,12 +289,12 @@ exports[`should match snapshot 1`] = `
                 class="chakra-link css-1wvu6nm"
                 href="/"
               >
-                Index Egapro
+                Egapro
               </a>
               <p
                 class="chakra-text css-dw5ttn"
               >
-                L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                Index de l’égalité professionnelle et représentation équilibrée
               </p>
             </div>
           </div>
@@ -328,22 +346,40 @@ exports[`should match snapshot 1`] = `
           <div
             class="css-1tqkm5s"
           >
-            <i
-              class="chakra-text css-itvw0n"
-            >
-              Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
-            </i>
             <p
-              class="chakra-text css-vc8k71"
+              class="chakra-text css-ltugf9"
             >
-              Contact : 
-              <a
-                class="chakra-link css-18ktbam"
-                href="mailto:index@travail.gouv.fr"
-              >
-                index@travail.gouv.fr
-              </a>
+              Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.
             </p>
+            <div
+              class="chakra-stack css-14r7i8g"
+            >
+              <span
+                class="chakra-text css-itvw0n"
+              >
+                Contact: 
+                <a
+                  class="chakra-link css-18ktbam"
+                  href="mailto:index@travail.gouv.fr"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  index@travail.gouv.fr
+                </a>
+              </span>
+              <span
+                class="chakra-text css-itvw0n"
+              >
+                <a
+                  class="chakra-link css-18ktbam"
+                  href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  Contribuer sur GitHub
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>

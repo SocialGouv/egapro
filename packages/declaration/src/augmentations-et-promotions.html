@@ -10,7 +10,7 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
     <div>
       {% include radios.html
         name="_indicateurs.augmentations_et_promotions.calculable"
-        label="L'indicateur sur les taux d'augmentations individuelles est-il calculable ?"
+        label="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable&nbsp;?"
         required="true"
         options="oui=oui&non=non"
         onchange="toggleFields()"
@@ -20,7 +20,7 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
 </fieldset>
 
 <fieldset id="fieldset-resultat-pourcentage">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat" label="Résultat final en pourcentage (%)" min=0 step="any" required=true onblur="notifyPercentage(event); maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
+  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat" label="Résultat final en pourcentage (%)" min=0 step="any" required=true oninput="toggleFields()" %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-nombre-salaries">
@@ -98,7 +98,7 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
     enableField('#fieldset-note-en-salaries', isCalculable)
     enableField('#fieldset-note', isCalculable)
   }
-  
+
   document.onloaded = () => {
     toggleFields()
   }

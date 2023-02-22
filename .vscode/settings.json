@@ -17,6 +17,12 @@
   "[javascript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // TODO remove when declaration is merged as a single repo
+  "[scss]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false
+  },
   "files.associations": {
     ".env*": "dotenv",
   },

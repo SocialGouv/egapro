@@ -1,17 +1,10 @@
-import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
+import { Box, Container, Link, List, Stack, Text } from "@chakra-ui/react";
+import { config } from "@common/config";
 
-import packageConfig from "../../../package.json";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 
-export interface FooterProps {
-  consultationMode?: boolean;
-}
-
-export const Footer = ({ consultationMode }: FooterProps) => {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version;
-
+export const Footer = () => {
   return (
     <Box
       id="footer"
@@ -55,37 +48,7 @@ export const Footer = ({ consultationMode }: FooterProps) => {
                 marginTop: "var(--chakra-space-4)",
               },
             }}
-          >
-            {!consultationMode && (
-              <ListItem>
-                <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
-                  <Flex justify="center" align="center">
-                    Télécharger la liste des référents Egapro (XLSX, 22 Ko) <ExternalLinkIcon ml={2} />
-                  </Flex>
-                </Link>
-              </ListItem>
-            )}
-            {/* <ListItem>
-              <NextLink href="/mentions-legales">
-                <Link>Mentions légales</Link>
-              </NextLink>
-            </ListItem>
-            <ListItem>
-              <Link href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
-                Accessibilité&nbsp;: partiellement conforme
-              </Link>
-            </ListItem>
-            <ListItem>
-              <NextLink href="/cgu">
-                <Link>Conditions générales d'utilisation</Link>
-              </NextLink>
-            </ListItem>
-            <ListItem>
-              <NextLink href="/politique-confidentialite">
-                <Link>Politique de confidentialité</Link>
-              </NextLink>
-            </ListItem> */}
-          </List>
+          ></List>
         </Box>
 
         <Box
@@ -98,21 +61,23 @@ export const Footer = ({ consultationMode }: FooterProps) => {
             },
           }}
         >
-          <Text fontSize="sm" as="i">
-            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+          <Text fontSize="sm" mb="4">
+            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
+            numérique des ministères sociaux.
           </Text>
-          {consultationMode ? (
-            <Text fontSize="sm" mt={1}>
-              Contact : <TextLink to={"mailto:index@travail.gouv.fr"}>index@travail.gouv.fr</TextLink>
-            </Text>
-          ) : (
-            <Text fontSize="sm" mt={1}>
-              Pour nous aider à l'améliorer{" "}
-              <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
-                contribuez sur Github
+          <Stack direction={["column", "row"]} mt="1" gap="4">
+            <Text fontSize="sm" as="span">
+              Contact:&nbsp;
+              <TextLink to={"mailto:index@travail.gouv.fr"} isExternal>
+                index@travail.gouv.fr
               </TextLink>
             </Text>
-          )}
+            <Text fontSize="sm" as="span">
+              <TextLink to={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`} isExternal>
+                Contribuer sur GitHub
+              </TextLink>
+            </Text>
+          </Stack>
         </Box>
       </Container>
     </Box>

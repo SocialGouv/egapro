@@ -4,7 +4,7 @@ import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { CorrectiveMeasures } from "../valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { DeclarationIndex } from "../valueObjects/declaration/declarationInfo/DeclarationIndex";
-import { IndicatorsYear } from "../valueObjects/declaration/declarationInfo/IndicatorsYear";
+import { DeclarationIndicatorsYear } from "../valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
 import { Publication } from "./declarationInfo/Publication";
 
 export interface DeclarationInfoProps {
@@ -14,7 +14,7 @@ export interface DeclarationInfoProps {
   draft: boolean;
   endReferencePeriod?: Date;
   index?: DeclarationIndex;
-  indicatorsYear: IndicatorsYear;
+  indicatorsYear: DeclarationIndicatorsYear;
   points?: PositiveNumber;
   publication?: Publication;
   sufficientPeriod: boolean;
@@ -52,7 +52,7 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
   }
 
   /** `année_indicateurs` - Peut être absent en cas de vieilles données */
-  get indicatorsYear(): IndicatorsYear {
+  get indicatorsYear(): DeclarationIndicatorsYear {
     return this.props.indicatorsYear;
   }
 
@@ -73,7 +73,7 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
   public fromJson(json: EntityPropsToJson<DeclarationInfoProps>) {
     const props: DeclarationInfoProps = {
       draft: json.draft,
-      indicatorsYear: new IndicatorsYear(json.indicatorsYear),
+      indicatorsYear: new DeclarationIndicatorsYear(json.indicatorsYear),
       sufficientPeriod: json.sufficientPeriod,
     };
 
@@ -88,7 +88,7 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
     if (json.endReferencePeriod) props.endReferencePeriod = new Date(json.endReferencePeriod);
     if (typeof json.index === "number") props.index = new DeclarationIndex(json.index);
     if (typeof json.points === "number") props.points = new PositiveNumber(json.points);
-    if (json.publication) props.publication = Publication.fromJson<Publication>(json.publication);
+    if (json.publication) props.publication = Publication.fromJson(json.publication);
 
     return new DeclarationInfo(props) as this;
   }

@@ -8,19 +8,18 @@ import { parseDate } from "./date"
 export const parseIntFormValue = (value: string, defaultValue: any = undefined) =>
   value === "" ? defaultValue : Number.isNaN(Number(value)) ? defaultValue : parseInt(value, 10)
 
-export const parseIntStateValue = (value: number | undefined) => (value === undefined ? "" : String(value))
+export const parseIntStateValue = (value?: number) => (value === undefined ? "" : String(value))
 
 // Float PARSE
 
 export const parseFloatFormValue = (value: string, defaultValue: any = undefined) =>
   value === "" ? defaultValue : Number.isNaN(Number(value)) ? defaultValue : percentageToFraction(parseFloat(value))
 
-export const parseFloatStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(fractionToPercentage(value))
+export const parseFloatStateValue = (value?: number) => (value === undefined ? "" : String(fractionToPercentage(value)))
 
 // Boolean PARSE
 
-export const parseBooleanFormValue = (value: string | undefined) => value === "true"
+export const parseBooleanFormValue = (value?: string) => value === "true"
 
 export const parseBooleanStateValue = (value: boolean) => String(value)
 
@@ -43,7 +42,7 @@ export type ValidatorFunction = (value: string, allValues?: any) => undefined | 
 export type AsyncValidatorFunction = (value: string, allValues?: string[]) => Promise<undefined | string>
 export type FormValidatorFunction = (values: Record<string, unknown>) => undefined | string
 
-export const required: ValidatorFunction = (value: string | undefined) =>
+export const required: ValidatorFunction = (value?: string) =>
   value && value.trim && value.trim().length ? undefined : "Ce champ ne peut être vide"
 
 export const mustBeNumber: ValidatorFunction = (value) =>
@@ -95,8 +94,8 @@ export const composeFormValidators =
       undefined,
     )
 
-export function isFormValid(formState: { formValidated: string }) {
-  return formState.formValidated === "Valid"
+export function isFormValid(formState?: { formValidated: string }) {
+  return formState?.formValidated === "Valid"
 }
 
 export const isFieldHasError = (meta: FieldMetaState<string>): boolean =>

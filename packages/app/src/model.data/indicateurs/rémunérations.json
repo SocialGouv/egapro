@@ -59,6 +59,10 @@
             },
             "additionalProperties": false
           }
+        },
+        "résultat": {
+          "type": "number",
+          "minimum": 0.0
         }
       }
     }

@@ -37,40 +37,6 @@ export function useInputValueChangeHandler(setter: (value: string) => void): Cha
   )
 }
 
-interface UseDataFetchingResult<SearchResult> {
-  result: SearchResult
-  loading: boolean
-}
-
-export function useDataFetching<SearchResult, SearchParams, DebouncedParams>(
-  fetchFunction: (params: SearchParams, debouncedParams: DebouncedParams) => Promise<SearchResult>,
-  params: SearchParams,
-  debouncedParams: DebouncedParams,
-  delay: number,
-): UseDataFetchingResult<SearchResult | null> {
-  const [result, setResult] = useState<SearchResult | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
-  useEffect(() => {
-    setLoading(true)
-  }, [params, debouncedParams])
-  useDebounceEffect(
-    debouncedParams,
-    delay,
-    (debouncedParams) => {
-      fetchFunction(params, debouncedParams).then((fetchedResults) => {
-        setResult(fetchedResults)
-        setLoading(false)
-      })
-    },
-    [fetchFunction, params],
-  )
-
-  return {
-    result,
-    loading,
-  }
-}
-
 /**
  * Update the title of the page and restore it when the component is unmouted.
  *

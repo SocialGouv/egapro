@@ -1,31 +1,33 @@
-import React, { FunctionComponent } from "react"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 
-import { FormState, TrancheEffectifs } from "../../globals"
-
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-import FormStack from "../../components/ds/FormStack"
-import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { calendarYear, Year } from "../../utils/date"
 
 interface RecapitulatifInformationsProps {
-  informationsFormValidated: FormState
-  trancheEffectifs: TrancheEffectifs
-  anneeDeclaration: number | undefined
-  finPeriodeReference: string | undefined
-  nombreSalaries: number | undefined
+  nombreSalaries?: number
   periodeSuffisante: boolean
 }
 
 const RecapitulatifInformations: FunctionComponent<RecapitulatifInformationsProps> = ({
-  informationsFormValidated,
-  trancheEffectifs,
-  anneeDeclaration,
-  finPeriodeReference,
   nombreSalaries,
   periodeSuffisante,
 }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const {
+    formValidated: informationsFormValidated,
+    trancheEffectifs,
+    anneeDeclaration,
+    finPeriodeReference,
+  } = state.informations
+
   if (informationsFormValidated !== "Valid") {
     return (
       <InfoBlock

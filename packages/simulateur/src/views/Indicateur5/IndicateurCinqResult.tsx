@@ -1,22 +1,22 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
-
 import ResultSummary from "../../components/ResultSummary"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import calculerIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import { isFormValid } from "../../utils/formHelpers"
 
-interface IndicateurCinqResultProps {
-  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
-  indicateurNombreSalariesSexeSousRepresente: number | undefined
-  noteIndicateurCinq: number | undefined
-  validateIndicateurCinq: (valid: FormState) => void
-}
+const IndicateurCinqResult: FunctionComponent = () => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
-  indicateurSexeSousRepresente,
-  indicateurNombreSalariesSexeSousRepresente,
-  noteIndicateurCinq,
-  validateIndicateurCinq,
-}) => {
+  if (!state) return null
+
+  const readOnly = isFormValid(state.indicateurCinq)
+
+  if (!readOnly) return null
+
+  const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
+    calculerIndicateurCinq(state)
+
   const firstLineInfo =
     indicateurSexeSousRepresente === undefined
       ? undefined
@@ -27,14 +27,14 @@ const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
       : "les hommes sont sur-représentés"
   return (
     <ResultSummary
-      firstLineLabel="votre résultat final est"
+      firstLineLabel="Votre résultat final est"
       firstLineData={
         indicateurNombreSalariesSexeSousRepresente !== undefined
           ? String(indicateurNombreSalariesSexeSousRepresente)
           : "--"
       }
       firstLineInfo={firstLineInfo}
-      secondLineLabel="votre note obtenue est"
+      secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"}
       indicateurSexeSurRepresente={
         indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"
@@ -43,7 +43,7 @@ const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
           ? "femmes"
           : "hommes"
       }
-      onEdit={() => validateIndicateurCinq("None")}
+      onEdit={() => dispatch({ type: "validateIndicateurCinq", valid: "None" })}
     />
   )
 }

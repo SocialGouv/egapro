@@ -1,8 +1,11 @@
 import React, { FunctionComponent } from "react"
 
-import { FormControl, FormLabel } from "@chakra-ui/react"
+import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/react"
 import InputRadioGroup from "./ds/InputRadioGroup"
 import InputRadio from "./ds/InputRadio"
+import { useField } from "react-final-form"
+import { hasFieldError } from "./Input"
+import { displayMetaErrors } from "../utils/form-error-helpers"
 
 interface RadiosBooleanProps {
   readOnly: boolean
@@ -12,8 +15,11 @@ interface RadiosBooleanProps {
 }
 
 const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldName, label, value }) => {
+  const field = useField(fieldName)
+  const error = hasFieldError(field.meta)
+
   return (
-    <FormControl isReadOnly={readOnly}>
+    <FormControl isReadOnly={readOnly} isInvalid={Boolean(error)}>
       <FormLabel as="div">{label}</FormLabel>
       <InputRadioGroup defaultValue={value}>
         <InputRadio value="true" choiceValue="true" fieldName={fieldName} isReadOnly={readOnly}>
@@ -23,6 +29,7 @@ const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldN
           Non
         </InputRadio>
       </InputRadioGroup>
+      <FormErrorMessage>{error && displayMetaErrors(field.meta.error)}</FormErrorMessage>
     </FormControl>
   )
 }

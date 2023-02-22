@@ -48,8 +48,8 @@ export class DeclarationData extends JsonEntity<DeclarationDataProps> {
     };
 
     if (json.source) props.source = new DeclarationSource(json.source);
-    if (json.indicators) props.indicators = Indicators.fromJson<Indicators>(json.indicators);
+    if (json.indicators) props.indicators = Indicators.fromJson(json.indicators);
 
-    return new DeclarationData(props, json.id) as typeof this;
+    return new DeclarationData(props, json.id) as this;
   }
 }

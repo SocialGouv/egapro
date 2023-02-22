@@ -54,6 +54,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
 
           localStorage.setItem("token", "")
           localStorage.setItem("tokenInfo", "")
+          localStorage.setItem("ega-token", "")
         }
       }
       setContext({ ...newContext, loading: false })
@@ -73,6 +74,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const logout = useCallback(function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
+    localStorage.setItem("ega-token", "")
     setContext({ ...initialContext, loading: false })
   }, [])
 

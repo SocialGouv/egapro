@@ -1,6 +1,4 @@
-import { fireEvent } from "@testing-library/react";
-import { waitFor } from "@testing-library/react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
@@ -11,7 +9,7 @@ jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(false));
 
 describe("Assujetti Page : disconnected mode ", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -39,7 +37,7 @@ describe("Assujetti Page : disconnected mode ", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/email", { shallow: false });
     });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/email", { shallow: false });
   });
 });

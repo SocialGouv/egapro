@@ -15,7 +15,7 @@ export type ButtonActionProps = ButtonProps & {
   onClick?: () => void
   disabled?: boolean
   loading?: boolean
-  type?: "button" | "submit" | "reset" | undefined
+  type?: "button" | "submit" | "reset"
 }
 
 const ButtonAction: FunctionComponent<ButtonActionProps> = ({

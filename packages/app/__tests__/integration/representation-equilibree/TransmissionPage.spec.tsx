@@ -13,7 +13,7 @@ jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidationPageData());
 
 describe("Transmission page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -44,13 +44,6 @@ describe("Transmission page", () => {
     render(<TransmissionPage />);
 
     const sendButton = screen.getByRole("button", { name: /renvoyer l'accusé de réception/i });
-    const newDeclaration = screen.getByRole("link", {
-      name: /effectuer une nouvelle déclaration/i,
-    });
-    const download = screen.getByRole("link", {
-      name: /télécharger le récapitulatif/i,
-    });
-
     // when user click send button
     await userEvent.click(sendButton);
 
@@ -80,9 +73,9 @@ describe("Transmission page", () => {
       expect(spies.routerChangeStart).toHaveBeenNthCalledWith(1, "./commencer", {
         shallow: false,
       });
-      expect(spies.routerChangeStart).toHaveBeenNthCalledWith(2, "/representation-equilibree/assujetti", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenNthCalledWith(2, "/representation-equilibree/assujetti", {
+      shallow: false,
     });
   });
 });

@@ -1,55 +1,24 @@
-import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
-import { RouteComponentProps } from "react-router-dom"
-
-import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
+import React, { FunctionComponent } from "react"
 
 import { useTitle } from "../../utils/hooks"
 
-import Page from "../../components/Page"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import LayoutForm from "../../components/LayoutForm"
+import SimulateurPage from "../../components/SimulateurPage"
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
-
-interface InformationsDeclarantProps extends RouteComponentProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
 
 const title = "Informations déclarant"
 
-const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ state, dispatch }) => {
+const InformationsDeclarant: FunctionComponent = () => {
   useTitle(title)
 
-  const updateInformationsDeclarant = useCallback(
-    (data: ActionInformationsDeclarantData) => dispatch({ type: "updateInformationsDeclarant", data }),
-    [dispatch],
-  )
-
-  const validateInformationsDeclarant = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformationsDeclarant", valid }),
-    [dispatch],
-  )
-
   return (
-    <PageInformationsDeclarant>
-      <LayoutFormAndResult
-        childrenForm={
-          <InformationsDeclarantForm
-            informationsDeclarant={state.informationsDeclarant}
-            readOnly={state.informationsDeclarant.formValidated === "Valid"}
-            updateInformationsDeclarant={updateInformationsDeclarant}
-            validateInformationsDeclarant={validateInformationsDeclarant}
-          />
-        }
-        childrenResult={null}
-      />
-    </PageInformationsDeclarant>
+    <SimulateurPage
+      title={title}
+      tagline="Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services de l’inspection du travail."
+    >
+      <LayoutForm form={<InformationsDeclarantForm />} />
+    </SimulateurPage>
   )
 }
-
-const PageInformationsDeclarant = ({ children }: PropsWithChildren) => (
-  <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
-    {children}
-  </Page>
-)
 
 export default InformationsDeclarant

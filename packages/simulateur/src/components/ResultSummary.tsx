@@ -4,6 +4,10 @@ import { Box, BoxProps, Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/re
 import ButtonAction from "./ds/ButtonAction"
 import { IconEdit } from "./ds/Icons"
 import Summary from "./Summary"
+import { useAppStateContextProvider } from "../hooks/useAppStateContextProvider"
+import { isFrozenDeclaration } from "../utils/isFrozenDeclaration"
+import { frozenDeclarationMessage } from "./MessageForFrozenDeclaration"
+import { SexeType } from "../globals"
 
 export interface ResultSummaryProps {
   firstLineLabel: string
@@ -12,7 +16,7 @@ export interface ResultSummaryProps {
   secondLineLabel: string
   secondLineData: string
   secondLineInfo?: string
-  indicateurSexeSurRepresente?: "hommes" | "femmes" | undefined
+  indicateurSexeSurRepresente?: SexeType
   onEdit?: () => void
 }
 
@@ -32,6 +36,12 @@ const ResultSummary: FunctionComponent<ResultSummaryProps> = ({
   indicateurSexeSurRepresente,
   onEdit,
 }) => {
+  const { state } = useAppStateContextProvider()
+
+  if (!state) return null
+
+  const frozenDeclaration = isFrozenDeclaration(state)
+
   return (
     <Summary
       footer={
@@ -43,6 +53,8 @@ const ResultSummary: FunctionComponent<ResultSummaryProps> = ({
             size="sm"
             variant="outline"
             colorScheme="primary"
+            disabled={frozenDeclaration}
+            title={frozenDeclaration ? frozenDeclarationMessage : ""}
           />
         )
       }

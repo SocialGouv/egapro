@@ -1,41 +1,35 @@
 import { Box, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 import arrayMutators from "final-form-arrays"
+import createDecorator from "final-form-calculate"
 import React, { FunctionComponent } from "react"
-import { Form } from "react-final-form"
+import { Field, Form } from "react-final-form"
 import { FieldArray } from "react-final-form-arrays"
 
-import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
-
-import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
-
-import createDecorator from "final-form-calculate"
-import ActionBar from "../../components/ActionBar"
+import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
 import { codeNafFromCode } from "../../components/CodeNaf"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import FormStack from "../../components/ds/FormStack"
-import { IconEdit, IconPlusCircle } from "../../components/ds/Icons"
+import { IconPlusCircle, IconWarning } from "../../components/ds/Icons"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
-import FormSubmit from "../../components/FormSubmit"
-import NombreEntreprises from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
+import { EntrepriseType, Structure } from "../../globals"
+import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { useDeclaration } from "../../hooks/useDeclaration"
+import { timestampToFrDate } from "../../utils/date"
+import { isFormValid, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
-const validate = (value: string) => {
+const isRequired = (value: string) => {
   const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
+
+  return requiredError ? { required: requiredError } : undefined
 }
 
 const validateForm = ({
@@ -51,11 +45,11 @@ const validateForm = ({
   structure: Structure
   nomUES: string
 }) => ({
-  nomEntreprise: validate(nomEntreprise),
-  siren: validate(siren),
-  codeNaf: validate(codeNaf),
-  structure: validate(structure),
-  nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
+  nomEntreprise: isRequired(nomEntreprise),
+  siren: isRequired(siren),
+  codeNaf: isRequired(codeNaf),
+  structure: isRequired(structure),
+  nomUES: structure === "Unité Economique et Sociale (UES)" ? isRequired(nomUES) : undefined,
 })
 
 // Update state when change on nombreEntreprises is made.
@@ -69,22 +63,24 @@ const updateNombreEntreprises = createDecorator({
 })
 
 interface InformationsEntrepriseFormProps {
-  state: AppState
-  update: (data: ActionInformationsEntrepriseData) => void
-  validate: (valid: FormState) => void
-  alreadyDeclared: boolean
+  code: string
 }
 
-const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
-  state,
-  update,
-  validate,
-  alreadyDeclared,
-}) => {
-  const informationsEntreprise = state.informationsEntreprise
-  const readOnly = state.informationsEntreprise.formValidated === "Valid"
+const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({ code }) => {
+  const { state, dispatch } = useAppStateContextProvider()
 
-  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  if (!state) return null
+
+  const alreadyDeclared = declaration?.data?.id === code
+
+  const informationsEntreprise = state.informationsEntreprise
+  const year = state.informations.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
+  const readOnly = isFormValid(state.informationsEntreprise)
+
+  const frozenDeclaration = isFrozenDeclaration(state)
 
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -99,46 +95,29 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
     nombreEntreprises: parseIntStateValue(informationsEntreprise.nombreEntreprises),
-    entreprisesUES: informationsEntreprise.entreprisesUES,
+    entreprisesUES: informationsEntreprise.entreprisesUES.length
+      ? informationsEntreprise.entreprisesUES
+      : [
+          {
+            nom: "",
+            siren: "",
+          },
+        ],
   }
 
-  const saveForm = (formData: any) => {
-    const {
-      nomEntreprise,
-      siren,
-      codeNaf,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      codePays,
-      commune,
-      structure,
-      nomUES,
-      nombreEntreprises,
-      entreprisesUES,
-    } = formData
-
-    update({
-      nomEntreprise: nomEntreprise,
-      siren: siren,
-      codeNaf: codeNaf,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      codePays,
-      commune,
-      structure,
-      nomUES,
-      nombreEntreprises: parseIntFormValue(nombreEntreprises),
-      entreprisesUES,
+  const saveForm = (formData: typeof initialValues) => {
+    dispatch({
+      type: "updateInformationsEntreprise",
+      data: {
+        ...formData,
+        nombreEntreprises: parseIntFormValue(formData.nombreEntreprises),
+      },
     })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validate("Valid")
+    dispatch({ type: "validateInformationsEntreprise", valid: "Valid" })
   }
 
   return (
@@ -160,7 +139,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="Cette page ne peut être validée car tous les champs ne sont pas renseignés." />
             )}
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Vous déclarez en tant que</FormLabel>
@@ -179,19 +158,31 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
               </InputRadioGroup>
             </FormControl>
             {readOnly || alreadyDeclared ? (
-              <FakeInputGroup
-                label="SIREN"
-                message={
-                  alreadyDeclared
-                    ? "Le SIREN n'est pas modifiable car une déclaration a déjà été validée et transmise."
-                    : undefined
-                }
-              >
-                {informationsEntreprise.siren}
-              </FakeInputGroup>
+              <>
+                <FakeInputGroup
+                  label="Siren"
+                  message={
+                    alreadyDeclared
+                      ? "Le Siren n'est pas modifiable car une déclaration a déjà été validée et transmise."
+                      : undefined
+                  }
+                >
+                  {informationsEntreprise.siren}
+                </FakeInputGroup>
+                {declaration && declaration.declared_at && (
+                  <Text mt={2} color="red.500" lineHeight="4">
+                    <IconWarning mr="2" />
+                    {`Attention, une déclaration pour le Siren ${informationsEntreprise.siren} et
+                    l'année ${year}, a déjà été transmise le ${timestampToFrDate(declaration.declared_at)}  par ${
+                      declaration.data.déclarant.email
+                    }`}
+                    .
+                  </Text>
+                )}
+              </>
             ) : (
               <FieldSiren
-                label="SIREN"
+                label="Siren"
                 name="siren"
                 readOnly={readOnly}
                 year={year}
@@ -233,11 +224,15 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                   errorText="le nom de l'UES n'est pas valide"
                   readOnly={readOnly}
                 />
-                <NombreEntreprises readOnly={readOnly} />
 
-                <Text>
-                  Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
-                </Text>
+                <hr />
+                <Box>
+                  <Box mt="0">
+                    <Text as="b">Siren des entreprises composant l'UES</Text>
+                    &nbsp;(ne pas inclure l'entreprise déclarante)
+                  </Box>
+                </Box>
+
                 <FieldArray name="entreprisesUES">
                   {({ fields }) => {
                     return (
@@ -251,7 +246,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                               readOnly={readOnly}
                               year={year}
                             />
-                            {!readOnly && (
+                            {!readOnly && values.nombreEntreprises > 2 && (
                               <Box style={{ marginLeft: 10, marginTop: 65 }}>
                                 <button onClick={() => fields.remove(index)}>❌</button>
                               </Box>
@@ -271,29 +266,28 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     leftIcon={<IconPlusCircle />}
                   />
                 )}
+
+                <Box>
+                  <Box mt="6">
+                    <Field name="nombreEntreprises">
+                      {({ input }) => (
+                        <Text mb={4} textAlign="right" fontStyle={"italic"}>
+                          {input.value} entreprises composent l'UES (déclarant compris)
+                        </Text>
+                      )}
+                    </Field>
+                  </Box>
+                </Box>
               </>
             )}
           </FormStack>
 
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/informations-declarant" label="Suivant" />
-              &emsp;
-              {informationsEntreprise.formValidated === "Valid" && (
-                <ButtonAction
-                  leftIcon={<IconEdit />}
-                  label="Modifier les données saisies"
-                  onClick={() => validate("None")}
-                  variant="link"
-                  size="sm"
-                />
-              )}
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit />
-            </ActionBar>
-          )}
+          <ActionBarSingleForm
+            readOnly={readOnly}
+            frozenDeclaration={frozenDeclaration}
+            to="/informations-declarant"
+            onClick={() => dispatch({ type: "validateInformationsEntreprise", valid: "None" })}
+          />
         </form>
       )}
     </Form>
