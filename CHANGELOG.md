@@ -1,3 +1,10 @@
+## [2.84.1](https://github.com/SocialGouv/egapro/compare/v2.84.0...v2.84.1) (2023-02-23)
+
+
+### Bug Fixes
+
+* ensure form working properly in ajout declarant ([9c87429](https://github.com/SocialGouv/egapro/commit/9c87429e033e6894445ecfbc09c79e9e285c7704))
+
 # [2.84.0](https://github.com/SocialGouv/egapro/compare/v2.83.1...v2.84.0) (2023-02-22)
 
 
