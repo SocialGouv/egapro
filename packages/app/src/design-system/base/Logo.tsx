@@ -3,7 +3,7 @@ export const Logo = () => {
     <p className="fr-logo">
       Ministère <br />
       du Travail,
-      <br /> du plein l’Emploi
+      <br /> du plein Emploi
       <br /> et de l’Insertion
     </p>
   );

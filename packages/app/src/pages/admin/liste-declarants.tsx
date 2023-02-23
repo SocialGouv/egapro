@@ -33,6 +33,7 @@ import {
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
+import type { OwnershipRequestSearchParam } from "@services/apiClient/useOwnershipRequestListStore";
 import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -46,12 +47,13 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
   [OwnershipRequestStatus.Enum.ERROR]: "warning",
 };
 
-const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
+const columnsMap: Map<GetOwnershipRequestInputOrderBy | "name", string> = new Map([
   ["status", "Status"],
   ["askerEmail", "Demandeur"],
   ["createdAt", "Date de la demande"],
   ["modifiedAt", "Date de traitement"],
   ["siren", "Siren"],
+  ["name", "Raison Sociale"],
   ["email", "Email"],
 ]);
 
@@ -140,6 +142,7 @@ const OwnershipRequestList = () => {
               <TableAdminBodyRowCol>{formatIsoToFr(item.createdAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{formatIsoToFr(item.modifiedAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
+              <TableAdminBodyRowCol>{item.name}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
 
               <TableAdminBodyRowCol>
@@ -211,14 +214,14 @@ const ActionButtons = () => {
   );
 };
 
-type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
+type SearchFormType = OwnershipRequestSearchParam;
 
 const OwnershipRequestPage: NextPageWithLayout = () => {
   const formState = useOwnershipRequestListStore(state => state.formState);
   const submit = useOwnershipRequestListStore(state => state.submit);
   const reset = useOwnershipRequestListStore(state => state.reset);
   const { isLoading } = useListeDeclarants(formState);
-  const { siren, status } = formState;
+  const { query, status } = formState;
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const {
@@ -228,16 +231,16 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     setValue,
   } = useForm<SearchFormType>({
     defaultValues: {
-      siren,
       status,
+      query,
     },
   });
 
   // Synchronizing form inputs with store. May look unnecessary at first, but mandatory for correct behaviour of the reset button.
   useEffect(() => {
-    if (siren !== undefined) setValue("siren", siren);
+    if (query !== undefined) setValue("query", query);
     if (status !== undefined) setValue("status", status);
-  }, [siren, status, setValue]);
+  }, [query, status, setValue]);
 
   return (
     <Box as="section">
@@ -251,10 +254,10 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
             <GridCol sm={3}>
               <FormGroup>
                 <FormInput
-                  id="siren-param"
-                  placeholder="Rechercher par Siren"
+                  id="query-param"
+                  placeholder="Rechercher par Siren ou email"
                   autoComplete="off"
-                  {...register("siren")}
+                  {...register("query")}
                 />
               </FormGroup>
             </GridCol>

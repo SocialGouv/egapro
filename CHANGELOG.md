@@ -1,3 +1,45 @@
+# [2.84.0](https://github.com/SocialGouv/egapro/compare/v2.83.1...v2.84.0) (2023-02-22)
+
+
+### Features
+
+* add logged email as default value for email declarant in ajout declarant ([9b1c6c0](https://github.com/SocialGouv/egapro/commit/9b1c6c0a45b19f489379a7a87e79a31cdbc8ece9)), closes [#1576](https://github.com/SocialGouv/egapro/issues/1576)
+* add raison sociale column in list declarant ([#1570](https://github.com/SocialGouv/egapro/issues/1570)) ([d544270](https://github.com/SocialGouv/egapro/commit/d544270d6558b837222622f0054b2f94a521ff0d))
+* allow spaces and better controls on ajout declarants ([#1579](https://github.com/SocialGouv/egapro/issues/1579)) ([5eb8682](https://github.com/SocialGouv/egapro/commit/5eb8682904375d356df391b27e579382b2577cd7))
+* **bo:** allow searching by email in liste declarants ([#1578](https://github.com/SocialGouv/egapro/issues/1578)) ([47d4625](https://github.com/SocialGouv/egapro/commit/47d4625334f63a739b4db3fd3cdfa0332662db25))
+
+## [2.83.1](https://github.com/SocialGouv/egapro/compare/v2.83.0...v2.83.1) (2023-02-21)
+
+
+### Bug Fixes
+
+* change logo text ([c450f7a](https://github.com/SocialGouv/egapro/commit/c450f7a5888ab571772826713c252066f4e1a9a6))
+* update reply to reference ([467dea2](https://github.com/SocialGouv/egapro/commit/467dea271925b6f15cec483f6b534d01bc5bdaed))
+
+# [2.83.0](https://github.com/SocialGouv/egapro/compare/v2.82.1...v2.83.0) (2023-02-20)
+
+
+### Bug Fixes
+
+* better NC value handling in public data (Fixes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([eb6a950](https://github.com/SocialGouv/egapro/commit/eb6a95032d429790dfb5502edf180877d402d24b))
+* bug for periodeSuffisante, just reason on false ([8bed6ec](https://github.com/SocialGouv/egapro/commit/8bed6ec0e7af3fc8a4e244a933d4c5dec9502878))
+* diff between 0 and None (Fixes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([0f4e163](https://github.com/SocialGouv/egapro/commit/0f4e163a1cc1d55ea361008419d12aba658e9dc8))
+* handle undefined case for isFormValid ([e690514](https://github.com/SocialGouv/egapro/commit/e690514adf3c4187ccf8fb81b831446bb883d17d))
+* readonly panel in simulation form ([4b391fc](https://github.com/SocialGouv/egapro/commit/4b391fcc640d048849b48d3090d94d841d210dc1)), closes [#1569](https://github.com/SocialGouv/egapro/issues/1569)
+* refactor simu ([#1553](https://github.com/SocialGouv/egapro/issues/1553)) ([b9125eb](https://github.com/SocialGouv/egapro/commit/b9125ebc52a2d0be0a4a8aea037886ff95e3af82))
+* right result not always well displayed ([85384c4](https://github.com/SocialGouv/egapro/commit/85384c4aa6409f817e614fcdca650cfbf9099d62))
+* sync forms and icon in menu when effectifs change ([#1559](https://github.com/SocialGouv/egapro/issues/1559)) ([bcc0798](https://github.com/SocialGouv/egapro/commit/bcc0798a6cb98887a92b4fd3a01c05967f9e167e))
+* wording spacing indic simu (Fixes [#1490](https://github.com/SocialGouv/egapro/issues/1490)) ([e14d103](https://github.com/SocialGouv/egapro/commit/e14d1030bf3c005a516ce200302009723532503b))
+
+
+### Features
+
+* disable buttons when simu are older than 1 year ([#1549](https://github.com/SocialGouv/egapro/issues/1549)) ([735cb07](https://github.com/SocialGouv/egapro/commit/735cb07d5b18750991403d6f0c413219836e7c55))
+* enable last owner deletion by staff ([#1567](https://github.com/SocialGouv/egapro/issues/1567)) ([d9dc01f](https://github.com/SocialGouv/egapro/commit/d9dc01fcd7a80e1bb326ff5537870db5e77040ad))
+* freeze objectifs and mesures when 2 years is passed ([#1561](https://github.com/SocialGouv/egapro/issues/1561)) ([9117bde](https://github.com/SocialGouv/egapro/commit/9117bde35ba29e7ea7783e519eb981933c77ba63))
+* new paragraph and pdf link for ajout-declarants ([#1550](https://github.com/SocialGouv/egapro/issues/1550)) ([627bdab](https://github.com/SocialGouv/egapro/commit/627bdaba22974c68db4efff99076bcef9a3b57ba))
+* refactor and add comment for calculs files ([#1558](https://github.com/SocialGouv/egapro/issues/1558)) ([6849896](https://github.com/SocialGouv/egapro/commit/6849896b89e64b663b3b5b49e1c77932b9a5ca29))
+
 ## [2.82.1](https://github.com/SocialGouv/egapro/compare/v2.82.0...v2.82.1) (2023-02-01)
 
 
