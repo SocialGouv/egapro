@@ -22,7 +22,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@services/apiClient";
 import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -107,7 +107,7 @@ const AddDeclarer: NextPageWithLayout = () => {
     handleSubmit,
     reset,
     formState: { errors, isValid },
-  } = useForm<CreateOwnershipRequestDTO>({
+  } = useForm<z.input<typeof formSchema>>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
   });
@@ -115,7 +115,7 @@ const AddDeclarer: NextPageWithLayout = () => {
   useEffect(() => {
     reset({
       askerEmail: user?.email,
-      emails: user?.email ? [user?.email] : [],
+      emails: user?.email,
     });
   }, [reset, user?.email]);
 
@@ -174,7 +174,10 @@ const AddDeclarer: NextPageWithLayout = () => {
                   Renseignez le(s) numéro(s) Siren ainsi que l'email du (des) déclarant(s) que vous souhaitez rattacher
                   au(x) numéro(s) Siren.
                 </p>
-                <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <form
+                  onSubmit={handleSubmit(data => onSubmit(data as unknown as CreateOwnershipRequestDTO))}
+                  noValidate
+                >
                   <FormLayout>
                     <FormGroup isError={Boolean(errors.askerEmail)}>
                       <FormGroupLabel htmlFor="email">Email demandeur</FormGroupLabel>
@@ -202,11 +205,11 @@ const AddDeclarer: NextPageWithLayout = () => {
                       />
                       {errors.sirens && (
                         <FormGroupMessage id="sirens-msg">
-                          {errors.sirens.message?.split("\n").map(m => (
-                            <>
+                          {errors.sirens.message?.split("\n").map((m, idx) => (
+                            <Fragment key={`sirens-error-${idx}`}>
                               {m}
                               <br />
-                            </>
+                            </Fragment>
                           ))}
                         </FormGroupMessage>
                       )}
@@ -225,11 +228,11 @@ const AddDeclarer: NextPageWithLayout = () => {
                       />
                       {errors.emails && (
                         <FormGroupMessage id="emails-msg">
-                          {errors.emails.message?.split("\n").map(m => (
-                            <>
+                          {errors.emails.message?.split("\n").map((m, idx) => (
+                            <Fragment key={`emails-error-${idx}`}>
                               {m}
                               <br />
-                            </>
+                            </Fragment>
                           ))}
                         </FormGroupMessage>
                       )}
