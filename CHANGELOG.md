@@ -1,3 +1,20 @@
+## [2.84.1](https://github.com/SocialGouv/egapro/compare/v2.84.0...v2.84.1) (2023-02-23)
+
+
+### Bug Fixes
+
+* ensure form working properly in ajout declarant ([9c87429](https://github.com/SocialGouv/egapro/commit/9c87429e033e6894445ecfbc09c79e9e285c7704))
+
+# [2.84.0](https://github.com/SocialGouv/egapro/compare/v2.83.1...v2.84.0) (2023-02-22)
+
+
+### Features
+
+* add logged email as default value for email declarant in ajout declarant ([9b1c6c0](https://github.com/SocialGouv/egapro/commit/9b1c6c0a45b19f489379a7a87e79a31cdbc8ece9)), closes [#1576](https://github.com/SocialGouv/egapro/issues/1576)
+* add raison sociale column in list declarant ([#1570](https://github.com/SocialGouv/egapro/issues/1570)) ([d544270](https://github.com/SocialGouv/egapro/commit/d544270d6558b837222622f0054b2f94a521ff0d))
+* allow spaces and better controls on ajout declarants ([#1579](https://github.com/SocialGouv/egapro/issues/1579)) ([5eb8682](https://github.com/SocialGouv/egapro/commit/5eb8682904375d356df391b27e579382b2577cd7))
+* **bo:** allow searching by email in liste declarants ([#1578](https://github.com/SocialGouv/egapro/issues/1578)) ([47d4625](https://github.com/SocialGouv/egapro/commit/47d4625334f63a739b4db3fd3cdfa0332662db25))
+
 ## [2.83.1](https://github.com/SocialGouv/egapro/compare/v2.83.0...v2.83.1) (2023-02-21)
 
 

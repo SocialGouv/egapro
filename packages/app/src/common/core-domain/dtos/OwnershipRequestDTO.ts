@@ -10,6 +10,7 @@ export interface OwnershipRequestDTO {
   errorDetail?: string;
   id: string;
   modifiedAt: string;
+  name: string;
   siren?: string;
   status: OwnershipRequestStatus.Enum;
 }
@@ -22,6 +23,7 @@ export type GetOwnershipRequestDTO = {
 };
 
 export type GetOwnershipRequestInputOrderBy = Exclude<keyof OwnershipRequestDTO, "errorDetail" | "id">;
+export type GetOwnershipRequestDbOrderBy = Exclude<GetOwnershipRequestInputOrderBy, "name">;
 export type GetOwnershipRequestInputDTO = z.infer<typeof getOwnershipRequestInputDTOSchema>;
 export type GetOwnershipRequestInputSchemaDTO = z.input<typeof getOwnershipRequestInputDTOSchema>;
 
@@ -37,8 +39,9 @@ export const getOwnershipRequestInputDTOSchema = z.object({
       z.literal("modifiedAt"),
       z.literal("siren"),
       z.literal("status"),
+      z.literal("name"),
     ])
     .optional(),
-  siren: z.string().optional(),
+  query: z.string().optional(),
   status: z.nativeEnum(OwnershipRequestStatus.Enum).optional(),
 });

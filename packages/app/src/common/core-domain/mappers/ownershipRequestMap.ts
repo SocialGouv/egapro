@@ -35,6 +35,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       siren: obj.siren?.getValue(),
       status: obj.status.getValue(),
       errorDetail: obj.errorDetail?.getValue(),
+      name: "",
     };
   },
 

@@ -14,7 +14,7 @@ type SearchParams = Partial<Omit<OwnershipRequestListStoreType["formState"], "ch
 const buildKey = (search?: SearchParams) => {
   if (!search) return null;
 
-  const { orderBy, orderDirection, siren, status, pageNumber, pageSize } = search;
+  const { orderBy, orderDirection, query, status, pageNumber, pageSize } = search;
 
   const limit = pageSize || ITEMS_PER_PAGE;
   const offset = pageNumber ? pageNumber * limit : 0;
@@ -22,7 +22,7 @@ const buildKey = (search?: SearchParams) => {
   const params = new URLSearchParams({
     ...(search.orderBy && { orderBy }),
     ...(search.orderDirection && { orderDirection }),
-    ...(search.siren && { siren }),
+    ...(search.query && { query }),
     ...(search.status && { status }),
     limit: String(limit),
     offset: String(offset),

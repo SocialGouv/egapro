@@ -3,7 +3,7 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import type { GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
@@ -14,7 +14,7 @@ import { ensureRequired } from "@common/utils/types";
 import type { IOwnershipRequestRepo, OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
-const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderBy, keyof OwnershipRequestRaw> = {
+const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestDbOrderBy, keyof OwnershipRequestRaw> = {
   createdAt: "created_at",
   siren: "siren",
   askerEmail: "asker_email",
@@ -22,6 +22,8 @@ const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderB
   status: "status",
   modifiedAt: "modified_at",
 };
+
+const QUERYABLE_COLS: Array<keyof OwnershipRequestRaw> = ["asker_email", "siren", "email"];
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   private table = sql("ownership_request");
@@ -161,7 +163,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async search({
-    siren,
+    query,
     status,
     limit,
     offset,
@@ -176,24 +178,27 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
         : sql``;
     const sqlLimit = limit ? sql`limit ${limit}` : sql``;
     const sqlOffset = offset ? sql`offset ${offset}` : sql``;
-    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
 
     const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
 
     return rows.map(ownershipRequestMap.toDomain);
   }
 
-  public async countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number> {
-    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+  public async countSearch({ query, status }: OwnershipSearchCriteria): Promise<number> {
+    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
     const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
 
     return Number(count);
   }
 
-  private buildSearchWhereClause({ siren = "", status }: OwnershipSearchCriteria) {
-    const sqlSiren = sql`siren like ${siren + "%"}`;
+  private buildSearchWhereClause({ query = "", status }: OwnershipSearchCriteria) {
+    const sqlQuery = sql`(${QUERYABLE_COLS.reduce(
+      (prev, col, idx) => sql`${prev} ${idx === 0 ? sql`` : sql`or`} ${sql(col)} ilike ${"%" + query + "%"}`,
+      sql``,
+    )})`;
     const sqlStatus = status ? sql`and status=${status}` : sql``;
 
-    return sql`where ${sqlSiren} ${sqlStatus}`;
+    return sql`where ${sqlQuery} ${sqlStatus}`;
   }
 }
