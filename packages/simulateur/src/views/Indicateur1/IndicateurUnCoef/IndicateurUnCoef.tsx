@@ -1,5 +1,5 @@
 import { Box, Tab, TabList, TabPanel, TabPanels, Tabs, Tag } from "@chakra-ui/react"
-import React, { FunctionComponent, useState } from "react"
+import React, { FunctionComponent, useEffect, useState } from "react"
 
 import { ActionType, AppState } from "../../../globals"
 
@@ -8,6 +8,7 @@ import { useScrollTo } from "../../../components/ScrollContext"
 import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm"
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm"
 import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm"
+import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 
 interface StepProps {
   step: number
@@ -35,6 +36,17 @@ export type TabIndicateurUnCoef = "Groupe" | "Effectif" | "Remuneration"
 
 const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dispatch }) => {
   const [tabIndex, setTabIndex] = useState(0)
+
+  // TODO: refactor this, to only calculate this once, and not in different components.
+  const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
+
+  useEffect(() => {
+    // On mount, if indicateur 1 is NC, show the tab Rémunérations.
+    if (!effectifsIndicateurCalculable) {
+      setTabIndex(2)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const scrollTo = useScrollTo()
 
