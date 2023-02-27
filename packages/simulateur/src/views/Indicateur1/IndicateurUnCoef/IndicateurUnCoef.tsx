@@ -1,14 +1,13 @@
 import { Box, Tab, TabList, TabPanel, TabPanels, Tabs, Tag } from "@chakra-ui/react"
 import React, { FunctionComponent, useEffect, useState } from "react"
 
-import { ActionType, AppState } from "../../../globals"
-
 import { useScrollTo } from "../../../components/ScrollContext"
 
 import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm"
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm"
 import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm"
 import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
+import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 
 interface StepProps {
   step: number
@@ -27,12 +26,7 @@ const Step: FunctionComponent<StepProps> = ({ step, stepLength, label, isCurrent
   </Box>
 )
 
-interface IndicateurUnCoefProps {
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
-
-const IndicateurUnContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | undefined>(undefined)
+const IndicateurUnContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | Record<string, never>>({})
 
 IndicateurUnContext.displayName = "IndicateurUnContext"
 
@@ -46,18 +40,20 @@ export const useIndicateurUnContext = () => {
 
 export type TabIndicateurUnCoef = "Groupe" | "Effectif" | "Remuneration"
 
-const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dispatch }) => {
+const IndicateurUnCoef: FunctionComponent = () => {
+  const { state } = useAppStateContextProvider()
+
   const [tabIndex, setTabIndex] = useState(0)
 
-  const calculsIndicateurUn = calculerIndicateurUn(state)
+  const calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn> | Record<string, never> = state
+    ? calculerIndicateurUn(state)
+    : {}
+
+  const indicateurCalculable = state ? calculsIndicateurUn.effectifsIndicateurCalculable : undefined
 
   useEffect(() => {
-    // On mount, if indicateur 1 is NC, show the tab Rémunérations.
-    // Only when effectifs tab is already validated, to not show it from start.
-    if (
-      !calculsIndicateurUn?.effectifsIndicateurCalculable &&
-      state.indicateurUn.coefficientEffectifFormValidated === "Valid"
-    ) {
+    // On mount, if indicateur 1 is NC, show the tab Rémunérations, only when effectifs tab is already validated, to not show it from start.
+    if (state?.indicateurUn?.coefficientEffectifFormValidated === "Valid" && indicateurCalculable === false) {
       setTabIndex(2)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

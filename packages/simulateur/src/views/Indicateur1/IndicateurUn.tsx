@@ -19,7 +19,7 @@ const title = "Indicateur écart de rémunération"
 const IndicateurUn: FunctionComponent = () => {
   useTitle(title)
 
-  const { state, dispatch } = useAppStateContextProvider()
+  const { state } = useAppStateContextProvider()
 
   if (!state) return null
 
@@ -64,7 +64,7 @@ const IndicateurUn: FunctionComponent = () => {
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm readOnly={readOnly} />
-      {modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef state={state} dispatch={dispatch} />}
+      {modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
     </PageIndicateurUn>
   )
 }
