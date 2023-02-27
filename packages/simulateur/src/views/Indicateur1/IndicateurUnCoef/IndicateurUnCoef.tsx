@@ -32,17 +32,32 @@ interface IndicateurUnCoefProps {
   dispatch: (action: ActionType) => void
 }
 
+const IndicateurUnContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | undefined>(undefined)
+
+IndicateurUnContext.displayName = "IndicateurUnContext"
+
+export const useIndicateurUnContext = () => {
+  const context = React.useContext(IndicateurUnContext)
+
+  if (!context) throw new Error("useIndicateurUnContext must be used within IndicateurUnContext")
+
+  return context
+}
+
 export type TabIndicateurUnCoef = "Groupe" | "Effectif" | "Remuneration"
 
 const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dispatch }) => {
   const [tabIndex, setTabIndex] = useState(0)
 
-  // TODO: refactor this, to only calculate this once, and not in different components.
-  const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
+  const calculsIndicateurUn = calculerIndicateurUn(state)
 
   useEffect(() => {
     // On mount, if indicateur 1 is NC, show the tab Rémunérations.
-    if (!effectifsIndicateurCalculable) {
+    // Only when effectifs tab is already validated, to not show it from start.
+    if (
+      !calculsIndicateurUn?.effectifsIndicateurCalculable &&
+      state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+    ) {
       setTabIndex(2)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,39 +77,41 @@ const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dis
   }
 
   return (
-    <Tabs
-      index={tabIndex}
-      onChange={navigateToIndex}
-      colorScheme="primary"
-      isFitted
-      bg="white"
-      border="1px solid"
-      borderColor="gray.200"
-      borderRadius="md"
-    >
-      <TabList>
-        <Tab>
-          <Step step={1} stepLength={3} label="Groupes" isCurrentStep={tabIndex === 0} />
-        </Tab>
-        <Tab>
-          <Step step={2} stepLength={3} label="Effectifs physiques" isCurrentStep={tabIndex === 1} />
-        </Tab>
-        <Tab>
-          <Step step={3} stepLength={3} label="Rémunérations" isCurrentStep={tabIndex === 2} />
-        </Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel>
-          <IndicateurUnCoefGroupForm navigateTo={navigateTo} />
-        </TabPanel>
-        <TabPanel>
-          <IndicateurUnCoefEffectifForm navigateTo={navigateTo} />
-        </TabPanel>
-        <TabPanel>
-          <IndicateurUnCoefRemuForm navigateTo={navigateTo} />
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+    <IndicateurUnContext.Provider value={{ ...calculsIndicateurUn }}>
+      <Tabs
+        index={tabIndex}
+        onChange={navigateToIndex}
+        colorScheme="primary"
+        isFitted
+        bg="white"
+        border="1px solid"
+        borderColor="gray.200"
+        borderRadius="md"
+      >
+        <TabList>
+          <Tab>
+            <Step step={1} stepLength={3} label="Groupes" isCurrentStep={tabIndex === 0} />
+          </Tab>
+          <Tab>
+            <Step step={2} stepLength={3} label="Effectifs physiques" isCurrentStep={tabIndex === 1} />
+          </Tab>
+          <Tab>
+            <Step step={3} stepLength={3} label="Rémunérations" isCurrentStep={tabIndex === 2} />
+          </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <IndicateurUnCoefGroupForm navigateTo={navigateTo} />
+          </TabPanel>
+          <TabPanel>
+            <IndicateurUnCoefEffectifForm navigateTo={navigateTo} />
+          </TabPanel>
+          <TabPanel>
+            <IndicateurUnCoefRemuForm navigateTo={navigateTo} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </IndicateurUnContext.Provider>
   )
 }
 

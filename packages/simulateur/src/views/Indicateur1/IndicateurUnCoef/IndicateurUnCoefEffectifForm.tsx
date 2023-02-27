@@ -7,11 +7,10 @@ import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { EffectifPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
-import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefEffectifFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -20,7 +19,7 @@ interface IndicateurUnCoefEffectifFormProps {
 const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({ navigateTo }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
-  const effectifsIndicateurCalculable = state && calculerIndicateurUn(state).effectifsIndicateurCalculable
+  const { effectifsIndicateurCalculable } = useIndicateurUnContext()
 
   useEffect(() => {
     // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
