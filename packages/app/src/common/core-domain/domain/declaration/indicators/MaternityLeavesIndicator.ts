@@ -32,6 +32,10 @@ export class MaternityLeavesIndicator extends JsonEntity<MaternityLeavesIndicato
     return this.props.score;
   }
 
+  public setScore(score: PositiveInteger) {
+    this.props.score = score;
+  }
+
   public fromJson(json: EntityPropsToJson<MaternityLeavesIndicatorProps>) {
     const props: MaternityLeavesIndicatorProps = {
       progressObjective: json.progressObjective,

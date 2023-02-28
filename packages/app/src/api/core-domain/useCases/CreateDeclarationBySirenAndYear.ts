@@ -1,5 +1,6 @@
 import { Declaration } from "@common/core-domain/domain/Declaration";
 import { DeclarationData } from "@common/core-domain/domain/DeclarationData";
+import { computeScores } from "@common/core-domain/domain/helpers/ScoreComputer";
 import {
   DeclarationSpecification,
   DeclarationSpecificationError,
@@ -156,6 +157,8 @@ export class CreateDeclarationBySirenAndYear implements UseCase<Input, void> {
             : void 0,
         },
       });
+
+      computeScores(declarationData);
 
       const specification = new DeclarationSpecification();
       try {

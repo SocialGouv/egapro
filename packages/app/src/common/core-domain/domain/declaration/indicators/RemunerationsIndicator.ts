@@ -67,6 +67,10 @@ export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorPro
     return this.props.score;
   }
 
+  public setScore(score: PositiveInteger) {
+    this.props.score = score;
+  }
+
   public fromJson(json: EntityPropsToJson<RemunerationsIndicatorProps>) {
     const props: RemunerationsIndicatorProps = {
       progressObjective: json.progressObjective,

@@ -70,6 +70,18 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
     return this.props.sufficientPeriod;
   }
 
+  public setComputablePoints(computablePoints: PositiveNumber) {
+    this.props.computablePoints = computablePoints;
+  }
+
+  public setPoints(points: PositiveNumber) {
+    this.props.points = points;
+  }
+
+  public setIndex(index: DeclarationIndex) {
+    this.props.index = index;
+  }
+
   public fromJson(json: EntityPropsToJson<DeclarationInfoProps>) {
     const props: DeclarationInfoProps = {
       draft: json.draft,

@@ -47,6 +47,10 @@ export class SalaryRaisesOrPromotionsIndicator extends JsonEntity<SalaryRaisesOr
     return this.props.score;
   }
 
+  public setScore(score: PositiveInteger) {
+    this.props.score = score;
+  }
+
   public fromJson(json: EntityPropsToJson<SalaryRaisesOrPromotionsIndicatorProps>): this {
     const categories = json.categories.map(cat => (cat ? new Percentage(cat) : null));
     const props: SalaryRaisesOrPromotionsIndicatorProps = {
