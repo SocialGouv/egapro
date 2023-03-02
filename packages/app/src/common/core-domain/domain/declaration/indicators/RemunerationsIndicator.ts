@@ -1,10 +1,11 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
 import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
+import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { AbstractIndicator } from "./AbstractIndicator";
 
 type Categorie = {
   name?: string;
@@ -16,18 +17,17 @@ type Categorie = {
   };
 };
 
-export interface RemunerationsIndicatorProps {
+export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {
   categories: Categorie[];
   cseConsultationDate?: Date;
   favorablePopulation?: FavorablePopulation;
   mode?: RemunerationsMode;
   notComputableReason?: NotComputableReason;
-  progressObjective?: string;
   result?: Percentage;
   score?: PositiveInteger;
 }
 
-export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorProps, never> {
+export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndicatorProps> {
   /** `catégories` */
   get categories(): Categorie[] {
     return [...this.props.categories];
@@ -50,11 +50,6 @@ export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorPro
   /** `non_calculable` - Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total */
   get notComputableReason(): NotComputableReason | undefined {
     return this.props.notComputableReason;
-  }
-
-  /** `objectif_de_progression` */
-  get progressObjective(): string | undefined {
-    return this.props.progressObjective;
   }
 
   /** `résultat` - Résultat final en % après application du seuil de pertinence à chaque catégorie */

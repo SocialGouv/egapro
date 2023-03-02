@@ -3,7 +3,9 @@ import { declarationRepo } from "@api/core-domain/repo";
 import { GetDeclarationBySirenAndYearError } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import { UpdateDeclarationWithOpMc } from "@api/core-domain/useCases/UpdateDeclarationWithOpMc";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
-import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
+import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
+import type { UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
+import { updateOpMcDTOSchema } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
@@ -14,14 +16,15 @@ type Res = NextController.Res<BaseController>;
 @Handler
 export default class OpMcSirenYearController implements BaseController {
   @LegacyTokenRequire({ ensureOwner: true })
-  public async get(req: Req, res: Res) {
+  @RouteZodBody(updateOpMcDTOSchema)
+  public async post(req: Req, res: Res) {
     const useCase = new UpdateDeclarationWithOpMc(declarationRepo);
     const { siren, year } = req.params;
+    const opmc = req.body as UpdateOpMcDTO;
 
     try {
-      const ret = await useCase.execute({ siren, year });
-      if (ret) res.status(StatusCodes.OK).json(ret);
-      else res.status(StatusCodes.NOT_FOUND).send(null);
+      await useCase.execute({ siren, year, opmc });
+      res.status(StatusCodes.NO_CONTENT).send(null);
     } catch (error: unknown) {
       console.error(error);
       if (error instanceof GetDeclarationBySirenAndYearError) {
