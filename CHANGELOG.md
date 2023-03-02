@@ -1,3 +1,17 @@
+# [2.85.0](https://github.com/SocialGouv/egapro/compare/v2.84.1...v2.85.0) (2023-03-02)
+
+
+### Bug Fixes
+
+* handle not found siren in liste declarant ([f4286fa](https://github.com/SocialGouv/egapro/commit/f4286fa0853997d836c3604cb84bdcf7b9fc9003))
+* remove alert in indicateuDeux for frozenDeclaration ([9444240](https://github.com/SocialGouv/egapro/commit/9444240513a744c913fe1d82f170803e1a80058f))
+* sync problem with resultat inputs in declaration ([#1588](https://github.com/SocialGouv/egapro/issues/1588)) ([1110a31](https://github.com/SocialGouv/egapro/commit/1110a31d1cb39a1676244289c119f06d6eaa80ce))
+
+
+### Features
+
+* refetch on focus for liste-declarants ([#1580](https://github.com/SocialGouv/egapro/issues/1580)) ([8e90f31](https://github.com/SocialGouv/egapro/commit/8e90f3198dbc5d3a374cac603e511e78feeea901))
+
 ## [2.84.1](https://github.com/SocialGouv/egapro/compare/v2.84.0...v2.84.1) (2023-02-23)
 
 
