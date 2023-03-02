@@ -32,7 +32,9 @@ const buildKey = (search?: SearchParams) => {
 };
 
 export const useListeDeclarants = (search?: SearchParams) => {
-  const { data, error, mutate } = useSWR<GetOwnershipRequestDTO>(buildKey(search), fetcherV2);
+  const { data, error, mutate } = useSWR<GetOwnershipRequestDTO>(buildKey(search), fetcherV2, {
+    revalidateOnFocus: true,
+  });
 
   const isError = !!error;
   const isLoading = !!search && !data && !isError;

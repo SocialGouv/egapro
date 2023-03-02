@@ -1,3 +1,5 @@
+import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type {
   GetOwnershipRequestDbOrderBy,
   GetOwnershipRequestDTO,
@@ -9,6 +11,7 @@ import { AppError } from "@common/shared-domain";
 import _ from "lodash";
 
 import type { IEntrepriseService } from "../infra/services/IEntrepriseService";
+import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO, GetOwnershipRequestDTO> {
@@ -54,7 +57,26 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
         ownershipRequests.map(async domain => {
           const req = ownershipRequestMap.toDTO(domain);
 
-          if (domain.siren) req.name = (await this.entrepriseService.siren(domain.siren)).simpleLabel;
+          if (domain.siren) {
+            try {
+              req.name = (await this.entrepriseService.siren(domain.siren)).simpleLabel;
+            } catch (error: unknown) {
+              if (
+                domain.status.getValue() === OwnershipRequestStatus.Enum.TO_PROCESS &&
+                error instanceof EntrepriseServiceNotFoundError
+              ) {
+                console.info("[GetOwnershipRequest] Siren not found on retrieve. Update status.", req.siren);
+                domain.changeStatus(
+                  OwnershipRequestStatus.Enum.ERROR,
+                  new ErrorDetail(["NOT_FOUND_SIREN", error.message]),
+                );
+                await this.ownershipRequestRepo.update(domain);
+                return ownershipRequestMap.toDTO(domain);
+              } else {
+                console.log(error);
+              }
+            }
+          }
           return req;
         }),
       );

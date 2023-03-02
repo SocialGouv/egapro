@@ -1,12 +1,19 @@
 import { TupleString } from "@common/shared-domain/domain/valueObjects";
 
-export const errorDetailCodes = ["EMAIL_DELIVERY_KO", "INVALID_EMAIL", "INVALID_SIREN", "ALREADY_PROCESSED"] as const;
+export const errorDetailCodes = [
+  "EMAIL_DELIVERY_KO",
+  "INVALID_EMAIL",
+  "INVALID_SIREN",
+  "ALREADY_PROCESSED",
+  "NOT_FOUND_SIREN",
+] as const;
 
 export const errorDetailLabel: Record<typeof errorDetailCodes[number], string> = {
   EMAIL_DELIVERY_KO: "L'envoi du mail a échoué",
   ALREADY_PROCESSED: "La demande a déjà été traitée",
   INVALID_EMAIL: "L'email est invalide",
   INVALID_SIREN: "Le SIREN est invalide",
+  NOT_FOUND_SIREN: "Le SIREN n'existe pas",
 };
 
 export type ErrorDetailCode = typeof errorDetailCodes[number];

@@ -9,7 +9,6 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
 import { ActionBarSingleForm } from "../../components/ActionBarSingleForm"
-import { MessageForFrozenDeclaration } from "../../components/MessageForFrozenDeclaration"
 import SimulateurPage from "../../components/SimulateurPage"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
@@ -85,8 +84,6 @@ const IndicateurDeux: FunctionComponent = () => {
 
   return (
     <PageIndicateurDeux>
-      <MessageForFrozenDeclaration />
-
       <LayoutFormAndResult
         form={<IndicateurDeuxForm calculsIndicateurDeux={calculsIndicateurDeux} />}
         result={<IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
