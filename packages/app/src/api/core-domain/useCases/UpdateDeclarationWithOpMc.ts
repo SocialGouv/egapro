@@ -43,5 +43,5 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   }
 }
 
-class UpdateDeclarationWithOpMcError extends AppError {}
-class UpdateDeclarationWithOpMcDeclarationNotFoundError extends UpdateDeclarationWithOpMcError {}
+export class UpdateDeclarationWithOpMcError extends AppError {}
+export class UpdateDeclarationWithOpMcDeclarationNotFoundError extends UpdateDeclarationWithOpMcError {}

@@ -1,7 +1,9 @@
 import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { declarationRepo } from "@api/core-domain/repo";
-import { GetDeclarationBySirenAndYearError } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
-import { UpdateDeclarationWithOpMc } from "@api/core-domain/useCases/UpdateDeclarationWithOpMc";
+import {
+  UpdateDeclarationWithOpMc,
+  UpdateDeclarationWithOpMcError,
+} from "@api/core-domain/useCases/UpdateDeclarationWithOpMc";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
 import type { UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
@@ -27,7 +29,7 @@ export default class OpMcSirenYearController implements BaseController {
       res.status(StatusCodes.NO_CONTENT).send(null);
     } catch (error: unknown) {
       console.error(error);
-      if (error instanceof GetDeclarationBySirenAndYearError) {
+      if (error instanceof UpdateDeclarationWithOpMcError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
         }
