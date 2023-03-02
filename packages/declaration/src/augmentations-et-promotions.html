@@ -20,7 +20,8 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
 </fieldset>
 
 <fieldset id="fieldset-resultat-pourcentage">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat" label="Résultat final en pourcentage (%)" min=0 step="any" required=true oninput="toggleFields()" %}</div>
+  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat" label="Résultat final en pourcentage (%)" min=0 step="any" required=true
+    onblur="maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-nombre-salaries">
@@ -88,11 +89,18 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
   }
 
   function toggleFields() {
+
+    const resultFieldValue = parseFloat(resultatField.value)
+    const resultatNombreSalariesFieldValue = parseFloat(resultatNombreSalariesField.value)
+
+    const isResultDifferentFromZero = !isNaN(resultFieldValue) && resultFieldValue !== 0
+    const isResultNbSalariesDifferentFromZero = !isNaN(resultatNombreSalariesFieldValue) && resultatNombreSalariesFieldValue !== 0
+
     const isCalculableChosen = calculableField.querySelector(':checked')
     const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
     enableField('#fieldset-resultat-pourcentage', isCalculable)
     enableField('#fieldset-resultat-nombre-salaries', isCalculable)
-    enableField('#fieldset-population-favorable', isCalculable && (resultatField.value != "0" || resultatNombreSalariesField.value != "0"))
+    enableField('#fieldset-population-favorable', isCalculable && (isResultDifferentFromZero || isResultNbSalariesDifferentFromZero))
     enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
     enableField('#fieldset-note-en-pourcentage', isCalculable)
     enableField('#fieldset-note-en-salaries', isCalculable)
