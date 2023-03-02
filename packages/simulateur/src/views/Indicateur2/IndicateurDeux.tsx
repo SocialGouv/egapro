@@ -85,8 +85,6 @@ const IndicateurDeux: FunctionComponent = () => {
 
   return (
     <PageIndicateurDeux>
-      <MessageForFrozenDeclaration />
-
       <LayoutFormAndResult
         form={<IndicateurDeuxForm calculsIndicateurDeux={calculsIndicateurDeux} />}
         result={<IndicateurDeuxResult calculsIndicateurDeux={calculsIndicateurDeux} />}
