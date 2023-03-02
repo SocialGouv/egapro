@@ -46,7 +46,7 @@ title: "Ecart de taux de promotions entre les femmes et les hommes"
 
 <fieldset id="fieldset-resultat-pourcentage">
     <div class=row>{% include input.html type="number" name="indicateurs.promotions.résultat" label="Résultat final en
-        %" min=0 step="any" required=true
+        %" onblur="maybeRefreshForm(event)" min=0 step="any" required=true
         oninput="toggleFields()" %}</div>
 </fieldset>
 
@@ -104,12 +104,16 @@ title: "Ecart de taux de promotions entre les femmes et les hommes"
     function toggleFields() {
         const isCalculableChosen = calculableField.querySelector(':checked')
         const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
+
+        const resultFieldValue = parseFloat(resultatField.value)
+        const isResultDifferentFromZero = !isNaN(resultFieldValue) && resultFieldValue !== 0
+
         enableField('#fieldset-resultat-ouv', isCalculable)
         enableField('#fieldset-resultat-emp', isCalculable)
         enableField('#fieldset-resultat-tam', isCalculable)
         enableField('#fieldset-resultat-ic', isCalculable)
         enableField('#fieldset-resultat-pourcentage', isCalculable)
-        enableField('#fieldset-population-favorable', isCalculable && resultatField.value != "0")
+        enableField('#fieldset-population-favorable', isCalculable && isResultDifferentFromZero)
         enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
         enableField('#fieldset-note', isCalculable)
         document.preFormSubmit = isCalculable ? validateNotAllEmpty("Vous devez renseigner les écarts de taux de promotions pour les CSP concernées") : undefined
