@@ -1,4 +1,4 @@
-import type { errorDetailCodes } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { errorDetailLabel } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type { OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
@@ -59,8 +59,8 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy | "name", string> = new Ma
 
 const buildErrorDetailMesage = (errorDetail: string) => {
   if (errorDetail) {
-    const [errorCode] = errorDetail.split(":");
-    return errorDetailLabel[errorCode as typeof errorDetailCodes[number]] || "";
+    const [errorCode, errorInfo] = errorDetail.split(":") as ErrorDetailTuple;
+    return `${errorDetailLabel[errorCode] || ""}${errorInfo.split(" | ").map(info => `\n- ${info}`)}`;
   }
 };
 
@@ -144,7 +144,6 @@ const OwnershipRequestList = () => {
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.name}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
-
               <TableAdminBodyRowCol>
                 {item.errorDetail && (
                   <Box className="fr-fi-information-line" title={buildErrorDetailMesage(item.errorDetail)}></Box>

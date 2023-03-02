@@ -107,4 +107,4 @@ export interface IEntrepriseService extends Service {
 }
 
 export class EntrepriseServiceError extends AppError {}
-export class EntrepriseServiceNotFoundError extends AppError {}
+export class EntrepriseServiceNotFoundError extends EntrepriseServiceError {}

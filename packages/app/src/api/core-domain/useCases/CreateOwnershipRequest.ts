@@ -8,6 +8,8 @@ import type { UseCase } from "@common/shared-domain";
 import { AppError, ValidationError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 
+import type { IEntrepriseService } from "../infra/services/IEntrepriseService";
+import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 interface Input {
@@ -22,12 +24,15 @@ const buildErrorMessage = (error: unknown, label: string, value: string) => {
   if (error instanceof Error) {
     message = `${message} | ${error.message}`;
   }
-  console.error(message);
+  console.error("CreateOwnershipRequest", message);
   return message;
 };
 
 export class CreateOwnershipRequest implements UseCase<Input, OwnershipRequestWarningsDTO> {
-  constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
+  constructor(
+    private readonly ownershipRequestRepo: IOwnershipRequestRepo,
+    private readonly entrepriseService: IEntrepriseService,
+  ) {}
 
   public async execute({ sirens, emails, askerEmail }: Input): Promise<OwnershipRequestWarningsDTO> {
     try {
@@ -46,9 +51,13 @@ export class CreateOwnershipRequest implements UseCase<Input, OwnershipRequestWa
       for (const siren of sirens) {
         try {
           const validatedSiren = new Siren(siren);
+          await this.entrepriseService.siren(validatedSiren);
           setOfSirens.add([validatedSiren, undefined]);
         } catch (error: unknown) {
-          const errorDetail = new ErrorDetail(["INVALID_SIREN", buildErrorMessage(error, "Siren", siren)]);
+          const errorDetail = new ErrorDetail([
+            error instanceof EntrepriseServiceNotFoundError ? "NOT_FOUND_SIREN" : "INVALID_SIREN",
+            buildErrorMessage(error, "Siren", siren),
+          ]);
           warnings.push(errorDetail);
           setOfSirens.add([undefined, errorDetail]);
         }
