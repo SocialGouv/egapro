@@ -2,12 +2,12 @@ import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/o
 import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 
 export interface DeclarationRaw {
-  data?: DeclarationDataRaw;
+  data: DeclarationDataRaw | null;
   declarant: string;
   declared_at: string;
-  draft?: DeclarationDataRaw;
+  draft: DeclarationDataRaw | null;
   ft: string;
-  legacy?: DeclarationDataRaw;
+  legacy: DeclarationDataRaw | null;
   modified_at: string;
   siren: string;
   year: number;

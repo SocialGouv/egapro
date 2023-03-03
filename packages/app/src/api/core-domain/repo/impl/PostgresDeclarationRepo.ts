@@ -5,6 +5,7 @@ import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { Any } from "@common/utils/types";
+import { inspect } from "util";
 
 import type { IDeclarationRepo } from "../IDeclarationRepo";
 
@@ -51,6 +52,7 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       } where siren=${siren.getValue()} and year=${year.getValue()} limit 1`;
 
       if (!raw) return null;
+      console.log("RAW FROM GETONE", inspect(raw, false, Infinity, true));
       return declarationMap.toDomain(raw);
     } catch (error: unknown) {
       console.error(error);
@@ -63,6 +65,8 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
   }
   public async save(item: Declaration, deleteDraft = false): Promise<void> {
     const raw = declarationMap.toPersistence(item);
+    console.log("RAW BEFURE UPDATE", inspect(raw, false, Infinity, true));
+    (raw as any).data = JSON.stringify(raw.data);
     if (deleteDraft) (raw as Any).draft = null;
     await sql`insert into ${this.table} value ${sql(
       raw,

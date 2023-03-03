@@ -52,7 +52,7 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     return this.props.url;
   }
 
-  public setUrl(url: string) {
+  public setUrl(url?: string) {
     this.props.url = url;
   }
 

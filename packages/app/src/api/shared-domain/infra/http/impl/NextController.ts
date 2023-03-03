@@ -1,5 +1,6 @@
 import { Object } from "@common/utils/overload";
 import type { SimpleObject } from "@common/utils/types";
+import Cors from "cors";
 import type { ServerResponse } from "http";
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
@@ -84,7 +85,16 @@ export class NextControllerResponse implements ControllerResponse<NextApiRespons
  * It also ensures http verb routing.
  */
 export const handler = (controller: NextController): NextApiHandler => {
-  return (req, res) => {
+  return async (req, res) => {
+    await new Promise((resolve, reject) => {
+      Cors()(req, res, result => {
+        if (result instanceof Error) {
+          return reject(result);
+        }
+        return resolve(result);
+      });
+    });
+
     const nextControllerRequest: NextControllerRequest = {
       _nodeRequest: req,
       _req: req,

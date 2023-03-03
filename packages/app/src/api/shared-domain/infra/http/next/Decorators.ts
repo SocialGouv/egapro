@@ -23,10 +23,10 @@ export const ZodifiedRoute =
   (target, _property, desc) => {
     const originalMethod = desc.value as NonNullable<TController["get"]>;
     desc.value = ((req: Req, res: Res) => {
-      const propParsed = schema.safeParse(req[requestProperty]);
+      const raw = req[requestProperty];
+      const propParsed = schema.safeParse(typeof raw === "string" ? JSON.parse(raw) : raw);
 
       if (!propParsed.success) {
-        console.error(propParsed.error);
         return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json(propParsed.error.flatten().fieldErrors);
       }
 

@@ -1,5 +1,5 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
@@ -10,10 +10,10 @@ import { AbstractIndicator } from "./AbstractIndicator";
 type Categorie = {
   name?: string;
   ranges?: {
-    "30:39"?: Percentage;
-    "40:49"?: Percentage;
-    "50:"?: Percentage;
-    ":29"?: Percentage;
+    "30:39"?: SimpleNumber;
+    "40:49"?: SimpleNumber;
+    "50:"?: SimpleNumber;
+    ":29"?: SimpleNumber;
   };
 };
 
@@ -68,10 +68,10 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
       categories: json.categories.map(({ name, ranges }) => ({
         name,
         ranges: {
-          "30:39": typeof ranges?.["30:39"] === "number" ? new Percentage(ranges["30:39"]) : void 0,
-          "40:49": typeof ranges?.["40:49"] === "number" ? new Percentage(ranges["40:49"]) : void 0,
-          "50:": typeof ranges?.["50:"] === "number" ? new Percentage(ranges["50:"]) : void 0,
-          ":29": typeof ranges?.[":29"] === "number" ? new Percentage(ranges[":29"]) : void 0,
+          "30:39": typeof ranges?.["30:39"] === "number" ? new SimpleNumber(ranges["30:39"]) : void 0,
+          "40:49": typeof ranges?.["40:49"] === "number" ? new SimpleNumber(ranges["40:49"]) : void 0,
+          "50:": typeof ranges?.["50:"] === "number" ? new SimpleNumber(ranges["50:"]) : void 0,
+          ":29": typeof ranges?.[":29"] === "number" ? new SimpleNumber(ranges[":29"]) : void 0,
         },
       })),
     };

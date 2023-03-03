@@ -12,7 +12,9 @@ import type {
 } from "@common/models/generated";
 import type { Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { omitByRecursively } from "@common/utils/object";
 import type { Any } from "@common/utils/types";
+import _ from "lodash";
 
 import { Declaration } from "../domain/Declaration";
 import { DeclarationData } from "../domain/DeclarationData";
@@ -30,6 +32,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
       year: new PositiveNumber(raw.year),
       data: raw.data
         ? DeclarationData.fromJson({
+            id: raw.data.id,
             company: {
               address: raw.data.entreprise.adresse,
               city: raw.data.entreprise.commune,
@@ -173,20 +176,20 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
       modified_at: obj.modifiedAt.toISOString(),
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
-      data: obj.data ? declarationDataToDTO(obj.data) : void 0,
-      draft: obj.draft && !obj.data ? declarationDataToDTO(obj.draft) : void 0,
-      legacy: void 0, // TODO
+      data: obj.data ? declarationDataToDTO(obj.data, true) : null,
+      draft: obj.draft && !obj.data ? declarationDataToDTO(obj.draft) : null,
+      legacy: null, // TODO
     };
   },
 };
 
-function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
+function declarationDataToDTO(data: DeclarationData, skipUndefined = false): DeclarationDTO {
   type Categories = NonNullable<Remunerations["catégories"]>[number];
   type Entreprise = Entreprises[number];
   type Tranche = NonNullable<Effectif["tranche"]>;
 
   const defaultCategories: CategoriesSimples = [null, null, null, null];
-  return {
+  const dto: DeclarationDTO = {
     déclarant: {
       email: data.declarant.email.getValue(),
       nom: data.declarant.lastname,
@@ -296,4 +299,9 @@ function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
       },
     },
   };
+
+  if (skipUndefined) {
+    return omitByRecursively(dto, _.isUndefined) as unknown as DeclarationDTO;
+  }
+  return dto;
 }

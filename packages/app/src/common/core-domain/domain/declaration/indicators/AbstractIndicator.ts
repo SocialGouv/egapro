@@ -10,7 +10,7 @@ export abstract class AbstractIndicator<P extends AbstractIndicatorProps> extend
     return this.props.progressObjective;
   }
 
-  public setProgressObjective(progressObjective: string) {
+  public setProgressObjective(progressObjective?: string) {
     this.props.progressObjective = progressObjective;
   }
 }

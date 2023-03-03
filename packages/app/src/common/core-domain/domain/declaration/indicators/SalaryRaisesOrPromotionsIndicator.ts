@@ -1,12 +1,12 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
 import type { AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
-type Categories = [Percentage | null, Percentage | null, Percentage | null, Percentage | null];
+type Categories = [SimpleNumber | null, SimpleNumber | null, SimpleNumber | null, SimpleNumber | null];
 
 export interface SalaryRaisesOrPromotionsIndicatorProps extends AbstractIndicatorProps {
   categories: Categories;
@@ -43,7 +43,7 @@ export class SalaryRaisesOrPromotionsIndicator extends AbstractIndicator<SalaryR
   }
 
   public fromJson(json: EntityPropsToJson<SalaryRaisesOrPromotionsIndicatorProps>): this {
-    const categories = json.categories.map(cat => (cat ? new Percentage(cat) : null));
+    const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
     const props: SalaryRaisesOrPromotionsIndicatorProps = {
       categories,
       progressObjective: json.progressObjective,
