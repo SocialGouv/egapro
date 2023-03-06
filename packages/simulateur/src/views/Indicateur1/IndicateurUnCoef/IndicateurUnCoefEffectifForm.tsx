@@ -1,5 +1,5 @@
 import { Text } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React, { FunctionComponent, useEffect } from "react"
 
 import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ds/ButtonAction"
@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
-import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefEffectifFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -18,6 +18,13 @@ interface IndicateurUnCoefEffectifFormProps {
 
 const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({ navigateTo }) => {
   const { state, dispatch } = useAppStateContextProvider()
+
+  const { effectifsIndicateurCalculable } = useIndicateurUnContext()
+
+  useEffect(() => {
+    // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
+    if (effectifsIndicateurCalculable === false) dispatch({ type: "validateIndicateurUn", valid: "Valid" })
+  }, [effectifsIndicateurCalculable, dispatch])
 
   if (!state) return null
 
@@ -107,11 +114,9 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
               <Text>
                 Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
               </Text>
-              {formValidated === "Invalid" && (
-                <Text mt={1}>
-                  <ActionLink onClick={() => navigateTo("Remuneration")}>Aller à l'étape 3 : rémunérations</ActionLink>
-                </Text>
-              )}
+              <Text mt={1}>
+                <ActionLink onClick={() => navigateTo("Remuneration")}>Aller à l'étape 3 : rémunérations</ActionLink>
+              </Text>
             </>
           }
         />

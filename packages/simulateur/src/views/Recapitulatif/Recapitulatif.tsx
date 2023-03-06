@@ -51,7 +51,7 @@ const Recapitulatif: FunctionComponent = () => {
   const indicateurUnCompliant =
     isFormValid(state.indicateurUn) ||
     // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-    (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.csp) ||
+    (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") ||
     !calculsIndicateurUn.effectifsIndicateurCalculable
 
   const indicateurDeuxCompliant =

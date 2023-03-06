@@ -1,16 +1,16 @@
 /** @jsxImportSource @emotion/react */
 
+import ActionBar from "../../../components/ActionBar"
 import ActionLink from "../../../components/ActionLink"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
-import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
 
 interface Props {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -19,17 +19,17 @@ interface Props {
 function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
   const { state, dispatch } = useAppStateContextProvider()
 
-  if (!state) return null
-
-  const { coefficientEffectifFormValidated } = state.indicateurUn
-
   const {
     effectifsIndicateurCalculable,
     effectifEtEcartRemuParTrancheCoef,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
-  } = calculerIndicateurUn(state)
+  } = useIndicateurUnContext()
+
+  if (!state) return null
+
+  const { coefficientEffectifFormValidated } = state.indicateurUn
 
   const updateIndicateurUn = (
     data: Array<{
@@ -60,11 +60,17 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
       <div>
         <InfoBlock
           type="warning"
-          title="Malheureusement votre indicateur n’est pas calculable en niveau ou coefficient hiérarchique"
+          title="Malheureusement votre indicateur n’est pas calculable"
           text="L’ensemble des groupes valables (c’est-à-dire comptant au
               moins 3 femmes et 3 hommes), représentent moins de 40% des
               effectifs. Vous devez calculer par CSP."
         />
+        <ActionBar>
+          <ButtonSimulatorLink
+            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
+            label="Suivant"
+          />
+        </ActionBar>
       </div>
     )
   }

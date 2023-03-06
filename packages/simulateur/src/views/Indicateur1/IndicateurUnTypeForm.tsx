@@ -17,24 +17,16 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
 
   if (!state) return null
 
-  const { coef, autre } = state.indicateurUn
+  const { modaliteCalcul } = state.indicateurUn
 
   const initialValues = {
-    modaliteDeclaration: coef ? "coef" : autre ? "autre" : "csp",
+    modaliteCalcul,
   }
 
   const saveForm = (formData: any) => {
-    const { modaliteDeclaration } = formData
-    let [csp, coef, autre] = [false, false, false]
-    if (modaliteDeclaration === "coef") {
-      coef = true
-    } else if (modaliteDeclaration === "autre") {
-      autre = true
-    } else {
-      csp = true
-    }
+    const { modaliteCalcul } = formData
 
-    dispatch({ type: "updateIndicateurUnType", data: { csp, coef, autre } })
+    dispatch({ type: "updateIndicateurUnType", data: { modaliteCalcul } })
   }
 
   return (
@@ -50,21 +42,21 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
           <FormStack>
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Modalité de calcul choisie pour cet indicateur</FormLabel>
-              <InputRadioGroup defaultValue={values.modaliteDeclaration}>
+              <InputRadioGroup defaultValue={values.modaliteCalcul}>
                 <Stack>
-                  <InputRadio value="csp" fieldName="modaliteDeclaration" choiceValue="csp" isReadOnly={readOnly}>
+                  <InputRadio value="csp" fieldName="modaliteCalcul" choiceValue="csp" isReadOnly={readOnly}>
                     Par catégorie socio-professionnelle
                   </InputRadio>
-                  <InputRadio value="coef" fieldName="modaliteDeclaration" choiceValue="coef" isReadOnly={readOnly}>
+                  <InputRadio value="coef" fieldName="modaliteCalcul" choiceValue="coef" isReadOnly={readOnly}>
                     Par niveau ou coefficient hiérarchique en application de la classification de branche
                   </InputRadio>
-                  <InputRadio value="autre" fieldName="modaliteDeclaration" choiceValue="autre" isReadOnly={readOnly}>
+                  <InputRadio value="autre" fieldName="modaliteCalcul" choiceValue="autre" isReadOnly={readOnly}>
                     Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
                   </InputRadio>
                 </Stack>
               </InputRadioGroup>
             </FormControl>
-            {values.modaliteDeclaration !== "csp" && (
+            {values.modaliteCalcul !== "csp" && (
               <Text fontSize="sm">
                 Si vous choisissez cette option, la consultation du CSE est obligatoire.
                 <br />
