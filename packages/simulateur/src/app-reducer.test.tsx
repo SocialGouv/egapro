@@ -226,7 +226,7 @@ describe("updateEffectif", () => {
 describe("updateIndicateurUnType", () => {
   const action: ActionType = {
     type: "updateIndicateurUnType",
-    data: { csp: false, coef: false, autre: false },
+    data: { modaliteCalcul: undefined },
   }
 
   test("nothing undefined state", () => {
@@ -1085,8 +1085,8 @@ describe("validateEffectif", () => {
 
       const expectedState = produce(stateDefault as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
-        draft.indicateurUn.formValidated = "Valid"
-        draft.indicateurUn.coefficientEffectifFormValidated = "Valid"
+        draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurDeux.formValidated = "Valid"
         draft.indicateurTrois.formValidated = "Valid"
         draft.indicateurDeuxTrois.formValidated = "Valid"
@@ -1130,7 +1130,7 @@ describe("validateEffectif", () => {
   describe("None with csp false", () => {
     const actionUpdateIndicateurUnType: ActionType = {
       type: "updateIndicateurUnType",
-      data: { csp: false, coef: false, autre: false },
+      data: { modaliteCalcul: undefined },
     }
 
     const stateCompleteAndValidateCoef = appReducer(stateCompleteAndValidate, actionUpdateIndicateurUnType)
@@ -1141,9 +1141,7 @@ describe("validateEffectif", () => {
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        csp: actionUpdateIndicateurUnType.data.csp,
-        coef: actionUpdateIndicateurUnType.data.coef,
-        autre: actionUpdateIndicateurUnType.data.autre,
+        modaliteCalcul: undefined,
       })
 
       expect(rest).toStrictEqual(restInitial)

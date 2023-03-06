@@ -34,9 +34,7 @@ export const simulationWithNoPeriodeSuffisante: { id: string; data: AppState } =
     },
     indicateurUn: {
       formValidated: "None",
-      csp: true,
-      coef: false,
-      autre: false,
+      modaliteCalcul: "csp",
       remunerationAnnuelle: [
         {
           tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],

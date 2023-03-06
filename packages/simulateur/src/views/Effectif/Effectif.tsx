@@ -107,7 +107,7 @@ const Effectif: FunctionComponent = () => {
           {/* This should never happen, as modifying the effectif will invalidate the indicateur form */}
           {isFormValid(state.effectif) &&
             isFormValid(state.indicateurUn) &&
-            state.indicateurUn.coef &&
+            state.indicateurUn.modaliteCalcul === "coef" &&
             (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
               totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
               <InfoBlock

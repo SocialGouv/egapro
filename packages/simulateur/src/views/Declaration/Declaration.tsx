@@ -98,7 +98,7 @@ function buildHelpers(state: AppState) {
   const allIndicateursCompliant =
     (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
+      (!effectifsIndicateurUnCalculable && state.indicateurUn.modaliteCalcul === "csp")) &&
     (trancheEffectifs !== "50 à 250"
       ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
         (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
@@ -107,7 +107,7 @@ function buildHelpers(state: AppState) {
     isFormValid(state.indicateurCinq)
 
   const indicateurUnData: DeclarationIndicateurUnData = {
-    nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
+    nombreCoefficients: state.indicateurUn.modaliteCalcul === "csp" ? undefined : state.indicateurUn.coefficient.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
     remunerationAnnuelle: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
@@ -394,7 +394,8 @@ const Declaration = ({ code }: DeclarationProps) => {
             </ListItem>
           )}
           {!isFormValid(state.indicateurUn) &&
-            ((indicateurUnData.nonCalculable && !state.indicateurUn.csp) || !indicateurUnData.nonCalculable) && (
+            ((indicateurUnData.nonCalculable && state.indicateurUn.modaliteCalcul !== "csp") ||
+              !indicateurUnData.nonCalculable) && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
               </ListItem>

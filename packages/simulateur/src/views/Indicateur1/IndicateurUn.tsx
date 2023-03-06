@@ -19,11 +19,11 @@ const title = "Indicateur écart de rémunération"
 const IndicateurUn: FunctionComponent = () => {
   useTitle(title)
 
-  const { state, dispatch } = useAppStateContextProvider()
+  const { state } = useAppStateContextProvider()
 
   if (!state) return null
 
-  const { csp } = state.indicateurUn
+  const { modaliteCalcul } = state.indicateurUn
 
   const readOnly = isFormValid(state.indicateurUn)
 
@@ -43,7 +43,7 @@ const IndicateurUn: FunctionComponent = () => {
   const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
   // les effectifs ne permettent pas de calculer l'indicateur
-  if (!effectifsIndicateurCalculable && state.indicateurUn.csp) {
+  if (!effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") {
     return (
       <PageIndicateurUn>
         <InfoBlock
@@ -64,7 +64,7 @@ const IndicateurUn: FunctionComponent = () => {
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm readOnly={readOnly} />
-      {csp ? <IndicateurUnCsp /> : <IndicateurUnCoef state={state} dispatch={dispatch} />}
+      {modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
     </PageIndicateurUn>
   )
 }

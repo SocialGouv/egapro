@@ -6,7 +6,6 @@ import { CSP, TrancheAge } from "./globals"
 import calculerIndicateurDeux from "./utils/calculsEgaProIndicateurDeux"
 import calculerIndicateurDeuxTrois from "./utils/calculsEgaProIndicateurDeuxTrois"
 import calculerIndicateurTrois from "./utils/calculsEgaProIndicateurTrois"
-import calculerIndicateurUn from "./utils/calculsEgaProIndicateurUn"
 import { datetimeToFrString } from "./utils/date"
 import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
@@ -72,9 +71,7 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    csp: true,
-    coef: false,
-    autre: false,
+    modaliteCalcul: "csp",
     remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",
@@ -273,16 +270,14 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
             => sinon (donc Invalid ou None) copier tel quel
         */
 
-        let newIndicateurUn = state.indicateurUn
+        const newIndicateurUn = state.indicateurUn
         let newIndicateurDeux = state.indicateurDeux
         let newIndicateurTrois = state.indicateurTrois
         let newIndicateurDeuxTrois = state.indicateurDeuxTrois
 
-        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
-          newIndicateurUn = defaultState.indicateurUn
-          newIndicateurUn.formValidated = "Valid"
-          newIndicateurUn.coefficientEffectifFormValidated = "Valid"
-        } else if (newIndicateurUn.formValidated === "Valid") {
+        if (newIndicateurUn.formValidated === "Valid") {
+          // For this indicator, we let the previous data and we just set the formValidated to "Invalid" to force user to confirm its data.
+          // The reason is that indicator 1 has a mini wizard in it with coefficient.
           newIndicateurUn.formValidated = "Invalid"
           newIndicateurUn.coefficientEffectifFormValidated = "Invalid"
         } // else we let the state unchanged
@@ -324,10 +319,10 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "updateIndicateurUnType": {
-      const { csp, coef, autre } = action.data
+      const { modaliteCalcul } = action.data
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, csp, coef, autre },
+        indicateurUn: { ...state.indicateurUn, modaliteCalcul },
       }
     }
     case "updateIndicateurUnCsp": {
