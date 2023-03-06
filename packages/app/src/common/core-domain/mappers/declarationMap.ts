@@ -12,6 +12,7 @@ import type {
 } from "@common/models/generated";
 import type { Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { dateObjectToDateISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
 import type { Any } from "@common/utils/types";
 import _ from "lodash";
@@ -171,9 +172,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
     // TODO
     return {
       declarant: obj.declarant.getValue(),
-      declared_at: obj.declaredAt.toISOString(),
+      declared_at: obj.declaredAt,
       ft: "", // TODO
-      modified_at: obj.modifiedAt.toISOString(),
+      modified_at: obj.modifiedAt,
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
       data: obj.data ? declarationDataToDTO(obj.data, true) : null,
@@ -199,16 +200,24 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
     déclaration: {
       année_indicateurs: data.declaration.indicatorsYear.getValue() as AnneeIndicateur,
       brouillon: data.declaration.draft,
-      date: data.declaration.date?.toISOString(),
-      fin_période_référence: data.declaration.endReferencePeriod?.toISOString(),
+      date: data.declaration.date ? dateObjectToDateISOString(data.declaration.date) : void 0,
+      fin_période_référence: data.declaration.endReferencePeriod
+        ? dateObjectToDateISOString(data.declaration.endReferencePeriod)
+        : void 0,
       index: data.declaration.index?.getValue(),
       mesures_correctives: data.declaration.correctiveMeasures?.getValue(),
       points: data.declaration.points?.getValue(),
       points_calculables: data.declaration.computablePoints?.getValue(),
       publication: {
-        date: data.declaration.publication?.date?.toISOString(),
-        date_publication_mesures: data.declaration.publication?.measuresPublishDate?.toISOString(),
-        date_publication_objectifs: data.declaration.publication?.objectivesPublishDate?.toISOString(),
+        date: data.declaration.publication?.date
+          ? dateObjectToDateISOString(data.declaration.publication?.date)
+          : void 0,
+        date_publication_mesures: data.declaration.publication?.measuresPublishDate
+          ? dateObjectToDateISOString(data.declaration.publication?.measuresPublishDate)
+          : void 0,
+        date_publication_objectifs: data.declaration.publication?.objectivesPublishDate
+          ? dateObjectToDateISOString(data.declaration.publication?.objectivesPublishDate)
+          : void 0,
         modalités: data.declaration.publication?.modalities,
         modalités_objectifs_mesures: data.declaration.publication?.objectivesMeasuresModalities,
         url: data.declaration.publication?.url,
@@ -294,7 +303,9 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
             ":29": cat.ranges?.[":29"]?.getValue(),
           },
         })),
-        date_consultation_cse: data.indicators?.remunerations?.cseConsultationDate?.toISOString(),
+        date_consultation_cse: data.indicators?.remunerations?.cseConsultationDate
+          ? dateObjectToDateISOString(data.indicators?.remunerations?.cseConsultationDate)
+          : void 0,
         mode: data.indicators?.remunerations?.mode?.getValue(),
       },
     },

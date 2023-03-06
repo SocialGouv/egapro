@@ -1,4 +1,4 @@
-import { format, fromUnixTime, parse, parseISO } from "date-fns";
+import { add, format, formatISO, fromUnixTime, isBefore, parse, parseISO } from "date-fns";
 
 export const FR_DATE_FORMAT = "dd/MM/yyyy";
 export const FR_DATETIME_FORMAT = "dd/MM/yyyy HH:mm";
@@ -24,3 +24,22 @@ export function parseDate(stringDate: string): Date {
   }
   return date;
 }
+
+/**
+ * Format the data to be compatible with the old and dark API python format
+ */
+export const toISOString = (date: string): string | undefined => {
+  const parsed = parseDate(date);
+  return parsed ? format(parsed, "yyyy-MM-dd") : undefined;
+};
+
+export const dateObjectToDateISOString = (date: Date) => formatISO(date, { representation: "date" });
+
+/**
+ * True if the date is older than the current date minus the duration.
+ *
+ * @param duration Duration from date-fns
+ */
+export const isDateBeforeDuration = (date: Date, duration: Duration, now = new Date()) => {
+  return isBefore(now, add(date, duration));
+};

@@ -1,9 +1,10 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
+import { OPMC_OPEN_DURATION_AFTER_EDIT } from "@common/dict";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
-import { parseDate } from "@common/utils/date";
+import { isDateBeforeDuration, parseDate } from "@common/utils/date";
 
 import type { IDeclarationRepo } from "../repo/IDeclarationRepo";
 
@@ -18,10 +19,23 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   public async execute({ opmc, siren, year }: Input): Promise<void> {
     const declaration = await this.declarationRepo.getOne([new Siren(siren), new PositiveNumber(+year)]);
 
-    if (!declaration) {
+    if (!declaration?.data) {
       throw new UpdateDeclarationWithOpMcDeclarationNotFoundError(
         `Declaration not found with siren=${siren} and year=${year}.`,
       );
+    }
+
+    const opMcAlreadySet = !!declaration.data.declaration.publication?.objectivesPublishDate;
+    const now = new Date();
+    const opMcStillEditable = isDateBeforeDuration(
+      declaration.modifiedAt,
+      { years: OPMC_OPEN_DURATION_AFTER_EDIT },
+      now,
+    );
+    if (opMcAlreadySet) {
+      if (!opMcStillEditable) {
+        throw new UpdateDeclarationWithOpMcPastTimeError(`OpMc cannot be set anymore. Time is passed.`);
+      }
     }
 
     declaration.data?.indicators?.remunerations?.setProgressObjective(opmc.objectifIndicateurUn);
@@ -36,9 +50,8 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
     declaration.data?.declaration.publication?.setObjectivesMeasuresModalities(
       opmc.modalitesPublicationObjectifsMesures,
     );
-    declaration.data?.declaration.publication?.setUrl(opmc.lienPublication);
 
-    declaration.setModifiedAt(new Date());
+    declaration.setModifiedAt(now);
 
     await this.declarationRepo.update(declaration);
   }
@@ -46,3 +59,4 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
 
 export class UpdateDeclarationWithOpMcError extends AppError {}
 export class UpdateDeclarationWithOpMcDeclarationNotFoundError extends UpdateDeclarationWithOpMcError {}
+export class UpdateDeclarationWithOpMcPastTimeError extends UpdateDeclarationWithOpMcError {}

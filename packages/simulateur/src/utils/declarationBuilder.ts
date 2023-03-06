@@ -1,4 +1,3 @@
-import lodashSet from "lodash/set"
 import type {
   AppState,
   DeclarationIndicateurCinqData,
@@ -11,7 +10,6 @@ import type {
   TrancheEffectifs,
   TrancheEffectifsAPI,
 } from "../globals"
-import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
 import { departementCode, regionCode } from "../components/RegionsDepartements"
 import { toISOString } from "./date"
@@ -567,76 +565,3 @@ export function computeValuesFromState(state: AppState) {
   }
 }
 */
-
-type MappingType = { [key: string]: { path: string; value?: string } }
-
-/*
- * Build mapping between flat data in ObjectifsMesures and a nested declaration.
- */
-const buildMappingObjectifsMesures = (data: ObjectifsMesuresFormSchema): MappingType => ({
-  objectifIndicateurUn: {
-    path: "data.indicateurs.rémunérations.objectif_de_progression",
-    value: data.objectifIndicateurUn,
-  },
-  objectifIndicateurDeux: {
-    path: "data.indicateurs.augmentations.objectif_de_progression",
-    value: data.objectifIndicateurDeux,
-  },
-  objectifIndicateurTrois: {
-    path: "data.indicateurs.promotions.objectif_de_progression",
-    value: data.objectifIndicateurTrois,
-  },
-  objectifIndicateurDeuxTrois: {
-    path: "data.indicateurs.augmentations_et_promotions.objectif_de_progression",
-    value: data.objectifIndicateurDeuxTrois,
-  },
-  objectifIndicateurQuatre: {
-    path: "data.indicateurs.congés_maternité.objectif_de_progression",
-    value: data.objectifIndicateurQuatre,
-  },
-  objectifIndicateurCinq: {
-    path: "data.indicateurs.hautes_rémunérations.objectif_de_progression",
-    value: data.objectifIndicateurCinq,
-  },
-  datePublicationMesures: {
-    path: "data.déclaration.publication.date_publication_mesures",
-    value: data.datePublicationMesures && toISOString(data.datePublicationMesures),
-  },
-  datePublicationObjectifs: {
-    path: "data.déclaration.publication.date_publication_objectifs",
-    value: data.datePublicationObjectifs && toISOString(data.datePublicationObjectifs),
-  },
-  modalitesPublicationObjectifsMesures: {
-    path: "data.déclaration.publication.modalités_objectifs_mesures",
-    value: data.modalitesPublicationObjectifsMesures,
-  },
-})
-
-/**
- * Add ObjectifsMesures data to the declaration.
- *
- * NB: the ObjectifsMesures must be checked before calling this function, to ensure that the declaration is compatible with it.
- *
- * @param declaration The declaration to update.
- * @param data The ObjectifsMesures data to add.
- * @returns The updated declaration.
- */
-export function updateDeclarationWithObjectifsMesures(
-  declaration: DeclarationAPI,
-  data: ObjectifsMesuresFormSchema,
-): DeclarationAPI {
-  const mapping = buildMappingObjectifsMesures(data)
-
-  const res: DeclarationAPI = {
-    ...declaration,
-  }
-
-  Object.keys(mapping).forEach((key) => {
-    const { path, value } = mapping[key]
-    if (value) {
-      lodashSet(res, path, value)
-    }
-  })
-
-  return res
-}

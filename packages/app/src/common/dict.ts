@@ -4,6 +4,13 @@ import type { SimpleObject } from "./utils/types";
 export const FIRST_YEAR = 2018 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
 
+// TODO: move to a better place 👼
+/**
+ * Number of year where opmc can be modified after first add.
+ * @todo Note: For 2022, first year of OPMC, we consider that the duration to be frozen is 2 years, but for next years, it will be 1 year like isFrozenDeclaration.
+ */
+export const OPMC_OPEN_DURATION_AFTER_EDIT = 2;
+
 /** Need to be set manually because declaration are not opened on Jan 1rst */
 export const CURRENT_YEAR = 2022 as const;
 /** Need to be set */

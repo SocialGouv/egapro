@@ -10,7 +10,6 @@ export const updateOpMcDTOSchema = z.object({
   datePublicationObjectifs: z.string(),
   datePublicationMesures: z.string(),
   modalitesPublicationObjectifsMesures: z.string(),
-  lienPublication: z.string().optional(),
 });
 
 export type UpdateOpMcDTO = z.infer<typeof updateOpMcDTOSchema>;

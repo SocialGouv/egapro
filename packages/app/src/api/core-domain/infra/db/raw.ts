@@ -4,20 +4,20 @@ import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/genera
 export interface DeclarationRaw {
   data: DeclarationDataRaw | null;
   declarant: string;
-  declared_at: string;
+  declared_at: Date;
   draft: DeclarationDataRaw | null;
   ft: string;
   legacy: DeclarationDataRaw | null;
-  modified_at: string;
+  modified_at: Date;
   siren: string;
   year: number;
 }
 
 export interface RepresentationEquilibreeRaw {
   data?: DeclarationDataRaw;
-  declared_at: string;
+  declared_at: Date;
   ft: string;
-  modified_at: string;
+  modified_at: Date;
   siren: string;
   year: number;
 }
