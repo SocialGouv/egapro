@@ -12,10 +12,10 @@ EFFECTIFS = {
 }
 
 # Always let the comment for us to switch between enabled read current year or not
-PUBLIC_YEARS = YEARS
-# PUBLIC_YEARS = [2018, 2019, 2020, 2021, 2022]
-PUBLIC_YEARS_REPEQ = YEARS_REPEQ
-# PUBLIC_YEARS_REPEQ = [2021, 2022]
+# PUBLIC_YEARS = YEARS
+PUBLIC_YEARS = [2018, 2019, 2020, 2021, 2022]
+# PUBLIC_YEARS_REPEQ = YEARS_REPEQ
+PUBLIC_YEARS_REPEQ = [2021, 2022]
 
 REGIONS = {
     "01": "Guadeloupe",
