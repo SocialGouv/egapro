@@ -3,7 +3,9 @@
   "version": "1.21.0",
   "private": true,
   "scripts": {
+    "predev": "only-include-used-icons",
     "dev": "next dev",
+    "prebuild": "only-include-used-icons",
     "build": "next build",
     "export": "next export",
     "start": "next start",
