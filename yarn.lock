@@ -1976,6 +1976,13 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@codegouvfr/react-dsfr@^0.37.0":
+  version "0.37.0"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.37.0.tgz#906775481e40c571489ed0a74e3f8f8051fcd1ed"
+  integrity sha512-etO7Lf2ZcaA9GFECNVOvbhxHFrGbNrJO9iG0SsJ0HjzSvYSzmUTtDAn3uZNmWQf3ouDPC3f+3tgYLWW90DBTyw==
+  dependencies:
+    tsafe "^1.4.0"
+
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
@@ -20039,6 +20046,11 @@ ts-pnp@^1.1.6:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/ts-pnp/-/ts-pnp-1.2.0.tgz#a500ad084b0798f1c3071af391e65912c86bca92"
   integrity sha512-csd+vJOb/gkzvcCHgTGSChYpy5f1/XKNsmvBGO4JXS+z1v2HobugDz4s1IeFXM3wZB44uczs+eazB5Q/ccdhQw==
+
+tsafe@^1.4.0:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/tsafe/-/tsafe-1.4.3.tgz#a98ce83616f0d9c01e3c6167a2ead45ba455b2ae"
+  integrity sha512-KjCdgjIqsbKW9oeJGSMVC23jhWm/VXJwkaZ7jffo/WaTioLGTHJqliHe9dECEVzIACNVNs/fwtKwU8wWK4jY4g==
 
 tsconfig-paths@^3.14.1:
   version "3.14.1"
