@@ -38,7 +38,7 @@ jobs:
             name: "{{ .Values.global.pgSecretName }}"
       with:
         imagePackage: pgadmin
-        dockerfile: docker/pgadmin/Dockerfile
+        context: docker/pgadmin
         buildArgs:
           PGHOST: "$(PGHOST)"
           PGDATABASE: "$(PGDATABASE)"

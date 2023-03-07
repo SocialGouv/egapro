@@ -39,6 +39,7 @@ maildev: {}
 pgadmin:
   ~chart: app
   ~needs: [build-pgadmin]
+  imagePackage: pgadmin
   host: "pgadmin-{{ .Values.global.host }}"
   probesPath: /misc/ping
   certSecretName: api-crt
@@ -52,7 +53,7 @@ job:
             name: "{{ .Values.global.pgSecretName }}"
       with:
         imagePackage: pgadmin
-        dockerfile: docker/pgadmin/Dockerfile
+        context: docker/pgadmin
         buildArgs:
           PGHOST: "$(PGHOST)"
           PGDATABASE: "$(PGDATABASE)"
