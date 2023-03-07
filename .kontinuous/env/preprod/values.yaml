@@ -35,3 +35,28 @@ app:
       memory: 1G
 
 maildev: {}
+
+pgadmin:
+  ~chart: app
+  ~needs: [build-pgadmin]
+  host: "pgadmin-{{ .Values.global.host }}"
+  probesPath: /misc/ping
+  certSecretName: api-crt
+
+job:
+  runs:
+    build-pgadmin:
+      use: build
+      envFrom:
+        - secretRef:
+            name: "{{ .Values.global.pgSecretName }}"
+      with:
+        imagePackage: pgadmin
+        dockerfile: docker/pgadmin/Dockerfile
+        buildArgs:
+          PGHOST: "$(PGHOST)"
+          PGDATABASE: "$(PGDATABASE)"
+          PGPORT: "$(PGPORT)"
+          PGUSER: "$(PGUSER)"
+          PGPASSWORD: "$(PGPASSWORD)"
+          PGSSLMODE: "$(PGSSLMODE)"
