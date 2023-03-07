@@ -101,10 +101,8 @@ services:
 
   apiv2_pgadmin:
     restart: always
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${APIV2_PGADMIN_DEFAULT_EMAIL:-admin}
-      PGADMIN_DEFAULT_PASSWORD: ${APIV2_PGADMIN_DEFAULT_PASSWORD:-admin}
+    build:
+      context: ./docker/pgadmin/
     ports:
       - ${APIV2_PGADMIN_PORT:-5050}:80
     volumes:
