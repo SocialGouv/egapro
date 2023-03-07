@@ -43,21 +43,14 @@ pgadmin:
   host: "pgadmin-{{ .Values.global.host }}"
   probesPath: /misc/ping
   certSecretName: api-crt
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
 
 job:
   runs:
     build-pgadmin:
       use: build
-      envFrom:
-        - secretRef:
-            name: "{{ .Values.global.pgSecretName }}"
       with:
         imagePackage: pgadmin
         context: docker/pgadmin
-        buildArgs:
-          PGHOST: "$(PGHOST)"
-          PGDATABASE: "$(PGDATABASE)"
-          PGPORT: "$(PGPORT)"
-          PGUSER: "$(PGUSER)"
-          PGPASSWORD: "$(PGPASSWORD)"
-          PGSSLMODE: "$(PGSSLMODE)"
