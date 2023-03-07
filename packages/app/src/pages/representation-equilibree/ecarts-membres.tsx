@@ -229,7 +229,7 @@ const EcartsMembres: NextPageWithLayout = () => {
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
-              <NextLink href="/representation-equilibree/ecarts-cadres" passHref>
+              <NextLink href="/representation-equilibree/ecarts-cadres" passHref legacyBehavior>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>

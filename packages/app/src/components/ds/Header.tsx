@@ -55,7 +55,7 @@ export const Header = () => {
             </Link>
           </Box>
           <Box fontFamily="gabriela">
-            <NextLink href="/" passHref>
+            <NextLink href="/" passHref legacyBehavior>
               <Link fontSize="2xl">Egapro</Link>
             </NextLink>
             <Text fontSize="xs">Index de l’égalité professionnelle et représentation équilibrée</Text>

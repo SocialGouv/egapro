@@ -80,7 +80,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays || ""} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="/representation-equilibree/declarant" passHref>
+            <NextLink href="/representation-equilibree/declarant" passHref legacyBehavior>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
             <FormButton>Suivant</FormButton>

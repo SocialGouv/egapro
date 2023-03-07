@@ -73,11 +73,11 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
-                  <NextLink href="/index-egapro" passHref>
+                  <NextLink href="/index-egapro" passHref legacyBehavior>
                     <ButtonAsLink className="fr-mr-4w">Calculer - Déclarer mon Index</ButtonAsLink>
                   </NextLink>
                   <NextLink href="/consulter-index" passHref>
-                    <a>Consulter l'Index</a>
+                    Consulter l'Index
                   </NextLink>
                 </CardBodyFooter>
               </CardBody>
@@ -102,12 +102,12 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
-                  <NextLink href="/representation-equilibree" passHref>
+                  <NextLink href="/representation-equilibree" passHref legacyBehavior>
                     <ButtonAsLink className="fr-mr-4w">Déclarer mes Écarts</ButtonAsLink>
                   </NextLink>
                   {ff["repeq-search"] && (
                     <NextLink href="/representation-equilibree/recherche" passHref>
-                      <a>Consulter les Écarts</a>
+                      Consulter les Écarts
                     </NextLink>
                   )}
                 </CardBodyFooter>

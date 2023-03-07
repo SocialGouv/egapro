@@ -190,7 +190,7 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <NextLink href="/representation-equilibree/ecarts-membres" passHref>
+            <NextLink href="/representation-equilibree/ecarts-membres" passHref legacyBehavior>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>

@@ -23,7 +23,7 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
     {isAuthenticated ? (
       <>
         <li>
-          <NextLink href="/index-egapro/tableauDeBord/mon-profil" passHref>
+          <NextLink href="/index-egapro/tableauDeBord/mon-profil" passHref legacyBehavior>
             <ButtonAsLink iconLeft="fr-icon-account-fill">
               {user?.email}
               {user?.staff ? " (staff)" : ""}
@@ -38,7 +38,7 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
       </>
     ) : (
       <li>
-        <NextLink href={`/representation-equilibree/email?redirectTo=${dest}`} passHref>
+        <NextLink href={`/representation-equilibree/email?redirectTo=${dest}`} passHref legacyBehavior>
           <ButtonAsLink type="button" variant="secondary" iconLeft="fr-icon-lock-fill">
             Se connecter
           </ButtonAsLink>
@@ -124,10 +124,8 @@ export const App = ({
                     </div>
                   </div>
                   <div className="fr-header__service">
-                    <NextLink href="/">
-                      <a title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion">
-                        <p className="fr-header__service-title">Egapro</p>
-                      </a>
+                    <NextLink href="/" title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion">
+                      <p className="fr-header__service-title">Egapro</p>
                     </NextLink>
                     <p className="fr-header__service-tagline">
                       Index de l’égalité professionnelle et représentation équilibrée femmes – hommes

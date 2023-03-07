@@ -15,7 +15,7 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   const router = useRouter();
   const currentRoute = router.pathname;
   return (
-    <NextLink href={`/representation-equilibree/${path}/`} passHref>
+    <NextLink href={`/representation-equilibree/${path}/`} passHref legacyBehavior>
       <SideMenuLink isCurrent={currentRoute === `/representation-equilibree/${path}`}>{children}</SideMenuLink>
     </NextLink>
   );

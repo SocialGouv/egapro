@@ -27,8 +27,8 @@ export type BreadcrumbItemProps = PropsWithChildren<{ href?: string; isCurrent?:
 export const BreadcrumbItem = ({ href, isCurrent, children }: BreadcrumbItemProps) => (
   <li>
     {href ? (
-      <NextLink href={href} passHref>
-        <a className="fr-breadcrumb__link">{children}</a>
+      <NextLink href={href} passHref className="fr-breadcrumb__link">
+        {children}
       </NextLink>
     ) : (
       <a aria-current={isCurrent && "page"} className="fr-breadcrumb__link">

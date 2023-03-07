@@ -22,9 +22,7 @@ export const EntrepriseFooter = () => {
       <FooterBody>
         <FooterBodyBrand>
           <NextLink href="/">
-            <a>
-              <Logo />
-            </a>
+            <Logo />
           </NextLink>
         </FooterBodyBrand>
         <FooterBodyContent>
@@ -57,17 +55,17 @@ export const EntrepriseFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref>
+          <NextLink href="/cgu" passHref legacyBehavior>
             <FooterBottomLink>CGU</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref>
+          <NextLink href="/mentions-legales" passHref legacyBehavior>
             <FooterBottomLink>Mentions légales</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref>
+          <NextLink href="/politique-de-confidentialite" passHref legacyBehavior>
             <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
@@ -91,9 +89,7 @@ export const PublicFooter = () => {
       <FooterBody>
         <FooterBodyBrand>
           <NextLink href="/">
-            <a>
-              <Logo />
-            </a>
+            <Logo />
           </NextLink>
         </FooterBodyBrand>
         <FooterBodyContent>
@@ -122,17 +118,17 @@ export const PublicFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref>
+          <NextLink href="/cgu" passHref legacyBehavior>
             <FooterBottomLink>CGU</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref>
+          <NextLink href="/mentions-legales" passHref legacyBehavior>
             <FooterBottomLink>Mentions légales</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref>
+          <NextLink href="/politique-de-confidentialite" passHref legacyBehavior>
             <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
           </NextLink>
         </FooterBottomItem>

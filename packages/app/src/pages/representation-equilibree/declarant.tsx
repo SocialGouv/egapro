@@ -136,8 +136,8 @@ const DeclarantPage: NextPageWithLayout = () => {
               J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
               vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
               consulter nos{" "}
-              <NextLink href="/cgu">
-                <a target="_blank">Conditions Générales d'Utilisation</a>
+              <NextLink href="/cgu" target="_blank">
+                Conditions Générales d'Utilisation
               </NextLink>
               .
             </FormCheckbox>
@@ -146,7 +146,7 @@ const DeclarantPage: NextPageWithLayout = () => {
             )}
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="/representation-equilibree/commencer" passHref>
+            <NextLink href="/representation-equilibree/commencer" passHref legacyBehavior>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>

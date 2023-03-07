@@ -74,7 +74,7 @@ const Validation: NextPageWithLayout = () => {
 
       <FormLayout>
         <FormLayoutButtonGroup>
-          <NextLink href={previousPage} passHref>
+          <NextLink href={previousPage} passHref legacyBehavior>
             <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
           </NextLink>
           <FormButton onClick={sendRepresentationEquilibree}>Valider et transmettre les résultats</FormButton>

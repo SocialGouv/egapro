@@ -70,7 +70,7 @@ const AssujettiPage: NextPageWithLayout = () => {
             Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
             les femmes et les hommes.
           </CalloutContent>
-          <NextLink href="/representation-equilibree/" passHref>
+          <NextLink href="/representation-equilibree/" passHref legacyBehavior>
             <ButtonAsLink>Retour à la page d'accueil</ButtonAsLink>
           </NextLink>
         </Callout>
@@ -78,6 +78,7 @@ const AssujettiPage: NextPageWithLayout = () => {
         <NextLink
           href={isAuthenticated ? "/representation-equilibree/commencer" : "/representation-equilibree/email"}
           passHref
+          legacyBehavior
         >
           <ButtonAsLink>Suivant</ButtonAsLink>
         </NextLink>

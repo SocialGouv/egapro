@@ -84,7 +84,7 @@ const Transmission: NextPageWithLayout = () => {
                 <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
                   {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
                 </FormButton>
-                <NextLink href="/representation-equilibree/assujetti/" passHref>
+                <NextLink href="/representation-equilibree/assujetti/" passHref legacyBehavior>
                   <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
                 </NextLink>
               </ButtonGroup>
