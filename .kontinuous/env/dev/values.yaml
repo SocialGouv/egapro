@@ -18,27 +18,9 @@ app:
     MAILER_SMTP_SSL: "False"
 
 maildev: {}
-
-pgadmin:
-  ~chart: app
-  ~needs: [build-pgadmin]
-  imagePackage: pgadmin
-  host: "pgadmin-{{ .Values.global.host }}"
-  probesPath: /misc/ping
-  containerPort: 5050
-  certSecretName: api-crt
-  envFrom:
-    - secretRef:
-        name: "{{ .Values.global.pgSecretName }}"
-
 pgweb: {}
 
 jobs:
   runs:
     create-db:
       use: create-db
-    build-pgadmin:
-      use: build
-      with:
-        imagePackage: pgadmin
-        context: docker/pgadmin

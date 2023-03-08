@@ -35,23 +35,4 @@ app:
       memory: 1G
 
 maildev: {}
-
-pgadmin:
-  ~chart: app
-  ~needs: [build-pgadmin]
-  imagePackage: pgadmin
-  host: "pgadmin-{{ .Values.global.host }}"
-  probesPath: /misc/ping
-  containerPort: 5050
-  certSecretName: api-crt
-  envFrom:
-    - secretRef:
-        name: "{{ .Values.global.pgSecretName }}"
-
-job:
-  runs:
-    build-pgadmin:
-      use: build
-      with:
-        imagePackage: pgadmin
-        context: docker/pgadmin
+pgweb: {}
