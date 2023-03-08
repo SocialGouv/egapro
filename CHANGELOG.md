@@ -1,3 +1,10 @@
+## [2.86.1](https://github.com/SocialGouv/egapro/compare/v2.86.0...v2.86.1) (2023-03-08)
+
+
+### Bug Fixes
+
+* disable 2023 decla ([944c7fb](https://github.com/SocialGouv/egapro/commit/944c7fb64c1f0f0ea4e908d3465c96865e202819))
+
 # [2.86.0](https://github.com/SocialGouv/egapro/compare/v2.85.0...v2.86.0) (2023-03-07)
 
 
