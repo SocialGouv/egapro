@@ -31,6 +31,8 @@ pgadmin:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
 
+pgweb: {}
+
 jobs:
   runs:
     create-db:
