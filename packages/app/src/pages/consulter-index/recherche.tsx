@@ -413,7 +413,7 @@ const SearchPage: NextPageWithLayout = () => {
   return (
     <>
       <form onSubmit={handleSubmit} style={{ textAlign: "center" }}>
-        <Heading fontFamily="gabriela" as="h1" size="lg" mb="8">
+        <Heading fontFamily="gabriela" as="h1" size="lg" mb="8" color="var(--chakra-colors-chakra-body-text)">
           Rechercher l'index de l'égalité professionnelle d'une entreprise
         </Heading>
         <Box mt={4} maxW="container.md" mx="auto">

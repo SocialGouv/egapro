@@ -37,7 +37,14 @@ function FormSearchSiren() {
 
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
-      <Heading as="h1" fontFamily="gabriela" size="lg" mb={["8", "12"]} mt={["0", "4"]}>
+      <Heading
+        as="h1"
+        fontFamily="gabriela"
+        size="lg"
+        mb={["8", "12"]}
+        mt={["0", "4"]}
+        color="var(--chakra-colors-chakra-body-text)"
+      >
         Consulter l'index de l'égalité professionnelle d'une entreprise
       </Heading>
       <Box>
@@ -69,7 +76,20 @@ function DownloadFileZone() {
 
   return date ? (
     <Center w="100vw" paddingTop="0" paddingBottom="12">
-      <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
+      <Flex
+        justify="center"
+        align="center"
+        mx={["4", "0"]}
+        direction={["column", "row"]}
+        sx={{
+          a: {
+            background: "none !important", // This is a hack to override the global css of dsfr on buttons.
+          },
+          "a:after": {
+            display: "none !important",
+          },
+        }}
+      >
         <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
           Télécharger le fichier des entreprises au {date}
         </Text>
