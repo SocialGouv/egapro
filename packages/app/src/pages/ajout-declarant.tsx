@@ -148,8 +148,8 @@ const AddDeclarer: NextPageWithLayout = () => {
                   meilleurs délais.
                 </p>
                 <p>
-                  Lors de la validation de votre demande par le service du ministre chargé du travail, vous recevrez un
-                  mail de confirmation sur l’email demandeur que vous avez déclaré et validé en début de procédure.
+                  Lors de la validation de votre demande par le service du ministre chargé du travail, un mail de
+                  confirmation sera envoyé au demandeur ainsi qu'au(x) déclarant(s) rattaché(s).
                 </p>
                 <p>
                   Si vous ne recevez pas ce mail, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre
@@ -157,12 +157,12 @@ const AddDeclarer: NextPageWithLayout = () => {
                 </p>
                 <Alert>
                   <p>
-                    Le déclarant rattaché au numéro Siren de l'entreprise pourra ainsi ajouter ou supprimer un ou des
-                    déclarants en se connectant à son espace avec son email. Vous trouverez ci-après la documentation
-                    pour le faire.
+                    Si vous n'avez pas reçu le mail de confirmation, il n'est pas nécessaire de nous contacter, vous
+                    pouvez vérifier le rattachement de l'email du ou des déclarants en vous connectant à votre espace.
                   </p>
+                  <p>Vous trouverez ci-après la documentation pour accéder à votre espace.</p>
                   <Box mt="2w">
-                    <a href="/Procedure.pour.ajouter.ou.supprimer.declarants.pdf" target="_blank" rel="noreferrer">
+                    <a href="/Guide.Mon.Espace.pdf" target="_blank" rel="noreferrer">
                       Guide ajout déclarant (pdf)
                     </a>
                   </Box>
@@ -170,6 +170,11 @@ const AddDeclarer: NextPageWithLayout = () => {
               </>
             ) : (
               <>
+                <Alert mb="2w">
+                  Si vous déclarez votre Index en tant qu'<b>unité économique et sociale (UES)</b>, vous devez faire une
+                  demande <b>uniquement</b> pour le numéro Siren de l'entreprise déclarant pour le compte de l'UES
+                  (cette entreprise doit être celle ayant effectué la déclaration les années précédentes).
+                </Alert>
                 <p>
                   Renseignez le(s) numéro(s) Siren ainsi que l'email du (des) déclarant(s) que vous souhaitez rattacher
                   au(x) numéro(s) Siren.
