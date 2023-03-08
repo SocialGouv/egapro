@@ -104,7 +104,7 @@ services:
     build:
       context: ./docker/pgadmin/
     ports:
-      - ${APIV2_PGADMIN_PORT:-5050}:80
+      - ${APIV2_PGADMIN_PORT:-5050}:5050
     volumes:
       - apiv2_pgadmin:/var/lib/pgadmin
     networks:

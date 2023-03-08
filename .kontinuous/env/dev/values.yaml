@@ -25,6 +25,7 @@ pgadmin:
   imagePackage: pgadmin
   host: "pgadmin-{{ .Values.global.host }}"
   probesPath: /misc/ping
+  containerPort: 5050
   certSecretName: api-crt
   envFrom:
     - secretRef:

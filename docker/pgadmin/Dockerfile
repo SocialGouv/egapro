@@ -11,6 +11,7 @@ ENV PGADMIN_DEFAULT_EMAIL=pgadmin@pgadmin.org
 ENV PGADMIN_DEFAULT_PASSWORD=admin
 ENV PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
 ENV PGADMIN_CONFIG_SERVER_MODE=False
+ENV PGADMIN_LISTEN_PORT=5050
 
 USER root
 
@@ -20,5 +21,7 @@ RUN chmod +x /entrypoint_override.sh && \
     chown pgadmin:root /pgadmin4/servers.json
 
 USER pgadmin
+
+EXPOSE ${PGADMIN_LISTEN_PORT}
 
 ENTRYPOINT /entrypoint_override.sh
