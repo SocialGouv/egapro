@@ -1,6 +1,17 @@
-import type { COUNTIES } from "@common/dict";
+import { COUNTIES, REGIONS } from "@common/dict";
 import { AdminLayout } from "@components/layouts/AdminLayout";
-import { Box, Container } from "@design-system";
+import {
+  Box,
+  Container,
+  FormCheckbox,
+  FormCheckboxGroup,
+  TableAdmin,
+  TableAdminBody,
+  TableAdminBodyRow,
+  TableAdminBodyRowCol,
+  TableAdminHead,
+  TableAdminHeadCol,
+} from "@design-system";
 import _ from "lodash";
 import { useEffect } from "react";
 
@@ -11,8 +22,7 @@ interface BaseReferent {
   id: string;
   name: string;
   principal: boolean;
-  // region: keyof typeof REGIONS;
-  region: string;
+  region: keyof typeof REGIONS;
   type: "email" | "url";
   value: string;
 }
@@ -27,18 +37,9 @@ interface UrlReferent extends BaseReferent {
 
 type Referent = EmailReferent | UrlReferent;
 
-// TODO
-// add coordination régionale
-// add type url
-// check for supléant
-// check for multiple values
 const data: Referent[] = [
   {
-    id: "",
-    name: "Michelle CHARPILLE",
-  },
-  {
-    id: "87",
+    id: "0",
     principal: true,
     region: "01",
     county: "971",
@@ -47,7 +48,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "88",
+    id: "1",
     principal: true,
     region: "02",
     county: "972",
@@ -56,7 +57,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "89",
+    id: "2",
     principal: true,
     region: "03",
     county: "973",
@@ -65,7 +66,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "90",
+    id: "3",
     principal: true,
     region: "04",
     county: "974",
@@ -74,7 +75,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "91",
+    id: "4",
     principal: true,
     region: "06",
     county: "976",
@@ -83,7 +84,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "68",
+    id: "5",
+    name: "Tassadit TERAHA",
+    principal: false,
+    region: "11",
+    type: "email",
+    value: "drieets-idf.ega-pro@drieets.gouv.fr",
+  },
+  {
+    id: "6",
     principal: true,
     region: "11",
     county: "75",
@@ -92,7 +101,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "70",
+    id: "7",
     principal: true,
     region: "11",
     county: "77",
@@ -101,7 +110,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "71",
+    id: "8",
     principal: true,
     region: "11",
     county: "78",
@@ -110,7 +119,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "82",
+    id: "9",
     principal: true,
     region: "11",
     county: "91",
@@ -119,7 +128,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "83",
+    id: "10",
     principal: true,
     region: "11",
     county: "92",
@@ -128,7 +137,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "84",
+    id: "11",
     principal: true,
     region: "11",
     county: "93",
@@ -137,7 +146,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "85",
+    id: "12",
     principal: true,
     region: "11",
     county: "94",
@@ -146,7 +155,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "86",
+    id: "13",
     principal: true,
     region: "11",
     county: "95",
@@ -155,7 +164,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "13",
+    id: "14",
+    name: "Fabienne MIRAMOND SCARDIA",
+    principal: false,
+    region: "24",
+    type: "email",
+    value: "dreets-cvl.ega-pro@dreets.gouv.fr",
+  },
+  {
+    id: "15",
     principal: true,
     region: "24",
     county: "18",
@@ -164,7 +181,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "22",
+    id: "16",
     principal: true,
     region: "24",
     county: "28",
@@ -173,7 +190,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "30",
+    id: "17",
     principal: true,
     region: "24",
     county: "36",
@@ -182,7 +199,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "31",
+    id: "18",
     principal: true,
     region: "24",
     county: "37",
@@ -191,7 +208,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "35",
+    id: "19",
     principal: true,
     region: "24",
     county: "41",
@@ -200,7 +217,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "39",
+    id: "20",
     principal: true,
     region: "24",
     county: "45",
@@ -209,7 +226,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "15",
+    id: "21",
+    name: "Cécile ROUSSEY",
+    principal: false,
+    region: "27",
+    type: "email",
+    value: "cecile.roussey@dreets.gouv.fr",
+  },
+  {
+    id: "22",
     principal: true,
     region: "27",
     county: "21",
@@ -218,7 +243,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "19",
+    id: "23",
     principal: true,
     region: "27",
     county: "25",
@@ -227,7 +252,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "33",
+    id: "24",
     principal: true,
     region: "27",
     county: "39",
@@ -236,7 +261,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "51",
+    id: "25",
     principal: true,
     region: "27",
     county: "58",
@@ -245,7 +270,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "63",
+    id: "26",
     principal: true,
     region: "27",
     county: "70",
@@ -254,7 +279,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "64",
+    id: "27",
     principal: true,
     region: "27",
     county: "71",
@@ -263,7 +288,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "80",
+    id: "28",
     principal: true,
     region: "27",
     county: "89",
@@ -272,7 +297,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "81",
+    id: "29",
     principal: true,
     region: "27",
     county: "90",
@@ -281,7 +306,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "9",
+    id: "30",
+    name: "Sylvie MACE",
+    principal: false,
+    region: "28",
+    type: "email",
+    value: "norm.ega-pro@dreets.gouv.fr",
+  },
+  {
+    id: "31",
     principal: true,
     region: "28",
     county: "14",
@@ -290,7 +323,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "21",
+    id: "32",
     principal: true,
     region: "28",
     county: "27",
@@ -299,7 +332,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "43",
+    id: "33",
     principal: true,
     region: "28",
     county: "50",
@@ -308,7 +341,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "54",
+    id: "34",
     principal: true,
     region: "28",
     county: "61",
@@ -317,7 +350,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "69",
+    id: "35",
     principal: true,
     region: "28",
     county: "76",
@@ -326,7 +359,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "1",
+    id: "36",
+    name: "Stéphanie TRUCHY",
+    principal: false,
+    region: "32",
+    type: "email",
+    value: "DREETS-HDF.Ega-Pro@dreets.gouv.fr",
+  },
+  {
+    id: "37",
     principal: true,
     region: "32",
     county: "02",
@@ -335,7 +376,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "52",
+    id: "38",
     principal: true,
     region: "32",
     county: "59",
@@ -344,7 +385,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "53",
+    id: "39",
     principal: true,
     region: "32",
     county: "60",
@@ -353,7 +394,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "55",
+    id: "40",
     principal: true,
     region: "32",
     county: "62",
@@ -362,7 +403,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "73",
+    id: "41",
     principal: true,
     region: "32",
     county: "80",
@@ -371,7 +412,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "4",
+    id: "42",
+    name: "Fabienne DEROZIER",
+    principal: false,
+    region: "44",
+    type: "email",
+    value: "dreets-ge.ega-pro@dreets.gouv.fr",
+  },
+  {
+    id: "43",
     principal: true,
     region: "44",
     county: "08",
@@ -380,7 +429,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "6",
+    id: "44",
     principal: true,
     region: "44",
     county: "10",
@@ -389,7 +438,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "44",
+    id: "45",
     principal: true,
     region: "44",
     county: "51",
@@ -398,7 +447,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "45",
+    id: "46",
     principal: true,
     region: "44",
     county: "52",
@@ -425,7 +474,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "50",
+    id: "49",
     principal: true,
     region: "44",
     county: "57",
@@ -434,7 +483,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "60",
+    id: "50",
     principal: true,
     region: "44",
     county: "67",
@@ -443,7 +492,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "61",
+    id: "51",
     principal: true,
     region: "44",
     county: "68",
@@ -452,7 +501,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "79",
+    id: "52",
     principal: true,
     region: "44",
     county: "88",
@@ -461,7 +510,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "38",
+    id: "53",
+    name: "Anne-Laurence LEMASSON",
+    principal: false,
+    region: "52",
+    type: "email",
+    value: "dreets-pdl.ega-pro@dreets.gouv.fr",
+  },
+  {
+    id: "54",
     principal: true,
     region: "52",
     county: "44",
@@ -470,7 +527,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "42",
+    id: "55",
     principal: true,
     region: "52",
     county: "49",
@@ -479,7 +536,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "46",
+    id: "56",
     principal: true,
     region: "52",
     county: "53",
@@ -488,7 +545,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "65",
+    id: "57",
     principal: true,
     region: "52",
     county: "72",
@@ -497,7 +554,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "76",
+    id: "58",
     principal: true,
     region: "52",
     county: "85",
@@ -506,7 +563,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "16",
+    id: "59",
+    name: "Véronique THOMAS",
+    principal: false,
+    region: "53",
+    type: "email",
+    value: "DREETS-BRET.Ega-Pro@dreets.gouv.fr",
+  },
+  {
+    id: "60",
     principal: true,
     region: "53",
     county: "22",
@@ -515,7 +580,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "23",
+    id: "61",
     principal: true,
     region: "53",
     county: "29",
@@ -524,7 +589,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "29",
+    id: "62",
     principal: true,
     region: "53",
     county: "35",
@@ -533,7 +598,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "49",
+    id: "63",
     principal: true,
     region: "53",
     county: "56",
@@ -542,7 +607,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "11",
+    id: "64",
+    name: "Lauriane CATALA",
+    principal: false,
+    region: "75",
+    type: "email",
+    value: "dreets-na.polet@dreets.gouv.fr",
+  },
+  {
+    id: "65",
     principal: true,
     region: "75",
     county: "16",
@@ -551,7 +624,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "12",
+    id: "66",
     principal: true,
     region: "75",
     county: "17",
@@ -560,7 +633,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "14",
+    id: "67",
     principal: true,
     region: "75",
     county: "19",
@@ -569,7 +642,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "17",
+    id: "68",
     principal: true,
     region: "75",
     county: "23",
@@ -578,7 +651,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "18",
+    id: "69",
     principal: true,
     region: "75",
     county: "24",
@@ -587,7 +660,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "27",
+    id: "70",
     principal: true,
     region: "75",
     county: "33",
@@ -596,7 +669,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "34",
+    id: "71",
     principal: true,
     region: "75",
     county: "40",
@@ -605,7 +678,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "41",
+    id: "72",
     principal: true,
     region: "75",
     county: "47",
@@ -614,7 +687,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "57",
+    id: "73",
     principal: true,
     region: "75",
     county: "64",
@@ -623,7 +696,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "72",
+    id: "74",
     principal: true,
     region: "75",
     county: "79",
@@ -632,7 +705,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "77",
+    id: "75",
     principal: true,
     region: "75",
     county: "86",
@@ -641,7 +714,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "78",
+    id: "76",
     principal: true,
     region: "75",
     county: "87",
@@ -650,7 +723,15 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "5",
+    id: "77",
+    name: "Nathalie CAMPOURCY",
+    principal: false,
+    region: "76",
+    type: "email",
+    value: "oc.ega-pro@dreets.gouv.fr",
+  },
+  {
+    id: "78",
     principal: true,
     region: "76",
     county: "09",
@@ -659,7 +740,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "7",
+    id: "79",
     principal: true,
     region: "76",
     county: "11",
@@ -668,7 +749,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "8",
+    id: "80",
     principal: true,
     region: "76",
     county: "12",
@@ -677,7 +758,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "24",
+    id: "81",
     principal: true,
     region: "76",
     county: "30",
@@ -686,7 +767,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "25",
+    id: "82",
     principal: true,
     region: "76",
     county: "31",
@@ -695,7 +776,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "26",
+    id: "83",
     principal: true,
     region: "76",
     county: "32",
@@ -704,7 +785,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "28",
+    id: "84",
     principal: true,
     region: "76",
     county: "34",
@@ -713,7 +794,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "40",
+    id: "85",
     principal: true,
     region: "76",
     county: "46",
@@ -722,7 +803,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "58",
+    id: "86",
     principal: true,
     region: "76",
     county: "65",
@@ -731,7 +812,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "59",
+    id: "87",
     principal: true,
     region: "76",
     county: "66",
@@ -740,7 +821,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "74",
+    id: "88",
     principal: true,
     region: "76",
     county: "81",
@@ -749,7 +830,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "75",
+    id: "89",
     principal: true,
     region: "76",
     county: "82",
@@ -758,7 +839,23 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "0",
+    id: "90",
+    name: "Michelle CHARPILLE",
+    principal: false,
+    region: "84",
+    type: "email",
+    value: "michelle.charpille@dreets.gouv.fr",
+  },
+  {
+    id: "91",
+    name: "DREETS AUVERGNE-RHONE-ALPES",
+    principal: false,
+    region: "84",
+    type: "email",
+    value: "ara.dialogue-social@dreets.gouv.fr",
+  },
+  {
+    id: "92",
     principal: true,
     region: "84",
     county: "01",
@@ -767,16 +864,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
-    name: "DDETS Ain",
+    id: "93",
+    principal: true,
+    name: "Egapro Ain",
     region: "84",
     type: "email",
     value: "ddets-direction@ain.gouv.fr",
     county: "01",
   },
   {
-    id: "2",
+    id: "94",
     principal: true,
     region: "84",
     county: "03",
@@ -785,7 +882,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "3",
+    id: "95",
     principal: true,
     region: "84",
     county: "07",
@@ -794,7 +891,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "10",
+    id: "96",
     principal: true,
     region: "84",
     county: "15",
@@ -803,16 +900,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "97",
+    principal: true,
     region: "84",
     county: "15",
-    name: "DDETSPP Cantal",
+    name: "Egapro Cantal",
     value: "ddetspp-direction@cantal.gouv.fr",
     type: "email",
   },
   {
-    id: "20",
+    id: "98",
     principal: true,
     region: "84",
     county: "26",
@@ -821,7 +918,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "32",
+    id: "99",
     principal: true,
     region: "84",
     county: "38",
@@ -830,16 +927,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "100",
+    principal: true,
     region: "84",
     county: "38",
-    name: "DDETS Isere",
+    name: "Egapro Isere",
     value: "ddets-direction@isere.gouv.fr",
     type: "email",
   },
   {
-    id: "36",
+    id: "101",
     principal: true,
     region: "84",
     county: "42",
@@ -848,16 +945,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "102",
+    principal: true,
     region: "84",
     county: "42",
-    name: "DDETS Loire",
+    name: "Egapro Loire",
     value: "ddets-direction@loire.gouv.fr",
     type: "email",
   },
   {
-    id: "37",
+    id: "103",
     principal: true,
     region: "84",
     county: "43",
@@ -866,16 +963,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "104",
+    principal: true,
     region: "84",
     county: "43",
-    name: "DDCSPP Haute-Loire",
+    name: "Egapro Haute-Loire",
     value: "ddcspp@haute-loire.gouv.fr",
     type: "email",
   },
   {
-    id: "56",
+    id: "105",
     principal: true,
     region: "84",
     county: "63",
@@ -884,16 +981,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "106",
+    principal: true,
     region: "84",
     county: "63",
-    name: "DDCS Puy de Dôme",
+    name: "Egapro Puy de Dôme",
     value: "ddcs@puy-de-dome.gouv.fr",
     type: "email",
   },
   {
-    id: "62",
+    id: "107",
     principal: true,
     region: "84",
     county: "69",
@@ -902,7 +999,7 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "66",
+    id: "108",
     principal: true,
     region: "84",
     county: "73",
@@ -911,16 +1008,16 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "109",
+    principal: true,
     region: "84",
     county: "73",
-    name: "DDETSPP Savoie",
+    name: "Egapro Savoie",
     value: "ddetspp-direction@savoie.gouv.fr",
     type: "email",
   },
   {
-    id: "67",
+    id: "110",
     principal: true,
     region: "84",
     county: "74",
@@ -929,26 +1026,89 @@ const data: Referent[] = [
     type: "email",
   },
   {
-    id: "",
-    principal: false,
+    id: "111",
+    principal: true,
     region: "84",
     county: "74",
-    name: "DDETS Haute Savoie",
+    name: "Egapro Haute Savoie",
     value: "ddets-direction@haute-savoie.gouv.fr",
     type: "email",
   },
+  {
+    id: "112",
+    name: "Valérie CORNIQUET DEMOLLIENS",
+    principal: true,
+    region: "93",
+    type: "url",
+    value: "http://paca.dreets.gouv.fr/Index-egalite-professionnelle-des-referents-pour-repondre-a-vos-questions",
+  },
+  {
+    id: "113",
+    name: "Valérie LEPETIT",
+    principal: true,
+    region: "94",
+    type: "email",
+    value: "DREETS-CORSE.Ega-pro@dreets.gouv.fr",
+  },
 ];
 
+const columnsMap = new Map([
+  ["region", "Région"],
+  ["county", "Département"],
+  ["name", "Nom"],
+  ["value", "Valeur"],
+  ["type", "Type"],
+  ["principal", "Principal"],
+]);
+
 const ReferentListPage: NextPageWithLayout = () => {
-  useEffect(() => {
-    console.log(_.orderBy(data, "region"));
-  });
+  useEffect(() => {}, []);
   return (
     <Box as="section">
       <Container py="8w">
         <h1>Liste des des référents Egapro</h1>
 
-        <div>{/* <OwnershipRequestList /> */}</div>
+        <div>
+          <TableAdmin>
+            <TableAdminHead>
+              {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
+                <TableAdminHeadCol
+                  key={columnValue}
+                  // orderDirection={orderBy === columnValue && orderDirection}
+                  // onClick={() => toggleOrderColumn(columnValue)}
+                >
+                  {columnLabel}
+                </TableAdminHeadCol>
+              ))}
+            </TableAdminHead>
+            <TableAdminBody>
+              {data.map(referent => (
+                <TableAdminBodyRow key={`referent-${referent.id}`}>
+                  <TableAdminBodyRowCol>
+                    {REGIONS[referent.region]} ({referent.region})
+                  </TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>
+                    {referent.county ? `${COUNTIES[referent.county]} (${referent.county})` : "-"}
+                  </TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>{referent.name}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>{_.truncate(referent.value, { length: 45 })}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>{referent.type}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>
+                    <FormCheckboxGroup singleCheckbox size="sm">
+                      <FormCheckbox
+                        id={referent.id}
+                        className="principal-checkbox"
+                        defaultChecked={referent.principal}
+                        // checked={referent.principal}
+                        // onChange={event => toggleItem({ id: item.id, checked: event.target.checked })}
+                      />
+                    </FormCheckboxGroup>
+                  </TableAdminBodyRowCol>
+                </TableAdminBodyRow>
+              ))}
+            </TableAdminBody>
+          </TableAdmin>
+        </div>
       </Container>
     </Box>
   );
