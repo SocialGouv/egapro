@@ -12,10 +12,10 @@ export const FIRST_YEAR_REPEQ = 2021 as const;
 export const OPMC_OPEN_DURATION_AFTER_EDIT = 2;
 
 /** Need to be set manually because declaration are not opened on Jan 1rst */
-export const CURRENT_YEAR = 2023 as const;
+export const CURRENT_YEAR = 2022 as const;
 /** Need to be set */
-// export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
-export const PUBLIC_CURRENT_YEAR = 2022 as const;
+export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
+// export const PUBLIC_CURRENT_YEAR = 2022 as const;
 
 export const YEARS = new Array(CURRENT_YEAR - FIRST_YEAR + 1).fill(null).map((_, idx) => FIRST_YEAR + idx);
 export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
