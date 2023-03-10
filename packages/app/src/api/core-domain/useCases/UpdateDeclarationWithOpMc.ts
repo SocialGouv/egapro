@@ -51,7 +51,9 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
       opmc.modalitesPublicationObjectifsMesures,
     );
 
-    declaration.setModifiedAt(now);
+    // TODO on ne change pas la date de modification pour éviter de pour redéclarer les opmc tous les ans avant la date limite
+    // il faudrait ajouter un champs "opMcModifiedAt"
+    // declaration.setModifiedAt(now);
 
     await this.declarationRepo.update(declaration);
   }
