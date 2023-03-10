@@ -1,7 +1,8 @@
 import type { AppState } from "../globals"
 import type { DeclarationDataField } from "../utils/declarationBuilder"
+import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
-import { genericFetch } from "./fetcher"
+import { fetcherV2, genericFetch } from "./fetcher"
 
 const commonHeaders = {
   Accept: "application/json",
@@ -84,6 +85,13 @@ export const putSimulation = (id: string, data: AppState) => putResource(`/simul
 export const putDeclaration = (declaration: DeclarationDataField) => {
   const { entreprise, déclaration } = declaration
   return putResource(`/declaration/${entreprise.siren}/${déclaration.année_indicateurs}`, declaration)
+}
+
+export const postOpMc = (siren: string, year: string, opmc: ObjectifsMesuresFormSchema) => {
+  return fetcherV2(`/declaration/${siren}/${year}/objectifs-mesures`, {
+    method: "POST",
+    body: JSON.stringify(opmc),
+  })
 }
 
 export const validateSiren = (siren: string, year?: number | undefined) => {

@@ -42,6 +42,10 @@ export class Declaration extends AggregateRoot<DeclarationProps, DeclarationPK> 
     return this.props.modifiedAt;
   }
 
+  public setModifiedAt(modifiedAt: Date) {
+    this.props.modifiedAt = new Date(modifiedAt);
+  }
+
   get siren(): Siren {
     return this.props.siren;
   }

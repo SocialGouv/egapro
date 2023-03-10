@@ -1,33 +1,33 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
-import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
+import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { AbstractIndicator } from "./AbstractIndicator";
 
 type Categorie = {
   name?: string;
   ranges?: {
-    "30:39"?: Percentage;
-    "40:49"?: Percentage;
-    "50:"?: Percentage;
-    ":29"?: Percentage;
+    "30:39"?: SimpleNumber;
+    "40:49"?: SimpleNumber;
+    "50:"?: SimpleNumber;
+    ":29"?: SimpleNumber;
   };
 };
 
-export interface RemunerationsIndicatorProps {
+export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {
   categories: Categorie[];
   cseConsultationDate?: Date;
   favorablePopulation?: FavorablePopulation;
   mode?: RemunerationsMode;
   notComputableReason?: NotComputableReason;
-  progressObjective?: string;
   result?: Percentage;
   score?: PositiveInteger;
 }
 
-export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorProps, never> {
+export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndicatorProps> {
   /** `catégories` */
   get categories(): Categorie[] {
     return [...this.props.categories];
@@ -52,11 +52,6 @@ export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorPro
     return this.props.notComputableReason;
   }
 
-  /** `objectif_de_progression` */
-  get progressObjective(): string | undefined {
-    return this.props.progressObjective;
-  }
-
   /** `résultat` - Résultat final en % après application du seuil de pertinence à chaque catégorie */
   get result(): Percentage | undefined {
     return this.props.result;
@@ -73,10 +68,10 @@ export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorPro
       categories: json.categories.map(({ name, ranges }) => ({
         name,
         ranges: {
-          "30:39": typeof ranges?.["30:39"] === "number" ? new Percentage(ranges["30:39"]) : void 0,
-          "40:49": typeof ranges?.["40:49"] === "number" ? new Percentage(ranges["40:49"]) : void 0,
-          "50:": typeof ranges?.["50:"] === "number" ? new Percentage(ranges["50:"]) : void 0,
-          ":29": typeof ranges?.[":29"] === "number" ? new Percentage(ranges[":29"]) : void 0,
+          "30:39": typeof ranges?.["30:39"] === "number" ? new SimpleNumber(ranges["30:39"]) : void 0,
+          "40:49": typeof ranges?.["40:49"] === "number" ? new SimpleNumber(ranges["40:49"]) : void 0,
+          "50:": typeof ranges?.["50:"] === "number" ? new SimpleNumber(ranges["50:"]) : void 0,
+          ":29": typeof ranges?.[":29"] === "number" ? new SimpleNumber(ranges[":29"]) : void 0,
         },
       })),
     };

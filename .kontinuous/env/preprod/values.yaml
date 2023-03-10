@@ -35,3 +35,4 @@ app:
       memory: 1G
 
 maildev: {}
+pgweb: {}

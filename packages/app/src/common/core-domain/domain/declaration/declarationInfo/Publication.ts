@@ -21,6 +21,10 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     return this.props.measuresPublishDate;
   }
 
+  public setMeasuresPublishDate(measuresPublishDate: Date) {
+    this.props.measuresPublishDate = new Date(measuresPublishDate);
+  }
+
   /** `modalités` */
   get modalities(): string | undefined {
     return this.props.modalities;
@@ -31,13 +35,25 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     return this.props.objectivesMeasuresModalities;
   }
 
+  public setObjectivesMeasuresModalities(objectivesMeasuresModalities: string) {
+    this.props.objectivesMeasuresModalities = objectivesMeasuresModalities;
+  }
+
   /** `date_publication_objectifs` */
   get objectivesPublishDate(): Date | undefined {
     return this.props.objectivesPublishDate;
   }
 
+  public setObjectivesPublishDate(objectivesPublishDate: Date) {
+    this.props.objectivesPublishDate = new Date(objectivesPublishDate);
+  }
+
   get url(): string | undefined {
     return this.props.url;
+  }
+
+  public setUrl(url?: string) {
+    this.props.url = url;
   }
 
   public fromJson(json: EntityPropsToJson<PublicationProps>) {
