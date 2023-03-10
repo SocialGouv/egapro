@@ -163,7 +163,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                   <p>Vous trouverez ci-après la documentation pour accéder à votre espace.</p>
                   <Box mt="2w">
                     <a href="/Guide.Mon.Espace.pdf" target="_blank" rel="noreferrer">
-                      Guide ajout déclarant (pdf)
+                      Guide Mon Espace (pdf)
                     </a>
                   </Box>
                 </Alert>
