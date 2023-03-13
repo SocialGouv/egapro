@@ -46,7 +46,7 @@ export type MutableArray<T> = T extends ReadonlyArray<infer U> ? U[] : never;
  * };
  * ```
  */
-export type UniqueString<TStr extends string> = TStr & {
+export type UniqueString<TStr extends string = string> = TStr & {
   _?: never & symbol;
 };
 

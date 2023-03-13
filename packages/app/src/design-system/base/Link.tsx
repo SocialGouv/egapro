@@ -1,11 +1,11 @@
 import { clsx } from "clsx";
 import { forwardRef } from "react";
 
-import type { IconStyles } from "../utils/icon-styles";
+import type { IconStyle } from "../utils/icon-styles";
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  iconLeft?: IconStyles;
-  iconRight?: IconStyles;
+  iconLeft?: IconStyle;
+  iconRight?: IconStyle;
   isCurrent?: boolean;
   isDisabled?: boolean;
   size?: "lg" | "sm";

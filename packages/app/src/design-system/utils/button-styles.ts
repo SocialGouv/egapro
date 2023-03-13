@@ -1,11 +1,11 @@
 import { clsx } from "clsx";
 
-import type { IconStyles } from "./icon-styles";
+import type { IconStyle } from "./icon-styles";
 
 export type ButtonStylesProps = {
-  iconLeft?: IconStyles;
-  iconOnly?: IconStyles;
-  iconRight?: IconStyles;
+  iconLeft?: IconStyle;
+  iconOnly?: IconStyle;
+  iconRight?: IconStyle;
   size?: "lg" | "sm";
   variant?: "secondary" | "tertiary-no-border" | "tertiary";
 };

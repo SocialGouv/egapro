@@ -16,6 +16,7 @@ export * from "./base/FormRadio";
 export * from "./base/FormSelect";
 export * from "./base/FormTextarea";
 export * from "./base/Grid";
+export * from "./base/Icon";
 export * from "./base/Link";
 export * from "./base/LinkGroup";
 export * from "./base/Logo";

@@ -1,6 +1,6 @@
 import { Dialog } from "@headlessui/react";
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import type { DetailsHTMLAttributes, PropsWithChildren } from "react";
 import { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
@@ -10,13 +10,13 @@ import { FormButton } from "./FormButton";
 import styles from "./Modale.module.css";
 
 export type ModaleProps = PropsWithChildren<
-  React.ReactHTMLElement<HTMLDivElement> & {
+  DetailsHTMLAttributes<HTMLDialogElement> & {
     isOpen: boolean;
     onClose: () => void;
   }
 >;
 
-export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
+export const Modale = ({ isOpen, onClose, children, ...rest }: ModaleProps) => {
   const arrayOfChildren = Children.toArray(children);
   compatibleComponents("Modale", ["ModaleButton", "ModaleTitle", "ModaleContent"], arrayOfChildren);
 
@@ -25,7 +25,7 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
   const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleContent");
 
   return (
-    <Dialog as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
+    <Dialog {...rest} as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
       <Dialog.Panel>
         <div className="fr-container fr-container--fluid fr-container-md">
           <div className="fr-grid-row fr-grid-row--center">
