@@ -3,6 +3,11 @@ if (window.location.href.includes("localhost:")) {
   API_URL = "http://127.0.0.1:2626"
 }
 if (process.env.REACT_APP_EGAPRO_API_URL) API_URL = process.env.REACT_APP_EGAPRO_API_URL
+let APIV2_URL = "/apiv2"
+if (window.location.href.includes("localhost:")) {
+  APIV2_URL = "http://127.0.0.1:3000/apiv2"
+}
+if (process.env.REACT_APP_EGAPRO_APIV2_URL) APIV2_URL = process.env.REACT_APP_EGAPRO_APIV2_URL
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
 
@@ -64,4 +69,8 @@ export const genericFetch = async (endpoint: string, options?: RequestInit) => {
  */
 export const fetcher = async (key: string, options: RequestInit) => {
   return genericFetch(API_URL + key, options)
+}
+
+export const fetcherV2 = async (key: string, options: RequestInit) => {
+  return genericFetch(APIV2_URL + key, options)
 }

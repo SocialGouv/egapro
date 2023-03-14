@@ -2,22 +2,22 @@ import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/o
 import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 
 export interface DeclarationRaw {
-  data?: DeclarationDataRaw;
+  data: DeclarationDataRaw | null;
   declarant: string;
-  declared_at: string;
-  draft?: DeclarationDataRaw;
+  declared_at: Date;
+  draft: DeclarationDataRaw | null;
   ft: string;
-  legacy?: DeclarationDataRaw;
-  modified_at: string;
+  legacy: DeclarationDataRaw | null;
+  modified_at: Date;
   siren: string;
   year: number;
 }
 
 export interface RepresentationEquilibreeRaw {
   data?: DeclarationDataRaw;
-  declared_at: string;
+  declared_at: Date;
   ft: string;
-  modified_at: string;
+  modified_at: Date;
   siren: string;
   year: number;
 }

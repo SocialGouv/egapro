@@ -15,20 +15,31 @@ export const Handler = <T extends new () => NextController>(target: T) => {
 
 type Req = NextController.Req<NextController>;
 type Res = NextController.Res<NextController>;
-export const RouteZodQuery =
-  <TController extends NextController>(schema: z.ZodObject<Any>): NextControllerMethodDecorator<TController> =>
+export const ZodifiedRoute =
+  <TController extends NextController>(
+    schema: z.ZodObject<Any>,
+    requestProperty: keyof Req,
+  ): NextControllerMethodDecorator<TController> =>
   (target, _property, desc) => {
     const originalMethod = desc.value as NonNullable<TController["get"]>;
     desc.value = ((req: Req, res: Res) => {
-      const params = schema.safeParse(req.query);
+      const raw = req[requestProperty];
+      const propParsed = schema.safeParse(typeof raw === "string" ? JSON.parse(raw) : raw);
 
-      if (!params.success) {
-        console.error(params.error);
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json(params.error.flatten().fieldErrors);
+      if (!propParsed.success) {
+        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json(propParsed.error.flatten().fieldErrors);
       }
 
-      req.query = params.data;
+      req[requestProperty] = propParsed.data as Any;
 
       return originalMethod?.call(target, req, res);
     }) as typeof desc.value;
   };
+
+export const RouteZodQuery = <TController extends NextController>(
+  schema: z.ZodObject<Any>,
+): NextControllerMethodDecorator<TController> => ZodifiedRoute(schema, "query");
+
+export const RouteZodBody = <TController extends NextController>(
+  schema: z.ZodObject<Any>,
+): NextControllerMethodDecorator<TController> => ZodifiedRoute(schema, "body");

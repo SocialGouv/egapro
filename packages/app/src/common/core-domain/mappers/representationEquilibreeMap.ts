@@ -10,6 +10,7 @@ import type {
 } from "@common/models/generated";
 import type { Mapper } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { dateObjectToDateISOString } from "@common/utils/date";
 import type { Any, Objectize } from "@common/utils/types";
 
 import { RepresentationEquilibree } from "../domain/RepresentationEquilibree";
@@ -114,9 +115,9 @@ export const representationEquilibreeMap: Required<
   toPersistence(obj) {
     // TODO
     return {
-      declared_at: obj.declaredAt.toISOString(),
+      declared_at: obj.declaredAt,
       ft: "", // TODO
-      modified_at: obj.modifiedAt.toISOString(),
+      modified_at: obj.modifiedAt,
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
       data: obj.data ? reprensentationEquilibreeDataToDTO(obj.data) : void 0,
@@ -138,16 +139,24 @@ function reprensentationEquilibreeDataToDTO(data: RepresentationEquilibreeData):
     déclaration: {
       année_indicateurs: data.declaration.indicatorsYear.getValue() as AnneeIndicateur,
       brouillon: data.declaration.draft,
-      date: data.declaration.date?.toISOString(),
-      fin_période_référence: data.declaration.endReferencePeriod?.toISOString(),
+      date: data.declaration.date ? dateObjectToDateISOString(data.declaration.date) : void 0,
+      fin_période_référence: data.declaration.endReferencePeriod
+        ? dateObjectToDateISOString(data.declaration.endReferencePeriod)
+        : void 0,
       index: data.declaration.index?.getValue(),
       mesures_correctives: data.declaration.correctiveMeasures?.getValue(),
       points: data.declaration.points?.getValue(),
       points_calculables: data.declaration.computablePoints?.getValue(),
       publication: {
-        date: data.declaration.publication?.date?.toISOString(),
-        date_publication_mesures: data.declaration.publication?.measuresPublishDate?.toISOString(),
-        date_publication_objectifs: data.declaration.publication?.objectivesPublishDate?.toISOString(),
+        date: data.declaration.publication?.date
+          ? dateObjectToDateISOString(data.declaration.publication?.date)
+          : void 0,
+        date_publication_mesures: data.declaration.publication?.measuresPublishDate
+          ? dateObjectToDateISOString(data.declaration.publication?.measuresPublishDate)
+          : void 0,
+        date_publication_objectifs: data.declaration.publication?.objectivesPublishDate
+          ? dateObjectToDateISOString(data.declaration.publication?.objectivesPublishDate)
+          : void 0,
         modalités: data.declaration.publication?.modalities,
         modalités_objectifs_mesures: data.declaration.publication?.objectivesMeasuresModalities,
         url: data.declaration.publication?.url,

@@ -1,26 +1,21 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { HighRemunerationsResult } from "../../valueObjects/declaration/indicators/HighRemunerationsResult";
+import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { AbstractIndicator } from "./AbstractIndicator";
 
-export interface HighRemunerationsIndicatorProps {
+export interface HighRemunerationsIndicatorProps extends AbstractIndicatorProps {
   favorablePopulation?: FavorablePopulation;
-  progressObjective?: string;
   result?: HighRemunerationsResult;
   score?: PositiveInteger;
 }
 
-export class HighRemunerationsIndicator extends JsonEntity<HighRemunerationsIndicatorProps, never> {
+export class HighRemunerationsIndicator extends AbstractIndicator<HighRemunerationsIndicatorProps> {
   /** `population_favorable` */
   get favorablePopulation(): FavorablePopulation | undefined {
     return this.props.favorablePopulation;
-  }
-
-  /** `objectif_de_progression` */
-  get progressObjective(): string | undefined {
-    return this.props.progressObjective;
   }
 
   /** `résultat` - Nombre de 0 à 5 du sexe sous représenté parmi les 10 plus hautes rémunérations */

@@ -41,7 +41,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Th>Année indicateurs</Th>
                   <Th>Structure</Th>
                   <Th>Tranche d'effectifs</Th>
-                  <Th>Date de déclaration</Th>
+                  <Th>Date de transmission</Th>
                   <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
                   <Th>Récap</Th>

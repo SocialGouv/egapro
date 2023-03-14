@@ -84,33 +84,31 @@ services:
       - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
 
   # TODO: delete when typescript API is done
-  apiv2_db:
-    restart: always
-    build:
-      context: ./packages/app/docker/db
-    environment:
-      POSTGRES_USER: ${APIV2_POSTGRES_USER:-postgress}
-      POSTGRES_PASSWORD: ${APIV2_POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${APIV2_POSTGRES_DB:-egapro}
-    ports:
-      - ${APIV2_POSTGRES_PORT:-5438}:5432
-    volumes:
-      - apiv2_pgdata:/var/lib/postgresql/data
-    networks:
-      - apiv2
+  # apiv2_db:
+  #   restart: always
+  #   build:
+  #     context: ./packages/app/docker/db
+  #   environment:
+  #     POSTGRES_USER: ${APIV2_POSTGRES_USER:-postgress}
+  #     POSTGRES_PASSWORD: ${APIV2_POSTGRES_PASSWORD:-postgres}
+  #     POSTGRES_DB: ${APIV2_POSTGRES_DB:-egapro}
+  #   ports:
+  #     - ${APIV2_POSTGRES_PORT:-5438}:5432
+  #   volumes:
+  #     - apiv2_pgdata:/var/lib/postgresql/data
 
-  apiv2_pgadmin:
-    restart: always
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${APIV2_PGADMIN_DEFAULT_EMAIL:-admin}
-      PGADMIN_DEFAULT_PASSWORD: ${APIV2_PGADMIN_DEFAULT_PASSWORD:-admin}
-    ports:
-      - ${APIV2_PGADMIN_PORT:-5050}:80
-    volumes:
-      - apiv2_pgadmin:/var/lib/pgadmin
-    networks:
-      - apiv2
+  # pgadmin:
+  #   image: dcagatay/pwless-pgadmin4
+  #   ports:
+  #     - ${APIV2_PGADMIN_PORT:-5050}:80
+  #   environment:
+  #     POSTGRES_USER: ${APIV2_POSTGRES_USER:-postgress}
+  #     POSTGRES_PASSWORD: ${APIV2_POSTGRES_PASSWORD:-postgres}
+  #     POSTGRES_DB: ${APIV2_POSTGRES_DB:-egapro}
+  #     POSTGRES_HOST: apiv2_db
+  #     POSTGRES_PORT: APIV2_POSTGRES_PORT
+  #   volumes:
+  #     - pgadmin:/var/lib/pgadmin
 
   reverse_proxy:
     image: nginx:alpine
@@ -119,12 +117,8 @@ services:
     ports:
       - 80:80
 
-networks:
-  apiv2:
-
-
 volumes:
   pgdata:
-  apiv2_pgdata:
-  apiv2_pgadmin:
+  apiv2_pgdata: # pgadmin:
+
   api_egginfos:
