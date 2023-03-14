@@ -1,6 +1,6 @@
 import { Dialog } from "@headlessui/react";
 import { clsx } from "clsx";
-import type { DetailsHTMLAttributes, PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
@@ -9,12 +9,10 @@ import type { FormButtonProps } from "./FormButton";
 import { FormButton } from "./FormButton";
 import styles from "./Modale.module.css";
 
-export type ModaleProps = PropsWithChildren<
-  DetailsHTMLAttributes<HTMLDialogElement> & {
-    isOpen: boolean;
-    onClose: () => void;
-  }
->;
+export type ModaleProps = JSX.IntrinsicElements["dialog"] & {
+  isOpen: boolean;
+  onClose: () => void;
+};
 
 export const Modale = ({ isOpen, onClose, children, ...rest }: ModaleProps) => {
   const arrayOfChildren = Children.toArray(children);

@@ -1,16 +1,16 @@
+import type { PropsWithoutChildren } from "@common/utils/types";
 import { clsx } from "clsx";
-import type { DetailsHTMLAttributes } from "react";
 
 import type { TextColorStyle } from "../utils/color-styles";
 import type { IconStyle } from "../utils/icon-styles";
 import style from "./Icon.module.css";
 
-export interface IconProps extends DetailsHTMLAttributes<HTMLSpanElement> {
+export type IconProps = JSX.IntrinsicElements["span"] & {
   color?: TextColorStyle;
   icon: IconStyle;
-}
+};
 
-export const Icon = ({ icon, onClick, color, ...rest }: IconProps) => (
+export const Icon = ({ icon, onClick, color, ...rest }: PropsWithoutChildren<IconProps>) => (
   <span
     {...rest}
     style={color ? { color: `var(--${color})` } : {}}

@@ -286,7 +286,7 @@ export const COUNTIES_IDS = [
   "976",
 ] as const;
 
-export const REGIONS_TO_COUNTIES = {
+export const REGIONS_TO_COUNTIES: Record<keyof typeof REGIONS, Array<keyof typeof COUNTIES>> = {
   "84": ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"],
   "27": ["21", "25", "39", "58", "70", "71", "89", "90"],
   "53": ["35", "22", "56", "29"],

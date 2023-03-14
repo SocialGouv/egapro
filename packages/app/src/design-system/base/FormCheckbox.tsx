@@ -69,7 +69,7 @@ export const FormCheckboxGroupContent = ({ children }: PropsWithChildren) => (
   <Box className="fr-fieldset__content">{children}</Box>
 );
 
-export type FormCheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type FormCheckboxProps = JSX.IntrinsicElements["input"] & {
   id: string;
   isDisabled?: boolean;
   isError?: boolean;

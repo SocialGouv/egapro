@@ -1,4 +1,5 @@
-import type { PropsWithChildren, ThHTMLAttributes } from "react";
+import type { PropsWithChildren } from "react";
+import { forwardRef } from "react";
 
 import style from "./TableAdmin.module.css";
 
@@ -15,8 +16,8 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
 );
 
 export interface TableAdminHeadColProps {
-  colSpan?: number;
-  onClick?: ThHTMLAttributes<HTMLTableCellElement>["onClick"];
+  colSpan?: JSX.IntrinsicElements["td"]["colSpan"];
+  onClick?: JSX.IntrinsicElements["th"]["onClick"];
   orderDirection?: "asc" | "desc" | false;
 }
 export const TableAdminHeadCol = ({
@@ -31,12 +32,17 @@ export const TableAdminHeadCol = ({
   </th>
 );
 
-export const TableAdminBody = ({ children }: PropsWithChildren) => <tbody>{children}</tbody>;
+export const TableAdminBody = forwardRef<HTMLTableSectionElement, PropsWithChildren>(({ children }, ref) => (
+  <tbody ref={ref}>{children}</tbody>
+));
+TableAdminBody.displayName = "TableAdminBody";
 
 export const TableAdminBodyRow = ({ children }: PropsWithChildren) => (
   <tr className={style.tableBodyRow}>{children}</tr>
 );
 
-export const TableAdminBodyRowCol = ({ children }: PropsWithChildren) => (
-  <td className={style.tableBodyRowCol}>{children}</td>
+export const TableAdminBodyRowCol = ({ children, ...rest }: JSX.IntrinsicElements["td"]) => (
+  <td {...rest} className={style.tableBodyRowCol}>
+    {children}
+  </td>
 );

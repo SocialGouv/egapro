@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from "react";
 import type { EventEmitter } from "stream";
 import type { ZodLiteral } from "zod";
 
@@ -239,6 +240,8 @@ export type RequireOnlyOne<T, Keys extends keyof T = keyof T> = {
 export type NonNullableProps<T> = {
   [P in keyof T]: NonNullable<T[P]>;
 };
+
+export type PropsWithoutChildren<T extends PropsWithChildren> = Omit<T, "children">;
 
 /**
  * Hacky type to remove readonly on each property
