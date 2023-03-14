@@ -161,7 +161,7 @@ const CommencerPage: NextPageWithLayout = () => {
   };
 
   return (
-    <AuthenticatedOnly>
+    <>
       <p>
         <b>
           Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
@@ -233,14 +233,16 @@ const CommencerPage: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-    </AuthenticatedOnly>
+    </>
   );
 };
 
 CommencerPage.getLayout = ({ children }) => {
   return (
     <RepresentationEquilibreeLayout disableAuth={true} title="Commencer">
-      <FeatureStatusProvider>{children}</FeatureStatusProvider>
+      <FeatureStatusProvider>
+        <AuthenticatedOnly redirectTo="/representation-equilibree/email">{children}</AuthenticatedOnly>
+      </FeatureStatusProvider>
     </RepresentationEquilibreeLayout>
   );
 };
