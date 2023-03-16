@@ -18,6 +18,7 @@ app:
     MAILER_SMTP_SSL: "False"
 
 maildev: {}
+pgweb: {}
 
 jobs:
   runs:

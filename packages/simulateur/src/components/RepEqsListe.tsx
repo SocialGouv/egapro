@@ -26,7 +26,7 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
     <Box mt="4">
       <Box m="6">
         <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-          Liste des déclarations - Représentation Équilibrée
+          Liste des déclarations transmises - Représentation Équilibrée
         </Text>
         {isLoading ? (
           <Spinner />

@@ -1,4 +1,4 @@
-import type { EntityPropsToJson } from "@common/shared-domain";
+import type { EntityPropsToJson, UUID } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
 
 import { Company } from "./declaration/Company";
@@ -11,6 +11,7 @@ export interface DeclarationDataProps {
   company: Company;
   declarant: Declarant;
   declaration: DeclarationInfo;
+  id?: UUID;
   indicators?: Indicators;
   source?: DeclarationSource;
 }
@@ -40,11 +41,12 @@ export class DeclarationData extends JsonEntity<DeclarationDataProps> {
     return this.props.indicators;
   }
 
-  public fromJson(json: EntityPropsToJson<DeclarationDataProps> & { id: string | undefined }) {
+  public fromJson(json: EntityPropsToJson<DeclarationDataProps>) {
     const props: DeclarationDataProps = {
       declarant: Declarant.fromJson(json.declarant),
       declaration: DeclarationInfo.fromJson(json.declaration),
       company: Company.fromJson(json.company),
+      id: json.id,
     };
 
     if (json.source) props.source = new DeclarationSource(json.source);
