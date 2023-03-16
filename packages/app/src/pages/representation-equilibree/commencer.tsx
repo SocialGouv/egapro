@@ -69,8 +69,8 @@ const formSchema = z
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const buildConfirmMessage = (siren: string) =>
-  `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
+const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =>
+  `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
   useUser();
@@ -126,12 +126,12 @@ const CommencerPage: NextPageWithLayout = () => {
 
   const onSubmit = async ({ year, siren }: FormType) => {
     // If no data are present in session storage.
-    if (!formData.entreprise?.siren) {
+    if (!formData.entreprise?.siren || !formData.year) {
       await saveAndGoNext(siren, Number(year));
       return;
     }
-    // If data are present in session storage and Siren has not been changed.
-    if (siren === formData.entreprise.siren) {
+    // If data are present in session storage and Siren and year have not changed.
+    if (siren === formData.entreprise.siren && Number(year) === formData.year) {
       router.push(
         formData.status === "edition"
           ? `/representation-equilibree/${siren}/${year}`
@@ -139,16 +139,14 @@ const CommencerPage: NextPageWithLayout = () => {
       );
       return;
     }
-    // If Siren has been changed, we ask the user if the user really want to erase the data.
-    if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
+    // If Siren or year have changed, we ask the user if he really wants to erase the data.
+    if (confirm(buildConfirmMessage({ siren: formData.entreprise.siren, year: formData.year }))) {
       // Start a new declaration of representation.
       resetFormData();
       await saveAndGoNext(siren, Number(year));
-      return;
     } else {
       // Rollback to the old Siren.
       setValue("siren", formData.entreprise.siren);
-      return;
     }
   };
 
