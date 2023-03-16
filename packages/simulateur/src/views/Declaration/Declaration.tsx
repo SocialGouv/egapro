@@ -213,7 +213,7 @@ const PageDeclaration = ({ children }: PropsWithChildren) => {
   return (
     <SimulateurPage
       title={title}
-      tagline="Une fois les informations renseignées, cliquez sur le bouton “Déclarer” en bas de page."
+      tagline="Une fois les informations renseignées, cliquez sur le bouton “Déclarer” en bas de page. Un index non-calculable doit être également déclaré."
     >
       {children}
     </SimulateurPage>

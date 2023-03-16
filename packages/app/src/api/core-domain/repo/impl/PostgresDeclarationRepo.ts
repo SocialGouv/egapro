@@ -64,7 +64,7 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
   public async save(item: Declaration, deleteDraft = false): Promise<void> {
     const raw = declarationMap.toPersistence(item);
     if (deleteDraft) (raw as Any).draft = null;
-    await sql`insert into ${this.table} value ${sql(
+    await sql`insert into ${this.table} ${sql(
       raw,
       "data",
       "declared_at",
@@ -73,7 +73,7 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       "year",
       "declarant",
       "draft",
-    )} on conflict ${sql(["siren", "year"])} do update set ${sql(raw, "data", "modified_at", "declarant", "draft")}`;
+    )} on conflict (siren, year) do update set ${sql(raw, "data", "modified_at", "declarant", "draft")}`;
   }
 
   public update(item: Declaration): Promise<void> {

@@ -12,6 +12,7 @@ export * from "./PositiveInteger";
 export * from "./PositiveNumber";
 export * from "./RangeInteger";
 export * from "./RangeNumber";
+export * from "./SimpleNumber";
 export * from "./SimpleStringValueObject";
 export * from "./Slug";
 export * from "./TupleNumber";

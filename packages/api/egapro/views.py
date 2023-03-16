@@ -515,7 +515,7 @@ async def search_representation_equilibree(request: Request, response: Response)
     q = request.query.get("q", "").strip()
     limit = request.query.int("limit", 10)
     offset = request.query.int("offset", 0)
-    section_naf = request.query.get("section_naf", None)
+    section_naf = request.query.get("naf", None)
     departement = request.query.get("departement", None)
     region = request.query.get("region", None)
     results = await db.search_representation_equilibree.run(

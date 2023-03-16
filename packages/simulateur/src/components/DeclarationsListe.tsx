@@ -26,7 +26,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
     <Box mt="4">
       <Box m="6">
         <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-          Liste des déclarations - Index Égalité Professionnelle
+          Liste des déclarations transmises - Index Égalité Professionnelle
         </Text>
         {isLoading ? (
           <Spinner />
@@ -41,7 +41,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Th>Année indicateurs</Th>
                   <Th>Structure</Th>
                   <Th>Tranche d'effectifs</Th>
-                  <Th>Date de déclaration</Th>
+                  <Th>Date de transmission</Th>
                   <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
                   <Th>Récap</Th>

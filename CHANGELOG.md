@@ -1,3 +1,24 @@
+## [2.86.1](https://github.com/SocialGouv/egapro/compare/v2.86.0...v2.86.1) (2023-03-08)
+
+
+### Bug Fixes
+
+* disable 2023 decla ([944c7fb](https://github.com/SocialGouv/egapro/commit/944c7fb64c1f0f0ea4e908d3465c96865e202819))
+
+# [2.86.0](https://github.com/SocialGouv/egapro/compare/v2.85.0...v2.86.0) (2023-03-07)
+
+
+### Bug Fixes
+
+* **apiv1:** fix tests for new year decla ([99cf82e](https://github.com/SocialGouv/egapro/commit/99cf82e3c4643abefe76de36a57f662981148b79))
+* **apiv1:** only use public year as current - 1 ([dacb27c](https://github.com/SocialGouv/egapro/commit/dacb27c6d9d6a66f7bb6858582dbc6e886cace61))
+
+
+### Features
+
+* enable 2023 decla (Fixes [#1571](https://github.com/SocialGouv/egapro/issues/1571) Fixes [#1533](https://github.com/SocialGouv/egapro/issues/1533)) ([1518c45](https://github.com/SocialGouv/egapro/commit/1518c45f9ddba44495b2dae47c2db612dc833be6))
+* refactor indicateurUn ([#1573](https://github.com/SocialGouv/egapro/issues/1573)) ([d97495c](https://github.com/SocialGouv/egapro/commit/d97495c56fb6fdfb659bcf1831bb5e478c08a923)), closes [#1588](https://github.com/SocialGouv/egapro/issues/1588)
+
 # [2.85.0](https://github.com/SocialGouv/egapro/compare/v2.84.1...v2.85.0) (2023-03-02)
 
 

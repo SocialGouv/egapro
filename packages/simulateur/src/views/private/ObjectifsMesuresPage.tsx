@@ -34,10 +34,9 @@ import FormSubmit from "../../components/FormSubmit"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useDeclaration } from "../../hooks/useDeclaration"
-import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
+import { postOpMc, sendReceiptObjectifsMesures } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import { dateToFrString, isOlderThanTimeAgo, parseDate } from "../../utils/date"
-import { updateDeclarationWithObjectifsMesures } from "../../utils/declarationBuilder"
 import { useToastMessage } from "../../utils/hooks"
 
 const Title = ({ children }: PropsWithChildren) => (
@@ -462,10 +461,8 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   if (index > 85) return <Text>Vous n'avez pas à remplir cette page car votre index est supérieur à 85.</Text>
 
   const onSubmit = async (formData: typeof initialValuesObjectifsMesures) => {
-    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationAPI, formData)
-
     try {
-      await putDeclaration(newDeclaration?.data)
+      await postOpMc(siren, year, formData)
       await sendReceiptObjectifsMesures(siren, Number(year))
       toastSuccess(finalMessage)
     } catch (error) {

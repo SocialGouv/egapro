@@ -1,25 +1,20 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
 import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
+import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { AbstractIndicator } from "./AbstractIndicator";
 
-export interface MaternityLeavesIndicatorProps {
+export interface MaternityLeavesIndicatorProps extends AbstractIndicatorProps {
   notComputableReason?: NotComputableReason;
-  progressObjective?: string;
   result?: Percentage;
   score?: PositiveInteger;
 }
 
-export class MaternityLeavesIndicator extends JsonEntity<MaternityLeavesIndicatorProps, never> {
+export class MaternityLeavesIndicator extends AbstractIndicator<MaternityLeavesIndicatorProps> {
   /** `non_calculable` - Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total */
   get notComputableReason(): NotComputableReason | undefined {
     return this.props.notComputableReason;
-  }
-
-  /** `objectif_de_progression` */
-  get progressObjective(): string | undefined {
-    return this.props.progressObjective;
   }
 
   /** `résultat` */

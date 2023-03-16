@@ -1,23 +1,23 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
 import { Percentage } from "@common/shared-domain/domain/valueObjects";
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects/PositiveInteger";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
+import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { AbstractIndicator } from "./AbstractIndicator";
 
-export interface SalaryRaisesAndPromotionsIndicatorProps {
+export interface SalaryRaisesAndPromotionsIndicatorProps extends AbstractIndicatorProps {
   employeesCountResult?: PositiveInteger;
   employeesCountScore?: PositiveInteger;
   favorablePopulation?: FavorablePopulation;
   notComputableReason?: NotComputableReason;
   percentScore?: Percentage;
-  progressObjective?: string;
   result?: Percentage;
   score?: PositiveInteger;
 }
 
-export class SalaryRaisesAndPromotionsIndicator extends JsonEntity<SalaryRaisesAndPromotionsIndicatorProps, never> {
+export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<SalaryRaisesAndPromotionsIndicatorProps> {
   /** `population_favorable` */
   get favorablePopulation(): FavorablePopulation | undefined {
     return this.props.favorablePopulation;
@@ -26,11 +26,6 @@ export class SalaryRaisesAndPromotionsIndicator extends JsonEntity<SalaryRaisesA
   /** `non_calculable` */
   get notComputableReason(): NotComputableReason | undefined {
     return this.props.notComputableReason;
-  }
-
-  /** `objectif_de_progression` */
-  get progressObjective(): string | undefined {
-    return this.props.progressObjective;
   }
 
   /** `résultat` */
