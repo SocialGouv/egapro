@@ -21,7 +21,7 @@ export * from "./base/Link";
 export * from "./base/LinkGroup";
 export * from "./base/Logo";
 export * from "./base/MainNav";
-export * from "./base/Modale";
+export * from "./base/Modal";
 export * from "./base/RecapSection";
 export * from "./base/SideMenu";
 export * from "./base/SkipLinks";

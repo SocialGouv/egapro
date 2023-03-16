@@ -4,9 +4,11 @@ import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "@common/dict";
 import { Object } from "@common/utils/overload";
 import { storePicker } from "@common/utils/zustand";
 import { AdminLayout } from "@components/layouts/AdminLayout";
+import type { ModalProps } from "@design-system";
 import {
   Box,
   Container,
+  FormButton,
   FormCheckbox,
   FormGroup,
   FormGroupLabel,
@@ -19,10 +21,7 @@ import {
   FormSelect,
   Icon,
   Link,
-  Modale,
-  ModaleButton,
-  ModaleContent,
-  ModaleTitle,
+  Modal,
   TableAdmin,
   TableAdminBody,
   TableAdminBodyRow,
@@ -35,7 +34,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
 import _ from "lodash";
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 
@@ -51,14 +50,15 @@ const columnMap = [
 
 const useReferentList = () =>
   useSWR<ReferentDTO[]>("/admin/referent", fetcherV2, { suspense: true, shouldRetryOnError: false });
-const store = storePicker(useReferentListStore);
+const useStorePicker = storePicker(useReferentListStore);
 
 interface ReferentListProps {
+  editModalId: string;
   referents: ReferentDTO[];
 }
 
-const ReferentList = ({ referents }: ReferentListProps) => {
-  const [orderBy, orderDirection, setCurrentEdited, togglerOrderColumn] = store(
+const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
+  const [orderBy, orderDirection, setCurrentEdited, togglerOrderColumn] = useStorePicker(
     "orderBy",
     "orderDirection",
     "setCurrentEdited",
@@ -94,7 +94,6 @@ const ReferentList = ({ referents }: ReferentListProps) => {
               key={columnValue}
               orderDirection={orderBy === columnValue && orderDirection}
               onClick={() => {
-                console.log("click", columnValue, "orderBy", orderBy);
                 togglerOrderColumn(columnValue);
               }}
             >
@@ -136,8 +135,22 @@ const ReferentList = ({ referents }: ReferentListProps) => {
                   />
                 </TableAdminBodyRowCol>
                 <TableAdminBodyRowCol>
-                  <Icon icon="fr-icon-edit-fill" onClick={() => doEditLine(referent)} />
-                  <Icon icon="fr-icon-delete-fill" onClick={() => doDeleteLine(referent)} />
+                  <FormButton
+                    iconOnly="fr-icon-edit-fill"
+                    variant="tertiary"
+                    size="sm"
+                    onClick={() => doEditLine(referent)}
+                    aria-controls={editModalId}
+                    data-fr-opened="false"
+                  />{" "}
+                  <FormButton
+                    iconOnly="fr-icon-delete-fill"
+                    variant="tertiary"
+                    size="sm"
+                    onClick={() => doDeleteLine(referent)}
+                    // aria-controls={editModalId}
+                    data-fr-opened="false"
+                  />
                 </TableAdminBodyRowCol>
               </TableAdminBodyRow>
             ))}
@@ -148,8 +161,11 @@ const ReferentList = ({ referents }: ReferentListProps) => {
   );
 };
 
-const EditReferentModale = () => {
-  const [currentEdited, setCurrentEdited] = store("currentEdited", "setCurrentEdited");
+interface EditReferentModalProps {
+  id: string;
+}
+const EditReferentModal = ({ id }: EditReferentModalProps) => {
+  const [currentEdited, setCurrentEdited] = useStorePicker("currentEdited", "setCurrentEdited");
   const {
     handleSubmit,
     register,
@@ -171,16 +187,28 @@ const EditReferentModale = () => {
 
   const fieldMap = new Map(columnMap);
 
-  const closeModale = () => {
+  const onClose: ModalProps["onClose"] = () => {
+    console.log("modal closed");
     setCurrentEdited();
   };
 
-  if (!currentEdited) return null;
+  // TODO
+  const doDelete = () => {
+    console.log("trigger delete");
+  };
+
+  // TODO
+  const doEdit = () => {
+    console.log("trigger edit");
+  };
 
   return (
-    <Modale isOpen onClose={closeModale}>
-      <ModaleTitle>Éditer - {writtenName || "👻"}</ModaleTitle>
-      <ModaleContent>
+    <Modal
+      onClose={onClose}
+      title={`Éditer - ${writtenName || "👻"}`}
+      icon="fr-icon-arrow-right-line"
+      id={id}
+      content={
         <form noValidate onSubmit={handleSubmit(_.noop)}>
           <FormGroup isError={!!errors.principal}>
             <FormCheckbox
@@ -214,14 +242,11 @@ const EditReferentModale = () => {
             <FormSelect
               id="edit-referent-region"
               aria-describedby={errors.region && "edit-referent-region-error"}
+              defaultValue={currentEdited?.region ?? ""}
               {...register("region")}
             >
               {_.sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
-                <option
-                  value={code}
-                  selected={code === currentEdited.region}
-                  key={`edit-referent-region-option-${code}`}
-                >
+                <option value={code} key={`edit-referent-region-option-${code}`}>
                   {name} ({code})
                 </option>
               ))}
@@ -238,15 +263,12 @@ const EditReferentModale = () => {
             <FormSelect
               id="edit-referent-county"
               aria-describedby={errors.county && "edit-referent-county-error"}
+              defaultValue={currentEdited?.county ?? ""}
               {...register("county")}
             >
               <option value="">Départements</option>
               {REGIONS_TO_COUNTIES[selectedRegion]?.map(code => (
-                <option
-                  value={code}
-                  selected={code === currentEdited.county}
-                  key={`edit-referent-county-option-${code}`}
-                >
+                <option value={code} key={`edit-referent-county-option-${code}`}>
                   {COUNTIES[code]} ({code})
                 </option>
               ))}
@@ -281,16 +303,32 @@ const EditReferentModale = () => {
             </FormRadioGroupContent>
           </FormRadioGroup>
         </form>
-      </ModaleContent>
-      <ModaleButton variant="tertiary">Supprimer</ModaleButton>
-      <ModaleButton>Sauvegarder</ModaleButton>
-    </Modale>
+      }
+      buttons={({ closableProps, instance }) => [
+        <FormButton
+          variant="tertiary"
+          key={`edit-referent-modal-delete-button-${id}`}
+          onClick={() => {
+            console.log(instance);
+            doDelete();
+            instance?.conceal();
+          }}
+          // {...closableProps}
+        >
+          Supprimer
+        </FormButton>,
+        <FormButton key={`edit-referent-modal-save-button-${id}`} onClick={() => doEdit()} {...closableProps}>
+          Sauvegarder
+        </FormButton>,
+      ]}
+    />
   );
 };
 
 const ReferentListPage: NextPageWithLayout = () => {
   const { data } = useReferentList();
-  const [orderBy, orderDirection] = store("orderBy", "orderDirection");
+  const [orderBy, orderDirection] = useStorePicker("orderBy", "orderDirection");
+  const editModalId = `edit-modal-${useId()}`;
 
   const { handleSubmit, register, watch } = useForm<{ query: string }>();
 
@@ -306,7 +344,7 @@ const ReferentListPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <EditReferentModale />
+      <EditReferentModal id={editModalId} />
       <Box as="section">
         <Container py="8w">
           <h1>Liste des des référents Egapro</h1>
@@ -317,7 +355,7 @@ const ReferentListPage: NextPageWithLayout = () => {
             </FormGroup>
           </form>
           <br />
-          <ReferentList referents={referents} />
+          <ReferentList referents={referents} editModalId={editModalId} />
         </Container>
       </Box>
     </>

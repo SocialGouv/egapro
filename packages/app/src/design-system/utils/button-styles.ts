@@ -7,17 +7,14 @@ export type ButtonStylesProps = {
   iconOnly?: IconStyle;
   iconRight?: IconStyle;
   size?: "lg" | "sm";
-  variant?: "secondary" | "tertiary-no-border" | "tertiary";
+  variant?: "close" | "secondary" | "tertiary-no-border" | "tertiary";
 };
 
 export const buttonStyles = ({ variant, size, iconLeft, iconRight, iconOnly }: ButtonStylesProps): string =>
   clsx(
     "fr-btn",
-    variant === "secondary" && "fr-btn--secondary",
-    variant === "tertiary" && "fr-btn--tertiary",
-    variant === "tertiary-no-border" && "fr-btn--tertiary-no-outline",
-    size === "sm" && "fr-btn--sm",
-    size === "lg" && "fr-btn--lg",
+    variant && `fr-btn--${variant}`,
+    size && `fr-btn--${size}`,
     iconLeft && `fr-btn--icon-left ${iconLeft}`,
     iconRight && `fr-btn--icon-right ${iconRight}`,
     iconOnly && iconOnly,

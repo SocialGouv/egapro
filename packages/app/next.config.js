@@ -27,6 +27,15 @@ const nextConfig = {
       },
     ];
   },
+  // Uncomment to debug dsfr script in node_modules with reload / nocache
+  //   webpack(config, context) {
+  //     if (!context.dev) return config;
+  //     config.snapshot = {
+  //       managedPaths: [/^(.+?[\\/]node_modules[\\/](?!(@gouvfr[\\/]dsfr))(@.+?[\\/])?.+?)[\\/]/],
+  //     };
+
+  //     return config;
+  //   },
 };
 
 module.exports = nextConfig;

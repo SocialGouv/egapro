@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import type { EventEmitter } from "stream";
 import type { ZodLiteral } from "zod";
 
@@ -50,6 +50,32 @@ export type MutableArray<T> = T extends ReadonlyArray<infer U> ? U[] : never;
 export type UniqueString<TStr extends string = string> = TStr & {
   _?: never & symbol;
 };
+
+/**
+ * Usefull when you need a node props with string autocomplete.
+ *
+ * @example
+ * ```ts
+ * type Autocomplete = "foo" | "bar";
+ * // ---
+ * type PropsA = {
+ *  content: ReactNode | Autocomplete;
+ * }
+ *
+ * const propsA: PropsA = {
+ *  content: ""; // BAD: no error and no autocomplete
+ * }
+ * // ---
+ * type PropsB = {
+ *  content: NoStringReactNode | Autocomplete;
+ * }
+ *
+ * const propsB: PropsB = {
+ *  content: "foo"; // GOOD: autocomplete
+ * }
+ * ```
+ */
+export type NoStringReactNode = Exclude<ReactNode, string>;
 
 export type UnknownMapping = UniqueString<string>;
 

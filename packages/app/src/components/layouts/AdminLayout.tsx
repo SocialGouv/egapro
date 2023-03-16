@@ -22,7 +22,7 @@ export const AdminLayout = ({ children, title, placeholder }: PropsWithChildren<
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
-      <DsfrScript />
+      <DsfrScript enableJs />
 
       <ClientOnly>
         <StaffOnly placeholder={placeholder}>{children}</StaffOnly>
