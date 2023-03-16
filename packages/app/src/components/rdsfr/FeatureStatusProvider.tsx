@@ -9,7 +9,7 @@ const ERROR_COLLAPSE_TIMEOUT = 5000;
 export type FeatureStatus =
   | {
       message: string;
-      type: "error" | "sucess";
+      type: "error" | "success";
     }
   | {
       type: "idle";
