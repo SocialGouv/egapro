@@ -10,7 +10,7 @@ export type FetcherReturn = {
   error: unknown;
   isError: boolean;
   isLoading: boolean;
-  message: AlertMessageType | null;
+  message?: AlertMessageType | null;
   mutate: (data: Any) => void;
 };
 
