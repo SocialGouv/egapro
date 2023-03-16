@@ -9,15 +9,14 @@ const ERROR_COLLAPSE_TIMEOUT = 5000;
 export type FeatureStatus =
   | {
       message: string;
-      type: "error";
+      type: "error" | "sucess";
     }
   | {
       type: "idle";
     }
   | {
       type: "loading";
-    }
-  | { message: string; type: "success" };
+    };
 
 type FeatureStatusContextType = {
   featureStatus: FeatureStatus;
@@ -32,8 +31,8 @@ const featureStatusDefault: FeatureStatusContextType = {
   setFeatureStatus: _status => {},
 };
 
-const featureStatusContext = createContext<typeof featureStatusDefault>(featureStatusDefault);
-featureStatusContext.displayName = "FeatureStatusContext";
+const FeatureStatusContext = createContext(featureStatusDefault);
+FeatureStatusContext.displayName = "FeatureStatusContext";
 
 /**
  * Context provider for FeatureStatus.
@@ -42,9 +41,9 @@ export const FeatureStatusProvider = ({ children }: PropsWithChildren) => {
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
   return (
-    <featureStatusContext.Provider value={{ featureStatus, setFeatureStatus }}>
+    <FeatureStatusContext.Provider value={{ featureStatus, setFeatureStatus }}>
       {children}
-    </featureStatusContext.Provider>
+    </FeatureStatusContext.Provider>
   );
 };
 
@@ -56,7 +55,7 @@ export const FeatureStatusProvider = ({ children }: PropsWithChildren) => {
  * @param reset true if you want to reinitialize the featureStatus (useful for pages component e. g.).
  */
 export const useFeatureStatus = ({ reset = false }: { reset?: boolean } = {}) => {
-  const context = useContext(featureStatusContext);
+  const context = useContext(FeatureStatusContext);
   const { setFeatureStatus } = context;
 
   if (!context)

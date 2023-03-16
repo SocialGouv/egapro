@@ -105,7 +105,13 @@ export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
                 label="Adresse email"
                 state={errors.email?.message ? "error" : "default"}
                 stateRelatedMessage={errors.email?.message}
-                nativeInputProps={{ ...register("email") }}
+                nativeInputProps={{
+                  ...register("email"),
+                  type: "email",
+                  spellCheck: false,
+                  autoComplete: "email",
+                  placeholder: "Exemple : nom@domaine.fr",
+                }}
               />
               <Button disabled={featureStatus.type === "loading" || !isValid}>Envoyer</Button>
             </div>

@@ -5,6 +5,7 @@ import { Header } from "@codegouvfr/react-dsfr/Header";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { useUser } from "@services/apiClient";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
@@ -29,7 +30,8 @@ const BrandTop = () => (
 );
 
 const DeclarationHeader = () => {
-  const { user } = useUser();
+  const router = useRouter();
+  const { user, logout } = useUser();
 
   return (
     <Header
@@ -45,10 +47,13 @@ const DeclarationHeader = () => {
         // },
         {
           iconId: "fr-icon-lock-fill",
-          linkProps: {
-            href: "#",
-          },
+          // linkProps: {
+          //   href: "#",
+          // },
           text: user ? "Se déconnecter" : "Se connecter",
+          buttonProps: {
+            onClick: user ? logout : () => router.push("/_index-egapro/declaration/email"),
+          },
         },
       ]}
       serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
