@@ -8,4 +8,8 @@ export class TupleString<T extends readonly string[] = string[]> extends SimpleS
     const escapedValues = strings.map(escapeStringRegexp).join("|");
     super(value, new RegExp(`^(${escapedValues})$`));
   }
+
+  public getValue(): T[number] {
+    return super.getValue();
+  }
 }

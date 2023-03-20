@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "scripts/dev",
-    "dev:apiv2db": "docker-compose up --build apiv2_db apiv2_pgadmin",
+    "pgadmin": "docker-compose up --build --force-recreate --remove-orphans pgadmin",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
     "dev:declaration": "docker-compose up --build --renew-anon-volumes --force-recreate --remove-orphans declaration",

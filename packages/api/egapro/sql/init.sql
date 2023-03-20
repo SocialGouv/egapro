@@ -67,3 +67,18 @@ create trigger trigger_ownership_request_modified_at
     on ownership_request
     for each row
 execute procedure modified_at_auto();
+
+
+create table if not exists referent
+(
+    id                  uuid                default uuid_generate_v4()
+        constraint referent_pk primary key,
+    county              text,
+    name                text not null,
+    principal           boolean not null    default false,
+    region              text not null,
+    type                text not null,
+    value               text not null,
+    substitute_name     text,
+    substitute_email    text
+);
