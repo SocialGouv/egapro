@@ -10,6 +10,7 @@ import {
   Container,
   FormButton,
   FormCheckbox,
+  FormFieldset,
   FormGroup,
   FormGroupLabel,
   FormGroupMessage,
@@ -68,6 +69,7 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
 
   const { mutate, error } = useReferentList();
 
+  // TODO:
   const doEditLine = useCallback(
     (referent: ReferentDTO) => {
       setCurrentEdited(referent);
@@ -75,6 +77,7 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
     [setCurrentEdited],
   );
 
+  // TODO:
   const doDeleteLine = useCallback(
     async (referent: ReferentDTO) => {
       const yes = confirm(`Supprimer "${referent.name}" ?`);
@@ -118,7 +121,17 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
                 <TableAdminBodyRowCol>
                   {referent.county ? `${COUNTIES[referent.county]} (${referent.county})` : "-"}
                 </TableAdminBodyRowCol>
-                <TableAdminBodyRowCol>{referent.name}</TableAdminBodyRowCol>
+                <TableAdminBodyRowCol>
+                  {referent.name}
+                  {referent.type === "email" && referent.substitute?.name ? (
+                    <>
+                      <br />
+                      <i className="fr-text--xs">{referent.substitute.name}</i>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </TableAdminBodyRowCol>
                 <TableAdminBodyRowCol>
                   <Link
                     size="sm"
@@ -127,6 +140,16 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
                   >
                     {_.truncate(referent.value, { length: 40 })}
                   </Link>
+                  {referent.type === "email" && referent.substitute?.email ? (
+                    <>
+                      <br />
+                      <Link size="sm" href={`mailto:${referent.substitute.email}`}>
+                        <i className="fr-text--xs">{_.truncate(referent.substitute.email, { length: 40 })}</i>
+                      </Link>
+                    </>
+                  ) : (
+                    ""
+                  )}
                 </TableAdminBodyRowCol>
                 <TableAdminBodyRowCol>
                   <Icon
@@ -169,22 +192,29 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
   const {
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors, isValid, isDirty },
     reset,
     watch,
+    trigger,
   } = useForm<ReferentDTO>({
     resolver: zodResolver(referentDTOSchema),
     mode: "onChange",
   });
 
   useEffect(() => {
-    reset(currentEdited);
+    reset({
+      ...currentEdited,
+      county: currentEdited?.county,
+      substitute: {
+        email: currentEdited?.substitute?.email ?? "",
+        name: currentEdited?.substitute?.name ?? "",
+      },
+    });
   }, [reset, currentEdited]);
 
   const writtenName = watch("name");
   const selectedRegion = watch("region");
   const selectedType = watch("type");
-
   const fieldMap = new Map(columnMap);
 
   const onClose: ModalProps["onClose"] = () => {
@@ -198,8 +228,12 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
   };
 
   // TODO
-  const doEdit = () => {
+  const doEdit = async () => {
     console.log("trigger edit");
+    const go = await trigger();
+    if (go) {
+      handleSubmit(data => console.log(data));
+    }
   };
 
   return (
@@ -209,105 +243,136 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
       icon="fr-icon-arrow-right-line"
       id={id}
       content={
-        <form noValidate onSubmit={handleSubmit(_.noop)}>
+        <form onSubmit={handleSubmit(_.noop)}>
+          <input type="hidden" id="form-referent-id" {...register("id")} />
           <FormGroup isError={!!errors.principal}>
             <FormCheckbox
-              id="edit-referent-principal"
-              aria-describedby={errors.principal && "edit-referent-principal-error"}
+              id="form-referent-principal"
+              aria-describedby={errors.principal && "form-referent-principal-error"}
               {...register("principal")}
             >
               {fieldMap.get("principal")}
             </FormCheckbox>
             {errors.principal && (
-              <FormGroupMessage id="edit-referent-principal-error">{errors.principal.message}</FormGroupMessage>
+              <FormGroupMessage id="form-referent-principal-error">{errors.principal.message}</FormGroupMessage>
             )}
           </FormGroup>
 
           <FormGroup isError={!!errors.name}>
-            <FormGroupLabel htmlFor="edit-referent-name" hint='Format : "Prénom NOM" ou "Nom du service"'>
+            <FormGroupLabel htmlFor="form-referent-name" hint='Format : "Prénom NOM" ou "Nom du service"'>
               {fieldMap.get("name")}
             </FormGroupLabel>
             <FormInput
-              id="edit-referent-name"
-              aria-describedby={errors.name && "edit-referent-name-error"}
+              id="form-referent-name"
+              aria-describedby={errors.name && "form-referent-name-error"}
               placeholder="Jean DUPONT"
               autoComplete="off"
               {...register("name")}
             />
-            {errors.name && <FormGroupMessage id="edit-referent-name-error">{errors.name.message}</FormGroupMessage>}
+            {errors.name && <FormGroupMessage id="form-referent-name-error">{errors.name.message}</FormGroupMessage>}
           </FormGroup>
 
           <FormGroup isError={!!errors.region}>
-            <FormGroupLabel htmlFor="edit-referent-region">{fieldMap.get("region")}</FormGroupLabel>
+            <FormGroupLabel htmlFor="form-referent-region">{fieldMap.get("region")}</FormGroupLabel>
             <FormSelect
-              id="edit-referent-region"
-              aria-describedby={errors.region && "edit-referent-region-error"}
+              id="form-referent-region"
+              aria-describedby={errors.region && "form-referent-region-error"}
               defaultValue={currentEdited?.region ?? ""}
               {...register("region")}
             >
               {_.sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
-                <option value={code} key={`edit-referent-region-option-${code}`}>
+                <option value={code} key={`form-referent-region-option-${code}`}>
                   {name} ({code})
                 </option>
               ))}
             </FormSelect>
             {errors.region && (
-              <FormGroupMessage id="edit-referent-region-error">{errors.region.message}</FormGroupMessage>
+              <FormGroupMessage id="form-referent-region-error">{errors.region.message}</FormGroupMessage>
             )}
           </FormGroup>
 
           <FormGroup isError={!!errors.county}>
-            <FormGroupLabel htmlFor="edit-referent-county" hint="Non obligatoire (ex: coordination régionale)">
+            <FormGroupLabel htmlFor="form-referent-county" hint="Non obligatoire (ex: coordination régionale)">
               {fieldMap.get("county")}
             </FormGroupLabel>
             <FormSelect
-              id="edit-referent-county"
-              aria-describedby={errors.county && "edit-referent-county-error"}
+              id="form-referent-county"
+              aria-describedby={errors.county && "form-referent-county-error"}
               defaultValue={currentEdited?.county ?? ""}
-              {...register("county")}
+              {...register("county", { setValueAs: value => (value === "" ? void 0 : value) })}
             >
               <option value="">Départements</option>
               {REGIONS_TO_COUNTIES[selectedRegion]?.map(code => (
-                <option value={code} key={`edit-referent-county-option-${code}`}>
+                <option value={code} key={`form-referent-county-option-${code}`}>
                   {COUNTIES[code]} ({code})
                 </option>
               ))}
             </FormSelect>
             {errors.county && (
-              <FormGroupMessage id="edit-referent-county-error">{errors.county.message}</FormGroupMessage>
+              <FormGroupMessage id="form-referent-county-error">{errors.county.message}</FormGroupMessage>
             )}
           </FormGroup>
 
           <FormGroup isError={!!errors.value}>
-            <FormGroupLabel htmlFor="edit-referent-value" hint={`Format : ${selectedType}`}>
+            <FormGroupLabel htmlFor="form-referent-substitute-name" hint={`Format : ${selectedType}`}>
               {fieldMap.get("value")}
             </FormGroupLabel>
             <FormInput
-              id="edit-referent-value"
-              aria-describedby={errors.name && "edit-referent-value-error"}
+              id="form-referent-value"
+              aria-describedby={errors.value && "form-referent-value-error"}
               placeholder={selectedType === "url" ? "https://site.gouv.fr" : "email@gouv.fr"}
-              autoComplete="off"
+              autoComplete={selectedType === "url" ? "off" : "email"}
+              type={selectedType}
+              spellCheck="false"
               {...register("value")}
             />
-            {errors.value && <FormGroupMessage id="edit-referent-value-error">{errors.value.message}</FormGroupMessage>}
+            {errors.value && <FormGroupMessage id="form-referent-value-error">{errors.value.message}</FormGroupMessage>}
           </FormGroup>
+
           <FormRadioGroup inline>
-            <FormRadioGroupLegend id="edit-referent-type">Type de la valeur</FormRadioGroupLegend>
+            <FormRadioGroupLegend id="form-referent-type">Type de la valeur</FormRadioGroupLegend>
             <FormRadioGroupContent>
-              <FormRadioGroupInput id="edit-referent-type-email" value="email" {...register("type")}>
+              <FormRadioGroupInput id="form-referent-type-email" value="email" {...register("type", { deps: "value" })}>
                 Email
               </FormRadioGroupInput>
-              <FormRadioGroupInput id="edit-referent-type-url" value="url" {...register("type")}>
+              <FormRadioGroupInput id="form-referent-type-url" value="url" {...register("type", { deps: "value" })}>
                 URL
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
+
+          <FormFieldset
+            legend="Suppléant"
+            hint="Non obligatoire. Peut-être représenté uniquement par le nom ou l'email."
+            error={errors.substitute?.name?.message || errors.substitute?.email?.message}
+            elements={[
+              <FormGroup key="form-referent-substitute-name">
+                <FormGroupLabel htmlFor="form-referent-substitute-name">Nom</FormGroupLabel>
+                <FormInput
+                  id="form-referent-substitute-name"
+                  placeholder="Jean DUPONT"
+                  autoComplete="off"
+                  {...register("substitute.name")}
+                />
+              </FormGroup>,
+              <FormGroup key="form-referent-substitute-email">
+                <FormGroupLabel htmlFor="form-referent-substitute-email">Email</FormGroupLabel>
+                <FormInput
+                  id="form-referent-substitute-email"
+                  placeholder="email@gouv.fr"
+                  type="email"
+                  autoComplete="off"
+                  {...register("substitute.email")}
+                />
+              </FormGroup>,
+            ]}
+          />
         </form>
       }
       buttons={({ closableProps, instance }) => [
         <FormButton
           variant="tertiary"
-          key={`edit-referent-modal-delete-button-${id}`}
+          key={`form-referent-modal-delete-button-${id}`}
           onClick={() => {
             console.log(instance);
             doDelete();
@@ -317,7 +382,12 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
         >
           Supprimer
         </FormButton>,
-        <FormButton key={`edit-referent-modal-save-button-${id}`} onClick={() => doEdit()} {...closableProps}>
+        <FormButton
+          disabled={!isValid || !isDirty}
+          key={`form-referent-modal-save-button-${id}`}
+          onClick={() => doEdit()}
+          {...closableProps}
+        >
           Sauvegarder
         </FormButton>,
       ]}
@@ -340,6 +410,10 @@ const ReferentListPage: NextPageWithLayout = () => {
     if (REGIONS[referent.region].toLowerCase().includes(str)) return true;
     if (referent.name.toLowerCase().includes(str)) return true;
     if (referent.value.toLowerCase().includes(str)) return true;
+    if (referent.type === "email") {
+      if (referent.substitute?.email?.toLowerCase().includes(str)) return true;
+      if (referent.substitute?.name?.toLowerCase().includes(str)) return true;
+    }
   });
 
   return (

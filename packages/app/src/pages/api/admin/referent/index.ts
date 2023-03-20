@@ -52,6 +52,9 @@ const data: ReferentDTO[] = [
     name: "Jean-François PENNEL",
     value: "DEETS-976.UC@deets.gouv.fr",
     type: "email",
+    substitute: {
+      email: "jean-francois.pennel@deets.gouv.fr",
+    },
   },
   {
     id: "5",
@@ -60,6 +63,9 @@ const data: ReferentDTO[] = [
     region: "11",
     type: "email",
     value: "drieets-idf.ega-pro@drieets.gouv.fr",
+    substitute: {
+      name: "Fabien THIANT",
+    },
   },
   {
     id: "6",
@@ -69,6 +75,9 @@ const data: ReferentDTO[] = [
     name: "Alexandra MUSY",
     value: "drieets-idf-ud75.ega-pro@drieets.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Fabienne DEMANIE",
+    },
   },
   {
     id: "7",
@@ -105,6 +114,9 @@ const data: ReferentDTO[] = [
     name: "Lolita REINA-RICO",
     value: "drieets-idf-ud92.ega-pro@drieets.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Alexandra KOSNAR",
+    },
   },
   {
     id: "11",
@@ -291,6 +303,9 @@ const data: ReferentDTO[] = [
     name: "Marie-France HUE",
     value: "ddets-ega-pro@calvados.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Chafea WIEZIK",
+    },
   },
   {
     id: "32",
@@ -353,6 +368,9 @@ const data: ReferentDTO[] = [
     name: "François VOET",
     value: "ddets-59-ega-pro@nord.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Anne Sophie GUYOT",
+    },
   },
   {
     id: "39",
@@ -388,6 +406,9 @@ const data: ReferentDTO[] = [
     region: "44",
     type: "email",
     value: "dreets-ge.ega-pro@dreets.gouv.fr",
+    substitute: {
+      name: "Isabelle COLLARD",
+    },
   },
   {
     id: "43",
@@ -424,6 +445,9 @@ const data: ReferentDTO[] = [
     name: "Aurélie CORNIAUX",
     value: "ddetspp-ega-pro@haute-marne.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Alexandra DUSSAUCY",
+    },
   },
   {
     id: "47",
@@ -433,6 +457,9 @@ const data: ReferentDTO[] = [
     name: "Mickaël MAROT",
     value: "ddets-ega-pro@meurthe-et-moselle.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Sylvie DIVOUX",
+    },
   },
   {
     id: "48",
@@ -637,6 +664,9 @@ const data: ReferentDTO[] = [
     name: "Corinne COULON",
     value: "ddets-ega-pro@gironde.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Anne RAMAT",
+    },
   },
   {
     id: "71",
@@ -664,6 +694,9 @@ const data: ReferentDTO[] = [
     name: "Angélique ITHURBURRU",
     value: "ddets-ega-pro@pyrenees-atlantiques.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Mélaine LABAT",
+    },
   },
   {
     id: "74",
@@ -699,6 +732,9 @@ const data: ReferentDTO[] = [
     region: "76",
     type: "email",
     value: "oc.ega-pro@dreets.gouv.fr",
+    substitute: {
+      name: "Fatima BAIBOU",
+    },
   },
   {
     id: "78",
@@ -708,6 +744,9 @@ const data: ReferentDTO[] = [
     name: "Sandra ROUCH",
     value: "ddetspp-ega-pro@ariege.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Annabelle FOUCHER",
+    },
   },
   {
     id: "79",
@@ -744,6 +783,9 @@ const data: ReferentDTO[] = [
     name: "Jennifer ABADIE",
     value: "ddets-ega-pro@haute-garonne.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Sylvie MARTINOU",
+    },
   },
   {
     id: "83",
@@ -771,6 +813,9 @@ const data: ReferentDTO[] = [
     name: "Ingrid LE FEVRE",
     value: "ddetspp-ega-pro@lot.gouv.fr",
     type: "email",
+    substitute: {
+      name: "Bertrand VIDAL",
+    },
   },
   {
     id: "86",
@@ -815,14 +860,9 @@ const data: ReferentDTO[] = [
     region: "84",
     type: "email",
     value: "michelle.charpille@dreets.gouv.fr",
-  },
-  {
-    id: "91",
-    name: "DREETS AUVERGNE-RHONE-ALPES",
-    principal: false,
-    region: "84",
-    type: "email",
-    value: "ara.dialogue-social@dreets.gouv.fr",
+    substitute: {
+      email: "ara.dialogue-social@dreets.gouv.fr",
+    },
   },
   {
     id: "92",
@@ -832,15 +872,9 @@ const data: ReferentDTO[] = [
     name: "Caroline MANDY",
     value: "caroline.mandy@ain.gouv.fr",
     type: "email",
-  },
-  {
-    id: "93",
-    principal: true,
-    name: "Egapro Ain",
-    region: "84",
-    type: "email",
-    value: "ddets-direction@ain.gouv.fr",
-    county: "01",
+    substitute: {
+      email: "ddets-direction@ain.gouv.fr",
+    },
   },
   {
     id: "94",
@@ -868,15 +902,9 @@ const data: ReferentDTO[] = [
     name: "Nathalie ANGELIER",
     value: "nathalie.angelier@cantal.gouv.fr",
     type: "email",
-  },
-  {
-    id: "97",
-    principal: true,
-    region: "84",
-    county: "15",
-    name: "Egapro Cantal",
-    value: "ddetspp-direction@cantal.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddetspp-direction@cantal.gouv.fr",
+    },
   },
   {
     id: "98",
@@ -895,15 +923,9 @@ const data: ReferentDTO[] = [
     name: "Lysiane DUPREZ-COLLIGNON",
     value: "lysiane.duprez-collignon@isere.gouv.fr",
     type: "email",
-  },
-  {
-    id: "100",
-    principal: true,
-    region: "84",
-    county: "38",
-    name: "Egapro Isere",
-    value: "ddets-direction@isere.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddets-direction@isere.gouv.fr",
+    },
   },
   {
     id: "101",
@@ -913,15 +935,9 @@ const data: ReferentDTO[] = [
     name: "Marie Cécile CHAMPEIL",
     value: "marie-cecile.champeil@loire.gouv.fr",
     type: "email",
-  },
-  {
-    id: "102",
-    principal: true,
-    region: "84",
-    county: "42",
-    name: "Egapro Loire",
-    value: "ddets-direction@loire.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddets-direction@loire.gouv.fr",
+    },
   },
   {
     id: "103",
@@ -931,15 +947,9 @@ const data: ReferentDTO[] = [
     name: "Isabelle ESTIER-PORTE",
     value: "isabelle.estier-porte@haute-loire.gouv.fr",
     type: "email",
-  },
-  {
-    id: "104",
-    principal: true,
-    region: "84",
-    county: "43",
-    name: "Egapro Haute-Loire",
-    value: "ddcspp@haute-loire.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddcspp@haute-loire.gouv.fr",
+    },
   },
   {
     id: "105",
@@ -949,15 +959,9 @@ const data: ReferentDTO[] = [
     name: "Estelle PARAYRE",
     value: "estelle.parayre@puy-de-dome.gouv.fr",
     type: "email",
-  },
-  {
-    id: "106",
-    principal: true,
-    region: "84",
-    county: "63",
-    name: "Egapro Puy de Dôme",
-    value: "ddcs@puy-de-dome.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddcs@puy-de-dome.gouv.fr",
+    },
   },
   {
     id: "107",
@@ -976,15 +980,9 @@ const data: ReferentDTO[] = [
     name: "Hubert GUIRIMAND",
     value: "hubert.guirimand@savoie.gouv.fr",
     type: "email",
-  },
-  {
-    id: "109",
-    principal: true,
-    region: "84",
-    county: "73",
-    name: "Egapro Savoie",
-    value: "ddetspp-direction@savoie.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddetspp-direction@savoie.gouv.fr",
+    },
   },
   {
     id: "110",
@@ -994,15 +992,9 @@ const data: ReferentDTO[] = [
     name: "Marie WODLI",
     value: "marie.wodli@haute-savoie.gouv.fr",
     type: "email",
-  },
-  {
-    id: "111",
-    principal: true,
-    region: "84",
-    county: "74",
-    name: "Egapro Haute Savoie",
-    value: "ddets-direction@haute-savoie.gouv.fr",
-    type: "email",
+    substitute: {
+      email: "ddets-direction@haute-savoie.gouv.fr",
+    },
   },
   {
     id: "112",

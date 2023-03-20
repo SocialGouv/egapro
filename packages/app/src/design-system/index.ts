@@ -10,6 +10,7 @@ export * from "./base/custom/AnchorLink";
 export * from "./base/Footer";
 export * from "./base/FormButton";
 export * from "./base/FormCheckbox";
+export * from "./base/FormFieldset";
 export * from "./base/FormGroup";
 export * from "./base/FormInput";
 export * from "./base/FormRadio";

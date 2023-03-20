@@ -7,7 +7,7 @@ import styles from "./FormInput.module.css";
 
 type FormInputCustomTypes = HTMLInputTypeAttribute | "percentage";
 
-export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type FormInputProps = Omit<JSX.IntrinsicElements["input"], "id" | "type"> & {
   icon?: IconStyle;
   id: string;
   isDisabled?: boolean;
