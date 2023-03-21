@@ -1,7 +1,6 @@
-import { action } from "@storybook/addon-actions";
-import type { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { FormButton } from "@design-system";
+import { action } from "@storybook/addon-actions";
+import type { ComponentMeta, ComponentStory } from "@storybook/react";
 
 export default {
   title: "Base/Form/FormButton",
@@ -41,7 +40,7 @@ export const WithVariant = () => (
     <FormButton variant="tertiary" onClick={action("button-click")}>
       FormButton
     </FormButton>
-    <FormButton variant="tertiary-no-border" onClick={action("button-click")}>
+    <FormButton variant="tertiary-no-outline" onClick={action("button-click")}>
       FormButton
     </FormButton>
   </div>
@@ -79,7 +78,7 @@ export const IsDisabled = () => (
     <FormButton variant="tertiary" onClick={action("button-click")} isDisabled>
       FormButton
     </FormButton>
-    <FormButton variant="tertiary-no-border" onClick={action("button-click")} isDisabled>
+    <FormButton variant="tertiary-no-outline" onClick={action("button-click")} isDisabled>
       FormButton
     </FormButton>
   </div>

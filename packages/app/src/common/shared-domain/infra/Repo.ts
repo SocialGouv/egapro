@@ -5,7 +5,7 @@ export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
   getAll(): Promise<T[]>;
 }
 
-export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo {
+export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo<T> {
   delete(item: T): Promise<void>;
   exists(id: ID): Promise<boolean>;
   getOne(id: ID): Promise<T | null>;

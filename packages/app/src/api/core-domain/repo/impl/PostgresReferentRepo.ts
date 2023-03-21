@@ -27,6 +27,10 @@ export class PostgresReferentRepo implements IReferentRepo {
     }
   }
 
+  public async truncate(): Promise<void> {
+    await sql`truncate table ${this.table}`;
+  }
+
   public async delete(item: Referent): Promise<void> {
     if (!item.id) {
       throw new UnexpectedRepositoryError("Cannot delete without id provided.");

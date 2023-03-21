@@ -1,6 +1,5 @@
-import type { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { ButtonAsLink } from "@design-system";
+import type { ComponentMeta, ComponentStory } from "@storybook/react";
 
 export default {
   title: "Base/ButtonAsLink",
@@ -40,7 +39,7 @@ export const WithVariant = () => (
     <ButtonAsLink href="#" variant="tertiary">
       Button
     </ButtonAsLink>
-    <ButtonAsLink href="#" variant="tertiary-no-border">
+    <ButtonAsLink href="#" variant="tertiary-no-outline">
       Button
     </ButtonAsLink>
   </div>
@@ -76,7 +75,7 @@ export const IsDisabled = () => (
     <ButtonAsLink variant="tertiary" isDisabled>
       Button
     </ButtonAsLink>
-    <ButtonAsLink variant="tertiary-no-border" isDisabled>
+    <ButtonAsLink variant="tertiary-no-outline" isDisabled>
       Button
     </ButtonAsLink>
   </div>

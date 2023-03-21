@@ -1,6 +1,6 @@
 import type { ReferentRaw } from "@api/core-domain/infra/db/raw";
 import type { Mapper } from "@common/shared-domain";
-import { Email, Url } from "@common/shared-domain/domain/valueObjects";
+import { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
 
 import { Referent } from "../domain/Referent";
 import { County } from "../domain/valueObjects/County";
@@ -11,23 +11,26 @@ import type { ReferentDTO } from "../dtos/ReferentDTO";
 export const referentMap: Required<Mapper<Referent, ReferentDTO, ReferentRaw>> = {
   toDomain(raw) {
     const type = new ReferentType(raw.type);
-    return new Referent({
-      name: raw.name,
-      principal: raw.principal,
-      type,
-      value: type.getValue() === ReferentType.Enum.EMAIL ? new Email(raw.value) : new Url(raw.value),
-      county: raw.county ? new County(raw.county) : void 0,
-      region: new Region(raw.region),
-      substitute: {
-        email: raw.substitute_email ? new Email(raw.substitute_email) : void 0,
-        name: raw.substitute_name ?? void 0,
+    return new Referent(
+      {
+        name: raw.name,
+        principal: raw.principal,
+        type,
+        value: type.getValue() === ReferentType.Enum.EMAIL ? new Email(raw.value) : new Url(raw.value),
+        county: raw.county ? new County(raw.county) : void 0,
+        region: new Region(raw.region),
+        substitute: {
+          email: raw.substitute_email ? new Email(raw.substitute_email) : void 0,
+          name: raw.substitute_name ?? void 0,
+        },
       },
-    });
+      new UniqueID(raw.id),
+    );
   },
 
   toDTO(obj) {
     return {
-      id: obj.id!.getValue(),
+      id: obj.id?.getValue() ?? "",
       name: obj.name,
       principal: obj.principal,
       region: obj.region.getValue(),
@@ -43,7 +46,7 @@ export const referentMap: Required<Mapper<Referent, ReferentDTO, ReferentRaw>> =
 
   toPersistence(obj) {
     return {
-      id: obj.id!.getValue(),
+      id: obj.id?.getValue() ?? "",
       name: obj.name,
       principal: obj.principal,
       region: obj.region.getValue(),

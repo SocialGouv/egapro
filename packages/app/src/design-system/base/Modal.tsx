@@ -13,6 +13,7 @@ import { Grid, GridCol } from "./Grid";
 import { Icon } from "./Icon";
 
 export type ModalProps = JSX.IntrinsicElements["dialog"] & {
+  backdropCanClose?: boolean;
   buttons: (param: { closableProps: ClosableModalButtonProps; instance?: ModalInstance }) => ReactNode[];
   content: ReactNode;
   icon?: IconStyle | NoStringReactNode;
@@ -34,6 +35,7 @@ export const Modal = ({
   buttons,
   size,
   id,
+  backdropCanClose = true,
   ...rest
 }: PropsWithoutChildren<ModalProps>) => {
   const titleId = `fr-modal-title-modal-${useId()}`;
@@ -63,7 +65,7 @@ export const Modal = ({
       className="fr-modal"
       aria-labelledby={titleId}
       role="dialog"
-      data-fr-concealing-backdrop
+      data-fr-concealing-backdrop={backdropCanClose}
     >
       <Container className="fr-container--fluid fr-container-md">
         <Grid justifyCenter>

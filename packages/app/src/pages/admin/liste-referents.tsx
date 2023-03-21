@@ -6,7 +6,9 @@ import { storePicker } from "@common/utils/zustand";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { ModalProps } from "@design-system";
 import {
+  Alert,
   Box,
+  ButtonGroup,
   Container,
   FormButton,
   FormCheckbox,
@@ -31,11 +33,12 @@ import {
   TableAdminHeadCol,
 } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import type { ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
 import _ from "lodash";
-import { Suspense, useCallback, useEffect, useId } from "react";
+import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 
@@ -160,7 +163,7 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
                 <TableAdminBodyRowCol>
                   <FormButton
                     iconOnly="fr-icon-edit-fill"
-                    variant="tertiary"
+                    variant="tertiary-no-outline"
                     size="sm"
                     onClick={() => doEditLine(referent)}
                     aria-controls={editModalId}
@@ -168,7 +171,7 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
                   />{" "}
                   <FormButton
                     iconOnly="fr-icon-delete-fill"
-                    variant="tertiary"
+                    variant="tertiary-no-outline"
                     size="sm"
                     onClick={() => doDeleteLine(referent)}
                     // aria-controls={editModalId}
@@ -395,6 +398,95 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
   );
 };
 
+const ActionButtons = () => {
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const doCreate = () => {
+    console.log("CREATE");
+  };
+
+  const doExport = () => {
+    console.log("EXPORT");
+  };
+
+  const doImport = async (modal?: ModalInstance) => {
+    if (!uploadFile) return;
+    setErrorMessage("");
+
+    const body = new FormData();
+    body.append("file", uploadFile);
+    setUploading(true);
+    try {
+      await fetcherV2("/admin/referent/import", {
+        headers: {},
+        method: "PUT",
+        body,
+      });
+
+      modal?.conceal();
+      setUploadFile(null);
+      document.location.reload();
+    } catch (error: unknown) {
+      setErrorMessage((error as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadToClient: JSX.IntrinsicElements["input"]["onChange"] = event => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadFile(file);
+    } else {
+      setUploadFile(null);
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        id="import-modal"
+        title="Importer des référents"
+        icon="fr-icon-download-fill"
+        backdropCanClose={!uploading}
+        content={
+          <>
+            <Box>
+              Importer depuis un fichier JSON une liste de référents.
+              <br />
+              Attention, cette opération remplacera les données existantes !
+            </Box>
+            <br />
+            <input disabled={uploading} type="file" accept=".json" name="import-file" onChange={uploadToClient} />
+            {uploading && <Alert mt="2w">Uploading...</Alert>}
+            {errorMessage && (
+              <Alert mt="2w" type="error">
+                {errorMessage}
+              </Alert>
+            )}
+          </>
+        }
+        buttons={({ instance }) => [
+          <FormButton disabled={!uploadFile || uploading} key="import-modal-button" onClick={() => doImport(instance)}>
+            Importer
+          </FormButton>,
+        ]}
+      />
+      <ButtonGroup inline="mobile-up" className="fr-mb-4w">
+        <FormButton onClick={() => doCreate()}>Ajouter</FormButton>
+        <FormButton variant="secondary" onClick={() => doExport()}>
+          Exporter
+        </FormButton>
+        <FormButton variant="tertiary" aria-controls="import-modal" data-fr-opened="false">
+          Importer
+        </FormButton>
+      </ButtonGroup>
+    </>
+  );
+};
+
 const ReferentListPage: NextPageWithLayout = () => {
   const { data } = useReferentList();
   const [orderBy, orderDirection] = useStorePicker("orderBy", "orderDirection");
@@ -423,13 +515,21 @@ const ReferentListPage: NextPageWithLayout = () => {
         <Container py="8w">
           <h1>Liste des des référents Egapro</h1>
 
-          <form noValidate onSubmit={handleSubmit(_.noop)}>
-            <FormGroup>
-              <FormInput id="query-param" placeholder="Rechercher" autoComplete="off" {...register("query")} />
-            </FormGroup>
-          </form>
-          <br />
-          <ReferentList referents={referents} editModalId={editModalId} />
+          <ActionButtons />
+
+          {data?.length ? (
+            <>
+              <form noValidate onSubmit={handleSubmit(_.noop)}>
+                <FormGroup>
+                  <FormInput id="query-param" placeholder="Rechercher" autoComplete="off" {...register("query")} />
+                </FormGroup>
+              </form>
+              <br />
+              <ReferentList referents={referents} editModalId={editModalId} />
+            </>
+          ) : (
+            <Alert>Pas de référents d'enregistré.</Alert>
+          )}
         </Container>
       </Box>
     </>
