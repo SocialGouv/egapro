@@ -619,27 +619,6 @@ async def test_search_with_offset(client):
     assert len(results) == 1
     assert results[0] == {
         "entreprise": {
-            "département": "78",
-            "ues": None,
-            "raison_sociale": "Open Bar",
-            "code_naf": None,
-            "région": "11",
-            "siren": "987654321",
-            "effectif": {"tranche": "1000:"},
-        },
-        "notes": {"2019": None},
-        "notes_augmentations": {"2019": None},
-        "notes_augmentations_et_promotions": {"2019": None},
-        "notes_conges_maternite": {"2019": None},
-        "notes_hautes_rémunérations": {"2019": None},
-        "notes_promotions": {"2019": None},
-        "notes_remunerations": {"2019": None},
-        "label": "Open Bar",
-    }
-    results = await db.search.run(region="11", limit=1, offset=1)
-    assert len(results) == 1
-    assert results[0] == {
-        "entreprise": {
             "département": "77",
             "ues": None,
             "raison_sociale": "Oran Bar",
@@ -656,6 +635,27 @@ async def test_search_with_offset(client):
         "notes_promotions": {"2019": None},
         "notes_remunerations": {"2019": None},
         "label": "Oran Bar",
+    }
+    results = await db.search.run(region="11", limit=1, offset=1)
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "ues": None,
+            "raison_sociale": "Open Bar",
+            "code_naf": None,
+            "région": "11",
+            "siren": "987654321",
+            "effectif": {"tranche": "1000:"},
+        },
+        "notes": {"2019": None},
+        "notes_augmentations": {"2019": None},
+        "notes_augmentations_et_promotions": {"2019": None},
+        "notes_conges_maternite": {"2019": None},
+        "notes_hautes_rémunérations": {"2019": None},
+        "notes_promotions": {"2019": None},
+        "notes_remunerations": {"2019": None},
+        "label": "Open Bar",
     }
 
 async def test_search_representation_equilibree_with_offset(client):
@@ -689,28 +689,6 @@ async def test_search_representation_equilibree_with_offset(client):
     assert len(results) == 1
     assert results[0] == {
         "entreprise": {
-            "département": "78",
-            "raison_sociale": "Open Bar",
-            "code_naf": None,
-            "région": "11",
-            "siren": "987654321",
-        },
-        "représentation_équilibrée": {
-            "2019": {
-                "pourcentage_femmes_cadres": None,
-                "pourcentage_hommes_cadres": None,
-                "pourcentage_femmes_membres": None,
-                "pourcentage_hommes_membres": None,
-                "motif_non_calculabilité_cadres": None,
-                "motif_non_calculabilité_membres": None,
-            },
-        },
-        "label": "Open Bar",
-    }
-    results = await db.search_representation_equilibree.run(region="11", limit=1, offset=1)
-    assert len(results) == 1
-    assert results[0] == {
-        "entreprise": {
             "département": "77",
             "raison_sociale": "Oran Bar",
             "région": "11",
@@ -728,6 +706,28 @@ async def test_search_representation_equilibree_with_offset(client):
             },
         },
         "label": "Oran Bar",
+    }
+    results = await db.search_representation_equilibree.run(region="11", limit=1, offset=1)
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "raison_sociale": "Open Bar",
+            "code_naf": None,
+            "région": "11",
+            "siren": "987654321",
+        },
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
+        "label": "Open Bar",
     }
 
 async def test_search_with_siren(declaration):
