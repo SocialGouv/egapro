@@ -25,9 +25,9 @@ export default class AdminReferentImportController implements NextController {
       console.error(error);
       if (error instanceof ImportReferentsError) {
         if (error.previousError instanceof ValidationError) {
-          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send({ error: error.previousError.message });
+          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: error.previousError.message });
         }
-        res.status(StatusCodes.BAD_REQUEST).send({ error: error.appErrorList().map(e => e.message) });
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.appErrorList().map(e => e.message) });
       } else {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }

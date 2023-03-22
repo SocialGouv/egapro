@@ -3,7 +3,7 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import type { Referent } from "@common/core-domain/domain/Referent";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
-import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
+import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 
 import type { IReferentRepo } from "../IReferentRepo";
@@ -31,11 +31,8 @@ export class PostgresReferentRepo implements IReferentRepo {
     await sql`truncate table ${this.table}`;
   }
 
-  public async delete(item: Referent): Promise<void> {
-    if (!item.id) {
-      throw new UnexpectedRepositoryError("Cannot delete without id provided.");
-    }
-    await this.sql`delete from ${this.table} where id = ${item.id?.getValue()}`;
+  public async delete(id: UniqueID): Promise<void> {
+    await this.sql`delete from ${this.table} where id = ${id.getValue()}`;
   }
 
   public async exists(id: UniqueID): Promise<boolean> {
@@ -49,10 +46,14 @@ export class PostgresReferentRepo implements IReferentRepo {
     return referentMap.toDomain(raw);
   }
 
-  public async save(item: Referent): Promise<void> {
+  public async save(item: Referent): Promise<UniqueID> {
     const raw = referentMap.toPersistence(item);
 
-    await sql`insert into ${this.table} ${sql(raw)} on conflict do update set ${sql(
+    if (raw.id === "") {
+      delete (raw as Any).id;
+    }
+
+    const update = sql(
       raw,
       "county",
       "name",
@@ -62,11 +63,15 @@ export class PostgresReferentRepo implements IReferentRepo {
       "substitute_name",
       "type",
       "value",
-    )}`;
+    );
+    const [rawReturn] = await this.sql`insert into ${this.table} ${sql(
+      raw,
+    )} on conflict (id) do update set ${update} returning *`;
+    return new UniqueID(rawReturn.id);
   }
 
-  public update(item: Referent): Promise<void> {
-    return this.save(item);
+  public async update(item: Referent): Promise<void> {
+    await this.save(item);
   }
 
   // --- bulk
@@ -77,17 +82,19 @@ export class PostgresReferentRepo implements IReferentRepo {
     return raws.map(referentMap.toDomain);
   }
 
-  public async saveBulk(...items: Referent[]): Promise<void> {
+  public async saveBulk(...items: Referent[]): Promise<UniqueID[]> {
     const raws = items.map(item => {
       const raw = referentMap.toPersistence(item);
       delete (raw as Any).id;
       return raw;
     });
 
-    await this.sql`insert into ${this.table} ${sql(raws)} on conflict do nothing returning true`;
+    const rawReturn = await this.sql`insert into ${this.table} ${sql(raws)} returning *`;
+
+    return rawReturn.map(item => new UniqueID(item.id));
   }
 
-  public deleteBulk(..._items: Referent[]): Promise<void> {
+  public deleteBulk(..._ids: UniqueID[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
   public existsMultiple(..._ids: UniqueID[]): Promise<boolean[]> {

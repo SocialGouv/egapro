@@ -43,7 +43,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public deleteBulk(...items: Ownership[]): Promise<void> {
+  public deleteBulk(..._ids: OwnershipPK[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -64,39 +64,43 @@ select siren, email, exists (
     return raws.map(raw => raw.exists);
   }
 
-  public getMultiple(...ids: OwnershipPK[]): Promise<Ownership[]> {
+  public getMultiple(..._ids: OwnershipPK[]): Promise<Ownership[]> {
     throw new Error("Method not implemented.");
   }
 
-  public async saveBulk(...items: Ownership[]): Promise<void> {
+  public async saveBulk(...items: Ownership[]): Promise<OwnershipPK[]> {
     const raws = items.map(ownershipMap.toPersistence);
 
     await this.sql`insert into ${this.table} ${_sql(raws)} on conflict do nothing returning true`;
+
+    return items.map(item => [item.siren, item.email]);
   }
 
-  public updateBulk(...items: Ownership[]): Promise<void> {
+  public updateBulk(..._items: Ownership[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public delete(item: Ownership): Promise<void> {
+  public delete(_id: OwnershipPK): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public exists(id: OwnershipPK): Promise<boolean> {
+  public exists(_id: OwnershipPK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
 
-  public getOne(id: OwnershipPK): Promise<Ownership | null> {
+  public getOne(_id: OwnershipPK): Promise<Ownership | null> {
     throw new Error("Method not implemented.");
   }
 
-  public async save(item: Ownership): Promise<void> {
+  public async save(item: Ownership): Promise<OwnershipPK> {
     const raw = ownershipMap.toPersistence(item);
 
     await this.sql`insert into ${this.table} ${_sql(raw)} on conflict do nothing returning true`;
+
+    return [item.siren, item.email];
   }
 
-  public update(item: Ownership): Promise<void> {
+  public update(_item: Ownership): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

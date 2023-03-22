@@ -1,10 +1,10 @@
 import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
-import { referentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
+import { createReferentDTOSchema, referentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "@common/dict";
 import { Object } from "@common/utils/overload";
+import type { pvoid } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AdminLayout } from "@components/layouts/AdminLayout";
-import type { ModalProps } from "@design-system";
 import {
   Alert,
   Box,
@@ -57,11 +57,12 @@ const useReferentList = () =>
 const useStorePicker = storePicker(useReferentListStore);
 
 interface ReferentListProps {
+  doDelete: (referent: ReferentDTO) => pvoid;
   editModalId: string;
   referents: ReferentDTO[];
 }
 
-const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
+const ReferentList = ({ referents, editModalId, doDelete }: ReferentListProps) => {
   const [orderBy, orderDirection, setCurrentEdited, togglerOrderColumn] = useStorePicker(
     "orderBy",
     "orderDirection",
@@ -70,26 +71,9 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
   );
   const [animationParent] = useAutoAnimate<HTMLTableSectionElement>();
 
-  const { mutate, error } = useReferentList();
-
-  // TODO:
-  const doEditLine = useCallback(
-    (referent: ReferentDTO) => {
-      setCurrentEdited(referent);
-    },
-    [setCurrentEdited],
-  );
-
-  // TODO:
-  const doDeleteLine = useCallback(
-    async (referent: ReferentDTO) => {
-      const yes = confirm(`Supprimer "${referent.name}" ?`);
-      if (yes) {
-        await mutate();
-      }
-    },
-    [mutate],
-  );
+  const doEditLine = (referent: ReferentDTO) => {
+    setCurrentEdited(referent);
+  };
 
   return (
     <>
@@ -173,9 +157,7 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
                     iconOnly="fr-icon-delete-fill"
                     variant="tertiary-no-outline"
                     size="sm"
-                    onClick={() => doDeleteLine(referent)}
-                    // aria-controls={editModalId}
-                    data-fr-opened="false"
+                    onClick={() => doDelete(referent)}
                   />
                 </TableAdminBodyRowCol>
               </TableAdminBodyRow>
@@ -189,9 +171,11 @@ const ReferentList = ({ referents, editModalId }: ReferentListProps) => {
 
 interface EditReferentModalProps {
   id: string;
+  mode: "create" | "edit";
 }
-const EditReferentModal = ({ id }: EditReferentModalProps) => {
-  const [currentEdited, setCurrentEdited] = useStorePicker("currentEdited", "setCurrentEdited");
+const ReferentModal = ({ id, mode = "edit" }: EditReferentModalProps) => {
+  const [currentEdited] = useStorePicker("currentEdited");
+  const { mutate, data } = useReferentList();
   const {
     handleSubmit,
     register,
@@ -200,57 +184,81 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
     watch,
     trigger,
   } = useForm<ReferentDTO>({
-    resolver: zodResolver(referentDTOSchema),
+    resolver: zodResolver(mode === "edit" ? referentDTOSchema : createReferentDTOSchema),
     mode: "onChange",
   });
 
-  useEffect(() => {
+  const cleanForm = useCallback(() => {
     reset({
-      ...currentEdited,
-      county: currentEdited?.county,
-      substitute: {
-        email: currentEdited?.substitute?.email ?? "",
-        name: currentEdited?.substitute?.name ?? "",
-      },
+      type: "email",
+      principal: true,
+      region: void 0,
     });
-  }, [reset, currentEdited]);
+  }, [reset]);
+
+  useEffect(() => {
+    if (mode === "edit") {
+      reset({
+        ...currentEdited,
+        county: currentEdited?.county,
+        substitute: {
+          email: currentEdited?.substitute?.email ?? "",
+          name: currentEdited?.substitute?.name ?? "",
+        },
+      });
+    } else cleanForm();
+  }, [reset, currentEdited, mode, cleanForm]);
 
   const writtenName = watch("name");
   const selectedRegion = watch("region");
   const selectedType = watch("type");
   const fieldMap = new Map(columnMap);
 
-  const onClose: ModalProps["onClose"] = () => {
-    console.log("modal closed");
-    setCurrentEdited();
-  };
-
-  // TODO
-  const doDelete = () => {
-    console.log("trigger delete");
-  };
-
-  // TODO
-  const doEdit = async () => {
-    console.log("trigger edit");
+  const updateReferentList = (list: ReferentDTO[] | undefined, formData: ReferentDTO) => [
+    ...(list?.filter(item => item.id !== formData.id) ?? []),
+    formData,
+  ];
+  const doSave = async (modal?: ModalInstance) => {
     const go = await trigger();
     if (go) {
-      handleSubmit(data => console.log(data));
+      handleSubmit(async formData => {
+        if (mode === "edit") {
+          await mutate(
+            async current => {
+              await fetcherV2(`/admin/referent/${formData.id}`, { method: "POST", body: JSON.stringify(formData) });
+              return updateReferentList(current, formData);
+            },
+            {
+              optimisticData: updateReferentList(data, formData),
+              rollbackOnError: true,
+            },
+          );
+        } else {
+          await mutate(async current => {
+            const { id } = await fetcherV2<{ id: string }>(`/admin/referent`, {
+              method: "PUT",
+              body: JSON.stringify(formData),
+            });
+            return [...(current ?? []), { ...formData, id }];
+          });
+        }
+        modal?.conceal();
+      })();
     }
   };
 
   return (
     <Modal
-      onClose={onClose}
-      title={`Éditer - ${writtenName || "👻"}`}
+      onClose={cleanForm}
+      title={`${mode === "edit" ? "Éditer" : "Créer"} - ${writtenName || "👻"}`}
       icon="fr-icon-arrow-right-line"
       id={id}
       content={
         <form onSubmit={handleSubmit(_.noop)}>
-          <input type="hidden" id="form-referent-id" {...register("id")} />
+          <input type="hidden" id={`${mode}-form-referent-id`} {...register("id")} />
           <FormGroup isError={!!errors.principal}>
             <FormCheckbox
-              id="form-referent-principal"
+              id={`${mode}-form-referent-principal`}
               aria-describedby={errors.principal && "form-referent-principal-error"}
               {...register("principal")}
             >
@@ -266,7 +274,7 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
               {fieldMap.get("name")}
             </FormGroupLabel>
             <FormInput
-              id="form-referent-name"
+              id={`${mode}-form-referent-name`}
               aria-describedby={errors.name && "form-referent-name-error"}
               placeholder="Jean DUPONT"
               autoComplete="off"
@@ -278,11 +286,12 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
           <FormGroup isError={!!errors.region}>
             <FormGroupLabel htmlFor="form-referent-region">{fieldMap.get("region")}</FormGroupLabel>
             <FormSelect
-              id="form-referent-region"
+              id={`${mode}-form-referent-region`}
               aria-describedby={errors.region && "form-referent-region-error"}
-              defaultValue={currentEdited?.region ?? ""}
+              defaultValue={mode === "edit" ? currentEdited?.region ?? "" : ""}
               {...register("region")}
             >
+              <option value="">Régions</option>
               {_.sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
                 <option value={code} key={`form-referent-region-option-${code}`}>
                   {name} ({code})
@@ -299,12 +308,15 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
               {fieldMap.get("county")}
             </FormGroupLabel>
             <FormSelect
-              id="form-referent-county"
+              id={`${mode}-form-referent-county`}
               aria-describedby={errors.county && "form-referent-county-error"}
-              defaultValue={currentEdited?.county ?? ""}
-              {...register("county", { setValueAs: value => (value === "" ? void 0 : value) })}
+              defaultValue={mode === "edit" ? currentEdited?.county ?? "" : ""}
+              {...register("county", {
+                disabled: !selectedRegion,
+                setValueAs: value => (value === "" ? void 0 : value),
+              })}
             >
-              <option value="">Départements</option>
+              <option value="">{selectedRegion ? "Département" : "Choisir une région d'abord"}</option>
               {REGIONS_TO_COUNTIES[selectedRegion]?.map(code => (
                 <option value={code} key={`form-referent-county-option-${code}`}>
                   {COUNTIES[code]} ({code})
@@ -321,7 +333,7 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
               {fieldMap.get("value")}
             </FormGroupLabel>
             <FormInput
-              id="form-referent-value"
+              id={`${mode}-form-referent-value`}
               aria-describedby={errors.value && "form-referent-value-error"}
               placeholder={selectedType === "url" ? "https://site.gouv.fr" : "email@gouv.fr"}
               autoComplete={selectedType === "url" ? "off" : "email"}
@@ -333,12 +345,20 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
           </FormGroup>
 
           <FormRadioGroup inline>
-            <FormRadioGroupLegend id="form-referent-type">Type de la valeur</FormRadioGroupLegend>
+            <FormRadioGroupLegend id={`${mode}-form-referent-type`}>Type de la valeur</FormRadioGroupLegend>
             <FormRadioGroupContent>
-              <FormRadioGroupInput id="form-referent-type-email" value="email" {...register("type", { deps: "value" })}>
+              <FormRadioGroupInput
+                id={`${mode}-form-referent-type-email`}
+                value="email"
+                {...register("type", { deps: "value" })}
+              >
                 Email
               </FormRadioGroupInput>
-              <FormRadioGroupInput id="form-referent-type-url" value="url" {...register("type", { deps: "value" })}>
+              <FormRadioGroupInput
+                id={`${mode}-form-referent-type-url`}
+                value="url"
+                {...register("type", { deps: "value" })}
+              >
                 URL
               </FormRadioGroupInput>
             </FormRadioGroupContent>
@@ -352,44 +372,31 @@ const EditReferentModal = ({ id }: EditReferentModalProps) => {
               <FormGroup key="form-referent-substitute-name">
                 <FormGroupLabel htmlFor="form-referent-substitute-name">Nom</FormGroupLabel>
                 <FormInput
-                  id="form-referent-substitute-name"
+                  id={`${mode}-form-referent-substitute-name`}
                   placeholder="Jean DUPONT"
                   autoComplete="off"
-                  {...register("substitute.name")}
+                  {...register("substitute.name", { setValueAs: value => (value === "" ? void 0 : value) })}
                 />
               </FormGroup>,
               <FormGroup key="form-referent-substitute-email">
                 <FormGroupLabel htmlFor="form-referent-substitute-email">Email</FormGroupLabel>
                 <FormInput
-                  id="form-referent-substitute-email"
+                  id={`${mode}-form-referent-substitute-email`}
                   placeholder="email@gouv.fr"
                   type="email"
                   autoComplete="off"
-                  {...register("substitute.email")}
+                  {...register("substitute.email", { setValueAs: value => (value === "" ? void 0 : value) })}
                 />
               </FormGroup>,
             ]}
           />
         </form>
       }
-      buttons={({ closableProps, instance }) => [
-        <FormButton
-          variant="tertiary"
-          key={`form-referent-modal-delete-button-${id}`}
-          onClick={() => {
-            console.log(instance);
-            doDelete();
-            instance?.conceal();
-          }}
-          // {...closableProps}
-        >
-          Supprimer
-        </FormButton>,
+      buttons={({ instance }) => [
         <FormButton
           disabled={!isValid || !isDirty}
           key={`form-referent-modal-save-button-${id}`}
-          onClick={() => doEdit()}
-          {...closableProps}
+          onClick={() => doSave(instance)}
         >
           Sauvegarder
         </FormButton>,
@@ -402,11 +409,9 @@ const ActionButtons = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const { mutate } = useReferentList();
 
-  const doCreate = () => {
-    console.log("CREATE");
-  };
-
+  // TODO
   const doExport = () => {
     console.log("EXPORT");
   };
@@ -427,8 +432,9 @@ const ActionButtons = () => {
 
       modal?.conceal();
       setUploadFile(null);
-      document.location.reload();
+      mutate();
     } catch (error: unknown) {
+      console.log(error);
       setErrorMessage((error as Error).message);
     } finally {
       setUploading(false);
@@ -446,6 +452,7 @@ const ActionButtons = () => {
 
   return (
     <>
+      <ReferentModal id="create-modal" mode="create" />
       <Modal
         id="import-modal"
         title="Importer des référents"
@@ -475,8 +482,10 @@ const ActionButtons = () => {
         ]}
       />
       <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-        <FormButton onClick={() => doCreate()}>Ajouter</FormButton>
-        <FormButton variant="secondary" onClick={() => doExport()}>
+        <FormButton aria-controls="create-modal" data-fr-opened="false">
+          Ajouter
+        </FormButton>
+        <FormButton variant="secondary" disabled onClick={() => doExport()}>
           Exporter
         </FormButton>
         <FormButton variant="tertiary" aria-controls="import-modal" data-fr-opened="false">
@@ -488,11 +497,35 @@ const ActionButtons = () => {
 };
 
 const ReferentListPage: NextPageWithLayout = () => {
-  const { data } = useReferentList();
+  const { data, mutate } = useReferentList();
   const [orderBy, orderDirection] = useStorePicker("orderBy", "orderDirection");
   const editModalId = `edit-modal-${useId()}`;
 
-  const { handleSubmit, register, watch } = useForm<{ query: string }>();
+  const { register, watch } = useForm<{ query: string }>();
+
+  const removeFromData = (list: ReferentDTO[] | undefined, id: string) => list?.filter(item => item.id !== id);
+  const doDelete = async (referent: ReferentDTO) => {
+    if (!referent.id) {
+      console.warn("Cannot delete referent without id.", referent);
+      return;
+    }
+
+    const yes = confirm(`Supprimer "${referent.name}" ?`);
+    if (yes) {
+      await mutate(
+        async currentData => {
+          await fetcherV2(`/admin/referent/${referent.id}`, {
+            method: "DELETE",
+          });
+          return removeFromData(currentData, referent.id);
+        },
+        {
+          optimisticData: removeFromData(data, referent.id),
+          rollbackOnError: true,
+        },
+      );
+    }
+  };
 
   const searchString = watch("query");
   const referents = _.orderBy(data, orderBy, orderDirection).filter(referent => {
@@ -510,7 +543,7 @@ const ReferentListPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <EditReferentModal id={editModalId} />
+      <ReferentModal id={editModalId} mode="edit" />
       <Box as="section">
         <Container py="8w">
           <h1>Liste des des référents Egapro</h1>
@@ -519,13 +552,13 @@ const ReferentListPage: NextPageWithLayout = () => {
 
           {data?.length ? (
             <>
-              <form noValidate onSubmit={handleSubmit(_.noop)}>
+              <form noValidate onSubmit={_.noop}>
                 <FormGroup>
                   <FormInput id="query-param" placeholder="Rechercher" autoComplete="off" {...register("query")} />
                 </FormGroup>
               </form>
               <br />
-              <ReferentList referents={referents} editModalId={editModalId} />
+              <ReferentList referents={referents} editModalId={editModalId} doDelete={doDelete} />
             </>
           ) : (
             <Alert>Pas de référents d'enregistré.</Alert>
@@ -543,7 +576,7 @@ const PlaceholderPage = () => {
         <h1>Liste des des référents Egapro</h1>
 
         <Box
-          style={{ background: "var(--background-alt-grey)", width: "100%", height: "20rem", borderRadius: 20 }}
+          style={{ background: "var(--background-alt-grey)", width: "100%", height: "20rem", borderRadius: 4 }}
         ></Box>
       </Container>
     </Box>
@@ -553,7 +586,7 @@ const PlaceholderPage = () => {
 ReferentListPage.getLayout = ({ children }) => {
   return (
     <AdminLayout title="Liste référents" placeholder={<PlaceholderPage />}>
-      {children}
+      <Suspense fallback={<PlaceholderPage />}>{children}</Suspense>
     </AdminLayout>
   );
 };

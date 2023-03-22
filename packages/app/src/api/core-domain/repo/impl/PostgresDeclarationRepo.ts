@@ -33,10 +33,10 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     }
   }
 
-  public delete(item: Declaration): Promise<void> {
+  public delete(_id: DeclarationPK): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists(id: DeclarationPK): Promise<boolean> {
+  public exists(_id: DeclarationPK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<Declaration[]> {
@@ -61,23 +61,18 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       throw error;
     }
   }
-  public async save(item: Declaration, deleteDraft = false): Promise<void> {
+  public async save(item: Declaration, deleteDraft = false): Promise<DeclarationPK> {
     const raw = declarationMap.toPersistence(item);
     if (deleteDraft) (raw as Any).draft = null;
-    await sql`insert into ${this.table} ${sql(
-      raw,
-      "data",
-      "declared_at",
-      "modified_at",
-      "siren",
-      "year",
-      "declarant",
-      "draft",
-    )} on conflict (siren, year) do update set ${sql(raw, "data", "modified_at", "declarant", "draft")}`;
+    const insert = sql(raw, "data", "declared_at", "modified_at", "siren", "year", "declarant", "draft");
+    const update = sql(raw, "data", "modified_at", "declarant", "draft");
+    await this.sql`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
+
+    return [item.siren, item.year];
   }
 
-  public update(item: Declaration): Promise<void> {
-    return this.save(item, true);
+  public async update(item: Declaration): Promise<void> {
+    await this.save(item, true);
   }
 
   private get requestLimit() {

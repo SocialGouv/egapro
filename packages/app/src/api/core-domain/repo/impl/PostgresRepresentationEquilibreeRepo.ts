@@ -36,10 +36,10 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     }
   }
 
-  public delete(item: RepresentationEquilibree): Promise<void> {
+  public delete(_id: RepresentationEquilibreePK): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists([siren, year]: RepresentationEquilibreePK): Promise<boolean> {
+  public exists(_id: RepresentationEquilibreePK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<RepresentationEquilibree[]> {
@@ -64,19 +64,20 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
       throw error;
     }
   }
-  public async save(item: RepresentationEquilibree): Promise<void> {
+  public async save(item: RepresentationEquilibree): Promise<RepresentationEquilibreePK> {
     const raw = representationEquilibreeMap.toPersistence(item);
-    await sql`insert into ${this.table} value ${sql(
-      raw,
-      "data",
-      "declared_at",
-      "modified_at",
+
+    const insert = sql(raw, "data", "declared_at", "modified_at", "siren", "year");
+    const update = sql(raw, "data", "modified_at");
+    await this.sql`insert into ${this.table} value ${insert} on conflict ${sql([
       "siren",
       "year",
-    )} on conflict ${sql(["siren", "year"])} do update set ${sql(raw, "data", "modified_at")}`;
+    ])} do update set ${update}`;
+
+    return [item.siren, item.year];
   }
-  public update(item: RepresentationEquilibree): Promise<void> {
-    return this.save(item);
+  public async update(item: RepresentationEquilibree): Promise<void> {
+    await this.save(item);
   }
 
   private get requestLimit() {

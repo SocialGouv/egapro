@@ -1,8 +1,10 @@
 import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { referentRepo } from "@api/core-domain/repo";
+import { CreateReferent, CreateReferentError } from "@api/core-domain/useCases/referent/CreateReferent";
 import { GetReferents, GetReferentsError } from "@api/core-domain/useCases/referent/GetReferents";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
+import type { CreateReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { createReferentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
 import { StatusCodes } from "http-status-codes";
 import { ValidationError } from "json-schema-to-typescript";
@@ -12,7 +14,7 @@ type Res = NextController.Res<NextController>;
 @Handler
 export default class AdminReferentController implements NextController {
   @LegacyTokenRequire({ staffOnly: true })
-  public async get(req: TokenReq, res: Res) {
+  public async get(_req: TokenReq, res: Res) {
     const useCase = new GetReferents(referentRepo);
 
     try {
@@ -30,21 +32,25 @@ export default class AdminReferentController implements NextController {
     }
   }
 
-  //   @LegacyTokenRequire({ staffOnly: true })
-  //   @RouteZodBody(referentDTOSchema)
-  //   public async post(req: TokenReq, res: Res) {
-  //     // update
-  //   }
-
   @LegacyTokenRequire({ staffOnly: true })
   @RouteZodBody(createReferentDTOSchema)
   public async put(req: TokenReq, res: Res) {
-    // create
-  }
+    const useCase = new CreateReferent(referentRepo);
+    const dto = req.body as unknown as CreateReferentDTO;
 
-  //   @LegacyTokenRequire({ staffOnly: true })
-  //   @RouteZodBody(z.object({ id: z.string() }))
-  //   public async delete(req: TokenReq, res: Res) {
-  //     // create
-  //   }
+    try {
+      const id = await useCase.execute(dto);
+      res.status(StatusCodes.CREATED).json({ id });
+    } catch (error: unknown) {
+      console.error(error);
+      if (error instanceof CreateReferentError) {
+        if (error.previousError instanceof ValidationError) {
+          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: error.previousError.message });
+        }
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.appErrorList().map(e => e.message) });
+      } else {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
+      }
+    }
+  }
 }
