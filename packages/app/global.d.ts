@@ -2,6 +2,10 @@ declare module "@gouvfr/dsfr/dist/dsfr.nomodule";
 declare module "@gouvfr/dsfr/dist/dsfr.module";
 declare module "@gouvfr/dsfr/dist/patch/patch.module";
 declare module "@gouvfr/dsfr/dist/dsfr/dsfr.module";
+declare module "@json2csv/*";
+declare module "js-xlsx" {
+  export * from "xlsx";
+}
 declare module "@gouvfr/dsfr" {
   export type Modes = "angular" | "auto" | "loaded" | "manual" | "react" | "runtime" | "vue";
 
