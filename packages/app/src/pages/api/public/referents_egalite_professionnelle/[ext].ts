@@ -28,7 +28,7 @@ export default class AdminReferentByIdController implements BaseController {
       const stream = await useCase.execute(ext);
       res.header("Content-Type", EXPORT_MIME[ext]);
       pipeline(stream, res._res, error => {
-        error && console.log("==== AZ", error);
+        error && res.header("Content-Type", EXPORT_MIME["json"]).status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
       });
     } catch (error: unknown) {
       console.error(error);

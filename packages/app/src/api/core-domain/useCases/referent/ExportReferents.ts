@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default-member */
 import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { COUNTIES, REGIONS } from "@common/dict";
@@ -12,7 +13,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import JS_XLSX from "js-xlsx";
 import _ from "lodash";
-import path from "path";
 import { Readable } from "stream";
 import XLSX from "xlsx";
 
@@ -22,7 +22,6 @@ export const EXPORT_MIME = {
   json: "application/json",
   csv: "text/csv",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //   xlsx: "application/json",
 };
 export const EXPORT_EXT = Object.keys(EXPORT_MIME);
 export type ValidExportExtension = typeof EXPORT_EXT[number];
@@ -93,15 +92,6 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
   }
 
   private streamAsXLSX(json: ReferentDTO[]): Readable {
-    // XLSX;
-    // const wbref = JS_XLSX.readFile(path.resolve(process.cwd(), "referents_egalite_professionnelle.xlsx"), {
-    //   cellStyles: true,
-    //   cellHTML: false,
-    //   cellNF: false,
-    // });
-    // console.log(wbref.vbaraw);
-    // return Readable.from("coucou");
-    path;
     const workbook = XLSX.utils.book_new();
     workbook.Props = {
       Author: "Egapro",
@@ -109,10 +99,8 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
       Company: "Ministère du Travail",
     };
     const worksheet = convertToWorksheet(json);
-    console.log(worksheet["!merges"]);
     XLSX.utils.book_append_sheet(workbook, worksheet, "Référents EgaPro");
 
-    JS_XLSX;
     const buf: Buffer = JS_XLSX.write(workbook, { type: "buffer" });
     return Readable.from(buf);
   }
@@ -120,6 +108,7 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
 
 export class ExportReferentsError extends AppError {}
 
+/** Specific region referent name */
 const REGION_REF_NAME: SimpleObject<string> = {
   "01": "DEETS GUADELOUPE",
   "03": "DGCOPOP GUYANE",
@@ -137,6 +126,7 @@ const borderStyle = {
   },
 };
 
+// CELL STYLE UTILS
 const fontStyle = {
   font: { sz: "11", name: "Calibri", color: { rgb: "000000" } },
   fill: {
@@ -153,6 +143,7 @@ const fontBoldStyle = {
   },
 };
 const fontLinkStyle = {
+  ...fontStyle,
   font: {
     ...fontStyle.font,
     underline: true,
@@ -163,10 +154,7 @@ const fontLinkStyle = {
 const regionTitleFullStyle = {
   fill: {
     patternType: "solid",
-    // fgColor: { rgb: "FF000000" },
-    // fgColor: { theme: 0, rgb: "000000" },
     fgColor: { rgb: "FFD8D8D8" },
-    // bgColor: { indexed: 64 },
   },
   font: {
     ...fontBoldStyle.font,
@@ -184,23 +172,28 @@ const emptyBorderCell: XLSX.CellObject = {
   },
 };
 
+// ---
+
 type ReferentWithLabels = ReferentDTO & {
   countyName: string;
   regionName: string;
 };
 const A_LETTER = 65;
 const address = (addr: string): XLSX.CellAddress => {
-  const [col, row] = addr.split("");
+  const [col, ..._row] = addr.split("");
+  const row = _row.join("");
   return { c: col.charCodeAt(0) - A_LETTER, r: parseInt(row) - 1 };
 };
 
 function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
+  // add region name and country name
   const augmented = data.map<ReferentWithLabels>(item => ({
     ...item,
     regionName: REGIONS[item.region],
     countyName: item.county ? COUNTIES[item.county] : "",
   }));
 
+  // sort alpha by regionname and county number
   const sorted = _.orderBy(augmented, ["regionName", "county"], ["asc", "asc"]);
   const grouped = _.groupBy(sorted, "regionName");
   const sheet: XLSX.StrictWS = {};
@@ -208,12 +201,14 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
     "!merges": [],
   };
 
-  const mergeCells = (merges: typeof meta["!merges"], s: string, e: string) =>
-    merges?.push({
+  /** Utils to quick add cells to merge like `mergeCells("A1", "A4")` */
+  const mergeCells = (s: string, e: string) =>
+    meta["!merges"]?.push({
       s: address(s),
       e: address(e),
     });
 
+  // main title
   sheet["C1"] = {
     v: `LISTE DES RÉFÉRENTS ÉGALITÉ PROFESSIONNELLE AU ${format(Date.now(), "dd MMMM yyyy", {
       locale: fr,
@@ -228,24 +223,26 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
     },
   };
 
-  mergeCells(meta["!merges"], "C1", "E1");
-  //   mergeCells("C1", "C2");
+  // merge main title in two steps
+  mergeCells("C1", "E1");
+  mergeCells("C1", "E2");
 
+  // start after title
   let line = 2;
   for (const [regionName, region] of Object.entries(grouped)) {
     line++;
-    // sheet[`A${line}`] = emptyBorderCell; // left side empty
-    // mergeCells(`A${line}`, `B${line}`);
+    sheet[`A${line}`] = emptyBorderCell; // left side empty
+    mergeCells(`A${line}`, `B${line}`);
 
     const [[coordRegionnale], restRegion] = _.partition(region, item => !item.county);
     const regionId = coordRegionnale?.region || restRegion[0]?.region;
-    //
+
     sheet[`C${line}`] = {
       t: "s",
       v: REGION_REF_NAME[regionId] ?? `DREETS ${regionName.toLocaleUpperCase()}`,
       s: regionTitleFullStyle,
     };
-    mergeCells(meta["!merges"], `C${line}`, `E${line}`); // merge region title
+    mergeCells(`C${line}`, `E${line}`); // merge region title
 
     if (coordRegionnale) {
       line++;
@@ -318,11 +315,8 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
         t: "s",
         v: referent.name + subName,
         s: {
-          ...fontBoldStyle,
+          ...fontStyle,
           ...borderStyle,
-          alignment: {
-            wrapText: true,
-          },
         },
       };
       sheet[`E${line}`] = {

@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { createReferentDTOSchema, referentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "@common/dict";
@@ -8,6 +9,7 @@ import { AdminLayout } from "@components/layouts/AdminLayout";
 import {
   Alert,
   Box,
+  ButtonAsLink,
   ButtonGroup,
   Container,
   FormButton,
@@ -411,11 +413,6 @@ const ActionButtons = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { mutate } = useReferentList();
 
-  // TODO
-  const doExport = () => {
-    console.log("EXPORT");
-  };
-
   const doImport = async (modal?: ModalInstance) => {
     if (!uploadFile) return;
     setErrorMessage("");
@@ -481,11 +478,48 @@ const ActionButtons = () => {
           </FormButton>,
         ]}
       />
+      <Modal
+        id="export-modal"
+        title="Exporter les référents"
+        content={
+          <>
+            <Box>
+              <ButtonAsLink
+                variant="tertiary-no-outline"
+                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`}
+                target="_blank"
+              >
+                XLSX
+              </ButtonAsLink>
+              <ButtonAsLink
+                variant="tertiary-no-outline"
+                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.csv`}
+                target="_blank"
+              >
+                CSV
+              </ButtonAsLink>
+              <ButtonAsLink
+                variant="tertiary-no-outline"
+                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.json`}
+                target="_blank"
+              >
+                JSON
+              </ButtonAsLink>
+            </Box>
+            <br />
+          </>
+        }
+        buttons={({ closableProps }) => [
+          <FormButton key="export-modal-button-close" {...closableProps}>
+            Fermer
+          </FormButton>,
+        ]}
+      />
       <ButtonGroup inline="mobile-up" className="fr-mb-4w">
         <FormButton aria-controls="create-modal" data-fr-opened="false">
           Ajouter
         </FormButton>
-        <FormButton variant="secondary" disabled onClick={() => doExport()}>
+        <FormButton variant="secondary" aria-controls="export-modal" data-fr-opened="false">
           Exporter
         </FormButton>
         <FormButton variant="tertiary" aria-controls="import-modal" data-fr-opened="false">
