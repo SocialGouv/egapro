@@ -6,8 +6,8 @@ import type { NextController } from "@api/shared-domain/infra/http/impl/NextCont
 import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
 import type { CreateReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { createReferentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
+import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
-import { ValidationError } from "json-schema-to-typescript";
 
 type TokenReq = LegacyTokenRequire.Wrap<NextController.Req<NextController>>;
 type Res = NextController.Res<NextController>;

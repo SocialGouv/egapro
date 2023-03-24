@@ -9,8 +9,8 @@ import {
 } from "@api/core-domain/useCases/referent/ExportReferents";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
+import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
-import { ValidationError } from "json-schema-to-typescript";
 import { pipeline } from "stream";
 
 type BaseController = NextController<"ext">;
