@@ -1,3 +1,24 @@
+# [2.87.0](https://github.com/SocialGouv/egapro/compare/v2.86.1...v2.87.0) (2023-03-24)
+
+
+### Bug Fixes
+
+* fix pytests for search ft ([9c82a66](https://github.com/SocialGouv/egapro/commit/9c82a664c672832e577fb7b7282b5bcda43dfb16))
+* naf code in search repeq (Fixes [#1571](https://github.com/SocialGouv/egapro/issues/1571)) ([6695711](https://github.com/SocialGouv/egapro/commit/66957116dc1226bab504e590f068898e62000d9e))
+* order search results by year instead of declared_at (Fixes [#1571](https://github.com/SocialGouv/egapro/issues/1571)) ([cb49833](https://github.com/SocialGouv/egapro/commit/cb4983394df0d5087457a66e9d62f58cb7898147))
+* update simu help (Fixes [#1572](https://github.com/SocialGouv/egapro/issues/1572)) ([2b9e60b](https://github.com/SocialGouv/egapro/commit/2b9e60b5372791920d282be46d781ebbb2cc6780))
+* wording declaration page on simulation (Fixes [#1587](https://github.com/SocialGouv/egapro/issues/1587)) ([9cb8d70](https://github.com/SocialGouv/egapro/commit/9cb8d70d6df62791d96769860b91395c74ae96fe))
+* wording in simu for mes decla (Fixes [#1595](https://github.com/SocialGouv/egapro/issues/1595)) ([e206c21](https://github.com/SocialGouv/egapro/commit/e206c21c2fd0ce90721943944502c5076c855388))
+* wording in simu for mes entreprises (Fixes [#1594](https://github.com/SocialGouv/egapro/issues/1594)) ([f8c8e5b](https://github.com/SocialGouv/egapro/commit/f8c8e5bfd6727278fa028e6546f1d76c54ed5067))
+* wording mes declaration (Fixes [#1586](https://github.com/SocialGouv/egapro/issues/1586)) ([4653fd7](https://github.com/SocialGouv/egapro/commit/4653fd7bd2f6cc31e088e237aed381426d9a7651))
+* wording pdf name ajout declarants (Fixes [#1591](https://github.com/SocialGouv/egapro/issues/1591)) ([b08ef2d](https://github.com/SocialGouv/egapro/commit/b08ef2ddcc4eecad88d64434055bf0ca993b42d4))
+
+
+### Features
+
+* add UES alert info on ajout declarant (Closes [#1591](https://github.com/SocialGouv/egapro/issues/1591)) ([328a931](https://github.com/SocialGouv/egapro/commit/328a931e4d53427bb654a599b207cf0efb86904b))
+* **apiv2:** post opmc ([#1590](https://github.com/SocialGouv/egapro/issues/1590)) ([b38332c](https://github.com/SocialGouv/egapro/commit/b38332ceb234ea9900c5b4e5b90cc1827e09c431))
+
 ## [2.86.1](https://github.com/SocialGouv/egapro/compare/v2.86.0...v2.86.1) (2023-03-08)
 
 
