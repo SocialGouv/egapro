@@ -60,10 +60,13 @@ const AideSimulation: NextPageWithLayout = () => {
                   plus tard le 1er mars de l’année en cours, au titre de l’année précédente.
                 </p>
                 <p>
-                  L’assujettissement de l’entreprise ou de l’unité économique et sociale (UES) est défini à la date de
-                  l’obligation de publication de l’index. Le calcul des effectifs assujettis de l’entreprise ou de
-                  l’unité économique et sociale (UES) est celui prévu aux articles L.1111-2 et L.1111-3 du code du
-                  travail.
+                  Pour la tranche d'effectifs assujettis, l’entreprise ou l’unité économique et sociale (UES) doit
+                  définir son assujettissement à la date de l’obligation de publication de l’index, soit le 1er mars. Le
+                  calcul des effectifs assujettis de l’entreprise ou de l’unité économique et sociale (UES) est celui
+                  prévu aux articles L.1111-2 et L.1111-3 du code du travail.
+                  <br />
+                  En revanche, il ne faut pas confondre les effectifs assujetties pour le calcul de l'assujettissement
+                  avec les effectifs qui sont pris en compte pour le calcul des indicateurs, cf. partie 2.
                 </p>
                 <p>
                   Les indicateurs sont calculés à partir des données de la période de référence annuelle choisie par
