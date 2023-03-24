@@ -36,8 +36,10 @@ export const DsfrScript = ({ enableJs }: DsfrScriptProps) => {
     (async () => {
       await import("@gouvfr/dsfr/dist/patch/patch.module");
       await import("@gouvfr/dsfr/dist/dsfr.module");
-      window.dsfr?.start();
-      confirmLoaded();
+      if (window.dsfr?.start) {
+        window.dsfr?.start();
+        confirmLoaded();
+      }
     })();
   }, [enableJs, loading, confirmLoaded]);
   return <></>;
