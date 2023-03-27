@@ -36,9 +36,13 @@ import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 const validateForm = ({
   finPeriodeReference,
   periodeSuffisante,
+  estCalculableIndex,
+  after2020,
 }: {
   finPeriodeReference?: string
   periodeSuffisante?: boolean
+  estCalculableIndex?: boolean
+  after2020?: boolean
 }) => {
   return ({ datePublication, dateConsultationCSE }: { datePublication: string; dateConsultationCSE: string }) => {
     // No validation at all, if periodeSuffisante is false.
@@ -47,11 +51,14 @@ const validateForm = ({
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
     const parsedDateCSE = parseDate(dateConsultationCSE) ? parseDate(dateConsultationCSE) : undefined
 
+    const checkDatePublication = estCalculableIndex || after2020
+
     return {
       datePublication:
-        parsedDatePublication !== undefined &&
-        parsedFinPeriodeReference !== undefined &&
-        parsedDatePublication > parsedFinPeriodeReference
+        (parsedDatePublication !== undefined &&
+          parsedFinPeriodeReference !== undefined &&
+          parsedDatePublication > parsedFinPeriodeReference) ||
+        !checkDatePublication
           ? undefined
           : {
               correspondanceFinPeriodeReference: `La date ne peut précéder la date de fin de la période de référence (${finPeriodeReference})`,
@@ -187,7 +194,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm({ finPeriodeReference, periodeSuffisante })}
+      validate={validateForm({ finPeriodeReference, periodeSuffisante, estCalculableIndex, after2020 })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
