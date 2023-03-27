@@ -36,7 +36,7 @@ export default class AdminReferentImportController implements NextController {
 
   // TODO as decorator
   private async getFileData(req: TokenReq) {
-    const form = formidable({ uploadDir: "./" });
+    const form = formidable();
     const content = await new Promise<string>((resolve, reject) => {
       form.parse(req._req, (error, _fields, files) => {
         if (error) return reject(error);
