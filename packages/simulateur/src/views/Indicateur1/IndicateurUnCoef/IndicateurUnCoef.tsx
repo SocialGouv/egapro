@@ -26,14 +26,14 @@ const Step: FunctionComponent<StepProps> = ({ step, stepLength, label, isCurrent
   </Box>
 )
 
-const IndicateurUnContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | Record<string, never>>({})
+const IndicateurUnCoefContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | Record<string, never>>({})
 
-IndicateurUnContext.displayName = "IndicateurUnContext"
+IndicateurUnCoefContext.displayName = "IndicateurUnCoefContext"
 
-export const useIndicateurUnContext = () => {
-  const context = React.useContext(IndicateurUnContext)
+export const useIndicateurUnCoefContext = () => {
+  const context = React.useContext(IndicateurUnCoefContext)
 
-  if (!context) throw new Error("useIndicateurUnContext must be used within IndicateurUnContext")
+  if (!context) throw new Error("useIndicateurUnCoefContext must be used within IndicateurUnCoefContext")
 
   return context
 }
@@ -73,7 +73,7 @@ const IndicateurUnCoef: FunctionComponent = () => {
   }
 
   return (
-    <IndicateurUnContext.Provider value={{ ...calculsIndicateurUn }}>
+    <IndicateurUnCoefContext.Provider value={{ ...calculsIndicateurUn }}>
       <Tabs
         index={tabIndex}
         onChange={navigateToIndex}
@@ -107,7 +107,7 @@ const IndicateurUnCoef: FunctionComponent = () => {
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </IndicateurUnContext.Provider>
+    </IndicateurUnCoefContext.Provider>
   )
 }
 

@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
-import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef, useIndicateurUnCoefContext } from "./IndicateurUnCoef"
 
 interface Props {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -25,7 +25,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
-  } = useIndicateurUnContext()
+  } = useIndicateurUnCoefContext()
 
   if (!state) return null
 

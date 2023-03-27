@@ -7,6 +7,7 @@ import { ActionType, AppState } from "../globals"
 type AppStateContextType = { state?: AppState; dispatch: React.Dispatch<ActionType> }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined)
+AppStateContext.displayName = "AppStateContext"
 
 export const AppStateContextProvider = ({ children }: PropsWithChildren) => {
   const [state, dispatchReducer] = useReducer(appReducer, undefined)

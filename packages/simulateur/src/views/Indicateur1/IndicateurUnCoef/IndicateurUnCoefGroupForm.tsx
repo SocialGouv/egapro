@@ -130,35 +130,34 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
         )}
       </Form>
 
-      {coefficientGroupFormValidated === "Valid" &&
-        (coefficientEffectifFormValidated === "Invalid" || formValidated === "Invalid") && (
-          <InfoBlock
-            mt={4}
-            title="Vos groupes ont été modifiés"
-            type="success"
-            text={
-              <>
-                <Text>
-                  Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
-                </Text>
-                <List mt={1}>
-                  {coefficientEffectifFormValidated === "Invalid" && (
-                    <ListItem>
-                      <ActionLink onClick={() => navigateTo("Effectif")}>Aller à l'étape 2&nbsp;: effectifs</ActionLink>
-                    </ListItem>
-                  )}
-                  {formValidated === "Invalid" && (
-                    <ListItem>
-                      <ActionLink onClick={() => navigateTo("Remuneration")}>
-                        Aller à l'étape 3&nbsp;: rémunérations
-                      </ActionLink>
-                    </ListItem>
-                  )}
-                </List>
-              </>
-            }
-          />
-        )}
+      {readOnly && (coefficientEffectifFormValidated === "Invalid" || formValidated === "Invalid") && (
+        <InfoBlock
+          mt={4}
+          title="Vos groupes ont été modifiés"
+          type="success"
+          text={
+            <>
+              <Text>
+                Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
+              </Text>
+              <List mt={1}>
+                {coefficientEffectifFormValidated === "Invalid" && (
+                  <ListItem>
+                    <ActionLink onClick={() => navigateTo("Effectif")}>Aller à l'étape 2&nbsp;: effectifs</ActionLink>
+                  </ListItem>
+                )}
+                {formValidated === "Invalid" && (
+                  <ListItem>
+                    <ActionLink onClick={() => navigateTo("Remuneration")}>
+                      Aller à l'étape 3&nbsp;: rémunérations
+                    </ActionLink>
+                  </ListItem>
+                )}
+              </List>
+            </>
+          }
+        />
+      )}
 
       <Modal
         isOpen={indexGroupToDelete !== undefined}

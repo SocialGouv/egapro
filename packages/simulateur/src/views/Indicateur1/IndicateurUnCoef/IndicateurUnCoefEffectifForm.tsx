@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
-import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef, useIndicateurUnCoefContext } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefEffectifFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -19,7 +19,7 @@ interface IndicateurUnCoefEffectifFormProps {
 const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({ navigateTo }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
-  const { effectifsIndicateurCalculable } = useIndicateurUnContext()
+  const { effectifsIndicateurCalculable } = useIndicateurUnCoefContext()
 
   useEffect(() => {
     // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
@@ -104,7 +104,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
         }
       />
 
-      {coefficientEffectifFormValidated === "Valid" && formValidated === "Invalid" && (
+      {readOnly && formValidated === "Invalid" && (
         <InfoBlock
           mt={4}
           title="Vos effectifs ont été modifiés"
