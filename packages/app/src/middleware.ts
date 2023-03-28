@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  console.log("CAUGHT !", pathname);
   // TODO next13 new middleware custom response
   if (pathname.startsWith("/representation-equilibree/recherche") && !_config.ff["repeq-search"]) {
     return NextResponse.redirect(new URL("/404", req.url));

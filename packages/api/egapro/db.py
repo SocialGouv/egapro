@@ -47,6 +47,9 @@ class RepresentationRecord(Record):
         data = self.get("data")
         return models.Data(data)
 
+class ReferentRecord(Record):
+    fields = ["id", "county", "name", "principal", "region", "type", "value"]
+
 class table:
 
     pool: asyncpg.pool.Pool = None
@@ -81,6 +84,17 @@ class table:
         conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
+
+class referent(table):
+    record_class = ReferentRecord
+    table_name = "referent"
+
+    @classmethod
+    async def getByCounty(cls, county: str) -> list[ReferentRecord]:
+        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE county=$1", county)
+
+    async def getByRegion(cls, region: str) -> list[ReferentRecord]:
+        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE region=$1", region)
 
 class representation_equilibree(table):
     record_class = RepresentationRecord

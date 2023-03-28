@@ -9,6 +9,9 @@ from pathlib import Path
 import yaml
 from jinja2 import Template, TemplateError, Undefined
 
+from egapro import db
+from egapro.constants import DEPARTEMENT_TO_REGION, REGIONS_TO_DEPARTEMENTS
+
 from .. import config
 from ..loggers import logger
 
@@ -120,5 +123,16 @@ def load():
 
     REPLY_TO.update(yaml.safe_load((root / "reply_to.yml").read_text()))
 
+async def getReplyTo(county: str):
+    region = DEPARTEMENT_TO_REGION[county]
+    ref = await db.referent.getByCounty(county)
+    if (len(ref) === 0)
+
 
 load()
+
+"""
+get list by county
+filter list by principal
+
+"""
