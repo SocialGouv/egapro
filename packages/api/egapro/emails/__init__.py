@@ -125,7 +125,12 @@ def load():
 
 async def getReplyTo(county: str):
     region = DEPARTEMENT_TO_REGION[county]
+    replyTo = list()
     coordPrincipal = await db.referent.getCoordRegion(region)
+    if (coordPrincipal.principal):
+        replyTo.append(coordPrincipal)
+        return replyTo
+
     ref = await db.referent.getPrincipalsByCounty(county)
     if (len(ref) == 0):
         print("coucou")

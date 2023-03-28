@@ -1,4 +1,4 @@
-from typing import Union
+from typing import KeysView, Literal, Union
 import uuid
 from datetime import datetime
 
@@ -9,12 +9,13 @@ from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
 import ujson as json
 
 from egapro import config, models, sql, utils, helpers
-from egapro.constants import DEPARTEMENTS, REGIONS
+from egapro.constants import DEPARTEMENT_TO_REGION, DEPARTEMENTS, REGIONS, REGIONS_TO_DEPARTEMENTS
 from egapro.loggers import logger
 
 
 class NoData(Exception):
     pass
+
 
 
 class Record(asyncpg.Record):
@@ -49,6 +50,35 @@ class RepresentationRecord(Record):
 
 class ReferentRecord(Record):
     fields = ["id", "county", "name", "principal", "region", "type", "value"]
+
+    @property
+    def id(self) -> str:
+        return self.get("id")
+
+    @property
+    def county(self) -> Union[str, None]:
+        return self.get("county")
+
+    @property
+    def name(self) -> str:
+        return self.get("name")
+
+    @property
+    def principal(self) -> bool:
+        return bool(self.get("principal")) or False
+
+    @property
+    def region(self) -> str:
+        return self.get("region")
+
+    @property
+    def type(self) -> Literal["url", "email"]:
+        return self.get("type")
+
+    @property
+    def value(self) -> str:
+        return self.get("value")
+
 
 class table:
 
