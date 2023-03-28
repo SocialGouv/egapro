@@ -27,7 +27,6 @@ const Step: FunctionComponent<StepProps> = ({ step, stepLength, label, isCurrent
 )
 
 const IndicateurUnCoefContext = React.createContext<ReturnType<typeof calculerIndicateurUn> | Record<string, never>>({})
-
 IndicateurUnCoefContext.displayName = "IndicateurUnCoefContext"
 
 export const useIndicateurUnCoefContext = () => {

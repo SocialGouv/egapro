@@ -23,7 +23,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
     modaliteCalcul,
   }
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: { modaliteCalcul: "csp" | "coef" | "autre" | undefined }) => {
     const { modaliteCalcul } = formData
 
     dispatch({ type: "updateIndicateurUnType", data: { modaliteCalcul } })

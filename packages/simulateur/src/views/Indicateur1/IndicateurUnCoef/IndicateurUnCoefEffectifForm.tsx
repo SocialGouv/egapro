@@ -23,8 +23,9 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
 
   useEffect(() => {
     // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
-    if (effectifsIndicateurCalculable === false) dispatch({ type: "validateIndicateurUn", valid: "Valid" })
-  }, [effectifsIndicateurCalculable, dispatch])
+    if (state?.indicateurUn?.coefficientEffectifFormValidated === "Valid" && effectifsIndicateurCalculable === false)
+      dispatch({ type: "validateIndicateurUn", valid: "Valid" })
+  }, [effectifsIndicateurCalculable, dispatch, state?.indicateurUn?.coefficientEffectifFormValidated])
 
   if (!state) return null
 
