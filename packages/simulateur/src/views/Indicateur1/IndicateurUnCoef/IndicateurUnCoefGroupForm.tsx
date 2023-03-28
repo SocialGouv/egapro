@@ -110,7 +110,12 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
 
             {readOnly ? (
               <ActionBar borderTop="1px solid" borderColor="gray.200" pt={4}>
-                <ButtonAction onClick={() => navigateTo("Effectif")} label="Suivant" size="lg" />
+                <ButtonAction
+                  variant="outline"
+                  onClick={() => navigateTo("Effectif")}
+                  label="Aller à Effectif"
+                  size="md"
+                />
                 <ButtonAction
                   onClick={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
                   label="Modifier les groupes"

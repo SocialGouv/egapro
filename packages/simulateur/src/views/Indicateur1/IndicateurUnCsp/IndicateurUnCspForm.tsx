@@ -4,8 +4,6 @@ import { FormState, RemunerationPourTrancheAge } from "../../../globals"
 import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 import { displayNameCSP } from "../../../utils/helpers"
 
-import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
-
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
@@ -50,12 +48,6 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
       readOnly={readOnly}
       updateIndicateurUn={updateIndicateurUnRaw}
       validateIndicateurUn={validateIndicateurUn}
-      nextLink={
-        <ButtonSimulatorLink
-          to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-          label="Suivant"
-        />
-      }
     />
   )
 }

@@ -1,10 +1,8 @@
 /** @jsxImportSource @emotion/react */
 
-import ActionBar from "../../../components/ActionBar"
 import ActionLink from "../../../components/ActionLink"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../../utils/formHelpers"
@@ -56,23 +54,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   // les effectifs ne permettent pas de calculer l'indicateur
   if (!effectifsIndicateurCalculable) {
-    return (
-      <div>
-        <InfoBlock
-          type="warning"
-          title="Malheureusement votre indicateur n’est pas calculable"
-          text="L’ensemble des groupes valables (c’est-à-dire comptant au
-              moins 3 femmes et 3 hommes), représentent moins de 40% des
-              effectifs. Vous devez calculer par CSP."
-        />
-        <ActionBar>
-          <ButtonSimulatorLink
-            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-            label="Suivant"
-          />
-        </ActionBar>
-      </div>
-    )
+    return <div>Votre indicateur n’étant pas calculable, les rémunérations ne sont pas à remplir.</div>
   }
 
   const readOnly = isFormValid(state.indicateurUn)
@@ -85,12 +67,6 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
           readOnly={readOnly}
           updateIndicateurUn={updateIndicateurUn}
           validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
-          nextLink={
-            <ButtonSimulatorLink
-              to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-              label="Suivant"
-            />
-          }
         />
       }
       result={

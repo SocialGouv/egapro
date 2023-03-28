@@ -90,7 +90,14 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
             readOnly={readOnly}
             updateEffectif={updateEffectifRaw}
             validateEffectif={(valid) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid })}
-            nextLink={<ButtonAction onClick={() => navigateTo("Remuneration")} label="Suivant" size={"lg"} />}
+            nextLink={
+              <ButtonAction
+                variant="outline"
+                onClick={() => navigateTo("Remuneration")}
+                label="Aller à Rémunérations"
+                size="md"
+              />
+            }
             formValidator={formValidator}
           />
         }

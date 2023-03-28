@@ -4,6 +4,7 @@ import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
 import ActionBar from "../../components/ActionBar"
+import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import SimulateurPage from "../../components/SimulateurPage"
@@ -19,7 +20,7 @@ const title = "Indicateur écart de rémunération"
 const IndicateurUn: FunctionComponent = () => {
   useTitle(title)
 
-  const { state } = useAppStateContextProvider()
+  const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
 
@@ -42,29 +43,33 @@ const IndicateurUn: FunctionComponent = () => {
 
   const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
-  // les effectifs ne permettent pas de calculer l'indicateur
-  if (!effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") {
-    return (
-      <PageIndicateurUn>
-        <InfoBlock
-          type="warning"
-          title="Malheureusement votre indicateur n’est pas calculable"
-          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-        />
-        <ActionBar>
-          <ButtonSimulatorLink
-            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-            label="Suivant"
-          />
-        </ActionBar>
-      </PageIndicateurUn>
-    )
-  }
+  const setWriteMode =
+    modaliteCalcul === "csp"
+      ? () => dispatch({ type: "validateIndicateurUn", valid: "None" })
+      : () => dispatch({ type: "validateIndicateurUnCoefEffectif", valid: "None" })
 
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm readOnly={readOnly} />
       {modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
+      {!effectifsIndicateurCalculable && (
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+        />
+      )}
+      {isFormValid(state.indicateurUn) && (
+        <ActionBar>
+          <ButtonSimulatorLink
+            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
+            label="Suivant"
+          />
+          {isFormValid(state.indicateurUn) && (
+            <ButtonAction size="lg" variant="outline" label="Modifier" onClick={setWriteMode} />
+          )}
+        </ActionBar>
+      )}
     </PageIndicateurUn>
   )
 }

@@ -46,7 +46,7 @@ interface IndicateurUnFormRawProps {
     }>,
   ) => void
   validateIndicateurUn: (valid: FormState) => void
-  nextLink: ReactNode
+  nextLink?: ReactNode
 }
 
 const groupByCSP = (
@@ -190,7 +190,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
             )}
           </FormStack>
 
-          {readOnly ? (
+          {readOnly && nextLink ? (
             <ActionBar>{nextLink}</ActionBar>
           ) : (
             <ActionBar>
