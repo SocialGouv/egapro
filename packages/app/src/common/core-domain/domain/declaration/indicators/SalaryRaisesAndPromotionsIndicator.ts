@@ -1,5 +1,5 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
-import { Percentage } from "@common/shared-domain/domain/valueObjects";
+import { Percentage, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects/PositiveInteger";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
@@ -39,7 +39,7 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
   }
 
   /** `résultat_nombre_salariés` - Résultat final en nombre équivalent de salariés */
-  get employeesCountResult(): PositiveInteger | undefined {
+  get employeesCountResult(): PositiveNumber | undefined {
     return this.props.employeesCountResult;
   }
 
@@ -62,7 +62,7 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
     if (typeof json.result === "number") props.result = new Percentage(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);
     if (typeof json.employeesCountResult === "number")
-      props.employeesCountResult = new PositiveInteger(json.employeesCountResult);
+      props.employeesCountResult = new PositiveNumber(json.employeesCountResult);
     if (typeof json.employeesCountScore === "number")
       props.employeesCountScore = new PositiveInteger(json.employeesCountScore);
     if (typeof json.percentScore === "number") props.percentScore = new Percentage(json.percentScore);

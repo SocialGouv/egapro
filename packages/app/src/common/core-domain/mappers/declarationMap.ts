@@ -272,7 +272,7 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         note: data.indicators?.maternityLeaves?.score?.getValue(),
         résultat: data.indicators?.maternityLeaves?.result?.getValue(),
         non_calculable: data.indicators?.maternityLeaves?.notComputableReason?.getValue() as Any,
-        objectif_de_progression: data.indicators?.salaryRaisesAndPromotions?.progressObjective,
+        objectif_de_progression: data.indicators?.maternityLeaves?.progressObjective,
       },
       hautes_rémunérations: {
         note: data.indicators?.highRemunerations?.score?.getValue(),

@@ -8,8 +8,8 @@ export const updateOpMcDTOSchema = z.object({
   objectifIndicateurQuatre: z.string().optional(),
   objectifIndicateurCinq: z.string().optional(),
   datePublicationObjectifs: z.string(),
-  datePublicationMesures: z.string(),
-  modalitesPublicationObjectifsMesures: z.string(),
+  datePublicationMesures: z.string().optional(),
+  modalitesPublicationObjectifsMesures: z.string().optional(),
 });
 
 export type UpdateOpMcDTO = z.infer<typeof updateOpMcDTOSchema>;

@@ -45,7 +45,8 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
     declaration.data?.indicators?.maternityLeaves?.setProgressObjective(opmc.objectifIndicateurQuatre);
     declaration.data?.indicators?.highRemunerations?.setProgressObjective(opmc.objectifIndicateurCinq);
 
-    declaration.data?.declaration.publication?.setMeasuresPublishDate(parseDate(opmc.datePublicationMesures));
+    if (opmc.datePublicationMesures)
+      declaration.data?.declaration.publication?.setMeasuresPublishDate(parseDate(opmc.datePublicationMesures));
     declaration.data?.declaration.publication?.setObjectivesPublishDate(parseDate(opmc.datePublicationObjectifs));
     declaration.data?.declaration.publication?.setObjectivesMeasuresModalities(
       opmc.modalitesPublicationObjectifsMesures,
