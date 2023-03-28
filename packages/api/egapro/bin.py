@@ -384,7 +384,7 @@ async def resend_receipts(
         url = config.DOMAIN + data.uri
         recipient_ = recipient or record["declarant"]
         try:
-            emails.success.send(
+            await emails.success.send(
                 recipient_,
                 url=url,
                 modified_at=record["modified_at"],
