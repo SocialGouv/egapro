@@ -20,7 +20,7 @@ export const config = {
       "repeq-search": true,
       apiv2: {
         enabled: this.env === "dev",
-        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin"],
+        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
       },
     };
   },
