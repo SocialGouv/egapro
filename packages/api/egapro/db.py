@@ -90,11 +90,12 @@ class referent(table):
     table_name = "referent"
 
     @classmethod
-    async def getByCounty(cls, county: str) -> list[ReferentRecord]:
-        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE county=$1", county)
+    async def getPrincipalsByCounty(cls, county: str) -> list[ReferentRecord]:
+        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE county='$1' AND principal=TRUE", county)
 
-    async def getByRegion(cls, region: str) -> list[ReferentRecord]:
-        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE region=$1", region)
+    @classmethod
+    async def getCoordRegion(cls, region: str) -> ReferentRecord:
+        return await cls.fetchrow(f"SELECT * from {cls.table_name} WHERE region='$1' AND county IS NULL LIMIT 1" , region)
 
 class representation_equilibree(table):
     record_class = RepresentationRecord

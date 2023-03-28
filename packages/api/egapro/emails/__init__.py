@@ -125,14 +125,24 @@ def load():
 
 async def getReplyTo(county: str):
     region = DEPARTEMENT_TO_REGION[county]
-    ref = await db.referent.getByCounty(county)
-    if (len(ref) === 0)
+    coordPrincipal = await db.referent.getCoordRegion(region)
+    ref = await db.referent.getPrincipalsByCounty(county)
+    if (len(ref) == 0):
+        print("coucou")
 
 
 load()
 
 """
+prepare replyto list
+
+get one by region without county (coord regional)
+if principal
+add to replyto list
+
 get list by county
 filter list by principal
 
+if list is empty add coord regional to replyto list even if not principal
+else add all to replyto list
 """
