@@ -35,7 +35,7 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     return this.props.objectivesMeasuresModalities;
   }
 
-  public setObjectivesMeasuresModalities(objectivesMeasuresModalities: string) {
+  public setObjectivesMeasuresModalities(objectivesMeasuresModalities?: string) {
     this.props.objectivesMeasuresModalities = objectivesMeasuresModalities;
   }
 
