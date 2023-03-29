@@ -48,10 +48,11 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
   </ul>
 );
 
-export const App = ({
-  children,
-  footer = <EntrepriseFooter />,
-}: PropsWithChildren & { footer?: React.ReactElement }) => {
+export interface AppProps {
+  disableAuth?: boolean;
+  footer?: React.ReactElement;
+}
+export const App = ({ children, footer = <EntrepriseFooter />, disableAuth }: PropsWithChildren<AppProps>) => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuId = "mobile-menu";
@@ -134,16 +135,18 @@ export const App = ({
                     </p>
                   </div>
                 </div>
-                <div className="fr-header__tools">
-                  <div className="fr-header__tools-links">
-                    <ActionButtonGroups
-                      dest={router.pathname}
-                      isAuthenticated={isAuthenticated}
-                      disconnectUser={disconnectUser}
-                      user={user}
-                    />
+                {!disableAuth && (
+                  <div className="fr-header__tools">
+                    <div className="fr-header__tools-links">
+                      <ActionButtonGroups
+                        dest={router.pathname}
+                        isAuthenticated={isAuthenticated}
+                        disconnectUser={disconnectUser}
+                        user={user}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
