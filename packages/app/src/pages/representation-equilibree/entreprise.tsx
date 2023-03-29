@@ -10,7 +10,6 @@ import {
   FormLayoutButtonGroup,
 } from "@design-system";
 import { useConfig, useFormManager } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 
@@ -80,9 +79,9 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays || ""} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="/representation-equilibree/declarant" passHref legacyBehavior>
-              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </NextLink>
+            <ButtonAsLink href="/representation-equilibree/declarant" variant="secondary">
+              Précédent
+            </ButtonAsLink>
             <FormButton>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>

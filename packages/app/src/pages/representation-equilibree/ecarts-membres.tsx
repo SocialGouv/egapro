@@ -33,7 +33,6 @@ import {
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -229,9 +228,9 @@ const EcartsMembres: NextPageWithLayout = () => {
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
-              <NextLink href="/representation-equilibree/ecarts-cadres" passHref legacyBehavior>
-                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-              </NextLink>
+              <ButtonAsLink href="/representation-equilibree/ecarts-cadres" variant="secondary">
+                Précédent
+              </ButtonAsLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>

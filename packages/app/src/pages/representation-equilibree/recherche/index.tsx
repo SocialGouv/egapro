@@ -20,6 +20,7 @@ import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
 import { useRouter } from "next/router";
+import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import type { ParsedUrlQueryInput } from "querystring";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -250,9 +251,9 @@ function DownloadFileZone() {
 
   return dateFile ? (
     <p className="fr-mt-3w">
-      <a href="/dgt-export-representation.xlsx">
+      <NextLinkOrA href="/dgt-export-representation.xlsx">
         Télécharger le fichier des représentations équilibrées au {dateFile} (xslx)
-      </a>
+      </NextLinkOrA>
     </p>
   ) : null;
 }

@@ -1,7 +1,8 @@
 import { clsx } from "clsx";
-import NextLink from "next/link";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
+
+import { NextLinkOrA } from "../utils/NextLinkOrA";
 
 export const Breadcrumb = ({ children }: PropsWithChildren) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,14 +27,8 @@ export type BreadcrumbItemProps = PropsWithChildren<{ href?: string; isCurrent?:
 
 export const BreadcrumbItem = ({ href, isCurrent, children }: BreadcrumbItemProps) => (
   <li>
-    {href ? (
-      <NextLink href={href} passHref className="fr-breadcrumb__link">
-        {children}
-      </NextLink>
-    ) : (
-      <a aria-current={isCurrent && "page"} className="fr-breadcrumb__link">
-        {children}
-      </a>
-    )}
+    <NextLinkOrA className="fr-breadcrumb__link" href={href || undefined} aria-current={!href && isCurrent && "page"}>
+      {children}
+    </NextLinkOrA>
   </li>
 );

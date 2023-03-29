@@ -24,6 +24,7 @@ import {
 import { useDeclaration } from "@services/apiClient/declaration";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
+import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../../../_app";
@@ -77,7 +78,9 @@ const DeclarationWithNavigation = ({ siren, year }: { siren: string; year: numbe
             <CardBody>
               <CardBodyContent>
                 <CardBodyContentTitle>
-                  <a href={`${config.api_url}/declaration/${siren}/${year}/pdf`}>Télécharger le récapitulatif</a>
+                  <NextLinkOrA href={`${config.api_url}/declaration/${siren}/${year}/pdf`}>
+                    Télécharger le récapitulatif
+                  </NextLinkOrA>
                 </CardBodyContentTitle>
                 <CardBodyContentDescription>
                   Année {year + 1} au titre des données {year}.

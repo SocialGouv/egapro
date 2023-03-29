@@ -23,7 +23,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { FormState } from "@services/apiClient";
 import { useFormManager } from "@services/apiClient";
 import { isAfter, parseISO } from "date-fns";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -190,9 +189,9 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <NextLink href="/representation-equilibree/ecarts-membres" passHref legacyBehavior>
-              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </NextLink>
+            <ButtonAsLink href="/representation-equilibree/ecarts-membres" variant="secondary">
+              Précédent
+            </ButtonAsLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>

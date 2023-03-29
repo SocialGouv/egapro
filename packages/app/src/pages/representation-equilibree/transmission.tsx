@@ -23,10 +23,10 @@ import {
   TileSuccessTitle,
 } from "@design-system";
 import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "../_app";
 
 const title = "Votre déclaration a été transmise";
@@ -84,9 +84,9 @@ const Transmission: NextPageWithLayout = () => {
                 <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
                   {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
                 </FormButton>
-                <NextLink href="/representation-equilibree/assujetti/" passHref legacyBehavior>
-                  <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
-                </NextLink>
+                <ButtonAsLink href="/representation-equilibree/assujetti/" onClick={initNewRepresentation}>
+                  Effectuer une nouvelle déclaration
+                </ButtonAsLink>
               </ButtonGroup>
             </form>
           </GridCol>
@@ -119,14 +119,15 @@ const Transmission: NextPageWithLayout = () => {
         )}
         <Grid mt="6w" justifyCenter haveGutters>
           <GridCol md={10} lg={8} className="fr-enlarge-link">
-            <a
+            <NextLinkOrA
+              isExternal
               // TODO: separate component with key as env
               href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
               target="_blank"
               rel="noreferrer"
             >
               <ImgJDMA />
-            </a>
+            </NextLinkOrA>
           </GridCol>
         </Grid>
       </TileSuccess>
@@ -135,9 +136,9 @@ const Transmission: NextPageWithLayout = () => {
           <CardBody>
             <CardBodyContent>
               <CardBodyContentTitle>
-                <a href="https://egapro.travail.gouv.fr">
+                <NextLinkOrA isExternal href="https://egapro.travail.gouv.fr">
                   Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
-                </a>
+                </NextLinkOrA>
               </CardBodyContentTitle>
               <CardBodyContentDescription>
                 Toutes les entreprises d’au moins 50 salariés doivent calculer et publier leur Index de l’égalité

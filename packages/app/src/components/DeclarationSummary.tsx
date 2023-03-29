@@ -1,4 +1,4 @@
-import type { DeclarationAPI } from "@common/models/declaration";
+import type { DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { formatAdresse, useConfig } from "@services/apiClient";
 
@@ -15,7 +15,7 @@ import {
 /**
  * Stateless component to display Declaration's informations.
  */
-export const DeclarationSummary = ({ data }: { data: DeclarationAPI["data"] }) => {
+export const DeclarationSummary = ({ data }: { data: DeclarationDTO }) => {
   const { déclarant, entreprise, indicateurs, déclaration } = data;
   const { config } = useConfig();
 
@@ -24,7 +24,7 @@ export const DeclarationSummary = ({ data }: { data: DeclarationAPI["data"] }) =
   return (
     <>
       <p>
-        Déclaration pour l’année {déclaration.année_indicateurs! + 1} au titre des données{" "}
+        Déclaration pour l’année {déclaration.année_indicateurs + 1} au titre des données{" "}
         {déclaration.année_indicateurs}.
       </p>
       {déclaration?.date && (

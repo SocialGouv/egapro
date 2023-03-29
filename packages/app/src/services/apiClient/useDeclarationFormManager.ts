@@ -1,8 +1,18 @@
-import type { MotifNCMaterniteValue, Sexe, Siren, TrancheEffectifsLabel } from "@common/models/declaration";
+import type { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
+import type { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
+import type { WORKFORCES } from "@common/dict";
+import type { Enum } from "@common/shared-domain/domain/valueObjects";
 import create from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
+
+type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
+type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];
+
+type TrancheEffectifsLabel = typeof WORKFORCES[keyof typeof WORKFORCES];
+
+type Sexe = Enum.ToString<typeof FavorablePopulation.Enum>;
 
 export type DeclarationFormState = {
   // External or meta data.
@@ -12,7 +22,7 @@ export type DeclarationFormState = {
     status: "creation" | "edition";
   };
   commencer?: {
-    siren: Siren;
+    siren: string;
     year: number;
   };
   // Only filled by the backend.
@@ -26,7 +36,7 @@ export type DeclarationFormState = {
   entreprise?:
     | {
         name: string;
-        sirens: Siren[];
+        sirens: string[];
         tranche: TrancheEffectifsLabel;
         type: "ues";
       }

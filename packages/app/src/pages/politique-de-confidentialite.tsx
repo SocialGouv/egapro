@@ -1,6 +1,7 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
 
 const PrivacyPolicy: NextPageWithLayout = () => {
@@ -99,19 +100,23 @@ const PrivacyPolicy: NextPageWithLayout = () => {
             </ul>
             <p>
               Vous pouvez exercer ces droits en écrivant à{" "}
-              <a href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</a>.
+              <NextLinkOrA isExternal href="mailto:index@travail.gouv.fr">
+                index@travail.gouv.fr
+              </NextLinkOrA>
+              .
             </p>
             <p>
               En raison de l’obligation de sécurité et de confidentialité dans le traitement des données à caractère
               personnel qui incombe à Index Egapro, votre demande sera uniquement traitée si vous rapportez la preuve de
               votre identité. Pour vous aider dans votre démarche, vous trouverez{" "}
-              <a
+              <NextLinkOrA
+                isExternal
                 href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces"
                 target="_blank"
                 rel="noreferrer"
               >
                 ici
-              </a>{" "}
+              </NextLinkOrA>{" "}
               un modèle de courrier élaboré par la Cnil.
             </p>
             <p>
@@ -155,9 +160,14 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                     <td>France</td>
                     <td>Hébergement</td>
                     <td>
-                      <a href="https://privacy.microsoft.com/fr-fr/privacystatement" target="_blank" rel="noreferrer">
+                      <NextLinkOrA
+                        isExternal
+                        href="https://privacy.microsoft.com/fr-fr/privacystatement"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         https://privacy.microsoft.com/fr-fr/privacystatement
-                      </a>
+                      </NextLinkOrA>
                     </td>
                   </tr>
                   <tr>
@@ -171,9 +181,14 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                     <td>Etats-Unis</td>
                     <td>Mesure d’audience</td>
                     <td>
-                      <a href="https://policies.google.com/privacy?hl=fr" target="_blank" rel="noreferrer">
+                      <NextLinkOrA
+                        isExternal
+                        href="https://policies.google.com/privacy?hl=fr"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         https://policies.google.com/privacy?hl=fr
-                      </a>
+                      </NextLinkOrA>
                     </td>
                   </tr>
                 </tbody>

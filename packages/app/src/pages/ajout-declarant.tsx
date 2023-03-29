@@ -26,6 +26,7 @@ import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
 
 const zodUniqueEmailArray = z.string().transform((val, ctx) => {
@@ -162,9 +163,9 @@ const AddDeclarer: NextPageWithLayout = () => {
                   </p>
                   <p>Vous trouverez ci-après la documentation pour accéder à votre espace.</p>
                   <Box mt="2w">
-                    <a href="/Guide.Mon.Espace.pdf" target="_blank" rel="noreferrer">
+                    <NextLinkOrA href="/Guide.Mon.Espace.pdf" target="_blank" rel="noreferrer">
                       Guide Mon Espace (pdf)
-                    </a>
+                    </NextLinkOrA>
                   </Box>
                 </Alert>
               </>

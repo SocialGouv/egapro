@@ -1,9 +1,17 @@
-import type { DeclarationAPI } from "@common/models/declaration";
+import type { DeclarationDTO } from "@common/models/generated";
 import useSWR from "swr";
 
 import type { FetcherOptions, FetcherReturn } from "./fetcher";
 import { fetcher, genericErrorMessage } from "./fetcher";
 import type { DeclarationFormState } from "./useDeclarationFormManager";
+
+export type DeclarationAPI = {
+  data: DeclarationDTO;
+  declared_at: number;
+  modified_at: number;
+  siren: string;
+  year: number;
+};
 
 export const putDeclaration = async (data: DeclarationFormState) => {
   //   const representation = buildRepresentation(data);

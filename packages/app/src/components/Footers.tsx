@@ -15,15 +15,17 @@ import {
 } from "@design-system";
 import NextLink from "next/link";
 
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
+
 /** Footer for entreprise */
 export const EntrepriseFooter = () => {
   return (
     <Footer>
       <FooterBody>
         <FooterBodyBrand>
-          <NextLink href="/">
+          <NextLinkOrA href="/">
             <Logo />
-          </NextLink>
+          </NextLinkOrA>
         </FooterBodyBrand>
         <FooterBodyContent>
           <FooterBodyContentDescription>
@@ -55,24 +57,19 @@ export const EntrepriseFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref legacyBehavior>
-            <FooterBottomLink>CGU</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/cgu">CGU</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref legacyBehavior>
-            <FooterBottomLink>Mentions légales</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/mentions-legales">Mentions légales</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref legacyBehavior>
-            <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
           <FooterBottomLink
             href="https://ara.numerique.gouv.fr/rapports/_YKXqg3aJMpFGmPh1tA0d/resultats"
             target="_blank"
+            isExternal
           >
             Accessibilité : partiellement conforme
           </FooterBottomLink>
@@ -88,9 +85,9 @@ export const PublicFooter = () => {
     <Footer>
       <FooterBody>
         <FooterBodyBrand>
-          <NextLink href="/">
+          <NextLinkOrA href="/">
             <Logo />
-          </NextLink>
+          </NextLinkOrA>
         </FooterBodyBrand>
         <FooterBodyContent>
           <FooterBodyContentDescription>
@@ -118,19 +115,13 @@ export const PublicFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref legacyBehavior>
-            <FooterBottomLink>CGU</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/cgu">CGU</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref legacyBehavior>
-            <FooterBottomLink>Mentions légales</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/mentions-legales">Mentions légales</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref legacyBehavior>
-            <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
         </FooterBottomItem>
       </FooterBottom>
     </Footer>

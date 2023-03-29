@@ -1,7 +1,6 @@
 import { DsfrScript } from "@components/DsfrScript";
 import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
@@ -15,9 +14,12 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   const router = useRouter();
   const currentRoute = router.pathname;
   return (
-    <NextLink href={`/representation-equilibree/${path}/`} passHref legacyBehavior>
-      <SideMenuLink isCurrent={currentRoute === `/representation-equilibree/${path}`}>{children}</SideMenuLink>
-    </NextLink>
+    <SideMenuLink
+      href={`/representation-equilibree/${path}/`}
+      isCurrent={currentRoute === `/representation-equilibree/${path}`}
+    >
+      {children}
+    </SideMenuLink>
   );
 };
 

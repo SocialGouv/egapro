@@ -14,8 +14,8 @@ import {
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager, useUser } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -139,9 +139,9 @@ const DeclarantPage: NextPageWithLayout = () => {
               J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
               vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
               consulter nos{" "}
-              <NextLink href="/cgu" target="_blank">
+              <NextLinkOrA href="/cgu" target="_blank">
                 Conditions Générales d'Utilisation
-              </NextLink>
+              </NextLinkOrA>
               .
             </FormCheckbox>
             {errors.accord_rgpd && (
@@ -149,9 +149,9 @@ const DeclarantPage: NextPageWithLayout = () => {
             )}
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="/_index-egapro/declaration/commencer" passHref legacyBehavior>
-              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </NextLink>
+            <ButtonAsLink href="/_index-egapro/declaration/commencer" variant="secondary">
+              Précédent
+            </ButtonAsLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </form>
