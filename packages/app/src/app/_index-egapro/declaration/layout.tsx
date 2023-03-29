@@ -177,7 +177,7 @@ const InnerDeclarationLayout = ({ children, title }: Omit<PropsWithChildren<Prop
   );
 };
 
-export const DeclarationLayout = ({ children, title, authenticated = false }: PropsWithChildren<Props>) => {
+const DeclarationLayout = ({ children, title, authenticated = false }: PropsWithChildren<Props>) => {
   if (authenticated) {
     return (
       <AuthenticatedOnly redirectTo="/_index-egapro/declaration/email" disableAuth={!authenticated}>
@@ -188,3 +188,5 @@ export const DeclarationLayout = ({ children, title, authenticated = false }: Pr
 
   return <InnerDeclarationLayout title={title}>{children}</InnerDeclarationLayout>;
 };
+
+export default DeclarationLayout;

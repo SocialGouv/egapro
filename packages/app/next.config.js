@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   swcMinify: true,
+  //   output: "standalone",
+  experimental: {
+    appDir: true,
+    // outputFileTracingRoot: path.join(__dirname, "../../"),
+  },
   webpack: config => {
     config.module.rules.push({
       test: /\.woff2$/,

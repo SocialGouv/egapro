@@ -1,5 +1,4 @@
 import { AlertEdition } from "@components/AlertEdition";
-import { DeclarationLayout } from "@components/layouts/DeclarationLayout";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import {
   ButtonAsLink,
@@ -15,12 +14,13 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager, useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
+import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../../_app";
+import type { NextPageWithLayout } from "../../../../pages/_app";
 
 const title = "Informations déclarant";
 

@@ -1,7 +1,6 @@
 import { config } from "@common/config";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { DeclarationSummary } from "@components/DeclarationSummary";
-import { DeclarationLayout } from "@components/layouts/DeclarationLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
@@ -24,10 +23,11 @@ import {
 import { useDeclaration } from "@services/apiClient/declaration";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
+import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../../../_app";
+import type { NextPageWithLayout } from "../../../../../pages/_app";
 
 const title = "Récapitulatif de la déclaration d'index egapro";
 

@@ -6,7 +6,6 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { useFeatureStatus } from "@components/FeatureStatusProvider";
-import { DeclarationLayout } from "@components/layouts/DeclarationLayout";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { AlertFeatureStatus, FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -15,11 +14,12 @@ import { checkSiren, fetchSiren, ownersForSiren, useUser } from "@services/apiCl
 import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/router";
+import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../../_app";
+import type { NextPageWithLayout } from "../../../../pages/_app";
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 

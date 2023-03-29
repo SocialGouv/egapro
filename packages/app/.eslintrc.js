@@ -11,6 +11,7 @@ const config = {
   plugins: ["prettier", "unused-imports", "simple-import-sort"],
   ignorePatterns: ["!.storybook", "!**/.*.js?(x)", "node_modules"],
   rules: {
+    // "@next/next/no-html-link-for-pages": ["error", "src/app"],
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react-hooks/rules-of-hooks": "error", // Vérifie les règles des Hooks
@@ -142,14 +143,14 @@ const config = {
           {
             prefer: "type-imports",
             // TODO: enable on new @typescript-eslint/eslint-plugin release (> 5.42.1)
-            // fixStyle: "inline-type-imports",
+            fixStyle: "inline-type-imports",
           },
         ],
         "@typescript-eslint/sort-type-union-intersection-members": "warn",
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)"],
+      files: ["src/pages/**/*.ts?(x)", "src/app/**/+(page|head|error|template|layout).tsx"],
       rules: {
         "import/no-default-export": "off",
       },

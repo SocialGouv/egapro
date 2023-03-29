@@ -1,10 +1,10 @@
-import { DeclarationLayout } from "@components/layouts/DeclarationLayout";
 import { EmailAuthenticator } from "@components/rdsfr/EmailAuthenticator";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
+import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
 
-import type { NextPageWithLayout } from "../../_app";
+import type { NextPageWithLayout } from "../../../../pages/_app";
 
 export const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
