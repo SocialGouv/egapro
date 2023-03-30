@@ -150,26 +150,28 @@ export const App = ({ children, footer = <EntrepriseFooter />, disableAuth }: Pr
               </div>
             </div>
           </div>
-          <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
-            <div className="fr-container">
-              <button
-                className="fr-btn--close fr-btn"
-                aria-controls={mobileMenuId}
-                title="Fermer"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Fermer
-              </button>
-              <div className="fr-header__menu-links">
-                <ActionButtonGroups
-                  dest={router.pathname}
-                  isAuthenticated={isAuthenticated}
-                  disconnectUser={disconnectUser}
-                  user={user}
-                />
+          {!disableAuth && (
+            <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
+              <div className="fr-container">
+                <button
+                  className="fr-btn--close fr-btn"
+                  aria-controls={mobileMenuId}
+                  title="Fermer"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Fermer
+                </button>
+                <div className="fr-header__menu-links">
+                  <ActionButtonGroups
+                    dest={router.pathname}
+                    isAuthenticated={isAuthenticated}
+                    disconnectUser={disconnectUser}
+                    user={user}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </header>
         <main role="main" id="content" className={styles.content}>
           {children}
