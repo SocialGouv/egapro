@@ -64,7 +64,6 @@
     "@babel/core": "^7.18.13",
     "@faker-js/faker": "^7.6.0",
     "@hookform/devtools": "^4.3.0",
-    "@semantic-release/changelog": "^6.0.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
