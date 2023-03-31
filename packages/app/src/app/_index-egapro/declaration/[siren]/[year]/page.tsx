@@ -1,3 +1,5 @@
+"use client";
+
 import { config } from "@common/config";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { DeclarationSummary } from "@components/DeclarationSummary";
@@ -22,12 +24,9 @@ import {
 } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { add, isAfter } from "date-fns";
-import { useRouter } from "next/router";
-import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
+import { useRouter } from "next/navigation";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { z } from "zod";
-
-import type { NextPageWithLayout } from "../../../../../pages/_app";
 
 const title = "Récapitulatif de la déclaration d'index egapro";
 
@@ -102,30 +101,23 @@ const schemaParams = z.object({
   year: zodYearSchema,
 });
 
-const RecapitulatifPage: NextPageWithLayout = () => {
-  const router = useRouter();
-  const { siren: sirenQuery, year: yearQuery } = router.query;
+const RecapitulatifPage = ({ params }: { params: any }) => {
+  const { siren: sirenQuery, year: yearQuery } = params;
 
   // It is safe to cast as string as we prevent invalid params with ParamsChecker boundary.
   const siren = sirenQuery as string;
   const year = Number(yearQuery as string);
 
   return (
-    <>
+    <FeatureStatusProvider>
       <h1>{title}</h1>
       <ParamsChecker schema={schemaParams}>
         <OwnersOnly siren={siren}>
           <DeclarationWithNavigation siren={siren} year={year} />
         </OwnersOnly>
       </ParamsChecker>
-    </>
+    </FeatureStatusProvider>
   );
 };
-
-RecapitulatifPage.getLayout = ({ children }) => (
-  <DeclarationLayout title={title} authenticated>
-    <FeatureStatusProvider>{children}</FeatureStatusProvider>
-  </DeclarationLayout>
-);
 
 export default RecapitulatifPage;

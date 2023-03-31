@@ -1,28 +1,25 @@
 import { EmailAuthenticator } from "@components/rdsfr/EmailAuthenticator";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
-import { useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
-import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
+import { useUserNext13 } from "@services/apiClient/useUserNext13";
+import { useRouter } from "next/navigation";
 
-import type { NextPageWithLayout } from "../../../../pages/_app";
-
-export const EmailPage: NextPageWithLayout = () => {
+const EmailPage = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useUserNext13();
 
   const defaultRedirectTo = "/_index-egapro/declaration/commencer";
 
   if (user) router.push(defaultRedirectTo);
 
-  return <EmailAuthenticator defaultRedirectTo={defaultRedirectTo} />;
-};
-
-EmailPage.getLayout = ({ children }) => {
   return (
-    <DeclarationLayout title="Validation de l'email">
-      <FeatureStatusProvider>{children}</FeatureStatusProvider>
-    </DeclarationLayout>
+    <FeatureStatusProvider>
+      <EmailAuthenticator defaultRedirectTo={defaultRedirectTo} />
+    </FeatureStatusProvider>
   );
 };
 
 export default EmailPage;
+
+export const metadata = {
+  title: "Validation de l'email",
+};

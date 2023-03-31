@@ -1,3 +1,5 @@
+"use client";
+
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -10,11 +12,11 @@ import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { AlertFeatureStatus, FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { checkSiren, fetchSiren, ownersForSiren, useUser } from "@services/apiClient";
+import { checkSiren, fetchSiren, ownersForSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { useRouter } from "next/router";
-import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
+import { useUserNext13 } from "@services/apiClient/useUserNext13";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -60,8 +62,8 @@ type FormType = z.infer<typeof formSchema>;
 const buildConfirmMessage = ({ siren, year }: { siren: string; year: string }) =>
   `Vous avez commencé une déclaration avec le Siren ${siren} pour l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
-export const SirenYearPage: NextPageWithLayout = () => {
-  useUser();
+const SirenYearPage: NextPageWithLayout = () => {
+  useUserNext13();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
@@ -160,7 +162,7 @@ export const SirenYearPage: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <FeatureStatusProvider>
       <Alert
         severity="info"
         title=""
@@ -216,15 +218,7 @@ export const SirenYearPage: NextPageWithLayout = () => {
           </Button>
         </div>
       </form>
-    </>
-  );
-};
-
-SirenYearPage.getLayout = ({ children }) => {
-  return (
-    <DeclarationLayout title="Commencer votre déclaration d’Index" authenticated>
-      <FeatureStatusProvider>{children}</FeatureStatusProvider>
-    </DeclarationLayout>
+    </FeatureStatusProvider>
   );
 };
 

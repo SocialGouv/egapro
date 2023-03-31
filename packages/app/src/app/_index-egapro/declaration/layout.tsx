@@ -2,10 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Header } from "@codegouvfr/react-dsfr/Header";
-import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
-import { useUser } from "@services/apiClient";
-import Head from "next/head";
-import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
@@ -30,32 +26,22 @@ const BrandTop = () => (
 );
 
 const DeclarationHeader = () => {
-  const router = useRouter();
-  const { user, logout } = useUser();
+  // const { user, logout } = useUser();
 
   return (
     <Header
       brandTop={<BrandTop />}
-      quickAccessItems={[
-        // {
-        //   iconId: "fr-icon-account-circle-fill",
-        //   linkProps: {
-        //     href: "#",
-        //     "aria-disabled": true,
-        //   },
-        //   text: user ? user.email : "",
-        // },
-        {
-          iconId: "fr-icon-lock-fill",
-          // linkProps: {
-          //   href: "#",
+      quickAccessItems={
+        [
+          // {
+          //   iconId: "fr-icon-lock-fill",
+          //   text: user ? "Se déconnecter" : "Se connecter",
+          //   buttonProps: {
+          //     onClick: user ? logout : () => redirect("/_index-egapro/declaration/email"),
+          //   },
           // },
-          text: user ? "Se déconnecter" : "Se connecter",
-          buttonProps: {
-            onClick: user ? logout : () => router.push("/_index-egapro/declaration/email"),
-          },
-        },
-      ]}
+        ]
+      }
       serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
       serviceTitle="Egapro"
       homeLinkProps={homeLinkProps}
@@ -139,14 +125,6 @@ const DeclarationFooter = () => {
 const InnerDeclarationLayout = ({ children, title }: Omit<PropsWithChildren<Props>, "authenticated">) => {
   return (
     <>
-      <Head>
-        <meta
-          name="description"
-          content="Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression."
-        />
-        <title>{[title, DEFAULT_TITLE].join(" - ")}</title>
-      </Head>
-
       <DeclarationHeader />
 
       <div className={fr.cx("fr-container")} style={{ maxWidth: 1000 }}>
@@ -178,15 +156,21 @@ const InnerDeclarationLayout = ({ children, title }: Omit<PropsWithChildren<Prop
 };
 
 const DeclarationLayout = ({ children, title, authenticated = false }: PropsWithChildren<Props>) => {
-  if (authenticated) {
-    return (
-      <AuthenticatedOnly redirectTo="/_index-egapro/declaration/email" disableAuth={!authenticated}>
-        <InnerDeclarationLayout title={title}>{children}</InnerDeclarationLayout>
-      </AuthenticatedOnly>
-    );
-  }
+  // if (authenticated) {
+  //   return (
+  //     <AuthenticatedOnly redirectTo="/_index-egapro/declaration/email" disableAuth={!authenticated}>
+  //       <InnerDeclarationLayout title={title}>{children}</InnerDeclarationLayout>
+  //     </AuthenticatedOnly>
+  //   );
+  // }
 
   return <InnerDeclarationLayout title={title}>{children}</InnerDeclarationLayout>;
 };
 
 export default DeclarationLayout;
+
+export const metadata = {
+  title: { default: DEFAULT_TITLE, template: `%s - ${DEFAULT_TITLE}` },
+  description:
+    "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.",
+};

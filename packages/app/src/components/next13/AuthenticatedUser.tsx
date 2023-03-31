@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@services/apiClient";
+import { useUserNext13 } from "@services/apiClient/useUserNext13";
 import { redirect } from "next/navigation";
 import { type PropsWithChildren } from "react";
 
@@ -13,7 +13,7 @@ type AuthenticatedUserProps =
   | (BaseAuthenticatedUserProps & { redirectTo: string });
 
 export const AuthenticatedUser = ({ fallback, ...rest }: AuthenticatedUserProps) => {
-  const { user } = useUser();
+  const { user } = useUserNext13();
   if (user) {
     if ("redirectTo" in rest) redirect(rest.redirectTo);
     return <>{rest.children}</>;

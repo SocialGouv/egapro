@@ -1,3 +1,5 @@
+"use client";
+
 import { AlertEdition } from "@components/AlertEdition";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import {
@@ -13,8 +15,7 @@ import {
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager, useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
-import { DeclarationLayout } from "packages/app/src/app/_index-egapro/declaration/layout";
+import { useRouter } from "next/navigation";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -80,7 +81,7 @@ const DeclarantPage: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <FeatureStatusProvider>
       <AlertEdition />
       <p>
         <b>
@@ -156,14 +157,8 @@ const DeclarantPage: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </form>
       </FormLayout>
-    </>
+    </FeatureStatusProvider>
   );
 };
-
-DeclarantPage.getLayout = ({ children }) => (
-  <DeclarationLayout title={title} authenticated>
-    <FeatureStatusProvider>{children}</FeatureStatusProvider>
-  </DeclarationLayout>
-);
 
 export default DeclarantPage;
