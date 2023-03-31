@@ -1,3 +1,21 @@
+## [2.87.2](https://github.com/SocialGouv/egapro/compare/v2.87.1...v2.87.2) (2023-03-30)
+
+
+### Bug Fixes
+
+* remove auth on repeq search (Fixes [#1604](https://github.com/SocialGouv/egapro/issues/1604)) ([610dca0](https://github.com/SocialGouv/egapro/commit/610dca0340911a8d6db1ecca9976bd3436f8e4e0))
+* remove auth on repeq search in mobile (Fixes [#1604](https://github.com/SocialGouv/egapro/issues/1604)) ([5d1d3af](https://github.com/SocialGouv/egapro/commit/5d1d3af80eee548b6916ee3f515fe5418fc993ef))
+
+## [2.87.1](https://github.com/SocialGouv/egapro/compare/v2.87.0...v2.87.1) (2023-03-28)
+
+
+### Bug Fixes
+
+* bug on validation ([#1601](https://github.com/SocialGouv/egapro/issues/1601)) ([36e1da1](https://github.com/SocialGouv/egapro/commit/36e1da143330f6fc193212da69db4b342911d4a2)), closes [#1600](https://github.com/SocialGouv/egapro/issues/1600)
+* declaration mapping ([17abd64](https://github.com/SocialGouv/egapro/commit/17abd641dff3b482adc6e3546f60094acc4cf375))
+* feature flag whitelist for opmc apiv2 route ([dbae7c8](https://github.com/SocialGouv/egapro/commit/dbae7c84e2d187d783648093e23551e9b9241e59))
+* opmc more optional fields ([95da8cc](https://github.com/SocialGouv/egapro/commit/95da8cc83472ae503aa10bc6c0f3fa2fafefbb6f))
+
 # [2.87.0](https://github.com/SocialGouv/egapro/compare/v2.86.1...v2.87.0) (2023-03-24)
 
 

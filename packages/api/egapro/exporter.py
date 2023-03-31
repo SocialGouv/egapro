@@ -181,7 +181,6 @@ async def public_data_as_xlsx(debug=False):
             ]
         )
         effectif = data.path("entreprise.effectif.tranche")
-        lt_250 = effectif == "50:250"
         sheet.append(
             [clean_cell(c) for c in
                 [
@@ -217,7 +216,7 @@ def get_note_lines(data: models.Data):
             "" if not lt_250 else value_or_NC(data.path("indicateurs.augmentations_et_promotions.note")),
             value_or_NC(data.path("indicateurs.congés_maternité.note")),
             data.path("indicateurs.hautes_rémunérations.note"),
-            data.grade
+            data.grade or "NC",
         ]
     else:
         return [

@@ -48,10 +48,11 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
   </ul>
 );
 
-export const App = ({
-  children,
-  footer = <EntrepriseFooter />,
-}: PropsWithChildren & { footer?: React.ReactElement }) => {
+export interface AppProps {
+  disableAuth?: boolean;
+  footer?: React.ReactElement;
+}
+export const App = ({ children, footer = <EntrepriseFooter />, disableAuth }: PropsWithChildren<AppProps>) => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuId = "mobile-menu";
@@ -134,39 +135,43 @@ export const App = ({
                     </p>
                   </div>
                 </div>
-                <div className="fr-header__tools">
-                  <div className="fr-header__tools-links">
-                    <ActionButtonGroups
-                      dest={router.pathname}
-                      isAuthenticated={isAuthenticated}
-                      disconnectUser={disconnectUser}
-                      user={user}
-                    />
+                {!disableAuth && (
+                  <div className="fr-header__tools">
+                    <div className="fr-header__tools-links">
+                      <ActionButtonGroups
+                        dest={router.pathname}
+                        isAuthenticated={isAuthenticated}
+                        disconnectUser={disconnectUser}
+                        user={user}
+                      />
+                    </div>
                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+          {!disableAuth && (
+            <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
+              <div className="fr-container">
+                <button
+                  className="fr-btn--close fr-btn"
+                  aria-controls={mobileMenuId}
+                  title="Fermer"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Fermer
+                </button>
+                <div className="fr-header__menu-links">
+                  <ActionButtonGroups
+                    dest={router.pathname}
+                    isAuthenticated={isAuthenticated}
+                    disconnectUser={disconnectUser}
+                    user={user}
+                  />
                 </div>
               </div>
             </div>
-          </div>
-          <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
-            <div className="fr-container">
-              <button
-                className="fr-btn--close fr-btn"
-                aria-controls={mobileMenuId}
-                title="Fermer"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Fermer
-              </button>
-              <div className="fr-header__menu-links">
-                <ActionButtonGroups
-                  dest={router.pathname}
-                  isAuthenticated={isAuthenticated}
-                  disconnectUser={disconnectUser}
-                  user={user}
-                />
-              </div>
-            </div>
-          </div>
+          )}
         </header>
         <main role="main" id="content" className={styles.content}>
           {children}
