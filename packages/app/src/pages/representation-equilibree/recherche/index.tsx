@@ -268,7 +268,7 @@ const HomePage: NextPageWithLayout = () => {
 };
 
 HomePage.getLayout = ({ children }) => {
-  return <ConsultationRepeqLayout>{children}</ConsultationRepeqLayout>;
+  return <ConsultationRepeqLayout disableAuth>{children}</ConsultationRepeqLayout>;
 };
 
 export default HomePage;

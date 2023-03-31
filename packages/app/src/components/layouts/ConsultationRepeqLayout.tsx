@@ -5,6 +5,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
+import type { AppProps } from "./App";
 import { App } from "./App";
 
 export type AsideLinkProps = PropsWithChildren<{
@@ -26,9 +27,16 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
 
 const DEFAULT_TITLE = "Recherche - Représentation équilibrée Egapro";
 
-export const ConsultationRepeqLayout = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
+export interface ConsultationRepeqLayoutProps extends AppProps {
+  title?: string;
+}
+export const ConsultationRepeqLayout = ({
+  children,
+  title,
+  ...rest
+}: PropsWithChildren<ConsultationRepeqLayoutProps>) => {
   return (
-    <App footer={<PublicFooter />}>
+    <App footer={<PublicFooter />} {...rest}>
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>

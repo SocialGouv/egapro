@@ -1,3 +1,11 @@
+## [2.87.2](https://github.com/SocialGouv/egapro/compare/v2.87.1...v2.87.2) (2023-03-30)
+
+
+### Bug Fixes
+
+* remove auth on repeq search (Fixes [#1604](https://github.com/SocialGouv/egapro/issues/1604)) ([610dca0](https://github.com/SocialGouv/egapro/commit/610dca0340911a8d6db1ecca9976bd3436f8e4e0))
+* remove auth on repeq search in mobile (Fixes [#1604](https://github.com/SocialGouv/egapro/issues/1604)) ([5d1d3af](https://github.com/SocialGouv/egapro/commit/5d1d3af80eee548b6916ee3f515fe5418fc993ef))
+
 ## [2.87.1](https://github.com/SocialGouv/egapro/compare/v2.87.0...v2.87.1) (2023-03-28)
 
 

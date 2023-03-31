@@ -9,7 +9,7 @@ const config = {
   },
   extends: ["eslint:recommended", "next/core-web-vitals", "plugin:import/recommended", "plugin:prettier/recommended"],
   plugins: ["prettier", "unused-imports", "simple-import-sort"],
-  ignorePatterns: ["!.storybook", "!**/.*.js?(x)", "node_modules"],
+  ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
   rules: {
     // "@next/next/no-html-link-for-pages": ["error", "src/app"],
     "react/prop-types": "off",
@@ -153,25 +153,6 @@ const config = {
       files: ["src/pages/**/*.ts?(x)", "src/app/**/+(page|head|error|template|layout).tsx"],
       rules: {
         "import/no-default-export": "off",
-      },
-    },
-    {
-      files: ["__stories__/**/*.tsx"],
-      extends: ["plugin:storybook/recommended"],
-      rules: {
-        "import/no-default-export": "off",
-      },
-      parserOptions: {
-        project: ["__stories__/tsconfig.json"],
-        sourceType: "module",
-      },
-      settings: {
-        "import/resolver": {
-          typescript: {
-            alwaysTryTypes: true,
-            project: ["__stories__/tsconfig.json"],
-          },
-        },
       },
     },
     {
