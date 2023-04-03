@@ -25,8 +25,8 @@ export type FormState = {
   hasWebsite: boolean;
   isEcartsCadresCalculable?: boolean;
   isEcartsMembresCalculable?: boolean;
-  motifEcartsCadresNonCalculable?: typeof motifNonCalculabiliteCadresOptions[number]["value"];
-  motifEcartsMembresNonCalculable?: typeof motifNonCalculabiliteMembresOptions[number]["value"];
+  motifEcartsCadresNonCalculable?: (typeof motifNonCalculabiliteCadresOptions)[number]["value"];
+  motifEcartsMembresNonCalculable?: (typeof motifNonCalculabiliteMembresOptions)[number]["value"];
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;

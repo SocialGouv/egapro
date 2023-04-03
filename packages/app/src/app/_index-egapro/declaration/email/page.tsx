@@ -1,3 +1,5 @@
+"use client";
+
 import { EmailAuthenticator } from "@components/rdsfr/EmailAuthenticator";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { useUserNext13 } from "@services/apiClient/useUserNext13";
@@ -19,7 +21,3 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
-
-export const metadata = {
-  title: "Validation de l'email",
-};

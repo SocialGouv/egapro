@@ -10,7 +10,7 @@ import type { EntrepriseType } from "./siren";
 type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
 type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];
 
-type TrancheEffectifsLabel = typeof WORKFORCES[keyof typeof WORKFORCES];
+type TrancheEffectifsLabel = (typeof WORKFORCES)[keyof typeof WORKFORCES];
 
 type Sexe = Enum.ToString<typeof FavorablePopulation.Enum>;
 

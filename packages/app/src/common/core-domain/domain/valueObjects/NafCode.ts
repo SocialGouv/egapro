@@ -5,7 +5,7 @@ import type { UnknownMapping } from "@common/utils/types";
 
 const NAF_KEYS = Object.keys(NAF);
 
-type Naf = typeof NAF_KEYS[number] | UnknownMapping;
+type Naf = (typeof NAF_KEYS)[number] | UnknownMapping;
 
 export class NafCode extends TupleString<typeof NAF_KEYS> {
   constructor(value: Naf) {

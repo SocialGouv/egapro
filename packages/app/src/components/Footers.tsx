@@ -13,7 +13,6 @@ import {
   FooterContentLink,
   Logo,
 } from "@design-system";
-import NextLink from "next/link";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 

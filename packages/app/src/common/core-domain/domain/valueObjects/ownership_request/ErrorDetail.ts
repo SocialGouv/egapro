@@ -8,7 +8,7 @@ export const errorDetailCodes = [
   "NOT_FOUND_SIREN",
 ] as const;
 
-export const errorDetailLabel: Record<typeof errorDetailCodes[number], string> = {
+export const errorDetailLabel: Record<(typeof errorDetailCodes)[number], string> = {
   EMAIL_DELIVERY_KO: "L'envoi du mail a échoué",
   ALREADY_PROCESSED: "La demande a déjà été traitée",
   INVALID_EMAIL: "L'email est invalide",
@@ -16,7 +16,7 @@ export const errorDetailLabel: Record<typeof errorDetailCodes[number], string> =
   NOT_FOUND_SIREN: "Le SIREN n'existe pas",
 };
 
-export type ErrorDetailCode = typeof errorDetailCodes[number];
+export type ErrorDetailCode = (typeof errorDetailCodes)[number];
 export type ErrorDetailTuple = [ErrorDetailCode, string];
 
 export class ErrorDetail extends TupleString<typeof errorDetailCodes> {

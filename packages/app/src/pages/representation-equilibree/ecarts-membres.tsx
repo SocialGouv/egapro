@@ -89,7 +89,7 @@ export type FormTypeInput = z.input<typeof formSchema>;
 
 // Fix TS limit to infer correct litterals in zod definition.
 export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsMembresNonCalculable"> & {
-  motifEcartsMembresNonCalculable: typeof motifNonCalculabiliteMembresOptions[number]["value"];
+  motifEcartsMembresNonCalculable: (typeof motifNonCalculabiliteMembresOptions)[number]["value"];
 };
 
 const EcartsMembres: NextPageWithLayout = () => {

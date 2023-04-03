@@ -5,7 +5,7 @@ import type { UnknownMapping } from "@common/utils/types";
 
 const COUNTRY_KEYS = Object.keys(COUNTRIES_ISO_TO_LIB);
 
-type Country = typeof COUNTRY_KEYS[number] | UnknownMapping;
+type Country = (typeof COUNTRY_KEYS)[number] | UnknownMapping;
 
 export class CountryCode extends TupleString<typeof COUNTRY_KEYS> {
   constructor(value: Country) {
