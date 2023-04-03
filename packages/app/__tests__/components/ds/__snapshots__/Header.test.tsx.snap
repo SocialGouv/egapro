@@ -6,7 +6,7 @@ exports[`should match snapshot 1`] = `
   "baseElement": <body>
     <div>
       <header
-        class="css-3p1eay"
+        class="css-6rrd1m"
         role="banner"
       >
         <div
@@ -87,7 +87,7 @@ exports[`should match snapshot 1`] = `
   </body>,
   "container": <div>
     <header
-      class="css-3p1eay"
+      class="css-6rrd1m"
       role="banner"
     >
       <div

@@ -5,7 +5,7 @@ import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
 import type { UseStatsParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useStats } from "@services/apiClient";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ButtonAction } from "./ds/ButtonAction";
