@@ -39,7 +39,7 @@ interface RadioLabelsProps {
   choices: RadioLabelChoice[]
 }
 
-const RadioLabels: FunctionComponent<RadioLabelsProps> = ({ readOnly, fieldName, label, value, choices }) => {
+const RadioLabels = ({ readOnly, fieldName, label, value, choices }: RadioLabelsProps) => {
   return (
     <FormControl>
       <FormLabel as="div">{label}</FormLabel>
