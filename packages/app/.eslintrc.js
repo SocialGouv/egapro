@@ -8,7 +8,7 @@ const config = {
     es2020: true,
   },
   extends: ["eslint:recommended", "next/core-web-vitals", "plugin:import/recommended", "plugin:prettier/recommended"],
-  plugins: ["prettier", "unused-imports", "simple-import-sort"],
+  plugins: ["prettier", "unused-imports", "simple-import-sort", "import"],
   ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
   rules: {
     // "@next/next/no-html-link-for-pages": ["error", "src/app"],
@@ -55,6 +55,8 @@ const config = {
     "import/newline-after-import": "error",
     "import/export": "off",
     "sort-import": "off",
+    // TODO enable when monorepo is killed
+    "import/named": "off",
     "prettier/prettier": [
       "error",
       {
@@ -81,10 +83,13 @@ const config = {
         sourceType: "module",
       },
       settings: {
+        "import/parsers": {
+          "@typescript-eslint/parser": [".ts", ".tsx"],
+        },
         "import/resolver": {
           typescript: {
             alwaysTryTypes: true,
-            project: ["tsconfig.json"],
+            project: "tsconfig.json",
           },
         },
       },
@@ -142,7 +147,6 @@ const config = {
           "error",
           {
             prefer: "type-imports",
-            // TODO: enable on new @typescript-eslint/eslint-plugin release (> 5.42.1)
             fixStyle: "inline-type-imports",
           },
         ],

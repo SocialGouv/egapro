@@ -1,3 +1,5 @@
+"use client";
+
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -5,7 +7,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { normalizeRouterQuery } from "@common/utils/url";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { requestEmailForToken } from "@services/apiClient";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -20,9 +22,9 @@ type FormType = z.infer<typeof formSchema>;
 type Props = { defaultRedirectTo: string };
 
 export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
-  const router = useRouter();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
-  const { redirectTo } = normalizeRouterQuery(router.query);
+  const query = useSearchParams();
+  const { redirectTo } = normalizeRouterQuery(query as any);
 
   const {
     register,

@@ -2,8 +2,8 @@ import type {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/representation-equilibree";
-import create from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
@@ -94,8 +94,8 @@ export const useFormManager = create<FormActions & { formData: FormState }>()(
         }),
     }),
     {
-      name: "ega-repeq-form", // name of item in the storage (must be unique)
-      getStorage: () => sessionStorage, // formData are removed when user is disconnected
+      name: "ega-repeq-form",
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );

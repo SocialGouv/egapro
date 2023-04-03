@@ -1,8 +1,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { create } from "zustand";
-import type { StateStorage } from "zustand/middleware";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 
 import { useFormManager } from "./useFormManager";
 import { useMe } from "./useMe";
@@ -79,10 +78,8 @@ export const useUserStore = create<UserStore>()(
       };
     },
     {
-      name: "ega-token", // name of item in the storage (must be unique)
-      getStorage() {
-        return SyncLegacyTokenStorage;
-      },
+      name: "ega-token",
+      storage: createJSONStorage(() => SyncLegacyTokenStorage),
     },
   ),
 );

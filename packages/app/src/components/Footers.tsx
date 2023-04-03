@@ -38,6 +38,7 @@ export const EntrepriseFooter = () => {
                 target="_blank"
                 rel="noreferrer"
                 title="Télécharger la liste des référents au format xlsx"
+                isExternal
               >
                 Télécharger la liste des référents
               </FooterContentLink>
@@ -47,6 +48,7 @@ export const EntrepriseFooter = () => {
                 href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
                 target="_blank"
                 rel="noreferrer"
+                isExternal
               >
                 Contribuer sur GitHub
               </FooterContentLink>

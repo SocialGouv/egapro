@@ -2,8 +2,8 @@ import type { FavorablePopulation } from "@common/core-domain/domain/valueObject
 import type { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import type { WORKFORCES } from "@common/dict";
 import type { Enum } from "@common/shared-domain/domain/valueObjects";
-import create from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
@@ -107,8 +107,8 @@ export const useDeclarationFormManager = create<FormActions & { formData: Declar
         }),
     }),
     {
-      name: "ega-declaration-form", // name of item in the storage (must be unique)
-      getStorage: () => sessionStorage, // formData are removed when user is disconnected
+      name: "ega-declaration-form",
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );
