@@ -24,7 +24,7 @@ export const EXPORT_MIME = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 export const EXPORT_EXT = Object.keys(EXPORT_MIME);
-export type ValidExportExtension = typeof EXPORT_EXT[number];
+export type ValidExportExtension = (typeof EXPORT_EXT)[number];
 
 export class ExportReferents implements UseCase<ValidExportExtension, Readable> {
   constructor(private readonly referentRepo: IReferentRepo) {}

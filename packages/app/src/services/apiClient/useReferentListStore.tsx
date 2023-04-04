@@ -1,6 +1,6 @@
 import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
-import create from "zustand";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
@@ -12,7 +12,7 @@ export const columnMap = [
   ["principal", "Principal"],
 ] as const;
 
-type OrderBy = typeof columnMap[number][0];
+type OrderBy = (typeof columnMap)[number][0];
 
 export type ReferentListStore = {
   currentEdited?: ReferentDTO;

@@ -1,7 +1,7 @@
 import "@design-system/theme";
 
 import { useEffect, useState } from "react";
-import create from "zustand";
+import { create } from "zustand";
 
 export interface DsfrScriptProps {
   enableJs?: boolean;
