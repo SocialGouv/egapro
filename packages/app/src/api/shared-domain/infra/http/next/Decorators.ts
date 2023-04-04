@@ -1,5 +1,4 @@
 import type { NextControllerMethodDecorator } from "@api/shared-domain/infra/http/next/type";
-import type { Any } from "@common/utils/types";
 import { StatusCodes } from "http-status-codes";
 import type { z } from "zod";
 
@@ -17,7 +16,7 @@ type Req = NextController.Req<NextController>;
 type Res = NextController.Res<NextController>;
 export const ZodifiedRoute =
   <TController extends NextController>(
-    schema: z.ZodObject<Any>,
+    schema: z.ZodType,
     requestProperty: keyof Req,
   ): NextControllerMethodDecorator<TController> =>
   (target, _property, desc) => {
@@ -30,16 +29,16 @@ export const ZodifiedRoute =
         return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json(propParsed.error.flatten().fieldErrors);
       }
 
-      req[requestProperty] = propParsed.data as Any;
+      req[requestProperty] = propParsed.data;
 
       return originalMethod?.call(target, req, res);
     }) as typeof desc.value;
   };
 
 export const RouteZodQuery = <TController extends NextController>(
-  schema: z.ZodObject<Any>,
+  schema: z.ZodType,
 ): NextControllerMethodDecorator<TController> => ZodifiedRoute(schema, "query");
 
 export const RouteZodBody = <TController extends NextController>(
-  schema: z.ZodObject<Any>,
+  schema: z.ZodType,
 ): NextControllerMethodDecorator<TController> => ZodifiedRoute(schema, "body");

@@ -37,3 +37,15 @@ export interface OwnershipRaw {
   email: string;
   siren: string;
 }
+
+export interface ReferentRaw {
+  county: string | null;
+  id: string;
+  name: string;
+  principal: boolean;
+  region: string;
+  substitute_email: string | null;
+  substitute_name: string | null;
+  type: string;
+  value: string;
+}

@@ -24,7 +24,7 @@ export default class OwnershipRequestController implements NextController {
       console.error(error);
       if (error instanceof CreateOwnershipRequestError) {
         if (error.previousError instanceof ValidationError) {
-          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
+          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: error.previousError.message });
         }
         res.status(StatusCodes.BAD_REQUEST).json({
           errorMessage: error

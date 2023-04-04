@@ -98,7 +98,7 @@ type TileCompanyLoadMoreProps = {
 
 export const TileCompanyLoadMore = ({ onClick }: TileCompanyLoadMoreProps) => (
   <div className={style.tableCompanyLoadMore}>
-    <FormButton size="sm" variant="tertiary-no-border" onClick={onClick} iconLeft="fr-icon-add-line">
+    <FormButton size="sm" variant="tertiary-no-outline" onClick={onClick} iconLeft="fr-icon-add-line">
       Afficher plus d’années
     </FormButton>
   </div>

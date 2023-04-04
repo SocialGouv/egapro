@@ -1,4 +1,4 @@
-from typing import Union
+from typing import KeysView, Literal, Union
 import uuid
 from datetime import datetime
 
@@ -9,12 +9,13 @@ from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
 import ujson as json
 
 from egapro import config, models, sql, utils, helpers
-from egapro.constants import DEPARTEMENTS, REGIONS
+from egapro.constants import DEPARTEMENT_TO_REGION, DEPARTEMENTS, REGIONS, REGIONS_TO_DEPARTEMENTS
 from egapro.loggers import logger
 
 
 class NoData(Exception):
     pass
+
 
 
 class Record(asyncpg.Record):
@@ -46,6 +47,38 @@ class RepresentationRecord(Record):
     def data(self):
         data = self.get("data")
         return models.Data(data)
+
+class ReferentRecord(Record):
+    fields = ["id", "county", "name", "principal", "region", "type", "value"]
+
+    @property
+    def id(self) -> str:
+        return self.get("id")
+
+    @property
+    def county(self) -> Union[str, None]:
+        return self.get("county")
+
+    @property
+    def name(self) -> str:
+        return self.get("name")
+
+    @property
+    def principal(self) -> bool:
+        return bool(self.get("principal")) or False
+
+    @property
+    def region(self) -> str:
+        return self.get("region")
+
+    @property
+    def type(self) -> Literal["url", "email"]:
+        return self.get("type")
+
+    @property
+    def value(self) -> str:
+        return self.get("value")
+
 
 class table:
 
@@ -81,6 +114,21 @@ class table:
         conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
+
+class referent(table):
+    record_class = ReferentRecord
+    table_name = "referent"
+
+    @classmethod
+    async def getPrincipalsByCounty(cls, county: str) -> list[ReferentRecord]:
+        return await cls.fetch(f"SELECT * from {cls.table_name} WHERE county=$1 AND principal=TRUE", county)
+
+    @classmethod
+    async def getCoordRegion(cls, region: str) -> Union[ReferentRecord, None]:
+        try:
+            return await cls.fetchrow(f"SELECT * from {cls.table_name} WHERE region=$1 AND county IS NULL LIMIT 1" , region)
+        except NoData:
+            return None
 
 class representation_equilibree(table):
     record_class = RepresentationRecord

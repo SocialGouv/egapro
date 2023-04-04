@@ -45,8 +45,9 @@ const genericFetch = async (endpoint: string, options: FetcherOptions = { throwE
   options = {
     ...options,
     headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
+      ...(options?.headers ?? {
+        "Content-Type": "application/json",
+      }),
       "API-KEY": useUserStore.getState().token,
     },
   };

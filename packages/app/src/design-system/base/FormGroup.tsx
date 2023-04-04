@@ -35,7 +35,12 @@ export type FormGroupMessageProps = PropsWithChildren<{
 }>;
 
 export const FormGroupMessage = ({ isValid, id, children, ...rest }: FormGroupMessageProps) => (
-  <p id={id} className={clsx(isValid ? "fr-valid-text" : "fr-error-text")} {...rest}>
+  <p
+    role={isValid ? "status" : "alert"}
+    id={id}
+    className={clsx(isValid ? "fr-valid-text" : "fr-error-text")}
+    {...rest}
+  >
     {children}
   </p>
 );

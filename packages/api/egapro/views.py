@@ -173,7 +173,7 @@ async def declare(request, response, siren, year):
             if not owners:  # Staff member
                 owners = request["email"]
             url = request.domain + data.uri
-            emails.success.send(owners, url=url, **data)
+            await emails.success.send(owners, url=url, **data)
 
 @app.route("/representation-equilibree/{siren:digit}", methods=["GET"])
 @tokens.require
@@ -327,7 +327,7 @@ async def resend_receipt(request, response, siren, year):
         owners = request["email"]
     data = record.data
     url = request.domain + data.uri
-    emails.success.send(owners, url=url, **data)
+    await emails.success.send(owners, url=url, **data)
     response.status = 204
 
 
@@ -343,7 +343,7 @@ async def resend_objectifs_receipt(request, response, siren, year):
     if not owners:  # Staff member
         owners = request["email"]
     data = record.data
-    emails.objectives.send(owners, **data)
+    await emails.objectives.send(owners, **data)
     response.status = 204
 
 
@@ -360,7 +360,7 @@ async def resend_representation_receipt(request, response, siren, year):
         owners = request["email"]
     data = record.data
     url = request.domain + data.uri
-    emails.representation.send(owners, url=url, **data)
+    await emails.representation.send(owners, url=url, **data)
     response.status = 204
 
 
@@ -437,7 +437,7 @@ async def start_simulation(request, response):
     uid = await db.simulation.create(request.json)
     response.json = {"id": uid}
     if email:
-        emails.permalink.send(email, id=uid)
+        await emails.permalink.send(email, id=uid)
     response.status = 200
 
 
@@ -450,7 +450,7 @@ async def send_simulation_code(request, response, uuid):
     response.status = 204
     if not email:
         raise HttpError(400, "Missing `email` key")
-    emails.permalink.send(email, id=uuid)
+    await emails.permalink.send(email, id=uuid)
 
 
 @app.route("/simulation/{uuid}")
@@ -590,7 +590,7 @@ async def put_representation(request, response, siren, year):
         if not owners:  # Staff member
             owners = request["email"]
         url = request.domain + data.uri
-        emails.representation.send(owners, url=url, **data)
+        await emails.representation.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):

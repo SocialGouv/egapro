@@ -458,13 +458,24 @@ async def test_declaring_twice_should_not_duplicate(client, app, body):
 
 async def test_confirmed_declaration_should_send_email(client, monkeypatch, body):
     sender = mock.Mock()
+    replyToList = [{
+        "id": "noid",
+        "name": "Foo Bar",
+        "principal": True,
+        "county": "12",
+        "region": constants.DEPARTEMENT_TO_REGION["12"],
+        "value": "foo@baz.fr",
+        "type": "email"
+    }]
+    async def mock_getReplyTo(_county: str):
+        return replyToList
     del body["id"]
     await db.ownership.put("514027945", "foo@bar.org")
     # Add another owner, that should be in the email recipients
     await db.ownership.put("514027945", "foo@foo.foo")
     body["déclaration"]["brouillon"] = True
     monkeypatch.setattr("egapro.emails.send", sender)
-    monkeypatch.setattr("egapro.emails.REPLY_TO", {"12": "Foo Bar <foo@baz.fr>"})
+    monkeypatch.setattr("egapro.emails.getReplyTo", mock_getReplyTo)
     resp = await client.put("/declaration/514027945/2019", body=body)
     assert resp.status == 204
     assert not sender.call_count
@@ -476,7 +487,7 @@ async def test_confirmed_declaration_should_send_email(client, monkeypatch, body
     assert to == ["foo@bar.org", "foo@foo.foo"]
     assert "/index-egapro/declaration/?siren=514027945&year=2019" in txt
     assert "/index-egapro/declaration/?siren=514027945&year=2019" in html
-    assert sender.call_args.kwargs["reply_to"] == "Foo Bar <foo@baz.fr>"
+    assert sender.call_args.kwargs["reply_to"] == replyToList
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2020.pdf"
 
 

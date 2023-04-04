@@ -9,6 +9,9 @@ from pathlib import Path
 import yaml
 from jinja2 import Template, TemplateError, Undefined
 
+from egapro import db
+from egapro.constants import DEPARTEMENT_TO_REGION
+
 from .. import config
 from ..loggers import logger
 
@@ -22,8 +25,6 @@ Voici le lien vous permettant de valider votre email:
 L'équipe Egapro
 """
 
-REPLY_TO = {}
-
 
 # Never fail when a deep attribute is missing (eg. indicateurs.rémunérations.note)
 class SilentUndefined(Undefined):
@@ -31,13 +32,13 @@ class SilentUndefined(Undefined):
         return None
 
 
-def send(to, subject, txt, html=None, reply_to=None, attachment=None):
+def send(to, subject, txt, html=None, reply_to: list[db.ReferentRecord] = [], attachment=None):
     msg = EmailMessage()
     msg["From"] = config.FROM_EMAIL
     msg["To"] = to
     msg["Subject"] = subject
     if reply_to:
-        msg["Reply-To"] = reply_to
+        msg["Reply-To"] = ", ".join(f"{referent.name}" for referent in reply_to if referent.type == "email") or ""
     msg.set_content(txt)
     if html:
         msg.add_alternative(html, subtype="html")
@@ -73,9 +74,9 @@ class Email:
         self.html = self.load(html)
         self.attachment = attachment
 
-    def send(self, to, **context):
+    async def send(self, to, **context):
         txt, html, subject = self(**context)
-        reply_to = REPLY_TO.get(context.get("departement"))
+        reply_to = await getReplyTo(context.get("departement"))
         attachment = None
         if self.attachment:
             attachment = self.attachment(context)
@@ -99,7 +100,7 @@ class Email:
 
 
 def load():
-    """Load templates, in order to do `emails.success.send()` for a template named
+    """Load templates, in order to do `await emails.success.send()` for a template named
     `success`."""
     root = Path(__file__).parent
     for path in root.iterdir():
@@ -118,7 +119,24 @@ def load():
                 attachment = pymodule.attachment
             globals()[path.name] = Email(subject, txt, html, attachment)
 
-    REPLY_TO.update(yaml.safe_load((root / "reply_to.yml").read_text()))
+async def getReplyTo(county: str):
+    if not county: # if foreign country, then no county
+        return []
+    region = DEPARTEMENT_TO_REGION[county]
+    reply_to: list[db.ReferentRecord] = []
+    coord_region = await db.referent.getCoordRegion(region)
+    if coord_region and coord_region.principal:
+        reply_to.append(coord_region)
+        return reply_to
+
+    referents = await db.referent.getPrincipalsByCounty(county)
+    if not referents:
+        if coord_region:
+            reply_to.append(coord_region)
+    else:
+        reply_to.extend(referents)
+
+    return reply_to
 
 
 load()

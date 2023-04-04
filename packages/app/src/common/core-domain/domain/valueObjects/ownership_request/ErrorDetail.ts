@@ -32,7 +32,7 @@ export class ErrorDetail extends TupleString<typeof errorDetailCodes> {
     return this.tuple[1];
   }
 
-  public getValue(): string {
+  public toString() {
     return this.errorCode + ":" + this.errorMessage;
   }
 }

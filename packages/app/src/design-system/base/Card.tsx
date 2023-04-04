@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
-import type { IconStyles } from "../utils/icon-styles";
+import type { IconStyle } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
@@ -54,7 +54,7 @@ export const CardBodyContentDescription = ({ children }: PropsWithChildren) => (
   <p className="fr-card__desc">{children}</p>
 );
 
-export type CardBodyContentLegendProps = PropsWithChildren<{ icon?: IconStyles }>;
+export type CardBodyContentLegendProps = PropsWithChildren<{ icon?: IconStyle }>;
 
 export const CardBodyContentDetails = ({ children, icon }: CardBodyContentLegendProps) => (
   <p className={clsx("fr-card__detail", icon)}>{children}</p>

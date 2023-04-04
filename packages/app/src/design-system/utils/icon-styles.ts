@@ -1,4 +1,4 @@
-export type IconStyles =
+export type IconStyle =
   | "fr-fi-information-line"
   | "fr-icon-account-fill"
   | "fr-icon-add-line"
@@ -8,12 +8,17 @@ export type IconStyles =
   | "fr-icon-arrow-up-fill"
   | "fr-icon-arrow-up-s-line"
   | "fr-icon-calendar-line"
+  | "fr-icon-checkbox-fill"
+  | "fr-icon-close-circle-fill"
+  | "fr-icon-delete-fill"
   | "fr-icon-edit-fill"
+  | "fr-icon-edit-line"
   | "fr-icon-error-fill"
   | "fr-icon-information-fill"
   | "fr-icon-line-fill"
   | "fr-icon-link"
   | "fr-icon-lock-fill"
+  | "fr-icon-mail-fill"
   | "fr-icon-menu-fill"
   | "fr-icon-success-fill"
   | "fr-icon-success-line"

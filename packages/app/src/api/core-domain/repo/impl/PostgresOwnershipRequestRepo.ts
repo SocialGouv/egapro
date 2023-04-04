@@ -7,7 +7,7 @@ import type { GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/Owne
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
-import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
+import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 import { ensureRequired } from "@common/utils/types";
 
@@ -52,10 +52,10 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return limit > 0 ? sql`limit ${limit}` : sql``;
   }
 
-  public delete(item: OwnershipRequest): Promise<void> {
+  public delete(_id: UniqueID): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists(id: UniqueID): Promise<boolean> {
+  public exists(_id: UniqueID): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<OwnershipRequest[]> {
@@ -80,10 +80,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     }
   }
 
-  public async save(item: OwnershipRequest): Promise<void> {
+  public async save(item: OwnershipRequest): Promise<UniqueID> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await sql`insert into ${this.table} ${sql(raw, "siren", "email", "asker_email", "status", "error_detail")}`;
+    const insert = sql(raw, "siren", "email", "asker_email", "status", "error_detail");
+    const [rawReturn] = await this.sql`insert into ${this.table} ${insert} returning *`;
+
+    return new UniqueID(rawReturn.id);
   }
 
   public async update(item: OwnershipRequest): Promise<void> {
@@ -126,22 +129,21 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     });
   }
 
-  public deleteBulk(...items: OwnershipRequest[]): Promise<void> {
+  public deleteBulk(..._ids: UniqueID[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public existsMultiple(...ids: UniqueID[]): Promise<boolean[]> {
+  public existsMultiple(..._ids: UniqueID[]): Promise<boolean[]> {
     throw new Error("Method not implemented.");
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const [{ count }] = await sql<[{ count: number }]>`select count(*) from ${this.table}`;
     const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
   }
 
-  public saveBulk(...items: OwnershipRequest[]): Promise<void> {
+  public saveBulk(..._items: OwnershipRequest[]): Promise<UniqueID[]> {
     throw new Error("Method not implemented.");
   }
 

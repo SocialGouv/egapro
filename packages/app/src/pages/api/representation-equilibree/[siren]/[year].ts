@@ -28,9 +28,9 @@ export default class RepEqSirenYearController implements BaseController {
       console.error(error);
       if (error instanceof GetRepresentationEquilibreeBySirenAndYearError) {
         if (error.previousError instanceof ValidationError) {
-          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
+          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: error.previousError.message });
         }
-        res.status(StatusCodes.BAD_REQUEST).send(error.appErrorList().map(e => e.message));
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.appErrorList().map(e => e.message) });
       } else {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }

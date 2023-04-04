@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
-import type { IconStyles } from "../utils/icon-styles";
+import type { IconStyle } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import type { BoxProps } from "./Box";
 import { Box } from "./Box";
@@ -13,7 +13,7 @@ export type CalloutProps = BoxProps &
   PropsWithChildren<
     Omit<MarginProps, "ml" | "mr" | "mx"> & {
       className?: string;
-      icon?: IconStyles;
+      icon?: IconStyle;
     }
   >;
 
