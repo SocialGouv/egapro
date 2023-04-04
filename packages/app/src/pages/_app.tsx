@@ -1,15 +1,33 @@
 import "@fontsource/cabin";
 import "@fontsource/gabriela";
 
+import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { config } from "@common/config";
 import { fetcher } from "@services/apiClient";
 import { init } from "@socialgouv/matomo-next";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
+import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
+
+// Only in TypeScript projects
+declare module "@codegouvfr/react-dsfr/next-pagesdir" {
+  interface RegisterLink {
+    Link: typeof Link;
+  }
+}
+
+const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
+  defaultColorScheme: "system",
+  Link,
+});
+
+export { dsfrDocumentApi };
+
+///
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (props: PropsWithChildren) => JSX.Element;
@@ -64,4 +82,4 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   );
 };
 
-export default MyApp;
+export default withDsfr(MyApp);

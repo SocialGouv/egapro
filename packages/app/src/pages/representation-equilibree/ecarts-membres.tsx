@@ -33,7 +33,6 @@ import {
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -90,7 +89,7 @@ export type FormTypeInput = z.input<typeof formSchema>;
 
 // Fix TS limit to infer correct litterals in zod definition.
 export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsMembresNonCalculable"> & {
-  motifEcartsMembresNonCalculable: typeof motifNonCalculabiliteMembresOptions[number]["value"];
+  motifEcartsMembresNonCalculable: (typeof motifNonCalculabiliteMembresOptions)[number]["value"];
 };
 
 const EcartsMembres: NextPageWithLayout = () => {
@@ -229,9 +228,9 @@ const EcartsMembres: NextPageWithLayout = () => {
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
-              <NextLink href="/representation-equilibree/ecarts-cadres" passHref>
-                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-              </NextLink>
+              <ButtonAsLink href="/representation-equilibree/ecarts-cadres" variant="secondary">
+                Précédent
+              </ButtonAsLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>

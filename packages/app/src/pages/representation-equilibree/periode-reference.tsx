@@ -14,7 +14,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager } from "@services/apiClient";
 import { endOfYear, formatISO, getYear } from "date-fns";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -114,11 +113,9 @@ const PeriodeReference: NextPageWithLayout = () => {
             </FormButton>
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="entreprise" passHref>
-              <ButtonAsLink size="sm" variant="secondary">
-                Précédent
-              </ButtonAsLink>
-            </NextLink>
+            <ButtonAsLink href="/representation-equilibree/entreprise" size="sm" variant="secondary">
+              Précédent
+            </ButtonAsLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>

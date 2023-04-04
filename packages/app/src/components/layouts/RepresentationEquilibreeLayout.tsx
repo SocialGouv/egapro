@@ -57,7 +57,7 @@ export const RepresentationEquilibreeLayout = ({
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>
             <ClientOnly>
-              <AuthenticatedOnly disableAuth={disableAuth}>
+              <AuthenticatedOnly disableAuth={disableAuth} redirectTo="/representation-equilibree/email">
                 {currentStep !== null && (
                   <Stepper mb="6w">
                     <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>

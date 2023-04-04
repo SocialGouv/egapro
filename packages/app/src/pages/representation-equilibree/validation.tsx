@@ -5,7 +5,6 @@ import { RepresentationEquilibreeLayout } from "@components/layouts/Representati
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
 import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import invariant from "tiny-invariant";
 
@@ -74,9 +73,9 @@ const Validation: NextPageWithLayout = () => {
 
       <FormLayout>
         <FormLayoutButtonGroup>
-          <NextLink href={previousPage} passHref>
-            <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-          </NextLink>
+          <ButtonAsLink href={previousPage} variant="secondary">
+            Précédent
+          </ButtonAsLink>
           <FormButton onClick={sendRepresentationEquilibree}>Valider et transmettre les résultats</FormButton>
         </FormLayoutButtonGroup>
       </FormLayout>

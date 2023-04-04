@@ -17,10 +17,12 @@ export const MainNavItem = ({ children, href }: MainNavItemProps) => {
   const currentRoute = router.pathname;
   return (
     <li className="fr-nav__item">
-      <Link href={href}>
-        <a className="fr-nav__link" aria-current={href === `/${currentRoute.split("/")[1]}` ? "page" : undefined}>
-          {children}
-        </a>
+      <Link
+        href={href}
+        className="fr-nav__link"
+        aria-current={href === `/${currentRoute.split("/")[1]}` ? "page" : undefined}
+      >
+        {children}
       </Link>
     </li>
   );

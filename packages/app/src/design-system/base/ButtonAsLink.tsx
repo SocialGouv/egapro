@@ -3,33 +3,49 @@ import { forwardRef } from "react";
 
 import type { ButtonStylesProps } from "../utils/button-styles";
 import { buttonStyles } from "../utils/button-styles";
+import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
+import { NextLinkOrA } from "../utils/NextLinkOrA";
 
 export type ButtonAsLinkProps = ButtonStylesProps &
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  NextLinkOrAProps & {
     isCurrent?: boolean;
     isDisabled?: boolean;
+    isExternal?: boolean;
   };
 
-export type ButtonAsLinkRef = HTMLAnchorElement;
-
-export const ButtonAsLink = forwardRef<ButtonAsLinkRef, ButtonAsLinkProps>(
+export const ButtonAsLink = forwardRef<HTMLAnchorElement, ButtonAsLinkProps>(
   (
-    { href, isCurrent, isDisabled, variant, size, iconLeft, iconRight, iconOnly, target, children, className, ...rest },
+    {
+      isCurrent,
+      isDisabled,
+      variant,
+      size,
+      iconLeft,
+      iconRight,
+      iconOnly,
+      target,
+      children,
+      className,
+      isExternal,
+      ...rest
+    },
     ref,
   ) => {
+    const hasHref = "href" in rest;
     return (
-      <a
+      <NextLinkOrA
         ref={ref}
-        href={href || undefined}
+        href={hasHref ? rest.href : undefined}
         aria-current={isCurrent ? "page" : undefined}
-        aria-disabled={isDisabled || !href ? true : undefined}
+        aria-disabled={isDisabled || !hasHref ? true : undefined}
         className={clsx(buttonStyles({ variant, size, iconLeft, iconRight, iconOnly }), className)}
         target={target}
         rel={target === "_blank" ? "noopener noreferrer" : undefined}
+        isExternal={isExternal}
         {...rest}
       >
         {children}
-      </a>
+      </NextLinkOrA>
     );
   },
 );

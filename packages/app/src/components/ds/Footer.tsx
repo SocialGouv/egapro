@@ -35,7 +35,17 @@ export const Footer = () => {
             },
           }}
         >
-          <Box pr={8}>
+          <Box
+            pr={8}
+            sx={{
+              a: {
+                background: "none !important", // This is a hack to override the global css of dsfr on links.
+              },
+              "a:after": {
+                display: "none !important",
+              },
+            }}
+          >
             <Link href="https://travail-emploi.gouv.fr/" isExternal pt={2} sx={{ display: "block" }}>
               <Logo />
             </Link>

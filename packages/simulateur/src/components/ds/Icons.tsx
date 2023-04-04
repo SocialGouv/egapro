@@ -39,29 +39,29 @@ export const IconText = ({ children }: PropsWithChildren) => {
   )
 }
 
-export const IconEdit: SvgComponent = (props) => <Icon as={PencilIcon} {...props} />
+export const IconEdit = (props: IconProps) => <Icon as={PencilIcon} {...props} />
 
-export const IconSearch: SvgComponent = (props) => <Icon as={SearchIcon} {...props} />
+export const IconSearch = (props: IconProps) => <Icon as={SearchIcon} {...props} />
 
-export const IconValid: SvgComponent = (props) => <Icon as={CheckCircleIcon} {...props} />
+export const IconValid = (props: IconProps) => <Icon as={CheckCircleIcon} {...props} />
 
-export const IconInvalid: SvgComponent = (props) => <Icon as={XCircleIcon} {...props} />
+export const IconInvalid = (props: IconProps) => <Icon as={XCircleIcon} {...props} />
 
-export const IconLamp: SvgComponent = (props) => <Icon as={LightBulbIcon} {...props} />
+export const IconLamp = (props: IconProps) => <Icon as={LightBulbIcon} {...props} />
 
-export const IconPeople: SvgComponent = (props) => <Icon as={UserIcon} {...props} />
+export const IconPeople = (props: IconProps) => <Icon as={UserIcon} {...props} />
 
-export const IconPeopleCircle: SvgComponent = (props) => <Icon as={UserCircleIcon} {...props} />
+export const IconPeopleCircle = (props: IconProps) => <Icon as={UserCircleIcon} {...props} />
 
-export const IconCalendar: SvgComponent = (props) => <Icon as={CalendarIcon} {...props} />
+export const IconCalendar = (props: IconProps) => <Icon as={CalendarIcon} {...props} />
 
-export const IconMoney: SvgComponent = (props) => <Icon as={CurrencyEuroIcon} {...props} />
+export const IconMoney = (props: IconProps) => <Icon as={CurrencyEuroIcon} {...props} />
 
-export const IconCheck: SvgComponent = (props) => <Icon as={CheckIcon} {...props} />
+export const IconCheck = (props: IconProps) => <Icon as={CheckIcon} {...props} />
 
-export const IconGrow: SvgComponent = (props) => <Icon as={TrendingUpIcon} {...props} />
+export const IconGrow = (props: IconProps) => <Icon as={TrendingUpIcon} {...props} />
 
-export const IconBack: SvgComponent = (props) => <Icon as={ArrowNarrowLeftIcon} {...props} />
+export const IconBack = (props: IconProps) => <Icon as={ArrowNarrowLeftIcon} {...props} />
 
 export const IconFemale: SvgComponent = (props) => (
   <Icon {...props}>
@@ -81,25 +81,25 @@ export const IconMale: SvgComponent = (props) => (
   </Icon>
 )
 
-export const IconWarning: SvgComponent = (props) => <Icon as={ExclamationIcon} {...props} />
+export const IconWarning = (props: IconProps) => <Icon as={ExclamationIcon} {...props} />
 
-export const IconCircleCross: SvgComponent = (props) => <Icon as={XCircleLineIcon} {...props} />
+export const IconCircleCross = (props: IconProps) => <Icon as={XCircleLineIcon} {...props} />
 
-export const IconOfficeBuilding: SvgComponent = (props) => <Icon as={OfficeBuildingIcon} {...props} />
+export const IconOfficeBuilding = (props: IconProps) => <Icon as={OfficeBuildingIcon} {...props} />
 
-export const IconDelete: SvgComponent = (props) => <Icon as={TrashIcon} {...props} />
+export const IconDelete = (props: IconProps) => <Icon as={TrashIcon} {...props} />
 
-export const IconPlusCircle: SvgComponent = (props) => <Icon as={PlusCircleIcon} {...props} />
+export const IconPlusCircle = (props: IconProps) => <Icon as={PlusCircleIcon} {...props} />
 
-export const IconMenu: SvgComponent = (props) => <Icon as={MenuIcon} {...props} />
+export const IconMenu = (props: IconProps) => <Icon as={MenuIcon} {...props} />
 
-export const IconLogout: SvgComponent = (props) => <Icon as={LogoutIcon} {...props} />
+export const IconLogout = (props: IconProps) => <Icon as={LogoutIcon} {...props} />
 
-export const IconLogin: SvgComponent = (props) => <Icon as={LoginIcon} {...props} />
+export const IconLogin = (props: IconProps) => <Icon as={LoginIcon} {...props} />
 
-export const IconQuestionMarkCircle: SvgComponent = (props) => <Icon as={QuestionMarkCircleIcon} {...props} />
+export const IconQuestionMarkCircle = (props: IconProps) => <Icon as={QuestionMarkCircleIcon} {...props} />
 
-export const IconUserGroup: SvgComponent = (props) => <Icon as={UserGroupIcon} {...props} />
+export const IconUserGroup = (props: IconProps) => <Icon as={UserGroupIcon} {...props} />
 
 export const IconDrag: SvgComponent = (props) => (
   <Icon {...props}>
@@ -110,6 +110,6 @@ export const IconDrag: SvgComponent = (props) => (
   </Icon>
 )
 
-export const IconExternalLink: SvgComponent = (props) => <Icon as={ExternalLinkIcon} {...props} />
+export const IconExternalLink = (props: IconProps) => <Icon as={ExternalLinkIcon} {...props} />
 
-export const IconArrowRight: SvgComponent = (props) => <Icon as={ChevronRightIcon} {...props} />
+export const IconArrowRight = (props: IconProps) => <Icon as={ChevronRightIcon} {...props} />

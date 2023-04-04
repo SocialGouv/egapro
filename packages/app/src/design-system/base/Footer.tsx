@@ -2,6 +2,8 @@ import type { PropsWithChildren } from "react";
 import { forwardRef } from "react";
 
 import { Container } from "../layout/Container";
+import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
+import { NextLinkOrA } from "../utils/NextLinkOrA";
 
 export const Footer = ({ children }: PropsWithChildren) => (
   <footer className="fr-footer" role="contentinfo" id="footer">
@@ -44,9 +46,14 @@ export const FooterBottom = ({ children }: PropsWithChildren) => {
       <div className="fr-footer__bottom-copy">
         <p>
           Sauf mention contraire, tous les contenus de ce site sont sous{" "}
-          <a href="https://github.com/SocialGouv/egapro/blob/master/LICENSE" target="_blank" rel="noreferrer">
+          <NextLinkOrA
+            href="https://github.com/SocialGouv/egapro/blob/master/LICENSE"
+            target="_blank"
+            rel="noreferrer"
+            isExternal
+          >
             licence Apache 2.0
-          </a>
+          </NextLinkOrA>
         </p>
       </div>
     </div>
@@ -57,24 +64,20 @@ export const FooterBottomItem = ({ children }: PropsWithChildren) => {
   return <li className="fr-footer__bottom-item">{children}</li>;
 };
 
-export const FooterBottomLink = forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>(
-  ({ children, ...rest }, ref) => {
-    return (
-      <a className="fr-footer__bottom-link" ref={ref} {...rest}>
-        {children}
-      </a>
-    );
-  },
-);
+export const FooterBottomLink = forwardRef<HTMLAnchorElement, NextLinkOrAProps>(({ children, ...rest }, ref) => {
+  return (
+    <NextLinkOrA className="fr-footer__bottom-link" ref={ref} {...rest}>
+      {children}
+    </NextLinkOrA>
+  );
+});
 
 FooterBottomLink.displayName = "FooterBottomLink";
 
-export type FooterContentLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
-
-export const FooterContentLink = ({ children, ...rest }: FooterContentLinkProps) => {
+export const FooterContentLink = ({ children, ...rest }: NextLinkOrAProps) => {
   return (
-    <a className="fr-footer__content-link" {...rest}>
+    <NextLinkOrA className="fr-footer__content-link" {...rest}>
       {children}
-    </a>
+    </NextLinkOrA>
   );
 };

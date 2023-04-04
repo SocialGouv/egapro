@@ -4,11 +4,11 @@ import type { TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
 import { clsx } from "clsx";
 import Head from "next/head";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import { useCallback, useEffect, useState } from "react";
 
+import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import styles from "./App.module.css";
 
 interface ActionButtonGroupsProps {
@@ -23,12 +23,10 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
     {isAuthenticated ? (
       <>
         <li>
-          <NextLink href="/index-egapro/tableauDeBord/mon-profil" passHref>
-            <ButtonAsLink iconLeft="fr-icon-account-fill">
-              {user?.email}
-              {user?.staff ? " (staff)" : ""}
-            </ButtonAsLink>
-          </NextLink>
+          <ButtonAsLink href="/index-egapro/tableauDeBord/mon-profil" iconLeft="fr-icon-account-fill">
+            {user?.email}
+            {user?.staff ? " (staff)" : ""}
+          </ButtonAsLink>
         </li>
         <li>
           <FormButton type="button" variant="secondary" iconLeft="fr-icon-lock-fill" onClick={disconnectUser}>
@@ -38,11 +36,14 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
       </>
     ) : (
       <li>
-        <NextLink href={`/representation-equilibree/email?redirectTo=${dest}`} passHref>
-          <ButtonAsLink type="button" variant="secondary" iconLeft="fr-icon-lock-fill">
-            Se connecter
-          </ButtonAsLink>
-        </NextLink>
+        <ButtonAsLink
+          href={`/representation-equilibree/email?redirectTo=${dest}`}
+          type="button"
+          variant="secondary"
+          iconLeft="fr-icon-lock-fill"
+        >
+          Se connecter
+        </ButtonAsLink>
       </li>
     )}
   </ul>
@@ -125,11 +126,12 @@ export const App = ({ children, footer = <EntrepriseFooter />, disableAuth }: Pr
                     </div>
                   </div>
                   <div className="fr-header__service">
-                    <NextLink href="/">
-                      <a title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion">
-                        <p className="fr-header__service-title">Egapro</p>
-                      </a>
-                    </NextLink>
+                    <NextLinkOrA
+                      href="/"
+                      title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion"
+                    >
+                      <p className="fr-header__service-title">Egapro</p>
+                    </NextLinkOrA>
                     <p className="fr-header__service-tagline">
                       Index de l’égalité professionnelle et représentation équilibrée femmes – hommes
                     </p>

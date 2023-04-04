@@ -44,6 +44,10 @@ export const ButtonAction = ({
     rightIcon={rightIcon}
     sx={{
       width: fullWidth ? "100%" : "auto",
+      ":hover": {
+        background: "var(--chakra-colors-primary-600) !important", // This is a hack to override the global css of dsfr on buttons.
+        color: "var(--chakra-colors-white) !important",
+      },
     }}
     {...rest}
   >

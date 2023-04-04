@@ -15,8 +15,8 @@ import {
   ImgHome,
 } from "@design-system";
 import type { GetStaticProps } from "next";
-import NextLink from "next/link";
 
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
 import styles from "./index.module.css";
 
@@ -73,12 +73,10 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
-                  <NextLink href="/index-egapro" passHref>
-                    <ButtonAsLink className="fr-mr-4w">Calculer - Déclarer mon Index</ButtonAsLink>
-                  </NextLink>
-                  <NextLink href="/consulter-index" passHref>
-                    <a>Consulter l'Index</a>
-                  </NextLink>
+                  <ButtonAsLink href="/index-egapro" className="fr-mr-4w">
+                    Calculer - Déclarer mon Index
+                  </ButtonAsLink>
+                  <NextLinkOrA href="/consulter-index">Consulter l'Index</NextLinkOrA>
                 </CardBodyFooter>
               </CardBody>
             </Card>
@@ -92,23 +90,22 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                     Déclarer vos écarts de représentation entre les femmes et les hommes dans les postes de direction.
                   </CardBodyContentDescription>
                   <CardBodyContentDescription>
-                    <a
+                    <NextLinkOrA
                       href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
                       target="_blank"
                       rel="noreferrer"
+                      isExternal
                     >
                       Pour plus d'informations sur la représentation équilibrée
-                    </a>
+                    </NextLinkOrA>
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
-                  <NextLink href="/representation-equilibree" passHref>
-                    <ButtonAsLink className="fr-mr-4w">Déclarer mes Écarts</ButtonAsLink>
-                  </NextLink>
+                  <ButtonAsLink href="/representation-equilibree" className="fr-mr-4w">
+                    Déclarer mes Écarts
+                  </ButtonAsLink>
                   {ff["repeq-search"] && (
-                    <NextLink href="/representation-equilibree/recherche" passHref>
-                      <a>Consulter les Écarts</a>
-                    </NextLink>
+                    <NextLinkOrA href="/representation-equilibree/recherche">Consulter les Écarts</NextLinkOrA>
                   )}
                 </CardBodyFooter>
               </CardBody>

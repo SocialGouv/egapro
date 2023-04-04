@@ -15,6 +15,12 @@ export const Header = () => {
       sx={{
         flexShrink: 0,
         borderBottom: "1px solid #E3E4ED",
+        a: {
+          background: "none !important", // This is a hack to override the global css of dsfr on links.
+        },
+        "a:after": {
+          display: "none !important",
+        },
       }}
     >
       <Box
@@ -55,7 +61,7 @@ export const Header = () => {
             </Link>
           </Box>
           <Box fontFamily="gabriela">
-            <NextLink href="/" passHref>
+            <NextLink href="/" passHref legacyBehavior>
               <Link fontSize="2xl">Egapro</Link>
             </NextLink>
             <Text fontSize="xs">Index de l’égalité professionnelle et représentation équilibrée</Text>

@@ -44,3 +44,5 @@ export const normalizeRouterQuery = (query: ParsedUrlQuery) =>
       ];
     }),
   );
+
+export type AnchorLink = `#${string}`;

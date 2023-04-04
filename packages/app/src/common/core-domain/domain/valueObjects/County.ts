@@ -5,7 +5,7 @@ import type { UnknownMapping } from "@common/utils/types";
 
 const COUNTIES_KEYS = Object.keys(COUNTIES);
 
-type Counties = typeof COUNTIES_KEYS[number] | UnknownMapping;
+type Counties = (typeof COUNTIES_KEYS)[number] | UnknownMapping;
 
 export class County extends TupleString<typeof COUNTIES_KEYS> {
   constructor(value: Counties) {

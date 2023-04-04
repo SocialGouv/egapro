@@ -13,7 +13,8 @@ import {
   FooterContentLink,
   Logo,
 } from "@design-system";
-import NextLink from "next/link";
+
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 
 /** Footer for entreprise */
 export const EntrepriseFooter = () => {
@@ -21,11 +22,9 @@ export const EntrepriseFooter = () => {
     <Footer>
       <FooterBody>
         <FooterBodyBrand>
-          <NextLink href="/">
-            <a>
-              <Logo />
-            </a>
-          </NextLink>
+          <NextLinkOrA href="/">
+            <Logo />
+          </NextLinkOrA>
         </FooterBodyBrand>
         <FooterBodyContent>
           <FooterBodyContentDescription>
@@ -39,6 +38,7 @@ export const EntrepriseFooter = () => {
                 target="_blank"
                 rel="noreferrer"
                 title="Télécharger la liste des référents au format xlsx"
+                isExternal
               >
                 Télécharger la liste des référents
               </FooterContentLink>
@@ -48,6 +48,7 @@ export const EntrepriseFooter = () => {
                 href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
                 target="_blank"
                 rel="noreferrer"
+                isExternal
               >
                 Contribuer sur GitHub
               </FooterContentLink>
@@ -57,24 +58,19 @@ export const EntrepriseFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref>
-            <FooterBottomLink>CGU</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/cgu">CGU</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref>
-            <FooterBottomLink>Mentions légales</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/mentions-legales">Mentions légales</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref>
-            <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
           <FooterBottomLink
             href="https://ara.numerique.gouv.fr/rapports/_YKXqg3aJMpFGmPh1tA0d/resultats"
             target="_blank"
+            isExternal
           >
             Accessibilité : partiellement conforme
           </FooterBottomLink>
@@ -90,11 +86,9 @@ export const PublicFooter = () => {
     <Footer>
       <FooterBody>
         <FooterBodyBrand>
-          <NextLink href="/">
-            <a>
-              <Logo />
-            </a>
-          </NextLink>
+          <NextLinkOrA href="/">
+            <Logo />
+          </NextLinkOrA>
         </FooterBodyBrand>
         <FooterBodyContent>
           <FooterBodyContentDescription>
@@ -122,19 +116,13 @@ export const PublicFooter = () => {
       </FooterBody>
       <FooterBottom>
         <FooterBottomItem>
-          <NextLink href="/cgu" passHref>
-            <FooterBottomLink>CGU</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/cgu">CGU</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/mentions-legales" passHref>
-            <FooterBottomLink>Mentions légales</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/mentions-legales">Mentions légales</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <NextLink href="/politique-de-confidentialite" passHref>
-            <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
-          </NextLink>
+          <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
         </FooterBottomItem>
       </FooterBottom>
     </Footer>

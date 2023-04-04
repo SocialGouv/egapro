@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unknown-property */
 import type { PropsWithChildren } from "react";
 
 export interface AnchorLinkProps {

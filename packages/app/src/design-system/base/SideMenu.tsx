@@ -4,6 +4,8 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useState } from "react";
 
 import { useCollapse } from "../hooks/useCollapse";
+import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
+import { NextLinkOrA } from "../utils/NextLinkOrA";
 import styles from "./SideMenu.module.css";
 
 export type SideMenuProps = PropsWithChildren<{
@@ -47,18 +49,22 @@ export const SideMenuTitle = ({ children }: PropsWithChildren) => <div className
 
 export const SideMenuList = ({ children }: PropsWithChildren) => <ul className="fr-sidemenu__list">{children}</ul>;
 
-export type SideMenuLinkProps = PropsWithChildren<
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    isCurrent?: boolean;
-  }
->;
+export type SideMenuLinkProps = NextLinkOrAProps & {
+  isCurrent?: boolean;
+};
 
 export const SideMenuLink = forwardRef<HTMLAnchorElement, SideMenuLinkProps>(
   ({ isCurrent, children, ...rest }, ref) => (
     <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>
-      <a className="fr-sidemenu__link" aria-current={isCurrent ? "page" : undefined} target="_self" {...rest} ref={ref}>
+      <NextLinkOrA
+        className="fr-sidemenu__link"
+        aria-current={isCurrent ? "page" : undefined}
+        target="_self"
+        {...rest}
+        ref={ref}
+      >
         {children}
-      </a>
+      </NextLinkOrA>
     </li>
   ),
 );

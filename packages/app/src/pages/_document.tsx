@@ -1,9 +1,14 @@
-import type { NextPage } from "next";
+//
+import type { DocumentProps } from "next/document";
 import { Head, Html, Main, NextScript } from "next/document";
 
-const Document: NextPage = () => {
+import { dsfrDocumentApi } from "./_app";
+
+const { getColorSchemeHtmlAttributes, augmentDocumentForDsfr } = dsfrDocumentApi;
+
+export default function Document(props: DocumentProps) {
   return (
-    <Html lang="fr">
+    <Html lang="fr" {...getColorSchemeHtmlAttributes(props)}>
       <Head />
       <body>
         <Main />
@@ -11,6 +16,6 @@ const Document: NextPage = () => {
       </body>
     </Html>
   );
-};
+}
 
-export default Document;
+augmentDocumentForDsfr(Document);
