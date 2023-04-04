@@ -326,6 +326,9 @@ const Declaration = ({ code }: DeclarationProps) => {
             <>
               <InfoBlock
                 type="warning"
+                title={`Index égalité femmes-hommes en ${
+                  Number(state.informations.anneeDeclaration) + 1
+                } (au titre des données ${state.informations.anneeDeclaration})`}
                 text={
                   !allFormsFilled
                     ? "Vous ne pouvez pas déclarer car toutes les pages relatives à la déclaration ne sont pas validées."

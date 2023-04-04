@@ -67,6 +67,9 @@ const RecapitulatifInformations: FunctionComponent<RecapitulatifInformationsProp
       ) : (
         <InfoBlock
           type="warning"
+          title={`Index égalité femmes-hommes en ${
+            Number(anneeDeclaration) + 1
+          } (au titre des données ${anneeDeclaration})`}
           text="Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables."
         />
       )}
