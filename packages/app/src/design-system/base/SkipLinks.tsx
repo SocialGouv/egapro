@@ -1,3 +1,4 @@
+import type { AnchorLink } from "@common/utils/url";
 import type { PropsWithChildren } from "react";
 
 export const SkipLinks = ({ children }: PropsWithChildren) => (
@@ -8,7 +9,7 @@ export const SkipLinks = ({ children }: PropsWithChildren) => (
   </div>
 );
 
-export type SkipLinksItemProps = PropsWithChildren<{ href: string }>;
+export type SkipLinksItemProps = PropsWithChildren<{ href: AnchorLink }>;
 
 export const SkipLinksItem = ({ children, href }: SkipLinksItemProps) => (
   <li>

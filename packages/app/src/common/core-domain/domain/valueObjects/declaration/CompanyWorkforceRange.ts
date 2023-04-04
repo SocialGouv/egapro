@@ -5,7 +5,7 @@ import type { UnknownMapping } from "@common/utils/types";
 
 const WORKFORCE_KEYS = Object.keys(WORKFORCES);
 
-type Workforces = typeof WORKFORCE_KEYS[number] | UnknownMapping;
+type Workforces = (typeof WORKFORCE_KEYS)[number] | UnknownMapping;
 
 export class CompanyWorkforceRange extends TupleString<typeof WORKFORCE_KEYS> {
   constructor(value: Workforces) {

@@ -67,8 +67,8 @@ export const motifNonCalculabiliteMembresOptions = [
 ] as const;
 
 type IndicateursRepresentationEquilibree = {
-  motif_non_calculabilité_cadres: typeof motifNonCalculabiliteCadresOptions[number]["value"] | undefined;
-  motif_non_calculabilité_membres: typeof motifNonCalculabiliteMembresOptions[number]["value"] | undefined;
+  motif_non_calculabilité_cadres: (typeof motifNonCalculabiliteCadresOptions)[number]["value"] | undefined;
+  motif_non_calculabilité_membres: (typeof motifNonCalculabiliteMembresOptions)[number]["value"] | undefined;
   pourcentage_femmes_cadres: number;
   pourcentage_femmes_membres: number;
   pourcentage_hommes_cadres: number;

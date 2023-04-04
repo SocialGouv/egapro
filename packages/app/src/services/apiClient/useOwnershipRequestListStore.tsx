@@ -5,7 +5,7 @@ import type {
   GetOwnershipRequestInputSchemaDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
-import create from "zustand";
+import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 

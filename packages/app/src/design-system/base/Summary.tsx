@@ -1,3 +1,4 @@
+import type { AnchorLink } from "@common/utils/url";
 import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
@@ -10,7 +11,7 @@ export const Summary = ({ children, className }: PropsWithChildren<{ className?:
   </nav>
 );
 
-export const SummaryLink = ({ children, href }: PropsWithChildren<{ href: string }>) => (
+export const SummaryLink = ({ children, href }: PropsWithChildren<{ href: AnchorLink }>) => (
   <li>
     <a className="fr-summary__link" href={href}>
       {children}

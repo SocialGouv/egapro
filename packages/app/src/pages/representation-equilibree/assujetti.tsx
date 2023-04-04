@@ -9,7 +9,6 @@ import {
   FormRadioGroupLegend,
 } from "@design-system";
 import { useUser } from "@services/apiClient";
-import NextLink from "next/link";
 import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
@@ -70,17 +69,14 @@ const AssujettiPage: NextPageWithLayout = () => {
             Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
             les femmes et les hommes.
           </CalloutContent>
-          <NextLink href="/representation-equilibree/" passHref>
-            <ButtonAsLink>Retour à la page d'accueil</ButtonAsLink>
-          </NextLink>
+          <ButtonAsLink href="/representation-equilibree/">Retour à la page d'accueil</ButtonAsLink>
         </Callout>
       )) || (
-        <NextLink
+        <ButtonAsLink
           href={isAuthenticated ? "/representation-equilibree/commencer" : "/representation-equilibree/email"}
-          passHref
         >
-          <ButtonAsLink>Suivant</ButtonAsLink>
-        </NextLink>
+          Suivant
+        </ButtonAsLink>
       )}
     </>
   );

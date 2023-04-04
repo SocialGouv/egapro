@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
-import { FunctionComponent, ReactNode } from "react"
+import { ReactNode } from "react"
 import { useField } from "react-final-form"
 import { Flex, FormControl, FormLabel } from "@chakra-ui/react"
 
@@ -39,7 +39,7 @@ interface RadioLabelsProps {
   choices: RadioLabelChoice[]
 }
 
-const RadioLabels: FunctionComponent<RadioLabelsProps> = ({ readOnly, fieldName, label, value, choices }) => {
+const RadioLabels = ({ readOnly, fieldName, label, value, choices }: RadioLabelsProps) => {
   return (
     <FormControl>
       <FormLabel as="div">{label}</FormLabel>

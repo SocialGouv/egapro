@@ -11,14 +11,14 @@ exports[`should match snapshot 1`] = `
         class="css-zf0iqh"
       >
         <header
-          class="css-3p1eay"
+          class="css-6rrd1m"
           role="banner"
         >
           <div
             class="css-9v6k7z"
           >
             <div
-              class="chakra-container css-1g9eqn7"
+              class="chakra-container css-11vl7h3"
             >
               <ul
                 class="chakra-stack css-9zlpoh"
@@ -48,7 +48,7 @@ exports[`should match snapshot 1`] = `
             </div>
           </div>
           <div
-            class="chakra-container css-1g9eqn7"
+            class="chakra-container css-11vl7h3"
             id="menu"
           >
             <div
@@ -94,7 +94,7 @@ exports[`should match snapshot 1`] = `
           role="main"
         >
           <div
-            class="chakra-container css-1uu3zu4"
+            class="chakra-container css-14vcoqp"
           >
             Hello
           </div>
@@ -105,13 +105,13 @@ exports[`should match snapshot 1`] = `
           role="contentinfo"
         >
           <div
-            class="chakra-container css-1pc1gtf"
+            class="chakra-container css-140na8g"
           >
             <div
               class="css-v3i7xg"
             >
               <div
-                class="css-wzhq7s"
+                class="css-1ffgthf"
               >
                 <a
                   class="chakra-link css-9tv0aq"
@@ -147,7 +147,7 @@ exports[`should match snapshot 1`] = `
                 >
                   Contact: 
                   <a
-                    class="chakra-link css-18ktbam"
+                    class="chakra-link css-17hbvgh"
                     href="mailto:index@travail.gouv.fr"
                     rel="noopener"
                     target="_blank"
@@ -159,7 +159,7 @@ exports[`should match snapshot 1`] = `
                   class="chakra-text css-itvw0n"
                 >
                   <a
-                    class="chakra-link css-18ktbam"
+                    class="chakra-link css-17hbvgh"
                     href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
                     rel="noopener"
                     target="_blank"
@@ -184,37 +184,37 @@ exports[`should match snapshot 1`] = `
         aria-live="polite"
         id="chakra-toast-manager-top"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
       />
       <ul
         aria-live="polite"
         id="chakra-toast-manager-top-left"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
       />
       <ul
         aria-live="polite"
         id="chakra-toast-manager-top-right"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
       />
       <ul
         aria-live="polite"
         id="chakra-toast-manager-bottom-left"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
       />
       <ul
         aria-live="polite"
         id="chakra-toast-manager-bottom"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
       />
       <ul
         aria-live="polite"
         id="chakra-toast-manager-bottom-right"
         role="region"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
       />
     </div>
   </body>,
@@ -223,14 +223,14 @@ exports[`should match snapshot 1`] = `
       class="css-zf0iqh"
     >
       <header
-        class="css-3p1eay"
+        class="css-6rrd1m"
         role="banner"
       >
         <div
           class="css-9v6k7z"
         >
           <div
-            class="chakra-container css-1g9eqn7"
+            class="chakra-container css-11vl7h3"
           >
             <ul
               class="chakra-stack css-9zlpoh"
@@ -260,7 +260,7 @@ exports[`should match snapshot 1`] = `
           </div>
         </div>
         <div
-          class="chakra-container css-1g9eqn7"
+          class="chakra-container css-11vl7h3"
           id="menu"
         >
           <div
@@ -306,7 +306,7 @@ exports[`should match snapshot 1`] = `
         role="main"
       >
         <div
-          class="chakra-container css-1uu3zu4"
+          class="chakra-container css-14vcoqp"
         >
           Hello
         </div>
@@ -317,13 +317,13 @@ exports[`should match snapshot 1`] = `
         role="contentinfo"
       >
         <div
-          class="chakra-container css-1pc1gtf"
+          class="chakra-container css-140na8g"
         >
           <div
             class="css-v3i7xg"
           >
             <div
-              class="css-wzhq7s"
+              class="css-1ffgthf"
             >
               <a
                 class="chakra-link css-9tv0aq"
@@ -359,7 +359,7 @@ exports[`should match snapshot 1`] = `
               >
                 Contact: 
                 <a
-                  class="chakra-link css-18ktbam"
+                  class="chakra-link css-17hbvgh"
                   href="mailto:index@travail.gouv.fr"
                   rel="noopener"
                   target="_blank"
@@ -371,7 +371,7 @@ exports[`should match snapshot 1`] = `
                 class="chakra-text css-itvw0n"
               >
                 <a
-                  class="chakra-link css-18ktbam"
+                  class="chakra-link css-17hbvgh"
                   href="https://github.com/SocialGouv/egapro/commit/<githubSha>"
                   rel="noopener"
                   target="_blank"

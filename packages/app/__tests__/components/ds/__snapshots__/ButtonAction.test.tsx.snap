@@ -6,7 +6,7 @@ exports[`should match snapshot 1`] = `
   "baseElement": <body>
     <div>
       <button
-        class="chakra-button css-5c2176"
+        class="chakra-button css-1fczsbl"
         type="button"
       >
         action
@@ -15,7 +15,7 @@ exports[`should match snapshot 1`] = `
   </body>,
   "container": <div>
     <button
-      class="chakra-button css-5c2176"
+      class="chakra-button css-1fczsbl"
       type="button"
     >
       action

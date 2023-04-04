@@ -2,6 +2,7 @@ import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
 
+import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
 
 const Cgu: NextPageWithLayout = () => {
@@ -75,7 +76,9 @@ const Cgu: NextPageWithLayout = () => {
               </p>
               <p>
                 Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous&nbsp;:{" "}
-                <a href="https://egapro.travail.gouv.fr/">https://egapro.travail.gouv.fr/</a>
+                <NextLinkOrA isExternal href="https://egapro.travail.gouv.fr/">
+                  https://egapro.travail.gouv.fr/
+                </NextLinkOrA>
               </p>
               <h2>Responsabilités</h2>
               <h3 className="fr-text--xl">EgaPro</h3>
