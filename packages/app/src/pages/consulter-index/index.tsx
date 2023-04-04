@@ -45,7 +45,7 @@ function FormSearchSiren() {
         mt={["0", "4"]}
         color="var(--chakra-colors-chakra-body-text)"
       >
-        Consulter l'index de l'égalité professionnelle d'une entreprise
+        Rechercher l'index de l'égalité professionnelle d'une entreprise
       </Heading>
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>
