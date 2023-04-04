@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
-import { FunctionComponent, ReactNode } from "react"
+import { ReactNode } from "react"
 import { useField } from "react-final-form"
 import { Flex, FormControl, FormLabel } from "@chakra-ui/react"
 
