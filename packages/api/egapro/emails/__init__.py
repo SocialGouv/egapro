@@ -120,6 +120,8 @@ def load():
             globals()[path.name] = Email(subject, txt, html, attachment)
 
 async def getReplyTo(county: str):
+    if not county: # if foreign country, then no county
+        return []
     region = DEPARTEMENT_TO_REGION[county]
     reply_to: list[db.ReferentRecord] = []
     coord_region = await db.referent.getCoordRegion(region)

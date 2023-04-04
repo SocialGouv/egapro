@@ -124,8 +124,11 @@ class referent(table):
         return await cls.fetch(f"SELECT * from {cls.table_name} WHERE county=$1 AND principal=TRUE", county)
 
     @classmethod
-    async def getCoordRegion(cls, region: str) -> ReferentRecord:
-        return await cls.fetchrow(f"SELECT * from {cls.table_name} WHERE region=$1 AND county IS NULL LIMIT 1" , region)
+    async def getCoordRegion(cls, region: str) -> Union[ReferentRecord, None]:
+        try:
+            return await cls.fetchrow(f"SELECT * from {cls.table_name} WHERE region=$1 AND county IS NULL LIMIT 1" , region)
+        except NoData:
+            return None
 
 class representation_equilibree(table):
     record_class = RepresentationRecord

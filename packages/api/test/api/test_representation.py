@@ -298,18 +298,29 @@ async def test_declaring_twice_should_not_duplicate(client, app, body):
 
 async def test_confirmed_representation_should_send_email(client, monkeypatch, body):
     sender = mock.Mock()
+    replyToList = [{
+        "id": "noid",
+        "name": "Foo Bar",
+        "principal": True,
+        "county": "12",
+        "region": constants.DEPARTEMENT_TO_REGION["12"],
+        "value": "foo@baz.fr",
+        "type": "email"
+    }]
+    async def mock_getReplyTo(_county: str):
+        return replyToList
     del body["id"]
     await db.ownership.put("514027945", "foo@bar.org")
     # Add another owner, that should be in the email recipients
     await db.ownership.put("514027945", "foo@foo.foo")
     monkeypatch.setattr("egapro.emails.send", sender)
-    monkeypatch.setattr("egapro.emails.REPLY_TO", {"12": "Foo Bar <foo@baz.fr>"})
+    monkeypatch.setattr("egapro.emails.getReplyTo", mock_getReplyTo)
     resp = await client.put("/representation-equilibree/514027945/2021", body=body)
     assert resp.status == 204
     assert sender.call_count == 1
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
-    assert sender.call_args.kwargs["reply_to"] == "Foo Bar <foo@baz.fr>"
+    assert sender.call_args.kwargs["reply_to"] == replyToList
 
 
 async def test_confirmed_representation_should_send_email_for_legacy_call(
