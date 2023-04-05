@@ -16,6 +16,12 @@ export const Footer = () => {
         "@media print": {
           display: "none",
         },
+        a: {
+          background: "none !important", // This is a hack to override the global css of dsfr on buttons.
+        },
+        "a:after": {
+          display: "none !important",
+        },
       }}
     >
       <Container
@@ -35,17 +41,7 @@ export const Footer = () => {
             },
           }}
         >
-          <Box
-            pr={8}
-            sx={{
-              a: {
-                background: "none !important", // This is a hack to override the global css of dsfr on links.
-              },
-              "a:after": {
-                display: "none !important",
-              },
-            }}
-          >
+          <Box pr={8}>
             <Link href="https://travail-emploi.gouv.fr/" isExternal pt={2} sx={{ display: "block" }}>
               <Logo />
             </Link>

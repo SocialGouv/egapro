@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { AverageIndicator } from "@components/AverageIndicator";
 import { ButtonAction } from "@components/ds/ButtonAction";
+import { TextLink } from "@components/ds/TextLink";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import { useRouter } from "next/router";
@@ -113,6 +114,24 @@ const HomePage: NextPageWithLayout = () => {
       <DownloadFileZone />
 
       <AverageIndicator />
+
+      <Text
+        fontSize="lg"
+        as="div"
+        sx={{
+          a: {
+            background: "none !important", // This is a hack to override the global css of dsfr on buttons.
+          },
+          "a:after": {
+            display: "none !important",
+          },
+        }}
+      >
+        <TextLink to="/representation-equilibree/recherche" isExternal>
+          Rechercher la représentation équilibrée d'une entreprise
+        </TextLink>
+      </Text>
+      <Box />
     </VStack>
   );
 };

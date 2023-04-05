@@ -251,7 +251,7 @@ function DownloadFileZone() {
 
   return dateFile ? (
     <p className="fr-mt-3w">
-      <NextLinkOrA href="/dgt-export-representation.xlsx">
+      <NextLinkOrA isExternal href="/dgt-export-representation.xlsx">
         Télécharger le fichier des représentations équilibrées au {dateFile} (xslx)
       </NextLinkOrA>
     </p>
@@ -263,6 +263,9 @@ const HomePage: NextPageWithLayout = () => {
     <Box>
       <FormSearchSiren />
       <DownloadFileZone />
+      <NextLinkOrA isExternal href="/consulter-index">
+        Rechercher l'index de l'égalité professionnelle d'une entreprise
+      </NextLinkOrA>
     </Box>
   );
 };

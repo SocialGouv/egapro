@@ -15,11 +15,9 @@ export const TextLink = ({ isExternal, children, to, ...rest }: TextLinkProps) =
     );
   } else {
     return (
-      <NextLink href={to} passHref legacyBehavior>
-        <Link textDecoration="underline" color="inherit" {...rest}>
-          {children}
-        </Link>
-      </NextLink>
+      <Link href={to} textDecoration="underline" color="inherit" {...rest} as={NextLink}>
+        {children}
+      </Link>
     );
   }
 };
