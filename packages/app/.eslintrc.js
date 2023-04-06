@@ -2,18 +2,20 @@
 const config = {
   root: true,
   reportUnusedDisableDirectives: true,
-  env: {
-    browser: true,
-    node: true,
-    es2020: true,
-  },
-  extends: ["eslint:recommended", "next/core-web-vitals", "plugin:import/recommended", "plugin:prettier/recommended"],
-  plugins: ["prettier", "unused-imports", "simple-import-sort", "import"],
+  extends: [
+    "eslint:recommended",
+    "next/core-web-vitals",
+    // default rules for import
+    "plugin:import/recommended",
+    // include prettier config which avoid conflict
+    "prettier",
+    // disable conflicting rules with plugin (not config!)
+    "plugin:prettier/recommended",
+  ],
+  plugins: ["prettier", "unused-imports", "simple-import-sort"],
   ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
   rules: {
-    // "@next/next/no-html-link-for-pages": ["error", "src/app"],
-    "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off",
+    "@next/next/no-html-link-for-pages": ["error", ["src/app", "src/pages"]],
     "react-hooks/rules-of-hooks": "error", // Vérifie les règles des Hooks
     "react-hooks/exhaustive-deps": "warn", // Vérifie les tableaux de dépendances
     "react/no-unescaped-entities": [
@@ -55,8 +57,6 @@ const config = {
     "import/newline-after-import": "error",
     "import/export": "off",
     "sort-import": "off",
-    // TODO enable when monorepo is killed
-    "import/named": "off",
     "prettier/prettier": [
       "error",
       {
@@ -78,21 +78,6 @@ const config = {
         // "plugin:@typescript-eslint/recommended-requiring-type-checking",
       ],
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
-      parserOptions: {
-        project: ["tsconfig.json"],
-        sourceType: "module",
-      },
-      settings: {
-        "import/parsers": {
-          "@typescript-eslint/parser": [".ts", ".tsx"],
-        },
-        "import/resolver": {
-          typescript: {
-            alwaysTryTypes: true,
-            project: "tsconfig.json",
-          },
-        },
-      },
       rules: {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": [
@@ -151,6 +136,8 @@ const config = {
           },
         ],
         "@typescript-eslint/sort-type-union-intersection-members": "warn",
+        // handled by tsc already (also not working -_-')
+        "import/no-unresolved": "off",
       },
     },
     {

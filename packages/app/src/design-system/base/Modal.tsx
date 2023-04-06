@@ -1,5 +1,4 @@
 import type { NoStringReactNode, PropsWithoutChildren } from "@common/utils/types";
-import { useDsfrStore } from "@components/DsfrScript";
 import type { ModalInstance } from "@gouvfr/dsfr";
 import type { ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
@@ -14,7 +13,7 @@ import { Icon } from "./Icon";
 
 export type ModalProps = JSX.IntrinsicElements["dialog"] & {
   backdropCanClose?: boolean;
-  buttons: (param: { closableProps: ClosableModalButtonProps; instance?: ModalInstance }) => ReactNode[];
+  buttons?: (param: { closableProps: ClosableModalButtonProps; instance?: ModalInstance }) => ReactNode[];
   content: ReactNode;
   icon?: IconStyle | NoStringReactNode;
   id: string;
@@ -26,20 +25,24 @@ export type ModalProps = JSX.IntrinsicElements["dialog"] & {
 
 export type ClosableModalButtonProps = { "aria-controls": string };
 
+/**
+ * @deprecated use react-dsfr Modal insead
+ */
 export const Modal = ({
   onClose,
   onOpen,
   title,
   icon,
   content,
-  buttons,
+  buttons: buttonsMaker,
   size,
   id,
   backdropCanClose = true,
   ...rest
 }: PropsWithoutChildren<ModalProps>) => {
   const titleId = `fr-modal-title-modal-${useId()}`;
-  const { loaded, dsfr } = useDsfrStore();
+  const loaded = typeof window !== "undefined";
+  const dsfr = () => (loaded ? window.dsfr : null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -56,6 +59,11 @@ export const Modal = ({
   }, [loaded, onClose, onOpen]);
 
   const colSize = size === "sm" ? 4 : size === "lg" ? 8 : 6;
+
+  const buttons = buttonsMaker?.({
+    closableProps: { "aria-controls": id },
+    instance: dialogRef.current ? dsfr()?.(dialogRef.current).modal : void 0,
+  });
 
   return (
     <dialog
@@ -83,13 +91,10 @@ export const Modal = ({
                 </h1>
                 {typeof content === "string" ? <p>{content}</p> : content}
               </Box>
-              {buttons.length && (
+              {buttons?.length && (
                 <Box className="fr-modal__footer">
                   <ButtonGroup iconPosition="left" position="right" as="ul" inline="desktop-up">
-                    {buttons({
-                      closableProps: { "aria-controls": id },
-                      instance: dialogRef.current ? dsfr()?.(dialogRef.current).modal : void 0,
-                    }).map((el, index) => (
+                    {buttons.map((el, index) => (
                       <li key={index}>{el}</li>
                     ))}
                   </ButtonGroup>

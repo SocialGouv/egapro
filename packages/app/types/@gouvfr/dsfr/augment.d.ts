@@ -1,4 +1,4 @@
-import type { DisclosureEventDetail, DsfrConfig, DsfrFramework } from "@gouvfr/dsfr";
+import { type DisclosureEventDetail, type DsfrConfig, type DsfrFramework } from "@gouvfr/dsfr";
 
 declare global {
   interface Window {
@@ -13,3 +13,5 @@ declare global {
     "dsfr.disclose": CustomEvent<DisclosureEventDetail>;
   }
 }
+
+export {};

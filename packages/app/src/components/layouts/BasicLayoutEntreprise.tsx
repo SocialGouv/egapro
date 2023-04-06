@@ -1,4 +1,3 @@
-import { DsfrScript } from "@components/DsfrScript";
 import { EntrepriseFooter } from "@components/Footers";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
@@ -16,7 +15,6 @@ export const BasicLayoutEntreprise = ({ children, title }: PropsWithChildren & {
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
-      <DsfrScript />
       {children}
     </App>
   );

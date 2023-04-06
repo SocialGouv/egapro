@@ -8,8 +8,9 @@ export type ButtonGroupProps = PropsWithChildren<
     as?: "div" | "ul";
     className?: string;
     iconPosition?: "left" | "right";
-    inline?: "desktop-up" | "mobile-up" | "tablet-up";
+    inline?: boolean | "desktop-up" | "mobile-up" | "tablet-up";
     position?: "left" | "right";
+    reverse?: boolean;
   }
 >;
 
@@ -20,6 +21,7 @@ export const ButtonGroup = ({
   children,
   position,
   iconPosition,
+  reverse,
   ...rest
 }: ButtonGroupProps) => {
   return (
@@ -29,6 +31,8 @@ export const ButtonGroup = ({
         inline === "mobile-up" && "fr-btns-group--inline-sm",
         inline === "tablet-up" && "fr-btns-group--inline-md",
         inline === "desktop-up" && "fr-btns-group--inline-lg",
+        inline === true && "fr-btns-group--inline",
+        reverse && "fr-btns-group--inline-reverse",
         position && `fr-btns-group--${position}`,
         iconPosition && `fr-btns-group--icon-${iconPosition}`,
         className,

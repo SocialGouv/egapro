@@ -1,5 +1,4 @@
 import { ClientOnly } from "@components/ClientOnly";
-import { DsfrScript } from "@components/DsfrScript";
 import { StaffOnly } from "@components/StaffOnly";
 import Head from "next/head";
 import type { PropsWithChildren, ReactNode } from "react";
@@ -22,7 +21,6 @@ export const AdminLayout = ({ children, title, placeholder }: PropsWithChildren<
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
-      <DsfrScript enableJs />
 
       <ClientOnly>
         <StaffOnly placeholder={placeholder}>{children}</StaffOnly>

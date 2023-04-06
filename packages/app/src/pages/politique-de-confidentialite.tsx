@@ -1,10 +1,13 @@
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
+import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
 
 const PrivacyPolicy: NextPageWithLayout = () => {
+  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
   return (
     <section>
       <Container py="8w">
@@ -176,21 +179,6 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                     <td>Suivi, analyse comportementale et mesure d’audience</td>
                     <td />
                   </tr>
-                  <tr>
-                    <td>Google</td>
-                    <td>Etats-Unis</td>
-                    <td>Mesure d’audience</td>
-                    <td>
-                      <NextLinkOrA
-                        isExternal
-                        href="https://policies.google.com/privacy?hl=fr"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        https://policies.google.com/privacy?hl=fr
-                      </NextLinkOrA>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -229,43 +217,21 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>GoogleAnalytics</td>
-                    <td>Mesure d’audience</td>
-                    <td>Outil Google de mesure d’audience</td>
-                    <td>Google</td>
-                    <td>Direction Générale du Travail&nbsp;; Google</td>
-                    <td>Oui</td>
-                  </tr>
-                  <tr>
-                    <td>GoogleTagManager</td>
-                    <td>Mesure d’audience</td>
-                    <td> Outil Google de gestion de balises</td>
-                    <td>Google</td>
-                    <td>Direction Générale du Travail&nbsp;; Google</td>
-                    <td>Oui</td>
-                  </tr>
-                  <tr>
                     <td>MATOMO</td>
                     <td>Mesure d’audience</td>
                     <td>Outil d’analyse comportementale des utilisateurs</td>
                     <td>MATOMO</td>
                     <td>Direction générale du Travail&nbsp;; MATOMO </td>
-                    <td>Non applicable</td>
-                  </tr>
-                  <tr>
-                    <td>Ad.doubleclick.net</td>
-                    <td>Publicité</td>
-                    <td>Service de publicité et de diffusion d’annonce</td>
-                    <td>Google</td>
-                    <td>Direction Générale du Travail&nbsp;; Google</td>
                     <td>Oui</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            {/* TODO: Insérer un lien qui mène vers le bandeau ou alors permettre de modifier le consentement*/}
             <p>
-              Vous pouvez retirer votre consentement relatif aux cookies <a href="">ici</a>
+              Vous pouvez retirer votre consentement relatif aux cookies{" "}
+              <Button priority="secondary" {...consentModalButtonProps}>
+                ici
+              </Button>
             </p>
           </GridCol>
         </Grid>
