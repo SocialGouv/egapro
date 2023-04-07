@@ -1,10 +1,13 @@
 import { Box, Container, Link, List, Stack, Text } from "@chakra-ui/react";
 import { config } from "@common/config";
 
+import { useGdprStore } from "../../design-system/base/custom/ConsentBanner";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 
 export const Footer = () => {
+  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
+
   return (
     <Box
       id="footer"
@@ -82,6 +85,17 @@ export const Footer = () => {
               <TextLink to={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`} isExternal>
                 Contribuer sur GitHub
               </TextLink>
+            </Text>
+            <Text
+              fontSize="sm"
+              as="span"
+              textDecoration="underline"
+              color="inherit"
+              cursor="pointer"
+              {...consentModalButtonProps.nativeButtonProps}
+              onClick={consentModalButtonProps.onClick}
+            >
+              Gestion des cookies
             </Text>
           </Stack>
         </Box>

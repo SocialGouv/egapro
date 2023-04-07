@@ -1,3 +1,4 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import { config } from "@common/config";
 import {
   Footer,
@@ -14,10 +15,13 @@ import {
   Logo,
 } from "@design-system";
 
+import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 
 /** Footer for entreprise */
 export const EntrepriseFooter = () => {
+  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
+
   return (
     <Footer>
       <FooterBody>
@@ -75,6 +79,11 @@ export const EntrepriseFooter = () => {
             Accessibilité : partiellement conforme
           </FooterBottomLink>
         </FooterBottomItem>
+        <FooterBottomItem>
+          <Button {...consentModalButtonProps} className="fr-footer__bottom-link">
+            Gestion des cookies
+          </Button>
+        </FooterBottomItem>
       </FooterBottom>
     </Footer>
   );
@@ -82,6 +91,8 @@ export const EntrepriseFooter = () => {
 
 /** Footer for the general public */
 export const PublicFooter = () => {
+  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
+
   return (
     <Footer>
       <FooterBody>
@@ -123,6 +134,15 @@ export const PublicFooter = () => {
         </FooterBottomItem>
         <FooterBottomItem>
           <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
+        </FooterBottomItem>
+        <FooterBottomItem>
+          <button
+            {...consentModalButtonProps.nativeButtonProps}
+            onClick={consentModalButtonProps.onClick}
+            className="fr-footer__bottom-link"
+          >
+            Gestion des cookies
+          </button>
         </FooterBottomItem>
       </FooterBottom>
     </Footer>

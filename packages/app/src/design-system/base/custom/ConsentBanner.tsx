@@ -109,7 +109,10 @@ export const ConsentBanner = ({
         <ConsentManager gdprPageLink={gdprPageLink} gdprPageLinkAs={GdprPageLinkAs} services={services} />
       </ConsentModal>
       {!stateFCM && (
-        <div className="fr-consent-banner">
+        <div
+          className="fr-consent-banner"
+          style={{ color: "var(--text-default-grey)" /* TODO remove when chakra is down */ }}
+        >
           <h2 className="fr-h6">À propos des cookies sur {siteName}</h2>
           <div className="fr-consent-banner__content">
             <p className="fr-text--sm">

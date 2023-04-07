@@ -5,11 +5,8 @@ import { Redirect, Route, RouteProps, Switch } from "react-router-dom"
 
 import Header from "../components/Header"
 
-import CGU from "../views/CGU"
 import Home from "../views/Home"
-import MentionsLegales from "../views/MentionsLegales"
 import PageNotFound from "../views/PageNotFound"
-import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
@@ -87,27 +84,9 @@ function AppLayout() {
           <DashboardRoutes />
         </Route>
 
-        <Route path="/politique-confidentialite" exact>
-          <SinglePageLayout>
-            <PolitiqueConfidentialite />
-          </SinglePageLayout>
-        </Route>
-
         <Route path="/accessibilite" exact>
           <SinglePageLayout>
             <Accessibilite />
-          </SinglePageLayout>
-        </Route>
-
-        <Route path="/cgu" exact>
-          <SinglePageLayout>
-            <CGU />
-          </SinglePageLayout>
-        </Route>
-
-        <Route path="/mentions-legales" exact>
-          <SinglePageLayout>
-            <MentionsLegales />
           </SinglePageLayout>
         </Route>
 

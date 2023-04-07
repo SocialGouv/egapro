@@ -1,8 +1,3 @@
-declare module "@gouvfr/dsfr/dist/dsfr.nomodule";
-declare module "@gouvfr/dsfr/dist/dsfr.module";
-declare module "@gouvfr/dsfr/dist/patch/patch.module";
-declare module "@gouvfr/dsfr/dist/dsfr/dsfr.module";
-
 /**
  * Fake, doesn't exist.
  * @deprecated
