@@ -1,15 +1,7 @@
 ---
 layout: empty
 ---
-<script>
-    // First, check the browser is compatible
-    try {
-        eval("async function _(){}")
-    }
-    catch (e) {
-        window.location.href = '{{site.baseurl}}/compatibilite.html'
-    }
-</script>
+<script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.EGAPRO_API_URL %}
 <script>
