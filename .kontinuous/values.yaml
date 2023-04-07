@@ -9,7 +9,7 @@ app:
     path: /
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
+        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr  prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://*.gouv.fr 'unsafe-inline' ; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
         more_set_headers "X-Frame-Options: deny";
         more_set_headers "X-XSS-Protection: 1; mode=block";
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -44,7 +44,7 @@ declaration:
     rewriteTarget: /$2
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
+        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr  prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://unpkg.com https://*.gouv.fr 'unsafe-inline' ; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
         more_set_headers "X-Frame-Options: deny";
         more_set_headers "X-XSS-Protection: 1; mode=block";
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -62,7 +62,7 @@ simulateur:
     rewriteTarget: /$2
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline'  'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
+        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr  prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://*.gouv.fr 'unsafe-inline' ; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
         more_set_headers "X-Frame-Options: deny";
         more_set_headers "X-XSS-Protection: 1; mode=block";
         more_set_headers "X-Content-Type-Options: nosniff";

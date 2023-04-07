@@ -122,7 +122,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ site.EGAPRO_SIMU_URL }}/cgu">Conditions générales d'utilisation</a>
+                    <a href="/cgu">Conditions générales d'utilisation</a>
                 </li>
                 <li>
                     <a href="/politique-de-confidentialite">
@@ -152,20 +152,13 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/immer@9.0.21/dist/immer.umd.production.min.js"></script>
+<script src="https://unpkg.com/zustand@4.3.7/umd/vanilla.production.js"></script>
+<script src="https://unpkg.com/zustand@4.3.7/umd/middleware.production.js"></script>
+<script src="https://unpkg.com/zustand@4.3.7/umd/middleware/immer.production.js"></script>
 <!-- Matomo -->
-<script type="text/javascript">
-    var _paq = window._paq = window._paq || [];
-    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function () {
-        var u = "//matomo.fabrique.social.gouv.fr/";
-        _paq.push(['setTrackerUrl', u + 'matomo.php']);
-        _paq.push(['setSiteId', '11']);
-        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-        g.type = 'text/javascript'; g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
-    })();
-</script>
+<script src="{{ site.baseurl }}/assets/js/matomo.js"></script>
+<script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
 <script>
