@@ -54,6 +54,7 @@
     "react-icons": "^4.4.0",
     "react-json-view": "^1.21.3",
     "react-use": "^17.4.0",
+    "sharp": "^0.32.0",
     "simple-zustand-devtools": "^1.1.0",
     "swr": "^2.1.2",
     "swr-devtools": "^1.2.2",

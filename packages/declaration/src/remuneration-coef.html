@@ -5,7 +5,10 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
 
 <hgroup>
   <h1>{{ page.title }}</h1>
-  <p>Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les niveaux ou coefficients et tranches d'âge pris en compte pour le calcul (zéro signifiant qu'il n'y a pas d'écart entre les femmes et les hommes). Un écart positif est à la faveur des hommes et un écart négatif est à la faveur des femmes.</p>
+  <p>Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les niveaux
+    ou coefficients et tranches d'âge pris en compte pour le calcul (zéro signifiant qu'il n'y a pas d'écart entre les
+    femmes et les hommes). Un écart positif est à la faveur des hommes et un écart négatif est à la faveur des femmes.
+  </p>
 </hgroup>
 
 <table>
@@ -24,17 +27,22 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
       <tr>
         <th>Coefficient {index}</th>
         <td>
-          {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[{index}].nom" value="categorie {index}" %}
-          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.:29" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
+          {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[{index}].nom" value="categorie
+          {index}" %}
+          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.:29"
+          step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
         </td>
         <td>
-          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.30:39" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
+          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.30:39"
+          step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
         </td>
         <td>
-          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.40:49" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
+          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.40:49"
+          step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
         </td>
         <td>
-          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.50:" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
+          {% include input.html type="number" name="indicateurs.rémunérations.catégories[{index}].tranches.50:"
+          step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
         </td>
       </tr>
     </template>
@@ -50,16 +58,16 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
   <button class="remove" id="removeCategoryBtn" onclick="removeCategory(event)">Supprimer la dernière ligne</button>
 </div>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
   let nombreCategories
   const template = document.getElementById('looper')
   const container = document.getElementById('container')
   const nombreCategoriesField = document.getElementById('nombreCategories')
   const removeCategoryButton = document.getElementById('removeCategoryBtn')
 
-  document.onready = function() {
+  document.onready = function () {
     updateNombreCategories(app.getItem('indicateurs.rémunérations.catégories.length') || 1)
-    for(let index = 0; index < nombreCategories; index++) {
+    for (let index = 0; index < nombreCategories; index++) {
       const node = document.importNode(template.content, true)
       container.appendChild(node)
     }
@@ -67,12 +75,12 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
     toggleButton()
   }
 
-  updateNombreCategories = function(nb) {
+  updateNombreCategories = function (nb) {
     nombreCategories = nb
     nombreCategoriesField.innerText = nb
   }
 
-  renameInputs = function() {
+  renameInputs = function () {
     const nodes = Array.from(container.querySelectorAll("tr"))
     nodes.map((node, index) => {
       const header = node.querySelector("th")
@@ -89,7 +97,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
     })
   }
 
-  addCategory = function(event) {
+  addCategory = function (event) {
     event.preventDefault()
     const node = document.importNode(template.content, true)
     container.appendChild(node)
@@ -98,7 +106,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
     toggleButton()
   }
 
-  removeCategory = function(event) {
+  removeCategory = function (event) {
     event.preventDefault()
     const node = container.lastElementChild
     container.removeChild(node)
@@ -107,7 +115,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par niveau ou coe
     toggleButton()
   }
 
-  toggleButton = function() {
+  toggleButton = function () {
     removeCategoryButton.disabled = nombreCategories <= 1
   }
 

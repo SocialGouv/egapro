@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
   reactStrictMode: true,
   swcMinify: true,
   // TODO optimize deployed output in build mode
@@ -7,6 +8,9 @@ const nextConfig = {
   experimental: {
     appDir: true,
     // outputFileTracingRoot: path.join(__dirname, "../../"),
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   webpack: config => {
     config.module.rules.push({

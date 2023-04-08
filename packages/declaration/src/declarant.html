@@ -4,7 +4,8 @@ title: "Informations déclarant"
 ---
 <h1>{{ page.title }}</h1>
 
-<p>Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services de l’inspection du travail.</p>
+<p>Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services de
+  l’inspection du travail.</p>
 
 <fieldset>
   <!-- fieldset display flex can't work in Chromium -->
@@ -15,12 +16,14 @@ title: "Informations déclarant"
 </fieldset>
 
 <fieldset>
-    <div>{% include input.html name="déclarant.email" label=" Email (saisi lors de la validation de l'email)" readonly=true data-always-readonly=true %}</div>
+  <div>{% include input.html name="déclarant.email" label=" Email (saisi lors de la validation de l'email)"
+    readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
 <fieldset>
   <div>
-    {% include input.html name="déclarant.téléphone" label="Numéro de téléphone" pattern="[0-9]{10}" placeholder="10 chiffres" required=true oninput="checkPatternValidity(event)" %}
+    {% include input.html name="déclarant.téléphone" label="Numéro de téléphone" pattern="[0-9]{10}" placeholder="10
+    chiffres" required=true oninput="checkPatternValidity(event)" %}
   </div>
 </fieldset>
 
@@ -29,14 +32,15 @@ title: "Informations déclarant"
     <div>
       <label>
         <input type="checkbox" id="field--_déclarant.cgu" name="_déclarant.cgu" value="oui" required="required" />
-        J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos
+        J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la
+        validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos
         <a href="/cgu">Conditions Générales d'Utilisation</a>
       </label>
     </div>
   </div>
 </fieldset>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
   document.onready = () => {
     if (app.getItem('déclarant.nom')) {
       // If we already have a `déclarant.nom` then we already submitted this

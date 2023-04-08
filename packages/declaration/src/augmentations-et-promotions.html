@@ -6,108 +6,118 @@ title: "Ecart de taux d'augmentations individuelles entre les femmes et les homm
 <h1>{{ page.title }}</h1>
 
 <fieldset>
-  <div class=row>
-    <div>
-      {% include radios.html
-        name="_indicateurs.augmentations_et_promotions.calculable"
-        label="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable&nbsp;?"
-        required="true"
-        options="oui=oui&non=non"
-        onchange="toggleFields()"
-        required="required" %}
+    <div class=row>
+        <div>
+            {% include radios.html
+            name="_indicateurs.augmentations_et_promotions.calculable"
+            label="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable&nbsp;?"
+            required="true"
+            options="oui=oui&non=non"
+            onchange="toggleFields()"
+            required="required" %}
+        </div>
     </div>
-  </div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-pourcentage">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat" label="Résultat final en pourcentage (%)" min=0 step="any" required=true
-    onblur="maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat"
+        label="Résultat final en pourcentage (%)" min=0 step="any" required=true
+        onblur="maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
 </fieldset>
 
 <fieldset id="fieldset-resultat-nombre-salaries">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.résultat_nombre_salariés" label="Résultat final en nombre équivalent de salariés" min=0 step="any" required=true onblur="maybeRefreshForm(event)" oninput="toggleFields()" %}</div>
+    <div class=row>{% include input.html type="number"
+        name="indicateurs.augmentations_et_promotions.résultat_nombre_salariés" label="Résultat final en nombre
+        équivalent de salariés" min=0 step="any" required=true onblur="maybeRefreshForm(event)" oninput="toggleFields()"
+        %}</div>
 </fieldset>
 
 <fieldset id="fieldset-population-favorable">
-  <div class=row>
-    {% include select.html
-      name="indicateurs.augmentations_et_promotions.population_favorable"
-      label="Population envers laquelle l'écart est favorable"
-      empty="true"
-      required=true
-      onchange="maybeRefreshForm(event)"
-      options="femmes=Femmes&hommes=Hommes"
-    %}
-  </div>
+    <div class=row>
+        {% include select.html
+        name="indicateurs.augmentations_et_promotions.population_favorable"
+        label="Population envers laquelle l'écart est favorable"
+        empty="true"
+        required=true
+        onchange="maybeRefreshForm(event)"
+        options="femmes=Femmes&hommes=Hommes"
+        %}
+    </div>
 </fieldset>
 
 <fieldset id="fieldset-motif">
-  <div class=row>
-    {% include select.html
-      name="indicateurs.augmentations_et_promotions.non_calculable"
-      label="Précision du motif de non calculabilité de l'indicateur"
-      empty="true"
-      required=true
-      options="etsno5f5h=L'entreprise ne comporte pas au moins 5 femmes et 5 hommes&absaugi=Absence d'augmentations individuelles"
-    %}
-  </div>
+    <div class=row>
+        {% include select.html
+        name="indicateurs.augmentations_et_promotions.non_calculable"
+        label="Précision du motif de non calculabilité de l'indicateur"
+        empty="true"
+        required=true
+        options="etsno5f5h=L'entreprise ne comporte pas au moins 5 femmes et 5 hommes&absaugi=Absence d'augmentations
+        individuelles"
+        %}
+    </div>
 </fieldset>
 
 <fieldset id="fieldset-note-en-pourcentage" class="note subnote">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.note_en_pourcentage" label="Nombre de points obtenus sur le résultat final en pourcentage" min=0 step="any" readonly=true data-always-readonly=true %}</div>
+    <div class=row>{% include input.html type="number"
+        name="indicateurs.augmentations_et_promotions.note_en_pourcentage" label="Nombre de points obtenus sur le
+        résultat final en pourcentage" min=0 step="any" readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-note-en-salaries" class="note subnote">
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.note_nombre_salariés" label="Nombre de points obtenus sur le résultat final en nombre de salariés" min=0 step="any" readonly=true data-always-readonly=true %}</div>
+    <div class=row>{% include input.html type="number"
+        name="indicateurs.augmentations_et_promotions.note_nombre_salariés" label="Nombre de points obtenus sur le
+        résultat final en nombre de salariés" min=0 step="any" readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
 <fieldset id="fieldset-note" class=note>
-  <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.note" label="Nombre de points obtenus à l'indicateur" min=0 step="any" readonly=true data-always-readonly=true %}</div>
+    <div class=row>{% include input.html type="number" name="indicateurs.augmentations_et_promotions.note" label="Nombre
+        de points obtenus à l'indicateur" min=0 step="any" readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
-<script>
-  const calculableField = selectField('_indicateurs.augmentations_et_promotions.calculable')
-  const resultatField = selectField("indicateurs.augmentations_et_promotions.résultat")
-  const resultatNombreSalariesField = selectField("indicateurs.augmentations_et_promotions.résultat_nombre_salariés")
-  const populationFavorableField = selectField("indicateurs.augmentations_et_promotions.population_favorable")
+<script nonce="{{ site.GITHUB_SHA }}">
+    const calculableField = selectField('_indicateurs.augmentations_et_promotions.calculable')
+    const resultatField = selectField("indicateurs.augmentations_et_promotions.résultat")
+    const resultatNombreSalariesField = selectField("indicateurs.augmentations_et_promotions.résultat_nombre_salariés")
+    const populationFavorableField = selectField("indicateurs.augmentations_et_promotions.population_favorable")
 
-  document.onready = () => {
-    if (app.getItem('indicateurs.augmentations_et_promotions')) {
-      // We did already submit this current form, so we can infer the
-      // "_indicateurs.augmentations_et_promotions.calculable" data.
-      if (!app.data._indicateurs) app.data._indicateurs = {}
-      app.data._indicateurs.augmentations_et_promotions = {calculable: app.data.indicateurs.augmentations_et_promotions.non_calculable ? "non" : "oui"}
+    document.onready = () => {
+        if (app.getItem('indicateurs.augmentations_et_promotions')) {
+            // We did already submit this current form, so we can infer the
+            // "_indicateurs.augmentations_et_promotions.calculable" data.
+            if (!app.data._indicateurs) app.data._indicateurs = {}
+            app.data._indicateurs.augmentations_et_promotions = { calculable: app.data.indicateurs.augmentations_et_promotions.non_calculable ? "non" : "oui" }
+        }
     }
-  }
 
-  function maybeRefreshForm(event) {
-    if (resultatField.checkValidity()
-        && resultatNombreSalariesField.checkValidity()
-        && populationFavorableField.checkValidity()) {
-      refreshForm(event)
+    function maybeRefreshForm(event) {
+        if (resultatField.checkValidity()
+            && resultatNombreSalariesField.checkValidity()
+            && populationFavorableField.checkValidity()) {
+            refreshForm(event)
+        }
     }
-  }
 
-  function toggleFields() {
+    function toggleFields() {
 
-    const resultFieldValue = parseFloat(resultatField.value)
-    const resultatNombreSalariesFieldValue = parseFloat(resultatNombreSalariesField.value)
+        const resultFieldValue = parseFloat(resultatField.value)
+        const resultatNombreSalariesFieldValue = parseFloat(resultatNombreSalariesField.value)
 
-    const isResultDifferentFromZero = !isNaN(resultFieldValue) && resultFieldValue !== 0
-    const isResultNbSalariesDifferentFromZero = !isNaN(resultatNombreSalariesFieldValue) && resultatNombreSalariesFieldValue !== 0
+        const isResultDifferentFromZero = !isNaN(resultFieldValue) && resultFieldValue !== 0
+        const isResultNbSalariesDifferentFromZero = !isNaN(resultatNombreSalariesFieldValue) && resultatNombreSalariesFieldValue !== 0
 
-    const isCalculableChosen = calculableField.querySelector(':checked')
-    const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
-    enableField('#fieldset-resultat-pourcentage', isCalculable)
-    enableField('#fieldset-resultat-nombre-salaries', isCalculable)
-    enableField('#fieldset-population-favorable', isCalculable && (isResultDifferentFromZero || isResultNbSalariesDifferentFromZero))
-    enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
-    enableField('#fieldset-note-en-pourcentage', isCalculable)
-    enableField('#fieldset-note-en-salaries', isCalculable)
-    enableField('#fieldset-note', isCalculable)
-  }
+        const isCalculableChosen = calculableField.querySelector(':checked')
+        const isCalculable = isCalculableChosen && calculableField.querySelector(':checked').value === 'oui'
+        enableField('#fieldset-resultat-pourcentage', isCalculable)
+        enableField('#fieldset-resultat-nombre-salaries', isCalculable)
+        enableField('#fieldset-population-favorable', isCalculable && (isResultDifferentFromZero || isResultNbSalariesDifferentFromZero))
+        enableField('#fieldset-motif', isCalculableChosen && !isCalculable)
+        enableField('#fieldset-note-en-pourcentage', isCalculable)
+        enableField('#fieldset-note-en-salaries', isCalculable)
+        enableField('#fieldset-note', isCalculable)
+    }
 
-  document.onloaded = () => {
-    toggleFields()
-  }
+    document.onloaded = () => {
+        toggleFields()
+    }
 </script>

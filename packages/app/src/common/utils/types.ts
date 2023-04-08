@@ -286,3 +286,7 @@ export const unreadonly = <T>(value: T): UnReadOnly<T> => value;
 export const ensureRequired = <T>(value: T) => value as Required<NonNullableProps<T>>;
 
 export const defined = <T>(value: Nothing | T) => value as T;
+export const excludeType =
+  <T>() =>
+  <V>(value: V) =>
+    value as Exclude<V, T>;

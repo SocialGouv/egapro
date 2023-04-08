@@ -2,6 +2,7 @@
 <html lang="fr" class="{{ page.class }}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
+<meta property="csp-nonce" content="{{ site.GITHUB_SHA }}">
 <title>{{ page.title }} - {{ site.title }}</title>
 <!-- {{ site.JEKYLL_ENV }} -->
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
@@ -9,10 +10,10 @@
 <script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.sentry-dsn %}
-<script src="{{ site.baseurl }}/assets/js/sentry.min.js"
+<script src="{{ site.baseurl }}/assets/lib/sentry.min.js"
     integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
     crossorigin="anonymous"></script>
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     if (typeof Sentry !== "undefined") {
         Sentry.init({
             dsn: '{{ site.sentry-dsn }}',
@@ -23,19 +24,19 @@
 {% endif %}
 
 {% if site.EGAPRO_API_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
 {% if site.EGAPRO_SIMU_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
 {% endif %}
 
 {% if site.GITHUB_SHA %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     GITHUB_SHA = "{{ site.GITHUB_SHA }}"
 </script>
 {% endif %}
@@ -138,16 +139,16 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/immer@9.0.21/dist/immer.umd.production.min.js"></script>
-<script src="https://unpkg.com/zustand@4.3.7/umd/vanilla.production.js"></script>
-<script src="https://unpkg.com/zustand@4.3.7/umd/middleware.production.js"></script>
-<script src="https://unpkg.com/zustand@4.3.7/umd/middleware/immer.production.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/immer.umd.production.min.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/vanilla.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/middleware.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/middleware/immer.js"></script>
 <!-- Matomo -->
 <script src="{{ site.baseurl }}/assets/js/matomo.js"></script>
 <script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     document.addEventListener("ready", () => {
         if (app.token && app.tokenInfo) {
             document.querySelector(".header__right").classList.add("user__connected");

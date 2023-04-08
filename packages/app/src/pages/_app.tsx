@@ -1,14 +1,29 @@
 import "@fontsource/cabin";
 import "@fontsource/gabriela";
 
+// should be before react-dsfr
+if (typeof window !== "undefined") {
+  const originalAppendChild = document.head.appendChild.bind(document.head);
+  document.head.appendChild = node => {
+    if (["style", "script"].includes(node.nodeName.toLocaleLowerCase())) {
+      (node as unknown as Element).setAttribute(
+        "nonce",
+        (node as unknown as Element).getAttribute("nonce") || config.githubSha,
+      );
+    }
+    return originalAppendChild(node);
+  };
+}
+
 import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { config } from "@common/config";
+import { excludeType } from "@common/utils/types";
 import { Matomo } from "@components/utils/Matomo";
 import { fetcher } from "@services/apiClient";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
+import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
 
@@ -98,4 +113,43 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   );
 };
 
-export default withDsfr(MyApp);
+const editChildren = (childrenToMap: ReactNode): ReactNode =>
+  Children.map(childrenToMap, child => {
+    if (
+      !child ||
+      typeof child === "string" ||
+      typeof child === "boolean" ||
+      typeof child === "number" ||
+      !("type" in child) // exclude fragments
+    ) {
+      return child;
+    }
+
+    const isScript = excludeType<string>()(child.type).name === "Script";
+    const isStyle = child.type === "style";
+    const actualProps = child.props ?? {};
+
+    if (isScript || isStyle) {
+      const newChild = cloneElement(child, {
+        nonce: config.githubSha,
+      });
+
+      return newChild;
+    }
+
+    if (actualProps?.children?.length) {
+      return cloneElement(child, {
+        children: editChildren(actualProps.children),
+      });
+    }
+
+    return child;
+  });
+
+const DsfrApp = withDsfr(MyApp);
+export default typeof window !== "undefined"
+  ? DsfrApp
+  : function WrappedApp(props: AppProps) {
+      const rendered = DsfrApp(props);
+      return cloneElement(rendered, { children: editChildren(rendered.props.children) });
+    };

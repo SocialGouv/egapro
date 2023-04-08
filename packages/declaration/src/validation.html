@@ -7,20 +7,21 @@ class: fulltext
 
 <h1>{{ page.title }}</h1>
 
-<p class="periode-suffisante" style="display: none">Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables.</p>
+<p class="periode-suffisante" style="display: none">Vous ne disposez pas d'une période de référence de 12 mois
+  consécutifs, vos indicateurs et votre index ne sont pas calculables.</p>
 
 <p>Vous êtes sur le point de valider la procédure vous permettant de transmettre
-aux services du ministre chargé du travail vos indicateurs et votre niveau de
-résultat en matière d’écart de rémunération entre les femmes et les hommes
-conformément aux dispositions de l’article D.1142-5 du code du travail.</p>
+  aux services du ministre chargé du travail vos indicateurs et votre niveau de
+  résultat en matière d’écart de rémunération entre les femmes et les hommes
+  conformément aux dispositions de l’article D.1142-5 du code du travail.</p>
 
 <p>Pour relire vos données à transmettre, cliquez sur
-« <a href="{{ site.baseurl }}/commencer.html">Revenir au début</a> ».</p>
+  « <a href="{{ site.baseurl }}/commencer.html">Revenir au début</a> ».</p>
 
 <p>Pour terminer la procédure, cliquez sur « <strong>Valider et transmettre les
-résultats</strong> ». Vous recevrez alors un accusé de réception par email.</p>
+    résultats</strong> ». Vous recevrez alors un accusé de réception par email.</p>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
   document.onready = () => {
     // Disable the button if we've already submitted the declaration.
     if (app.mode === 'reading') {

@@ -82,7 +82,7 @@ title: "Ecart de taux d'augmentations individuelles (hors promotion) entre les f
         obtenus à l'indicateur" min=0 step="any" readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     const calculableField = selectField('_indicateurs.augmentations.calculable')
     const resultatField = selectField("indicateurs.augmentations.résultat")
     const populationFavorableField = selectField("indicateurs.augmentations.population_favorable")

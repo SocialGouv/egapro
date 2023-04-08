@@ -8,8 +8,8 @@ app:
   ingress:
     path: /
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'none' ; connect-src 'self' https://*.gouv.fr ; font-src 'self' ; media-src 'self' https://*.gouv.fr ; img-src 'self' data: https://*.gouv.fr ;  prefetch-src 'self' https://*.gouv.fr ; script-src 'self' https://*.gouv.fr 'strict-dynamic' ; frame-src 'self' https://*.gouv.fr ; style-src 'self' ; frame-ancestors 'self' https://*.gouv.fr ; base-uri 'self' https://*.gouv.fr ; form-action 'self' https://*.gouv.fr;";
+      nginx.ingress.kubernetes.io/configuration-snippet: &headers |
+        more_set_headers "Content-Security-Policy: default-src 'none';   connect-src 'self' https://*.gouv.fr;   font-src 'self' data: blob: 'nonce-{{ $.Values.global.sha }}';   media-src 'self' https://*.gouv.fr;   img-src 'self' data: https://*.gouv.fr;   prefetch-src 'self' https://*.gouv.fr;   script-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.sha }}';   frame-src 'self' https://*.gouv.fr;   style-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.sha }}';   frame-ancestors 'self' https://*.gouv.fr;   base-uri 'self' https://*.gouv.fr;   form-action 'self' https://*.gouv.fr";
         more_set_headers "X-Frame-Options: deny";
         more_set_headers "X-XSS-Protection: 1; mode=block";
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -43,11 +43,7 @@ declaration:
     path: /index-egapro/declaration(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'none' ; connect-src 'self' https://*.gouv.fr ; font-src 'self' ; media-src 'self' https://*.gouv.fr ; img-src 'self' data: https://*.gouv.fr ;  prefetch-src 'self' https://*.gouv.fr ; script-src 'self' https://*.gouv.fr 'strict-dynamic' ; frame-src 'self' https://*.gouv.fr ; style-src 'self' ; frame-ancestors 'self' https://*.gouv.fr ; base-uri 'self' https://*.gouv.fr ; form-action 'self' https://*.gouv.fr;";
-        more_set_headers "X-Frame-Options: deny";
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-        more_set_headers "X-Content-Type-Options: nosniff";
+      nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 simulateur:
@@ -61,11 +57,7 @@ simulateur:
     path: /index-egapro(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr;  prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://*.gouv.fr 'unsafe-inline' ; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
-        more_set_headers "X-Frame-Options: deny";
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-        more_set_headers "X-Content-Type-Options: nosniff";
+      nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 api:
