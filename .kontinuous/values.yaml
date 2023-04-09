@@ -1,3 +1,27 @@
+x-secure-headers: &headers >
+  more_set_headers
+  "Content-Security-Policy:
+  default-src 'none';
+  connect-src 'self' https://*.gouv.fr;
+  font-src 'self' data: blob:;
+  media-src 'self' https://*.gouv.fr;
+  img-src 'self' data: https://*.gouv.fr;
+  prefetch-src 'self' https://*.gouv.fr;
+  script-src 'self' https://*.gouv.fr 'nonce-rand0m';
+  frame-src 'self' https://*.gouv.fr;
+  style-src 'self' https://*.gouv.fr 'nonce-rand0m';
+  frame-ancestors 'self' https://*.gouv.fr;
+  base-uri 'self' https://*.gouv.fr;
+  form-action 'self' https://*.gouv.fr";
+
+  more_set_headers "X-Frame-Options: deny";
+
+  more_set_headers "X-XSS-Protection: 1; mode=block";
+
+  more_set_headers "X-Content-Type-Options: nosniff";
+
+  more_set_headers "Referrer-Policy: no-referrer, strict-origin-when-cross-origin";
+
 app:
   ~chart: app
   ~needs: [build-app]
@@ -8,27 +32,7 @@ app:
   ingress:
     path: /
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: &headers >
-        more_set_headers
-        "Content-Security-Policy:
-        default-src 'none';
-        connect-src 'self' https://*.gouv.fr;
-        font-src 'self' data: blob:;
-        media-src 'self' https://*.gouv.fr;
-        img-src 'self' data: https://*.gouv.fr;
-        prefetch-src 'self' https://*.gouv.fr;
-        script-src 'self' https://*.gouv.fr 'nonce-rand0m';
-        frame-src 'self' https://*.gouv.fr;
-        style-src 'self' https://*.gouv.fr 'nonce-rand0m';
-        frame-ancestors 'self' https://*.gouv.fr;
-        base-uri 'self' https://*.gouv.fr;
-        form-action 'self' https://*.gouv.fr";
-
-        more_set_headers "X-Frame-Options: deny";
-
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-
-        more_set_headers "X-Content-Type-Options: nosniff";
+      nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
   envFrom:
     - secretRef:
