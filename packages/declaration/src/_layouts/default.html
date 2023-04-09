@@ -2,7 +2,7 @@
 <html lang="fr" class="{{ page.class }}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
-<meta property="csp-nonce" content="{{ site.GITHUB_SHA }}">
+<meta property="csp-nonce" content="rand0m">
 <title>{{ page.title }} - {{ site.title }}</title>
 <!-- {{ site.JEKYLL_ENV }} -->
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
@@ -13,7 +13,7 @@
 <script src="{{ site.baseurl }}/assets/lib/sentry.min.js"
     integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
     crossorigin="anonymous"></script>
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     if (typeof Sentry !== "undefined") {
         Sentry.init({
             dsn: '{{ site.sentry-dsn }}',
@@ -24,19 +24,19 @@
 {% endif %}
 
 {% if site.EGAPRO_API_URL %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
 {% if site.EGAPRO_SIMU_URL %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
 {% endif %}
 
 {% if site.GITHUB_SHA %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     GITHUB_SHA = "{{ site.GITHUB_SHA }}"
 </script>
 {% endif %}
@@ -148,7 +148,7 @@
 <script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     document.addEventListener("ready", () => {
         if (app.token && app.tokenInfo) {
             document.querySelector(".header__right").classList.add("user__connected");

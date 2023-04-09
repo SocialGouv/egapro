@@ -4,25 +4,25 @@ layout: empty
 <script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.EGAPRO_API_URL %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
 {% if site.EGAPRO_SIMU_URL %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
 {% endif %}
 
 {% if site.GITHUB_SHA %}
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     GITHUB_SHA = "{{ site.GITHUB_SHA }}"
 </script>
 {% endif %}
 
 <script src="{{site.baseurl}}/assets/js/utils.js"></script>
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
     document.addEventListener("ready", async () => {
         const urlParams = new URLSearchParams(location.search)
 

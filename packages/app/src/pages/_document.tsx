@@ -9,13 +9,13 @@ const { getColorSchemeHtmlAttributes, augmentDocumentForDsfr } = dsfrDocumentApi
 
 export default function Document(props: DocumentProps) {
   return (
-    <Html lang="fr" {...getColorSchemeHtmlAttributes(props)} nonce={config.githubSha}>
-      <Head nonce={config.githubSha}>
-        <meta property="csp-nonce" content={config.githubSha} />
+    <Html lang="fr" {...getColorSchemeHtmlAttributes(props)} nonce={config.nonce}>
+      <Head nonce={config.nonce}>
+        <meta property="csp-nonce" content={config.nonce} />
       </Head>
       <body>
         <Main />
-        <NextScript nonce={config.githubSha} />
+        <NextScript nonce={config.nonce} />
       </body>
     </Html>
   );

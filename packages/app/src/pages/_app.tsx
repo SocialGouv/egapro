@@ -8,7 +8,7 @@ if (typeof window !== "undefined") {
     if (["style", "script"].includes(node.nodeName.toLocaleLowerCase())) {
       (node as unknown as Element).setAttribute(
         "nonce",
-        (node as unknown as Element).getAttribute("nonce") || config.githubSha,
+        (node as unknown as Element).getAttribute("nonce") || config.nonce,
       );
     }
     return originalAppendChild(node);
@@ -131,7 +131,7 @@ const editChildren = (childrenToMap: ReactNode): ReactNode =>
 
     if (isScript || isStyle) {
       const newChild = cloneElement(child, {
-        nonce: config.githubSha,
+        nonce: config.nonce,
       });
 
       return newChild;

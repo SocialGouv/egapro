@@ -32,7 +32,7 @@ title: "Niveau de résultat global"
   </div>
 </fieldset>
 
-<script nonce="{{ site.GITHUB_SHA }}">
+<script nonce="rand0m">
   document.onready = () => {
     enableField("#fieldset-mesures-correctives", app.data.déclaration.index < 75 && app.data.déclaration.points_calculables >= 75)
     if (app.data.déclaration.points_calculables < 75) {
