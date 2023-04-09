@@ -20,6 +20,7 @@ import { AppStateContextProvider } from "./hooks/useAppStateContextProvider"
 import { ConsentBanner, useGdprStore } from "./components/ConsentBanner"
 import createCache from "@emotion/cache"
 import { CacheProvider } from "@emotion/react"
+import { nonce } from "./config"
 
 declare module "./components/ConsentBanner" {
   interface GdprServiceNames {
@@ -76,7 +77,7 @@ const Matomo = () => {
 
 const styleCache = createCache({
   key: "egapro",
-  nonce: "rand0m",
+  nonce,
 })
 
 const App = () => {
