@@ -18,6 +18,8 @@ import AppLayout from "./containers/AppLayout"
 import theme from "./theme"
 import { AppStateContextProvider } from "./hooks/useAppStateContextProvider"
 import { ConsentBanner, useGdprStore } from "./components/ConsentBanner"
+import createCache from "@emotion/cache"
+import { CacheProvider } from "@emotion/react"
 
 declare module "./components/ConsentBanner" {
   interface GdprServiceNames {
@@ -72,48 +74,55 @@ const Matomo = () => {
   return <></>
 }
 
+const styleCache = createCache({
+  key: "egapro",
+  nonce: "rand0m",
+})
+
 const App = () => {
   return (
-    <ChakraProvider theme={theme}>
-      <ErrorBoundary
-        FallbackComponent={ErrorFallback}
-        onReset={() => {
-          history.goBack()
-        }}
-      >
-        <Matomo />
-        <Router history={piwik.connectToHistory(history, trackAtConnect)}>
-          <GridProvider>
-            {/* TODO: update the following date and message when there's another announcement */}
-            {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
-              <Box position="fixed" left={4} bottom={4} right={4} zIndex={1000}>
-                <InfoBlock
-                  title="Interruption de service programmée"
-                  text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
-                  closeButton={true}
-                />
-              </Box>
-            )}
+    <CacheProvider value={styleCache}>
+      <ChakraProvider theme={theme}>
+        <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={() => {
+            history.goBack()
+          }}
+        >
+          <Matomo />
+          <Router history={piwik.connectToHistory(history, trackAtConnect)}>
+            <GridProvider>
+              {/* TODO: update the following date and message when there's another announcement */}
+              {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
+                <Box position="fixed" left={4} bottom={4} right={4} zIndex={1000}>
+                  <InfoBlock
+                    title="Interruption de service programmée"
+                    text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
+                    closeButton={true}
+                  />
+                </Box>
+              )}
 
-            <AppStateContextProvider>
-              <ConsentBanner
-                gdprPageLink="/politique-de-confidentialite#cookies"
-                gdprPageLinkAs={(props: LinkProps) => <Link {...props} isExternal color="blue.500" />}
-                siteName="Egapro"
-                services={[
-                  {
-                    name: "matomo",
-                    title: "Matomo",
-                    description: "Outil d’analyse comportementale des utilisateurs.",
-                  },
-                ]}
-              />
-              <AppLayout />
-            </AppStateContextProvider>
-          </GridProvider>
-        </Router>
-      </ErrorBoundary>
-    </ChakraProvider>
+              <AppStateContextProvider>
+                <ConsentBanner
+                  gdprPageLink="/politique-de-confidentialite#cookies"
+                  gdprPageLinkAs={(props: LinkProps) => <Link {...props} isExternal color="blue.500" />}
+                  siteName="Egapro"
+                  services={[
+                    {
+                      name: "matomo",
+                      title: "Matomo",
+                      description: "Outil d’analyse comportementale des utilisateurs.",
+                    },
+                  ]}
+                />
+                <AppLayout />
+              </AppStateContextProvider>
+            </GridProvider>
+          </Router>
+        </ErrorBoundary>
+      </ChakraProvider>
+    </CacheProvider>
   )
 }
 

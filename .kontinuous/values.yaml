@@ -196,6 +196,7 @@ jobs:
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           REACT_APP_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
           PUBLIC_URL: "/index-egapro"
+          INLINE_RUNTIME_CHUNK: false
 
 deactivate:
   jobs-deactivate:
