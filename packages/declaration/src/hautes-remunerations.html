@@ -29,7 +29,7 @@ title: "Nombre de salariés du sexe sous-représenté parmi les 10 salariés aya
     points obtenus à l'indicateur" min=0 max=35 readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
-<script nonce="rand0m">
+<script nonce="{{ site.GITHUB_SHA }}">
   const resultatField = selectField("indicateurs.hautes_rémunérations.résultat")
   const populationFavorableField = selectField("indicateurs.hautes_rémunérations.population_favorable")
 

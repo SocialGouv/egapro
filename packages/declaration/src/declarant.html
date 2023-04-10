@@ -40,7 +40,7 @@ title: "Informations déclarant"
   </div>
 </fieldset>
 
-<script nonce="rand0m">
+<script nonce="{{ site.GITHUB_SHA }}">
   document.onready = () => {
     if (app.getItem('déclarant.nom')) {
       // If we already have a `déclarant.nom` then we already submitted this

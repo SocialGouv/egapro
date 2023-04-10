@@ -21,7 +21,7 @@ class: fulltext
 <p>Pour terminer la procédure, cliquez sur « <strong>Valider et transmettre les
     résultats</strong> ». Vous recevrez alors un accusé de réception par email.</p>
 
-<script nonce="rand0m">
+<script nonce="{{ site.GITHUB_SHA }}">
   document.onready = () => {
     // Disable the button if we've already submitted the declaration.
     if (app.mode === 'reading') {

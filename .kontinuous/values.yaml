@@ -7,9 +7,9 @@ x-secure-headers: &headers >
   media-src 'self' https://*.gouv.fr;
   img-src 'self' data: https://*.gouv.fr;
   prefetch-src 'self' https://*.gouv.fr;
-  script-src 'self' https://*.gouv.fr 'nonce-rand0m';
+  script-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
   frame-src 'self' https://*.gouv.fr;
-  style-src 'self' https://*.gouv.fr 'nonce-rand0m';
+  style-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
   frame-ancestors 'self' https://*.gouv.fr;
   base-uri 'self' https://*.gouv.fr;
   form-action 'self' https://*.gouv.fr";

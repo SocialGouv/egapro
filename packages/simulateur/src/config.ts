@@ -24,4 +24,4 @@ export const indicateursInfo = {
   },
 }
 
-export const nonce = "rand0m"
+export const nonce = process.env.REACT_APP_GITHUB_SHA
