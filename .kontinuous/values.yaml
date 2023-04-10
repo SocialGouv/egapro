@@ -32,7 +32,7 @@ app:
   ingress:
     path: /
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: *headers
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
   envFrom:
     - secretRef:
@@ -63,7 +63,7 @@ declaration:
     path: /index-egapro/declaration(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: *headers
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 simulateur:
@@ -77,7 +77,7 @@ simulateur:
     path: /index-egapro(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: *headers
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 api:
