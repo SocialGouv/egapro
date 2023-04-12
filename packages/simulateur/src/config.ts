@@ -24,4 +24,4 @@ export const indicateursInfo = {
   },
 }
 
-export const nonce = process.env.REACT_APP_GITHUB_SHA
+export const nonce = process.env.REACT_APP_GITHUB_SHA || "dev"
