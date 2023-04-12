@@ -5,6 +5,9 @@ import type { Any } from "./utils/types";
 export type FeatureFlag = keyof typeof config.ff;
 
 export const config = {
+  get nonce() {
+    return this.githubSha;
+  },
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
   get apiv2_url() {

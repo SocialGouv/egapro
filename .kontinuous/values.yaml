@@ -1,3 +1,27 @@
+x-secure-headers: &headers >-
+  more_set_headers
+  "Content-Security-Policy:
+  default-src 'none';
+  connect-src 'self' https://*.gouv.fr;
+  font-src 'self' data: blob:;
+  media-src 'self' https://*.gouv.fr;
+  img-src 'self' data: https://*.gouv.fr;
+  prefetch-src 'self' https://*.gouv.fr;
+  script-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
+  frame-src 'self' https://*.gouv.fr;
+  style-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
+  frame-ancestors 'self' https://*.gouv.fr;
+  base-uri 'self' https://*.gouv.fr;
+  form-action 'self' https://*.gouv.fr";
+
+  more_set_headers "X-Frame-Options: deny";
+
+  more_set_headers "X-XSS-Protection: 1; mode=block";
+
+  more_set_headers "X-Content-Type-Options: nosniff";
+
+  more_set_headers "Referrer-Policy: no-referrer, strict-origin-when-cross-origin";
+
 app:
   ~chart: app
   ~needs: [build-app]
@@ -8,11 +32,7 @@ app:
   ingress:
     path: /
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
-        more_set_headers "X-Frame-Options: deny";
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-        more_set_headers "X-Content-Type-Options: nosniff";
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
   envFrom:
     - secretRef:
@@ -43,11 +63,7 @@ declaration:
     path: /index-egapro/declaration(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
-        more_set_headers "X-Frame-Options: deny";
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-        more_set_headers "X-Content-Type-Options: nosniff";
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 simulateur:
@@ -61,11 +77,7 @@ simulateur:
     path: /index-egapro(/|$)(.*)
     rewriteTarget: /$2
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline'  'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
-        more_set_headers "X-Frame-Options: deny";
-        more_set_headers "X-XSS-Protection: 1; mode=block";
-        more_set_headers "X-Content-Type-Options: nosniff";
+      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
 
 api:
@@ -156,7 +168,7 @@ jobs:
         buildArgs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
           NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
-          NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.sha }}"
+          NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
           EGAPRO_ENV: "{{ .Values.global.env }}"
 
     build-api:
@@ -174,7 +186,7 @@ jobs:
           BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           EGAPRO_SIMU_URL: "https://{{ .Values.global.host }}/index-egapro"
-          GITHUB_SHA: "{{ $.Values.global.sha }}"
+          GITHUB_SHA: "{{ $.Values.global.shortSha }}"
 
     build-simulateur:
       use: build
@@ -186,8 +198,9 @@ jobs:
         buildArgs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
-          REACT_APP_GITHUB_SHA: "{{ $.Values.global.sha }}"
+          REACT_APP_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
           PUBLIC_URL: "/index-egapro"
+          INLINE_RUNTIME_CHUNK: false
 
 deactivate:
   jobs-deactivate:

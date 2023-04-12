@@ -8,12 +8,12 @@ title: "Ecart de rémunération entre les femmes et les hommes"
   <div class=row>
     <div>
       {% include radios.html
-        name="_indicateurs.rémunérations.calculable"
-        label="L’indicateur sur l’écart de rémunération est-il calculable ?"
-        required="true"
-        options="oui=oui&non=non"
-        onchange="toggleFields(event)"
-        required="required" %}
+      name="_indicateurs.rémunérations.calculable"
+      label="L’indicateur sur l’écart de rémunération est-il calculable ?"
+      required="true"
+      options="oui=oui&non=non"
+      onchange="toggleFields(event)"
+      required="required" %}
     </div>
   </div>
 </fieldset>
@@ -22,13 +22,15 @@ title: "Ecart de rémunération entre les femmes et les hommes"
   <div class=row>
     <div>
       {% include radios.html
-        name="indicateurs.rémunérations.mode"
-        label="Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération"
-        required="true"
-        block="true"
-        options="niveau_branche=Par niveau ou coefficient hiérarchique en application de la classification de branche&niveau_autre=Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes&csp=Par catégorie socio-professionnelle"
-        onchange="toggleFields(event)"
-        required="required" %}
+      name="indicateurs.rémunérations.mode"
+      label="Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération"
+      required="true"
+      block="true"
+      options="niveau_branche=Par niveau ou coefficient hiérarchique en application de la classification de
+      branche&niveau_autre=Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des
+      postes&csp=Par catégorie socio-professionnelle"
+      onchange="toggleFields(event)"
+      required="required" %}
     </div>
   </div>
 </fieldset>
@@ -37,19 +39,21 @@ title: "Ecart de rémunération entre les femmes et les hommes"
   <div class=row>
     <div>
       {% include radios.html
-        name="_indicateurs.rémunérations.cse_mis_en_place"
-        label="Un CSE a-t-il été mis en place ?"
-        required="true"
-        options="oui=oui&non=non"
-        onchange="toggleFields(event)"
-        required="required" %}
+      name="_indicateurs.rémunérations.cse_mis_en_place"
+      label="Un CSE a-t-il été mis en place ?"
+      required="true"
+      options="oui=oui&non=non"
+      onchange="toggleFields(event)"
+      required="required" %}
     </div>
   </div>
 </fieldset>
 
 <fieldset id="fieldset-cse">
   <div class=row>
-    {% include input.html type="date" name="indicateurs.rémunérations.date_consultation_cse" label="Date de consultation du CSE pour le choix de cette modalité de calcul" required=true placeholder="aaaa-mm-jj" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" oninput="checkDatePost2018(event)" %}
+    {% include input.html type="date" name="indicateurs.rémunérations.date_consultation_cse" label="Date de consultation
+    du CSE pour le choix de cette modalité de calcul" required=true placeholder="aaaa-mm-jj"
+    pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" oninput="checkDatePost2018(event)" %}
   </div>
 </fieldset>
 
@@ -57,8 +61,11 @@ title: "Ecart de rémunération entre les femmes et les hommes"
   <div class=row>
     <div>
       <label>
-        <input type="checkbox" id="field--_indicateurs.rémunérations.calculable_csp" name="_indicateurs.rémunérations.calculable_csp" value="oui" required="required" onchange="toggleFields(this)" />
-        Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.
+        <input type="checkbox" id="field--_indicateurs.rémunérations.calculable_csp"
+          name="_indicateurs.rémunérations.calculable_csp" value="oui" required="required"
+          onchange="toggleFields(this)" />
+        Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que
+        l'indicateur n'est pas calculable.
       </label>
     </div>
   </div>
@@ -67,16 +74,16 @@ title: "Ecart de rémunération entre les femmes et les hommes"
 <fieldset id="fieldset-motif">
   <div class=row>
     {% include select.html
-      name="indicateurs.rémunérations.non_calculable"
-      label="Précision du motif de non calculabilité de l'indicateur"
-      empty="true"
-      required=true
-      options="egvi40pcet=Effectif des groupes valides inférieur à 40% de l'effectif total"
+    name="indicateurs.rémunérations.non_calculable"
+    label="Précision du motif de non calculabilité de l'indicateur"
+    empty="true"
+    required=true
+    options="egvi40pcet=Effectif des groupes valides inférieur à 40% de l'effectif total"
     %}
   </div>
 </fieldset>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
   const calculableField = selectField('_indicateurs.rémunérations.calculable')
   const calculableCspField = selectField('_indicateurs.rémunérations.calculable_csp')
   const modeField = selectField('indicateurs.rémunérations.mode')
@@ -109,9 +116,9 @@ title: "Ecart de rémunération entre les femmes et les hommes"
     enableField('#fieldset-motif', isCalculableChosen && !isCalculable && isCalculatedCsp)
 
     if (app.getItem("indicateurs.rémunérations.catégories") &&
-        event &&
-        ["_indicateurs.rémunérations.calculable", "indicateurs.rémunérations.mode"].includes(event.target.name)
-        ) {
+      event &&
+      ["_indicateurs.rémunérations.calculable", "indicateurs.rémunérations.mode"].includes(event.target.name)
+    ) {
       // Make sure the following "remuneration-csp" or "remuneration-coef" form has no values
       // for a previously filled "mode".
       delete app.data.indicateurs.rémunérations.catégories

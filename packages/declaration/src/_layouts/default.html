@@ -2,31 +2,18 @@
 <html lang="fr" class="{{ page.class }}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
+<meta property="csp-nonce" content="{{ site.GITHUB_SHA }}">
 <title>{{ page.title }} - {{ site.title }}</title>
 <!-- {{ site.JEKYLL_ENV }} -->
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
 
-<script>
-    // The declaration app is not compatible with Internet Explorer.
-    // See https://fr.w3docs.com/snippets/javascript/comment-detecter-internet-explorer-en-javascript.html.
-
-    var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE '); // to detect IE 10 and older
-    var trident = ua.indexOf('Trident/'); // to detect IE 11
-
-    if (msie > 0 || trident > 0) {
-        if (!window.location.href.endsWith('/compatibilite.html')) {
-            window.location.href = '{{site.baseurl}}/compatibilite.html'
-        }
-    }
-
-</script>
+<script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.sentry-dsn %}
-<script src="{{ site.baseurl }}/assets/js/sentry.min.js"
+<script src="{{ site.baseurl }}/assets/lib/sentry.min.js"
     integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
     crossorigin="anonymous"></script>
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     if (typeof Sentry !== "undefined") {
         Sentry.init({
             dsn: '{{ site.sentry-dsn }}',
@@ -37,19 +24,19 @@
 {% endif %}
 
 {% if site.EGAPRO_API_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
 {% if site.EGAPRO_SIMU_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
 {% endif %}
 
 {% if site.GITHUB_SHA %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     GITHUB_SHA = "{{ site.GITHUB_SHA }}"
 </script>
 {% endif %}
@@ -108,13 +95,13 @@
             </div>
             <ul role="list">
                 <li>
-                    <a href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                        target="_blank" rel="noopener noreferrer">
+                    <a href="/apiv2/public/referents_egalite_professionnelle.xlsx" target="_blank"
+                        rel="noopener noreferrer">
                         Télécharger la liste des référents Egapro (XLSX, 22Ko)
                     </a>
                 </li>
                 <li>
-                    <a href="{{ site.EGAPRO_SIMU_URL }}/mentions-legales">Mentions légales</a>
+                    <a href="/mentions-legales">Mentions légales</a>
                 </li>
                 <li>
                     <a href="{{ site.EGAPRO_SIMU_URL }}/a11y/declaration-accessibilite-rgaa-4-1.pdf">
@@ -122,10 +109,10 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ site.EGAPRO_SIMU_URL }}/cgu">Conditions générales d'utilisation</a>
+                    <a href="/cgu">Conditions générales d'utilisation</a>
                 </li>
                 <li>
-                    <a href="{{ site.EGAPRO_SIMU_URL }}/politique-confidentialite">
+                    <a href="/politique-de-confidentialite">
                         Politique de confidentialité
                     </a>
                 </li>
@@ -133,7 +120,8 @@
         </div>
         <div class="footer__right">
             <i>
-                Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.
+                Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
+                numérique des ministères sociaux.
             </i>
             <p>
                 Pour nous aider à l'améliorer
@@ -151,23 +139,16 @@
     </div>
 </div>
 
+<script src="{{ site.baseurl }}/assets/lib/immer.umd.production.min.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/vanilla.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/middleware.js"></script>
+<script src="{{ site.baseurl }}/assets/lib/zustand/middleware/immer.js"></script>
 <!-- Matomo -->
-<script type="text/javascript">
-    var _paq = window._paq = window._paq || [];
-    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function () {
-        var u = "//matomo.fabrique.social.gouv.fr/";
-        _paq.push(['setTrackerUrl', u + 'matomo.php']);
-        _paq.push(['setSiteId', '11']);
-        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-        g.type = 'text/javascript'; g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
-    })();
-</script>
+<script src="{{ site.baseurl }}/assets/js/matomo.js"></script>
+<script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     document.addEventListener("ready", () => {
         if (app.token && app.tokenInfo) {
             document.querySelector(".header__right").classList.add("user__connected");

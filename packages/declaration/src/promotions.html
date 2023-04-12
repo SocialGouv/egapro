@@ -81,7 +81,7 @@ title: "Ecart de taux de promotions entre les femmes et les hommes"
         obtenus à l'indicateur" min=0 readonly=true data-always-readonly=true %}</div>
 </fieldset>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     const calculableField = selectField('_indicateurs.promotions.calculable')
     const resultatField = selectField("indicateurs.promotions.résultat")
     const populationFavorableField = selectField("indicateurs.promotions.population_favorable")

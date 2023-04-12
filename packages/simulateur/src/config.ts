@@ -23,3 +23,5 @@ export const indicateursInfo = {
     title: "Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations",
   },
 }
+
+export const nonce = process.env.REACT_APP_GITHUB_SHA || "dev"

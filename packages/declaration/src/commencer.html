@@ -28,7 +28,7 @@ prevButtonLabel: "Nouvelle déclaration"
 
 </fieldset>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     // Update year to ensure the Siren's validation to be accurate.
     function updateYearInState() {
         app.annee = selectField('déclaration.année_indicateurs').value

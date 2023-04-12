@@ -1,22 +1,44 @@
 import "@fontsource/cabin";
 import "@fontsource/gabriela";
 
+// should be before react-dsfr
+if (typeof window !== "undefined") {
+  const originalAppendChild = document.head.appendChild.bind(document.head);
+  document.head.appendChild = node => {
+    if (["style", "script"].includes(node.nodeName.toLocaleLowerCase())) {
+      (node as unknown as Element).setAttribute(
+        "nonce",
+        (node as unknown as Element).getAttribute("nonce") || config.nonce,
+      );
+    }
+    return originalAppendChild(node);
+  };
+}
+
 import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { config } from "@common/config";
+import { excludeType } from "@common/utils/types";
+import { Matomo } from "@components/utils/Matomo";
 import { fetcher } from "@services/apiClient";
-import { init } from "@socialgouv/matomo-next";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
-import { useEffect } from "react";
+import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
+
+import { ConsentBanner } from "../design-system/base/custom/ConsentBanner";
 
 // Only in TypeScript projects
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {
     Link: typeof Link;
+  }
+}
+
+declare module "../design-system/base/custom/ConsentBanner" {
+  interface GdprServiceNames {
+    matomo: never;
   }
 }
 
@@ -38,48 +60,96 @@ type AppPropsWithLayout = AppProps & {
 };
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
-  useEffect(() => {
-    if (config.matomo.siteId) {
-      init(config.matomo);
-    }
-  }, []);
-
   // Use the layout defined at the page level, if available
   const Layout = Component.getLayout ?? (({ children }) => <>{children}</>);
 
   return (
-    <SWRDevTools>
-      <SWRConfig
-        value={{
-          fetcher,
-          revalidateOnFocus: false,
-          onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-            // Never retry on 401 Unauthorized.
-            if (error.statusCode === 401) return;
-
-            // Never retry on 404.
-            if (error.statusCode === 404) return;
-
-            // Never retry on 403 Forbidden.
-            if (error.statusCode === 403) return;
-
-            // Never retry on 422 Unprocessable Entity.
-            if (error.statusCode === 422) return;
-
-            // Only retry up to 3 times.
-            if (retryCount >= 3) return;
-
-            // Retry after 5 seconds.
-            setTimeout(() => revalidate({ retryCount }), 5000);
+    <>
+      <Matomo env={config.env} />
+      <ConsentBanner
+        gdprPageLink="/politique-de-confidentialite#cookies"
+        gdprPageLinkAs={Link}
+        siteName="Egapro"
+        services={[
+          {
+            name: "matomo",
+            title: "Matomo",
+            description: "Outil d’analyse comportementale des utilisateurs.",
           },
-        }}
-      >
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </SWRConfig>
-    </SWRDevTools>
+        ]}
+      />
+      <SWRDevTools>
+        <SWRConfig
+          value={{
+            fetcher,
+            revalidateOnFocus: false,
+            onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+              // Never retry on 401 Unauthorized.
+              if (error.statusCode === 401) return;
+
+              // Never retry on 404.
+              if (error.statusCode === 404) return;
+
+              // Never retry on 403 Forbidden.
+              if (error.statusCode === 403) return;
+
+              // Never retry on 422 Unprocessable Entity.
+              if (error.statusCode === 422) return;
+
+              // Only retry up to 3 times.
+              if (retryCount >= 3) return;
+
+              // Retry after 5 seconds.
+              setTimeout(() => revalidate({ retryCount }), 5000);
+            },
+          }}
+        >
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </SWRConfig>
+      </SWRDevTools>
+    </>
   );
 };
 
-export default withDsfr(MyApp);
+const editChildren = (childrenToMap: ReactNode): ReactNode =>
+  Children.map(childrenToMap, child => {
+    if (
+      !child ||
+      typeof child === "string" ||
+      typeof child === "boolean" ||
+      typeof child === "number" ||
+      !("type" in child) // exclude fragments
+    ) {
+      return child;
+    }
+
+    const isScript = excludeType<string>()(child.type).name === "Script";
+    const isStyle = child.type === "style";
+    const actualProps = child.props ?? {};
+
+    if (isScript || isStyle) {
+      const newChild = cloneElement(child, {
+        nonce: config.nonce,
+      });
+
+      return newChild;
+    }
+
+    if (actualProps?.children?.length) {
+      return cloneElement(child, {
+        children: editChildren(actualProps.children),
+      });
+    }
+
+    return child;
+  });
+
+const DsfrApp = withDsfr(MyApp);
+export default typeof window !== "undefined"
+  ? DsfrApp
+  : function WrappedApp(props: AppProps) {
+      const rendered = DsfrApp(props);
+      return cloneElement(rendered, { children: editChildren(rendered.props.children) });
+    };

@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { forwardRef } from "react"
 import { Button, ButtonProps as ButtonChakraProps } from "@chakra-ui/react"
 
 export type ButtonProps = ButtonChakraProps & {
@@ -18,37 +18,45 @@ export type ButtonActionProps = ButtonProps & {
   type?: "button" | "submit" | "reset"
 }
 
-const ButtonAction: FunctionComponent<ButtonActionProps> = ({
-  label,
-  colorScheme = "primary",
-  variant = "solid",
-  onClick,
-  leftIcon,
-  rightIcon,
-  type,
-  size = "md",
-  disabled = false,
-  loading = false,
-  fullWidth,
-  ...rest
-}) => (
-  <Button
-    size={size}
-    type={type}
-    onClick={onClick}
-    isDisabled={disabled}
-    isLoading={loading}
-    colorScheme={colorScheme}
-    variant={variant}
-    leftIcon={leftIcon}
-    rightIcon={rightIcon}
-    sx={{
-      width: fullWidth ? "100%" : "auto",
-    }}
-    {...rest}
-  >
-    {label}
-  </Button>
+const ButtonAction = forwardRef<HTMLButtonElement, ButtonActionProps>(
+  (
+    {
+      label,
+      colorScheme = "primary",
+      variant = "solid",
+      onClick,
+      leftIcon,
+      rightIcon,
+      type,
+      size = "md",
+      disabled = false,
+      loading = false,
+      fullWidth,
+      ...rest
+    },
+    ref,
+  ) => (
+    <Button
+      size={size}
+      type={type}
+      onClick={onClick}
+      isDisabled={disabled}
+      isLoading={loading}
+      colorScheme={colorScheme}
+      variant={variant}
+      leftIcon={leftIcon}
+      rightIcon={rightIcon}
+      ref={ref}
+      sx={{
+        width: fullWidth ? "100%" : "auto",
+      }}
+      {...rest}
+    >
+      {label}
+    </Button>
+  ),
 )
+
+ButtonAction.displayName = "ButtonAction"
 
 export default ButtonAction

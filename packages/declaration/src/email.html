@@ -19,7 +19,7 @@ title: "Validation de l'email"
     <button rel=next>Valider mon email</button>
 </nav>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     document.getElementById('page-form').addEventListener('submit', async (event) => {
         event.preventDefault()
         const email = event.target.email.value

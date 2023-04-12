@@ -1,36 +1,28 @@
 ---
 layout: empty
 ---
-<script>
-    // First, check the browser is compatible
-    try {
-        eval("async function _(){}")
-    }
-    catch (e) {
-        window.location.href = '{{site.baseurl}}/compatibilite.html'
-    }
-</script>
+<script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.EGAPRO_API_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
 {% if site.EGAPRO_SIMU_URL %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
 {% endif %}
 
 {% if site.GITHUB_SHA %}
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     GITHUB_SHA = "{{ site.GITHUB_SHA }}"
 </script>
 {% endif %}
 
 <script src="{{site.baseurl}}/assets/js/utils.js"></script>
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     document.addEventListener("ready", async () => {
         const urlParams = new URLSearchParams(location.search)
 

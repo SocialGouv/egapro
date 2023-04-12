@@ -5,7 +5,7 @@ module.exports = {
     node: true,
     es2020: true,
   },
-  ignorePatterns: ["node_modules/*", "public/js/tarteaucitron/*", "build/*"],
+  ignorePatterns: ["node_modules/*", "build/*"],
   extends: [
     "react-app",
     "eslint:recommended",

@@ -6,8 +6,7 @@ exports[`should match snapshot 1`] = `
   "baseElement": <body>
     <div>
       <div
-        class="chakra-alert css-1kt8lb2"
-        data-status="info"
+        class="chakra-alert css-a4lh6w"
         role="alert"
       >
         <div
@@ -21,7 +20,6 @@ exports[`should match snapshot 1`] = `
         </div>
         <div
           class="chakra-alert__title css-wrynpv"
-          data-status="info"
         >
           Hello
         </div>
@@ -30,8 +28,7 @@ exports[`should match snapshot 1`] = `
   </body>,
   "container": <div>
     <div
-      class="chakra-alert css-1kt8lb2"
-      data-status="info"
+      class="chakra-alert css-a4lh6w"
       role="alert"
     >
       <div
@@ -45,7 +42,6 @@ exports[`should match snapshot 1`] = `
       </div>
       <div
         class="chakra-alert__title css-wrynpv"
-        data-status="info"
       >
         Hello
       </div>

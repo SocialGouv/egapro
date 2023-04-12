@@ -1,4 +1,3 @@
-import { DsfrScript } from "@components/DsfrScript";
 import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -34,8 +33,6 @@ export const RepresentationEquilibreeStartLayout = ({
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
-
-      <DsfrScript />
 
       <Container py="6w">
         <Grid justifyCenter>

@@ -18,7 +18,7 @@ title: "Validation de l'email"
     <a class=button href="{{ site.baseurl}}/email.html" rel=prev>Modifier l'email</a>
 </nav>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
     document.getElementById('email-recall').textContent = localStorage.egapro_decla_email
 
     document.body.addEventListener('load', () => {

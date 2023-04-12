@@ -6,7 +6,7 @@ exports[`should match snapshot 1`] = `
   "baseElement": <body>
     <div>
       <footer
-        class="css-1dthsy1"
+        class="css-7r6qi5"
         id="footer"
         role="contentinfo"
       >
@@ -17,7 +17,7 @@ exports[`should match snapshot 1`] = `
             class="css-v3i7xg"
           >
             <div
-              class="css-ylm6dp"
+              class="css-111wug5"
             >
               <a
                 class="chakra-link css-1xbuty4"
@@ -73,6 +73,13 @@ exports[`should match snapshot 1`] = `
                   Contribuer sur GitHub
                 </a>
               </span>
+              <span
+                aria-controls="consent-modal-0"
+                class="chakra-text css-a3rw3m"
+                data-fr-opened="false"
+              >
+                Gestion des cookies
+              </span>
             </div>
           </div>
         </div>
@@ -81,7 +88,7 @@ exports[`should match snapshot 1`] = `
   </body>,
   "container": <div>
     <footer
-      class="css-1dthsy1"
+      class="css-7r6qi5"
       id="footer"
       role="contentinfo"
     >
@@ -92,7 +99,7 @@ exports[`should match snapshot 1`] = `
           class="css-v3i7xg"
         >
           <div
-            class="css-ylm6dp"
+            class="css-111wug5"
           >
             <a
               class="chakra-link css-1xbuty4"
@@ -147,6 +154,13 @@ exports[`should match snapshot 1`] = `
               >
                 Contribuer sur GitHub
               </a>
+            </span>
+            <span
+              aria-controls="consent-modal-0"
+              class="chakra-text css-a3rw3m"
+              data-fr-opened="false"
+            >
+              Gestion des cookies
             </span>
           </div>
         </div>

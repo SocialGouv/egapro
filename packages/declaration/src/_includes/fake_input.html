@@ -1,17 +1,14 @@
 <div>
   {% include input.html
-    name=include.name
-    label=include.label
-    hidden=true %}
-  <span
-    id="fake-field--{{ include.name }}"
-    class="fake-input{% if include.class %} {{ include.class }}{% endif %}"
-    readonly="readonly"
-  >
+  name=include.name
+  label=include.label
+  hidden=true %}
+  <span id="fake-field--{{ include.name }}" class="fake-input{% if include.class %} {{ include.class }}{% endif %}"
+    readonly="readonly">
   </span>
 </div>
 
-<script>
+<script nonce="{{ site.GITHUB_SHA }}">
   document.addEventListener("loaded", () => {
     const field = selectField("{{ include.name }}")
     const fakeField = selectFakeField("{{ include.name }}")
