@@ -20,7 +20,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { partition } from "lodash"
-import React, { ElementType, PropsWithChildren, useRef, useState } from "react"
+import React, { ElementType, PropsWithChildren, useEffect, useRef, useState } from "react"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { immer } from "zustand/middleware/immer"
@@ -101,11 +101,15 @@ export const ConsentBanner = ({
   const { isOpen, onClose, onOpen } = useDisclosure({ defaultIsOpen: !firstChoiceMade, id: "consent-modal" })
   window.openConsentModal = onOpen
   const consents = useGdprStore((state) => state.consents)
-  const [accepted, setAccepted] = useState<string[]>([
-    ...Object.entries(consents)
-      .filter(([, consent]) => consent)
-      .map(([name]) => name),
-  ])
+  const [accepted, setAccepted] = useState<string[]>([])
+
+  useEffect(() => {
+    setAccepted([
+      ...Object.entries(consents)
+        .filter(([, consent]) => consent)
+        .map(([name]) => name),
+    ])
+  }, [consents])
   const initialFocusRef = useRef(null)
 
   const accept = <T extends string>(service?: GdprService<T>) => {
