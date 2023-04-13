@@ -42,29 +42,38 @@ const IndicateurUn: FunctionComponent = () => {
 
   const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
-  // les effectifs ne permettent pas de calculer l'indicateur
-  if (!effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") {
-    return (
-      <PageIndicateurUn>
-        <InfoBlock
-          type="warning"
-          title="Malheureusement votre indicateur n’est pas calculable"
-          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-        />
-        <ActionBar>
-          <ButtonSimulatorLink
-            to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-            label="Suivant"
-          />
-        </ActionBar>
-      </PageIndicateurUn>
-    )
-  }
+  // // les effectifs ne permettent pas de calculer l'indicateur
+  // if (!effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") {
+  //   return (
+  //     <PageIndicateurUn>
+  //       <InfoBlock
+  //         type="warning"
+  //         title="Malheureusement votre indicateur n’est pas calculable"
+  //         text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+  //       />
+  //       <ActionBar>
+  //         <ButtonSimulatorLink
+  //           to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
+  //           label="Suivant"
+  //         />
+  //       </ActionBar>
+  //     </PageIndicateurUn>
+  //   )
+  // }
 
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm readOnly={readOnly} />
-      {modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
+      {!effectifsIndicateurCalculable &&
+        state.indicateurUn.modaliteCalcul === "csp" &&
+        isFormValid(state.indicateurUn) && (
+          <InfoBlock
+            type="warning"
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+          />
+        )}
+      {!modaliteCalcul ? null : modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
     </PageIndicateurUn>
   )
 }

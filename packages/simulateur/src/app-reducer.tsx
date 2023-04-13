@@ -71,7 +71,7 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    modaliteCalcul: "csp",
+    modaliteCalcul: undefined,
     remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",

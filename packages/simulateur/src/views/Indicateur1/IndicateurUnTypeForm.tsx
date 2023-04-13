@@ -2,10 +2,10 @@ import { FormControl, FormLabel, Stack, Text } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
+import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
-import FormAutoSave from "../../components/FormAutoSave"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 
 interface IndicateurUnTypeFormProps {
@@ -31,14 +31,16 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
 
   return (
     <Form
-      onSubmit={() => {
-        console.debug("onSubmit de IndicateurUnTypeForm")
+      onSubmit={(formData) => {
+        console.log("onSubmit de IndicateurUnTypeForm")
+
+        saveForm(formData)
       }}
       initialValues={initialValues}
     >
       {({ handleSubmit, values }) => (
         <form onSubmit={handleSubmit}>
-          <FormAutoSave saveForm={saveForm} />
+          {/* <FormAutoSave saveForm={saveForm} /> */}
           <FormStack>
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Modalité de calcul choisie pour cet indicateur</FormLabel>
@@ -64,6 +66,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
               </Text>
             )}
           </FormStack>
+          <ButtonAction type="submit" mt="6" label="Valider mode de calcul" size={"lg"} />
         </form>
       )}
     </Form>
