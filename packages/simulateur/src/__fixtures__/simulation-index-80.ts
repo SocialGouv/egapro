@@ -56,6 +56,7 @@ export const simulationWithIndex80: { id: string; data: AppState } = {
     indicateurUn: {
       formValidated: "Valid",
       modaliteCalcul: "csp",
+      modaliteCalculformValidated: "Valid",
       remunerationAnnuelle: [
         {
           tranchesAges: [

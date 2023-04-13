@@ -36,7 +36,7 @@ export type AppState = {
   indicateurUn: {
     formValidated: FormState // Valeur calculé et non plus modifiable via l'UI. Valid si cspFormValidated est Valid pour modalideCalcul === "csp" ou si coefficientRemuFormValidated est Valid pour modalideCalcul === "coef" ou "autre" ou bien si non calculable à partir des effectifs de coefficient.
     modaliteCalcul?: "csp" | "coef" | "autre"
-    //modaliteCalculformValidated: FormState // => pour la première partie, permettant de choisir un mode de calcul
+    modaliteCalculformValidated: FormState // => pour la première partie, permettant de choisir un mode de calcul
     // cspFormValidated: FormState
     remunerationAnnuelle: RemunerationsPourCSP[]
     coefficientGroupFormValidated: FormState
@@ -146,6 +146,10 @@ export type ActionType =
   | {
       type: "updateIndicateurUnType"
       data: ActionIndicateurUnTypeData
+    }
+  | {
+      type: "validateIndicateurUnModaliteCalcul"
+      valid: FormState
     }
   | {
       type: "updateIndicateurUnCsp"

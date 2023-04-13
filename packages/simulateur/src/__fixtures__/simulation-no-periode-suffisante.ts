@@ -35,6 +35,7 @@ export const simulationWithNoPeriodeSuffisante: { id: string; data: AppState } =
     indicateurUn: {
       formValidated: "None",
       modaliteCalcul: "csp",
+      modaliteCalculformValidated: "None",
       remunerationAnnuelle: [
         {
           tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],

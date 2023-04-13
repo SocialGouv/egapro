@@ -3,11 +3,10 @@ import React, { FunctionComponent, PropsWithChildren } from "react"
 import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
-import ActionBar from "../../components/ActionBar"
 import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import SimulateurPage from "../../components/SimulateurPage"
-import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
@@ -23,9 +22,10 @@ const IndicateurUn: FunctionComponent = () => {
 
   if (!state) return null
 
-  const { modaliteCalcul } = state.indicateurUn
+  const { modaliteCalcul, modaliteCalculformValidated } = state.indicateurUn
 
-  const readOnly = isFormValid(state.indicateurUn)
+  // const readOnly = isFormValid(state.indicateurUn)
+  const readOnly = state.indicateurUn.modaliteCalculformValidated === "Valid"
 
   // le formulaire d'effectif n'est pas validé
   if (!isFormValid(state.effectif)) {
@@ -42,40 +42,25 @@ const IndicateurUn: FunctionComponent = () => {
 
   const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
 
-  // // les effectifs ne permettent pas de calculer l'indicateur
-  // if (!effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") {
-  //   return (
-  //     <PageIndicateurUn>
-  //       <InfoBlock
-  //         type="warning"
-  //         title="Malheureusement votre indicateur n’est pas calculable"
-  //         text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-  //       />
-  //       <ActionBar>
-  //         <ButtonSimulatorLink
-  //           to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-  //           label="Suivant"
-  //         />
-  //       </ActionBar>
-  //     </PageIndicateurUn>
-  //   )
-  // }
-
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm readOnly={readOnly} />
-      {!effectifsIndicateurCalculable &&
-        state.indicateurUn.modaliteCalcul === "csp" &&
-        isFormValid(state.indicateurUn) && (
-          <InfoBlock
-            type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-          />
-        )}
-      {!modaliteCalcul ? null : modaliteCalcul === "csp" ? <IndicateurUnCsp /> : <IndicateurUnCoef />}
+      {modaliteCalculformValidated === "Valid" && (
+        <IndicateurUnModeCalculValide
+          modaliteCalcul={modaliteCalcul}
+          effectifsIndicateurCalculable={effectifsIndicateurCalculable}
+        />
+      )}
     </PageIndicateurUn>
   )
+}
+
+const IndicateurUnModeCalculValide = ({ modaliteCalcul, effectifsIndicateurCalculable }: any) => {
+  if (!modaliteCalcul) return null
+
+  if (modaliteCalcul === "csp") return <IndicateurUnCsp effectifsIndicateurCalculable={effectifsIndicateurCalculable} />
+
+  return <IndicateurUnCoef />
 }
 
 const PageIndicateurUn = ({ children }: PropsWithChildren) => (
