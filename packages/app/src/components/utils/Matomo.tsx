@@ -18,6 +18,7 @@ export const Matomo = ({ env }: MatomoProps) => {
         ...config.matomo,
         onInitialization: () => {
           push(["enableHeartBeatTimer"]);
+          push(["disableQueueRequest"]);
           push(["requireCookieConsent"]);
         },
       });
@@ -27,9 +28,11 @@ export const Matomo = ({ env }: MatomoProps) => {
     if (matomoConsent) {
       console.log("Activation des cookies Matomo.");
       push(["rememberCookieConsentGiven"]);
+      // push(["forgetUserOptOut"]);
     } else {
       console.log("Désactivation des cookies Matomo.");
       push(["forgetCookieConsentGiven"]);
+      // push(["optUserOut"]);
     }
   }, [env, inited, matomoConsent]);
 

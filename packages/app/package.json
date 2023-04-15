@@ -20,7 +20,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2",
     "@chakra-ui/react": "^2",
-    "@codegouvfr/react-dsfr": "^0.45.0",
+    "@codegouvfr/react-dsfr": "^0.47.0",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@fontsource/cabin": "^4.5.10",

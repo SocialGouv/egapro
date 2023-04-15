@@ -1837,10 +1837,10 @@
   resolved "https://registry.yarnpkg.com/@chakra-ui/visually-hidden/-/visually-hidden-2.0.12.tgz#e4bb4983ed16dbdb7e8e84c29e81e3e493661284"
   integrity sha512-5Vn21NpAol5tX5OKJlMh4pfTlX98CNhrbA29OGZyfPzNjXw2ZQo0iDUPG4gMNa9EdbVWpbbRmT6l6R6ObatEUw==
 
-"@codegouvfr/react-dsfr@^0.45.0":
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.45.0.tgz#5f608f9edfbf3574d7ca7f48bee86d5fb87d10e5"
-  integrity sha512-CW9lLg74CteqkfLx9kXHYVfFsIQta3mRE9jGidgm/uC/vj1CqDk7RkzuyhYS3H8nU+z44jOsw+gL1hczgpGNqQ==
+"@codegouvfr/react-dsfr@^0.47.0":
+  version "0.47.0"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.47.0.tgz#b069a75f5ded701fb03b095bb4e4d659d62672a6"
+  integrity sha512-uQGY6w7CPbnD4/w+UNdomAKRD1YeiQG3qsBiWLr9sX/rBwXSVrw/NnETmwaM2cnCtT/ekdlDWRSe64es9o8zjQ==
   dependencies:
     tsafe "^1.6.0"
 
