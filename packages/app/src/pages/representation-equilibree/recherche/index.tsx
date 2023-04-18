@@ -11,8 +11,9 @@ import {
   FormGroupMessage,
   FormInput,
   FormSelect,
-  TileCompanyRepeqs,
 } from "@design-system";
+import { TileCompanyRepeqs } from "@design-system/client";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { filterDepartements, useConfig } from "@services/apiClient";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
@@ -20,7 +21,6 @@ import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
 import { useRouter } from "next/router";
-import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import type { ParsedUrlQueryInput } from "querystring";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";

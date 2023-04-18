@@ -6,9 +6,9 @@ import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir
 import { config } from "@common/config";
 import { Matomo } from "@components/utils/Matomo";
 import Link from "next/link";
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 
-import { ConsentBanner } from "../design-system/base/custom/ConsentBanner";
+import { ConsentBanner } from "../design-system/base/client/ConsentBanner";
 import { defaultColorScheme } from "./defaultColorScheme";
 
 const RootLayout = ({ children }: PropsWithChildren) => (
@@ -30,7 +30,9 @@ const RootLayout = ({ children }: PropsWithChildren) => (
         ]}
       />
 
-      <Matomo env={config.env} />
+      <Suspense>
+        <Matomo env={config.env} />
+      </Suspense>
     </head>
     <body>
       <DsfrProvider defaultColorScheme={defaultColorScheme}>

@@ -1,7 +1,7 @@
 import { Box, Container, Link, List, Stack, Text } from "@chakra-ui/react";
 import { config } from "@common/config";
 
-import { useGdprStore } from "../../design-system/base/custom/ConsentBanner";
+import { useGdprStore } from "../../design-system/base/client/ConsentBanner";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 

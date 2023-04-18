@@ -6,8 +6,10 @@ import { config } from "@common/config";
 import { Brand } from "@components/Brand";
 import { type PropsWithChildren } from "react";
 
+import { Breadcrumb } from "./Breadcrumb";
 import styles from "./consultation.module.css";
 import { ConsultationFooter } from "./Footer";
+import { Navigation } from "./Navigation";
 
 const homeLinkProps: HeaderProps["homeLinkProps"] = {
   href: "/",
@@ -36,9 +38,11 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         serviceTitle="Egapro"
         serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
         homeLinkProps={homeLinkProps}
+        navigation={<Navigation />}
       />
       <main role="main" id="content" className={styles.content}>
-        <div className={fr.cx("fr-container")} style={{ ...fr.spacing("padding", { rightLeft: "6w" }) }}>
+        <div className={fr.cx("fr-container")}>
+          <Breadcrumb />
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
             <div className={fr.cx("fr-col-sm-12", "fr-col-md-10", "fr-col-lg-8")}>{children}</div>
           </div>

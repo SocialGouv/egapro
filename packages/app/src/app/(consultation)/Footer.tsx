@@ -2,7 +2,7 @@
 
 import { Footer, type FooterProps } from "@codegouvfr/react-dsfr/Footer";
 
-import { useGdprStore } from "../../design-system/base/custom/ConsentBanner";
+import { useGdprStore } from "../../design-system/base/client/ConsentBanner";
 
 export const ConsultationFooter = (props: Omit<FooterProps, "cookiesManagementLinkProps">) => {
   const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);

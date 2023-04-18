@@ -6,7 +6,7 @@ import { stringify } from "qs";
 import type { Entreprise, Etablissement, IEntrepriseService, SearchParameters } from "../IEntrepriseService";
 import { EntrepriseServiceError, EntrepriseServiceNotFoundError } from "../IEntrepriseService";
 
-const RECHERCHE_ENTREPRISE_URL = "https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/";
+const RECHERCHE_ENTREPRISE_URL = new URL("https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/");
 
 export class RechercheEntrepriseService implements IEntrepriseService {
   public async search(parameters: SearchParameters): Promise<Entreprise[]> {

@@ -1,7 +1,7 @@
+import { adressLabel } from "@common/dict";
 import { useState } from "react";
 
-import { useAdressLabel } from "../../services/apiClient/useAdressLabel";
-import type { RepeqType } from "../../services/apiClient/useSearchRepeqs";
+import type { RepeqType } from "../../../services/apiClient/useSearchRepeqs";
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -17,7 +17,7 @@ import {
   TileCompanyTableHeadCol,
   TileCompanyTitle,
   TileCompanyYear,
-} from "./TileCompany";
+} from "../TileCompany";
 
 export type data = { men?: number; women?: number };
 
@@ -50,7 +50,7 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
     <TileCompany>
       <TileCompanyTitle>{raison_sociale}</TileCompanyTitle>
       <TileCompanySiren>{siren}</TileCompanySiren>
-      <TileCompanyLocation>{useAdressLabel({ departement: département, region: région })}</TileCompanyLocation>
+      <TileCompanyLocation>{adressLabel({ county: département, region: région })}</TileCompanyLocation>
       <TileCompanyTable>
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>

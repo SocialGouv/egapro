@@ -1,4 +1,5 @@
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { useUser } from "@services/apiClient";
 import {
   ButtonAsLink,
   Callout,
@@ -7,8 +8,7 @@ import {
   FormRadioGroupContent,
   FormRadioGroupInput,
   FormRadioGroupLegend,
-} from "@design-system";
-import { useUser } from "@services/apiClient";
+} from "packages/app/src/design-system/server";
 import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";

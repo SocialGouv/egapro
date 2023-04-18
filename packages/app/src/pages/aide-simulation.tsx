@@ -1,5 +1,6 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { AnchorLink, Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { AnchorLink } from "@design-system/client";
 import Head from "next/head";
 
 import type { NextPageWithLayout } from "./_app";

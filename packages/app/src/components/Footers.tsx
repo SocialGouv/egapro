@@ -13,9 +13,9 @@ import {
   FooterBottomLink,
   FooterContentLink,
   Logo,
-} from "@design-system";
+} from "packages/app/src/design-system/server";
 
-import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
+import { useGdprStore } from "../design-system/base/client/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 
 /** Footer for entreprise */

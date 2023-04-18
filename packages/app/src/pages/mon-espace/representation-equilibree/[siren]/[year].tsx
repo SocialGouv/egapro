@@ -2,11 +2,11 @@ import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeRouterQuery } from "@common/utils/url";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { StaffOnly } from "@components/StaffOnly";
-import { Alert } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useRepresentationEquilibree } from "@services/apiClient";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { Alert } from "packages/app/src/design-system/server";
 
 import type { NextPageWithLayout } from "../../../_app";
 

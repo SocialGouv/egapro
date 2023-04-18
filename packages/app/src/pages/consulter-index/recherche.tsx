@@ -21,6 +21,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import { adressLabel } from "@common/dict";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
@@ -29,7 +30,6 @@ import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import type { SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
-import { useAdressLabel } from "@services/apiClient/useAdressLabel";
 import { useRouter } from "next/router";
 import type { ParsedUrlQuery } from "querystring";
 import type { ChangeEventHandler, DOMAttributes } from "react";
@@ -91,7 +91,7 @@ function Company({ company }: { company: CompanyType }) {
           <Box mt={3}>{company.entreprise.siren}</Box>
           <Flex my={2} alignItems="center" justifyContent="start">
             <Icon as={HiOutlineLocationMarker} mr={2} />
-            {useAdressLabel({ departement: company.entreprise.département, region: company.entreprise.région })}
+            {adressLabel({ county: company.entreprise.département, region: company.entreprise.région })}
           </Flex>
         </Box>
         <Flex

@@ -26,7 +26,6 @@ import {
   FormSelect,
   Icon,
   Link,
-  Modal,
   TableAdmin,
   TableAdminBody,
   TableAdminBodyRow,
@@ -34,6 +33,7 @@ import {
   TableAdminHead,
   TableAdminHeadCol,
 } from "@design-system";
+import { Modal } from "@design-system/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";

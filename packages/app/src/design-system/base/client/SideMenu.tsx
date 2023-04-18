@@ -3,9 +3,9 @@ import { clsx } from "clsx";
 import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useState } from "react";
 
-import { useCollapse } from "../hooks/useCollapse";
-import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
-import { NextLinkOrA } from "../utils/NextLinkOrA";
+import { useCollapse } from "../../hooks/useCollapse";
+import type { NextLinkOrAProps } from "../../utils/NextLinkOrA";
+import { NextLinkOrA } from "../../utils/NextLinkOrA";
 import styles from "./SideMenu.module.css";
 
 export type SideMenuProps = PropsWithChildren<{

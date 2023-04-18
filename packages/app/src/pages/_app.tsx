@@ -27,7 +27,7 @@ import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
 
-import { ConsentBanner } from "../design-system/base/custom/ConsentBanner";
+import { ConsentBanner } from "../design-system/base/client/ConsentBanner";
 
 // Only in TypeScript projects
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {

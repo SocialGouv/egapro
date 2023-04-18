@@ -1,5 +1,5 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { Container, Grid, GridCol } from "@design-system";
+import { Container, Grid, GridCol } from "packages/app/src/design-system/server";
 
 import type { NextPageWithLayout } from "./_app";
 

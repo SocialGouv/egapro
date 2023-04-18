@@ -1,6 +1,10 @@
 import { zodDateSchema } from "@common/utils/form";
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormManager } from "@services/apiClient";
+import { endOfYear, formatISO, getYear } from "date-fns";
+import { useRouter } from "next/router";
 import {
   ButtonAsLink,
   FormButton,
@@ -10,11 +14,7 @@ import {
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-} from "@design-system";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager } from "@services/apiClient";
-import { endOfYear, formatISO, getYear } from "date-fns";
-import { useRouter } from "next/router";
+} from "packages/app/src/design-system/server";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 

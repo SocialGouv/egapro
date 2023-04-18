@@ -6,6 +6,9 @@ import { DeclarationSummary } from "@components/DeclarationSummary";
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
+import { useDeclaration } from "@services/apiClient/declaration";
+import { add, isAfter } from "date-fns";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   AlertTitle,
@@ -21,10 +24,7 @@ import {
   FormLayoutButtonGroup,
   Grid,
   GridCol,
-} from "@design-system";
-import { useDeclaration } from "@services/apiClient/declaration";
-import { add, isAfter } from "date-fns";
-import { useRouter } from "next/navigation";
+} from "packages/app/src/design-system/server";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { z } from "zod";
 

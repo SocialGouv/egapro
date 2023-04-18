@@ -1,6 +1,6 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
+import { Container, Grid, GridCol } from "packages/app/src/design-system/server";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";

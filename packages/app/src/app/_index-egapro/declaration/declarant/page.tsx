@@ -2,6 +2,10 @@
 
 import { AlertEdition } from "@components/AlertEdition";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormManager } from "@services/apiClient";
+import { useUserNext13 } from "@services/apiClient/useUserNext13";
+import { useRouter } from "next/navigation";
 import {
   ButtonAsLink,
   FormButton,
@@ -12,11 +16,7 @@ import {
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-} from "@design-system";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager } from "@services/apiClient";
-import { useUserNext13 } from "@services/apiClient/useUserNext13";
-import { useRouter } from "next/navigation";
+} from "packages/app/src/design-system/server";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";

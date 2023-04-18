@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 export const useCollapse = (id: string, isExpanded: boolean) => {

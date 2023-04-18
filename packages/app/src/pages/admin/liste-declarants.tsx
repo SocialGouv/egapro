@@ -8,7 +8,12 @@ import { Object } from "@common/utils/overload";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import { Pagination } from "@components/Pagination";
-import type { TagProps } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
+import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
+import type { OwnershipRequestSearchParam } from "@services/apiClient/useOwnershipRequestListStore";
+import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
+import type { TagProps } from "packages/app/src/design-system/server";
 import {
   Alert,
   Box,
@@ -29,12 +34,7 @@ import {
   TableAdminHead,
   TableAdminHeadCol,
   Tag,
-} from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
-import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
-import type { OwnershipRequestSearchParam } from "@services/apiClient/useOwnershipRequestListStore";
-import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
+} from "packages/app/src/design-system/server";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 

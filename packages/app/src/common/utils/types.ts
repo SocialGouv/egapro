@@ -169,6 +169,13 @@ export type PartialKeys<T> = {
 }[keyof T];
 export type RequiredKeys<T> = Exclude<keyof T, PartialKeys<T>>;
 export type Objectize<T> = { [K in keyof T]: Objectize<T[K]> };
+export type UnwrapObectize<T> = T extends Objectize<infer R>
+  ? {
+      [K in keyof R]: R[K];
+    }
+  : T;
+export type ClearObject<T> = UnwrapObectize<Objectize<T>>;
+
 export type InvertPartial<T> = Objectize<
   {
     [K in RequiredKeys<T>]?: T[K];
@@ -268,6 +275,9 @@ export type NonNullableProps<T> = {
 };
 
 export type PropsWithoutChildren<T extends PropsWithChildren> = Omit<T, "children">;
+
+export type RecordValues<T> = T extends Record<Any, infer R> ? R : never;
+export type RecordKeys<T> = T extends Record<infer R, unknown> ? R : never;
 
 /**
  * Hacky type to remove readonly on each property
