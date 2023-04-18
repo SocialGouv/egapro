@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Stack, Text } from "@chakra-ui/react"
+import { Box, FormControl, FormLabel, Stack, Text } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
@@ -38,57 +38,60 @@ const IndicateurUnModaliteCalculForm: FunctionComponent<IndicateurUnTypeFormProp
   }
 
   return (
-    <Form onSubmit={onSubmit} initialValues={initialValues}>
-      {({ handleSubmit, values }) => (
-        <>
-          <form onSubmit={handleSubmit}>
-            <FormAutoSave saveForm={saveForm} />
-            <FormStack>
-              <FormControl isReadOnly={readOnly}>
-                <FormLabel as="div">Modalité de calcul choisie pour cet indicateur</FormLabel>
-                <InputRadioGroup defaultValue={values.modaliteCalcul}>
-                  <Stack>
-                    <InputRadio value="csp" fieldName="modaliteCalcul" choiceValue="csp" isReadOnly={readOnly}>
-                      Par catégorie socio-professionnelle
-                    </InputRadio>
-                    <InputRadio value="coef" fieldName="modaliteCalcul" choiceValue="coef" isReadOnly={readOnly}>
-                      Par niveau ou coefficient hiérarchique en application de la classification de branche
-                    </InputRadio>
-                    <InputRadio value="autre" fieldName="modaliteCalcul" choiceValue="autre" isReadOnly={readOnly}>
-                      Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
-                    </InputRadio>
-                  </Stack>
-                </InputRadioGroup>
-              </FormControl>
-              {values.modaliteCalcul !== "csp" && (
-                <Text fontSize="sm">
-                  Si vous choisissez cette option, la consultation du CSE est obligatoire.
-                  <br />
-                  La date de consultation vous sera demandée au moment de la déclaration.
-                </Text>
+    <Box mb="6">
+      <Form onSubmit={onSubmit} initialValues={initialValues}>
+        {({ handleSubmit, values }) => (
+          <>
+            <form onSubmit={handleSubmit}>
+              <FormAutoSave saveForm={saveForm} />
+              <FormStack>
+                <FormControl isReadOnly={readOnly}>
+                  <FormLabel as="div">Modalité de calcul choisie pour cet indicateur</FormLabel>
+                  <InputRadioGroup defaultValue={values.modaliteCalcul}>
+                    <Stack>
+                      <InputRadio value="csp" fieldName="modaliteCalcul" choiceValue="csp" isReadOnly={readOnly}>
+                        Par catégorie socio-professionnelle
+                      </InputRadio>
+                      <InputRadio value="coef" fieldName="modaliteCalcul" choiceValue="coef" isReadOnly={readOnly}>
+                        Par niveau ou coefficient hiérarchique en application de la classification de branche
+                      </InputRadio>
+                      <InputRadio value="autre" fieldName="modaliteCalcul" choiceValue="autre" isReadOnly={readOnly}>
+                        Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
+                      </InputRadio>
+                    </Stack>
+                  </InputRadioGroup>
+                </FormControl>
+                {values.modaliteCalcul !== "csp" && (
+                  <Text fontSize="sm">
+                    Si vous choisissez cette option, la consultation du CSE est obligatoire.
+                    <br />
+                    La date de consultation vous sera demandée au moment de la déclaration.
+                  </Text>
+                )}
+              </FormStack>
+              {modaliteCalculformValidated !== "Valid" && (
+                <ButtonAction type="submit" mt="6" label="Valider mode de calcul" size="lg" />
               )}
-            </FormStack>
-            {modaliteCalculformValidated !== "Valid" && (
-              <ButtonAction type="submit" mt="6" label="Valider mode de calcul" size="lg" />
+            </form>
+            {modaliteCalculformValidated === "Valid" && (
+              <ButtonAction
+                variant="outline"
+                type="button"
+                label="Modifier le mode de calcul"
+                mt="6"
+                size="lg"
+                maxW="max-content"
+                onClick={() =>
+                  dispatch({
+                    type: "unsetIndicateurUnModaliteCalcul",
+                  })
+                }
+              />
             )}
-          </form>
-          {modaliteCalculformValidated === "Valid" && (
-            <ButtonAction
-              variant="outline"
-              type="button"
-              mt="6"
-              label="Modifier le mode de calcul"
-              size="lg"
-              onClick={() =>
-                dispatch({
-                  type: "unsetIndicateurUnModaliteCalcul",
-                })
-              }
-            />
-          )}
-        </>
-      )}
-    </Form>
+          </>
+        )}
+      </Form>
+    </Box>
   )
 }
 
