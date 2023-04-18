@@ -11,7 +11,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import { isFormValid } from "../../utils/formHelpers"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
-import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
+import IndicateurUnModaliteCalculForm from "./IndicateurUnModaliteCalculForm"
 
 const title = "Indicateur écart de rémunération"
 
@@ -44,7 +44,7 @@ const IndicateurUn: FunctionComponent = () => {
 
   return (
     <PageIndicateurUn>
-      <IndicateurUnTypeForm readOnly={readOnly} />
+      <IndicateurUnModaliteCalculForm readOnly={readOnly} />
       {modaliteCalculformValidated === "Valid" && (
         <IndicateurUnModeCalculValide
           modaliteCalcul={modaliteCalcul}

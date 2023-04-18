@@ -45,7 +45,7 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    dispatch({ type: "validateIndicateurUnCoefGroup", valid: "Valid" })
+    dispatch({ type: "setValidIndicateurUnCoefGroup" })
   }
 
   const confirmGroupToDelete = (index: number) => setIndexGroupToDelete(index)
@@ -87,7 +87,7 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                           name={`${name}.name`}
                           index={index}
                           deleteGroup={confirmGroupToDelete}
-                          editGroup={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
+                          editGroup={() => dispatch({ type: "unsetIndicateurUnCoefGroup" })}
                           readOnly={readOnly}
                         />
                       ))
@@ -112,7 +112,7 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
               <ActionBar borderTop="1px solid" borderColor="gray.200" pt={4}>
                 <ButtonAction onClick={() => navigateTo("Effectif")} label="Suivant" size="lg" />
                 <ButtonAction
-                  onClick={() => dispatch({ type: "validateIndicateurUnCoefGroup", valid: "None" })}
+                  onClick={() => dispatch({ type: "unsetIndicateurUnCoefGroup" })}
                   label="Modifier les groupes"
                   variant="link"
                   disabled={frozenDeclaration}

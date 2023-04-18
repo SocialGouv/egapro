@@ -2,18 +2,18 @@ import { FormControl, FormLabel, Stack, Text } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 
+import FormAutoSave from "../../components/FormAutoSave"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
-import FormAutoSave from "../../components/FormAutoSave"
 
 interface IndicateurUnTypeFormProps {
   readOnly: boolean
 }
 
-const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ readOnly }) => {
+const IndicateurUnModaliteCalculForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ readOnly }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
@@ -27,14 +27,13 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
   const saveForm = (formData: any) => {
     const { modaliteCalcul } = formData
 
-    dispatch({ type: "updateIndicateurUnType", data: { modaliteCalcul } })
+    dispatch({ type: "updateIndicateurUnModaliteCalcul", data: { modaliteCalcul } })
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
     dispatch({
-      type: "validateIndicateurUnModaliteCalcul",
-      valid: "Valid",
+      type: "setValidIndicateurUnModaliteCalcul",
     })
   }
 
@@ -82,8 +81,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
               size="lg"
               onClick={() =>
                 dispatch({
-                  type: "validateIndicateurUnModaliteCalcul",
-                  valid: "None",
+                  type: "unsetIndicateurUnModaliteCalcul",
                 })
               }
             />
@@ -94,4 +92,4 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ re
   )
 }
 
-export default IndicateurUnTypeForm
+export default IndicateurUnModaliteCalculForm

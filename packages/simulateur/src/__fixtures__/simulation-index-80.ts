@@ -92,6 +92,7 @@ export const simulationWithIndex80: { id: string; data: AppState } = {
       ],
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
+      coefficientRemuFormValidated: "None",
       coefficient: [],
       noteFinale: 40,
       nonCalculable: false,

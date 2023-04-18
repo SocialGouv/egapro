@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { FormState, RemunerationPourTrancheAge } from "../../../globals"
+import { RemunerationPourTrancheAge } from "../../../globals"
 
 import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 import { displayNameCSP } from "../../../utils/helpers"
@@ -12,14 +12,9 @@ import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 interface IndicateurUnCspFormProps {
   ecartRemuParTrancheAge: Array<EffectifEtEcartRemuGroupCsp>
   readOnly: boolean
-  validateIndicateurUn: (valid: FormState) => void
 }
 
-const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
-  ecartRemuParTrancheAge,
-  readOnly,
-  validateIndicateurUn,
-}) => {
+const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({ ecartRemuParTrancheAge, readOnly }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
   const ecartRemuParTrancheAgeRaw = ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
@@ -49,7 +44,7 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
       ecartRemuParTrancheAge={ecartRemuParTrancheAgeRaw}
       readOnly={readOnly}
       updateIndicateurUn={updateIndicateurUnRaw}
-      validateIndicateurUn={validateIndicateurUn}
+      setValidIndicateurUn={() => dispatch({ type: "setValidIndicateurUnCSP" })}
       nextLink={
         <ButtonSimulatorLink
           to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}

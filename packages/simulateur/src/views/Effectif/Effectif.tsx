@@ -1,7 +1,6 @@
 import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
@@ -44,7 +43,7 @@ const Effectif: FunctionComponent = () => {
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
                 totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
-                validateEffectif={(valid: FormState) => dispatch({ type: "validateEffectif", valid })}
+                unsetEffectif={() => dispatch({ type: "unsetEffectif" })}
               />
             )
           }

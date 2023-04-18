@@ -223,9 +223,9 @@ describe("updateEffectif", () => {
   })
 })
 
-describe("updateIndicateurUnType", () => {
+describe("updateIndicateurUnModaliteCalcul", () => {
   const action: ActionType = {
-    type: "updateIndicateurUnType",
+    type: "updateIndicateurUnModaliteCalcul",
     data: { modaliteCalcul: undefined },
   }
 
@@ -1072,8 +1072,7 @@ describe("validateInformationsSimulation", () => {
 describe("validateEffectif", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "Valid",
+      type: "setValidEffectif",
     }
 
     test("nothing undefined state", () => {
@@ -1110,8 +1109,7 @@ describe("validateEffectif", () => {
 
   describe("None with csp true", () => {
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "None",
+      type: "unsetEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1129,7 +1127,7 @@ describe("validateEffectif", () => {
 
   describe("None with csp false", () => {
     const actionUpdateIndicateurUnType: ActionType = {
-      type: "updateIndicateurUnType",
+      type: "updateIndicateurUnModaliteCalcul",
       data: { modaliteCalcul: undefined },
     }
 
@@ -1148,8 +1146,7 @@ describe("validateEffectif", () => {
     })
 
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "None",
+      type: "unsetEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1167,8 +1164,7 @@ describe("validateEffectif", () => {
 describe("validateIndicateurUnCoefGroup", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefGroup",
-      valid: "Valid",
+      type: "setValidIndicateurUnCoefGroup",
     }
 
     test("nothing undefined state", () => {
@@ -1224,8 +1220,7 @@ describe("validateIndicateurUnCoefGroup", () => {
 
   describe("None", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefGroup",
-      valid: "None",
+      type: "unsetIndicateurUnCoefGroup",
     }
 
     test("invalid complete validate state", () => {
@@ -1256,8 +1251,7 @@ describe("validateIndicateurUnCoefGroup", () => {
 describe("validateIndicateurUnCoefEffectif", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefEffectif",
-      valid: "Valid",
+      type: "setValidIndicateurUnCoefEffectif",
     }
 
     test("nothing undefined state", () => {
@@ -1311,8 +1305,7 @@ describe("validateIndicateurUnCoefEffectif", () => {
 
   describe("None", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefEffectif",
-      valid: "None",
+      type: "unsetIndicateurUnCoefEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1341,8 +1334,8 @@ describe("validateIndicateurUnCoefEffectif", () => {
 
 describe("validateIndicateurUn", () => {
   const action: ActionType = {
-    type: "validateIndicateurUn",
-    valid: "Valid",
+    // type: "validateIndicateurUn",
+    type: "setValidIndicateurUnCSP",
   }
 
   test("nothing undefined state", () => {

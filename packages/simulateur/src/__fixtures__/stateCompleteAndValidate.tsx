@@ -10,23 +10,20 @@ const actionValidateInformationsSimulation: ActionType = {
 }
 
 const actionValidateEffectif: ActionType = {
-  type: "validateEffectif",
-  valid: "Valid",
+  type: "setValidEffectif",
 }
 
 const actionValidateIndicateurUnCoefGroup: ActionType = {
-  type: "validateIndicateurUnCoefGroup",
-  valid: "Valid",
+  type: "setValidIndicateurUnCoefGroup",
 }
 
 const actionValidateIndicateurUnCoefEffectif: ActionType = {
-  type: "validateIndicateurUnCoefEffectif",
-  valid: "Valid",
+  type: "setValidIndicateurUnCoefEffectif",
 }
 
 const actionValidateIndicateurUn: ActionType = {
-  type: "validateIndicateurUn",
-  valid: "Valid",
+  // type: "validateIndicateurUn",
+  type: "setValidIndicateurUnCSP",
 }
 
 const actionValidateIndicateurDeux: ActionType = {

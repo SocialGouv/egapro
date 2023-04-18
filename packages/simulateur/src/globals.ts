@@ -38,12 +38,11 @@ export type AppState = {
     modaliteCalcul?: "csp" | "coef" | "autre"
     modaliteCalculformValidated: FormState // => pour la première partie, permettant de choisir un mode de calcul
     // cspFormValidated: FormState
-    remunerationAnnuelle: RemunerationsPourCSP[]
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
-    // coefficientRemuFormValidated: FormState => pour s'assurer que l'onglet rémunération est renseigné. Il peut être à None si
-    // l'indicateur devient non calculable à cause des effectifs de coefficient.
+    coefficientRemuFormValidated: FormState
     coefficient: CoefficientGroupe[]
+    remunerationAnnuelle: RemunerationsPourCSP[]
   } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
@@ -139,17 +138,28 @@ export type ActionType =
       type: "updateEffectif"
       data: ActionEffectifData
     }
+  //   | {
+  //       type: "validateEffectif"
+  //       valid: FormState
+  //     }
   | {
-      type: "validateEffectif"
-      valid: FormState
+      type: "unsetEffectif"
     }
   | {
-      type: "updateIndicateurUnType"
+      type: "setValidEffectif"
+    }
+  | {
+      type: "setInvalidEffectif"
+    }
+  | {
+      type: "updateIndicateurUnModaliteCalcul"
       data: ActionIndicateurUnTypeData
     }
   | {
-      type: "validateIndicateurUnModaliteCalcul"
-      valid: FormState
+      type: "setValidIndicateurUnModaliteCalcul"
+    }
+  | {
+      type: "unsetIndicateurUnModaliteCalcul"
     }
   | {
       type: "updateIndicateurUnCsp"
@@ -166,18 +176,59 @@ export type ActionType =
       type: "updateIndicateurUnCoef"
       data: ActionIndicateurUnCoefData
     }
+  // ------------------------------------
   | {
-      type: "validateIndicateurUnCoefGroup"
-      valid: FormState
+      type: "setValidIndicateurUnCSP"
     }
   | {
-      type: "validateIndicateurUnCoefEffectif"
-      valid: FormState
+      type: "setInvalidIndicateurUnCSP"
     }
   | {
-      type: "validateIndicateurUn"
-      valid: FormState
+      type: "unsetIndicateurUnCSP"
     }
+  | {
+      type: "setValidIndicateurUnCoefGroup"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefGroup"
+    }
+  | {
+      type: "unsetIndicateurUnCoefGroup"
+    }
+  | {
+      type: "setValidIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "unsetIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "setValidIndicateurUnCoefRemuneration"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefRemuneration"
+    }
+  | {
+      type: "unsetIndicateurUnCoefRemuneration"
+    }
+  //   | {
+  //       type: "validateIndicateurUnCoefGroup"
+  //       valid: FormState
+  //     }
+  //   | {
+  //       type: "validateIndicateurUnCoefEffectif"
+  //       valid: FormState
+  //     }
+  //   | {
+  //       type: "validateIndicateurUnRemuGroup"
+  //       valid: FormState
+  //     }
+  //   | {
+  //       type: "validateIndicateurUn"
+  //       valid: FormState
+  //     }
   | {
       type: "updateIndicateurDeux"
       data: ActionIndicateurDeuxData

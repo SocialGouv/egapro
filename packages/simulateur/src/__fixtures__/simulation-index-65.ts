@@ -92,6 +92,7 @@ export const simulationWithIndex65: { id: string; data: AppState } = {
       ],
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
+      coefficientRemuFormValidated: "None",
       coefficient: [],
       nonCalculable: false,
       motifNonCalculable: "",

@@ -56,6 +56,7 @@ export const simulationWithNoPeriodeSuffisante: { id: string; data: AppState } =
       ],
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
+      coefficientRemuFormValidated: "None",
       coefficient: [],
       nonCalculable: true,
       motifNonCalculable: "egvi40pcet",

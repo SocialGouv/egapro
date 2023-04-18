@@ -1,7 +1,7 @@
 import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 
-import { TrancheAge, RemunerationPourTrancheAge, FormState } from "../../globals"
+import { RemunerationPourTrancheAge, TrancheAge } from "../../globals"
 
 import {
   composeValidators,
@@ -14,13 +14,13 @@ import {
 } from "../../utils/formHelpers"
 import { displayNameTranchesAges } from "../../utils/helpers"
 
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import FormError from "../../components/FormError"
+import BlocForm from "../../components/BlocForm"
 import FormStack from "../../components/ds/FormStack"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
 
 export const aboveZero: ValidatorFunction = (value) =>
   minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
@@ -45,7 +45,7 @@ interface IndicateurUnFormRawProps {
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => void
-  validateIndicateurUn: (valid: FormState) => void
+  setValidIndicateurUn: () => void
   nextLink: ReactNode
 }
 
@@ -90,7 +90,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
-  validateIndicateurUn,
+  setValidIndicateurUn,
   nextLink,
 }) => {
   const initialValues = {
@@ -126,7 +126,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurUn("Valid")
+    setValidIndicateurUn()
   }
 
   return (

@@ -7,7 +7,6 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
 import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
@@ -29,7 +28,9 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   if (!state) return null
 
-  const { coefficientEffectifFormValidated } = state.indicateurUn
+  // const { coefficientEffectifFormValidated } = state.indicateurUn
+
+  const { coefficientEffectifFormValidated, coefficientRemuFormValidated } = state.indicateurUn
 
   const updateIndicateurUn = (
     data: Array<{
@@ -75,7 +76,9 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     )
   }
 
-  const readOnly = isFormValid(state.indicateurUn)
+  // const readOnly = isFormValid(state.indicateurUn)
+
+  const readOnly = coefficientRemuFormValidated === "Valid"
 
   return (
     <LayoutFormAndResult
@@ -84,7 +87,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
           updateIndicateurUn={updateIndicateurUn}
-          validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
+          setValidIndicateurUn={() => dispatch({ type: "setValidIndicateurUnCoefRemuneration" })}
           nextLink={
             <ButtonSimulatorLink
               to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
@@ -99,7 +102,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}
             noteIndicateurUn={noteIndicateurUn}
-            validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
+            unsetIndicateurUn={() => dispatch({ type: "unsetIndicateurUnCoefRemuneration" })}
           />
         )
       }
