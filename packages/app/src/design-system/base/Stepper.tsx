@@ -7,6 +7,7 @@ import styles from "./Stepper.module.css";
 
 export type StepperProps = PropsWithChildren<Omit<MarginProps, "ml" | "mr" | "mx">>;
 
+/** @deprecated use react-dsfr */
 export const Stepper = ({ children, ...rest }: StepperProps) => {
   return (
     <Box className="fr-stepper" {...rest}>

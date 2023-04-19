@@ -4,17 +4,6 @@ import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  checkSiren,
-  fetchRepresentationEquilibreeAsFormState,
-  fetchSiren,
-  ownersForSiren,
-  useFormManager,
-  useUser,
-} from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   Alert,
   AlertTitle,
@@ -26,7 +15,18 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
   FormSelect,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  checkSiren,
+  fetchRepresentationEquilibreeAsFormState,
+  fetchSiren,
+  ownersForSiren,
+  useFormManager,
+  useUser,
+} from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

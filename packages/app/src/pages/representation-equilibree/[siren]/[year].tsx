@@ -4,9 +4,6 @@ import { RepresentationEquilibreeLayout } from "@components/layouts/Representati
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
-import { useRepresentationEquilibree } from "@services/apiClient";
-import { add, isAfter } from "date-fns";
-import { useRouter } from "next/router";
 import {
   Alert,
   AlertTitle,
@@ -22,8 +19,11 @@ import {
   FormLayoutButtonGroup,
   Grid,
   GridCol,
-} from "packages/app/src/design-system/server";
-import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
+} from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
+import { useRepresentationEquilibree } from "@services/apiClient";
+import { add, isAfter } from "date-fns";
+import { useRouter } from "next/router";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../../_app";

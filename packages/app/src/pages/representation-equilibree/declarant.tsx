@@ -1,8 +1,5 @@
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager, useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   ButtonAsLink,
   FormButton,
@@ -13,7 +10,10 @@ import {
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormManager, useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

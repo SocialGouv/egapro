@@ -1,6 +1,6 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { Container, Grid, GridCol } from "packages/app/src/design-system/server";
+import { Container, Grid, GridCol } from "@design-system";
 
 import { useGdprStore } from "../design-system/base/client/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";

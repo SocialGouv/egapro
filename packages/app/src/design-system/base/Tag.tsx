@@ -7,6 +7,7 @@ export type TagProps = PropsWithChildren<React.HTMLAttributes<HTMLDivElement>> &
   variant?: "error" | "info" | "success" | "warning";
 };
 
+/** @deprecated use react-dsfr */
 export const Tag = ({ children, variant, ...rest }: TagProps) => (
   <div {...rest}>
     <div

@@ -2,11 +2,6 @@ import { formatIsoToFr } from "@common/utils/date";
 import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { FormState } from "@services/apiClient";
-import { useFormManager } from "@services/apiClient";
-import { isAfter, parseISO } from "date-fns";
-import { useRouter } from "next/router";
 import {
   Alert,
   AlertTitle,
@@ -23,7 +18,12 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormTextarea,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { FormState } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
+import { isAfter, parseISO } from "date-fns";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

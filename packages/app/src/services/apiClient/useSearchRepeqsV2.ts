@@ -35,10 +35,11 @@ export type SearchParams = {
   section_naf?: string;
 };
 
-export const useSearchRepeqsV2 = async (
-  _searchParams = {},
-  pageIndex = 0,
-): Promise<{ cleanedParams: URLSearchParams; searchResult: RepeqsType }> => {
+/**
+ * @todo
+ * @deprecated Transform to useCase and direct call db
+ */
+export const fetchSearchRepeqsV2 = async (_searchParams = {}, pageIndex = 0): Promise<RepeqsType> => {
   const cleaned = new URLSearchParams(QueryString.stringify(_searchParams));
   const q = cleaned.get("q");
   const region = cleaned.get("region");
@@ -57,14 +58,14 @@ export const useSearchRepeqsV2 = async (
   const url = new URL(`${config.api_url}/representation-equilibree/search?${searchParams.toString()}`);
   const response = await fetch(url, {
     next: {
-      revalidate: 10,
+      revalidate: 0,
     },
   });
 
   if (response.ok) {
-    return { cleanedParams: searchParams, searchResult: await response.json() };
+    return await response.json();
   }
 
   console.error("Search failed", response.status, response.statusText);
-  return { cleanedParams: searchParams, searchResult: { count: 0, data: [] } };
+  return { count: 0, data: [] };
 };

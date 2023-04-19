@@ -13,6 +13,7 @@ export type ButtonAsLinkProps = ButtonStylesProps &
     isExternal?: boolean;
   };
 
+/** @deprecated use react-dsfr */
 export const ButtonAsLink = forwardRef<HTMLAnchorElement, ButtonAsLinkProps>(
   (
     {

@@ -1,7 +1,5 @@
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { useConfig, useFormManager } from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   ButtonAsLink,
   FormButton,
@@ -10,7 +8,9 @@ import {
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { useConfig, useFormManager } from "@services/apiClient";
+import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 
 import type { NextPageWithLayout } from "../_app";

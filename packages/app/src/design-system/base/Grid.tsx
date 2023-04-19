@@ -1,25 +1,28 @@
-import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { forwardRef, type PropsWithChildren } from "react";
 
 import type { MarginProps } from "../utils/spacing";
-import { Box } from "./Box";
+import { Box, BoxRef } from "./Box";
 
 export type GridProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & { haveGutters?: boolean; justifyCenter?: boolean }
 >;
 
-export const Grid = ({ children, haveGutters, justifyCenter, ...rest }: GridProps) => (
-  <Box
-    className={clsx("fr-grid-row", haveGutters && "fr-grid-row--gutters", justifyCenter && "fr-grid-row--center")}
+export const Grid = forwardRef<HTMLDivElement, GridProps>(({ children, haveGutters, justifyCenter, ...rest }, ref) => (
+  <BoxRef
+    dsfrClassName={["fr-grid-row", haveGutters && "fr-grid-row--gutters", justifyCenter && "fr-grid-row--center"]}
+    ref={ref}
     {...rest}
   >
     {children}
-  </Box>
-);
+  </BoxRef>
+));
+
+Grid.displayName = "Grid";
 
 type ColsNumberType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 export type GridColProps = PropsWithChildren & {
+  base?: ColsNumberType;
   className?: string;
   lg?: ColsNumberType;
   md?: ColsNumberType;
@@ -27,17 +30,18 @@ export type GridColProps = PropsWithChildren & {
   xl?: ColsNumberType;
 };
 
-export const GridCol = ({ sm = 12, md, lg, xl, className, children, ...rest }: GridColProps) => (
-  <div
-    className={clsx(
-      sm && `fr-col-${sm}`,
+export const GridCol = ({ base = 12, sm, md, lg, xl, className, children, ...rest }: GridColProps) => (
+  <Box
+    className={className}
+    dsfrClassName={[
+      base && `fr-col-${base}`,
+      sm && `fr-col-sm-${sm}`,
       md && `fr-col-md-${md}`,
       lg && `fr-col-lg-${lg}`,
       xl && `fr-col-xl-${xl}`,
-      className,
-    )}
+    ]}
     {...rest}
   >
     {children}
-  </div>
+  </Box>
 );

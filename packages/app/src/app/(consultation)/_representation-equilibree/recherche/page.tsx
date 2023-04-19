@@ -1,56 +1,38 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Alert, AlertTitle, Box } from "@design-system";
+import { Box, GridCol } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
-import { type RepeqsType, useSearchRepeqsV2 } from "@services/apiClient/useSearchRepeqsV2";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
 import _ from "lodash";
 import Link from "next/link";
-import { type ReactElement, Suspense } from "react";
+import { Suspense } from "react";
 
 import { DownloadFileZone } from "./DownloadFileZone";
 import { FormSearchSiren, type FormTypeInput } from "./FormSearchSiren";
+import { NextPageLink } from "./NextPageLink";
 
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterRepEq = async ({
-  searchParams: { page = "1", ...searchParams },
+  searchParams: { page = "0", ...searchParams },
 }: NextServerPageProps<"", WithPageFormType>) => {
   let pageNumber = Number(page);
-  pageNumber = _.isFinite(pageNumber) ? Math.max(1, pageNumber) : 1;
-  const { cleanedParams, searchResult } = await useSearchRepeqsV2(searchParams, pageNumber - 1);
-  console.log("ConsulterRepEq page generated");
-
-  // console.log(cleanedParams.toString(), params.toString(), page);
-  // params.append("page", String(pageNumber + 1));
-
-  const pagination = (
-    <Pagination
-      count={Math.ceil(searchResult.count / 10)}
-      defaultPage={pageNumber}
-      getPageLinkProps={num => {
-        const params = new URLSearchParams(cleanedParams);
-        params.delete("offset");
-        params.set("page", String(num));
-
-        console.log("==pagelink", num, params.toString());
-
-        return {
-          href: `?${params.toString()}`,
-        };
-      }}
-    />
-  );
+  pageNumber = _.isFinite(pageNumber) ? Math.max(0, pageNumber) : 0;
 
   return (
-    <Box mb="4w">
-      <h1 className="fr-h2">Rechercher la représentation équilibrée d'une entreprise</h1>
+    <Box dsfrClassName="fr-mb-4w">
+      <h1 className={fr.cx("fr-h2")}>Rechercher la représentation équilibrée d'une entreprise</h1>
       <Suspense>
         <FormSearchSiren searchParams={searchParams} />
       </Suspense>
-      <div>
-        <DisplayRepeqs pagination={pagination} page={pageNumber} repeqs={searchResult} />
-        {pagination}
-      </div>
+      <ClientAnimate>
+        {!_.isEmpty(searchParams) && (
+          // @ts-ignore
+          <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
+        )}
+      </ClientAnimate>
       {/* @ts-ignore */}
       <DownloadFileZone />
       <Link href="/_consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
@@ -58,44 +40,52 @@ const ConsulterRepEq = async ({
   );
 };
 
-const DisplayRepeqs = ({
-  page,
-  repeqs,
-  pagination,
-}: {
-  page: number;
-  pagination: ReactElement;
-  repeqs: RepeqsType;
-}) => {
+const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
+  const repeqs = await fetchSearchRepeqsV2(searchParams);
   const count = repeqs.count;
+
   if (count === 0) {
-    return (
-      <Alert type="info" mt="3w">
-        <AlertTitle as="h2">Aucune entreprise trouvée.</AlertTitle>
-        <p>Veuillez modifier votre recherche.</p>
-      </Alert>
-    );
+    return <Alert severity="info" title="Aucune entreprise trouvée" description="Veuillez modifier votre recherche." />;
   }
 
-  const itemsOnPage = Math.min(count, 10 * page);
-  const substract = Math.min(9, count - 1 - (page - 1) * 10);
-  const results = `${itemsOnPage - substract}-${itemsOnPage}`;
-
+  let totalLength = repeqs.data.length;
+  const pages = await Promise.all(
+    [...Array(page)].map(async (_, i) => {
+      const repeqs = await fetchSearchRepeqsV2(searchParams, i + 1);
+      totalLength += repeqs.data.length;
+      // @ts-ignore
+      return <Page repeqs={repeqs} key={i + 1} />;
+    }),
+  );
   return (
-    <div className="fr-mt-3w">
-      {results} sur {count}
-      {pagination}
-      <div className="fr-grid-row fr-grid-row--gutters">
-        {repeqs.data.map(repeq => (
-          <div key={repeq.entreprise.siren} className="fr-col-12">
-            <TileCompanyRepeqs {...repeq} />
-          </div>
-        ))}
-      </div>
-    </div>
+    <>
+      <Box dsfrClassName="fr-mt-3w">
+        {totalLength} {count > 10 ? `sur ${count}` : ""} résultat{count > 1 ? "s" : ""}
+        <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+          {/* @ts-ignore */}
+          <Page repeqs={repeqs} />
+          {pages}
+        </ClientAnimate>
+      </Box>
+      {totalLength < count && (
+        <Suspense>
+          <NextPageLink />
+        </Suspense>
+      )}
+    </>
   );
 };
 
-// export const dynamic = "force-dynamic";
+const Page = async ({ repeqs }: { repeqs: RepeqsType }) => {
+  return (
+    <Suspense>
+      {repeqs.data.map(repeq => (
+        <GridCol key={repeq.entreprise.siren}>
+          <TileCompanyRepeqs {...repeq} />
+        </GridCol>
+      ))}
+    </Suspense>
+  );
+};
 
 export default ConsulterRepEq;

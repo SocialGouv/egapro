@@ -1,20 +1,18 @@
-import type { theme } from "./theme";
-
-export type Props = keyof (typeof theme)["space"];
+import { type SpacingToken } from "@codegouvfr/react-dsfr";
 
 export type SpacingProps = {
-  mb?: Props;
-  ml?: Props;
-  mr?: Props;
-  mt?: Props;
-  mx?: Props | "auto";
-  my?: Props;
-  pb?: Props;
-  pl?: Props;
-  pr?: Props;
-  pt?: Props;
-  px?: Props;
-  py?: Props;
+  mb?: SpacingToken;
+  ml?: SpacingToken;
+  mr?: SpacingToken;
+  mt?: SpacingToken;
+  mx?: SpacingToken | "auto";
+  my?: SpacingToken;
+  pb?: SpacingToken;
+  pl?: SpacingToken;
+  pr?: SpacingToken;
+  pt?: SpacingToken;
+  px?: SpacingToken;
+  py?: SpacingToken;
 };
 
 export type MarginProps = Omit<SpacingProps, "pb" | "pl" | "pr" | "pt" | "px" | "py">;

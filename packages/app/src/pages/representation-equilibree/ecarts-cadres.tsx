@@ -3,9 +3,6 @@ import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInpu
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager } from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   Alert,
   AlertTitle,
@@ -33,7 +30,10 @@ import {
   GridCol,
   Link,
   LinkGroup,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormManager } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";

@@ -4,9 +4,6 @@ import type { ValidationError } from "@common/shared-domain";
 import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUser } from "@services/apiClient";
-import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import {
   Alert,
   Box,
@@ -21,7 +18,10 @@ import {
   FormTextarea,
   Grid,
   GridCol,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useUser } from "@services/apiClient";
+import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

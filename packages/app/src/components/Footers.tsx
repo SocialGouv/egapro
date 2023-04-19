@@ -13,7 +13,7 @@ import {
   FooterBottomLink,
   FooterContentLink,
   Logo,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
 
 import { useGdprStore } from "../design-system/base/client/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";

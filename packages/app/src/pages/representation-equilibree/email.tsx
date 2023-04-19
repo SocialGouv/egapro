@@ -2,9 +2,6 @@ import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { requestEmailForToken, useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   Alert,
   AlertTitle,
@@ -15,7 +12,10 @@ import {
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { requestEmailForToken, useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 

@@ -1,8 +1,6 @@
 import { YEARS_REPEQ } from "@common/dict";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { StaffOnly } from "@components/StaffOnly";
-import { useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
 import {
   FormButton,
   FormGroup,
@@ -11,7 +9,9 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
   FormSelect,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 import type { NextPageWithLayout } from "../../_app";

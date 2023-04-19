@@ -1,8 +1,8 @@
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
+import { Container, Grid, GridCol, Stepper, StepperDetails, StepperTitle } from "@design-system";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Container, Grid, GridCol, Stepper, StepperDetails, StepperTitle } from "packages/app/src/design-system/server";
 import type { PropsWithChildren } from "react";
 
 import { App } from "./App";

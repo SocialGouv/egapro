@@ -1,8 +1,6 @@
 import { config } from "@common/config";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
-import { useRouter } from "next/router";
-import type { FormButtonProps } from "packages/app/src/design-system/server";
+import type { FormButtonProps } from "@design-system";
 import {
   ButtonAsLink,
   ButtonGroup,
@@ -23,7 +21,9 @@ import {
   ImgJDMA,
   TileSuccess,
   TileSuccessTitle,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";

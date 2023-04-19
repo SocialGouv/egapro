@@ -3,9 +3,9 @@ import { AlertEdition } from "@components/AlertEdition";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
+import { ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
 import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 import { useRouter } from "next/router";
-import { ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "packages/app/src/design-system/server";
 import invariant from "tiny-invariant";
 
 import type { NextPageWithLayout } from "../_app";

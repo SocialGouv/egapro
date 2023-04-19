@@ -6,6 +6,7 @@ export type FormGroupProps = PropsWithChildren<{
   isValid?: boolean;
 }>;
 
+/** @deprecated use react-dsfr */
 export const FormGroup = ({ isValid, isError, children }: FormGroupProps) => (
   <div className={clsx("fr-input-group", isValid && "fr-input-group--valid", isError && "fr-input-group--error")}>
     {children}

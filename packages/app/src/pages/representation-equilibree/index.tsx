@@ -1,5 +1,4 @@
 import { BasicLayoutEntreprise } from "@components/layouts/BasicLayoutEntreprise";
-import Head from "next/head";
 import {
   Box,
   ButtonAsLink,
@@ -15,7 +14,8 @@ import {
   Grid,
   GridCol,
   ImgRepresentationEquilibree,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import Head from "next/head";
 
 import type { NextPageWithLayout } from "../_app";
 

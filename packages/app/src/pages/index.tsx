@@ -1,6 +1,5 @@
 import { config } from "@common/config";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import type { GetStaticProps } from "next";
 import {
   Box,
   ButtonAsLink,
@@ -14,7 +13,8 @@ import {
   Grid,
   GridCol,
   ImgHome,
-} from "packages/app/src/design-system/server";
+} from "@design-system";
+import type { GetStaticProps } from "next";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import type { NextPageWithLayout } from "./_app";
