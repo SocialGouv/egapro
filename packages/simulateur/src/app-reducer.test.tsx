@@ -1,6 +1,6 @@
 import { CSP, TrancheAge, ActionType, AppState } from "./globals"
 
-import appReducer, { dataIndicateurUnCoefGroup } from "./app-reducer"
+import appReducer, { defaultDataIndicateurUnCoefGroup } from "./app-reducer"
 
 import stateDefault from "./__fixtures__/stateDefault"
 import stateComplete from "./__fixtures__/stateComplete"
@@ -254,7 +254,7 @@ describe("updateIndicateurUnCsp", () => {
   const action: ActionType = {
     type: "updateIndicateurUnCsp",
     data: {
-      remunerationAnnuelle: [
+      remunerationsAnnuelles: [
         {
           categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
@@ -395,7 +395,7 @@ describe("updateIndicateurUnCoefAddGroup", () => {
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+      coefficients: [...indicateurUnInitial.coefficients, defaultDataIndicateurUnCoefGroup],
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -406,7 +406,7 @@ describe("updateIndicateurUnCoefAddGroup", () => {
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+      coefficients: [...indicateurUnInitial.coefficients, defaultDataIndicateurUnCoefGroup],
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -427,11 +427,11 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
     const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficients
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: restCoefficients,
+      coefficients: restCoefficients,
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -441,11 +441,11 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
     const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficients
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: restCoefficients,
+      coefficients: restCoefficients,
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -462,9 +462,9 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
-            name: "Commercial",
+            nom: "Commercial",
           },
         ],
       },
@@ -478,26 +478,26 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
 
-      const { coefficient: changedCoefficient } = indicateurUnInitial
-      changedCoefficient[0].name = "Commercial"
+      const { coefficients: changedCoefficient } = indicateurUnInitial
+      changedCoefficient[0].nom = "Commercial"
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
 
-    test("change complete state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
+    test.only("change complete state", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+      const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
 
-      const { coefficient: changedCoefficient } = indicateurUnInitial
-      changedCoefficient[0].name = "Commercial"
+      const { coefficients: changedCoefficients } = indicateurUnInitial
+      changedCoefficients[0].nom = "Commercial"
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficients,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -507,7 +507,7 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
             tranchesAges: [
               {
@@ -545,7 +545,7 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
         action.data.coefficient,
         { arrayMerge: combineMerge },
@@ -553,7 +553,7 @@ describe("updateIndicateurUnCoef", () => {
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -563,7 +563,7 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
         action.data.coefficient,
         { arrayMerge: combineMerge },
@@ -571,7 +571,7 @@ describe("updateIndicateurUnCoef", () => {
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -581,7 +581,7 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
             tranchesAges: [
               {
@@ -619,7 +619,7 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
         action.data.coefficient,
         { arrayMerge: combineMerge },
@@ -627,7 +627,7 @@ describe("updateIndicateurUnCoef", () => {
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -637,7 +637,7 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
         action.data.coefficient,
         { arrayMerge: combineMerge },
@@ -645,7 +645,7 @@ describe("updateIndicateurUnCoef", () => {
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1764,7 +1764,7 @@ describe("validateDeclaration", () => {
     valid: "Valid",
     // @ts-ignore: see comment above
     indicateurUnData: {
-      coefficient: [],
+      coefficients: [],
       motifNonCalculable: "",
       nombreCoefficients: 6,
       noteFinale: 31,

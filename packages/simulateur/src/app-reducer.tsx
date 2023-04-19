@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge"
 
-import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
+import type { ActionType, AppState, CoefficientGroupe, PeriodeDeclaration, RemunerationsPourCSP } from "./globals"
 
 import { CSP, TrancheAge } from "./globals"
 import calculerIndicateurDeux from "./utils/calculsEgaProIndicateurDeux"
@@ -12,7 +12,7 @@ import mapEnum from "./utils/mapEnum"
 import { combineMerge, overwriteMerge } from "./utils/merge"
 import produce from "immer"
 
-const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
@@ -21,18 +21,21 @@ const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   })),
 }))
 
-const dataIndicateurUnCsp = mapEnum(CSP, (categorieSocioPro: CSP) => ({
-  categorieSocioPro,
-  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
-    trancheAge,
-    remunerationAnnuelleBrutFemmes: undefined,
-    remunerationAnnuelleBrutHommes: undefined,
-    ecartTauxRemuneration: undefined,
-  })),
-}))
+const defaultDataIndicateurUnCsp = mapEnum(
+  CSP,
+  (categorieSocioPro: CSP): RemunerationsPourCSP => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
+      trancheAge,
+      remunerationAnnuelleBrutFemmes: undefined,
+      remunerationAnnuelleBrutHommes: undefined,
+      ecartTauxRemuneration: undefined,
+    })),
+  }),
+)
 
-export const dataIndicateurUnCoefGroup = {
-  name: "",
+export const defaultDataIndicateurUnCoefGroup: CoefficientGroupe = {
+  nom: "",
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
@@ -43,14 +46,14 @@ export const dataIndicateurUnCoefGroup = {
   })),
 }
 
-const dataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxAugmentationFemmes: undefined,
   tauxAugmentationHommes: undefined,
   ecartTauxAugmentation: undefined,
 }))
 
-const dataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxPromotionFemmes: undefined,
   tauxPromotionHommes: undefined,
@@ -68,27 +71,27 @@ const defaultState: AppState = {
   },
   effectif: {
     formValidated: "None",
-    nombreSalaries: dataEffectif,
+    nombreSalaries: defaultDataEffectif,
   },
   indicateurUn: {
     formValidated: "None",
     modaliteCalcul: undefined,
     modaliteCalculformValidated: "None",
-    remunerationAnnuelle: dataIndicateurUnCsp,
+    remunerationsAnnuelles: defaultDataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",
     coefficientRemuFormValidated: "None",
-    coefficient: [],
+    coefficients: [],
   },
   indicateurDeux: {
     formValidated: "None",
     presenceAugmentation: true,
-    tauxAugmentation: dataIndicateurDeux,
+    tauxAugmentation: defaultDataIndicateurDeux,
   },
   indicateurTrois: {
     formValidated: "None",
     presencePromotion: true,
-    tauxPromotion: dataIndicateurTrois,
+    tauxPromotion: defaultDataIndicateurTrois,
   },
   indicateurDeuxTrois: {
     formValidated: "None",
@@ -395,46 +398,46 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "updateIndicateurUnCsp": {
-      const { remunerationAnnuelle } = action.data
+      const { remunerationsAnnuelles: remunerationAnnuelle } = action.data
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, remunerationAnnuelle },
+        indicateurUn: { ...state.indicateurUn, remunerationsAnnuelles: remunerationAnnuelle },
       }
     }
     // TODO: devrait avoir un impact sur les champs effectifs et rémunérations
     case "updateIndicateurUnCoefAddGroup": {
-      const newGroupCoef = { ...dataIndicateurUnCoefGroup } // Clone to avoid mutable issues
-      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef]
+      const newGroupCoef = { ...defaultDataIndicateurUnCoefGroup } // Clone to avoid mutable issues
+      const coefficient = [...state.indicateurUn.coefficients, newGroupCoef]
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, coefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: coefficient },
       }
     }
     // TODO: devrait avoir un impact sur les champs effectifs et rémunérations
     case "updateIndicateurUnCoefDeleteGroup": {
       const coefficient = [
-        ...state.indicateurUn.coefficient.slice(0, action.index),
-        ...state.indicateurUn.coefficient.slice(action.index + 1, state.indicateurUn.coefficient.length),
+        ...state.indicateurUn.coefficients.slice(0, action.index),
+        ...state.indicateurUn.coefficients.slice(action.index + 1, state.indicateurUn.coefficients.length),
       ]
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, coefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: coefficient },
       }
     }
     // Utilisé par l'onglet pour les groupes, pour les effectifs et pour les rémunérations...
     case "updateIndicateurUnCoef": {
-      const { coefficient } = action.data
+      const { coefficients } = action.data
 
       const mergedCoefficient = deepmerge(
-        state.indicateurUn.coefficient,
+        state.indicateurUn.coefficients,
         // @ts-ignore
-        coefficient,
+        coefficients,
         { arrayMerge: combineMerge },
       )
       return {
         ...state,
         // @ts-ignore
-        indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: mergedCoefficient },
       }
     }
     // case "validateIndicateurUnCoefGroup": {

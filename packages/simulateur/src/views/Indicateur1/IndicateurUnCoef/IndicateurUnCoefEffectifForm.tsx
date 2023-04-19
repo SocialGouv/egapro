@@ -28,10 +28,14 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
 
   if (!state) return null
 
-  const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
-    state.indicateurUn
+  const {
+    coefficients: coefficient,
+    coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
+    formValidated,
+  } = state.indicateurUn
 
-  const effectifRaw = coefficient.map(({ name, tranchesAges }, index) => ({
+  const effectifRaw = coefficient.map(({ nom: name, tranchesAges }, index) => ({
     id: index,
     name,
     tranchesAges,
@@ -44,10 +48,10 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
       tranchesAges: Array<EffectifPourTrancheAge>
     }>,
   ) => {
-    const coefficient = data.map(({ tranchesAges }) => ({
+    const coefficients = data.map(({ tranchesAges }) => ({
       tranchesAges,
     }))
-    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficients } })
   }
 
   const {

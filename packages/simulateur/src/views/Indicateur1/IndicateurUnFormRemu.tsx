@@ -36,7 +36,7 @@ interface remunerationGroup {
   remunerationAnnuelleBrutHommes?: number
 }
 
-interface IndicateurUnFormRawProps {
+interface IndicateurUnFormRemuProps {
   ecartRemuParTrancheAge: Array<remunerationGroup>
   readOnly: boolean
   updateIndicateurUn: (
@@ -86,7 +86,11 @@ const groupByCSP = (
   return Object.entries(tmpArray).map(([_, tranchesAges]) => tranchesAges)
 }
 
-const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
+/**
+ * Composant pour récupérer les informations de rémunération.
+ * Utilisé par le mode de calcul CSP et par le mode coefficient, pour l'onglet de rémunération.
+ */
+const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
@@ -203,4 +207,4 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   )
 }
 
-export default IndicateurUnFormRaw
+export default IndicateurUnFormRemu

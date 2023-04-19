@@ -41,8 +41,8 @@ export type AppState = {
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
     coefficientRemuFormValidated: FormState
-    coefficient: CoefficientGroupe[]
-    remunerationAnnuelle: RemunerationsPourCSP[]
+    coefficients: CoefficientGroupe[]
+    remunerationsAnnuelles: RemunerationsPourCSP[]
   } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
@@ -329,12 +329,12 @@ export type ActionIndicateurUnTypeData = {
 }
 
 export type ActionIndicateurUnCspData = {
-  remunerationAnnuelle: RemunerationsPourCSP[]
+  remunerationsAnnuelles: RemunerationsPourCSP[]
 }
 
 export type ActionIndicateurUnCoefData = {
-  coefficient:
-    | Array<{ name: string }>
+  coefficients:
+    | Array<{ nom: string }>
     | Array<{
         tranchesAges: EffectifPourTrancheAge[]
       }>
@@ -347,8 +347,8 @@ export type DeclarationIndicateurUnData = {
   nombreCoefficients?: number
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet"
-  remunerationAnnuelle: RemunerationsPourCSP[]
-  coefficient: CoefficientGroupe[]
+  remunerationsAnnuelles: RemunerationsPourCSP[]
+  coefficients: CoefficientGroupe[]
   resultatFinal?: number
   sexeSurRepresente?: SexeType
   noteFinale?: number
@@ -520,7 +520,7 @@ export type CoefficientPourTrancheAge = {
 }
 
 export type CoefficientGroupe = {
-  name: string
+  nom: string
   tranchesAges: CoefficientPourTrancheAge[]
 }
 

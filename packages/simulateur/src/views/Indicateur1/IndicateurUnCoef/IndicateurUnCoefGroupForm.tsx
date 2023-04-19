@@ -20,6 +20,7 @@ import InputField from "./components/CoefGroupInputField"
 import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
 import { isFrozenDeclaration } from "../../../utils/isFrozenDeclaration"
 import { frozenDeclarationMessage } from "../../../components/MessageForFrozenDeclaration"
+import { CoefficientGroupe } from "../../../globals"
 
 interface IndicateurUnCoefGroupFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -33,15 +34,19 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
 
   const frozenDeclaration = isFrozenDeclaration(state)
 
-  const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
-    state.indicateurUn
+  const {
+    coefficients: coefficient,
+    coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
+    formValidated,
+  } = state.indicateurUn
 
   const readOnly = coefficientGroupFormValidated === "Valid"
 
   const initialValues = { groupes: coefficient }
 
-  const saveForm = (formData: any) =>
-    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient: formData.groupes } })
+  const saveForm = ({ groupes }: { groupes: CoefficientGroupe[] }) =>
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficients: groupes } })
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
@@ -81,10 +86,10 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
                         </Text>
                       </Box>
                     ) : (
-                      fields.map((name, index) => (
+                      fields.map((nom, index) => (
                         <InputField
                           key={index}
-                          name={`${name}.name`}
+                          name={`${nom}.nom`}
                           index={index}
                           deleteGroup={confirmGroupToDelete}
                           editGroup={() => dispatch({ type: "unsetIndicateurUnCoefGroup" })}

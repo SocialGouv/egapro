@@ -107,11 +107,12 @@ function buildHelpers(state: AppState) {
     isFormValid(state.indicateurCinq)
 
   const indicateurUnData: DeclarationIndicateurUnData = {
-    nombreCoefficients: state.indicateurUn.modaliteCalcul === "csp" ? undefined : state.indicateurUn.coefficient.length,
+    nombreCoefficients:
+      state.indicateurUn.modaliteCalcul === "csp" ? undefined : state.indicateurUn.coefficients.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
-    remunerationAnnuelle: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
-    coefficient: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
+    remunerationsAnnuelles: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationsAnnuelles),
+    coefficients: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficients),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn,

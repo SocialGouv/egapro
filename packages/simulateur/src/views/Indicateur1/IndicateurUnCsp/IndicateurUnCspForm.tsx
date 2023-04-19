@@ -7,7 +7,7 @@ import { displayNameCSP } from "../../../utils/helpers"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
+import IndicateurUnFormRemu from "../IndicateurUnFormRemu"
 
 interface IndicateurUnCspFormProps {
   ecartRemuParTrancheAge: Array<EffectifEtEcartRemuGroupCsp>
@@ -34,13 +34,13 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({ ecar
       tranchesAges,
     }))
 
-    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationAnnuelle } })
+    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationsAnnuelles: remunerationAnnuelle } })
   }
 
   if (!state) return null
 
   return (
-    <IndicateurUnFormRaw
+    <IndicateurUnFormRemu
       ecartRemuParTrancheAge={ecartRemuParTrancheAgeRaw}
       readOnly={readOnly}
       updateIndicateurUn={updateIndicateurUnRaw}

@@ -57,7 +57,7 @@ export const simulationWithIndex80: { id: string; data: AppState } = {
       formValidated: "Valid",
       modaliteCalcul: "csp",
       modaliteCalculformValidated: "Valid",
-      remunerationAnnuelle: [
+      remunerationsAnnuelles: [
         {
           tranchesAges: [
             {
@@ -93,7 +93,7 @@ export const simulationWithIndex80: { id: string; data: AppState } = {
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
       coefficientRemuFormValidated: "None",
-      coefficient: [],
+      coefficients: [],
       noteFinale: 40,
       nonCalculable: false,
       resultatFinal: 0,

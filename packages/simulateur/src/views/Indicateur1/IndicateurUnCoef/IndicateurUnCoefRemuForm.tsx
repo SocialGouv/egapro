@@ -7,7 +7,7 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
+import IndicateurUnFormRemu from "../IndicateurUnFormRemu"
 import IndicateurUnResult from "../IndicateurUnResult"
 import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
 
@@ -28,8 +28,6 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   if (!state) return null
 
-  // const { coefficientEffectifFormValidated } = state.indicateurUn
-
   const { coefficientEffectifFormValidated, coefficientRemuFormValidated } = state.indicateurUn
 
   const updateIndicateurUn = (
@@ -38,10 +36,10 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
-    const coefficient = data.map(({ tranchesAges }) => ({
+    const coefficients = data.map(({ tranchesAges }) => ({
       tranchesAges,
     }))
-    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficients } })
   }
 
   // le formulaire d'effectif n'est pas validé
@@ -76,14 +74,12 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     )
   }
 
-  // const readOnly = isFormValid(state.indicateurUn)
-
   const readOnly = coefficientRemuFormValidated === "Valid"
 
   return (
     <LayoutFormAndResult
       form={
-        <IndicateurUnFormRaw
+        <IndicateurUnFormRemu
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
           updateIndicateurUn={updateIndicateurUn}

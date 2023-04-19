@@ -1,5 +1,5 @@
 import React from "react"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import "@testing-library/jest-dom/extend-expect"
 import { BrowserRouter } from "react-router-dom"
 import userEvent from "@testing-library/user-event"
@@ -60,7 +60,9 @@ test("Generer token page should be ok with a valid email", async () => {
       <GenererTokenUtilisateurPage />
     </BrowserRouter>,
   )
-  await userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
+  await act(async () => {
+    await userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
+  })
   fireEvent.submit(screen.getByRole("button", { name: /générer/i }))
   await screen.findByText(/Lien d'authentification vers le simulateur/i)
   await screen.findByText(/Lien d'authentification vers la déclaration/i)

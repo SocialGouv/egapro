@@ -66,6 +66,10 @@ export const getTotalNbSalarie = (effectif: Effectif) =>
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 },
   )
 
+/**
+ * Composant pour renseigner les informations d'effectif.
+ * Utilisé par la page Effectif et par la page indicateur 1 avec le mode de calcul coefficient/autre.
+ */
 const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
   effectifRaw,
   readOnly,

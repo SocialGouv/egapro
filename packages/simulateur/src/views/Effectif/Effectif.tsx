@@ -28,7 +28,7 @@ const Effectif: FunctionComponent = () => {
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
     totalNombreSalariesFemme: totalNombreSalariesFemmeCoef,
-  } = totalNombreSalaries(state.indicateurUn.coefficient)
+  } = totalNombreSalaries(state.indicateurUn.coefficients)
 
   return (
     <SimulateurPage
