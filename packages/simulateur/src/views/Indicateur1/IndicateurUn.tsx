@@ -1,6 +1,5 @@
 import React, { FunctionComponent, PropsWithChildren } from "react"
 
-import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
 import FormStack from "../../components/ds/FormStack"
@@ -24,7 +23,6 @@ const IndicateurUn: FunctionComponent = () => {
 
   const { modaliteCalcul, modaliteCalculformValidated } = state.indicateurUn
 
-  // const readOnly = isFormValid(state.indicateurUn)
   const readOnly = state.indicateurUn.modaliteCalculformValidated === "Valid"
 
   // le formulaire d'effectif n'est pas validé
@@ -40,25 +38,18 @@ const IndicateurUn: FunctionComponent = () => {
     )
   }
 
-  const { effectifsIndicateurCalculable } = calculerIndicateurUn(state)
-
   return (
     <PageIndicateurUn>
       <IndicateurUnModaliteCalculForm readOnly={readOnly} />
-      {modaliteCalculformValidated === "Valid" && (
-        <IndicateurUnModeCalculValide
-          modaliteCalcul={modaliteCalcul}
-          effectifsIndicateurCalculable={effectifsIndicateurCalculable}
-        />
-      )}
+      {modaliteCalculformValidated === "Valid" && <IndicateurUnModeCalculValide modaliteCalcul={modaliteCalcul} />}
     </PageIndicateurUn>
   )
 }
 
-const IndicateurUnModeCalculValide = ({ modaliteCalcul, effectifsIndicateurCalculable }: any) => {
+const IndicateurUnModeCalculValide = ({ modaliteCalcul }: any) => {
   if (!modaliteCalcul) return null
 
-  if (modaliteCalcul === "csp") return <IndicateurUnCsp effectifsIndicateurCalculable={effectifsIndicateurCalculable} />
+  if (modaliteCalcul === "csp") return <IndicateurUnCsp />
 
   return <IndicateurUnCoef />
 }

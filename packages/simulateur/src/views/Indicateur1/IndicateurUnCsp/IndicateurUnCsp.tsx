@@ -8,11 +8,7 @@ import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnResult from "../IndicateurUnResult"
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
 
-type Props = {
-  effectifsIndicateurCalculable: boolean
-}
-
-const IndicateurUnCsp: FunctionComponent<Props> = ({ effectifsIndicateurCalculable }) => {
+const IndicateurUnCsp: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
 
   if (!state) return null
@@ -24,6 +20,7 @@ const IndicateurUnCsp: FunctionComponent<Props> = ({ effectifsIndicateurCalculab
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn,
+    effectifsIndicateurCalculable,
   } = calculerIndicateurUn(state)
 
   if (!effectifsIndicateurCalculable)

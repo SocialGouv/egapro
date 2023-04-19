@@ -41,8 +41,8 @@ export type AppState = {
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
     coefficientRemuFormValidated: FormState
-    coefficients: CoefficientGroupe[]
-    remunerationsAnnuelles: RemunerationsPourCSP[]
+    coefficients: CoefficientGroupe[] // Uniquement pour modalité coefficient ou autre.
+    remunerationsAnnuelles: RemunerationsPourCSP[] // Uniquement pour modalité CSP.
   } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
