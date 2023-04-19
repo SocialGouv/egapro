@@ -75,7 +75,7 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    modaliteCalcul: undefined,
+    modaliteCalcul: "csp",
     modaliteCalculformValidated: "None",
     remunerationsAnnuelles: defaultDataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
@@ -558,6 +558,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       return produce(state, (draft) => {
         draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
       })
     }
     case "setValidIndicateurUnCoefRemuneration": {

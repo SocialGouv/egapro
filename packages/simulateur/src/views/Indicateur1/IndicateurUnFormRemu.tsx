@@ -27,9 +27,9 @@ export const aboveZero: ValidatorFunction = (value) =>
 
 const validator = composeValidators(required, mustBeNumber, aboveZero)
 
-interface remunerationGroup {
+interface RemunerationGroup {
   id: any
-  name: string
+  nom: string
   trancheAge: TrancheAge
   validiteGroupe: boolean
   remunerationAnnuelleBrutFemmes?: number
@@ -37,7 +37,7 @@ interface remunerationGroup {
 }
 
 interface IndicateurUnFormRemuProps {
-  ecartRemuParTrancheAge: Array<remunerationGroup>
+  ecartRemuParTrancheAge: Array<RemunerationGroup>
   readOnly: boolean
   updateIndicateurUn: (
     data: Array<{
@@ -50,13 +50,13 @@ interface IndicateurUnFormRemuProps {
 }
 
 const groupByCSP = (
-  ecartRemuParTrancheAge: Array<remunerationGroup>,
+  ecartRemuParTrancheAge: Array<RemunerationGroup>,
 ): Array<{
   id: any
-  name: string
-  tranchesAges: Array<remunerationGroup>
+  nom: string
+  tranchesAges: Array<RemunerationGroup>
 }> => {
-  const tmpArray = ecartRemuParTrancheAge.reduce((acc, { id, name, ...otherAttr }) => {
+  const tmpArray = ecartRemuParTrancheAge.reduce((acc, { id, nom, ...otherAttr }) => {
     // @ts-ignore
     const el = acc[id]
 
@@ -73,7 +73,7 @@ const groupByCSP = (
         ...acc,
         [id]: {
           id,
-          name,
+          nom,
           tranchesAges: [otherAttr],
         },
       }
@@ -98,7 +98,7 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
   nextLink,
 }) => {
   const initialValues = {
-    remunerationAnnuelle: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+    remunerationsAnnuelles: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(
         ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
@@ -113,7 +113,7 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
   }
 
   const saveForm = (formData: any) => {
-    const remunerationAnnuelle = formData.remunerationAnnuelle.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+    const remunerationsAnnuelles = formData.remunerationsAnnuelles.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(
         ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, trancheAge }: any) => {
@@ -125,7 +125,7 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
         },
       ),
     }))
-    updateIndicateurUn(remunerationAnnuelle)
+    updateIndicateurUn(remunerationsAnnuelles)
   }
 
   const onSubmit = (formData: any) => {
@@ -149,15 +149,15 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés." />
             )}
-            {initialValues.remunerationAnnuelle.map(
+            {initialValues.remunerationsAnnuelles.map(
               (
                 {
                   id,
-                  name,
+                  nom,
                   tranchesAges,
                 }: {
                   id: any
-                  name: string
+                  nom: string
                   tranchesAges: Array<{
                     trancheAge: TrancheAge
                     validiteGroupe: boolean
@@ -166,7 +166,7 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
                 indexGroupe,
               ) => {
                 return (
-                  <BlocForm key={id} title={name} label="rémunération moyenne">
+                  <BlocForm key={id} title={nom} label="rémunération moyenne">
                     {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
                       return (
                         <FieldInputsMenWomen
@@ -181,8 +181,8 @@ const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
                           calculable={validiteGroupe}
                           calculableNumber={3}
                           mask="number"
-                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
-                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          femmeFieldName={`remunerationsAnnuelles.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                          hommeFieldName={`remunerationsAnnuelles.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
                           validatorFemmes={validator}
                           validatorHommes={validator}
                         />

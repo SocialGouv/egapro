@@ -19,7 +19,7 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({ ecar
 
   const ecartRemuParTrancheAgeRaw = ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
     id: categorieSocioPro,
-    name: displayNameCSP(categorieSocioPro),
+    nom: displayNameCSP(categorieSocioPro),
     ...otherAttr,
   }))
 

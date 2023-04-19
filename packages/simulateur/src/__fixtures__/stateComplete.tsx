@@ -256,7 +256,7 @@ const actionUpdateIndicateurUnCoefName: ActionType = {
   data: {
     coefficients: [
       {
-        name: "Business Developers",
+        nom: "Business Developers",
       },
     ],
   },

@@ -1,4 +1,4 @@
-import { CSP, TrancheAge, ActionType, AppState } from "./globals"
+import { CSP, TrancheAge, ActionType, AppState, CoefficientGroupe } from "./globals"
 
 import appReducer, { defaultDataIndicateurUnCoefGroup } from "./app-reducer"
 
@@ -475,30 +475,26 @@ describe("updateIndicateurUnCoef", () => {
     })
 
     test("change default state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
-
-      const { coefficients: changedCoefficient } = indicateurUnInitial
-      changedCoefficient[0].nom = "Commercial"
-
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficients: changedCoefficient,
+      // Only name is supposed to change, so we just patch the initial indicateurUn.
+      const patchedIndicateurUnInitial: AppState["indicateurUn"] = produce(indicateurUnInitial, (draft) => {
+        draft.coefficients[0].nom = "Commercial"
       })
+      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
+
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
       expect(rest).toStrictEqual(restInitial)
     })
 
-    test.only("change complete state", () => {
+    test("change complete state", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+      // Only name is supposed to change, so we just patch the initial indicateurUn.
+      const patchedIndicateurUnInitial: AppState["indicateurUn"] = produce(indicateurUnInitial, (draft) => {
+        draft.coefficients[0].nom = "Commercial"
+      })
       const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
 
-      const { coefficients: changedCoefficients } = indicateurUnInitial
-      changedCoefficients[0].nom = "Commercial"
-
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficients: changedCoefficients,
-      })
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
       expect(rest).toStrictEqual(restInitial)
     })
   })
@@ -541,14 +537,15 @@ describe("updateIndicateurUnCoef", () => {
     })
 
     test("change default state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
+      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
 
       const changedCoefficient = deepmerge(
         indicateurUnInitial.coefficients,
-        // @ts-ignore
-        action.data.coefficient,
-        { arrayMerge: combineMerge },
+        action.data.coefficients as CoefficientGroupe[], // An element in action.data.coefficients is a subset of CoefficientGroupe.
+        {
+          arrayMerge: combineMerge,
+        },
       )
 
       expect(indicateurUn).toStrictEqual({
@@ -565,7 +562,7 @@ describe("updateIndicateurUnCoef", () => {
       const changedCoefficient = deepmerge(
         indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
@@ -621,7 +618,7 @@ describe("updateIndicateurUnCoef", () => {
       const changedCoefficient = deepmerge(
         indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
@@ -639,7 +636,7 @@ describe("updateIndicateurUnCoef", () => {
       const changedCoefficient = deepmerge(
         indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
@@ -1234,8 +1231,7 @@ describe("validateIndicateurUnCoefGroup", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientGroupFormValidated: "None",
-        coefficientEffectifFormValidated: "Invalid",
-        formValidated: "Invalid",
+        formValidated: "None",
       })
 
       expect(declaration).toStrictEqual({
@@ -1319,7 +1315,7 @@ describe("validateIndicateurUnCoefEffectif", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientEffectifFormValidated: "None",
-        formValidated: "Invalid",
+        formValidated: "None",
       })
 
       expect(declaration).toStrictEqual({
