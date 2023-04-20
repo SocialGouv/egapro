@@ -277,56 +277,44 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
             => sinon (donc Invalid ou None), laisser tel quel
         */
 
-      // We need to copy the objects to avoid mutating read only property afterwards.
-      let newIndicateurUn = { ...state.indicateurUn }
-      let newIndicateurDeux = { ...state.indicateurDeux }
-      let newIndicateurTrois = { ...state.indicateurTrois }
-      let newIndicateurDeuxTrois = { ...state.indicateurDeuxTrois }
+      return produce(state, (draft) => {
+        draft.effectif.formValidated = "Valid"
 
-      if (newIndicateurUn.modaliteCalcul === "csp") {
-        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
-          newIndicateurUn = { ...defaultState.indicateurUn }
-          newIndicateurUn.formValidated = "Valid"
-          newIndicateurUn.modaliteCalculformValidated = "Valid"
+        if (state.indicateurUn.modaliteCalcul === "csp") {
+          if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+            draft.indicateurUn = { ...defaultState.indicateurUn }
+            draft.indicateurUn.formValidated = "Valid"
+            draft.indicateurUn.modaliteCalculformValidated = "Valid"
+          } else {
+            draft.indicateurUn.formValidated = "None"
+          }
         } else {
-          newIndicateurUn.formValidated = "None"
-        }
-      } else {
-        // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
-        newIndicateurUn.formValidated = "None"
-        newIndicateurUn.coefficientEffectifFormValidated = "None"
-      } // else we let the state unchanged
+          // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
+          draft.indicateurUn.formValidated = "None"
+          draft.indicateurUn.coefficientEffectifFormValidated = "None"
+        } // else we let the state unchanged
 
-      if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
-        newIndicateurDeux = { ...defaultState.indicateurDeux }
-        newIndicateurDeux.formValidated = "Valid"
-      } else if (newIndicateurDeux.formValidated === "Valid") {
-        newIndicateurDeux.formValidated = "Invalid"
-      } // else we let the state unchanged
+        if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
+          draft.indicateurDeux = { ...defaultState.indicateurDeux }
+          draft.indicateurDeux.formValidated = "Valid"
+        } else if (draft.indicateurDeux.formValidated === "Valid") {
+          draft.indicateurDeux.formValidated = "Invalid"
+        } // else we let the state unchanged
 
-      if (!calculerIndicateurTrois(state).effectifsIndicateurCalculable) {
-        newIndicateurTrois = { ...defaultState.indicateurTrois }
-        newIndicateurTrois.formValidated = "Valid"
-      } else if (newIndicateurTrois.formValidated === "Valid") {
-        newIndicateurTrois.formValidated = "Invalid"
-      } // else we let the state unchanged
+        if (!calculerIndicateurTrois(state).effectifsIndicateurCalculable) {
+          draft.indicateurTrois = { ...defaultState.indicateurTrois }
+          draft.indicateurTrois.formValidated = "Valid"
+        } else if (draft.indicateurTrois.formValidated === "Valid") {
+          draft.indicateurTrois.formValidated = "Invalid"
+        } // else we let the state unchanged
 
-      if (!calculerIndicateurDeuxTrois(state).effectifsIndicateurCalculable) {
-        newIndicateurDeuxTrois = { ...defaultState.indicateurDeuxTrois }
-        newIndicateurDeuxTrois.formValidated = "Valid"
-      } else if (newIndicateurDeuxTrois.formValidated === "Valid") {
-        newIndicateurDeuxTrois.formValidated = "Invalid"
-      } // else we let the state unchanged
-
-      return {
-        ...state,
-        effectif: { ...state.effectif, formValidated: "Valid" },
-        // Si les nouveaux effectifs, rendent non calculables les indicateurs 2, 3 ou 2&3, alors on les met à Valid.
-        indicateurUn: newIndicateurUn,
-        indicateurDeux: newIndicateurDeux,
-        indicateurTrois: newIndicateurTrois,
-        indicateurDeuxTrois: newIndicateurDeuxTrois,
-      }
+        if (!calculerIndicateurDeuxTrois(state).effectifsIndicateurCalculable) {
+          draft.indicateurDeuxTrois = { ...defaultState.indicateurDeuxTrois }
+          draft.indicateurDeuxTrois.formValidated = "Valid"
+        } else if (draft.indicateurDeuxTrois.formValidated === "Valid") {
+          draft.indicateurDeuxTrois.formValidated = "Invalid"
+        } // else we let the state unchanged
+      })
     }
     case "setInvalidEffectif": {
       return {
