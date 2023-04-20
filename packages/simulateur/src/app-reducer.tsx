@@ -277,14 +277,15 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
             => sinon (donc Invalid ou None), laisser tel quel
         */
 
-      let newIndicateurUn = { ...state.indicateurUn } // We need to copy the object to avoid mutating read only property afterwards.
+      // We need to copy the objects to avoid mutating read only property afterwards.
+      let newIndicateurUn = { ...state.indicateurUn }
       let newIndicateurDeux = { ...state.indicateurDeux }
       let newIndicateurTrois = { ...state.indicateurTrois }
       let newIndicateurDeuxTrois = { ...state.indicateurDeuxTrois }
 
       if (newIndicateurUn.modaliteCalcul === "csp") {
-        newIndicateurUn = { ...defaultState.indicateurUn }
         if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+          newIndicateurUn = { ...defaultState.indicateurUn }
           newIndicateurUn.formValidated = "Valid"
           newIndicateurUn.modaliteCalculformValidated = "Valid"
         } else {

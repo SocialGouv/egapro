@@ -1081,7 +1081,8 @@ describe("validateEffectif", () => {
 
       const expectedState = produce(stateDefault as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
-        draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.formValidated = "Valid"
+        draft.indicateurUn.modaliteCalculformValidated = "Valid"
         draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurDeux.formValidated = "Valid"
         draft.indicateurTrois.formValidated = "Valid"
