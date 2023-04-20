@@ -8,6 +8,7 @@ import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate"
 import deepmerge from "deepmerge"
 import { combineMerge } from "./utils/merge"
 import produce from "immer"
+import { calculerValiditeGroupe3 } from "./utils/calculsEgaProIndicateurUn"
 
 const stateUndefined = undefined
 
@@ -1285,16 +1286,22 @@ describe("validateIndicateurUnCoefEffectif", () => {
         ...restInitial
       } = stateComplete as AppState
 
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficientEffectifFormValidated: "Valid",
-        formValidated: indicateurUnInitial.formValidated,
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficientEffectifFormValidated = "Valid"
+
+        draft.coefficients.forEach((categorie) => {
+          categorie.tranchesAges.forEach((trancheAge) => {
+            if (!calculerValiditeGroupe3(trancheAge.nombreSalariesFemmes || 0, trancheAge.nombreSalariesHommes || 0)) {
+              trancheAge.remunerationAnnuelleBrutFemmes = 0
+              trancheAge.remunerationAnnuelleBrutHommes = 0
+            }
+          })
+        })
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
+
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
