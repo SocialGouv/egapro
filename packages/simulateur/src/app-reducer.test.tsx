@@ -1264,16 +1264,15 @@ describe("validateIndicateurUnCoefEffectif", () => {
         ...restInitial
       } = stateDefault as AppState
 
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficientEffectifFormValidated: "Valid",
-        formValidated: indicateurUnInitial.formValidated,
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficientEffectifFormValidated = "Valid"
+        draft.coefficientRemuFormValidated = "Valid"
+        draft.formValidated = "Valid"
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
+
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
