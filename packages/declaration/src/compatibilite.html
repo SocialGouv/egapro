@@ -40,8 +40,8 @@ layout:
 </style>
 
 {% if site.sentry-dsn %}
-<script src="{{ site.baseurl }}/assets/lib/sentry.min.js"
-    integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/sentry.min.js"
+    integrity="sha384-qyMzw2aULjHXFNeWyA/ualD0TNGRLIT3TS6ZgNJ3zo119oLx4Ao9+5tsDI+JqHxN%"
     crossorigin="anonymous"></script>
 <script nonce="{{ site.GITHUB_SHA }}">
     if (typeof Sentry !== "undefined") {
@@ -131,13 +131,13 @@ layout:
 <div id="toast">
     <div class=content>
         <span class=message></span>
-        <a href="#" onclick="notify.close(event)" class=close>x</a>
+        <a href="#" nonce="{{ site.GITHUB_SHA }}" onclick="notify.close(event)" class=close>x</a>
     </div>
 </div>
 
 <!-- Matomo -->
-<script src="{{ site.baseurl }}/assets/js/matomo.js"></script>
-<script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/js/matomo.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
 </html>

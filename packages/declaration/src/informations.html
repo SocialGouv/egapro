@@ -28,14 +28,15 @@ title: "Informations calcul et période de référence"
 
 <!-- Only visible for période_suffisante at true -->
 
-<div id="details" style="display: none">
+<div id="details" nonce="{{ site.GITHUB_SHA }}" style="display: none">
 
     <fieldset id="fieldset-fin-période-référence">
         <div class=row>
             {% include input.html type="date" label="Date de fin de la période de référence<br /> choisie pour le calcul
             des indicateurs" name="déclaration.fin_période_référence" required="required"
             placeholder="aaaa-mm-jj" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" oninput="checkDate(event)" %}
-            <a class="button" href="#" onclick="updatePeriode(event)">sélectionner la fin de l'année civile</a>
+            <a class="button" href="#" nonce="{{ site.GITHUB_SHA }}" onclick="updatePeriode(event)">sélectionner la fin
+                de l'année civile</a>
         </div>
     </fieldset>
 

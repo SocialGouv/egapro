@@ -7,11 +7,11 @@
 <!-- {{ site.JEKYLL_ENV }} -->
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
 
-<script async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" async="false" src="{{site.baseurl}}/assets/js/test-compatibilite.js"></script>
 
 {% if site.sentry-dsn %}
-<script src="{{ site.baseurl }}/assets/lib/sentry.min.js"
-    integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/sentry.min.js"
+    integrity="sha384-qyMzw2aULjHXFNeWyA/ualD0TNGRLIT3TS6ZgNJ3zo119oLx4Ao9+5tsDI+JqHxN%"
     crossorigin="anonymous"></script>
 <script nonce="{{ site.GITHUB_SHA }}">
     if (typeof Sentry !== "undefined") {
@@ -42,7 +42,7 @@
 {% endif %}
 
 
-<script src="{{ site.baseurl }}/assets/js/utils.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/js/utils.js"></script>
 
 <header role="banner">
     <div class="header__container">
@@ -133,19 +133,19 @@
 </footer>
 
 <div id="toast">
-    <div class=content>
-        <span class=message></span>
-        <a href="#" onclick="notify.close(event)" class=close>x</a>
+    <div class="content">
+        <span class="message"></span>
+        <a href="#" nonce="{{ site.GITHUB_SHA }}" onclick="notify.close(event)" class=close>x</a>
     </div>
 </div>
 
-<script src="{{ site.baseurl }}/assets/lib/immer.umd.production.min.js"></script>
-<script src="{{ site.baseurl }}/assets/lib/zustand/vanilla.js"></script>
-<script src="{{ site.baseurl }}/assets/lib/zustand/middleware.js"></script>
-<script src="{{ site.baseurl }}/assets/lib/zustand/middleware/immer.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/immer.umd.production.min.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/zustand/vanilla.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/zustand/middleware.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/lib/zustand/middleware/immer.js"></script>
 <!-- Matomo -->
-<script src="{{ site.baseurl }}/assets/js/matomo.js"></script>
-<script async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/js/matomo.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" async src="https://matomo.fabrique.social.gouv.fr/matomo.js"></script>
 <!-- End Matomo Code -->
 
 <script nonce="{{ site.GITHUB_SHA }}">
