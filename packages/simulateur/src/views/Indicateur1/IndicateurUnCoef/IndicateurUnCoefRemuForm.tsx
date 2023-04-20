@@ -47,7 +47,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     return (
       <InfoBlock
         type="warning"
-        title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+        title="Vous devez valider les effectifs physiques avant d’accéder à cette étape"
         text={<ActionLink onClick={() => navigateTo("Effectif")}>Renseigner les effectifs</ActionLink>}
       />
     )
