@@ -478,7 +478,7 @@ describe("updateIndicateurUnCoef", () => {
     test("change default state", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
       // Only name is supposed to change, so we just patch the initial indicateurUn.
-      const patchedIndicateurUnInitial: AppState["indicateurUn"] = produce(indicateurUnInitial, (draft) => {
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
         draft.coefficients[0].nom = "Commercial"
       })
       const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
@@ -490,7 +490,7 @@ describe("updateIndicateurUnCoef", () => {
     test("change complete state", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
       // Only name is supposed to change, so we just patch the initial indicateurUn.
-      const patchedIndicateurUnInitial: AppState["indicateurUn"] = produce(indicateurUnInitial, (draft) => {
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
         draft.coefficients[0].nom = "Commercial"
       })
       const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
@@ -1040,10 +1040,8 @@ describe("validateInformationsSimulation", () => {
       ...informationsInitial,
       formValidated: "Valid",
     })
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
+
     expect(rest).toStrictEqual(restInitial)
   })
 
@@ -1059,10 +1057,8 @@ describe("validateInformationsSimulation", () => {
       ...informationsInitial,
       formValidated: "Valid",
     })
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
+
     expect(rest).toStrictEqual(restInitial)
   })
 })
@@ -1181,14 +1177,9 @@ describe("validateIndicateurUnCoefGroup", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientGroupFormValidated: "Valid",
-        coefficientEffectifFormValidated: indicateurUnInitial.coefficientEffectifFormValidated,
-        formValidated: indicateurUnInitial.formValidated,
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1208,10 +1199,7 @@ describe("validateIndicateurUnCoefGroup", () => {
         formValidated: indicateurUnInitial.formValidated,
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1358,10 +1346,7 @@ describe("validateIndicateurUn", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1379,10 +1364,7 @@ describe("validateIndicateurUn", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1411,10 +1393,7 @@ describe("validateIndicateurDeux", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1432,10 +1411,7 @@ describe("validateIndicateurDeux", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1464,10 +1440,7 @@ describe("validateIndicateurTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1485,10 +1458,7 @@ describe("validateIndicateurTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1517,10 +1487,7 @@ describe("validateIndicateurDeuxTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1538,10 +1505,7 @@ describe("validateIndicateurDeuxTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1570,10 +1534,7 @@ describe("validateIndicateurQuatre", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1591,10 +1552,7 @@ describe("validateIndicateurQuatre", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1623,10 +1581,7 @@ describe("validateIndicateurCinq", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1644,10 +1599,7 @@ describe("validateIndicateurCinq", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1676,10 +1628,7 @@ describe("validateInformationsEntreprise", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1697,10 +1646,7 @@ describe("validateInformationsEntreprise", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1729,10 +1675,7 @@ describe("validateInformationsDeclarant", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1750,10 +1693,7 @@ describe("validateInformationsDeclarant", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
