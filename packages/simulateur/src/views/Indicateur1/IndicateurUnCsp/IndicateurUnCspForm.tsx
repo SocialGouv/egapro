@@ -29,12 +29,12 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({ ecar
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
-    const remunerationAnnuelle = data.map(({ id, tranchesAges }) => ({
+    const remunerationsAnnuelles = data.map(({ id, tranchesAges }) => ({
       categorieSocioPro: id,
       tranchesAges,
     }))
 
-    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationsAnnuelles: remunerationAnnuelle } })
+    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationsAnnuelles } })
   }
 
   if (!state) return null

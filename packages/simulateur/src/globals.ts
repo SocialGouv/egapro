@@ -37,7 +37,6 @@ export type AppState = {
     formValidated: FormState // Valeur calculé et non plus modifiable via l'UI. Valid si cspFormValidated est Valid pour modalideCalcul === "csp" ou si coefficientRemuFormValidated est Valid pour modalideCalcul === "coef" ou "autre" ou bien si non calculable à partir des effectifs de coefficient.
     modaliteCalcul?: "csp" | "coef" | "autre"
     modaliteCalculformValidated: FormState // => pour la première partie, permettant de choisir un mode de calcul
-    // cspFormValidated: FormState
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
     coefficientRemuFormValidated: FormState
@@ -138,10 +137,6 @@ export type ActionType =
       type: "updateEffectif"
       data: ActionEffectifData
     }
-  //   | {
-  //       type: "validateEffectif"
-  //       valid: FormState
-  //     }
   | {
       type: "unsetEffectif"
     }
@@ -176,7 +171,6 @@ export type ActionType =
       type: "updateIndicateurUnCoef"
       data: ActionIndicateurUnCoefData
     }
-  // ------------------------------------
   | {
       type: "setValidIndicateurUnCSP"
     }
@@ -213,22 +207,6 @@ export type ActionType =
   | {
       type: "unsetIndicateurUnCoefRemuneration"
     }
-  //   | {
-  //       type: "validateIndicateurUnCoefGroup"
-  //       valid: FormState
-  //     }
-  //   | {
-  //       type: "validateIndicateurUnCoefEffectif"
-  //       valid: FormState
-  //     }
-  //   | {
-  //       type: "validateIndicateurUnRemuGroup"
-  //       valid: FormState
-  //     }
-  //   | {
-  //       type: "validateIndicateurUn"
-  //       valid: FormState
-  //     }
   | {
       type: "updateIndicateurDeux"
       data: ActionIndicateurDeuxData
@@ -531,37 +509,6 @@ export type CoefficientGroupe2 = {
   effectifs: [FemmeHomme, FemmeHomme, FemmeHomme, FemmeHomme]
   remunerations: [FemmeHomme, FemmeHomme, FemmeHomme, FemmeHomme]
 }
-
-// const data = [
-//   { name: "Toto", effectifs: null, remunerations: null },
-//   { name: "Supertramp", effectifs: null, remunerations: null },
-// ]
-
-// const data = [
-//   {
-//     name: "Toto",
-//     effectifs: [
-//       [10, 5],
-//       [7, 5],
-//       [0, 0],
-//       [0, 5],
-//     ],
-//     remunerations: [
-//       [2000, 3000],
-//       [2500, 2400],
-//       [0, 0],
-//       [0, 5000],
-//     ],
-//   },
-//   { name: "Supertramp", effectifs: null, remunerations: null },
-// ]
-
-// const dataByCSP = [
-//   { name: "ouvriers", effectifs: null, remunerations: null },
-//   { name: "employes", effectifs: null, remunerations: null },
-//   { name: "tam", effectifs: null, remunerations: null },
-//   { name: "cadres", effectifs: null, remunerations: null },
-// ]
 
 export type TauxAugmentationPourCSP = {
   categorieSocioPro: CSP
