@@ -42,19 +42,6 @@ const IndicateurDeuxTrois: FunctionComponent = () => {
 
   const readOnly = isFormValid(state.indicateurDeuxTrois)
 
-  // le formulaire d'informations n'est pas validé
-  if (!isFormValid(state.informations)) {
-    return (
-      <PageIndicateurDeuxTrois>
-        <InfoBlock
-          type="warning"
-          title="Vous devez renseignez vos informations d'entreprise avant d'avoir accès à cet indicateur"
-          text={<TextSimulatorLink to="/informations" label="Renseigner les informations" />}
-        />
-      </PageIndicateurDeuxTrois>
-    )
-  }
-
   // le formulaire d'effectif n'est pas validé
   if (!isFormValid(state.effectif)) {
     return (

@@ -372,7 +372,6 @@ const Declaration = ({ code }: DeclarationProps) => {
   // tous les formulaires ne sont pas encore validés
   if (
     !allIndicateursCompliant ||
-    !isFormValid(state.informations) ||
     !isFormValid(state.effectif) ||
     !isFormValid(state.informationsEntreprise) ||
     !isFormValid(state.informationsDeclarant)
@@ -387,11 +386,6 @@ const Declaration = ({ code }: DeclarationProps) => {
           Les pages suivantes ne sont pas validées
         </Heading>
         <UnorderedList mt={2}>
-          {!isFormValid(state.informations) && (
-            <ListItem>
-              <TextSimulatorLink to="/informations" label="Informations calcul et période de référence" />
-            </ListItem>
-          )}
           {!isFormValid(state.effectif) && (
             <ListItem>
               <TextSimulatorLink to="/effectifs" label="Effectifs pris en compte" />

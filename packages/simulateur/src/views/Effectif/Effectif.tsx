@@ -124,8 +124,7 @@ const Effectif: FunctionComponent = () => {
               />
             )}
 
-          {isFormValid(state.informations) &&
-            isFormValid(state.effectif) &&
+          {isFormValid(state.effectif) &&
             totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
             state.informations.trancheEffectifs === "50 à 250" && (
               <InfoBlock
