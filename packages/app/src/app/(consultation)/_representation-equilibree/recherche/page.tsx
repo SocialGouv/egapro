@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, GridCol } from "@design-system";
+import { Box, GridCol, Heading } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
@@ -10,7 +11,7 @@ import _ from "lodash";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { DownloadFileZone } from "./DownloadFileZone";
+import { DetailedDownload } from "../../../../design-system/base/DetailedDownload";
 import { FormSearchSiren, type FormTypeInput } from "./FormSearchSiren";
 import { NextPageLink } from "./NextPageLink";
 
@@ -23,7 +24,7 @@ const ConsulterRepEq = async ({
 
   return (
     <Box dsfrClassName="fr-mb-4w">
-      <h1 className={fr.cx("fr-h2")}>Rechercher la représentation équilibrée d'une entreprise</h1>
+      <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
       <Suspense>
         <FormSearchSiren searchParams={searchParams} />
       </Suspense>
@@ -34,7 +35,10 @@ const ConsulterRepEq = async ({
         )}
       </ClientAnimate>
       {/* @ts-ignore */}
-      <DownloadFileZone />
+      <DetailedDownload
+        href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
+        label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
+      />
       <Link href="/_consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
     </Box>
   );

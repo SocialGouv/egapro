@@ -28,6 +28,7 @@ export * from "./base/TableAdmin";
 export * from "./base/Tag";
 export * from "./base/TileCompany";
 export * from "./base/TileSuccess";
+export * from "./base/Typography";
 export * from "./img/ImgHome";
 export * from "./img/ImgJDMA";
 export * from "./img/ImgRepresentationEquilibree";

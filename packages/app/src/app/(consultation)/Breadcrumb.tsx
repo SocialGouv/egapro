@@ -41,11 +41,11 @@ export const Breadcrumb = () => {
     pathSegments.reduce(
       ({ currentSegmentMap, segments }, path, currentIndex) => {
         return {
-          currentSegmentMap: currentSegmentMap[path].segments ?? {},
+          currentSegmentMap: currentSegmentMap[path]?.segments ?? {},
           segments: [
             ...segments,
             {
-              label: currentSegmentMap[path].label,
+              label: currentSegmentMap[path]?.label ?? "Page Actuelle",
               linkProps: {
                 href: `/${pathSegments.slice(0, currentIndex + 1).join("/")}`,
               },
