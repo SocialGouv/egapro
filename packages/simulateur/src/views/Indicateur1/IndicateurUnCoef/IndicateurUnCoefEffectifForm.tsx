@@ -67,6 +67,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
   if (coefficientGroupFormValidated !== "Valid") {
     return (
       <InfoBlock
+        type="warning"
         title="Vous devez valider les groupes avant d'accéder à cette étape"
         text={<ActionLink onClick={() => navigateTo("Groupe")}>Renseigner les groupes</ActionLink>}
       />
