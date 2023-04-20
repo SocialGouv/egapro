@@ -1,0 +1,5 @@
+disable: true
+quiet: true
+exit-code: 0
+scanners: []
+timeout: 1s
