@@ -36,7 +36,7 @@ export const RepresentationEquilibreeStartLayout = ({
       </Head>
 
       <Container py="6w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             {children}
           </GridCol>

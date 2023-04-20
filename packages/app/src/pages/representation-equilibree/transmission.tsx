@@ -77,7 +77,7 @@ const Transmission: NextPageWithLayout = () => {
           de courriers indésirables.
         </p>
         <p>Nous vous remercions de votre transmission.</p>
-        <Grid mt="6w" justifyCenter>
+        <Grid mt="6w" align="center">
           <GridCol md={10} lg={8}>
             <form>
               <ButtonGroup>
@@ -92,7 +92,7 @@ const Transmission: NextPageWithLayout = () => {
           </GridCol>
         </Grid>
         {formData.entreprise?.siren && (
-          <Grid mt="6w" justifyCenter>
+          <Grid mt="6w" align="center">
             <GridCol md={10} lg={8}>
               <Card size="sm" isEnlargeLink>
                 <CardBody>
@@ -117,7 +117,7 @@ const Transmission: NextPageWithLayout = () => {
             </GridCol>
           </Grid>
         )}
-        <Grid mt="6w" justifyCenter haveGutters>
+        <Grid mt="6w" align="center" haveGutters>
           <GridCol md={10} lg={8} className="fr-enlarge-link">
             <NextLinkOrA
               isExternal

@@ -71,7 +71,7 @@ const DeclarationWithNavigation = ({ siren, year }: { siren: string; year: numbe
         </FormLayoutButtonGroup>
       </FormLayout>
 
-      <Grid mt="6w" justifyCenter>
+      <Grid mt="6w" align="center">
         <GridCol md={10} lg={8}>
           <Card size="sm" isEnlargeLink>
             <CardBody>

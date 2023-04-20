@@ -3,9 +3,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, GridCol, Heading } from "@design-system";
+import { Box, Container, Grid, GridCol, Heading } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
 import _ from "lodash";
 import Link from "next/link";
@@ -22,25 +23,42 @@ const ConsulterRepEq = async ({
   let pageNumber = Number(page);
   pageNumber = _.isFinite(pageNumber) ? Math.max(0, pageNumber) : 0;
 
+  //  dsfrClassName="fr-mb-4w"
   return (
-    <Box dsfrClassName="fr-mb-4w">
-      <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
-      <Suspense>
-        <FormSearchSiren searchParams={searchParams} />
-      </Suspense>
-      <ClientAnimate>
-        {!_.isEmpty(searchParams) && (
-          // @ts-ignore
-          <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
-        )}
-      </ClientAnimate>
-      {/* @ts-ignore */}
-      <DetailedDownload
-        href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
-        label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
-      />
-      <Link href="/_consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
-    </Box>
+    <>
+      <Container as="section">
+        <Grid haveGutters align="center">
+          <GridCol sm={12} md={10} lg={8}>
+            <Box>
+              <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
+              <Suspense>
+                <FormSearchSiren searchParams={searchParams} />
+              </Suspense>
+            </Box>
+          </GridCol>
+        </Grid>
+      </Container>
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} dsfrClassName="fr-pb-4w">
+        <Container as="section">
+          <Grid haveGutters align="center">
+            <GridCol sm={12} md={10} lg={8}>
+              <ClientAnimate>
+                {!_.isEmpty(searchParams) && (
+                  // @ts-ignore
+                  <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
+                )}
+              </ClientAnimate>
+              {/* @ts-ignore */}
+              <DetailedDownload
+                href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
+                label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
+              />
+              <Link href="/_consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
+            </GridCol>
+          </Grid>
+        </Container>
+      </Box>
+    </>
   );
 };
 
@@ -63,19 +81,28 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
   );
   return (
     <>
-      <Box dsfrClassName="fr-mt-3w">
-        {totalLength} {count > 10 ? `sur ${count}` : ""} résultat{count > 1 ? "s" : ""}
+      <Container fluid>
+        <Heading
+          as="h2"
+          variant="h4"
+          text={`${totalLength} ${count > 10 ? `sur ${count}` : ""} résultat${count > 1 ? "s" : ""}`}
+        />
         <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
           {/* @ts-ignore */}
           <Page repeqs={repeqs} />
           {pages}
         </ClientAnimate>
+      </Container>
+      <Box mt="3w">
+        <ScrollTopButton smooth skipHeader title="Revenir en haut" priority="tertiary" className={fr.cx("fr-mr-3w")}>
+          Revenir en haut
+        </ScrollTopButton>
+        {totalLength < count && (
+          <Suspense>
+            <NextPageLink />
+          </Suspense>
+        )}
       </Box>
-      {totalLength < count && (
-        <Suspense>
-          <NextPageLink />
-        </Suspense>
-      )}
     </>
   );
 };

@@ -11,7 +11,7 @@ const PrivacyPolicy: NextPageWithLayout = () => {
   return (
     <section>
       <Container py="8w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>Protection des données à caractère personnel – Index Egapro</h1>
             <h2>Responsable de traitements</h2>

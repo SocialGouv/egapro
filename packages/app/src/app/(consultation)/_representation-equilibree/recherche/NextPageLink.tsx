@@ -12,10 +12,8 @@ export const NextPageLink = () => {
   cleanSearchParams.set("page", nextPage);
 
   return (
-    <div className="fr-mt-3w">
-      <Button linkProps={{ href: `${pathname}?${cleanSearchParams.toString()}` }} priority="secondary">
-        Voir les résultats suivants
-      </Button>
-    </div>
+    <Button linkProps={{ href: `${pathname}?${cleanSearchParams.toString()}` }} priority="secondary">
+      Voir les résultats suivants
+    </Button>
   );
 };

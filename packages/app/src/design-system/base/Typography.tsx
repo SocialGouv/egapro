@@ -64,9 +64,9 @@ export type HeadingProps = (HeadingAttributes &
       }
   );
 
-const headingProps = ({ display, ...rest }: Omit<HeadingProps, "as" | "text" | "variant">) => {
+const headingProps = ({ display, variant, ...rest }: Omit<HeadingProps, "as" | "text">) => {
   const tagProps = typographyProps(rest);
-  tagProps.className = cx(tagProps.className, fr.cx(display && `fr-display--${display}`));
+  tagProps.className = cx(tagProps.className, fr.cx(display && `fr-display--${display}`, variant && `fr-${variant}`));
 
   return tagProps;
 };
@@ -84,9 +84,8 @@ const headingProps = ({ display, ...rest }: Omit<HeadingProps, "as" | "text" | "
  *
  * @see https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-de-l-identite-de-l-etat/typographie/#:~:text=Titres%20et%20titres%20alternatifs
  */
-export const Heading = ({ as, text, variant, ...rest }: HeadingProps) => {
+export const Heading = ({ as: HtmlTag, text, ...rest }: HeadingProps) => {
   const tagProps = headingProps(rest);
-  const HtmlTag = variant ?? as;
 
   return <HtmlTag {...tagProps}>{text}</HtmlTag>;
 };
@@ -94,9 +93,8 @@ export const Heading = ({ as, text, variant, ...rest }: HeadingProps) => {
 /**
  * Ref version of {@link Heading}
  */
-export const HeadingRef = forwardRef<HTMLHeadingElement, HeadingProps>(({ as, text, variant, ...rest }, ref) => {
+export const HeadingRef = forwardRef<HTMLHeadingElement, HeadingProps>(({ as: HtmlTag, text, ...rest }, ref) => {
   const tagProps = headingProps(rest);
-  const HtmlTag = variant ?? as;
 
   return (
     <HtmlTag {...tagProps} ref={ref}>

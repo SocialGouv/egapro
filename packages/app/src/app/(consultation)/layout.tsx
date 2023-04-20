@@ -43,10 +43,8 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
       <main role="main" id="content" className={styles.content}>
         <div className={fr.cx("fr-container")}>
           <Breadcrumb />
-          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-sm-12", "fr-col-md-10", "fr-col-lg-8")}>{children}</div>
-          </div>
         </div>
+        {children}
       </main>
       <ConsultationFooter
         brandTop={brand}
@@ -80,20 +78,38 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         }
         linkList={[
           {
-            categoryName: "Contact",
+            categoryName: "Liens utiles",
             links: [
               {
-                text: "index@travail.gouv.fr",
+                text: "Télécharger la liste des référents",
                 linkProps: {
-                  href: "mailto:index@travail.gouv.fr",
-                  target: "_blank",
-                  rel: "noreferrer",
+                  href: `${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`,
+                  download: true,
                 },
               },
               {
                 text: "Contribuer sur Github",
                 linkProps: {
                   href: `https://github.com/SocialGouv/egapro/commit/${config.githubSha}`,
+                  target: "_blank",
+                  rel: "noreferrer",
+                },
+              },
+            ],
+          },
+          {
+            categoryName: " ",
+            links: [
+              {
+                text: "Consulter l'aide",
+                linkProps: {
+                  href: "/aide-simulation",
+                },
+              },
+              {
+                text: "index@travail.gouv.fr",
+                linkProps: {
+                  href: "mailto:index@travail.gouv.fr",
                   target: "_blank",
                   rel: "noreferrer",
                 },

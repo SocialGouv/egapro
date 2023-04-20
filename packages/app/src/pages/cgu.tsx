@@ -16,7 +16,7 @@ const Cgu: NextPageWithLayout = () => {
       </Head>
       <section>
         <Container py="8w">
-          <Grid justifyCenter>
+          <Grid align="center">
             <GridCol md={10} lg={8}>
               <h1>Conditions d’utilisation</h1>
               <p>

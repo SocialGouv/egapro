@@ -13,7 +13,7 @@ const AideSimulation: NextPageWithLayout = () => {
       </Head>
       <section>
         <Container py="8w">
-          <Grid justifyCenter>
+          <Grid align="center">
             <GridCol md={10} lg={8}>
               <h1>Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes</h1>
               <p>

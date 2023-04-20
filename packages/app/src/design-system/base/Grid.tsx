@@ -4,12 +4,21 @@ import type { MarginProps } from "../utils/spacing";
 import { Box, BoxRef } from "./Box";
 
 export type GridProps = PropsWithChildren<
-  Omit<MarginProps, "ml" | "mr" | "mx"> & { haveGutters?: boolean; justifyCenter?: boolean }
+  Omit<MarginProps, "ml" | "mr" | "mx"> & {
+    align?: "center" | "left" | "right";
+    haveGutters?: boolean;
+    valign?: "bottom" | "middle" | "top";
+  }
 >;
 
-export const Grid = forwardRef<HTMLDivElement, GridProps>(({ children, haveGutters, justifyCenter, ...rest }, ref) => (
+export const Grid = forwardRef<HTMLDivElement, GridProps>(({ children, haveGutters, align, valign, ...rest }, ref) => (
   <BoxRef
-    dsfrClassName={["fr-grid-row", haveGutters && "fr-grid-row--gutters", justifyCenter && "fr-grid-row--center"]}
+    dsfrClassName={[
+      "fr-grid-row",
+      haveGutters && "fr-grid-row--gutters",
+      align && `fr-grid-row--${align}`,
+      valign && `fr-grid-row--${valign}`,
+    ]}
     ref={ref}
     {...rest}
   >

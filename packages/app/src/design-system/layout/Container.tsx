@@ -1,18 +1,18 @@
-import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type FrCxArg } from "@codegouvfr/react-dsfr";
 
-import { Box } from "../base/Box";
-import type { SpacingProps } from "../utils/spacing";
+import { Box, type BoxProps } from "../base/Box";
 
-export type ContainerProps = PropsWithChildren<
-  Omit<SpacingProps, "ml" | "mr" | "mx" | "pl" | "pr" | "px"> & {
-    className?: string;
-  }
->;
+export type ContainerProps = Omit<BoxProps, "ml" | "mr" | "mx" | "pl" | "pr" | "px"> & {
+  fluid?: boolean;
+  size?: "lg" | "md" | "sm" | "xl";
+};
 
-export const Container = ({ children, className, ...rest }: ContainerProps) => {
+export const Container = ({ children, dsfrClassName, fluid, size, ...rest }: ContainerProps) => {
+  let containerClass = "fr-container";
+  if (size) containerClass += `-${size}`;
+  if (fluid) containerClass += `--fluid`;
   return (
-    <Box className={clsx("fr-container", className)} {...rest}>
+    <Box dsfrClassName={[dsfrClassName, containerClass as FrCxArg]} {...rest}>
       {children}
     </Box>
   );

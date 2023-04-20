@@ -76,7 +76,7 @@ export const Modal = ({
       data-fr-concealing-backdrop={backdropCanClose}
     >
       <Container className="fr-container--fluid fr-container-md">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={colSize} lg={colSize}>
             <Box className="fr-modal__body">
               <Box className="fr-modal__header">
