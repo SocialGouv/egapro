@@ -18,9 +18,11 @@ layout: default
         Vous pouvez la modifier et elle remplacera la déclaration actuelle une fois à nouveau validée et transmise à la
         dernière étape.
     </p>
-    <button type="button" onclick="setDraftStatus()">Modifier la déclaration</button>
-    <button type="button" onclick="resendReceipt()">Renvoyer l'accusé de réception</button>
-    <button id="objectifs-mesures-button" type="button" onclick="goToMeConnecter()" style="margin-top: 10px">Aller aux
+    <button type="button" nonce="{{ site.GITHUB_SHA }}" onclick="setDraftStatus()">Modifier la déclaration</button>
+    <button type="button" nonce="{{ site.GITHUB_SHA }}" onclick="resendReceipt()">Renvoyer l'accusé de
+        réception</button>
+    <button id="objectifs-mesures-button" type="button" nonce="{{ site.GITHUB_SHA }}" onclick="goToMeConnecter()"
+        style="margin-top: 10px">Aller aux
         objectifs de progression et mesures de correction
     </button>
 </section>
@@ -41,7 +43,7 @@ layout: default
         Vous pouvez la consulter ici mais si vous souhaitez la modifier, vous devez le faire depuis le formulaire de
         calcul et déclaration.
     </p>
-    <button type="button" onclick="goToSimulationApp()">Modifier ma déclaration</button>
+    <button type="button" nonce="{{ site.GITHUB_SHA }}" onclick="goToSimulationApp()">Modifier ma déclaration</button>
 </section>
 
 <main>
@@ -63,4 +65,4 @@ layout: default
 </nav>
 
 <!-- tunnel.js uses DOM and should be loaded last -->
-<script src="{{ site.baseurl }}/assets/js/tunnel.js"></script>
+<script nonce="{{ site.GITHUB_SHA }}" src="{{ site.baseurl }}/assets/js/tunnel.js"></script>

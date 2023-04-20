@@ -13,6 +13,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.ref || github.event.pull_request.head.ref }}
 
 jobs:
-  kontinuous:
-    uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate.yaml@v1
+  socialgouv:
+    uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate.yaml@v1.4.5
     secrets: inherit

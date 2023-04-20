@@ -50,7 +50,7 @@ title: "Politique de confidentialité et protection de la vie privée"
     <a class=button href="email.html" rel=next>Suivant</a>
 </nav>
 
-<script async="false">
+<script nonce="{{ site.GITHUB_SHA }}" async="false">
     document.addEventListener("ready", () => {
         if (app.token && app.tokenInfo) {
             document.querySelector(".button[href='email.html']").href = "commencer.html";
