@@ -429,6 +429,11 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         draft.indicateurUn.formValidated = "None"
         draft.indicateurUn.coefficientRemuFormValidated = "None"
 
+        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+          draft.indicateurUn.formValidated = "Valid"
+          draft.indicateurUn.coefficientRemuFormValidated = "Valid"
+        }
+
         // We have to traverse the coefficients to check if some groups are now invalid.
         // If so, we have to reset the remuneration to 0.
         draft.indicateurUn.coefficients.forEach((categorie) => {
