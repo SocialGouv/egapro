@@ -16,7 +16,7 @@ title: "Transmission de la procédure"
 <p>Si vous ne recevez pas cet accusé de réception, merci de bien vérifier que
     celui-ci n'a pas été déplacé dans votre dossier de courriers indésirables.</p>
 
-<div id="objectifs-mesures" class="show-for-2021" style="margin-top: 40px">
+<div id="objectifs-mesures" class="show-for-2021" nonce="{{ site.GITHUB_SHA }}" style="margin-top: 40px">
     <p class="legal-text show-for-75-85"><em>Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021
             visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les
             entreprises ayant obtenu un Index inférieur à 85 points doivent fixer par accord ou, à défaut, par décision
@@ -37,10 +37,12 @@ title: "Transmission de la procédure"
             du travail et au comité social et économique.</em>
     </p>
 
-    <p class="show-for-75-85"><button onclick="goToMeConnecter()">Déclarer les objectifs de progression
+    <p class="show-for-75-85"><button nonce="{{ site.GITHUB_SHA }}" onclick="goToMeConnecter()">Déclarer les objectifs
+            de progression
             maintenant</button></p>
 
-    <p class="show-for-0-75"><button onclick="goToMeConnecter()">Déclarer les objectifs de progression et les mesures de
+    <p class="show-for-0-75"><button nonce="{{ site.GITHUB_SHA }}" onclick="goToMeConnecter()">Déclarer les objectifs de
+            progression et les mesures de
             correction maintenant</button></p>
 
     <p class="show-for-75-85 show-for-0-75">Si vous souhaitez les déclarer ultérieurement, vous pouvez vous connecter à
@@ -49,11 +51,13 @@ title: "Transmission de la procédure"
 
 <!-- <center>Nous vous remercions de votre transmission.</center> -->
 
-<p style="margin-top: 40px">Si vous le souhaitez, vous pouvez effectuer une <a href="./commencer.html"
+<p nonce="{{ site.GITHUB_SHA }}" style="margin-top: 40px">Si vous le souhaitez, vous pouvez effectuer une <a
+        href="./commencer.html" nonce="{{ site.GITHUB_SHA }}"
         onclick="app.resetData(); app.dataToLocalStorage()">nouvelle déclaration</a>.</p>
-<div style="margin-top: 4rem;">
-    <p style="font-weight: bold;">Aidez-nous à améliorer cette démarche</p>
-    <p style="margin-bottom: 2rem;">Donnez-nous votre avis, cela ne prend que 2 minutes.</p>
+<div nonce="{{ site.GITHUB_SHA }}" style="margin-top: 4rem;">
+    <p nonce="{{ site.GITHUB_SHA }}" style="font-weight: bold;">Aidez-nous à améliorer cette démarche</p>
+    <p nonce="{{ site.GITHUB_SHA }}" style="margin-bottom: 2rem;">Donnez-nous votre avis, cela ne prend que 2 minutes.
+    </p>
     <a
         href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-declaration&key=73366ddb13d498f4c77d01c2983bab48">
         <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis">
