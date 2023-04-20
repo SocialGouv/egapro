@@ -11,7 +11,7 @@ import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
 import { combineMerge, overwriteMerge } from "./utils/merge"
 import produce from "immer"
-import calculerIndicateurUn from "./utils/calculsEgaProIndicateurUn"
+import calculerIndicateurUn, { calculerValiditeGroupe3 } from "./utils/calculsEgaProIndicateurUn"
 
 const defaultDataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
@@ -428,6 +428,17 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         // When effectifs changed, we need to ensure to go to remu tab for validation to be done.
         draft.indicateurUn.formValidated = "None"
         draft.indicateurUn.coefficientRemuFormValidated = "None"
+
+        // We have to traverse the coefficients to check if some groups are now invalid.
+        // If so, we have to reset the remuneration to 0.
+        draft.indicateurUn.coefficients.forEach((categorie) => {
+          categorie.tranchesAges.forEach((trancheAge) => {
+            if (!calculerValiditeGroupe3(trancheAge.nombreSalariesFemmes || 0, trancheAge.nombreSalariesHommes || 0)) {
+              trancheAge.remunerationAnnuelleBrutFemmes = 0
+              trancheAge.remunerationAnnuelleBrutHommes = 0
+            }
+          })
+        })
       })
     }
     case "setInvalidIndicateurUnCoefEffectif": {
