@@ -62,7 +62,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
           title="Malheureusement votre indicateur n’est pas calculable"
           text="L’ensemble des groupes valables (c’est-à-dire comptant au
               moins 3 femmes et 3 hommes), représentent moins de 40% des
-              effectifs. Vous devez calculer par CSP."
+              effectifs."
         />
         <ActionBar>
           <ButtonSimulatorLink
