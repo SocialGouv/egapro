@@ -108,7 +108,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
     return error ? { message: error } : undefined
   }
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: typeof initialValues) => {
     const effectif = formData.effectif.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(({ nombreSalariesFemmes, nombreSalariesHommes, ...otherPropsTrancheAge }: any) => {
@@ -122,7 +122,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
     updateEffectif(effectif)
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     setValidEffectif()
   }
