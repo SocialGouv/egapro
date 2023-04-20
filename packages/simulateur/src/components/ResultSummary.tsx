@@ -18,6 +18,7 @@ export interface ResultSummaryProps {
   secondLineInfo?: string
   indicateurSexeSurRepresente?: SexeType
   onEdit?: () => void
+  label?: string
 }
 
 const Legend: FunctionComponent<BoxProps> = ({ children, ...rest }) => (
@@ -35,6 +36,7 @@ const ResultSummary: FunctionComponent<ResultSummaryProps> = ({
   secondLineInfo,
   indicateurSexeSurRepresente,
   onEdit,
+  label = "Modifier les informations",
 }) => {
   const { state } = useAppStateContextProvider()
 
@@ -48,7 +50,7 @@ const ResultSummary: FunctionComponent<ResultSummaryProps> = ({
         onEdit && (
           <ButtonAction
             leftIcon={<IconEdit />}
-            label="Modifier les informations"
+            label={label}
             onClick={onEdit}
             size="sm"
             variant="outline"

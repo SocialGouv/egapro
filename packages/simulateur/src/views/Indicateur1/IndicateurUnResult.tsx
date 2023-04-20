@@ -28,6 +28,7 @@ const IndicateurUnResult: FunctionComponent<IndicateurUnResultProps> = ({
       secondLineData={(noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       onEdit={unsetIndicateurUn}
+      label="Modifier les rémunérations"
     />
   )
 }
