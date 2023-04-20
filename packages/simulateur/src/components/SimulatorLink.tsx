@@ -28,12 +28,13 @@ export default SimulatorLinkWithRouter
 interface LinkProps {
   label: string
   to: string
+  fullWidth?: boolean
 }
 
-export function ButtonSimulatorLink({ to, label }: LinkProps) {
+export function ButtonSimulatorLink({ to, label, fullWidth }: LinkProps) {
   return (
     <SimulatorLinkWithRouter>
-      {(toSimulator) => <ButtonLink to={`${toSimulator}${to}`} label={label} size="lg" />}
+      {(toSimulator) => <ButtonLink fullWidth={fullWidth} to={`${toSimulator}${to}`} label={label} size="lg" />}
     </SimulatorLinkWithRouter>
   )
 }

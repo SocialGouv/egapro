@@ -7,6 +7,7 @@ import calculerIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 import { isFormValid } from "../../../utils/formHelpers"
 import IndicateurUnResult from "../IndicateurUnResult"
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
+import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
 const IndicateurUnCsp: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
@@ -25,11 +26,18 @@ const IndicateurUnCsp: FunctionComponent = () => {
 
   if (!effectifsIndicateurCalculable)
     return (
-      <InfoBlock
-        type="warning"
-        title="Malheureusement votre indicateur n’est pas calculable"
-        text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-      />
+      <>
+        <InfoBlock
+          type="warning"
+          title="Malheureusement votre indicateur n’est pas calculable"
+          text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+        />
+        <ButtonSimulatorLink
+          to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
+          label="Suivant"
+          fullWidth={false}
+        />
+      </>
     )
 
   return (
