@@ -13,12 +13,11 @@ import {
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { indicateursInfo } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurUnProps {
   calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn>
