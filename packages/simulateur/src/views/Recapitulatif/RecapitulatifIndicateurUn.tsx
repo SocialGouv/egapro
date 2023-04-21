@@ -46,16 +46,11 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   }
 
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? (
-      ""
-    ) : (
-      <TextSimulatorLink to="/indicateur1" label="Vous devez calculer par CSP" />
-    )
     return (
       <InfoBlock
         type="warning"
         title={indicateursInfo.indicateur1.title}
-        text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
+        text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs.`}
       />
     )
   }
