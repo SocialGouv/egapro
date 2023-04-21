@@ -63,7 +63,8 @@ const IndicateurUnModaliteCalculForm: FunctionComponent<IndicateurUnTypeFormProp
                 </FormControl>
                 {values.modaliteCalcul !== "csp" && (
                   <Text fontSize="sm">
-                    Si vous choisissez cette option, la consultation du CSE est obligatoire.
+                    Si vous choisissez l'une des modalités de calcul par niveau ou coefficient hiérarchique, la
+                    consultation du CSE est obligatoire.
                     <br />
                     La date de consultation vous sera demandée au moment de la déclaration.
                   </Text>
