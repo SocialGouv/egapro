@@ -282,7 +282,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
 
         if (state.indicateurUn.modaliteCalcul === "csp") {
           if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
-            draft.indicateurUn = { ...defaultState.indicateurUn }
+            draft.indicateurUn = { ...defaultState.indicateurUn, modaliteCalcul: "csp" }
             draft.indicateurUn.formValidated = "Valid"
             draft.indicateurUn.modaliteCalculformValidated = "Valid"
           } else {
