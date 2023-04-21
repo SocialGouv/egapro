@@ -1,4 +1,3 @@
-import { capitalize } from "@common/utils/string";
 import { ConsultationRepeqLayout } from "@components/layouts/ConsultationRepeqLayout";
 import {
   Alert,
@@ -20,6 +19,7 @@ import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
+import { capitalize } from "lodash";
 import { useRouter } from "next/router";
 import type { ParsedUrlQueryInput } from "querystring";
 import { useCallback, useEffect, useState } from "react";

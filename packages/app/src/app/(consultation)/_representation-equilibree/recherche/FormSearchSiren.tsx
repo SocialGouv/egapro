@@ -1,6 +1,6 @@
 "use client";
 
-import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import {
@@ -12,9 +12,8 @@ import {
   SORTED_REGIONS,
 } from "@common/dict";
 import { omitByRecursively } from "@common/utils/object";
-import { capitalize } from "@common/utils/string";
 import { Grid, GridCol } from "@design-system";
-import _ from "lodash";
+import { capitalize, isUndefined } from "lodash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -64,7 +63,7 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
   function onSubmit(data: FormTypeInput) {
     router.replace(
       `${location.pathname}?${new URLSearchParams(
-        omitByRecursively(data, _.isUndefined) as Partial<FormTypeInput>,
+        omitByRecursively(data, isUndefined) as Partial<FormTypeInput>,
       ).toString()}`,
     );
   }

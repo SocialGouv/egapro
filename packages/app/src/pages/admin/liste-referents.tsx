@@ -39,7 +39,7 @@ import type { ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
-import _ from "lodash";
+import { noop, orderBy as _orderBy, sortBy, truncate } from "lodash";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
@@ -127,13 +127,13 @@ const ReferentList = ({ referents, editModalId, doDelete }: ReferentListProps) =
                     iconLeft={referent.type === "email" ? "fr-icon-mail-fill" : "fr-icon-link"}
                     href={(referent.type === "email" ? "mailto:" : "") + referent.value}
                   >
-                    {_.truncate(referent.value, { length: 40 })}
+                    {truncate(referent.value, { length: 40 })}
                   </Link>
                   {referent.type === "email" && referent.substitute?.email ? (
                     <>
                       <br />
                       <Link size="sm" href={`mailto:${referent.substitute.email}`}>
-                        <i className="fr-text--xs">{_.truncate(referent.substitute.email, { length: 40 })}</i>
+                        <i className="fr-text--xs">{truncate(referent.substitute.email, { length: 40 })}</i>
                       </Link>
                     </>
                   ) : (
@@ -256,7 +256,7 @@ const ReferentModal = ({ id, mode = "edit" }: EditReferentModalProps) => {
       icon="fr-icon-arrow-right-line"
       id={id}
       content={
-        <form onSubmit={handleSubmit(_.noop)}>
+        <form onSubmit={handleSubmit(noop)}>
           <input type="hidden" id={`${mode}-form-referent-id`} {...register("id")} />
           <FormGroup isError={!!errors.principal}>
             <FormCheckbox
@@ -294,7 +294,7 @@ const ReferentModal = ({ id, mode = "edit" }: EditReferentModalProps) => {
               {...register("region")}
             >
               <option value="">Régions</option>
-              {_.sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
+              {sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
                 <option value={code} key={`form-referent-region-option-${code}`}>
                   {name} ({code})
                 </option>
@@ -562,7 +562,7 @@ const ReferentListPage: NextPageWithLayout = () => {
   };
 
   const searchString = watch("query");
-  const referents = _.orderBy(data, orderBy, orderDirection).filter(referent => {
+  const referents = _orderBy(data, orderBy, orderDirection).filter(referent => {
     if (!searchString) return true;
     const str = searchString.toLowerCase();
     if (referent.county && COUNTIES[referent.county].toLowerCase().includes(str)) return true;
@@ -586,7 +586,7 @@ const ReferentListPage: NextPageWithLayout = () => {
 
           {data?.length ? (
             <>
-              <form noValidate onSubmit={_.noop}>
+              <form noValidate onSubmit={noop}>
                 <FormGroup>
                   <FormInput id="query-param" placeholder="Rechercher" autoComplete="off" {...register("query")} />
                 </FormGroup>

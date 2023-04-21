@@ -1,7 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   // "typescript.preferences.importModuleSpecifier": "project-relative",
-  "typescript.suggest.paths": false,
   "eslint.workingDirectories": [
     {
       "pattern": "packages/*",

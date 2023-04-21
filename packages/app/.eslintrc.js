@@ -12,7 +12,7 @@ const config = {
     // disable conflicting rules with plugin (not config!)
     "plugin:prettier/recommended",
   ],
-  plugins: ["prettier", "unused-imports", "simple-import-sort"],
+  plugins: ["prettier", "unused-imports", "simple-import-sort", "lodash"],
   ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
   rules: {
     "@next/next/no-html-link-for-pages": ["error", ["src/app", "src/pages"]],
@@ -56,7 +56,11 @@ const config = {
     "import/no-internal-modules": "off",
     "import/newline-after-import": "error",
     "import/export": "off",
+    "import/no-useless-path-segments": "warn",
+    "import/no-absolute-path": "warn",
+    "import/no-named-as-default": "off",
     "sort-import": "off",
+    "lodash/import-scope": ["error", "member"],
     "prettier/prettier": [
       "error",
       {

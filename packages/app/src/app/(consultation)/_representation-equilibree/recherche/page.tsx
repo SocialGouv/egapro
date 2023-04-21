@@ -29,12 +29,10 @@ const ConsulterRepEq = async ({
       <Container as="section">
         <Grid haveGutters align="center">
           <GridCol sm={12} md={10} lg={8}>
-            <Box>
-              <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
-              <Suspense>
-                <FormSearchSiren searchParams={searchParams} />
-              </Suspense>
-            </Box>
+            <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
+            <Suspense>
+              <FormSearchSiren searchParams={searchParams} />
+            </Suspense>
           </GridCol>
         </Grid>
       </Container>
@@ -94,14 +92,20 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
         </ClientAnimate>
       </Container>
       <Box mt="3w">
-        <ScrollTopButton smooth skipHeader title="Revenir en haut" priority="tertiary" className={fr.cx("fr-mr-3w")}>
-          Revenir en haut
-        </ScrollTopButton>
-        {totalLength < count && (
-          <Suspense>
-            <NextPageLink />
-          </Suspense>
-        )}
+        <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-sm", "fr-btns-group--left")}>
+          <li>
+            <ScrollTopButton smooth skipHeader title="Revenir en haut" priority="tertiary">
+              Revenir en haut
+            </ScrollTopButton>
+          </li>
+          {totalLength < count && (
+            <li>
+              <Suspense>
+                <NextPageLink />
+              </Suspense>
+            </li>
+          )}
+        </ul>
       </Box>
     </>
   );

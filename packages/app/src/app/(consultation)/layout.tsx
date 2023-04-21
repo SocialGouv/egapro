@@ -85,6 +85,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
                 linkProps: {
                   href: `${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`,
                   download: true,
+                  target: "_blank",
                 },
               },
               {

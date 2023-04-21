@@ -23,13 +23,13 @@ import {
 } from "@chakra-ui/react";
 import { adressLabel } from "@common/dict";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
-import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import type { SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
+import { capitalize } from "lodash";
 import { useRouter } from "next/router";
 import type { ParsedUrlQuery } from "querystring";
 import type { ChangeEventHandler, DOMAttributes } from "react";

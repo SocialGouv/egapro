@@ -58,7 +58,7 @@ export const fetchSearchRepeqsV2 = async (_searchParams = {}, pageIndex = 0): Pr
   const url = new URL(`${config.api_url}/representation-equilibree/search?${searchParams.toString()}`);
   const response = await fetch(url, {
     next: {
-      revalidate: 0,
+      revalidate: 30,
     },
   });
 

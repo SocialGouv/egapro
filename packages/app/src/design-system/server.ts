@@ -22,6 +22,7 @@ export * from "./base/Logo";
 export * from "./base/RecapSection";
 export * from "./base/SkipLinks";
 export * from "./base/SkipLinks";
+export * from "./base/Stat";
 export * from "./base/Stepper";
 export * from "./base/Summary";
 export * from "./base/TableAdmin";

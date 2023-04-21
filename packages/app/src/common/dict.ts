@@ -30,6 +30,9 @@ export const PUBLIC_YEARS_REPEQ = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR_REP
   .map((_, idx) => FIRST_YEAR_REPEQ + idx);
 export const PUBLIC_YEARS_REPEQ_DESC = PUBLIC_YEARS_REPEQ.reverse();
 
+export const DISPLAY_CURRENT_YEAR = PUBLIC_CURRENT_YEAR + 1;
+export const DISPLAY_PUBLIC_YEARS = PUBLIC_YEARS.map(y => y + 1);
+
 export const INVALID_YEAR = 0 as const;
 
 export const WORKFORCES = {
