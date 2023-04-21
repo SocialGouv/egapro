@@ -1,7 +1,7 @@
 import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 
-import { TrancheAge, RemunerationPourTrancheAge, FormState } from "../../globals"
+import { RemunerationPourTrancheAge, TrancheAge } from "../../globals"
 
 import {
   composeValidators,
@@ -14,30 +14,30 @@ import {
 } from "../../utils/formHelpers"
 import { displayNameTranchesAges } from "../../utils/helpers"
 
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import FormError from "../../components/FormError"
+import BlocForm from "../../components/BlocForm"
 import FormStack from "../../components/ds/FormStack"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
 
 export const aboveZero: ValidatorFunction = (value) =>
   minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
 
 const validator = composeValidators(required, mustBeNumber, aboveZero)
 
-interface remunerationGroup {
+interface RemunerationGroup {
   id: any
-  name: string
+  nom: string
   trancheAge: TrancheAge
   validiteGroupe: boolean
   remunerationAnnuelleBrutFemmes?: number
   remunerationAnnuelleBrutHommes?: number
 }
 
-interface IndicateurUnFormRawProps {
-  ecartRemuParTrancheAge: Array<remunerationGroup>
+interface IndicateurUnFormRemuProps {
+  ecartRemuParTrancheAge: Array<RemunerationGroup>
   readOnly: boolean
   updateIndicateurUn: (
     data: Array<{
@@ -45,18 +45,18 @@ interface IndicateurUnFormRawProps {
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => void
-  validateIndicateurUn: (valid: FormState) => void
+  setValidIndicateurUn: () => void
   nextLink: ReactNode
 }
 
 const groupByCSP = (
-  ecartRemuParTrancheAge: Array<remunerationGroup>,
+  ecartRemuParTrancheAge: Array<RemunerationGroup>,
 ): Array<{
   id: any
-  name: string
-  tranchesAges: Array<remunerationGroup>
+  nom: string
+  tranchesAges: Array<RemunerationGroup>
 }> => {
-  const tmpArray = ecartRemuParTrancheAge.reduce((acc, { id, name, ...otherAttr }) => {
+  const tmpArray = ecartRemuParTrancheAge.reduce((acc, { id, nom, ...otherAttr }) => {
     // @ts-ignore
     const el = acc[id]
 
@@ -73,7 +73,7 @@ const groupByCSP = (
         ...acc,
         [id]: {
           id,
-          name,
+          nom,
           tranchesAges: [otherAttr],
         },
       }
@@ -86,15 +86,19 @@ const groupByCSP = (
   return Object.entries(tmpArray).map(([_, tranchesAges]) => tranchesAges)
 }
 
-const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
+/**
+ * Composant pour récupérer les informations de rémunération.
+ * Utilisé par le mode de calcul CSP et par le mode coefficient, pour l'onglet de rémunération.
+ */
+const IndicateurUnFormRemu: FunctionComponent<IndicateurUnFormRemuProps> = ({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
-  validateIndicateurUn,
+  setValidIndicateurUn,
   nextLink,
 }) => {
   const initialValues = {
-    remunerationAnnuelle: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+    remunerationsAnnuelles: groupByCSP(ecartRemuParTrancheAge).map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(
         ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
@@ -109,7 +113,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   }
 
   const saveForm = (formData: any) => {
-    const remunerationAnnuelle = formData.remunerationAnnuelle.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+    const remunerationsAnnuelles = formData.remunerationsAnnuelles.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(
         ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, trancheAge }: any) => {
@@ -121,12 +125,12 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
         },
       ),
     }))
-    updateIndicateurUn(remunerationAnnuelle)
+    updateIndicateurUn(remunerationsAnnuelles)
   }
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateIndicateurUn("Valid")
+    setValidIndicateurUn()
   }
 
   return (
@@ -145,15 +149,15 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés." />
             )}
-            {initialValues.remunerationAnnuelle.map(
+            {initialValues.remunerationsAnnuelles.map(
               (
                 {
                   id,
-                  name,
+                  nom,
                   tranchesAges,
                 }: {
                   id: any
-                  name: string
+                  nom: string
                   tranchesAges: Array<{
                     trancheAge: TrancheAge
                     validiteGroupe: boolean
@@ -162,7 +166,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
                 indexGroupe,
               ) => {
                 return (
-                  <BlocForm key={id} title={name} label="rémunération moyenne">
+                  <BlocForm key={id} title={nom} label="rémunération moyenne">
                     {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
                       return (
                         <FieldInputsMenWomen
@@ -177,8 +181,8 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
                           calculable={validiteGroupe}
                           calculableNumber={3}
                           mask="number"
-                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
-                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          femmeFieldName={`remunerationsAnnuelles.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                          hommeFieldName={`remunerationsAnnuelles.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
                           validatorFemmes={validator}
                           validatorHommes={validator}
                         />
@@ -203,4 +207,4 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   )
 }
 
-export default IndicateurUnFormRaw
+export default IndicateurUnFormRemu

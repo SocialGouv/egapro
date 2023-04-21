@@ -1,5 +1,5 @@
 import { Text } from "@chakra-ui/react"
-import React, { FunctionComponent, useEffect } from "react"
+import React, { FunctionComponent } from "react"
 
 import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ds/ButtonAction"
@@ -10,7 +10,7 @@ import { useAppStateContextProvider } from "../../../hooks/useAppStateContextPro
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
-import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
+import { TabIndicateurUnCoef } from "./IndicateurUnCoef"
 
 interface IndicateurUnCoefEffectifFormProps {
   navigateTo: (tab: TabIndicateurUnCoef) => void
@@ -19,19 +19,23 @@ interface IndicateurUnCoefEffectifFormProps {
 const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({ navigateTo }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
-  const { effectifsIndicateurCalculable } = useIndicateurUnContext()
+  // const { effectifsIndicateurCalculable } = useIndicateurUnContext()
 
-  useEffect(() => {
-    // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
-    if (effectifsIndicateurCalculable === false) dispatch({ type: "validateIndicateurUn", valid: "Valid" })
-  }, [effectifsIndicateurCalculable, dispatch])
+  // useEffect(() => {
+  //   // Si l'indicateur 1 devient non calculable, on considère que l'ensemble du formulaire 1 est valide pour avoir une UI correcte (coche verte, etc.)
+  //   if (effectifsIndicateurCalculable === false) dispatch({ type: "validateIndicateurUn", valid: "Valid" })
+  // }, [effectifsIndicateurCalculable, dispatch])
 
   if (!state) return null
 
-  const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
-    state.indicateurUn
+  const {
+    coefficients: coefficient,
+    coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
+    formValidated,
+  } = state.indicateurUn
 
-  const effectifRaw = coefficient.map(({ name, tranchesAges }, index) => ({
+  const effectifRaw = coefficient.map(({ nom: name, tranchesAges }, index) => ({
     id: index,
     name,
     tranchesAges,
@@ -44,10 +48,10 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
       tranchesAges: Array<EffectifPourTrancheAge>
     }>,
   ) => {
-    const coefficient = data.map(({ tranchesAges }) => ({
+    const coefficients = data.map(({ tranchesAges }) => ({
       tranchesAges,
     }))
-    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficients } })
   }
 
   const {
@@ -63,7 +67,8 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
   if (coefficientGroupFormValidated !== "Valid") {
     return (
       <InfoBlock
-        title="Vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
+        type="warning"
+        title="Vous devez valider les groupes avant d'accéder à cette étape"
         text={<ActionLink onClick={() => navigateTo("Groupe")}>Renseigner les groupes</ActionLink>}
       />
     )
@@ -88,7 +93,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
             effectifRaw={effectifRaw}
             readOnly={readOnly}
             updateEffectif={updateEffectifRaw}
-            validateEffectif={(valid) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid })}
+            setValidEffectif={() => dispatch({ type: "setValidIndicateurUnCoefEffectif" })}
             nextLink={<ButtonAction onClick={() => navigateTo("Remuneration")} label="Suivant" size={"lg"} />}
             formValidator={formValidator}
           />
@@ -98,7 +103,7 @@ const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFo
             <EffectifResult
               totalNombreSalariesFemme={totalNombreSalariesFemmeCoef}
               totalNombreSalariesHomme={totalNombreSalariesHommeCoef}
-              validateEffectif={(valid) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid })}
+              unsetEffectif={() => dispatch({ type: "unsetIndicateurUnCoefEffectif" })}
             />
           )
         }

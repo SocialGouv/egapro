@@ -261,8 +261,8 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
 
   if (indicateur1.mode !== "csp") {
     indicateur1.date_consultation_cse = toISOString(state.declaration.dateConsultationCSE)
-    indicateur1.catégories = indicateurUn.coefficient.map((coef) => ({
-      nom: coef.name,
+    indicateur1.catégories = indicateurUn.coefficients.map((coef) => ({
+      nom: coef.nom,
       tranches: {
         ":29": asPercentage(coef.tranchesAges[0].ecartTauxRemuneration),
         "30:39": asPercentage(coef.tranchesAges[1].ecartTauxRemuneration),
@@ -272,7 +272,7 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
     }))
   } else {
     const csp = ["ouv", "emp", "tam", "ic"]
-    indicateur1.catégories = indicateurUn.remunerationAnnuelle.map((coef, index) => ({
+    indicateur1.catégories = indicateurUn.remunerationsAnnuelles.map((coef, index) => ({
       nom: csp[index],
       tranches: {
         ":29": asPercentage(coef.tranchesAges[0].ecartTauxRemuneration),

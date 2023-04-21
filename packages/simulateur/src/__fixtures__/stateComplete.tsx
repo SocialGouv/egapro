@@ -130,7 +130,7 @@ const actionUpdateEffectif: ActionType = {
 const actionUpdateIndicateurUnCsp: ActionType = {
   type: "updateIndicateurUnCsp",
   data: {
-    remunerationAnnuelle: [
+    remunerationsAnnuelles: [
       {
         categorieSocioPro: CSP.Ouvriers,
         tranchesAges: [
@@ -254,9 +254,9 @@ const actionUpdateIndicateurUnCsp: ActionType = {
 const actionUpdateIndicateurUnCoefName: ActionType = {
   type: "updateIndicateurUnCoef",
   data: {
-    coefficient: [
+    coefficients: [
       {
-        name: "Business Developers",
+        nom: "Business Developers",
       },
     ],
   },
@@ -265,7 +265,7 @@ const actionUpdateIndicateurUnCoefName: ActionType = {
 const actionUpdateIndicateurUnCoefNombreSalaries: ActionType = {
   type: "updateIndicateurUnCoef",
   data: {
-    coefficient: [
+    coefficients: [
       {
         tranchesAges: [
           {
@@ -297,7 +297,7 @@ const actionUpdateIndicateurUnCoefNombreSalaries: ActionType = {
 const actionUpdateIndicateurUnCoefRemuneration: ActionType = {
   type: "updateIndicateurUnCoef",
   data: {
-    coefficient: [
+    coefficients: [
       {
         tranchesAges: [
           {

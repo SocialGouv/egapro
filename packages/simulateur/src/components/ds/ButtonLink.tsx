@@ -29,7 +29,7 @@ function ButtonLink({
     rightIcon,
     size,
     sx: {
-      width: fullWidth ? "100%" : "auto",
+      width: fullWidth ? "auto" : "max-content",
     },
   }
 

@@ -13,12 +13,11 @@ import {
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { indicateursInfo } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurUnProps {
   calculsIndicateurUn: ReturnType<typeof calculerIndicateurUn>
@@ -46,16 +45,11 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   }
 
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? (
-      ""
-    ) : (
-      <TextSimulatorLink to="/indicateur1" label="Vous devez calculer par CSP" />
-    )
     return (
       <InfoBlock
         type="warning"
         title={indicateursInfo.indicateur1.title}
-        text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
+        text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs.`}
       />
     )
   }

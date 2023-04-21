@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { FormState, RemunerationPourTrancheAge } from "../../../globals"
+import { RemunerationPourTrancheAge } from "../../../globals"
 
 import { EffectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 import { displayNameCSP } from "../../../utils/helpers"
@@ -7,24 +7,19 @@ import { displayNameCSP } from "../../../utils/helpers"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
+import IndicateurUnFormRemu from "../IndicateurUnFormRemu"
 
 interface IndicateurUnCspFormProps {
   ecartRemuParTrancheAge: Array<EffectifEtEcartRemuGroupCsp>
   readOnly: boolean
-  validateIndicateurUn: (valid: FormState) => void
 }
 
-const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
-  ecartRemuParTrancheAge,
-  readOnly,
-  validateIndicateurUn,
-}) => {
+const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({ ecartRemuParTrancheAge, readOnly }) => {
   const { state, dispatch } = useAppStateContextProvider()
 
   const ecartRemuParTrancheAgeRaw = ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
     id: categorieSocioPro,
-    name: displayNameCSP(categorieSocioPro),
+    nom: displayNameCSP(categorieSocioPro),
     ...otherAttr,
   }))
 
@@ -34,22 +29,22 @@ const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
-    const remunerationAnnuelle = data.map(({ id, tranchesAges }) => ({
+    const remunerationsAnnuelles = data.map(({ id, tranchesAges }) => ({
       categorieSocioPro: id,
       tranchesAges,
     }))
 
-    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationAnnuelle } })
+    dispatch({ type: "updateIndicateurUnCsp", data: { remunerationsAnnuelles } })
   }
 
   if (!state) return null
 
   return (
-    <IndicateurUnFormRaw
+    <IndicateurUnFormRemu
       ecartRemuParTrancheAge={ecartRemuParTrancheAgeRaw}
       readOnly={readOnly}
       updateIndicateurUn={updateIndicateurUnRaw}
-      validateIndicateurUn={validateIndicateurUn}
+      setValidIndicateurUn={() => dispatch({ type: "setValidIndicateurUnCSP" })}
       nextLink={
         <ButtonSimulatorLink
           to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}

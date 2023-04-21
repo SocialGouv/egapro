@@ -7,8 +7,7 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 import { RemunerationPourTrancheAge } from "../../../globals"
 import { useAppStateContextProvider } from "../../../hooks/useAppStateContextProvider"
-import { isFormValid } from "../../../utils/formHelpers"
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
+import IndicateurUnFormRemu from "../IndicateurUnFormRemu"
 import IndicateurUnResult from "../IndicateurUnResult"
 import { TabIndicateurUnCoef, useIndicateurUnContext } from "./IndicateurUnCoef"
 
@@ -29,7 +28,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
 
   if (!state) return null
 
-  const { coefficientEffectifFormValidated } = state.indicateurUn
+  const { coefficientEffectifFormValidated, coefficientRemuFormValidated } = state.indicateurUn
 
   const updateIndicateurUn = (
     data: Array<{
@@ -37,10 +36,10 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
       tranchesAges: Array<RemunerationPourTrancheAge>
     }>,
   ) => {
-    const coefficient = data.map(({ tranchesAges }) => ({
+    const coefficients = data.map(({ tranchesAges }) => ({
       tranchesAges,
     }))
-    dispatch({ type: "updateIndicateurUnCoef", data: { coefficient } })
+    dispatch({ type: "updateIndicateurUnCoef", data: { coefficients } })
   }
 
   // le formulaire d'effectif n'est pas validé
@@ -48,7 +47,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     return (
       <InfoBlock
         type="warning"
-        title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+        title="Vous devez valider les effectifs physiques avant d’accéder à cette étape"
         text={<ActionLink onClick={() => navigateTo("Effectif")}>Renseigner les effectifs</ActionLink>}
       />
     )
@@ -63,7 +62,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
           title="Malheureusement votre indicateur n’est pas calculable"
           text="L’ensemble des groupes valables (c’est-à-dire comptant au
               moins 3 femmes et 3 hommes), représentent moins de 40% des
-              effectifs. Vous devez calculer par CSP."
+              effectifs."
         />
         <ActionBar>
           <ButtonSimulatorLink
@@ -75,16 +74,16 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
     )
   }
 
-  const readOnly = isFormValid(state.indicateurUn)
+  const readOnly = coefficientRemuFormValidated === "Valid"
 
   return (
     <LayoutFormAndResult
       form={
-        <IndicateurUnFormRaw
+        <IndicateurUnFormRemu
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
           updateIndicateurUn={updateIndicateurUn}
-          validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
+          setValidIndicateurUn={() => dispatch({ type: "setValidIndicateurUnCoefRemuneration" })}
           nextLink={
             <ButtonSimulatorLink
               to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
@@ -99,7 +98,7 @@ function IndicateurUnCoefEffectifForm({ navigateTo }: Props) {
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}
             noteIndicateurUn={noteIndicateurUn}
-            validateIndicateurUn={(valid) => dispatch({ type: "validateIndicateurUn", valid })}
+            unsetIndicateurUn={() => dispatch({ type: "unsetIndicateurUnCoefRemuneration" })}
           />
         )
       }

@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event"
 
 import AskEmail from "./AskEmail"
 import * as mockApi from "../utils/api"
+import { act } from "react-dom/test-utils"
 
 test("AskEmail should not accept empty email", () => {
   render(<AskEmail />)
@@ -16,8 +17,13 @@ test("AskEmail should not accept empty email", () => {
 
 test("AskEmail should not accept invalid email", async () => {
   render(<AskEmail />)
-  await userEvent.type(screen.getByLabelText(/Email/i), "invalid")
-  expect(screen.getByLabelText(/Email/i)).toHaveValue("invalid")
+
+  const input = screen.getByLabelText(/Email/i)
+
+  await act(async () => {
+    await userEvent.type(input, "invalid")
+  })
+  expect(input).toHaveValue("invalid")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
   expect(screen.getByText("L'adresse mail est invalide")).toBeInTheDocument()
 })
@@ -27,7 +33,10 @@ test("AskEmail should accept valid email", async () => {
   ;(mockApi.sendValidationEmail as jest.Mock).mockImplementation(() => Promise.resolve())
 
   render(<AskEmail />)
-  await userEvent.type(screen.getByLabelText(/Email/i), "john@maclane.us")
+
+  await act(async () => {
+    await userEvent.type(screen.getByLabelText(/Email/i), "john@maclane.us")
+  })
   expect(screen.getByLabelText(/Email/i)).toHaveValue("john@maclane.us")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
 

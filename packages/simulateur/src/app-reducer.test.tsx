@@ -1,6 +1,6 @@
-import { CSP, TrancheAge, ActionType, AppState } from "./globals"
+import { CSP, TrancheAge, ActionType, AppState, CoefficientGroupe } from "./globals"
 
-import appReducer, { dataIndicateurUnCoefGroup } from "./app-reducer"
+import appReducer, { defaultDataIndicateurUnCoefGroup } from "./app-reducer"
 
 import stateDefault from "./__fixtures__/stateDefault"
 import stateComplete from "./__fixtures__/stateComplete"
@@ -8,6 +8,7 @@ import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate"
 import deepmerge from "deepmerge"
 import { combineMerge } from "./utils/merge"
 import produce from "immer"
+import { calculerValiditeGroupe3 } from "./utils/calculsEgaProIndicateurUn"
 
 const stateUndefined = undefined
 
@@ -223,9 +224,9 @@ describe("updateEffectif", () => {
   })
 })
 
-describe("updateIndicateurUnType", () => {
+describe("updateIndicateurUnModaliteCalcul", () => {
   const action: ActionType = {
-    type: "updateIndicateurUnType",
+    type: "updateIndicateurUnModaliteCalcul",
     data: { modaliteCalcul: undefined },
   }
 
@@ -254,7 +255,7 @@ describe("updateIndicateurUnCsp", () => {
   const action: ActionType = {
     type: "updateIndicateurUnCsp",
     data: {
-      remunerationAnnuelle: [
+      remunerationsAnnuelles: [
         {
           categorieSocioPro: CSP.Ouvriers,
           tranchesAges: [
@@ -395,7 +396,7 @@ describe("updateIndicateurUnCoefAddGroup", () => {
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+      coefficients: [...indicateurUnInitial.coefficients, defaultDataIndicateurUnCoefGroup],
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -406,7 +407,7 @@ describe("updateIndicateurUnCoefAddGroup", () => {
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+      coefficients: [...indicateurUnInitial.coefficients, defaultDataIndicateurUnCoefGroup],
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -427,11 +428,11 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
     const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficients
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: restCoefficients,
+      coefficients: restCoefficients,
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -441,11 +442,11 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
     const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficients
 
     expect(indicateurUn).toStrictEqual({
       ...indicateurUnInitial,
-      coefficient: restCoefficients,
+      coefficients: restCoefficients,
     })
     expect(rest).toStrictEqual(restInitial)
   })
@@ -462,9 +463,9 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
-            name: "Commercial",
+            nom: "Commercial",
           },
         ],
       },
@@ -475,30 +476,26 @@ describe("updateIndicateurUnCoef", () => {
     })
 
     test("change default state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
-
-      const { coefficient: changedCoefficient } = indicateurUnInitial
-      changedCoefficient[0].name = "Commercial"
-
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+      // Only name is supposed to change, so we just patch the initial indicateurUn.
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficients[0].nom = "Commercial"
       })
+      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
+
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
       expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
-
-      const { coefficient: changedCoefficient } = indicateurUnInitial
-      changedCoefficient[0].name = "Commercial"
-
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+      // Only name is supposed to change, so we just patch the initial indicateurUn.
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficients[0].nom = "Commercial"
       })
+      const { indicateurUn, ...rest } = appReducer(stateComplete, action) as AppState
+
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
       expect(rest).toStrictEqual(restInitial)
     })
   })
@@ -507,7 +504,7 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
             tranchesAges: [
               {
@@ -541,19 +538,20 @@ describe("updateIndicateurUnCoef", () => {
     })
 
     test("change default state", () => {
-      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
+      const { indicateurUn, ...rest } = appReducer(stateDefaultWithOneGroup, action) as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
-        // @ts-ignore
-        action.data.coefficient,
-        { arrayMerge: combineMerge },
+        indicateurUnInitial.coefficients,
+        action.data.coefficients as CoefficientGroupe[], // An element in action.data.coefficients is a subset of CoefficientGroupe.
+        {
+          arrayMerge: combineMerge,
+        },
       )
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -563,15 +561,15 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -581,7 +579,7 @@ describe("updateIndicateurUnCoef", () => {
     const action: ActionType = {
       type: "updateIndicateurUnCoef",
       data: {
-        coefficient: [
+        coefficients: [
           {
             tranchesAges: [
               {
@@ -619,15 +617,15 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -637,15 +635,15 @@ describe("updateIndicateurUnCoef", () => {
       const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
 
       const changedCoefficient = deepmerge(
-        indicateurUnInitial.coefficient,
+        indicateurUnInitial.coefficients,
         // @ts-ignore
-        action.data.coefficient,
+        action.data.coefficients,
         { arrayMerge: combineMerge },
       )
 
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
-        coefficient: changedCoefficient,
+        coefficients: changedCoefficient,
       })
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1042,10 +1040,8 @@ describe("validateInformationsSimulation", () => {
       ...informationsInitial,
       formValidated: "Valid",
     })
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
+
     expect(rest).toStrictEqual(restInitial)
   })
 
@@ -1061,10 +1057,8 @@ describe("validateInformationsSimulation", () => {
       ...informationsInitial,
       formValidated: "Valid",
     })
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
+
     expect(rest).toStrictEqual(restInitial)
   })
 })
@@ -1072,8 +1066,7 @@ describe("validateInformationsSimulation", () => {
 describe("validateEffectif", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "Valid",
+      type: "setValidEffectif",
     }
 
     test("nothing undefined state", () => {
@@ -1086,6 +1079,7 @@ describe("validateEffectif", () => {
       const expectedState = produce(stateDefault as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
         draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.modaliteCalculformValidated = "None"
         draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurDeux.formValidated = "Valid"
         draft.indicateurTrois.formValidated = "Valid"
@@ -1110,8 +1104,7 @@ describe("validateEffectif", () => {
 
   describe("None with csp true", () => {
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "None",
+      type: "unsetEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1129,7 +1122,7 @@ describe("validateEffectif", () => {
 
   describe("None with csp false", () => {
     const actionUpdateIndicateurUnType: ActionType = {
-      type: "updateIndicateurUnType",
+      type: "updateIndicateurUnModaliteCalcul",
       data: { modaliteCalcul: undefined },
     }
 
@@ -1148,8 +1141,7 @@ describe("validateEffectif", () => {
     })
 
     const action: ActionType = {
-      type: "validateEffectif",
-      valid: "None",
+      type: "unsetEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1167,8 +1159,7 @@ describe("validateEffectif", () => {
 describe("validateIndicateurUnCoefGroup", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefGroup",
-      valid: "Valid",
+      type: "setValidIndicateurUnCoefGroup",
     }
 
     test("nothing undefined state", () => {
@@ -1186,14 +1177,9 @@ describe("validateIndicateurUnCoefGroup", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientGroupFormValidated: "Valid",
-        coefficientEffectifFormValidated: indicateurUnInitial.coefficientEffectifFormValidated,
-        formValidated: indicateurUnInitial.formValidated,
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1213,10 +1199,7 @@ describe("validateIndicateurUnCoefGroup", () => {
         formValidated: indicateurUnInitial.formValidated,
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1224,8 +1207,7 @@ describe("validateIndicateurUnCoefGroup", () => {
 
   describe("None", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefGroup",
-      valid: "None",
+      type: "unsetIndicateurUnCoefGroup",
     }
 
     test("invalid complete validate state", () => {
@@ -1239,8 +1221,7 @@ describe("validateIndicateurUnCoefGroup", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientGroupFormValidated: "None",
-        coefficientEffectifFormValidated: "Invalid",
-        formValidated: "Invalid",
+        formValidated: "None",
       })
 
       expect(declaration).toStrictEqual({
@@ -1256,8 +1237,7 @@ describe("validateIndicateurUnCoefGroup", () => {
 describe("validateIndicateurUnCoefEffectif", () => {
   describe("Valid", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefEffectif",
-      valid: "Valid",
+      type: "setValidIndicateurUnCoefEffectif",
     }
 
     test("nothing undefined state", () => {
@@ -1272,16 +1252,15 @@ describe("validateIndicateurUnCoefEffectif", () => {
         ...restInitial
       } = stateDefault as AppState
 
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficientEffectifFormValidated: "Valid",
-        formValidated: indicateurUnInitial.formValidated,
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficientEffectifFormValidated = "Valid"
+        draft.coefficientRemuFormValidated = "Valid"
+        draft.formValidated = "Valid"
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
+
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1294,16 +1273,22 @@ describe("validateIndicateurUnCoefEffectif", () => {
         ...restInitial
       } = stateComplete as AppState
 
-      expect(indicateurUn).toStrictEqual({
-        ...indicateurUnInitial,
-        coefficientEffectifFormValidated: "Valid",
-        formValidated: indicateurUnInitial.formValidated,
+      const patchedIndicateurUnInitial = produce(indicateurUnInitial, (draft) => {
+        draft.coefficientEffectifFormValidated = "Valid"
+
+        draft.coefficients.forEach((categorie) => {
+          categorie.tranchesAges.forEach((trancheAge) => {
+            if (!calculerValiditeGroupe3(trancheAge.nombreSalariesFemmes || 0, trancheAge.nombreSalariesHommes || 0)) {
+              trancheAge.remunerationAnnuelleBrutFemmes = 0
+              trancheAge.remunerationAnnuelleBrutHommes = 0
+            }
+          })
+        })
       })
 
-      expect(declaration).toStrictEqual({
-        ...declarationInitial,
-        formValidated: declarationInitial.formValidated,
-      })
+      expect(indicateurUn).toStrictEqual(patchedIndicateurUnInitial)
+
+      expect(declaration).toStrictEqual(declarationInitial)
 
       expect(rest).toStrictEqual(restInitial)
     })
@@ -1311,8 +1296,7 @@ describe("validateIndicateurUnCoefEffectif", () => {
 
   describe("None", () => {
     const action: ActionType = {
-      type: "validateIndicateurUnCoefEffectif",
-      valid: "None",
+      type: "unsetIndicateurUnCoefEffectif",
     }
 
     test("invalid complete validate state", () => {
@@ -1326,7 +1310,7 @@ describe("validateIndicateurUnCoefEffectif", () => {
       expect(indicateurUn).toStrictEqual({
         ...indicateurUnInitial,
         coefficientEffectifFormValidated: "None",
-        formValidated: "Invalid",
+        formValidated: "None",
       })
 
       expect(declaration).toStrictEqual({
@@ -1341,8 +1325,8 @@ describe("validateIndicateurUnCoefEffectif", () => {
 
 describe("validateIndicateurUn", () => {
   const action: ActionType = {
-    type: "validateIndicateurUn",
-    valid: "Valid",
+    // type: "validateIndicateurUn",
+    type: "setValidIndicateurUnCSP",
   }
 
   test("nothing undefined state", () => {
@@ -1362,10 +1346,7 @@ describe("validateIndicateurUn", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1383,10 +1364,7 @@ describe("validateIndicateurUn", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1415,10 +1393,7 @@ describe("validateIndicateurDeux", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1436,10 +1411,7 @@ describe("validateIndicateurDeux", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1468,10 +1440,7 @@ describe("validateIndicateurTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1489,10 +1458,7 @@ describe("validateIndicateurTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1521,10 +1487,7 @@ describe("validateIndicateurDeuxTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1542,10 +1505,7 @@ describe("validateIndicateurDeuxTrois", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1574,10 +1534,7 @@ describe("validateIndicateurQuatre", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1595,10 +1552,7 @@ describe("validateIndicateurQuatre", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1627,10 +1581,7 @@ describe("validateIndicateurCinq", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1648,10 +1599,7 @@ describe("validateIndicateurCinq", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1680,10 +1628,7 @@ describe("validateInformationsEntreprise", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1701,10 +1646,7 @@ describe("validateInformationsEntreprise", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1733,10 +1675,7 @@ describe("validateInformationsDeclarant", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1754,10 +1693,7 @@ describe("validateInformationsDeclarant", () => {
       formValidated: "Valid",
     })
 
-    expect(declaration).toStrictEqual({
-      ...declarationInitial,
-      formValidated: declarationInitial.formValidated,
-    })
+    expect(declaration).toStrictEqual(declarationInitial)
 
     expect(rest).toStrictEqual(restInitial)
   })
@@ -1771,7 +1707,7 @@ describe("validateDeclaration", () => {
     valid: "Valid",
     // @ts-ignore: see comment above
     indicateurUnData: {
-      coefficient: [],
+      coefficients: [],
       motifNonCalculable: "",
       nombreCoefficients: 6,
       noteFinale: 31,

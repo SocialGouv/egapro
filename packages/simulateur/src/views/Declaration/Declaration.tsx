@@ -107,11 +107,12 @@ function buildHelpers(state: AppState) {
     isFormValid(state.indicateurCinq)
 
   const indicateurUnData: DeclarationIndicateurUnData = {
-    nombreCoefficients: state.indicateurUn.modaliteCalcul === "csp" ? undefined : state.indicateurUn.coefficient.length,
+    nombreCoefficients:
+      state.indicateurUn.modaliteCalcul === "csp" ? undefined : state.indicateurUn.coefficients.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
-    remunerationAnnuelle: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
-    coefficient: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
+    remunerationsAnnuelles: calculerEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationsAnnuelles),
+    coefficients: calculerEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficients),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn,
@@ -371,7 +372,6 @@ const Declaration = ({ code }: DeclarationProps) => {
   // tous les formulaires ne sont pas encore validés
   if (
     !allIndicateursCompliant ||
-    !isFormValid(state.informations) ||
     !isFormValid(state.effectif) ||
     !isFormValid(state.informationsEntreprise) ||
     !isFormValid(state.informationsDeclarant)
@@ -386,11 +386,6 @@ const Declaration = ({ code }: DeclarationProps) => {
           Les pages suivantes ne sont pas validées
         </Heading>
         <UnorderedList mt={2}>
-          {!isFormValid(state.informations) && (
-            <ListItem>
-              <TextSimulatorLink to="/informations" label="Informations calcul et période de référence" />
-            </ListItem>
-          )}
           {!isFormValid(state.effectif) && (
             <ListItem>
               <TextSimulatorLink to="/effectifs" label="Effectifs pris en compte" />

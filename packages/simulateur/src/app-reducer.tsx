@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge"
 
-import type { ActionType, AppState, PeriodeDeclaration } from "./globals"
+import type { ActionType, AppState, CoefficientGroupe, PeriodeDeclaration, RemunerationsPourCSP } from "./globals"
 
 import { CSP, TrancheAge } from "./globals"
 import calculerIndicateurDeux from "./utils/calculsEgaProIndicateurDeux"
@@ -10,8 +10,10 @@ import { datetimeToFrString } from "./utils/date"
 import { isFormValid } from "./utils/formHelpers"
 import mapEnum from "./utils/mapEnum"
 import { combineMerge, overwriteMerge } from "./utils/merge"
+import produce from "immer"
+import calculerIndicateurUn, { calculerValiditeGroupe3 } from "./utils/calculsEgaProIndicateurUn"
 
-const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
@@ -20,18 +22,21 @@ const dataEffectif = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   })),
 }))
 
-const dataIndicateurUnCsp = mapEnum(CSP, (categorieSocioPro: CSP) => ({
-  categorieSocioPro,
-  tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
-    trancheAge,
-    remunerationAnnuelleBrutFemmes: undefined,
-    remunerationAnnuelleBrutHommes: undefined,
-    ecartTauxRemuneration: undefined,
-  })),
-}))
+const defaultDataIndicateurUnCsp = mapEnum(
+  CSP,
+  (categorieSocioPro: CSP): RemunerationsPourCSP => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
+      trancheAge,
+      remunerationAnnuelleBrutFemmes: undefined,
+      remunerationAnnuelleBrutHommes: undefined,
+      ecartTauxRemuneration: undefined,
+    })),
+  }),
+)
 
-export const dataIndicateurUnCoefGroup = {
-  name: "",
+export const defaultDataIndicateurUnCoefGroup: CoefficientGroupe = {
+  nom: "",
   tranchesAges: mapEnum(TrancheAge, (trancheAge: TrancheAge) => ({
     trancheAge,
     nombreSalariesFemmes: undefined,
@@ -42,14 +47,14 @@ export const dataIndicateurUnCoefGroup = {
   })),
 }
 
-const dataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataIndicateurDeux = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxAugmentationFemmes: undefined,
   tauxAugmentationHommes: undefined,
   ecartTauxAugmentation: undefined,
 }))
 
-const dataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
+const defaultDataIndicateurTrois = mapEnum(CSP, (categorieSocioPro: CSP) => ({
   categorieSocioPro,
   tauxPromotionFemmes: undefined,
   tauxPromotionHommes: undefined,
@@ -67,25 +72,27 @@ const defaultState: AppState = {
   },
   effectif: {
     formValidated: "None",
-    nombreSalaries: dataEffectif,
+    nombreSalaries: defaultDataEffectif,
   },
   indicateurUn: {
     formValidated: "None",
-    modaliteCalcul: "csp",
-    remunerationAnnuelle: dataIndicateurUnCsp,
+    modaliteCalcul: undefined,
+    modaliteCalculformValidated: "None",
+    remunerationsAnnuelles: defaultDataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",
-    coefficient: [],
+    coefficientRemuFormValidated: "None",
+    coefficients: [],
   },
   indicateurDeux: {
     formValidated: "None",
     presenceAugmentation: true,
-    tauxAugmentation: dataIndicateurDeux,
+    tauxAugmentation: defaultDataIndicateurDeux,
   },
   indicateurTrois: {
     formValidated: "None",
     presencePromotion: true,
-    tauxPromotion: dataIndicateurTrois,
+    tauxPromotion: defaultDataIndicateurTrois,
   },
   indicateurDeuxTrois: {
     formValidated: "None",
@@ -253,72 +260,69 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         effectif: { ...state.effectif, nombreSalaries },
       }
     }
-    case "validateEffectif": {
-      if (action.valid === "None") {
-        return {
-          ...state,
-          effectif: { ...state.effectif, formValidated: "None" },
-        }
-      } else if (action.valid === "Valid") {
-        /* Recalcul sur les indicateurs dépendants des effectifs.
+    case "unsetEffectif": {
+      return {
+        ...state,
+        effectif: { ...state.effectif, formValidated: "None" },
+      }
+    }
+    case "setValidEffectif": {
+      /* Recalcul sur les indicateurs dépendants des effectifs.
 
         Logique:
         Pour le calculsIndicateurX
           => si non calculable, on reset l'indicateurX + formValidated = "Valid", c'est à dire qu'il devient OK et la coche doit être verte.
           => si calculable
-            => si state.indicateurX.formValidated === "Valid" => formValidated = "Invalid"
-            => sinon (donc Invalid ou None) copier tel quel
+            => si state.indicateurX.formValidated === "Valid" => formValidated = "Invalid", pour indiquer qu'il faut revalider les données
+            => sinon (donc Invalid ou None), laisser tel quel
         */
 
-        const newIndicateurUn = state.indicateurUn
-        let newIndicateurDeux = state.indicateurDeux
-        let newIndicateurTrois = state.indicateurTrois
-        let newIndicateurDeuxTrois = state.indicateurDeuxTrois
+      return produce(state, (draft) => {
+        draft.effectif.formValidated = "Valid"
 
-        if (newIndicateurUn.formValidated === "Valid") {
-          // For this indicator, we let the previous data and we just set the formValidated to "Invalid" to force user to confirm its data.
-          // The reason is that indicator 1 has a mini wizard in it with coefficient.
-          newIndicateurUn.formValidated = "Invalid"
-          newIndicateurUn.coefficientEffectifFormValidated = "Invalid"
+        if (state.indicateurUn.modaliteCalcul === "csp") {
+          if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+            draft.indicateurUn = { ...defaultState.indicateurUn, modaliteCalcul: "csp" }
+            draft.indicateurUn.formValidated = "Valid"
+            draft.indicateurUn.modaliteCalculformValidated = "Valid"
+          } else {
+            draft.indicateurUn.formValidated = "None"
+          }
+        } else {
+          // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
+          draft.indicateurUn.formValidated = "None"
+          draft.indicateurUn.coefficientEffectifFormValidated = "None"
         } // else we let the state unchanged
 
         if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
-          newIndicateurDeux = defaultState.indicateurDeux
-          newIndicateurDeux.formValidated = "Valid"
-        } else if (newIndicateurDeux.formValidated === "Valid") {
-          newIndicateurDeux.formValidated = "Invalid"
+          draft.indicateurDeux = { ...defaultState.indicateurDeux }
+          draft.indicateurDeux.formValidated = "Valid"
+        } else if (draft.indicateurDeux.formValidated === "Valid") {
+          draft.indicateurDeux.formValidated = "Invalid"
         } // else we let the state unchanged
 
         if (!calculerIndicateurTrois(state).effectifsIndicateurCalculable) {
-          newIndicateurTrois = defaultState.indicateurTrois
-          newIndicateurTrois.formValidated = "Valid"
-        } else if (newIndicateurTrois.formValidated === "Valid") {
-          newIndicateurTrois.formValidated = "Invalid"
+          draft.indicateurTrois = { ...defaultState.indicateurTrois }
+          draft.indicateurTrois.formValidated = "Valid"
+        } else if (draft.indicateurTrois.formValidated === "Valid") {
+          draft.indicateurTrois.formValidated = "Invalid"
         } // else we let the state unchanged
 
         if (!calculerIndicateurDeuxTrois(state).effectifsIndicateurCalculable) {
-          newIndicateurDeuxTrois = defaultState.indicateurDeuxTrois
-          newIndicateurDeuxTrois.formValidated = "Valid"
-        } else if (newIndicateurDeuxTrois.formValidated === "Valid") {
-          newIndicateurDeuxTrois.formValidated = "Invalid"
+          draft.indicateurDeuxTrois = { ...defaultState.indicateurDeuxTrois }
+          draft.indicateurDeuxTrois.formValidated = "Valid"
+        } else if (draft.indicateurDeuxTrois.formValidated === "Valid") {
+          draft.indicateurDeuxTrois.formValidated = "Invalid"
         } // else we let the state unchanged
-
-        return {
-          ...state,
-          effectif: { ...state.effectif, formValidated: action.valid },
-          // Si les nouveaux effectifs, rendent non calculables les indicateurs 2, 3 ou 2&3, alors on les met à Valid.
-          indicateurUn: newIndicateurUn,
-          indicateurDeux: newIndicateurDeux,
-          indicateurTrois: newIndicateurTrois,
-          indicateurDeuxTrois: newIndicateurDeuxTrois,
-        }
-      }
+      })
+    }
+    case "setInvalidEffectif": {
       return {
         ...state,
-        effectif: { ...state.effectif, formValidated: action.valid },
+        effectif: { ...state.effectif, formValidated: "Invalid" },
       }
     }
-    case "updateIndicateurUnType": {
+    case "updateIndicateurUnModaliteCalcul": {
       const { modaliteCalcul } = action.data
       return {
         ...state,
@@ -326,88 +330,173 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "updateIndicateurUnCsp": {
-      const { remunerationAnnuelle } = action.data
+      const { remunerationsAnnuelles } = action.data
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, remunerationAnnuelle },
+        indicateurUn: { ...state.indicateurUn, remunerationsAnnuelles },
       }
     }
+    // TODO: devrait avoir un impact sur les champs effectifs et rémunérations
     case "updateIndicateurUnCoefAddGroup": {
-      const newGroupCoef = { ...dataIndicateurUnCoefGroup } // Clone to avoid mutable issues
-      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef]
+      const newGroupCoef = { ...defaultDataIndicateurUnCoefGroup } // Clone to avoid mutable issues
+      const coefficient = [...state.indicateurUn.coefficients, newGroupCoef]
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, coefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: coefficient },
       }
     }
+    // TODO: devrait avoir un impact sur les champs effectifs et rémunérations
     case "updateIndicateurUnCoefDeleteGroup": {
       const coefficient = [
-        ...state.indicateurUn.coefficient.slice(0, action.index),
-        ...state.indicateurUn.coefficient.slice(action.index + 1, state.indicateurUn.coefficient.length),
+        ...state.indicateurUn.coefficients.slice(0, action.index),
+        ...state.indicateurUn.coefficients.slice(action.index + 1, state.indicateurUn.coefficients.length),
       ]
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, coefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: coefficient },
       }
     }
+    // Utilisé par l'onglet pour les groupes, pour les effectifs et pour les rémunérations...
     case "updateIndicateurUnCoef": {
-      const { coefficient } = action.data
+      const { coefficients } = action.data
 
       const mergedCoefficient = deepmerge(
-        state.indicateurUn.coefficient,
+        state.indicateurUn.coefficients,
         // @ts-ignore
-        coefficient,
+        coefficients,
         { arrayMerge: combineMerge },
       )
       return {
         ...state,
         // @ts-ignore
-        indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient },
+        indicateurUn: { ...state.indicateurUn, coefficients: mergedCoefficient },
       }
     }
-    case "validateIndicateurUnCoefGroup": {
-      return {
-        ...state,
-        indicateurUn: {
-          ...state.indicateurUn,
-          coefficientGroupFormValidated: action.valid,
-          coefficientEffectifFormValidated:
-            action.valid === "None" && state.indicateurUn.coefficientEffectifFormValidated === "Valid"
-              ? "Invalid"
-              : state.indicateurUn.coefficientEffectifFormValidated,
-          formValidated:
-            action.valid === "None" && isFormValid(state.indicateurUn) ? "Invalid" : state.indicateurUn.formValidated,
-        },
-        declaration: {
-          ...state.declaration,
-          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
-        },
-      }
+    case "setValidIndicateurUnCSP": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.formValidated = "Valid"
+      })
     }
-    case "validateIndicateurUnCoefEffectif": {
-      return {
-        ...state,
-        indicateurUn: {
-          ...state.indicateurUn,
-          coefficientEffectifFormValidated: action.valid,
-          formValidated:
-            action.valid === "None" && isFormValid(state.indicateurUn) ? "Invalid" : state.indicateurUn.formValidated,
-        },
-        declaration: {
-          ...state.declaration,
-          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
-        },
-      }
+    case "setInvalidIndicateurUnCSP": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.formValidated = "Invalid"
+      })
     }
-    case "validateIndicateurUn": {
-      return {
-        ...state,
-        indicateurUn: { ...state.indicateurUn, formValidated: action.valid },
-        declaration: {
-          ...state.declaration,
-          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
-        },
-      }
+    case "unsetIndicateurUnCSP": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
+      })
+    }
+    case "setValidIndicateurUnCoefGroup": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientGroupFormValidated = "Valid"
+        // When groups changed, we need to ensure to go to effectif and remu tabs for validation to be done.
+        draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.coefficientEffectifFormValidated = "None"
+        draft.indicateurUn.coefficientRemuFormValidated = "None"
+      })
+    }
+    case "setInvalidIndicateurUnCoefGroup": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientGroupFormValidated = "Invalid"
+        draft.indicateurUn.formValidated = "Invalid"
+      })
+    }
+    case "unsetIndicateurUnCoefGroup": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientGroupFormValidated = "None"
+        draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
+      })
+    }
+    case "setValidIndicateurUnCoefEffectif": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientEffectifFormValidated = "Valid"
+        // When effectifs changed, we need to ensure to go to remu tab for validation to be done.
+        draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.coefficientRemuFormValidated = "None"
+
+        if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+          draft.indicateurUn.formValidated = "Valid"
+          draft.indicateurUn.coefficientRemuFormValidated = "Valid"
+        }
+
+        // We have to traverse the coefficients to check if some groups are now invalid.
+        // If so, we have to reset the remuneration to 0.
+        draft.indicateurUn.coefficients.forEach((categorie) => {
+          categorie.tranchesAges.forEach((trancheAge) => {
+            if (!calculerValiditeGroupe3(trancheAge.nombreSalariesFemmes || 0, trancheAge.nombreSalariesHommes || 0)) {
+              trancheAge.remunerationAnnuelleBrutFemmes = 0
+              trancheAge.remunerationAnnuelleBrutHommes = 0
+            }
+          })
+        })
+      })
+    }
+    case "setInvalidIndicateurUnCoefEffectif": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientEffectifFormValidated = "Invalid"
+        draft.indicateurUn.formValidated = "Invalid"
+      })
+    }
+    case "unsetIndicateurUnCoefEffectif": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientEffectifFormValidated = "None"
+        draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
+      })
+    }
+    case "setValidIndicateurUnCoefRemuneration": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientRemuFormValidated = "Valid"
+        draft.indicateurUn.formValidated =
+          state.indicateurUn.coefficientGroupFormValidated === "Valid" &&
+          state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+            ? "Valid"
+            : "None"
+      })
+    }
+    case "setInvalidIndicateurUnCoefRemuneration": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientRemuFormValidated = "Invalid"
+        draft.indicateurUn.formValidated = "Invalid"
+      })
+    }
+    case "unsetIndicateurUnCoefRemuneration": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.coefficientRemuFormValidated = "None"
+        draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
+      })
+    }
+    case "setValidIndicateurUnModaliteCalcul": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.modaliteCalculformValidated = "Valid"
+
+        if (draft.indicateurUn.modaliteCalcul !== "csp") {
+          draft.indicateurUn.formValidated =
+            state.indicateurUn.coefficientGroupFormValidated === "Valid" &&
+            state.indicateurUn.coefficientEffectifFormValidated === "Valid" &&
+            state.indicateurUn.coefficientRemuFormValidated === "Valid"
+              ? "Valid"
+              : "None"
+        } else {
+          if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+            draft.indicateurUn.formValidated = "Valid"
+            draft.indicateurUn.modaliteCalculformValidated = "Valid"
+          } else {
+            draft.indicateurUn.formValidated = "None"
+          }
+        }
+      })
+    }
+    case "unsetIndicateurUnModaliteCalcul": {
+      return produce(state, (draft) => {
+        draft.indicateurUn.modaliteCalculformValidated = "None"
+        draft.indicateurUn.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
+      })
     }
     case "updateIndicateurDeux": {
       const { tauxAugmentation, presenceAugmentation } = action.data

@@ -31,6 +31,7 @@ import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { estCalculable } from "../../utils/helpers"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import calculerIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 // NB : some fields (like RadioButton Oui/Non) are only validated at field-level.
 const validateForm = ({
@@ -107,6 +108,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
   if (!state) return null
 
   const { declaration, informations, informationsEntreprise } = state
+
+  const isIndicateurUnCoefCalculable = calculerIndicateurUn(state).effectifsIndicateurCalculable
 
   const estCalculableIndex = estCalculable(noteIndex)
   const finPeriodeReference = informations.finPeriodeReference
@@ -215,7 +218,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({ noteIndex, v
                   // MesuresCorrection has its own validation at the component level.
                   <MesuresCorrection readOnly={readOnly} />
                 )}
-                {state.indicateurUn.modaliteCalcul !== "csp" && (
+                {state.indicateurUn.modaliteCalcul !== "csp" && isIndicateurUnCoefCalculable && (
                   <>
                     {informationsEntreprise.structure === "Entreprise" && (
                       <RequiredRadiosBoolean
