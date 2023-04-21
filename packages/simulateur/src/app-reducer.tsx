@@ -285,8 +285,8 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
             draft.indicateurUn = { ...defaultState.indicateurUn, modaliteCalcul: "csp" }
             draft.indicateurUn.formValidated = "Valid"
             draft.indicateurUn.modaliteCalculformValidated = "Valid"
-          } else {
-            draft.indicateurUn.formValidated = "None"
+          } else if (draft.indicateurUn.formValidated === "Valid") {
+            draft.indicateurUn.formValidated = "Invalid"
           }
         } else {
           // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
