@@ -35,7 +35,7 @@ export interface AverageIndicatorFormProps {
 const yearsDisplayed = PUBLIC_YEARS_DESC.map(y => y + 1);
 
 const getQuery = moize(
-  (data: AverageIndicatorFormType) => {
+  (data: Partial<AverageIndicatorFormType>) => {
     const newData = { ...data };
     if (newData.region && newData.departement) {
       if (REGIONS_TO_COUNTIES[newData.region].includes(newData.departement)) {
@@ -61,7 +61,8 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
   const regionSelected = watch("region");
 
   const onSubmit = (data: AverageIndicatorFormType) => {
-    const query = getQuery(data);
+    const { year: _, ...newData } = data;
+    const query = getQuery(newData);
     router.push(`${pathname}/recherche?${query}`);
   };
   const onChange = (data: AverageIndicatorFormType) => {
@@ -71,7 +72,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} onChange={handleSubmit(onChange)}>
-      <Container fluid dsfrClassName={["fr-btns-group--center"]}>
+      <Container fluid className={fr.cx("fr-btns-group--center")}>
         <Grid haveGutters align="center">
           <GridCol sm={6}>
             <Select

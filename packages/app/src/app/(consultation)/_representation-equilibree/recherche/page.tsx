@@ -3,17 +3,16 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Container, Grid, GridCol, Heading } from "@design-system";
+import { Box, Container, DetailedDownload, Grid, GridCol, Heading } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
-import _ from "lodash";
+import { isEmpty, isFinite } from "lodash";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { DetailedDownload } from "../../../../design-system/base/DetailedDownload";
-import { FormSearchSiren, type FormTypeInput } from "./FormSearchSiren";
+import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
 import { NextPageLink } from "./NextPageLink";
 
 type WithPageFormType = FormTypeInput & { page?: string };
@@ -21,9 +20,8 @@ const ConsulterRepEq = async ({
   searchParams: { page = "0", ...searchParams },
 }: NextServerPageProps<"", WithPageFormType>) => {
   let pageNumber = Number(page);
-  pageNumber = _.isFinite(pageNumber) ? Math.max(0, pageNumber) : 0;
+  pageNumber = isFinite(pageNumber) ? Math.max(0, pageNumber) : 0;
 
-  //  dsfrClassName="fr-mb-4w"
   return (
     <>
       <Container as="section">
@@ -36,12 +34,12 @@ const ConsulterRepEq = async ({
           </GridCol>
         </Grid>
       </Container>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} dsfrClassName="fr-pb-4w">
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-4w")}>
         <Container as="section">
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
-                {!_.isEmpty(searchParams) && (
+                {!isEmpty(searchParams) && (
                   // @ts-ignore
                   <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
                 )}
@@ -92,10 +90,17 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
         </ClientAnimate>
       </Container>
       <Box mt="3w">
-        <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-sm", "fr-btns-group--left")}>
+        <ul
+          className={fr.cx(
+            "fr-btns-group",
+            "fr-btns-group--inline-sm",
+            "fr-btns-group--left",
+            "fr-btns-group--icon-left",
+          )}
+        >
           <li>
-            <ScrollTopButton smooth skipHeader title="Revenir en haut" priority="tertiary">
-              Revenir en haut
+            <ScrollTopButton smooth skipHeader>
+              Haut de page
             </ScrollTopButton>
           </li>
           {totalLength < count && (

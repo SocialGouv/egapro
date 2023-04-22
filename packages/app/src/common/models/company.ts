@@ -9,7 +9,7 @@ export type CompanyType = {
     raison_sociale: string;
     région: string;
     siren: string;
-    ues: { entreprises: Array<{ raison_sociale: string; siren: string }>; nom: string };
+    ues?: { entreprises: Array<{ raison_sociale: string; siren: string }>; nom: string };
   };
   label: string;
   notes: Record<number, number>;

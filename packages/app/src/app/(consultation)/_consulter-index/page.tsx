@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
+import { fr } from "@codegouvfr/react-dsfr";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { config } from "@common/config";
 import { DISPLAY_CURRENT_YEAR, DISPLAY_PUBLIC_YEARS } from "@common/dict";
@@ -9,10 +10,6 @@ import { fetchStatsV2 } from "@services/apiClient/useStatsV2";
 import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
 
 import { AverageIndicatorForm, type AverageIndicatorFormType } from "./AverageIndicatorForm";
-
-// todo: /_consulter-index?year=2023 (last year) by default
-// then /_xx?year=2023&region=xx&departement.... and so on
-// server side fetching and rendering
 
 const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageIndicatorFormType>) => {
   const intYear = parseInt(String(searchParams.year)) || DISPLAY_CURRENT_YEAR;
@@ -50,15 +47,15 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
           </GridCol>
         </Grid>
       </Container>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} dsfrClassName="fr-pb-4w">
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-4w")}>
         <Container as="section">
           <Grid haveGutters align="center">
             <GridCol md={4} lg={5} />
             <GridCol sm={12} md={4} lg={2}>
               {average ? (
-                <Stat display="lg" text={average} helpText={`Index Moyen ${+searchParams.year}`} />
+                <Stat display={{ asTitle: "lg" }} text={average} helpText={`Index Moyen ${+searchParams.year}`} />
               ) : (
-                <Stat display="lg" text="N/A" helpText={`Index Moyen ${+searchParams.year}`} />
+                <Stat display={{ asTitle: "lg" }} text="N/A" helpText={`Index Moyen ${+searchParams.year}`} />
               )}
             </GridCol>
             <GridCol md={4} lg={5} />

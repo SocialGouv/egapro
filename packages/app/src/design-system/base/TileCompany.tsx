@@ -1,18 +1,34 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import type { Any } from "@common/utils/types";
 import { clsx } from "clsx";
 import type { PropsWithChildren } from "react";
 
 import { FormButton } from "./FormButton";
+import { Grid } from "./Grid";
 import style from "./TileCompany.module.css";
+import { Text } from "./Typography";
 
 export const TileCompany = ({ children }: PropsWithChildren) => <div className={style.tile}>{children}</div>;
 
 export type TileCompanyTitleProps = PropsWithChildren<{
-  titleAs?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p";
+  ues?: boolean;
 }>;
 
-export const TileCompanyTitle = ({ children, titleAs: HtmlTag = "h2" }: TileCompanyTitleProps) => {
-  return <HtmlTag className={style.title}>{children}</HtmlTag>;
+export const TileCompanyTitle = ({ children, ues }: TileCompanyTitleProps) => {
+  return (
+    <Grid valign="middle">
+      <Text inline variant={["xl", "bold"]} className={fr.cx("fr-m-0", "fr-mr-1w")} text={children} />
+      {ues && (
+        <div>
+          <Badge style={{ verticalAlign: "middle" }}>
+            <span aria-hidden className={fr.cx("fr-icon-building-fill", "fr-icon--sm", "fr-mr-1v")}></span>
+            <span>UES</span>
+          </Badge>
+        </div>
+      )}
+    </Grid>
+  );
 };
 
 export const TileCompanySiren = ({ children }: PropsWithChildren) => <div className={style.siren}>{children}</div>;
@@ -61,6 +77,11 @@ export const TileCompanyYear = ({ year }: { year: number }) => (
   <>
     <div className={style.tableYear}>{year}</div>
     <div className={style.tableYearLegend}>(données {year - 1})</div>
+  </>
+);
+export const TileCompanyScore = ({ score }: { score: number | string }) => (
+  <>
+    <div className={style.tableScore}>{score}</div>
   </>
 );
 

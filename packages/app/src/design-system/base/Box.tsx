@@ -1,4 +1,4 @@
-import { fr, type FrCxArg } from "@codegouvfr/react-dsfr";
+import { fr } from "@codegouvfr/react-dsfr";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { forwardRef, type PropsWithChildren } from "react";
 
@@ -9,13 +9,11 @@ export type BoxProps = PropsWithChildren<
     SpacingProps & {
       as?: "article" | "div" | "footer" | "section";
       className?: CxArg;
-      dsfrClassName?: FrCxArg;
     }
 >;
 
 const boxProps = ({
   className,
-  dsfrClassName,
   mt,
   mr,
   mb,
@@ -30,10 +28,7 @@ const boxProps = ({
   py,
   ...rest
 }: Omit<BoxProps, "as">): React.HTMLAttributes<HTMLDivElement> => ({
-  className: cx(
-    fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py }), dsfrClassName),
-    className,
-  ),
+  className: cx(fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py })), className),
   ...rest,
 });
 

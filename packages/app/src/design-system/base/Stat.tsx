@@ -1,20 +1,26 @@
+import { fr } from "@codegouvfr/react-dsfr";
+
 import { Box } from "./Box";
-import { type HeadingProps, Text } from "./Typography";
+import { type HeadingProps, Text, type TextProps } from "./Typography";
 
 export interface StatProps {
   align?: "center" | "left" | "right";
-  display?: HeadingProps["display"];
+  display?: { asText: TextProps<false>["variant"] } | { asTitle: HeadingProps["display"] };
   helpText?: string;
   label?: string;
   text: string;
 }
 
-export const Stat = ({ text, display = "lg", helpText, label, align = "center" }: StatProps) => {
+export const Stat = ({ text, display = { asTitle: "lg" }, helpText, label, align = "center" }: StatProps) => {
   return (
     <Box style={{ textAlign: align }}>
-      {label && <Text text={label} variant="md" dsfrClassName="fr-m-0" />}
-      <Text text={text} dsfrClassName={[`fr-display--${display}`, "fr-m-0"]} />
-      {helpText && <Text text={helpText} variant="bold" dsfrClassName="fr-m-0" />}
+      {label && <Text text={label} variant="md" className={fr.cx("fr-m-0")} />}
+      <Text
+        text={text}
+        {...("asText" in display ? { variant: display.asText } : {})}
+        className={fr.cx("asTitle" in display && display.asTitle && `fr-display--${display.asTitle}`, "fr-m-0")}
+      />
+      {helpText && <Text text={helpText} variant="bold" className={fr.cx("fr-m-0")} />}
     </Box>
   );
 };

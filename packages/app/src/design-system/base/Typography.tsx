@@ -1,19 +1,17 @@
-import { fr, type FrCxArg } from "@codegouvfr/react-dsfr";
+import { fr } from "@codegouvfr/react-dsfr";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { type PropsWithoutChildren } from "@common/utils/types";
 import { buildSpacingClasses, type SpacingProps } from "@design-system/utils/spacing";
-import { forwardRef } from "react";
+import { type ForwardedRef, forwardRef, type ReactNode } from "react";
 
 type TypoVariant = (typeof fr.typography)[number]["selector"];
 export type TypographyProps = SpacingProps & {
   className?: CxArg;
-  dsfrClassName?: FrCxArg;
-  text: string;
+  text: ReactNode;
 };
 
 const typographyProps = <P extends Omit<TypographyProps, "text">>({
   className,
-  dsfrClassName,
   mt,
   mr,
   mb,
@@ -28,10 +26,7 @@ const typographyProps = <P extends Omit<TypographyProps, "text">>({
   py,
   ...rest
 }: P) => ({
-  className: cx(
-    fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py }), dsfrClassName),
-    className,
-  ),
+  className: cx(fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py })), className),
   ...rest,
 });
 
@@ -105,15 +100,18 @@ export const HeadingRef = forwardRef<HTMLHeadingElement, HeadingProps>(({ as: Ht
 HeadingRef.displayName = "HeadingRef";
 
 type TextVariant = TypoVariant extends infer R ? (R extends `.fr-text--${infer T}` ? T : never) : never;
-type TextAttributes = React.HTMLAttributes<HTMLParagraphElement>;
-export type TextProps = TextAttributes &
+type TextAttributes<Inline extends boolean> = Inline extends true
+  ? React.HTMLAttributes<HTMLSpanElement>
+  : React.HTMLAttributes<HTMLParagraphElement>;
+export type TextProps<Inline extends boolean> = TextAttributes<Inline> &
   TypographyProps & {
-    variant?: TextVariant;
+    inline?: Inline;
+    variant?: TextVariant | TextVariant[];
   };
 
-const textProps = ({ variant, ...rest }: Omit<TextProps, "text">) => {
+const textProps = ({ variant, ...rest }: Omit<TextProps<boolean>, "inline" | "text">) => {
   const tagProps = typographyProps(rest);
-  tagProps.className = cx(tagProps.className, fr.cx(variant && `fr-text--${variant}`));
+  tagProps.className = cx(tagProps.className, fr.cx(variant && [variant].flat().map(v => `fr-text--${v}` as const)));
 
   return tagProps;
 };
@@ -121,14 +119,22 @@ const textProps = ({ variant, ...rest }: Omit<TextProps, "text">) => {
 /**
  * @see https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-de-l-identite-de-l-etat/typographie/#:~:text=Corps%20de%20texte
  */
-export const Text = ({ text, ...rest }: TextProps) => <p {...textProps(rest)}>{text}</p>;
+export const Text = <Inline extends boolean>({ inline, text, ...rest }: TextProps<Inline>) =>
+  inline ? <span {...textProps(rest)}>{text}</span> : <p {...textProps(rest)}>{text}</p>;
 
 /**
  * Ref version of {@link Text}
  */
-export const TextRef = forwardRef<HTMLParagraphElement, TextProps>(({ text, ...rest }, ref) => (
-  <p {...textProps(rest)} ref={ref}>
-    {text}
-  </p>
-));
+export const TextRef = forwardRef<HTMLParagraphElement | HTMLSpanElement, TextProps<boolean>>(
+  ({ text, inline, ...rest }, ref) =>
+    inline === true ? (
+      <span {...textProps(rest)} ref={ref}>
+        {text}
+      </span>
+    ) : (
+      <p {...textProps(rest)} ref={ref as ForwardedRef<HTMLParagraphElement>}>
+        {text}
+      </p>
+    ),
+);
 TextRef.displayName = "TextRef";

@@ -13,6 +13,7 @@ import {
 } from "@common/dict";
 import { omitByRecursively } from "@common/utils/object";
 import { Grid, GridCol } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { capitalize, isUndefined } from "lodash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
@@ -31,6 +32,7 @@ export interface FormSearchSirenProps {
 
 export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
   const router = useRouter();
+  const [toggleAnimRef] = useAutoAnimate();
 
   const {
     formState: { errors },
@@ -76,7 +78,7 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
             label="Nom ou numéro Siren de l’entreprise"
             nativeInputProps={{
               id: "q",
-              placeholder: "Saisissez le nom ou le Siren d'une entreprise",
+              title: "Saisissez le nom ou le Siren d'une entreprise",
               autoComplete: "off",
               ...register("q"),
             }}

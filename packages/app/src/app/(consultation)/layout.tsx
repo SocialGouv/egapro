@@ -1,9 +1,9 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import { Header, type HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { Brand } from "@components/Brand";
+import { Container } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 import { Breadcrumb } from "./Breadcrumb";
@@ -41,9 +41,9 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         navigation={<Navigation />}
       />
       <main role="main" id="content" className={styles.content}>
-        <div className={fr.cx("fr-container")}>
+        <Container>
           <Breadcrumb />
-        </div>
+        </Container>
         {children}
       </main>
       <ConsultationFooter
@@ -64,7 +64,10 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
             text: "Politique de confidentialité",
             linkProps: { href: "/politique-de-confidentialite" },
           },
-          headerFooterDisplayItem,
+          {
+            ...headerFooterDisplayItem,
+            iconId: "fr-icon-theme-fill",
+          },
         ]}
         personalDataLinkProps={{ href: "/politique-de-confidentialite" }}
         termsLinkProps={{ href: "/mentions-legales" }}
