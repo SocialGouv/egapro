@@ -3,7 +3,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type CompaniesType } from "@common/models/company";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Container, Grid, GridCol, Heading } from "@design-system";
+import { Box, Container, Grid, GridCol, Heading, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { fetchSearchV2 } from "@services/apiClient/useSearchV2";
@@ -41,7 +41,7 @@ const ConsulterIndexRecherche = ({
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
                 {!isEmpty(searchParams) && (
-                  <Suspense>
+                  <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
                     {/* @ts-ignore */}
                     <DisplayCompanies page={pageNumber} searchParams={searchParams} />
                   </Suspense>

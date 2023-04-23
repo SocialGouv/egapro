@@ -3,7 +3,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Container, DetailedDownload, Grid, GridCol, Heading } from "@design-system";
+import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Text } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
@@ -42,8 +42,10 @@ const ConsulterRepEq = async ({
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
                 {!isEmpty(searchParams) && (
-                  // @ts-ignore
-                  <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
+                  <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
+                    {/* @ts-ignore */}
+                    <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
+                  </Suspense>
                 )}
               </ClientAnimate>
               {/* @ts-ignore */}
