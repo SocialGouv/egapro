@@ -15,6 +15,8 @@ import { Suspense } from "react";
 import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
 import { NextPageLink } from "./NextPageLink";
 
+export const dynamic = "force-dynamic";
+
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterRepEq = async ({
   searchParams: { page = "0", ...searchParams },
@@ -49,7 +51,7 @@ const ConsulterRepEq = async ({
                 href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
                 label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
               />
-              <Link href="/_consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
+              <Link href="/consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
             </GridCol>
           </Grid>
         </Container>

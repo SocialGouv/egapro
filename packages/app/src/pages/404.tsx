@@ -1,8 +1,9 @@
-import { Box, Text } from "@chakra-ui/react";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { push } from "@socialgouv/matomo-next";
 import { useEffect } from "react";
 
+import { Box } from "../design-system/base/Box";
+import { Text } from "../design-system/base/Typography";
 import type { NextPageWithLayout } from "./_app";
 
 const NotFoundPage: NextPageWithLayout = () => {
@@ -11,10 +12,8 @@ const NotFoundPage: NextPageWithLayout = () => {
   }, []);
 
   return (
-    <Box textAlign="center" mt="8">
-      <Text as="h2" fontSize="2xl">
-        Malheureusement la page que vous cherchez n'existe pas !
-      </Text>
+    <Box style={{ textAlign: "center" }} mt="8v">
+      <Text variant="xl" text="Malheureusement la page que vous cherchez n'existe pas !" />
     </Box>
   );
 };

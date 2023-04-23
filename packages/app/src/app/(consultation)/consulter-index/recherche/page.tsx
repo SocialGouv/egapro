@@ -11,8 +11,10 @@ import { isEmpty } from "lodash";
 import { TileCompanyIndex } from "packages/app/src/design-system/base/client/TileCompanyIndex";
 import { Suspense } from "react";
 
-import { NextPageLink } from "../../_representation-equilibree/recherche/NextPageLink";
 import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
+import { NextPageLink } from "../../representation-equilibree/recherche/NextPageLink";
+
+export const dynamic = "force-dynamic";
 
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterIndexRecherche = ({
@@ -39,8 +41,10 @@ const ConsulterIndexRecherche = ({
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
                 {!isEmpty(searchParams) && (
-                  // @ts-ignore
-                  <DisplayCompanies page={pageNumber} searchParams={searchParams} />
+                  <Suspense>
+                    {/* @ts-ignore */}
+                    <DisplayCompanies page={pageNumber} searchParams={searchParams} />
+                  </Suspense>
                 )}
               </ClientAnimate>
             </GridCol>

@@ -11,10 +11,15 @@ interface SegmentMap {
 }
 
 const segmentMap: SegmentMap = {
-  "_consulter-index": {
+  "consulter-index": {
     label: "Index Egapro",
+    segments: {
+      recherche: {
+        label: "Rechercher l'index de l'égalité professionnelle d'une entreprise",
+      },
+    },
   },
-  "_representation-equilibree": {
+  "representation-equilibree": {
     label: "Représentation équilibrée",
     segments: {
       recherche: {

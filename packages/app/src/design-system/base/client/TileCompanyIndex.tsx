@@ -62,8 +62,6 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
     .sort()
     .reverse();
 
-  // TODO UES tag + list
-  // number of employees
   return (
     <TileCompany>
       <Container fluid>

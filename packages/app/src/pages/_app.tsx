@@ -15,6 +15,7 @@ if (typeof window !== "undefined") {
   };
 }
 
+import ConsentBanner from "@codegouvfr/react-dsfr/ConsentBanner";
 import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { config } from "@common/config";
 import { excludeType } from "@common/utils/types";
@@ -27,8 +28,6 @@ import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
 
-import { ConsentBanner } from "../design-system/base/client/ConsentBanner";
-
 // Only in TypeScript projects
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {
@@ -36,8 +35,8 @@ declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   }
 }
 
-declare module "../design-system/base/custom/ConsentBanner" {
-  interface GdprServiceNames {
+declare module "@codegouvfr/react-dsfr/gdpr" {
+  interface RegisterGdprServices {
     matomo: never;
   }
 }
@@ -67,8 +66,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
     <>
       <Matomo env={config.env} />
       <ConsentBanner
-        gdprPageLink="/politique-de-confidentialite#cookies"
-        gdprPageLinkAs={Link}
+        gdprLinkProps={{
+          href: "/politique-de-confidentialite#cookies",
+        }}
         siteName="Egapro"
         services={[
           {

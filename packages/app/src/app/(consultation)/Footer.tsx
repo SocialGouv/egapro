@@ -1,22 +1,15 @@
 "use client";
 
+import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { Footer, type FooterProps } from "@codegouvfr/react-dsfr/Footer";
 
-import { useGdprStore } from "../../design-system/base/client/ConsentBanner";
-
 export const ConsultationFooter = (props: Omit<FooterProps, "cookiesManagementLinkProps">) => {
-  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
-
   return (
     <>
       <Footer
         {...props}
-        cookiesManagementLinkProps={{
+        cookiesManagementButtonProps={{
           ...consentModalButtonProps.nativeButtonProps,
-          href: "#",
-          onClick(e) {
-            e.preventDefault();
-          },
         }}
       />
     </>

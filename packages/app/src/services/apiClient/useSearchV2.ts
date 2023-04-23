@@ -29,7 +29,7 @@ export const fetchSearchV2 = async (_searchParams = {}, pageIndex = 0): Promise<
   const url = new URL(`${config.api_url}/search?${searchParams.toString()}`);
   const response = await fetch(url, {
     next: {
-      revalidate: 30,
+      revalidate: 0,
     },
   });
 

@@ -18,16 +18,16 @@ export const Navigation = () => {
         {
           text: "Index",
           linkProps: {
-            href: "/_consulter-index",
+            href: "/consulter-index",
           },
-          isActive: segment === "_consulter-index",
+          isActive: segment === "consulter-index",
         },
         {
           text: "Représentation équilibrée",
           linkProps: {
-            href: "/_representation-equilibree/recherche",
+            href: "/representation-equilibree/recherche",
           },
-          isActive: segment === "_representation-equilibree",
+          isActive: segment === "representation-equilibree",
         },
       ]}
     />

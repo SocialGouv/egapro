@@ -1,14 +1,13 @@
 import "./StartDsfr";
 
+import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getColorSchemeHtmlAttributes";
 import { config } from "@common/config";
 import { Matomo } from "@components/utils/Matomo";
-import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
-import { ConsentBanner } from "../design-system/base/client/ConsentBanner";
 import { defaultColorScheme } from "./defaultColorScheme";
 
 const RootLayout = ({ children }: PropsWithChildren) => (
@@ -37,8 +36,9 @@ const RootLayout = ({ children }: PropsWithChildren) => (
     <body>
       <DsfrProvider defaultColorScheme={defaultColorScheme}>
         <ConsentBanner
-          gdprPageLink="/politique-de-confidentialite#cookies"
-          gdprPageLinkAs={Link}
+          gdprLinkProps={{
+            href: "/politique-de-confidentialite#cookies",
+          }}
           siteName="Egapro"
           services={[
             {

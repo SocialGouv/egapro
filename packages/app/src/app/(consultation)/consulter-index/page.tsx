@@ -11,6 +11,8 @@ import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDo
 
 import { AverageIndicatorForm, type AverageIndicatorFormType } from "./AverageIndicatorForm";
 
+export const dynamic = "force-dynamic";
+
 const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageIndicatorFormType>) => {
   const intYear = parseInt(String(searchParams.year)) || DISPLAY_CURRENT_YEAR;
   searchParams.year = String(DISPLAY_PUBLIC_YEARS.includes(intYear) ? intYear : DISPLAY_CURRENT_YEAR);
@@ -29,7 +31,7 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
         <Grid haveGutters align="center">
           <GridCol sm={12} md={10} lg={8}>
             <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
-            <SimpleSubmitForm action="/_consulter-index/recherche" noValidate>
+            <SimpleSubmitForm action="/consulter-index/recherche" noValidate>
               <SearchBar
                 big
                 label="Rechercher"
