@@ -1078,7 +1078,7 @@ describe("validateEffectif", () => {
 
       const expectedState = produce(stateDefault as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
-        draft.indicateurUn.formValidated = "None"
+        draft.indicateurUn.formValidated = "Invalid"
         draft.indicateurUn.modaliteCalculformValidated = "None"
         draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurDeux.formValidated = "Valid"
@@ -1090,15 +1090,14 @@ describe("validateEffectif", () => {
     })
 
     test("change complete state", () => {
-      const { effectif, ...rest } = appReducer(stateComplete, action) as AppState
-      const { effectif: effectifInitial, ...restInitial } = stateComplete as AppState
+      const newState = appReducer(stateComplete, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "Valid",
+      const expectedState = produce(stateComplete as AppState, (draft) => {
+        draft.effectif.formValidated = "Valid"
+        draft.indicateurUn.formValidated = "Invalid"
       })
 
-      expect(rest).toStrictEqual(restInitial)
+      expect(newState).toStrictEqual(expectedState)
     })
   })
 
