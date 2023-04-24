@@ -20,7 +20,7 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
   let average = "";
   try {
     const stats = await fetchStatsV2(searchParams);
-    average = stats?.avg.toFixed(0) ?? "";
+    average = stats?.avg?.toFixed(0) ?? "";
   } catch (e) {
     console.log(e);
   }

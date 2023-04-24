@@ -1,4 +1,3 @@
-/* eslint-disable import/no-named-as-default-member */
 import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { COUNTIES, REGIONS } from "@common/dict";
@@ -7,12 +6,10 @@ import { AppError } from "@common/shared-domain";
 import { Object } from "@common/utils/overload";
 import type { SimpleObject } from "@common/utils/types";
 import { AsyncParser } from "@json2csv/node";
-// eslint-disable-next-line import/no-duplicates
 import { format } from "date-fns";
-// eslint-disable-next-line import/no-duplicates
 import { fr } from "date-fns/locale";
 import JS_XLSX from "js-xlsx";
-import _ from "lodash";
+import { groupBy, orderBy, partition } from "lodash";
 import { Readable } from "stream";
 import XLSX from "xlsx";
 
@@ -194,8 +191,8 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
   }));
 
   // sort alpha by regionname and county number
-  const sorted = _.orderBy(augmented, ["regionName", "county"], ["asc", "asc"]);
-  const grouped = _.groupBy(sorted, "regionName");
+  const sorted = orderBy(augmented, ["regionName", "county"], ["asc", "asc"]);
+  const grouped = groupBy(sorted, "regionName");
   const sheet: XLSX.StrictWS = {};
   const meta: XLSX.WorkSheet = {
     "!merges": [],
@@ -234,7 +231,7 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
     sheet[`A${line}`] = emptyBorderCell; // left side empty
     mergeCells(`A${line}`, `B${line}`);
 
-    const [[coordRegionnale], restRegion] = _.partition(region, item => !item.county);
+    const [[coordRegionnale], restRegion] = partition(region, item => !item.county);
     const regionId = coordRegionnale?.region || restRegion[0]?.region;
 
     sheet[`C${line}`] = {

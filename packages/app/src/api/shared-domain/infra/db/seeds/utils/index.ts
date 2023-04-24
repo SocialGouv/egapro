@@ -8,7 +8,7 @@ import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects
 import { generateLuhnNumber } from "@common/utils/luhn";
 import { Object } from "@common/utils/overload";
 import { faker } from "@faker-js/faker/locale/fr";
-import _ from "lodash";
+import { random, sample } from "lodash";
 
 // export const seedDeclarationIndex = async () => {
 //   const declarantFirstname = faker.name.firstName();
@@ -36,8 +36,8 @@ export const getRandomDeclarationRepEq = () => {
   const declaredAt = faker.date.recent(30);
   const siren = new Siren(generateLuhnNumber(faker.random.numeric(8)));
   const region = getRandomRegion();
-  const executiveMenPercent = _.random(100);
-  const memberMenPercent = _.random(100);
+  const executiveMenPercent = random(100);
+  const memberMenPercent = random(100);
 
   return new RepresentationEquilibree({
     declaredAt,
@@ -65,7 +65,7 @@ export const getRandomDeclarationRepEq = () => {
       },
       declaration: {
         draft: false,
-        indicatorsYear: _.sample(YEARS_REPEQ)!,
+        indicatorsYear: sample(YEARS_REPEQ)!,
         sufficientPeriod: false,
         endReferencePeriod: new Date(declaredAt.getFullYear(), 12).toISOString(),
       },
@@ -82,7 +82,7 @@ export const getRandomDeclarationRepEq = () => {
   });
 };
 
-const getRandomNafCode = () => _.sample(Object.keys(NAF))!;
-const getRandomRegion = () => _.sample(Object.keys(REGIONS))!;
+const getRandomNafCode = () => sample(Object.keys(NAF))!;
+const getRandomRegion = () => sample(Object.keys(REGIONS))!;
 const getRandomCounty = (region?: keyof typeof REGIONS) =>
-  region ? _.sample(REGIONS_TO_COUNTIES[region]) : _.sample(Object.keys(COUNTIES))!;
+  region ? sample(REGIONS_TO_COUNTIES[region]) : sample(Object.keys(COUNTIES))!;

@@ -136,7 +136,36 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
                   <TileCompanyScore score={`${row.note ?? "NC"}`} />
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  <Container fluid style={{ textAlign: "left" }}>
+                  <ul
+                    style={{ listStyle: "none", columns: "2 2rem", textAlign: "left" }}
+                    className={fr.cx("fr-m-0", "fr-p-0")}
+                  >
+                    <li>
+                      Écart rémunérations : <Text inline variant="bold" text={`${row.note_remunerations ?? "NC"}`} />
+                    </li>
+                    <li>
+                      Écart taux d'augmentation :{" "}
+                      {entreprise.effectif.tranche === "50:250" ? (
+                        <Text inline variant="bold" text={`${row.note_augmentations_et_promotions ?? "NC"}`} />
+                      ) : (
+                        <Text inline variant="bold" text={`${row.note_augmentations ?? "NC"}`} />
+                      )}
+                    </li>
+                    {entreprise.effectif.tranche !== "50:250" && (
+                      <li>
+                        Écart taux promotion : <Text inline variant="bold" text={`${row.note_promotions ?? "NC"}`} />
+                      </li>
+                    )}
+                    <li>
+                      Retour congé maternité :{" "}
+                      <Text inline variant="bold" text={`${row.note_conges_maternite ?? "NC"}`} />
+                    </li>
+                    <li>
+                      Hautes rémunérations :{" "}
+                      <Text inline variant="bold" text={`${row.note_hautes_rémunérations ?? "NC"}`} />
+                    </li>
+                  </ul>
+                  {/* <Container fluid style={{ textAlign: "left" }}>
                     <Grid>
                       <GridCol xl={6}>
                         Écart rémunérations : <Text inline variant="bold" text={`${row.note_remunerations ?? "NC"}`} />
@@ -167,7 +196,7 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
                         </GridCol>
                       </Grid>
                     )}
-                  </Container>
+                  </Container> */}
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>
             ))}

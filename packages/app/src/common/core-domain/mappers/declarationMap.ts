@@ -15,7 +15,7 @@ import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects
 import { dateObjectToDateISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
 import type { Any } from "@common/utils/types";
-import _ from "lodash";
+import { isUndefined } from "lodash";
 
 import { Declaration } from "../domain/Declaration";
 import { DeclarationData } from "../domain/DeclarationData";
@@ -312,7 +312,7 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
   };
 
   if (skipUndefined) {
-    return omitByRecursively(dto, _.isUndefined) as unknown as DeclarationDTO;
+    return omitByRecursively(dto, isUndefined) as unknown as DeclarationDTO;
   }
   return dto;
 }

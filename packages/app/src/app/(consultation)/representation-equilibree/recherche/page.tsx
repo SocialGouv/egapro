@@ -133,3 +133,11 @@ const Page = async ({ repeqs }: { repeqs: RepeqsType }) => {
 };
 
 export default ConsulterRepEq;
+
+/*
+3/
+  v-------app----------vv---simu----vv--app--v
+- http://egapro.travail.gouv.fr/index-egapro/recherche
+- http://egapro.travail.gouv.fr/representation-equilibree/recherche
+
+*/

@@ -7,6 +7,7 @@ export interface StatProps {
   align?: "center" | "left" | "right";
   display?: { asText: TextProps<false>["variant"] } | { asTitle: HeadingProps["display"] };
   helpText?: string;
+  helpTextVariant?: TextProps<false>["variant"];
   label?: string;
   text: string;
 }

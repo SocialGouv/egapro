@@ -2,7 +2,7 @@ import type { ReferentRaw } from "@api/core-domain/infra/db/raw";
 import type { Mapper } from "@common/shared-domain";
 import { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
 import { omitByRecursively } from "@common/utils/object";
-import _ from "lodash";
+import { isUndefined } from "lodash";
 
 import { Referent } from "../domain/Referent";
 import { County } from "../domain/valueObjects/County";
@@ -45,7 +45,7 @@ export const referentMap: Required<Mapper<Referent, ReferentDTO, ReferentRaw>> =
       },
     };
 
-    return omitByRecursively(dto, _.isUndefined) as unknown as ReferentDTO;
+    return omitByRecursively(dto, isUndefined) as unknown as ReferentDTO;
   },
 
   toPersistence(obj) {

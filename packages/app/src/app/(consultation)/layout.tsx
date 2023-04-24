@@ -83,14 +83,14 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
           {
             categoryName: "Liens utiles",
             links: [
-              {
-                text: "Télécharger la liste des référents",
-                linkProps: {
-                  href: `${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`,
-                  download: true,
-                  target: "_blank",
-                },
-              },
+              // {
+              //   text: "Télécharger la liste des référents",
+              //   linkProps: {
+              //     href: `${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`,
+              //     download: true,
+              //     target: "_blank",
+              //   },
+              // },
               {
                 text: "Contribuer sur Github",
                 linkProps: {
