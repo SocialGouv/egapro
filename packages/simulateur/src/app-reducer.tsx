@@ -261,10 +261,12 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "unsetEffectif": {
-      return {
-        ...state,
-        effectif: { ...state.effectif, formValidated: "None" },
-      }
+      return produce(state, (draft) => {
+        draft.effectif.formValidated = "None"
+        if (isFormValid(state.declaration)) {
+          draft.declaration.formValidated = "Invalid"
+        }
+      })
     }
     case "setValidEffectif": {
       /* Recalcul sur les indicateurs dépendants des effectifs.
@@ -316,6 +318,8 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         } else if (draft.indicateurDeuxTrois.formValidated === "Valid") {
           draft.indicateurDeuxTrois.formValidated = "Invalid"
         } // else we let the state unchanged
+
+        ///
       })
     }
     case "setInvalidEffectif": {
