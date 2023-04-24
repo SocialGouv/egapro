@@ -1074,11 +1074,12 @@ describe("validateEffectif", () => {
     })
 
     test("change default state", () => {
+      // This case is not possible because the setValidEffectif required to do an updateEffectif before.
       const newState = appReducer(stateDefault, action) as AppState
 
       const expectedState = produce(stateDefault as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
-        draft.indicateurUn.formValidated = "Invalid"
+        draft.indicateurUn.formValidated = "None"
         draft.indicateurUn.modaliteCalculformValidated = "None"
         draft.indicateurUn.coefficientEffectifFormValidated = "None"
         draft.indicateurDeux.formValidated = "Valid"
@@ -1094,7 +1095,7 @@ describe("validateEffectif", () => {
 
       const expectedState = produce(stateComplete as AppState, (draft) => {
         draft.effectif.formValidated = "Valid"
-        draft.indicateurUn.formValidated = "Invalid"
+        draft.indicateurUn.formValidated = "None"
       })
 
       expect(newState).toStrictEqual(expectedState)
