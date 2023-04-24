@@ -290,7 +290,7 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
           }
         } else {
           // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
-          draft.indicateurUn.formValidated = "None"
+          draft.indicateurUn.formValidated = "Invalid"
           draft.indicateurUn.coefficientEffectifFormValidated = "None"
         } // else we let the state unchanged
 
