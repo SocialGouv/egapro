@@ -1,4 +1,5 @@
 import { config } from "@common/config";
+import { buildFormState } from "@common/models/representation-equilibree";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
@@ -20,10 +21,11 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { useRepresentationEquilibree } from "@services/apiClient";
+import { useFormManager, useRepresentationEquilibree } from "@services/apiClient";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
 import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
+import { useEffect } from "react";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../../_app";
@@ -34,6 +36,14 @@ const title = "Récapitulatif de la Représentation Équilibrée";
 const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string; year: number }) => {
   const router = useRouter();
   const { repeq, error } = useRepresentationEquilibree(siren, year);
+  const { saveFormData } = useFormManager();
+
+  useEffect(() => {
+    if (repeq?.data) {
+      const formData = buildFormState(repeq.data);
+      saveFormData({ ...formData, status: "edition" });
+    }
+  }, [repeq, saveFormData]);
 
   const olderThanOneYear = !repeq?.data.déclaration.date
     ? undefined

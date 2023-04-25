@@ -1,14 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
 import AssujetiPage from "@/pages/representation-equilibree/assujetti";
+import mockRouter from "next-router-mock";
+
+jest.mock("next/router", () => require("next-router-mock"));
 
 // for radio inputs, cast is mandatory to have access to checked attribute
 const getRadioInputOui = () => screen.getByRole("radio", { name: /oui, je suis concerné/i }) as HTMLInputElement;
 const getRadioInputNon = () => screen.getByRole("radio", { name: /non, je ne suis pas concerné/i }) as HTMLInputElement;
 
 describe("Assujetti Page", () => {
+  mockRouter.push("/");
+
   it("should select OUI by default", () => {
+    // Set the initial url:
+
     render(<AssujetiPage />);
     const inputRadioOui = getRadioInputOui();
     expect(inputRadioOui.checked).toBeTruthy();
