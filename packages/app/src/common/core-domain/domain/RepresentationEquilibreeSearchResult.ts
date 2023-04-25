@@ -18,9 +18,9 @@ export class RepresentationEquilibreeSearchResult extends AggregateRoot<
   RepresentationEquilibreeSearchResultPK
 > {
   get data(): RepresentationEquilibreeData {
-    return this.data;
+    return this.props.data;
   }
   get results(): EntityMap<RepEqIndicatorsYear, BalancedRepresentation> {
-    return this.results.clone();
+    return this.props.results.clone();
   }
 }

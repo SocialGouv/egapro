@@ -103,8 +103,9 @@ export const representationEquilibreeSearchResultMap: Mapper<
   },
 
   toDTO(obj) {
+    const company = reprensentationEquilibreePublicDataToDTO(obj.data);
     return {
-      company: reprensentationEquilibreePublicDataToDTO(obj.data),
+      company,
       results: [...obj.results].reduce(
         (acc, [year, result]) => ({
           ...acc,
@@ -128,10 +129,14 @@ function reprensentationEquilibreePublicDataToDTO(data: RepresentationEquilibree
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     nafCode: data.company.nafCode!.getValue(),
     countyCode: data.company.county!.getValue(),
-    workforce: {
-      total: data.company.workforce!.total!.getValue(),
-      range: data.company.workforce!.range!.getValue(),
-    },
+    ...(data.company.workforce?.total || data.company.workforce?.range
+      ? {
+          workforce: {
+            total: data.company.workforce?.total?.getValue(),
+            range: data.company.workforce?.range?.getValue(),
+          },
+        }
+      : {}),
     name: data.company.name!,
     regionCode: data.company.region!.getValue(),
     siren: data.company.siren.getValue(),

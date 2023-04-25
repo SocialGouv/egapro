@@ -1,7 +1,9 @@
+import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
+import { type SearchRepresentationEquilibreeResultDTO } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { adressLabel } from "@common/dict";
 import { useState } from "react";
 
-import type { RepeqType } from "../../../services/apiClient/useSearchRepeqs";
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -18,6 +20,7 @@ import {
   TileCompanyTitle,
   TileCompanyYear,
 } from "../TileCompany";
+import { Text } from "../Typography";
 
 export type data = { men?: number; women?: number };
 
@@ -32,8 +35,8 @@ export type TileCompanyRepeqsProps = {
   title: string;
 };
 
-export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: RepeqType) => {
-  const { département, région, raison_sociale, siren } = entreprise;
+export const TileCompanyRepeqs = ({ company, results }: SearchRepresentationEquilibreeResultDTO) => {
+  const { countyCode, regionCode, name, siren } = company;
 
   const rowsDefault = 4;
   const [rowsNumber, setRowsNumber] = useState(rowsDefault);
@@ -41,16 +44,16 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
     setRowsNumber(rowsNumber + rowsDefault);
   };
 
-  const years = Object.keys(représentation_équilibrée)
+  const years = Object.keys(results)
     .map(year => Number(year))
     .sort()
     .reverse();
 
   return (
     <TileCompany>
-      <TileCompanyTitle>{raison_sociale}</TileCompanyTitle>
+      <TileCompanyTitle>{name}</TileCompanyTitle>
       <TileCompanySiren>{siren}</TileCompanySiren>
-      <TileCompanyLocation>{adressLabel({ county: département, region: région })}</TileCompanyLocation>
+      <TileCompanyLocation>{adressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
       <TileCompanyTable>
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>
@@ -59,7 +62,7 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
         </TileCompanyTableHead>
         <TileCompanyTableBody>
           {years
-            .map(year => ({ year, ...représentation_équilibrée[year] }))
+            .map(year => ({ year, ...results[year] }))
             .slice(0, rowsNumber)
             .map(row => (
               <TileCompanyTableBodyRow key={row.year}>
@@ -67,15 +70,24 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
                   <TileCompanyYear year={row.year + 1} />
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
+                  {row.notComputableReasonExecutives && (
+                    <Text
+                      variant="lg"
+                      text={NotComputableReasonExecutiveRepEq.Label[row.notComputableReasonExecutives]}
+                    />
+                  )}
                   <TileCompanyPercent>
-                    <TileCompanyPercentData number={row.pourcentage_femmes_cadres} legend="Femmes" />
-                    <TileCompanyPercentData number={row.pourcentage_hommes_cadres} legend="Hommes" />
+                    <TileCompanyPercentData number={row.executiveWomenPercent} legend="Femmes" />
+                    <TileCompanyPercentData number={row.executiveMenPercent} legend="Hommes" />
                   </TileCompanyPercent>
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
+                  {row.notComputableReasonMembers && (
+                    <Text variant="lg" text={NotComputableReasonMemberRepEq.Label[row.notComputableReasonMembers]} />
+                  )}
                   <TileCompanyPercent>
-                    <TileCompanyPercentData number={row.pourcentage_femmes_membres} legend="Femmes" />
-                    <TileCompanyPercentData number={row.pourcentage_hommes_membres} legend="Hommes" />
+                    <TileCompanyPercentData number={row.memberWomenPercent} legend="Femmes" />
+                    <TileCompanyPercentData number={row.memberMenPercent} legend="Hommes" />
                   </TileCompanyPercent>
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>

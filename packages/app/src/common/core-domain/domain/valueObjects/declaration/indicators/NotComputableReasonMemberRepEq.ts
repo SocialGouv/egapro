@@ -10,7 +10,9 @@ export namespace NotComputableReasonMemberRepEq {
     AUCUNE_INSTANCE_DIRIGEANTE = "aucune_instance_dirigeante",
   }
 
-  export interface Label {
-    [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Aucune instance dirigeante";
-  }
+  export const Label = {
+    [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Aucune instance dirigeante",
+  } as const;
+
+  export type Label = typeof Label;
 }

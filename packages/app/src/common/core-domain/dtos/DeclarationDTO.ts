@@ -17,8 +17,8 @@ export type PublicCompanyDTO = {
     }>;
     name: string;
   };
-  workforce: {
-    range: keyof WORKFORCES;
-    total: number;
+  workforce?: {
+    range?: keyof WORKFORCES;
+    total?: number;
   };
 };

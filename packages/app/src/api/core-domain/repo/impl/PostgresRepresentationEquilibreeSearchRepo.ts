@@ -6,6 +6,7 @@ import { representationEquilibreeSearchResultMap } from "@common/core-domain/map
 import { PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { isFinite } from "lodash";
+import { type PostgresError } from "postgres";
 
 import {
   type IRepresentationEquilibreeSearchRepo,
@@ -21,7 +22,6 @@ SELECT
     )) as results
 FROM representation_equilibree
 JOIN search_representation_equilibree ON representation_equilibree.siren=search_representation_equilibree.siren AND representation_equilibree.year=search_representation_equilibree.year
-    {where}
 GROUP BY representation_equilibree.siren
 ORDER BY max(representation_equilibree.year) DESC
 LIMIT $1
@@ -47,7 +47,7 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
     const raws = await sql<RepresentationEquilibreeSearchResultRaw[]>`
         SELECT
-            array_agg(${this.repEqTable}.data ORDER BY ${this.repEqTable}.year DESC) as data,
+            (jsonb_agg(${this.repEqTable}.data ORDER BY ${this.repEqTable}.year DESC) -> 0) as data,
             jsonb_object_agg(${this.repEqTable}.year::text, json_build_object(
                 'executiveMenPercent', replace((${
                   this.repEqTable
@@ -83,9 +83,16 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
 
   public async count(criteria: RepresentationEquilibreeSearchCriteria): Promise<number> {
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
-    const [{ count }] =
-      await sql<SQLCount>`select count(distinct(siren)) as count from ${this.table} ${sqlWhereClause}`;
-    return +count;
+
+    try {
+      const [{ count }] =
+        await sql<SQLCount>`select count(distinct(siren)) as count from ${this.table} ${sqlWhereClause}`;
+      return +count;
+    } catch (e: unknown) {
+      const postgreError = e as PostgresError;
+      console.log("!!!!PostgresError!!!!!!!!!", postgreError.cause, postgreError.query);
+      throw e;
+    }
   }
 
   private buildSearchWhereClause(criteria: RepresentationEquilibreeSearchCriteria) {
@@ -99,7 +106,7 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
     }
 
     // no "and" clause because will be first
-    const sqlYear = sql`${this.table}.year in sql(${sql(PUBLIC_YEARS_REPEQ)})`;
+    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS_REPEQ)}`;
     const sqlDepartement = criteria.countyCode ? sql`and ${this.table}.departement=${criteria.countyCode}` : sql``;
     const sqlSectionNaf = criteria.nafSection ? sql`and ${this.table}.section_naf=${criteria.nafSection}` : sql``;
     const sqlRegion = criteria.regionCode ? sql`and ${this.table}.region=${criteria.regionCode}` : sql``;

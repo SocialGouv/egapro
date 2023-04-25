@@ -4,13 +4,16 @@ import { SearchRepresentationEquilibree } from "@api/core-domain/useCases/Search
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
-import { type SearchRepresentationEquilibreeInputDTO } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
+import { type ConsultationDTO } from "@common/core-domain/dtos/helpers/common";
+import {
+  type SearchRepresentationEquilibreeInputDTO,
+  type SearchRepresentationEquilibreeResultDTO,
+} from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Text } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
-import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
 import { isEmpty, isFinite } from "lodash";
 import Link from "next/link";
 import QueryString from "querystring";
@@ -32,12 +35,13 @@ const cachedSearch = cache((input: FormTypeInput, pageIndex = 0) => {
   const naf = cleaned.get("naf");
 
   // clean
-  q && (criteria.query = q);
-  region && (criteria.regionCode = region);
-  departement && searchParams.set("departement", departement);
-  naf && searchParams.set("naf", naf);
+  if (q) criteria.query = q;
+  if (region) criteria.regionCode = region as typeof criteria.regionCode;
+  if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
+  if (departement) criteria.nafSection = naf as typeof criteria.nafSection;
+  if (pageIndex > 0) criteria.offset = pageIndex * 10;
 
-  if (pageIndex > 0) searchParams.set("offset", String(pageIndex * 10));
+  return useCase.execute(criteria);
 });
 
 type WithPageFormType = FormTypeInput & { page?: string };
@@ -86,7 +90,7 @@ const ConsulterRepEq = async ({
 };
 
 const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
-  const repeqs = await cachedSearch({});
+  const repeqs = await cachedSearch(searchParams);
   const count = repeqs.count;
 
   if (count === 0) {
@@ -96,7 +100,7 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
   let totalLength = repeqs.data.length;
   const pages = await Promise.all(
     [...Array(page)].map(async (_, i) => {
-      const repeqs = await fetchSearchRepeqsV2(searchParams, i + 1);
+      const repeqs = await cachedSearch(searchParams, i + 1);
       totalLength += repeqs.data.length;
       // @ts-ignore
       return <Page repeqs={repeqs} key={i + 1} />;
@@ -143,14 +147,16 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
   );
 };
 
-const Page = async ({ repeqs }: { repeqs: RepeqsType }) => {
+const Page = async ({ repeqs }: { repeqs: ConsultationDTO<SearchRepresentationEquilibreeResultDTO> }) => {
   return (
     <Suspense>
-      {repeqs.data.map(repeq => (
-        <GridCol key={repeq.entreprise.siren}>
-          <TileCompanyRepeqs {...repeq} />
-        </GridCol>
-      ))}
+      {repeqs.data.map(repeq => {
+        return (
+          <GridCol key={repeq.company.siren}>
+            <TileCompanyRepeqs {...repeq} />
+          </GridCol>
+        );
+      })}
     </Suspense>
   );
 };

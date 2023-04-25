@@ -13,8 +13,10 @@ export namespace NotComputableReasonExecutiveRepEq {
     UN_SEUL_CADRE_DIRIGEANT = "un_seul_cadre_dirigeant",
   }
 
-  export interface Label {
-    [Enum.AUCUN_CADRE_DIRIGEANT]: "Aucun cadre dirigeant";
-    [Enum.UN_SEUL_CADRE_DIRIGEANT]: "Un seul cadre dirigeant";
-  }
+  export const Label = {
+    [Enum.AUCUN_CADRE_DIRIGEANT]: "Aucun cadre dirigeant",
+    [Enum.UN_SEUL_CADRE_DIRIGEANT]: "Un seul cadre dirigeant",
+  } as const;
+
+  export type Label = typeof Label;
 }
