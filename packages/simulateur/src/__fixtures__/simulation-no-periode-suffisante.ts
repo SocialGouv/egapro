@@ -35,7 +35,8 @@ export const simulationWithNoPeriodeSuffisante: { id: string; data: AppState } =
     indicateurUn: {
       formValidated: "None",
       modaliteCalcul: "csp",
-      remunerationAnnuelle: [
+      modaliteCalculformValidated: "None",
+      remunerationsAnnuelles: [
         {
           tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
           categorieSocioPro: 0,
@@ -55,7 +56,8 @@ export const simulationWithNoPeriodeSuffisante: { id: string; data: AppState } =
       ],
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
-      coefficient: [],
+      coefficientRemuFormValidated: "None",
+      coefficients: [],
       nonCalculable: true,
       motifNonCalculable: "egvi40pcet",
     },

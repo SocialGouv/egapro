@@ -48,11 +48,7 @@ const Recapitulatif: FunctionComponent = () => {
   const calculsIndicateurCinq = calculerIndicateurCinq(state)
 
   // TODO : il faudrait plutôt remonter l'état Valid dans le reducer quand les effectifs deviennent non calculables. Ainsi, on aurait les coches du menu gauche toujours synchronisées.
-  const indicateurUnCompliant =
-    isFormValid(state.indicateurUn) ||
-    // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-    (!calculsIndicateurUn.effectifsIndicateurCalculable && state.indicateurUn.modaliteCalcul === "csp") ||
-    !calculsIndicateurUn.effectifsIndicateurCalculable
+  const indicateurUnCompliant = isFormValid(state.indicateurUn)
 
   const indicateurDeuxCompliant =
     isFormValid(state.indicateurDeux) ||

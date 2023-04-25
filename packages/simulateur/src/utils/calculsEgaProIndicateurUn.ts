@@ -83,7 +83,7 @@ export type EffectifEtEcartRemuGroupCsp = EffectifGroup & {
 
 export type EffectifEtEcartRemuGroupCoef = EffectifGroup & {
   id: any
-  name: string
+  nom: string
   trancheAge: TrancheAge
   remunerationAnnuelleBrutFemmes?: number
   remunerationAnnuelleBrutHommes?: number
@@ -193,8 +193,8 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCsp = (
 export const calculerEffectifsEtEcartRemuParTrancheAgeCoef = (
   coefficient: CoefficientGroupe[],
 ): EffectifEtEcartRemuGroupCoef[] => {
-  const dataCoefficientByRow = coefficient.reduce<Array<CoefficientPourTrancheAge & { name: string; id: number }>>(
-    (acc, { name, tranchesAges }, id) => acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, name, id }))),
+  const dataCoefficientByRow = coefficient.reduce<Array<CoefficientPourTrancheAge & { nom: string; id: number }>>(
+    (acc, { nom, tranchesAges }, id) => acc.concat(tranchesAges.map((trancheAge) => ({ ...trancheAge, nom, id }))),
     [],
   )
 
@@ -216,7 +216,7 @@ export const calculerEffectifsEtEcartRemuParTrancheAgeCoef = (
     return {
       ...effectifs,
       id: groupTrancheAgeCoef.id,
-      name: groupTrancheAgeCoef.name,
+      nom: groupTrancheAgeCoef.nom,
       trancheAge: groupTrancheAgeCoef.trancheAge,
 
       remunerationAnnuelleBrutFemmes,
@@ -268,11 +268,11 @@ export const calculerNote = (indicateurEcartRemuneration?: number): number | und
 export default function calculerIndicateurUn(state: AppState) {
   const effectifEtEcartRemuParTrancheCsp = calculerEffectifsEtEcartRemuParTrancheAgeCsp(
     state.effectif.nombreSalaries,
-    state.indicateurUn.remunerationAnnuelle,
+    state.indicateurUn.remunerationsAnnuelles,
   )
 
   const effectifEtEcartRemuParTrancheCoef = calculerEffectifsEtEcartRemuParTrancheAgeCoef(
-    state.indicateurUn.coefficient,
+    state.indicateurUn.coefficients,
   )
 
   const effectifEtEcartRemuParTranche =

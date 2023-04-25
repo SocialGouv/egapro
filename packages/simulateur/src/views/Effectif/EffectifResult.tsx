@@ -1,26 +1,24 @@
-import React from "react"
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
+import React from "react"
 
-import { FormState } from "../../globals"
-
-import Summary from "../../components/Summary"
 import { FunctionComponent } from "react"
+import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
+import Summary from "../../components/Summary"
 import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
-import { frozenDeclarationMessage } from "../../components/MessageForFrozenDeclaration"
 
 interface EffectifResultProps {
   totalNombreSalariesHomme: number
   totalNombreSalariesFemme: number
-  validateEffectif: (valid: FormState) => void
+  unsetEffectif: () => void
 }
 
 const EffectifResult: FunctionComponent<EffectifResultProps> = ({
   totalNombreSalariesHomme,
   totalNombreSalariesFemme,
-  validateEffectif,
+  unsetEffectif,
 }) => {
   const { state } = useAppStateContextProvider()
 
@@ -34,7 +32,7 @@ const EffectifResult: FunctionComponent<EffectifResultProps> = ({
         <ButtonAction
           leftIcon={<IconEdit />}
           label="Modifier les effectifs"
-          onClick={() => validateEffectif("None")}
+          onClick={() => unsetEffectif()}
           size="sm"
           variant="outline"
           colorScheme="primary"

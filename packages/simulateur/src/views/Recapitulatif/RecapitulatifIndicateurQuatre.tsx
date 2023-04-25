@@ -8,6 +8,7 @@ import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvid
 import calculerIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface RecapitulatifIndicateurQuatreProps {
   calculsIndicateurQuatre: ReturnType<typeof calculerIndicateurQuatre>
@@ -20,12 +21,16 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
 
   if (!state) return null
 
-  const { formValidated, presenceCongeMat, nombreSalarieesPeriodeAugmentation } = state.indicateurQuatre
+  const { presenceCongeMat, nombreSalarieesPeriodeAugmentation } = state.indicateurQuatre
 
   const { indicateurCalculable, indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre } =
     calculsIndicateurQuatre
 
-  if (formValidated !== "None" && !indicateurCalculable) {
+  if (!isFormValid(state.indicateurQuatre)) {
+    return <MessageWhenInvalid indicateur="indicateur4" />
+  }
+
+  if (!indicateurCalculable) {
     const messageNonCalculable =
       presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation === 0
         ? "d’augmentations salariales pendant la durée du ou des congés maternité"
@@ -37,10 +42,6 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
         text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
       />
     )
-  }
-
-  if (formValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur4" />
   }
 
   return (

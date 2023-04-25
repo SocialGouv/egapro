@@ -49,13 +49,16 @@ const IndicateurUnCoef: FunctionComponent = () => {
     ? calculerIndicateurUn(state)
     : {}
 
-  const indicateurCalculable = state ? calculsIndicateurUn.effectifsIndicateurCalculable : undefined
-
   useEffect(() => {
-    // On mount, if indicateur 1 is NC, show the tab Rémunérations, only when effectifs tab is already validated, to not show it from start.
-    if (state?.indicateurUn?.coefficientEffectifFormValidated === "Valid" && indicateurCalculable === false) {
+    // On mount, set the tab index to the first unfilled tab or the last tab.
+    if (state?.indicateurUn?.coefficientGroupFormValidated === "None") {
+      setTabIndex(0)
+    } else if (state?.indicateurUn?.coefficientEffectifFormValidated === "None") {
+      setTabIndex(1)
+    } else {
       setTabIndex(2)
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

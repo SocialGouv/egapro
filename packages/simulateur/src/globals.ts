@@ -34,12 +34,14 @@ export type AppState = {
     nombreSalaries: EffectifsPourCSP[]
   } & Partial<DeclarationEffectifData>
   indicateurUn: {
-    formValidated: FormState
+    formValidated: FormState // Valeur calculé et non plus modifiable via l'UI. Valid si cspFormValidated est Valid pour modalideCalcul === "csp" ou si coefficientRemuFormValidated est Valid pour modalideCalcul === "coef" ou "autre" ou bien si non calculable à partir des effectifs de coefficient.
     modaliteCalcul?: "csp" | "coef" | "autre"
-    remunerationAnnuelle: RemunerationsPourCSP[]
+    modaliteCalculformValidated: FormState // => pour la première partie, permettant de choisir un mode de calcul
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
-    coefficient: CoefficientGroupe[]
+    coefficientRemuFormValidated: FormState
+    coefficients: CoefficientGroupe[] // Uniquement pour modalité coefficient ou autre.
+    remunerationsAnnuelles: RemunerationsPourCSP[] // Uniquement pour modalité CSP.
   } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
@@ -136,12 +138,23 @@ export type ActionType =
       data: ActionEffectifData
     }
   | {
-      type: "validateEffectif"
-      valid: FormState
+      type: "unsetEffectif"
     }
   | {
-      type: "updateIndicateurUnType"
+      type: "setValidEffectif"
+    }
+  | {
+      type: "setInvalidEffectif"
+    }
+  | {
+      type: "updateIndicateurUnModaliteCalcul"
       data: ActionIndicateurUnTypeData
+    }
+  | {
+      type: "setValidIndicateurUnModaliteCalcul"
+    }
+  | {
+      type: "unsetIndicateurUnModaliteCalcul"
     }
   | {
       type: "updateIndicateurUnCsp"
@@ -159,16 +172,40 @@ export type ActionType =
       data: ActionIndicateurUnCoefData
     }
   | {
-      type: "validateIndicateurUnCoefGroup"
-      valid: FormState
+      type: "setValidIndicateurUnCSP"
     }
   | {
-      type: "validateIndicateurUnCoefEffectif"
-      valid: FormState
+      type: "setInvalidIndicateurUnCSP"
     }
   | {
-      type: "validateIndicateurUn"
-      valid: FormState
+      type: "unsetIndicateurUnCSP"
+    }
+  | {
+      type: "setValidIndicateurUnCoefGroup"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefGroup"
+    }
+  | {
+      type: "unsetIndicateurUnCoefGroup"
+    }
+  | {
+      type: "setValidIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "unsetIndicateurUnCoefEffectif"
+    }
+  | {
+      type: "setValidIndicateurUnCoefRemuneration"
+    }
+  | {
+      type: "setInvalidIndicateurUnCoefRemuneration"
+    }
+  | {
+      type: "unsetIndicateurUnCoefRemuneration"
     }
   | {
       type: "updateIndicateurDeux"
@@ -270,12 +307,12 @@ export type ActionIndicateurUnTypeData = {
 }
 
 export type ActionIndicateurUnCspData = {
-  remunerationAnnuelle: RemunerationsPourCSP[]
+  remunerationsAnnuelles: RemunerationsPourCSP[]
 }
 
 export type ActionIndicateurUnCoefData = {
-  coefficient:
-    | Array<{ name: string }>
+  coefficients:
+    | Array<{ nom: string }>
     | Array<{
         tranchesAges: EffectifPourTrancheAge[]
       }>
@@ -288,8 +325,8 @@ export type DeclarationIndicateurUnData = {
   nombreCoefficients?: number
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet"
-  remunerationAnnuelle: RemunerationsPourCSP[]
-  coefficient: CoefficientGroupe[]
+  remunerationsAnnuelles: RemunerationsPourCSP[]
+  coefficients: CoefficientGroupe[]
   resultatFinal?: number
   sexeSurRepresente?: SexeType
   noteFinale?: number
@@ -461,8 +498,16 @@ export type CoefficientPourTrancheAge = {
 }
 
 export type CoefficientGroupe = {
-  name: string
+  nom: string
   tranchesAges: CoefficientPourTrancheAge[]
+}
+
+type FemmeHomme = [number, number]
+
+export type CoefficientGroupe2 = {
+  name: string
+  effectifs: [FemmeHomme, FemmeHomme, FemmeHomme, FemmeHomme]
+  remunerations: [FemmeHomme, FemmeHomme, FemmeHomme, FemmeHomme]
 }
 
 export type TauxAugmentationPourCSP = {

@@ -56,7 +56,8 @@ export const simulationWithIndex65: { id: string; data: AppState } = {
     indicateurUn: {
       formValidated: "Valid",
       modaliteCalcul: "csp",
-      remunerationAnnuelle: [
+      modaliteCalculformValidated: "Valid",
+      remunerationsAnnuelles: [
         {
           categorieSocioPro: 0,
           tranchesAges: [
@@ -91,7 +92,8 @@ export const simulationWithIndex65: { id: string; data: AppState } = {
       ],
       coefficientGroupFormValidated: "None",
       coefficientEffectifFormValidated: "None",
-      coefficient: [],
+      coefficientRemuFormValidated: "None",
+      coefficients: [],
       nonCalculable: false,
       motifNonCalculable: "",
       resultatFinal: 0,

@@ -223,15 +223,17 @@ Object {
     ],
   },
   "indicateurUn": Object {
-    "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
+    "coefficientRemuFormValidated": "None",
+    "coefficients": Array [],
     "formValidated": "None",
-    "modaliteCalcul": "csp",
+    "modaliteCalcul": undefined,
+    "modaliteCalculformValidated": "None",
     "motifNonCalculable": "",
     "nombreCoefficients": 6,
     "noteFinale": 31,
-    "remunerationAnnuelle": Array [
+    "remunerationsAnnuelles": Array [
       Object {
         "categorieSocioPro": 0,
         "tranchesAges": Array [
@@ -619,15 +621,17 @@ Object {
     ],
   },
   "indicateurUn": Object {
-    "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
+    "coefficientRemuFormValidated": "None",
+    "coefficients": Array [],
     "formValidated": "None",
-    "modaliteCalcul": "csp",
+    "modaliteCalcul": undefined,
+    "modaliteCalculformValidated": "None",
     "motifNonCalculable": "",
     "nombreCoefficients": 6,
     "noteFinale": 31,
-    "remunerationAnnuelle": Array [
+    "remunerationsAnnuelles": Array [
       Object {
         "categorieSocioPro": 0,
         "tranchesAges": Array [

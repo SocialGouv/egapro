@@ -1,8 +1,8 @@
-import React, { FunctionComponent, ReactNode } from "react"
 import { Grid, GridItem, Text } from "@chakra-ui/react"
+import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 
-import { FormState, EffectifPourTrancheAge } from "../../globals"
+import { EffectifPourTrancheAge } from "../../globals"
 
 import {
   composeFormValidators,
@@ -15,16 +15,15 @@ import {
   parseIntStateValue,
   required,
 } from "../../utils/formHelpers"
-import { displayInt } from "../../utils/helpers"
-import { displayNameTranchesAges } from "../../utils/helpers"
+import { displayInt, displayNameTranchesAges } from "../../utils/helpers"
 
-import FormStack from "../../components/ds/FormStack"
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
+import BlocForm from "../../components/BlocForm"
+import FormStack from "../../components/ds/FormStack"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
 import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
 
 type Effectif = Array<{
   id: any
@@ -38,7 +37,7 @@ interface EffectifFormRawProps {
   effectifRaw: Effectif
   readOnly: boolean
   updateEffectif: (data: Effectif) => void
-  validateEffectif: (valid: FormState) => void
+  setValidEffectif: () => void
   nextLink: ReactNode
   formValidator?: FormValidatorFunction
 }
@@ -67,11 +66,15 @@ export const getTotalNbSalarie = (effectif: Effectif) =>
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 },
   )
 
+/**
+ * Composant pour renseigner les informations d'effectif.
+ * Utilisé par la page Effectif et par la page indicateur 1 avec le mode de calcul coefficient/autre.
+ */
 const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
   effectifRaw,
   readOnly,
   updateEffectif,
-  validateEffectif,
+  setValidEffectif,
   nextLink,
   formValidator,
 }) => {
@@ -105,7 +108,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
     return error ? { message: error } : undefined
   }
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: typeof initialValues) => {
     const effectif = formData.effectif.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
       tranchesAges: tranchesAges.map(({ nombreSalariesFemmes, nombreSalariesHommes, ...otherPropsTrancheAge }: any) => {
@@ -119,9 +122,9 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
     updateEffectif(effectif)
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
-    validateEffectif("Valid")
+    setValidEffectif()
   }
 
   return (

@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useMemo } from "react"
-import { FormState, EffectifPourTrancheAge } from "../../globals"
+import { EffectifPourTrancheAge } from "../../globals"
 
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
+import { isFormValid } from "../../utils/formHelpers"
 import { displayNameCSP } from "../../utils/helpers"
 import EffectifFormRaw from "./EffectifFormRaw"
-import { isFormValid } from "../../utils/formHelpers"
 
 const EffectifForm: FunctionComponent = () => {
   const { state, dispatch } = useAppStateContextProvider()
@@ -21,8 +21,6 @@ const EffectifForm: FunctionComponent = () => {
       })),
     [effectif],
   )
-
-  const validateEffectif = (valid: FormState) => dispatch({ type: "validateEffectif", valid })
 
   const updateEffectifRaw = (
     data: Array<{
@@ -48,7 +46,7 @@ const EffectifForm: FunctionComponent = () => {
       effectifRaw={effectifRaw}
       readOnly={readOnly}
       updateEffectif={updateEffectifRaw}
-      validateEffectif={validateEffectif}
+      setValidEffectif={() => dispatch({ type: "setValidEffectif" })}
       nextLink={<ButtonSimulatorLink to="/indicateur1" label="Suivant" />}
     />
   )

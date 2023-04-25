@@ -1,7 +1,6 @@
 import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 
-import { FormState } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import InfoBlock from "../../components/ds/InfoBlock"
@@ -29,7 +28,7 @@ const Effectif: FunctionComponent = () => {
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
     totalNombreSalariesFemme: totalNombreSalariesFemmeCoef,
-  } = totalNombreSalaries(state.indicateurUn.coefficient)
+  } = totalNombreSalaries(state.indicateurUn.coefficients)
 
   return (
     <SimulateurPage
@@ -44,7 +43,7 @@ const Effectif: FunctionComponent = () => {
               <EffectifResult
                 totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
                 totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
-                validateEffectif={(valid: FormState) => dispatch({ type: "validateEffectif", valid })}
+                unsetEffectif={() => dispatch({ type: "unsetEffectif" })}
               />
             )
           }
@@ -125,8 +124,7 @@ const Effectif: FunctionComponent = () => {
               />
             )}
 
-          {isFormValid(state.informations) &&
-            isFormValid(state.effectif) &&
+          {isFormValid(state.effectif) &&
             totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
             state.informations.trancheEffectifs === "50 à 250" && (
               <InfoBlock

@@ -14,7 +14,7 @@
     const fakeField = selectFakeField("{{ include.name }}")
     const value = field.value
 
-    const dict = eval("{{ include.dict }}")
+    const dict = {{ include.dict }}
     const fakeValue = `{% if include.with-value %}${value} - {% endif %}${dict[value]}`
 
     if (value) {

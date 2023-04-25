@@ -28,7 +28,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   if (!state) return null
 
   const isEffectifsFilled = isFormValid(state.effectif)
-  const indicateurTroisFormValidated = state.indicateurTrois.formValidated
 
   const {
     effectifsIndicateurCalculable,
@@ -41,6 +40,10 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   } = calculsIndicateurTrois
 
   if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur3" />
+  }
+
+  if (!isFormValid(state.indicateurTrois)) {
     return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
@@ -62,10 +65,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu de promotion durant la période de référence"
       />
     )
-  }
-
-  if (indicateurTroisFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
   return (

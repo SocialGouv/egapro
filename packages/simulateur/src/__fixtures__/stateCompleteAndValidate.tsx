@@ -10,23 +10,20 @@ const actionValidateInformationsSimulation: ActionType = {
 }
 
 const actionValidateEffectif: ActionType = {
-  type: "validateEffectif",
-  valid: "Valid",
+  type: "setValidEffectif",
 }
 
 const actionValidateIndicateurUnCoefGroup: ActionType = {
-  type: "validateIndicateurUnCoefGroup",
-  valid: "Valid",
+  type: "setValidIndicateurUnCoefGroup",
 }
 
 const actionValidateIndicateurUnCoefEffectif: ActionType = {
-  type: "validateIndicateurUnCoefEffectif",
-  valid: "Valid",
+  type: "setValidIndicateurUnCoefEffectif",
 }
 
 const actionValidateIndicateurUn: ActionType = {
-  type: "validateIndicateurUn",
-  valid: "Valid",
+  // type: "validateIndicateurUn",
+  type: "setValidIndicateurUnCSP",
 }
 
 const actionValidateIndicateurDeux: ActionType = {
@@ -74,8 +71,8 @@ const actionValidateDeclaration: ActionType = {
     nombreCoefficients: 6,
     nonCalculable: false,
     motifNonCalculable: "",
-    remunerationAnnuelle: [],
-    coefficient: [],
+    remunerationsAnnuelles: [],
+    coefficients: [],
     resultatFinal: 8.0,
     sexeSurRepresente: "femmes",
     noteFinale: 31,

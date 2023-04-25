@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 
-import { FormState, SexeType } from "../../globals"
+import { SexeType } from "../../globals"
 
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
@@ -10,14 +10,14 @@ interface IndicateurUnResultProps {
   indicateurEcartRemuneration?: number
   indicateurSexeSurRepresente?: SexeType
   noteIndicateurUn?: number
-  validateIndicateurUn: (valid: FormState) => void
+  unsetIndicateurUn: () => void
 }
 
 const IndicateurUnResult: FunctionComponent<IndicateurUnResultProps> = ({
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   noteIndicateurUn,
-  validateIndicateurUn,
+  unsetIndicateurUn,
 }) => {
   return (
     <ResultSummary
@@ -27,7 +27,8 @@ const IndicateurUnResult: FunctionComponent<IndicateurUnResultProps> = ({
       secondLineLabel="Votre note obtenue est"
       secondLineData={(noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"}
       indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      onEdit={() => validateIndicateurUn("None")}
+      onEdit={unsetIndicateurUn}
+      label="Modifier les rémunérations"
     />
   )
 }

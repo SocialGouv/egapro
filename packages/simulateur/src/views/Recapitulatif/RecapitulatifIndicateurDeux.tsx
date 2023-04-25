@@ -27,8 +27,6 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
 
   if (!state) return null
 
-  const indicateurDeuxFormValidated = state.indicateurDeux.formValidated
-
   const isEffectifsFilled = isFormValid(state.effectif)
 
   const {
@@ -42,6 +40,10 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   } = calculsIndicateurDeux
 
   if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
+  if (!isFormValid(state.indicateurDeux)) {
     return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
@@ -63,10 +65,6 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d’augmentation durant la période de référence"
       />
     )
-  }
-
-  if (indicateurDeuxFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
   return (
