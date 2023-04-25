@@ -261,10 +261,12 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "unsetEffectif": {
-      return {
-        ...state,
-        effectif: { ...state.effectif, formValidated: "None" },
-      }
+      return produce(state, (draft) => {
+        draft.effectif.formValidated = "None"
+        if (isFormValid(state.declaration)) {
+          draft.declaration.formValidated = "Invalid"
+        }
+      })
     }
     case "setValidEffectif": {
       /* Recalcul sur les indicateurs dépendants des effectifs.
@@ -280,19 +282,21 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
       return produce(state, (draft) => {
         draft.effectif.formValidated = "Valid"
 
-        if (state.indicateurUn.modaliteCalcul === "csp") {
-          if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
-            draft.indicateurUn = { ...defaultState.indicateurUn, modaliteCalcul: "csp" }
-            draft.indicateurUn.formValidated = "Valid"
-            draft.indicateurUn.modaliteCalculformValidated = "Valid"
+        if (state.indicateurUn.modaliteCalculformValidated === "Valid") {
+          if (state.indicateurUn.modaliteCalcul === "csp") {
+            if (!calculerIndicateurUn(state).effectifsIndicateurCalculable) {
+              draft.indicateurUn = { ...defaultState.indicateurUn, modaliteCalcul: "csp" }
+              draft.indicateurUn.formValidated = "Valid"
+              draft.indicateurUn.modaliteCalculformValidated = "Valid"
+            } else if (draft.indicateurUn.formValidated === "Valid") {
+              draft.indicateurUn.formValidated = "Invalid"
+            }
           } else {
-            draft.indicateurUn.formValidated = "None"
+            // If effectifs in Effectif page changed and indicateur was previously filled, we need to force user to go to effectif coefficient tab for validation to be done.
+            draft.indicateurUn.formValidated = "Invalid"
+            draft.indicateurUn.coefficientEffectifFormValidated = "None"
           }
-        } else {
-          // If effectifs in Effectif page changed, we need to force user to go to effectif coefficient tab for validation to be done.
-          draft.indicateurUn.formValidated = "None"
-          draft.indicateurUn.coefficientEffectifFormValidated = "None"
-        } // else we let the state unchanged
+        }
 
         if (!calculerIndicateurDeux(state).effectifsIndicateurCalculable) {
           draft.indicateurDeux = { ...defaultState.indicateurDeux }
@@ -314,6 +318,8 @@ function appReducer(state: AppState | undefined, action: ActionType): AppState |
         } else if (draft.indicateurDeuxTrois.formValidated === "Valid") {
           draft.indicateurDeuxTrois.formValidated = "Invalid"
         } // else we let the state unchanged
+
+        ///
       })
     }
     case "setInvalidEffectif": {

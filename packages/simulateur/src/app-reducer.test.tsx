@@ -1074,6 +1074,7 @@ describe("validateEffectif", () => {
     })
 
     test("change default state", () => {
+      // This case is not possible because the setValidEffectif required to do an updateEffectif before.
       const newState = appReducer(stateDefault, action) as AppState
 
       const expectedState = produce(stateDefault as AppState, (draft) => {
@@ -1090,15 +1091,14 @@ describe("validateEffectif", () => {
     })
 
     test("change complete state", () => {
-      const { effectif, ...rest } = appReducer(stateComplete, action) as AppState
-      const { effectif: effectifInitial, ...restInitial } = stateComplete as AppState
+      const newState = appReducer(stateComplete, action) as AppState
 
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "Valid",
+      const expectedState = produce(stateComplete as AppState, (draft) => {
+        draft.effectif.formValidated = "Valid"
+        draft.indicateurUn.formValidated = "None"
       })
 
-      expect(rest).toStrictEqual(restInitial)
+      expect(newState).toStrictEqual(expectedState)
     })
   })
 
@@ -1108,15 +1108,14 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      const { effectif, ...rest } = appReducer(stateCompleteAndValidate, action) as AppState
+      const newState = appReducer(stateCompleteAndValidate, action) as AppState
 
-      const { effectif: effectifInitial, ...restInitial } = stateCompleteAndValidate as AppState
-
-      expect(effectif).toStrictEqual({
-        ...effectifInitial,
-        formValidated: "None",
+      const expectedState = produce(stateCompleteAndValidate as AppState, (draft) => {
+        draft.effectif.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
       })
-      expect(rest).toStrictEqual(restInitial)
+
+      expect(newState).toStrictEqual(expectedState)
     })
   })
 
@@ -1140,15 +1139,16 @@ describe("validateEffectif", () => {
       expect(rest).toStrictEqual(restInitial)
     })
 
-    const action: ActionType = {
-      type: "unsetEffectif",
-    }
-
     test("invalid complete validate state", () => {
+      const action: ActionType = {
+        type: "unsetEffectif",
+      }
+
       const newState = appReducer(stateCompleteAndValidateCoef, action) as AppState
 
       const expectedState = produce(stateCompleteAndValidateCoef as AppState, (draft) => {
         draft.effectif.formValidated = "None"
+        draft.declaration.formValidated = "Invalid"
       })
 
       expect(newState).toStrictEqual(expectedState)

@@ -50,10 +50,15 @@ const IndicateurUnCoef: FunctionComponent = () => {
     : {}
 
   useEffect(() => {
-    // On mount, if indicateur 1 has already remu tab filled, go to remu tab
-    if (state?.indicateurUn?.coefficientEffectifFormValidated === "Valid") {
+    // On mount, set the tab index to the first unfilled tab or the last tab.
+    if (state?.indicateurUn?.coefficientGroupFormValidated === "None") {
+      setTabIndex(0)
+    } else if (state?.indicateurUn?.coefficientEffectifFormValidated === "None") {
+      setTabIndex(1)
+    } else {
       setTabIndex(2)
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
