@@ -11,7 +11,7 @@ import type {
 import type { Mapper } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { dateObjectToDateISOString } from "@common/utils/date";
-import type { Any, Objectize } from "@common/utils/types";
+import type { Any } from "@common/utils/types";
 
 import { RepresentationEquilibree } from "../domain/RepresentationEquilibree";
 import { RepresentationEquilibreeData } from "../domain/RepresentationEquilibreeData";
@@ -121,7 +121,7 @@ export const representationEquilibreeMap: Required<
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
       data: obj.data ? reprensentationEquilibreeDataToDTO(obj.data) : void 0,
-    } as Objectize<RepresentationEquilibreeRaw>;
+    };
   },
 };
 

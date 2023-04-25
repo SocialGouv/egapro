@@ -168,6 +168,7 @@ export type PartialKeys<T> = {
   [K in keyof T]-?: undefined extends T[K] ? K : never;
 }[keyof T];
 export type RequiredKeys<T> = Exclude<keyof T, PartialKeys<T>>;
+/** Can also "convert" `interface` into `type` */
 export type Objectize<T> = { [K in keyof T]: Objectize<T[K]> };
 export type UnwrapObectize<T> = T extends Objectize<infer R>
   ? {

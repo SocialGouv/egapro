@@ -13,7 +13,8 @@
     "test": "NODE_ENV=test jest --watch",
     "test:coverage": "NODE_ENV=test jest --coverage",
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
-    "type-check": "tsc --pretty --noEmit && tsc --pretty --noEmit -p __tests__/tsconfig.json",
+    "type-check-test": "tsc -p __tests__/tsconfig.json",
+    "type-check": "tsc",
     "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts",
     "generateModelsFromSchema": "ts-node --project scripts/tsconfig.json scripts/generateModelsFromSchema.ts"
   },

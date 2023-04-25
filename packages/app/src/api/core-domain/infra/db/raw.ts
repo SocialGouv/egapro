@@ -1,5 +1,8 @@
+import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
+import { type Enum } from "@common/shared-domain/domain/valueObjects";
 
 export interface DeclarationRaw {
   data: DeclarationDataRaw | null;
@@ -20,6 +23,21 @@ export interface RepresentationEquilibreeRaw {
   modified_at: Date;
   siren: string;
   year: number;
+}
+
+export interface RepresentationEquilibreeSearchResultRaw {
+  data: DeclarationDataRaw;
+  results: Record<
+    number,
+    {
+      executiveMenPercent: number | null;
+      executiveWomenPercent: number | null;
+      memberMenPercent: number | null;
+      memberWomenPercent: number | null;
+      notComputableReasonExecutives: Enum.ToString<typeof NotComputableReasonExecutiveRepEq.Enum> | null;
+      notComputableReasonMembers: Enum.ToString<typeof NotComputableReasonMemberRepEq.Enum> | null;
+    }
+  >;
 }
 
 export interface OwnershipRequestRaw {

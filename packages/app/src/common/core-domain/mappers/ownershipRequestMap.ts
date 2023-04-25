@@ -1,7 +1,7 @@
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import type { Mapper } from "@common/shared-domain";
 import { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
-import type { Objectize } from "@common/utils/types";
+import type { ClearObject } from "@common/utils/types";
 
 import { OwnershipRequest } from "../domain/OwnershipRequest";
 import { ErrorDetail } from "../domain/valueObjects/ownership_request/ErrorDetail";
@@ -46,6 +46,6 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       email: obj.email?.getValue() || null,
       status: obj.status.getValue(),
       error_detail: obj.errorDetail ? [obj.errorDetail.errorCode, obj.errorDetail.errorMessage] : null,
-    } as Objectize<OwnershipRequestRaw>;
+    } as ClearObject<OwnershipRequestRaw>;
   },
 };
