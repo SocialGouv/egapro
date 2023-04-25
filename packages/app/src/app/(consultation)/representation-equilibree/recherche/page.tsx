@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
+import { representationEquilibreeSearchRepo } from "@api/core-domain/repo";
+import { SearchRepresentationEquilibree } from "@api/core-domain/useCases/SearchRepresentationEquilibree";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
+import { type SearchRepresentationEquilibreeInputDTO } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Text } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
@@ -10,12 +13,32 @@ import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { fetchSearchRepeqsV2, type RepeqsType } from "@services/apiClient/useSearchRepeqsV2";
 import { isEmpty, isFinite } from "lodash";
 import Link from "next/link";
-import { Suspense } from "react";
+import QueryString from "querystring";
+import { cache, Suspense } from "react";
 
 import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
 import { NextPageLink } from "./NextPageLink";
 
 export const dynamic = "force-dynamic";
+
+const useCase = new SearchRepresentationEquilibree(representationEquilibreeSearchRepo);
+
+const cachedSearch = cache((input: FormTypeInput, pageIndex = 0) => {
+  const criteria: SearchRepresentationEquilibreeInputDTO = {};
+  const cleaned = new URLSearchParams(QueryString.stringify(input));
+  const q = cleaned.get("q");
+  const region = cleaned.get("region");
+  const departement = cleaned.get("departement");
+  const naf = cleaned.get("naf");
+
+  // clean
+  q && (criteria.query = q);
+  region && (criteria.regionCode = region);
+  departement && searchParams.set("departement", departement);
+  naf && searchParams.set("naf", naf);
+
+  if (pageIndex > 0) searchParams.set("offset", String(pageIndex * 10));
+});
 
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterRepEq = async ({
@@ -63,7 +86,7 @@ const ConsulterRepEq = async ({
 };
 
 const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
-  const repeqs = await fetchSearchRepeqsV2(searchParams);
+  const repeqs = await cachedSearch({});
   const count = repeqs.count;
 
   if (count === 0) {
