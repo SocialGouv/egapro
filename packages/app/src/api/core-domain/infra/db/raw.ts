@@ -1,5 +1,5 @@
-import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
-import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
+import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { type DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 
 export interface DeclarationRaw {
   data: DeclarationDataRaw | null;

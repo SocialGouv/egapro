@@ -1,5 +1,5 @@
 import NAF from "./utils/naf.json";
-import type { SimpleObject } from "./utils/types";
+import { type SimpleObject } from "./utils/types";
 
 export const FIRST_YEAR = 2018 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;

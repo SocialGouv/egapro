@@ -1,5 +1,5 @@
 import { escapeStringRegexp } from "@common/utils/string";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 

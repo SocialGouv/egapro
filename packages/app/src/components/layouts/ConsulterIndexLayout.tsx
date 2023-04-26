@@ -2,7 +2,7 @@ import { Box, Container, Flex } from "@chakra-ui/layout";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Header } from "@components/ds/Header";
 import Head from "next/head";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { theme } from "../../theme";
 import { Footer } from "../ds/Footer";

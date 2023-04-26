@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Box } from "./Box";
 import styles from "./RecapSection.module.css";

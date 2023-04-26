@@ -21,22 +21,22 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
+import { type CompaniesType, type CompanyType, type TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
-import type { SearchCompanyParams } from "@services/apiClient";
+import { type SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
 import { useAdressLabel } from "@services/apiClient/useAdressLabel";
 import { useRouter } from "next/router";
-import type { ParsedUrlQuery } from "querystring";
-import type { ChangeEventHandler, DOMAttributes } from "react";
+import { type ParsedUrlQuery } from "querystring";
+import { type ChangeEventHandler, type DOMAttributes } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const workforceLabels: Record<TrancheType, string[]> = {
   "50:250": ["50 à 250", "salariés"],

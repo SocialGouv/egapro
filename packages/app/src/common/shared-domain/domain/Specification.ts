@@ -1,5 +1,5 @@
-import type { Any } from "../../utils/types";
-import type { Entity } from "./Entity";
+import { type Any } from "../../utils/types";
+import { type Entity } from "./Entity";
 
 type DefaultEntity = Entity<Any, Any>;
 export interface Specification<T extends DefaultEntity> {

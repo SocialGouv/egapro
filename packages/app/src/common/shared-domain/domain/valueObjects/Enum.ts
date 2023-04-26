@@ -1,4 +1,4 @@
-import type { Any, UnknownMapping } from "@common/utils/types";
+import { type Any, type UnknownMapping } from "@common/utils/types";
 
 import { enumHasValueGuard } from "../../../utils/enum";
 import { ValidationError } from "../ValidationError";

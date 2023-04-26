@@ -1,7 +1,7 @@
 import { ClientOnly } from "@components/ClientOnly";
 import { StaffOnly } from "@components/StaffOnly";
 import Head from "next/head";
-import type { PropsWithChildren, ReactNode } from "react";
+import { type PropsWithChildren, type ReactNode } from "react";
 
 import { App } from "./App";
 

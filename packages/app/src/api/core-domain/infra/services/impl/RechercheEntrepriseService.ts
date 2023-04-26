@@ -1,9 +1,14 @@
 import { StatusCodes } from "@api/shared-domain/infra/http/Controller";
-import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { Siret } from "@common/core-domain/domain/valueObjects/Siret";
+import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { stringify } from "qs";
 
-import type { Entreprise, Etablissement, IEntrepriseService, SearchParameters } from "../IEntrepriseService";
+import {
+  type Entreprise,
+  type Etablissement,
+  type IEntrepriseService,
+  type SearchParameters,
+} from "../IEntrepriseService";
 import { EntrepriseServiceError, EntrepriseServiceNotFoundError } from "../IEntrepriseService";
 
 const RECHERCHE_ENTREPRISE_URL = "https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/";

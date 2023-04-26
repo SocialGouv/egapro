@@ -1,12 +1,12 @@
-import type { OwnershipRaw } from "@api/core-domain/infra/db/raw";
+import { type OwnershipRaw } from "@api/core-domain/infra/db/raw";
 import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
-import type { Ownership, OwnershipPK } from "@common/core-domain/domain/Ownership";
-import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type Ownership, type OwnershipPK } from "@common/core-domain/domain/Ownership";
+import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { ownershipMap } from "@common/core-domain/mappers/ownershipMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
-import type { IOwnershipRepo } from "../IOwnershipRepo";
+import { type IOwnershipRepo } from "../IOwnershipRepo";
 
 export class PostgresOwnershipRepo implements IOwnershipRepo {
   private table = _sql("ownership");

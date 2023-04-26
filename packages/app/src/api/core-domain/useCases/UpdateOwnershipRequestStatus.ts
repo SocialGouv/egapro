@@ -1,18 +1,18 @@
 import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type {
-  OwnershipRequestAction,
-  OwnershipRequestActionDTO,
+import {
+  type OwnershipRequestAction,
+  type OwnershipRequestActionDTO,
 } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
-import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
-import type { UseCase } from "@common/shared-domain";
+import { type OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import { ensureRequired } from "@common/utils/types";
 import _ from "lodash";
 
-import type { IGlobalMailerService } from "../infra/mail/IGlobalMailerService";
-import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
+import { type IGlobalMailerService } from "../infra/mail/IGlobalMailerService";
+import { type IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 const KNOWN_ACTIONS: Array<OwnershipRequestActionDTO["action"]> = ["accept", "refuse"];
 

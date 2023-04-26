@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Box } from "../base/Box";
-import type { SpacingProps } from "../utils/spacing";
+import { type SpacingProps } from "../utils/spacing";
 
 export type ContainerProps = PropsWithChildren<
   Omit<SpacingProps, "ml" | "mr" | "mx" | "pl" | "pr" | "px"> & {

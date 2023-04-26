@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Header } from "@codegouvfr/react-dsfr/Header";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
 

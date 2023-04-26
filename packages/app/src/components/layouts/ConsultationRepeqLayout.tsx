@@ -2,9 +2,9 @@ import { PublicFooter } from "@components/Footers";
 import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
-import type { AppProps } from "./App";
+import { type AppProps } from "./App";
 import { App } from "./App";
 
 export type AsideLinkProps = PropsWithChildren<{

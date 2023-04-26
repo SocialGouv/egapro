@@ -4,7 +4,7 @@ import {
   GetRepresentationEquilibreeBySirenAndYear,
   GetRepresentationEquilibreeBySirenAndYearError,
 } from "@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";

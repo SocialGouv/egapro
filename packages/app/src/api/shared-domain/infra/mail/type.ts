@@ -1,5 +1,5 @@
-import type { Any } from "@common/utils/types";
-import type { Attachment } from "nodemailer/lib/mailer";
+import { type Any } from "@common/utils/types";
+import { type Attachment } from "nodemailer/lib/mailer";
 
 export type MailTemplate = {
   // TODO do not use specific "nodemailer" type

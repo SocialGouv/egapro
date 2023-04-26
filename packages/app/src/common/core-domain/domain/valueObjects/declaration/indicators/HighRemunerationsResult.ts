@@ -1,4 +1,4 @@
-import type { RangeNumber } from "@common/shared-domain/domain/valueObjects";
+import { type RangeNumber } from "@common/shared-domain/domain/valueObjects";
 import { RangeInteger } from "@common/shared-domain/domain/valueObjects";
 
 const range: RangeNumber.Range = [0, 5];

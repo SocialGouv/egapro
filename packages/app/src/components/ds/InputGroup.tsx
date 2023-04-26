@@ -1,6 +1,6 @@
-import type { FormControlProps } from "@chakra-ui/react";
+import { type FormControlProps } from "@chakra-ui/react";
 import { Box, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, VisuallyHidden } from "@chakra-ui/react";
-import type { FieldMetaState } from "react-final-form";
+import { type FieldMetaState } from "react-final-form";
 import { Field } from "react-final-form";
 
 import { ActivityIndicator } from "./ActivityIndicator";

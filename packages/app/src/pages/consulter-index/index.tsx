@@ -16,11 +16,11 @@ import { TextLink } from "@components/ds/TextLink";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import { useRouter } from "next/router";
-import type { DOMAttributes } from "react";
+import { type DOMAttributes } from "react";
 import { useEffect, useRef, useState } from "react";
 import { HiDownload } from "react-icons/hi";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 function FormSearchSiren() {
   const router = useRouter();

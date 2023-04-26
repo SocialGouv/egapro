@@ -19,7 +19,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const title = "Validation de l'email";
 

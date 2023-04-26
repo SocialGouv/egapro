@@ -1,4 +1,4 @@
-import type { PartialObject, ValueKeyIteratee } from "lodash";
+import { type PartialObject, type ValueKeyIteratee } from "lodash";
 import _ from "lodash";
 
 /**

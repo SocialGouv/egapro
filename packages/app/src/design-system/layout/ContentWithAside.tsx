@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 export const ContentWithAside = ({ children }: PropsWithChildren) => <div className="fr-grid-row">{children}</div>;
 

@@ -1,10 +1,10 @@
-import type { NoStringReactNode, PropsWithoutChildren } from "@common/utils/types";
-import type { ModalInstance } from "@gouvfr/dsfr";
-import type { ReactNode } from "react";
+import { type NoStringReactNode, type PropsWithoutChildren } from "@common/utils/types";
+import { type ModalInstance } from "@gouvfr/dsfr";
+import { type ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 
 import { Container } from "../layout/Container";
-import type { IconStyle } from "../utils/icon-styles";
+import { type IconStyle } from "../utils/icon-styles";
 import { Box } from "./Box";
 import { ButtonGroup } from "./ButtonGroup";
 import { FormButton } from "./FormButton";

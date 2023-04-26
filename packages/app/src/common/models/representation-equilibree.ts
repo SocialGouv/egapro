@@ -1,5 +1,5 @@
-import type { COUNTIES, COUNTRIES, NAF, REGIONS } from "@common/dict";
-import type { FormState } from "@services/apiClient";
+import { type COUNTIES, type COUNTRIES, type NAF, type REGIONS } from "@common/dict";
+import { type FormState } from "@services/apiClient";
 
 export type RepresentationEquilibreeAPI = {
   data: RepresentationEquilibreeDataField;

@@ -1,8 +1,8 @@
 import { AggregateRoot } from "@common/shared-domain";
-import type { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { type Email, type PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
-import type { DeclarationData } from "./DeclarationData";
-import type { Siren } from "./valueObjects/Siren";
+import { type DeclarationData } from "./DeclarationData";
+import { type Siren } from "./valueObjects/Siren";
 
 export interface DeclarationProps {
   data?: DeclarationData;

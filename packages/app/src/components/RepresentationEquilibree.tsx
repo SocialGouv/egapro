@@ -1,4 +1,4 @@
-import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
+import { type RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
 import {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,

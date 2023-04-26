@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 export interface AnchorLinkProps {
   anchor: string;

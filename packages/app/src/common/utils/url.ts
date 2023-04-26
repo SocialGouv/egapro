@@ -1,4 +1,4 @@
-import type { ParsedUrlQuery } from "querystring";
+import { type ParsedUrlQuery } from "querystring";
 
 /**
  * Build an URLSearchParams from an object.

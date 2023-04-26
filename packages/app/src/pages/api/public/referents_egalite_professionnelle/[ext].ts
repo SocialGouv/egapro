@@ -1,13 +1,13 @@
-import type { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
+import { type LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { referentRepo } from "@api/core-domain/repo";
-import type { ValidExportExtension } from "@api/core-domain/useCases/referent/ExportReferents";
+import { type ValidExportExtension } from "@api/core-domain/useCases/referent/ExportReferents";
 import {
   EXPORT_EXT,
   EXPORT_MIME,
   ExportReferents,
   ExportReferentsError,
 } from "@api/core-domain/useCases/referent/ExportReferents";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";

@@ -1,13 +1,13 @@
-import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
-import type { Mapper } from "@common/shared-domain";
+import { type OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
+import { type Mapper } from "@common/shared-domain";
 import { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
-import type { Objectize } from "@common/utils/types";
+import { type Objectize } from "@common/utils/types";
 
 import { OwnershipRequest } from "../domain/OwnershipRequest";
 import { ErrorDetail } from "../domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
+import { type OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
 
 export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestDTO, OwnershipRequestRaw>> = {
   toDomain(raw) {

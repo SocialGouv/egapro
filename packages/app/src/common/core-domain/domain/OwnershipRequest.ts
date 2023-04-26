@@ -1,9 +1,9 @@
 import { Entity } from "@common/shared-domain";
-import type { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
+import { type Email, type UniqueID } from "@common/shared-domain/domain/valueObjects";
 
-import type { ErrorDetail } from "./valueObjects/ownership_request/ErrorDetail";
+import { type ErrorDetail } from "./valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
-import type { Siren } from "./valueObjects/Siren";
+import { type Siren } from "./valueObjects/Siren";
 
 export interface OwnershipRequestProps {
   askerEmail: Email;

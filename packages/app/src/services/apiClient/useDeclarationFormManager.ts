@@ -1,11 +1,11 @@
-import type { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
-import type { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
-import type { WORKFORCES } from "@common/dict";
-import type { Enum } from "@common/shared-domain/domain/valueObjects";
+import { type FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
+import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
+import { type WORKFORCES } from "@common/dict";
+import { type Enum } from "@common/shared-domain/domain/valueObjects";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { EntrepriseType } from "./siren";
+import { type EntrepriseType } from "./siren";
 
 type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
 type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];

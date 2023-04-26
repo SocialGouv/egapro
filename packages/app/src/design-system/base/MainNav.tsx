@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 export const MainNav = ({ children }: PropsWithChildren) => {
   return (

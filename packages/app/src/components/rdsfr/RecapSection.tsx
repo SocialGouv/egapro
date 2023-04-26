@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import styles from "./RecapSection.module.css";
 

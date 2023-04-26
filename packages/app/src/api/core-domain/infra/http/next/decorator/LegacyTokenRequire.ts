@@ -1,13 +1,13 @@
 import { ownershipRepo } from "@api/core-domain/repo";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { config } from "@common/config";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { AppError, ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
-import type { Algorithm, JwtPayload } from "jsonwebtoken";
+import { type Algorithm, type JwtPayload } from "jsonwebtoken";
 import { JsonWebTokenError, TokenExpiredError, verify as jwtVerify } from "jsonwebtoken";
 
-import type { NextControllerMethodDecorator } from "../../../../../shared-domain/infra/http/next/type";
+import { type NextControllerMethodDecorator } from "../../../../../shared-domain/infra/http/next/type";
 
 class LegacyTokenRequireError extends AppError {}
 class LegacyTokenRequireNonOwnerError extends AppError {}

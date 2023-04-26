@@ -28,7 +28,7 @@ import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useEffect } from "react";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../../_app";
+import { type NextPageWithLayout } from "../../_app";
 
 const title = "Récapitulatif de la Représentation Équilibrée";
 

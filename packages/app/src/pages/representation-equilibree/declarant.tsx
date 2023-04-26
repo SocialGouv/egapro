@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const formSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis" }),

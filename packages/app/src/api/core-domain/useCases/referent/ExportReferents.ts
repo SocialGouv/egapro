@@ -1,22 +1,19 @@
-/* eslint-disable import/no-named-as-default-member */
-import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { COUNTIES, REGIONS } from "@common/dict";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { Object } from "@common/utils/overload";
-import type { SimpleObject } from "@common/utils/types";
+import { type SimpleObject } from "@common/utils/types";
 import { AsyncParser } from "@json2csv/node";
-// eslint-disable-next-line import/no-duplicates
 import { format } from "date-fns";
-// eslint-disable-next-line import/no-duplicates
 import { fr } from "date-fns/locale";
 import JS_XLSX from "js-xlsx";
 import _ from "lodash";
 import { Readable } from "stream";
 import XLSX from "xlsx";
 
-import type { IReferentRepo } from "../../repo/IReferentRepo";
+import { type IReferentRepo } from "../../repo/IReferentRepo";
 
 export const EXPORT_MIME = {
   json: "application/json",

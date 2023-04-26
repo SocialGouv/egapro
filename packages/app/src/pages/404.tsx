@@ -3,7 +3,7 @@ import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { push } from "@socialgouv/matomo-next";
 import { useEffect } from "react";
 
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {

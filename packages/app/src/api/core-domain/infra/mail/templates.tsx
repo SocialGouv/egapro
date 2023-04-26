@@ -1,4 +1,4 @@
-import type { MailTemplate } from "@api/shared-domain/infra/mail/type";
+import { type MailTemplate } from "@api/shared-domain/infra/mail/type";
 import { config } from "@common/config";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";

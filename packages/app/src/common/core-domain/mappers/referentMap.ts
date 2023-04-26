@@ -1,5 +1,5 @@
-import type { ReferentRaw } from "@api/core-domain/infra/db/raw";
-import type { Mapper } from "@common/shared-domain";
+import { type ReferentRaw } from "@api/core-domain/infra/db/raw";
+import { type Mapper } from "@common/shared-domain";
 import { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
 import { omitByRecursively } from "@common/utils/object";
 import _ from "lodash";
@@ -8,7 +8,7 @@ import { Referent } from "../domain/Referent";
 import { County } from "../domain/valueObjects/County";
 import { ReferentType } from "../domain/valueObjects/referent/ReferentType";
 import { Region } from "../domain/valueObjects/Region";
-import type { ReferentDTO } from "../dtos/ReferentDTO";
+import { type ReferentDTO } from "../dtos/ReferentDTO";
 
 export const referentMap: Required<Mapper<Referent, ReferentDTO, ReferentRaw>> = {
   toDomain(raw) {

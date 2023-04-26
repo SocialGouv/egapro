@@ -1,7 +1,7 @@
-import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { Siret } from "@common/core-domain/domain/valueObjects/Siret";
-import type { CodeNaf } from "@common/models/generated";
-import type { Service } from "@common/shared-domain";
+import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type Siret } from "@common/core-domain/domain/valueObjects/Siret";
+import { type CodeNaf } from "@common/models/generated";
+import { type Service } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 
 type EtatAdministratif = "A" | "C" | "F";

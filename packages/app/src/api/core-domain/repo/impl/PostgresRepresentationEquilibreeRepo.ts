@@ -1,15 +1,15 @@
-import type { RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
+import { type RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
-import type {
-  RepresentationEquilibree,
-  RepresentationEquilibreePK,
+import {
+  type RepresentationEquilibree,
+  type RepresentationEquilibreePK,
 } from "@common/core-domain/domain/RepresentationEquilibree";
-import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
-import type { IRepresentationEquilibreeRepo } from "../IRepresentationEquilibreeRepo";
+import { type IRepresentationEquilibreeRepo } from "../IRepresentationEquilibreeRepo";
 
 export class PostgresRepresentationEquilibreeRepo implements IRepresentationEquilibreeRepo {
   private sql = sql<RepresentationEquilibreeRaw[]>;

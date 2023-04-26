@@ -1,4 +1,4 @@
-import type { UniqueString } from "@common/utils/types";
+import { type UniqueString } from "@common/utils/types";
 
 export type BackgroundColorStyle =
   | UniqueString

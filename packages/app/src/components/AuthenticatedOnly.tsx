@@ -1,5 +1,5 @@
 import { useUser } from "@services/apiClient";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 type Props = PropsWithChildren<unknown> & { disableAuth?: boolean | undefined; redirectTo: string };
 

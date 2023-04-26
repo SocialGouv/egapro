@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 export type FormGroupProps = PropsWithChildren<{
   isError?: boolean;

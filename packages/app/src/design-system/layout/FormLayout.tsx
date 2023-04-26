@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Box } from "../base/Box";
 import { ButtonGroup } from "../base/ButtonGroup";
-import type { MarginProps } from "../utils/spacing";
+import { type MarginProps } from "../utils/spacing";
 import styles from "./FormLayout.module.css";
 
 export type FormLayoutProps = PropsWithChildren<

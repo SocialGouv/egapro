@@ -1,6 +1,6 @@
 import { PublicFooter } from "@components/Footers";
 import Head from "next/head";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { App } from "./App";
 

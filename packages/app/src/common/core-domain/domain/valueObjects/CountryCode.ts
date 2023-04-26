@@ -1,7 +1,7 @@
 import { COUNTRIES_ISO_TO_LIB } from "@common/dict";
 import { TupleString } from "@common/shared-domain/domain/valueObjects";
 import { Object } from "@common/utils/overload";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 const COUNTRY_KEYS = Object.keys(COUNTRIES_ISO_TO_LIB);
 

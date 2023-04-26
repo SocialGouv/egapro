@@ -8,7 +8,7 @@ import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormMana
 import { useRouter } from "next/router";
 import invariant from "tiny-invariant";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const Validation: NextPageWithLayout = () => {
   const router = useRouter();

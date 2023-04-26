@@ -1,4 +1,4 @@
-import type { Any, IsTuple, Objectize } from "./types";
+import { type Any, type IsTuple, type Objectize } from "./types";
 
 type Keys<T> = Objectize<Array<keyof T>>;
 type Values<T> = Objectize<Array<T[keyof T]>>;

@@ -1,5 +1,5 @@
-import type { CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
-import type { OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
+import { type CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
+import { type OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 
 import { fetcherV2 } from "./fetcher";
 

@@ -1,4 +1,4 @@
-import type { Any } from "../../../utils/types";
+import { type Any } from "../../../utils/types";
 import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
 

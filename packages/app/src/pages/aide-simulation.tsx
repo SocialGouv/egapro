@@ -2,7 +2,7 @@ import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { AnchorLink, Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
 import Head from "next/head";
 
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const AideSimulation: NextPageWithLayout = () => {
   return (

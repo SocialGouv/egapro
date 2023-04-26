@@ -1,11 +1,11 @@
-import type {
-  motifNonCalculabiliteCadresOptions,
-  motifNonCalculabiliteMembresOptions,
+import {
+  type motifNonCalculabiliteCadresOptions,
+  type motifNonCalculabiliteMembresOptions,
 } from "@common/models/representation-equilibree";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { EntrepriseType } from "./siren";
+import { type EntrepriseType } from "./siren";
 
 export type FormState = {
   date?: string | undefined; // Only filled by the backend.

@@ -2,9 +2,9 @@ import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/L
 import { referentRepo } from "@api/core-domain/repo";
 import { CreateReferent, CreateReferentError } from "@api/core-domain/useCases/referent/CreateReferent";
 import { GetReferents, GetReferentsError } from "@api/core-domain/useCases/referent/GetReferents";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
-import type { CreateReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type CreateReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { createReferentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";

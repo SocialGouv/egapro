@@ -1,11 +1,11 @@
 import { EntrepriseFooter } from "@components/Footers";
 import { ButtonAsLink, FormButton, Logo, SkipLinks, SkipLinksItem } from "@design-system";
-import type { TokenInfoType } from "@services/apiClient";
+import { type TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
 import { clsx } from "clsx";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";

@@ -1,10 +1,10 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 
-import type { IDeclarationRepo } from "../repo/IDeclarationRepo";
+import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 
 interface Input {
   siren: string;

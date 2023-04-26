@@ -1,7 +1,7 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const LegalNotice: NextPageWithLayout = () => {
   return (

@@ -1,6 +1,6 @@
-import type { StoreApi, UseBoundStore } from "zustand";
+import { type StoreApi, type UseBoundStore } from "zustand";
 
-import type { Any } from "./types";
+import { type Any } from "./types";
 
 type MapFromStore<
   T extends UseBoundStore<StoreApi<Any>>,

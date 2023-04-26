@@ -1,5 +1,5 @@
-import type { Any } from "../../utils/types";
-import type { Entity } from "../domain";
+import { type Any } from "../../utils/types";
+import { type Entity } from "../domain";
 
 export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
   getAll(): Promise<T[]>;

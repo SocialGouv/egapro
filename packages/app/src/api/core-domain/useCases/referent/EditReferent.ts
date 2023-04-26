@@ -2,13 +2,13 @@ import { Referent } from "@common/core-domain/domain/Referent";
 import { County } from "@common/core-domain/domain/valueObjects/County";
 import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/ReferentType";
 import { Region } from "@common/core-domain/domain/valueObjects/Region";
-import type { EditReferentDTO, ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type EditReferentDTO, type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
 
-import type { IReferentRepo } from "../../repo/IReferentRepo";
+import { type IReferentRepo } from "../../repo/IReferentRepo";
 
 export class EditReferent implements UseCase<EditReferentDTO, ReferentDTO> {
   constructor(private readonly referentRepo: IReferentRepo) {}

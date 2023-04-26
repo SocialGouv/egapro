@@ -1,12 +1,12 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
-import type { IconStyle } from "../utils/icon-styles";
-import type { MarginProps } from "../utils/spacing";
-import type { BoxProps } from "./Box";
+import { type IconStyle } from "../utils/icon-styles";
+import { type MarginProps } from "../utils/spacing";
+import { type BoxProps } from "./Box";
 import { Box } from "./Box";
 import styles from "./Callout.module.css";
-import type { FormButtonProps } from "./FormButton";
+import { type FormButtonProps } from "./FormButton";
 import { FormButton } from "./FormButton";
 
 export type CalloutProps = BoxProps &

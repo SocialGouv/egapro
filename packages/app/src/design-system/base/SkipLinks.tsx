@@ -1,5 +1,5 @@
-import type { AnchorLink } from "@common/utils/url";
-import type { PropsWithChildren } from "react";
+import { type AnchorLink } from "@common/utils/url";
+import { type PropsWithChildren } from "react";
 
 export const SkipLinks = ({ children }: PropsWithChildren) => (
   <div className="fr-skiplinks">

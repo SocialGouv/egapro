@@ -4,7 +4,7 @@ import { Container, Grid, GridCol } from "@design-system";
 
 import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const PrivacyPolicy: NextPageWithLayout = () => {
   const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);

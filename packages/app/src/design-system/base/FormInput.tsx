@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
-import type { HTMLInputTypeAttribute } from "react";
+import { type HTMLInputTypeAttribute } from "react";
 import { forwardRef } from "react";
 
-import type { IconStyle } from "../utils/icon-styles";
+import { type IconStyle } from "../utils/icon-styles";
 
 type FormInputCustomTypes = HTMLInputTypeAttribute | "percentage";
 

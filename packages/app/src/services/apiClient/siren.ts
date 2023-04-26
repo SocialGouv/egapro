@@ -1,4 +1,4 @@
-import type { Entreprise } from "@common/models/representation-equilibree";
+import { type Entreprise } from "@common/models/representation-equilibree";
 import moize from "moize";
 
 import { fetcher } from "./fetcher";

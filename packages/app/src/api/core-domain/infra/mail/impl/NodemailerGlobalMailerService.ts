@@ -1,13 +1,13 @@
-import type { Templates } from "@api/shared-domain/infra/mail/IMailerService";
+import { type Templates } from "@api/shared-domain/infra/mail/IMailerService";
 import { defaultSendMailConfig, mailer, verifyMailerConnection } from "@api/shared-domain/infra/mail/nodemailer";
 import { config } from "@common/config";
 import { UnexpectedError, UnexpectedMailerError } from "@common/shared-domain";
 import { isNodeErrorNoException } from "@common/utils/error";
-import type { SendMailOptions } from "nodemailer";
-import type { Options } from "nodemailer/lib/mailer";
+import { type SendMailOptions } from "nodemailer";
+import { type Options } from "nodemailer/lib/mailer";
 import { getSystemErrorName } from "util";
 
-import type { IGlobalMailerService } from "../IGlobalMailerService";
+import { type IGlobalMailerService } from "../IGlobalMailerService";
 
 /**
  * Specific implementation of the global mailer service with nodemailer.

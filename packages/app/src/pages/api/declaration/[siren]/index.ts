@@ -4,7 +4,7 @@ import {
   GetAllDeclarationsBySiren,
   GetAllDeclarationsBySirenError,
 } from "@api/core-domain/useCases/GetAllDeclarationsBySiren";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";

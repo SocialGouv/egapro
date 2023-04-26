@@ -1,9 +1,9 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
-import type { SelectProps } from "@chakra-ui/react";
+import { type SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
-import type { UseStatsParams } from "@services/apiClient";
+import { type UseStatsParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useStats } from "@services/apiClient";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

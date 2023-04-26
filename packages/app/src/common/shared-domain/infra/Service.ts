@@ -1,4 +1,4 @@
-import type { pvoid } from "@common/utils/types";
+import { type pvoid } from "@common/utils/types";
 
 export interface Service {
   /**

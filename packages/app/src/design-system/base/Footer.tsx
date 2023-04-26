@@ -1,8 +1,8 @@
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import { forwardRef } from "react";
 
 import { Container } from "../layout/Container";
-import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
+import { type NextLinkOrAProps } from "../utils/NextLinkOrA";
 import { NextLinkOrA } from "../utils/NextLinkOrA";
 
 export const Footer = ({ children }: PropsWithChildren) => (

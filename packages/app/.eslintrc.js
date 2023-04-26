@@ -56,6 +56,11 @@ const config = {
     "import/no-internal-modules": "off",
     "import/newline-after-import": "error",
     "import/export": "off",
+    "import/no-useless-path-segments": "warn",
+    "import/no-absolute-path": "warn",
+    "import/no-named-as-default": "off",
+    "import/consistent-type-specifier-style": ["error", "prefer-inline"],
+    "import/no-duplicates": ["error", { "prefer-inline": true }],
     "sort-import": "off",
     "prettier/prettier": [
       "error",

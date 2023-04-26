@@ -1,4 +1,4 @@
-import type { StyleFunctionProps } from "@chakra-ui/theme-tools";
+import { type StyleFunctionProps } from "@chakra-ui/theme-tools";
 
 export const components = {
   components: {

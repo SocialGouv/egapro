@@ -1,10 +1,10 @@
-import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
+import { type RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
 import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
 import { ApiError } from "next/dist/server/api-utils";
 import useSWR from "swr";
 
 import { fetcher } from "./fetcher";
-import type { FormState } from "./useFormManager";
+import { type FormState } from "./useFormManager";
 import { useUser } from "./useUser";
 
 export const putRepresentationEquilibree = async (data: FormState) => {
