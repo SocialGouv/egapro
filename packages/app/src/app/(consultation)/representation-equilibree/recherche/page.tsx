@@ -17,7 +17,7 @@ import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { isEmpty, isFinite } from "lodash";
 import Link from "next/link";
 import QueryString from "querystring";
-import { cache, Suspense } from "react";
+import { Suspense } from "react";
 
 import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
 import { NextPageLink } from "./NextPageLink";
@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const useCase = new SearchRepresentationEquilibree(representationEquilibreeSearchRepo);
 
-const cachedSearch = cache((input: FormTypeInput, pageIndex = 0) => {
+const search = async (input: FormTypeInput, pageIndex = 0) => {
   const criteria: SearchRepresentationEquilibreeInputDTO = {};
   const cleaned = new URLSearchParams(QueryString.stringify(input));
   const q = cleaned.get("q");
@@ -42,7 +42,7 @@ const cachedSearch = cache((input: FormTypeInput, pageIndex = 0) => {
   if (pageIndex > 0) criteria.offset = pageIndex * 10;
 
   return useCase.execute(criteria);
-});
+};
 
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterRepEq = async ({
@@ -90,7 +90,7 @@ const ConsulterRepEq = async ({
 };
 
 const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
-  const repeqs = await cachedSearch(searchParams);
+  const repeqs = await search(searchParams);
   const count = repeqs.count;
 
   if (count === 0) {
@@ -100,7 +100,7 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
   let totalLength = repeqs.data.length;
   const pages = await Promise.all(
     [...Array(page)].map(async (_, i) => {
-      const repeqs = await cachedSearch(searchParams, i + 1);
+      const repeqs = await search(searchParams, i + 1);
       totalLength += repeqs.data.length;
       // @ts-ignore
       return <Page repeqs={repeqs} key={i + 1} />;
