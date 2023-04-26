@@ -1,4 +1,3 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { config } from "@common/config";
 import {
   Footer,
@@ -80,9 +79,13 @@ export const EntrepriseFooter = () => {
           </FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <Button {...consentModalButtonProps} className="fr-footer__bottom-link">
+          <button
+            {...consentModalButtonProps.nativeButtonProps}
+            onClick={consentModalButtonProps.onClick}
+            className="fr-footer__bottom-link"
+          >
             Gestion des cookies
-          </Button>
+          </button>
         </FooterBottomItem>
       </FooterBottom>
     </Footer>
