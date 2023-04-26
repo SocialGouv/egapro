@@ -1,5 +1,5 @@
 import { Enum } from "@common/shared-domain/domain/valueObjects";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 type Values = Enum.ToString<typeof ReferentType.Enum>;
 export class ReferentType<TLitteral extends Values = Values> extends Enum<typeof ReferentType.Enum> {

@@ -1,7 +1,7 @@
 import { Entity } from "@common/shared-domain";
-import type { Email } from "@common/shared-domain/domain/valueObjects";
+import { type Email } from "@common/shared-domain/domain/valueObjects";
 
-import type { Siren } from "./valueObjects/Siren";
+import { type Siren } from "./valueObjects/Siren";
 
 export interface OwnershipProps {
   email: Email;

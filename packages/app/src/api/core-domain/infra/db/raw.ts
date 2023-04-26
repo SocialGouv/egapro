@@ -1,8 +1,8 @@
 import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
-import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
-import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
+import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { type DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 import { type Enum } from "@common/shared-domain/domain/valueObjects";
 
 export interface DeclarationRaw {

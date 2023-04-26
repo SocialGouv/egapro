@@ -1,7 +1,7 @@
 import { type Declaration } from "@common/core-domain/domain/Declaration";
 import { type DeclarationSearchResult } from "@common/core-domain/domain/DeclarationSearchResult";
 import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import type { SearchDefaultCriteria, SearchRepo } from "@common/shared-domain";
+import { type SearchDefaultCriteria, type SearchRepo } from "@common/shared-domain";
 
 export interface DeclarationSearchCriteria extends SearchDefaultCriteria {
   countyCode?: string;

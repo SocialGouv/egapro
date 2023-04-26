@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { Box } from "../design-system/base/Box";
 import { Text } from "../design-system/base/Typography";
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {

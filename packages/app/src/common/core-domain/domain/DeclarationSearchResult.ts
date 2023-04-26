@@ -4,7 +4,7 @@ import { type EntityMap } from "@common/shared-domain/domain/EntityMap";
 import { type DeclarationData } from "./DeclarationData";
 import { type DeclarationScoreSynthesis } from "./DeclarationScoreSynthesis";
 import { type DeclarationIndicatorsYear } from "./valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
-import type { Siren } from "./valueObjects/Siren";
+import { type Siren } from "./valueObjects/Siren";
 
 export interface DeclarationSearchResultProps {
   data: EntityMap<DeclarationIndicatorsYear, DeclarationData>;

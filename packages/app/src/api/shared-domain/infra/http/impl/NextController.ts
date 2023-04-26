@@ -1,10 +1,16 @@
 import { Object } from "@common/utils/overload";
-import type { SimpleObject } from "@common/utils/types";
+import { type SimpleObject } from "@common/utils/types";
 import Cors from "cors";
-import type { ServerResponse } from "http";
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
+import { type ServerResponse } from "http";
+import { type NextApiHandler, type NextApiRequest, type NextApiResponse } from "next";
 
-import type { AnyUrl, BackToReferer, Controller, ControllerRequest, ControllerResponse } from "../Controller";
+import {
+  type AnyUrl,
+  type BackToReferer,
+  type Controller,
+  type ControllerRequest,
+  type ControllerResponse,
+} from "../Controller";
 import { StatusCodes } from "../Controller";
 
 export type NextController<TParamKeys extends string = string> = Controller<

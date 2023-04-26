@@ -1,5 +1,5 @@
-import type { Any, pvoid, SimpleObject, UniqueString } from "@common/utils/types";
-import type { IncomingMessage, ServerResponse } from "http";
+import { type Any, type pvoid, type SimpleObject, type UniqueString } from "@common/utils/types";
+import { type IncomingMessage, type ServerResponse } from "http";
 import { StatusCodes } from "http-status-codes";
 
 interface QueryString {

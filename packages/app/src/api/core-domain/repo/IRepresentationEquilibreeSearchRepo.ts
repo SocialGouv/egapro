@@ -1,6 +1,6 @@
-import type { RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
+import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type RepresentationEquilibreeSearchResult } from "@common/core-domain/domain/RepresentationEquilibreeSearchResult";
-import type { SearchDefaultCriteria, SearchRepo } from "@common/shared-domain";
+import { type SearchDefaultCriteria, type SearchRepo } from "@common/shared-domain";
 
 export interface RepresentationEquilibreeSearchCriteria extends SearchDefaultCriteria {
   countyCode?: string;

@@ -1,10 +1,10 @@
-import type { CompaniesType, CompanyType } from "@common/models/company";
+import { type CompaniesType, type CompanyType } from "@common/models/company";
 import moize from "moize";
-import type { SWRInfiniteKeyLoader } from "swr/infinite";
+import { type SWRInfiniteKeyLoader } from "swr/infinite";
 import useSWRInfinite from "swr/infinite";
 
 import { buildUrlParams } from "../../common/utils/url";
-import type { FetcherInfiniteReturn } from "./fetcher";
+import { type FetcherInfiniteReturn } from "./fetcher";
 import { fetcher } from "./fetcher";
 
 export type SearchCompanyParams = {

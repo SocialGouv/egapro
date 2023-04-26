@@ -4,9 +4,9 @@ import {
   UpdateDeclarationWithOpMc,
   UpdateDeclarationWithOpMcError,
 } from "@api/core-domain/useCases/UpdateDeclarationWithOpMc";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler, RouteZodBody } from "@api/shared-domain/infra/http/next/Decorators";
-import type { UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
+import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { updateOpMcDTOSchema } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";

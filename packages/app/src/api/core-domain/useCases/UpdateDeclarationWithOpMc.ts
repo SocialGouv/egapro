@@ -1,12 +1,12 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
+import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { OPMC_OPEN_DURATION_AFTER_EDIT } from "@common/dict";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { isDateBeforeDuration, parseDate } from "@common/utils/date";
 
-import type { IDeclarationRepo } from "../repo/IDeclarationRepo";
+import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 
 type Input = {
   opmc: UpdateOpMcDTO;

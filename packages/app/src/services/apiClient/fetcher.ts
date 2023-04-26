@@ -1,7 +1,7 @@
 import { config } from "@common/config";
 import { ApiError } from "next/dist/server/api-utils";
 
-import type { Any } from "../../common/utils/types";
+import { type Any } from "../../common/utils/types";
 import { useUserStore } from "./useUser";
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";

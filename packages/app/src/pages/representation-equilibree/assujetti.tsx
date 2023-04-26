@@ -11,7 +11,7 @@ import {
 import { useUser } from "@services/apiClient";
 import { useState } from "react";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const title = "Êtes-vous assujetti ?";
 

@@ -1,5 +1,5 @@
 import { Enum } from "@common/shared-domain/domain/valueObjects";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 export class OwnershipRequestStatus extends Enum<typeof OwnershipRequestStatus.Enum> {
   constructor(value: Enum.ToString<typeof OwnershipRequestStatus.Enum> | OwnershipRequestStatus.Enum | UnknownMapping) {

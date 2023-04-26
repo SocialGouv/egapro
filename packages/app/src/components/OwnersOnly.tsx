@@ -1,5 +1,5 @@
 import { useUser } from "@services/apiClient";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";
 

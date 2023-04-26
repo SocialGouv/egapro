@@ -1,5 +1,5 @@
 import { config } from "@common/config";
-import type { CompaniesType } from "@common/models/company";
+import { type CompaniesType } from "@common/models/company";
 import QueryString from "querystring";
 
 export type SearchCompanyParams = {

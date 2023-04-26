@@ -1,8 +1,8 @@
-import type { Service } from "@common/shared-domain";
-import type { SimpleObject } from "@common/utils/types";
-import type { SendMailOptions } from "nodemailer";
+import { type Service } from "@common/shared-domain";
+import { type SimpleObject } from "@common/utils/types";
+import { type SendMailOptions } from "nodemailer";
 
-import type { MailTemplateFunction } from "./type";
+import { type MailTemplateFunction } from "./type";
 
 export type Templates = SimpleObject<MailTemplateFunction>;
 

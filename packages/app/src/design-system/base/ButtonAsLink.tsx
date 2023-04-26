@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
 import { forwardRef } from "react";
 
-import type { ButtonStylesProps } from "../utils/button-styles";
+import { type ButtonStylesProps } from "../utils/button-styles";
 import { buttonStyles } from "../utils/button-styles";
-import type { NextLinkOrAProps } from "../utils/NextLinkOrA";
+import { type NextLinkOrAProps } from "../utils/NextLinkOrA";
 import { NextLinkOrA } from "../utils/NextLinkOrA";
 
 export type ButtonAsLinkProps = ButtonStylesProps &

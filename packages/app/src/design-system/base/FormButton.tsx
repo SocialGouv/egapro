@@ -1,4 +1,4 @@
-import type { ButtonStylesProps } from "../utils/button-styles";
+import { type ButtonStylesProps } from "../utils/button-styles";
 import { buttonStyles } from "../utils/button-styles";
 
 export type FormButtonProps = ButtonStylesProps &

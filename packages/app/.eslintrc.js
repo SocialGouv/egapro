@@ -59,6 +59,8 @@ const config = {
     "import/no-useless-path-segments": "warn",
     "import/no-absolute-path": "warn",
     "import/no-named-as-default": "off",
+    "import/consistent-type-specifier-style": ["error", "prefer-inline"],
+    "import/no-duplicates": ["error", { "prefer-inline": true }],
     "sort-import": "off",
     "lodash/import-scope": ["error", "member"],
     "prettier/prettier": [

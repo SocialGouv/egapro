@@ -14,10 +14,10 @@ import {
   GridCol,
   ImgHome,
 } from "@design-system";
-import type { GetStaticProps } from "next";
+import { type GetStaticProps } from "next";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 import styles from "./index.module.css";
 
 interface HomeProps {

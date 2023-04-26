@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren, ReactElement } from "react";
+import { type PropsWithChildren, type ReactElement } from "react";
 import { Children, cloneElement, forwardRef } from "react";
 
 import { ConditionalWrapper } from "../utils/ConditionalWrapper";
-import type { MarginProps } from "../utils/spacing";
+import { type MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 import styles from "./FormCheckbox.module.css";
 

@@ -1,9 +1,9 @@
-import type { DeclarationDTO } from "@common/models/generated";
+import { type DeclarationDTO } from "@common/models/generated";
 import useSWR from "swr";
 
-import type { FetcherOptions, FetcherReturn } from "./fetcher";
+import { type FetcherOptions, type FetcherReturn } from "./fetcher";
 import { fetcher, genericErrorMessage } from "./fetcher";
-import type { DeclarationFormState } from "./useDeclarationFormManager";
+import { type DeclarationFormState } from "./useDeclarationFormManager";
 
 export type DeclarationAPI = {
   data: DeclarationDTO;

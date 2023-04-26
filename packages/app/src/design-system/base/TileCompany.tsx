@@ -1,8 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { FormButton } from "./FormButton";
 import { Grid } from "./Grid";

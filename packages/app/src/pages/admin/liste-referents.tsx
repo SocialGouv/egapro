@@ -1,9 +1,9 @@
 import { config } from "@common/config";
-import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { createReferentDTOSchema, referentDTOSchema } from "@common/core-domain/dtos/ReferentDTO";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "@common/dict";
 import { Object } from "@common/utils/overload";
-import type { pvoid } from "@common/utils/types";
+import { type pvoid } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import {
@@ -35,7 +35,7 @@ import {
 } from "@design-system";
 import { Modal } from "@design-system/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { ModalInstance } from "@gouvfr/dsfr";
+import { type ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
@@ -44,7 +44,7 @@ import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const columnMap = [
   ["region", "Région"],

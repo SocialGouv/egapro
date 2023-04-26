@@ -1,4 +1,4 @@
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
 export interface UseCase<TRequest, TResponse> {
   execute(request: TRequest): Promise<TResponse>;

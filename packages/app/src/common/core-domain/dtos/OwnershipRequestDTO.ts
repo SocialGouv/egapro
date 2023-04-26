@@ -1,4 +1,4 @@
-import type { ZodSizedTupleFromUnion } from "@common/utils/types";
+import { type ZodSizedTupleFromUnion } from "@common/utils/types";
 import { z } from "zod";
 
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";

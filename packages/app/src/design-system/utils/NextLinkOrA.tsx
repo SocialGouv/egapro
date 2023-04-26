@@ -1,4 +1,4 @@
-import type { HTMLAnchorProps } from "@common/utils/react-props";
+import { type HTMLAnchorProps } from "@common/utils/react-props";
 import Link, { type LinkProps } from "next/link";
 import { type PropsWithChildren } from "react";
 

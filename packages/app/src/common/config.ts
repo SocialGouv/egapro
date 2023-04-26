@@ -1,6 +1,6 @@
 import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
-import type { Any } from "./utils/types";
+import { type Any } from "./utils/types";
 
 export type FeatureFlag = keyof typeof config.ff;
 

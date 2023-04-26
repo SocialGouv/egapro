@@ -1,8 +1,8 @@
-import type { PropsWithoutChildren } from "@common/utils/types";
+import { type PropsWithoutChildren } from "@common/utils/types";
 import { clsx } from "clsx";
 
-import type { TextColorStyle } from "../utils/color-styles";
-import type { IconStyle } from "../utils/icon-styles";
+import { type TextColorStyle } from "../utils/color-styles";
+import { type IconStyle } from "../utils/icon-styles";
 import style from "./Icon.module.css";
 
 export type IconProps = JSX.IntrinsicElements["span"] & {

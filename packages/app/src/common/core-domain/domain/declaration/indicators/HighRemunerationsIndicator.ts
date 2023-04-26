@@ -1,9 +1,9 @@
-import type { EntityPropsToJson } from "@common/shared-domain";
+import { type EntityPropsToJson } from "@common/shared-domain";
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { HighRemunerationsResult } from "../../valueObjects/declaration/indicators/HighRemunerationsResult";
-import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
 export interface HighRemunerationsIndicatorProps extends AbstractIndicatorProps {

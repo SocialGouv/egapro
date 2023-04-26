@@ -1,7 +1,7 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
-import type { PropsWithChildren, ReactNode } from "react";
+import { type PropsWithChildren, type ReactNode } from "react";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";
 

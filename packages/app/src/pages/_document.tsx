@@ -1,6 +1,6 @@
 //
 import { config } from "@common/config";
-import type { DocumentProps } from "next/document";
+import { type DocumentProps } from "next/document";
 import { Head, Html, Main, NextScript } from "next/document";
 
 import { dsfrDocumentApi } from "./_app";

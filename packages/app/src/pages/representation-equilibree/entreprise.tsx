@@ -11,9 +11,9 @@ import {
 } from "@design-system";
 import { useConfig, useFormManager } from "@services/apiClient";
 import { useRouter } from "next/router";
-import type { FormEvent } from "react";
+import { type FormEvent } from "react";
 
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
   const router = useRouter();

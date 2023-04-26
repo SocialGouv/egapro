@@ -1,9 +1,9 @@
 import { entrepriseService } from "@api/core-domain/infra/services";
 import { ownershipRequestRepo } from "@api/core-domain/repo";
 import { CreateOwnershipRequest, CreateOwnershipRequestError } from "@api/core-domain/useCases/CreateOwnershipRequest";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
-import type { UseCaseParameters } from "@common/shared-domain";
+import { type UseCaseParameters } from "@common/shared-domain";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 

@@ -3,7 +3,7 @@ import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } fr
 import { AnchorLink } from "@design-system/client";
 import Head from "next/head";
 
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const AideSimulation: NextPageWithLayout = () => {
   return (

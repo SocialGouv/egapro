@@ -1,8 +1,8 @@
-import type { EntityPropsToJson } from "@common/shared-domain";
+import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
-import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
 export interface MaternityLeavesIndicatorProps extends AbstractIndicatorProps {

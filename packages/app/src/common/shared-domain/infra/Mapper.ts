@@ -1,5 +1,5 @@
-import type { Any, Objectize } from "../../utils/types";
-import type { Entity } from "../domain";
+import { type Any, type Objectize } from "../../utils/types";
+import { type Entity } from "../domain";
 
 export interface Mapper<E extends Entity<Any, Any>, D, P = Any> {
   toDTO(obj: E): D;

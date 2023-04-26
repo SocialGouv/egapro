@@ -1,9 +1,9 @@
-import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 
-import type { IReferentRepo } from "../../repo/IReferentRepo";
+import { type IReferentRepo } from "../../repo/IReferentRepo";
 
 export class GetReferents implements UseCase<never, ReferentDTO[]> {
   constructor(private readonly referentRepo: IReferentRepo) {}

@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
-import type { MarginProps } from "../utils/spacing";
+import { type MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 import styles from "./Stepper.module.css";
 

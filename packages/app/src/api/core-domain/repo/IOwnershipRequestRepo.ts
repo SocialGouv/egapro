@@ -1,9 +1,9 @@
-import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
-import type {
-  GetOwnershipRequestDbOrderBy,
-  GetOwnershipRequestInputDTO,
+import { type OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import {
+  type GetOwnershipRequestDbOrderBy,
+  type GetOwnershipRequestInputDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import type { BulkRepo } from "@common/shared-domain";
+import { type BulkRepo } from "@common/shared-domain";
 
 export const OWNERSHIP_REQUEST_SORTABLE_COLS = [
   "createdAt",

@@ -1,22 +1,22 @@
-import type { RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
-import type {
-  AnneeIndicateur,
-  CodeNaf,
-  CodePays,
-  Departement,
-  Effectif,
-  Entreprise as Entreprises,
-  Region,
+import { type RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
+import {
+  type AnneeIndicateur,
+  type CodeNaf,
+  type CodePays,
+  type Departement,
+  type Effectif,
+  type Entreprise as Entreprises,
+  type Region,
 } from "@common/models/generated";
-import type { Mapper } from "@common/shared-domain";
+import { type Mapper } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { dateObjectToDateISOString } from "@common/utils/date";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
 import { RepresentationEquilibree } from "../domain/RepresentationEquilibree";
 import { RepresentationEquilibreeData } from "../domain/RepresentationEquilibreeData";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { DeclarationDTO } from "../dtos/DeclarationDTO";
+import { type DeclarationDTO } from "../dtos/DeclarationDTO";
 
 export const representationEquilibreeMap: Required<
   Mapper<RepresentationEquilibree, DeclarationDTO | null, RepresentationEquilibreeRaw>

@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { forwardRef } from "react";
 
-import type { IconStyle } from "../utils/icon-styles";
+import { type IconStyle } from "../utils/icon-styles";
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   iconLeft?: IconStyle;

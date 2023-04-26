@@ -1,9 +1,9 @@
 import { Entity } from "@common/shared-domain";
-import type { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
+import { type Email, type UniqueID, type Url } from "@common/shared-domain/domain/valueObjects";
 
-import type { County } from "./valueObjects/County";
-import type { ReferentType } from "./valueObjects/referent/ReferentType";
-import type { Region } from "./valueObjects/Region";
+import { type County } from "./valueObjects/County";
+import { type ReferentType } from "./valueObjects/referent/ReferentType";
+import { type Region } from "./valueObjects/Region";
 
 interface Substitute {
   email?: Email;

@@ -1,13 +1,13 @@
 import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { referentRepo } from "@api/core-domain/repo";
 import { ImportReferents, ImportReferentsError } from "@api/core-domain/useCases/referent/ImportReferents";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
 import formidable from "formidable";
 import { readFileSync, unlinkSync } from "fs";
 import { StatusCodes } from "http-status-codes";
-import type { PageConfig } from "next";
+import { type PageConfig } from "next";
 
 type TokenReq = LegacyTokenRequire.Wrap<NextController.Req<NextController>>;
 type Res = NextController.Res<NextController>;

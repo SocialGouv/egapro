@@ -1,6 +1,6 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
-import type { ValidationError } from "@common/shared-domain";
+import { type CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
+import { type ValidationError } from "@common/shared-domain";
 import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const zodUniqueEmailArray = z.string().transform((val, ctx) => {
   const splitted = val.split(",").map(v => v.trim());

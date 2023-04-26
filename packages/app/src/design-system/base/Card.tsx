@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
-import type { IconStyle } from "../utils/icon-styles";
-import type { MarginProps } from "../utils/spacing";
+import { type IconStyle } from "../utils/icon-styles";
+import { type MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
 export type CardProps = PropsWithChildren<

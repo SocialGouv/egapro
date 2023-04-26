@@ -1,12 +1,12 @@
-import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import { type DeclarationRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
-import type { Declaration, DeclarationPK } from "@common/core-domain/domain/Declaration";
-import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
+import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
-import type { IDeclarationRepo } from "../IDeclarationRepo";
+import { type IDeclarationRepo } from "../IDeclarationRepo";
 
 export class PostgresDeclarationRepo implements IDeclarationRepo {
   private sql = sql<DeclarationRaw[]>;

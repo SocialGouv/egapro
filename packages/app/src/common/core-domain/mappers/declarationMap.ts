@@ -1,26 +1,26 @@
-import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
-import type {
-  AnneeIndicateur,
-  CategoriesSimples,
-  CodeNaf,
-  CodePays,
-  Departement,
-  Effectif,
-  Entreprise as Entreprises,
-  Region,
-  Remunerations,
+import { type DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import {
+  type AnneeIndicateur,
+  type CategoriesSimples,
+  type CodeNaf,
+  type CodePays,
+  type Departement,
+  type Effectif,
+  type Entreprise as Entreprises,
+  type Region,
+  type Remunerations,
 } from "@common/models/generated";
-import type { Mapper } from "@common/shared-domain";
+import { type Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { dateObjectToDateISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 import { isUndefined } from "lodash";
 
 import { Declaration } from "../domain/Declaration";
 import { DeclarationData } from "../domain/DeclarationData";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { DeclarationDTO } from "../dtos/DeclarationDTO";
+import { type DeclarationDTO } from "../dtos/DeclarationDTO";
 
 export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null, DeclarationRaw>> = {
   // TODO convert without validation if perf are not good

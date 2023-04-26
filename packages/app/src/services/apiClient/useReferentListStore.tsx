@@ -1,4 +1,4 @@
-import type { ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
+import { type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";

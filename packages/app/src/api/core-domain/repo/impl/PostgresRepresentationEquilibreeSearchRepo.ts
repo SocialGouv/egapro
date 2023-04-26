@@ -1,6 +1,6 @@
 import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
-import type { RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
+import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type RepresentationEquilibreeSearchResult } from "@common/core-domain/domain/RepresentationEquilibreeSearchResult";
 import { representationEquilibreeSearchResultMap } from "@common/core-domain/mappers/representationEquilibreeSearchResultMap";
 import { PUBLIC_YEARS_REPEQ } from "@common/dict";

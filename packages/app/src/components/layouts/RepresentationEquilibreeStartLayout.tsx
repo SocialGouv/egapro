@@ -2,7 +2,7 @@ import { Container, Grid, GridCol } from "@design-system";
 import { SideMenuLink } from "@design-system/client";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { App } from "./App";
 

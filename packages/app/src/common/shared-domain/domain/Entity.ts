@@ -1,6 +1,6 @@
-import type { Any, Objectize, SimpleObject } from "../../utils/types";
-import type { ValueObject } from "./ValueObject";
-import type { Enum } from "./valueObjects";
+import { type Any, type Objectize, type SimpleObject } from "../../utils/types";
+import { type ValueObject } from "./ValueObject";
+import { type Enum } from "./valueObjects";
 
 export type UUID = string;
 export abstract class Entity<P, out Id = UUID> {

@@ -7,11 +7,11 @@ import {
   UpdateOwnershipRequestStatus,
   UpdateOwnershipRequestStatusError,
 } from "@api/core-domain/useCases/UpdateOwnershipRequestStatus";
-import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { type NextController } from "@api/shared-domain/infra/http/impl/NextController";
 import { Handler, RouteZodQuery } from "@api/shared-domain/infra/http/next/Decorators";
-import type { GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import { type GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { getOwnershipRequestInputDTOSchema } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import type { UseCaseParameters } from "@common/shared-domain";
+import { type UseCaseParameters } from "@common/shared-domain";
 import { AppError, ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 

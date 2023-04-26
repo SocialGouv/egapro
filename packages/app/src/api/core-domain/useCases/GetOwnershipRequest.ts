@@ -1,18 +1,18 @@
 import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type {
-  GetOwnershipRequestDbOrderBy,
-  GetOwnershipRequestDTO,
-  GetOwnershipRequestInputDTO,
+import {
+  type GetOwnershipRequestDbOrderBy,
+  type GetOwnershipRequestDTO,
+  type GetOwnershipRequestInputDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { sortBy } from "lodash";
 
-import type { IEntrepriseService } from "../infra/services/IEntrepriseService";
+import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
 import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
-import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
+import { type IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO, GetOwnershipRequestDTO> {
   constructor(

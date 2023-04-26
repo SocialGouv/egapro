@@ -1,5 +1,5 @@
-import type { RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
-import type { Mapper } from "@common/shared-domain";
+import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
 import { BalancedRepresentation } from "../domain/declaration/indicators/BalancedRepresentation";

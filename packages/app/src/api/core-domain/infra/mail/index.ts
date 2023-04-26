@@ -1,6 +1,6 @@
 import { services } from "@common/config";
 
-import type { IGlobalMailerService } from "./IGlobalMailerService";
+import { type IGlobalMailerService } from "./IGlobalMailerService";
 import { NodemailerGlobalMailerService } from "./impl/NodemailerGlobalMailerService";
 import * as templates from "./templates";
 

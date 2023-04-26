@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import { type PropsWithChildren, type ReactNode } from "react";
 
 export interface ConditionalWrapperProps {
   condition: boolean;

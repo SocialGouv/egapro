@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { forwardRef, type PropsWithChildren } from "react";
 
-import type { MarginProps } from "../utils/spacing";
+import { type MarginProps } from "../utils/spacing";
 import { Box, BoxRef } from "./Box";
 
 export type GridProps = PropsWithChildren<

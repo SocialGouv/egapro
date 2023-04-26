@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
 
 export const ClientOnly = ({ children, ...delegated }: PropsWithChildren) => {

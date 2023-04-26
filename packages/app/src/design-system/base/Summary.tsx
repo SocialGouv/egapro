@@ -1,6 +1,6 @@
-import type { AnchorLink } from "@common/utils/url";
+import { type AnchorLink } from "@common/utils/url";
 import { clsx } from "clsx";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 export const Summary = ({ children, className }: PropsWithChildren<{ className?: string }>) => (
   <nav className={clsx("fr-summary", className)} role="navigation" aria-labelledby="fr-summary-title">

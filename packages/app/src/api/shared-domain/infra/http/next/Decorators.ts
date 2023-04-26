@@ -1,8 +1,8 @@
-import type { NextControllerMethodDecorator } from "@api/shared-domain/infra/http/next/type";
+import { type NextControllerMethodDecorator } from "@api/shared-domain/infra/http/next/type";
 import { StatusCodes } from "http-status-codes";
-import type { z } from "zod";
+import { type z } from "zod";
 
-import type { NextController } from "../impl/NextController";
+import { type NextController } from "../impl/NextController";
 import { handler } from "../impl/NextController";
 
 /**

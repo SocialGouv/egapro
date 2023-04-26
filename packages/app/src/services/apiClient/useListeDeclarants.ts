@@ -1,11 +1,11 @@
-import type {
-  GetOwnershipRequestDTO,
-  GetOwnershipRequestInputSchemaDTO,
+import {
+  type GetOwnershipRequestDTO,
+  type GetOwnershipRequestInputSchemaDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import useSWR from "swr";
 
 import { fetcherV2 } from "./fetcher";
-import type { OwnershipRequestListStoreType } from "./useOwnershipRequestListStore";
+import { type OwnershipRequestListStoreType } from "./useOwnershipRequestListStore";
 
 const ITEMS_PER_PAGE = 10;
 

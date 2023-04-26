@@ -1,4 +1,4 @@
-import type { DeclarationDTO } from "@common/models/generated";
+import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { formatAdresse, useConfig } from "@services/apiClient";
 

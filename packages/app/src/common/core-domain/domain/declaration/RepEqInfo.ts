@@ -1,11 +1,11 @@
-import type { EntityPropsToJson } from "@common/shared-domain";
+import { type EntityPropsToJson } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { CorrectiveMeasures } from "../valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { DeclarationIndex } from "../valueObjects/declaration/declarationInfo/DeclarationIndex";
 import { DeclarationIndicatorsYear } from "../valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
-import type { RepEqIndicatorsYear } from "../valueObjects/declaration/declarationInfo/RepEqIndicatorsYear";
+import { type RepEqIndicatorsYear } from "../valueObjects/declaration/declarationInfo/RepEqIndicatorsYear";
 import { Publication } from "./declarationInfo/Publication";
 
 export interface RepEqInfoProps {

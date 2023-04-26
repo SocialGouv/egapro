@@ -8,7 +8,7 @@ import { useRepresentationEquilibree } from "@services/apiClient";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 
-import type { NextPageWithLayout } from "../../../_app";
+import { type NextPageWithLayout } from "../../../_app";
 
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 

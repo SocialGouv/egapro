@@ -3,7 +3,7 @@ import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
 
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "./_app";
+import { type NextPageWithLayout } from "./_app";
 
 const Cgu: NextPageWithLayout = () => {
   return (

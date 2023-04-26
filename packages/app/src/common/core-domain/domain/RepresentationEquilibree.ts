@@ -1,8 +1,8 @@
 import { AggregateRoot } from "@common/shared-domain";
-import type { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { type PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
-import type { RepresentationEquilibreeData } from "./RepresentationEquilibreeData";
-import type { Siren } from "./valueObjects/Siren";
+import { type RepresentationEquilibreeData } from "./RepresentationEquilibreeData";
+import { type Siren } from "./valueObjects/Siren";
 
 export interface RepresentationEquilibreeProps {
   data?: RepresentationEquilibreeData;

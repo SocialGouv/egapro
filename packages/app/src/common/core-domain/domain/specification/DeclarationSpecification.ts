@@ -1,6 +1,6 @@
 import { AbstractSpecification, ValidationError } from "@common/shared-domain";
 
-import type { DeclarationData } from "../DeclarationData";
+import { type DeclarationData } from "../DeclarationData";
 
 const GOOD_INDEX_THRESHOLD = 85;
 const NO_INDEX = -1;

@@ -1,6 +1,6 @@
 import { config } from "@common/config";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import type { FormButtonProps } from "@design-system";
+import { type FormButtonProps } from "@design-system";
 import {
   ButtonAsLink,
   ButtonGroup,
@@ -27,7 +27,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
-import type { NextPageWithLayout } from "../_app";
+import { type NextPageWithLayout } from "../_app";
 
 const title = "Votre déclaration a été transmise";
 

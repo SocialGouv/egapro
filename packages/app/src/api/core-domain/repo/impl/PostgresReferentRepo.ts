@@ -1,12 +1,12 @@
-import type { ReferentRaw } from "@api/core-domain/infra/db/raw";
+import { type ReferentRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
-import type { Referent } from "@common/core-domain/domain/Referent";
+import { type Referent } from "@common/core-domain/domain/Referent";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
-import type { Any } from "@common/utils/types";
+import { type Any } from "@common/utils/types";
 
-import type { IReferentRepo } from "../IReferentRepo";
+import { type IReferentRepo } from "../IReferentRepo";
 
 export class PostgresReferentRepo implements IReferentRepo {
   private sql = sql<ReferentRaw[]>;

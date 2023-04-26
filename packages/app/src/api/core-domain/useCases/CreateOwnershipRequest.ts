@@ -1,16 +1,16 @@
 import { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
-import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
-import type { UseCase } from "@common/shared-domain";
+import { type OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
+import { type UseCase } from "@common/shared-domain";
 import { AppError, ValidationError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 
-import type { IEntrepriseService } from "../infra/services/IEntrepriseService";
+import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
 import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
-import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
+import { type IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 interface Input {
   askerEmail: string;

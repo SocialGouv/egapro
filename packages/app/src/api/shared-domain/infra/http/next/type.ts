@@ -1,4 +1,4 @@
-import type { NextController } from "../impl/NextController";
+import { type NextController } from "../impl/NextController";
 
 /**
  * Base type for any decorators used in a {@link NextController} context.

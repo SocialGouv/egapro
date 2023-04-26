@@ -1,10 +1,10 @@
 import { Disclosure } from "@headlessui/react";
 import { clsx } from "clsx";
-import type { CSSProperties, PropsWithChildren } from "react";
+import { type CSSProperties, type PropsWithChildren } from "react";
 import { forwardRef, useState } from "react";
 
 import { useCollapse } from "../../hooks/useCollapse";
-import type { NextLinkOrAProps } from "../../utils/NextLinkOrA";
+import { type NextLinkOrAProps } from "../../utils/NextLinkOrA";
 import { NextLinkOrA } from "../../utils/NextLinkOrA";
 import styles from "./SideMenu.module.css";
 

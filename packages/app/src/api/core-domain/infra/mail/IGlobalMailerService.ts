@@ -1,4 +1,4 @@
-import type { IMailerService } from "@api/shared-domain/infra/mail/IMailerService";
+import { type IMailerService } from "@api/shared-domain/infra/mail/IMailerService";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- used in doc
 import * as templates from "./templates";

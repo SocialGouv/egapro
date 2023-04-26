@@ -1,10 +1,10 @@
-import type { EntityPropsToJson } from "@common/shared-domain";
+import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects/PositiveInteger";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
-import type { AbstractIndicatorProps } from "./AbstractIndicator";
+import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
 export interface SalaryRaisesAndPromotionsIndicatorProps extends AbstractIndicatorProps {

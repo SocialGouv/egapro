@@ -1,7 +1,7 @@
 import { isEmpty } from "@common/utils/object";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
-import type { ZodType } from "zod";
+import { type PropsWithChildren } from "react";
+import { type ZodType } from "zod";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";
 

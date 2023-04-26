@@ -14,7 +14,7 @@ import { useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
-import type { NextPageWithLayout } from "../../_app";
+import { type NextPageWithLayout } from "../../_app";
 
 const title = "Recherche de représentation équilibrée";
 

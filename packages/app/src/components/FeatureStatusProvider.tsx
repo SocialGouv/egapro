@@ -1,5 +1,5 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";

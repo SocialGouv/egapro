@@ -1,8 +1,8 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type {
-  GetOwnershipRequestDTO,
-  GetOwnershipRequestInputOrderBy,
-  GetOwnershipRequestInputSchemaDTO,
+import {
+  type GetOwnershipRequestDTO,
+  type GetOwnershipRequestInputOrderBy,
+  type GetOwnershipRequestInputSchemaDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create } from "zustand";

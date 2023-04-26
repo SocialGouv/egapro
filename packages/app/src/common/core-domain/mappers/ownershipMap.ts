@@ -1,10 +1,10 @@
-import type { OwnershipRaw } from "@api/core-domain/infra/db/raw";
-import type { Mapper } from "@common/shared-domain";
+import { type OwnershipRaw } from "@api/core-domain/infra/db/raw";
+import { type Mapper } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 
 import { Ownership } from "../domain/Ownership";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { OwnershipDTO } from "../dtos/OwnershipDTO";
+import { type OwnershipDTO } from "../dtos/OwnershipDTO";
 
 export const ownershipMap: Required<Mapper<Ownership, OwnershipDTO, OwnershipRaw>> = {
   // TODO convert without validation if perf are not good

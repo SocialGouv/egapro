@@ -1,7 +1,7 @@
 import { COUNTIES } from "@common/dict";
 import { TupleString } from "@common/shared-domain/domain/valueObjects";
 import { Object } from "@common/utils/overload";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 const COUNTIES_KEYS = Object.keys(COUNTIES);
 

@@ -1,5 +1,5 @@
 import { NAF, NAF_SECTIONS } from "./utils/naf";
-import type { SimpleObject, UnknownMapping } from "./utils/types";
+import { type SimpleObject, type UnknownMapping } from "./utils/types";
 
 export const FIRST_YEAR = 2018 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;

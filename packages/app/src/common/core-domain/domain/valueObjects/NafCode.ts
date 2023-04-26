@@ -1,7 +1,7 @@
 import { NAF } from "@common/dict";
 import { TupleString } from "@common/shared-domain/domain/valueObjects";
 import { Object } from "@common/utils/overload";
-import type { UnknownMapping } from "@common/utils/types";
+import { type UnknownMapping } from "@common/utils/types";
 
 const NAF_KEYS = Object.keys(NAF);
 

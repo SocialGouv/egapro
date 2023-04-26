@@ -1,6 +1,6 @@
-import type { PropsWithChildren, ReactNode } from "react";
-import type { EventEmitter } from "stream";
-import type { ZodLiteral } from "zod";
+import { type PropsWithChildren, type ReactNode } from "react";
+import { type EventEmitter } from "stream";
+import { type ZodLiteral } from "zod";
 
 /**
  * Use it to simplify void function that can be a promise.

@@ -26,7 +26,7 @@ import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
 import { z } from "zod";
 
-import type { NextPageWithLayout } from "../../_app";
+import { type NextPageWithLayout } from "../../_app";
 
 const title = "Récapitulatif de la Représentation Équilibrée";
 

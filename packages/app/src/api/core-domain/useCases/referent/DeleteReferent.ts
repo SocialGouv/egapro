@@ -1,8 +1,8 @@
-import type { UseCase } from "@common/shared-domain";
+import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 
-import type { IReferentRepo } from "../../repo/IReferentRepo";
+import { type IReferentRepo } from "../../repo/IReferentRepo";
 
 export class DeleteReferent implements UseCase<string, void> {
   constructor(private readonly referentRepo: IReferentRepo) {}
