@@ -21,12 +21,12 @@ import moize from "moize";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-export interface AverageIndicatorFormType {
+export type AverageIndicatorFormType = {
   departement?: keyof typeof COUNTIES;
   naf?: keyof typeof NAF_SECTIONS;
   region?: keyof typeof REGIONS;
   year: string;
-}
+};
 
 export interface AverageIndicatorFormProps {
   searchParams: AverageIndicatorFormType;

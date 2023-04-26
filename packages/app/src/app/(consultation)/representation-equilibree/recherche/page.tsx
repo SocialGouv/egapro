@@ -38,7 +38,7 @@ const search = async (input: FormTypeInput, pageIndex = 0) => {
   if (q) criteria.query = q;
   if (region) criteria.regionCode = region as typeof criteria.regionCode;
   if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
-  if (departement) criteria.nafSection = naf as typeof criteria.nafSection;
+  if (naf) criteria.nafSection = naf as typeof criteria.nafSection;
   if (pageIndex > 0) criteria.offset = pageIndex * 10;
 
   return useCase.execute(criteria);

@@ -1,3 +1,4 @@
+import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
@@ -24,6 +25,30 @@ export interface RepresentationEquilibreeRaw {
   siren: string;
   year: number;
 }
+
+type NotComputableReasonString = Enum.ToString<typeof NotComputableReason.Enum>;
+export interface DeclarationSearchResultRaw {
+  data: Record<number, DeclarationDataRaw>;
+  results: Record<
+    number,
+    {
+      highRemunerationsScore: number | null;
+      index: number | null;
+      maternityLeavesScore: number | null;
+      notComputableReasonMaternityLeaves: NotComputableReasonString | null;
+      notComputableReasonPromotions: NotComputableReasonString | null;
+      notComputableReasonRemunerations: NotComputableReasonString | null;
+      notComputableReasonSalaryRaises: NotComputableReasonString | null;
+      notComputableReasonSalaryRaisesAndPromotions: NotComputableReasonString | null;
+      promotionsScore: number | null;
+      remunerationsScore: number | null;
+      salaryRaisesAndPromotionsScore: number | null;
+      salaryRaisesScore: number | null;
+    }
+  >;
+}
+
+export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {
   data: DeclarationDataRaw;

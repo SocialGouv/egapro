@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
+import { declarationSearchRepo } from "@api/core-domain/repo";
+import { type DeclarationStatsCriteria } from "@api/core-domain/repo/IDeclarationSearchRepo";
+import { GetDeclarationStats } from "@api/core-domain/useCases/GetDeclarationStats";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { config } from "@common/config";
@@ -6,12 +9,30 @@ import { DISPLAY_CURRENT_YEAR, DISPLAY_PUBLIC_YEARS } from "@common/dict";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Container, Grid, GridCol, Heading, Stat } from "@design-system";
 import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
-import { fetchStatsV2 } from "@services/apiClient/useStatsV2";
 import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
+import QueryString from "querystring";
 
 import { AverageIndicatorForm, type AverageIndicatorFormType } from "./AverageIndicatorForm";
 
 export const dynamic = "force-dynamic";
+
+const useCase = new GetDeclarationStats(declarationSearchRepo);
+
+const getStats = async (input: AverageIndicatorFormType) => {
+  const criteria: DeclarationStatsCriteria = {};
+  const cleaned = new URLSearchParams(QueryString.stringify(input));
+  const departement = cleaned.get("departement");
+  const region = cleaned.get("region");
+  const section_naf = cleaned.get("section_naf");
+  const year = cleaned.get("year");
+
+  if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
+  if (region) criteria.regionCode = region as typeof criteria.regionCode;
+  if (section_naf) criteria.nafSection = section_naf as typeof criteria.nafSection;
+  if (year) criteria.year = year as typeof criteria.year;
+
+  return useCase.execute(criteria);
+};
 
 const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageIndicatorFormType>) => {
   const intYear = parseInt(String(searchParams.year)) || DISPLAY_CURRENT_YEAR;
@@ -19,8 +40,8 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
 
   let average = "";
   try {
-    const stats = await fetchStatsV2(searchParams);
-    average = stats?.avg?.toFixed(0) ?? "";
+    const stats = await getStats(searchParams as AverageIndicatorFormType);
+    average = stats?.avg?.toFixed?.(0) ?? "";
   } catch (e) {
     console.log(e);
   }
