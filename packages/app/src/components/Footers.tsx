@@ -78,9 +78,13 @@ export const EntrepriseFooter = () => {
           </FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <Button {...consentModalButtonProps} className="fr-footer__bottom-link">
+          <button
+            {...consentModalButtonProps.nativeButtonProps}
+            onClick={consentModalButtonProps.onClick}
+            className="fr-footer__bottom-link"
+          >
             Gestion des cookies
-          </Button>
+          </button>
         </FooterBottomItem>
       </FooterBottom>
     </Footer>

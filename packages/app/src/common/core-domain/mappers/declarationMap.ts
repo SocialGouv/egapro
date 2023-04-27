@@ -239,62 +239,81 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
       plan_relance: data.company.hasRecoveryPlan,
       raison_sociale: data.company.name,
       région: data.company.region?.getValue() as Region,
-      ues: {
-        entreprises: data.company.ues?.companies.map<Entreprise>(company => ({
-          raison_sociale: company.name,
-          siren: company.siren.getValue(),
-        })),
-        nom: data.company.ues?.name,
-      },
+      ...(data.company.ues
+        ? {
+            ues: {
+              entreprises: data.company.ues.companies.map<Entreprise>(company => ({
+                raison_sociale: company.name,
+                siren: company.siren.getValue(),
+              })),
+              nom: data.company.ues.name,
+            },
+          }
+        : {}),
     },
     source: data.source?.getValue(),
     id: data.id,
-    indicateurs: {
-      augmentations: {
-        catégories: data.indicators?.salaryRaises?.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
-        non_calculable: data.indicators?.salaryRaises?.notComputableReason?.getValue() as Any,
-        note: data.indicators?.salaryRaises?.score?.getValue(),
-        objectif_de_progression: data.indicators?.salaryRaises?.progressObjective,
-        population_favorable: data.indicators?.salaryRaises?.favorablePopulation?.getValue(),
-        résultat: data.indicators?.salaryRaises?.result?.getValue(),
-      },
-      augmentations_et_promotions: {
-        note: data.indicators?.salaryRaisesAndPromotions?.score?.getValue(),
-        non_calculable: data.indicators?.salaryRaisesAndPromotions?.notComputableReason?.getValue() as Any,
-        résultat: data.indicators?.salaryRaisesAndPromotions?.result?.getValue(),
-        note_en_pourcentage: data.indicators?.salaryRaisesAndPromotions?.percentScore?.getValue(),
-        note_nombre_salariés: data.indicators?.salaryRaisesAndPromotions?.employeesCountScore?.getValue(),
-        objectif_de_progression: data.indicators?.salaryRaisesAndPromotions?.progressObjective,
-        population_favorable: data.indicators?.salaryRaisesAndPromotions?.favorablePopulation?.getValue(),
-        résultat_nombre_salariés: data.indicators?.salaryRaisesAndPromotions?.employeesCountResult?.getValue(),
-      },
-      congés_maternité: {
-        note: data.indicators?.maternityLeaves?.score?.getValue(),
-        résultat: data.indicators?.maternityLeaves?.result?.getValue(),
-        non_calculable: data.indicators?.maternityLeaves?.notComputableReason?.getValue() as Any,
-        objectif_de_progression: data.indicators?.maternityLeaves?.progressObjective,
-      },
-      hautes_rémunérations: {
-        note: data.indicators?.highRemunerations?.score?.getValue(),
-        résultat: data.indicators?.highRemunerations?.result?.getValue(),
-        objectif_de_progression: data.indicators?.highRemunerations?.progressObjective,
-        population_favorable: data.indicators?.highRemunerations?.favorablePopulation?.getValue(),
-      },
-      promotions: {
-        note: data.indicators?.promotions?.score?.getValue(),
-        non_calculable: data.indicators?.promotions?.notComputableReason?.getValue() as Any,
-        résultat: data.indicators?.promotions?.result?.getValue(),
-        objectif_de_progression: data.indicators?.promotions?.progressObjective,
-        population_favorable: data.indicators?.promotions?.favorablePopulation?.getValue(),
-        catégories: data.indicators?.promotions?.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
-      },
-      rémunérations: {
-        note: data.indicators?.remunerations?.score?.getValue(),
-        non_calculable: data.indicators?.remunerations?.notComputableReason?.getValue() as Any,
-        résultat: data.indicators?.remunerations?.result?.getValue(),
-        objectif_de_progression: data.indicators?.remunerations?.progressObjective,
-        population_favorable: data.indicators?.remunerations?.favorablePopulation?.getValue(),
-        catégories: data.indicators?.remunerations?.categories.map<Categories>(cat => ({
+  };
+
+  if (data.indicators) {
+    dto.indicateurs = {};
+
+    if (data.indicators.salaryRaises)
+      dto.indicateurs.augmentations = {
+        catégories: data.indicators.salaryRaises.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
+        non_calculable: data.indicators.salaryRaises.notComputableReason?.getValue() as Any,
+        note: data.indicators.salaryRaises.score?.getValue(),
+        objectif_de_progression: data.indicators.salaryRaises.progressObjective,
+        population_favorable: data.indicators.salaryRaises.favorablePopulation?.getValue(),
+        résultat: data.indicators.salaryRaises.result?.getValue(),
+      };
+
+    if (data.indicators.salaryRaisesAndPromotions)
+      dto.indicateurs.augmentations_et_promotions = {
+        note: data.indicators.salaryRaisesAndPromotions.score?.getValue(),
+        non_calculable: data.indicators.salaryRaisesAndPromotions.notComputableReason?.getValue() as Any,
+        résultat: data.indicators.salaryRaisesAndPromotions.result?.getValue(),
+        note_en_pourcentage: data.indicators.salaryRaisesAndPromotions.percentScore?.getValue(),
+        note_nombre_salariés: data.indicators.salaryRaisesAndPromotions.employeesCountScore?.getValue(),
+        objectif_de_progression: data.indicators.salaryRaisesAndPromotions.progressObjective,
+        population_favorable: data.indicators.salaryRaisesAndPromotions.favorablePopulation?.getValue(),
+        résultat_nombre_salariés: data.indicators.salaryRaisesAndPromotions.employeesCountResult?.getValue(),
+      };
+
+    if (data.indicators.maternityLeaves)
+      dto.indicateurs.congés_maternité = {
+        note: data.indicators.maternityLeaves.score?.getValue(),
+        résultat: data.indicators.maternityLeaves.result?.getValue(),
+        non_calculable: data.indicators.maternityLeaves.notComputableReason?.getValue() as Any,
+        objectif_de_progression: data.indicators.maternityLeaves.progressObjective,
+      };
+
+    if (data.indicators.highRemunerations)
+      dto.indicateurs.hautes_rémunérations = {
+        note: data.indicators.highRemunerations.score?.getValue(),
+        résultat: data.indicators.highRemunerations.result?.getValue(),
+        objectif_de_progression: data.indicators.highRemunerations.progressObjective,
+        population_favorable: data.indicators.highRemunerations.favorablePopulation?.getValue(),
+      };
+
+    if (data.indicators.promotions)
+      dto.indicateurs.promotions = {
+        note: data.indicators.promotions.score?.getValue(),
+        non_calculable: data.indicators.promotions.notComputableReason?.getValue() as Any,
+        résultat: data.indicators.promotions.result?.getValue(),
+        objectif_de_progression: data.indicators.promotions.progressObjective,
+        population_favorable: data.indicators.promotions.favorablePopulation?.getValue(),
+        catégories: data.indicators.promotions.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
+      };
+
+    if (data.indicators.remunerations)
+      dto.indicateurs.rémunérations = {
+        note: data.indicators.remunerations.score?.getValue(),
+        non_calculable: data.indicators.remunerations.notComputableReason?.getValue() as Any,
+        résultat: data.indicators.remunerations.result?.getValue(),
+        objectif_de_progression: data.indicators.remunerations.progressObjective,
+        population_favorable: data.indicators.remunerations.favorablePopulation?.getValue(),
+        catégories: data.indicators.remunerations.categories.map<Categories>(cat => ({
           nom: cat.name,
           tranches: {
             "30:39": cat.ranges?.["30:39"]?.getValue(),
@@ -303,13 +322,12 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
             ":29": cat.ranges?.[":29"]?.getValue(),
           },
         })),
-        date_consultation_cse: data.indicators?.remunerations?.cseConsultationDate
-          ? dateObjectToDateISOString(data.indicators?.remunerations?.cseConsultationDate)
+        date_consultation_cse: data.indicators?.remunerations.cseConsultationDate
+          ? dateObjectToDateISOString(data.indicators?.remunerations.cseConsultationDate)
           : void 0,
-        mode: data.indicators?.remunerations?.mode?.getValue(),
-      },
-    },
-  };
+        mode: data.indicators?.remunerations.mode?.getValue(),
+      };
+  }
 
   if (skipUndefined) {
     return omitByRecursively(dto, isUndefined) as unknown as DeclarationDTO;

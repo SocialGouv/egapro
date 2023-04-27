@@ -1,4 +1,5 @@
 import { config } from "@common/config";
+import { buildFormState } from "@common/models/representation-equilibree";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
@@ -34,6 +35,14 @@ const title = "Récapitulatif de la Représentation Équilibrée";
 const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string; year: number }) => {
   const router = useRouter();
   const { repeq, error } = useRepresentationEquilibree(siren, year);
+  const { saveFormData } = useFormManager();
+
+  useEffect(() => {
+    if (repeq?.data) {
+      const formData = buildFormState(repeq.data);
+      saveFormData({ ...formData, status: "edition" });
+    }
+  }, [repeq, saveFormData]);
 
   const olderThanOneYear = !repeq?.data.déclaration.date
     ? undefined
