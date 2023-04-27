@@ -1,4 +1,3 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { config } from "@common/config";
 import {

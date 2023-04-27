@@ -3,7 +3,6 @@ import { type HTMLInputTypeAttribute } from "react";
 import { forwardRef } from "react";
 
 import { type IconStyle } from "../utils/icon-styles";
-import styles from "./FormInput.module.css";
 
 type FormInputCustomTypes = HTMLInputTypeAttribute | "percentage";
 

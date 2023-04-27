@@ -22,9 +22,10 @@ import {
   GridCol,
 } from "@design-system";
 import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
-import { useRepresentationEquilibree } from "@services/apiClient";
+import { useFormManager, useRepresentationEquilibree } from "@services/apiClient";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { z } from "zod";
 
 import { type NextPageWithLayout } from "../../_app";
