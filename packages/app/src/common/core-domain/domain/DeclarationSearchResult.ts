@@ -8,7 +8,9 @@ import { type Siren } from "./valueObjects/Siren";
 
 export interface DeclarationSearchResultProps {
   data: EntityMap<DeclarationIndicatorsYear, DeclarationData>;
+  name: string;
   results: EntityMap<DeclarationIndicatorsYear, DeclarationScoreSynthesis>;
+  siren: Siren;
 }
 
 export type DeclarationSearchResultPK = [Siren, DeclarationIndicatorsYear];
@@ -17,7 +19,16 @@ export class DeclarationSearchResult extends AggregateRoot<DeclarationSearchResu
   get data(): EntityMap<DeclarationIndicatorsYear, DeclarationData> {
     return this.props.data.clone();
   }
+
+  get name(): string {
+    return this.props.name;
+  }
+
   get results(): EntityMap<DeclarationIndicatorsYear, DeclarationScoreSynthesis> {
     return this.props.results.clone();
+  }
+
+  get siren(): Siren {
+    return this.props.siren;
   }
 }

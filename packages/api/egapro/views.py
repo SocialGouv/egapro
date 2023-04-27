@@ -117,6 +117,7 @@ def ensure_owner(view):
     return wrapper
 
 
+# apiv2 ok
 @app.route("/healthz", methods=["GET"])
 async def healthz(request, response):
     response.status = 200
@@ -510,6 +511,7 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+# apiv2 ok
 @app.route("/representation-equilibree/search", methods=["GET"])
 async def search_representation_equilibree(request: Request, response: Response):
     q = request.query.get("q", "").strip()
@@ -592,6 +594,7 @@ async def put_representation(request, response, siren, year):
         url = request.domain + data.uri
         await emails.representation.send(owners, url=url, **data)
 
+# apiv2 ok
 @app.route("/search")
 async def search(request, response):
     q = request.query.get("q", "").strip()
@@ -616,7 +619,7 @@ async def search(request, response):
         ),
     }
 
-
+# apiv2 ok
 @app.route("/stats")
 async def stats(request, response):
     section_naf = request.query.get("section_naf", None)
@@ -632,6 +635,7 @@ async def stats(request, response):
     response.json = dict(stats)
 
 
+# apiv2 ok-ish (dict.ts)
 @app.route("/config")
 async def get_config(request, response):
     keys = request.query.list("key", [])

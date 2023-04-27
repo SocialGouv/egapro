@@ -29,6 +29,7 @@ export interface RepresentationEquilibreeRaw {
 type NotComputableReasonString = Enum.ToString<typeof NotComputableReason.Enum>;
 export interface DeclarationSearchResultRaw {
   data: Record<number, DeclarationDataRaw>;
+  name: string;
   results: Record<
     number,
     {
@@ -46,6 +47,7 @@ export interface DeclarationSearchResultRaw {
       salaryRaisesScore: number | null;
     }
   >;
+  siren: string;
 }
 
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";

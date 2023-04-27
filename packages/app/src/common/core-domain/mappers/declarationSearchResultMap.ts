@@ -6,6 +6,7 @@ import { DeclarationData } from "../domain/DeclarationData";
 import { DeclarationScoreSynthesis } from "../domain/DeclarationScoreSynthesis";
 import { DeclarationSearchResult } from "../domain/DeclarationSearchResult";
 import { DeclarationIndicatorsYear } from "../domain/valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
+import { Siren } from "../domain/valueObjects/Siren";
 import { type PublicCompanyDTO } from "../dtos/DeclarationDTO";
 import { type SearchDeclarationResultDTO } from "../dtos/SearchDeclarationDTO";
 
@@ -16,6 +17,8 @@ export const declarationSearchResultMap: Mapper<
 > = {
   toDomain(raw) {
     return new DeclarationSearchResult({
+      name: raw.name,
+      siren: new Siren(raw.siren),
       results: new EntityMap(
         Object.entries(raw.results).map(([key, value]) => [
           new DeclarationIndicatorsYear(+key),
@@ -108,6 +111,8 @@ export const declarationSearchResultMap: Mapper<
       {} as SearchDeclarationResultDTO["company"],
     );
     return {
+      name: obj.name,
+      siren: obj.siren.getValue(),
       company,
       results: [...obj.results].reduce(
         (acc, [year, result]) => ({

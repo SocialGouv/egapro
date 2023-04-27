@@ -22,19 +22,6 @@ import {
 } from "../TileCompany";
 import { Text } from "../Typography";
 
-export type data = { men?: number; women?: number };
-
-export type TileCompanyRepeqsProps = {
-  data: Array<{
-    executivesManagers: data;
-    governingMembers: data;
-    year: number;
-  }>;
-  location: string;
-  siren: string;
-  title: string;
-};
-
 export const TileCompanyRepeqs = ({ company, results }: SearchRepresentationEquilibreeResultDTO) => {
   const { countyCode, regionCode, name, siren } = company;
 

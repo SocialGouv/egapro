@@ -42,6 +42,12 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
     const raws = await sql<DeclarationSearchResultRaw[]>`
         SELECT
+            (array_agg(${this.declaTable}.data ORDER BY ${
+      this.declaTable
+    }.year DESC))[1]->'entreprise'->>'siren' as siren,
+                    (array_agg(${this.declaTable}.data ORDER BY ${
+      this.declaTable
+    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
             jsonb_object_agg(${this.declaTable}.year::text, ${this.declaTable}.data) as data,
             jsonb_object_agg(${this.declaTable}.year::text, json_build_object(
                 'index', (${this.declaTable}.data->'déclaration'->>'index')::int,
@@ -55,19 +61,19 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
                 'highRemunerationsScore', (${
                   this.declaTable
                 }.data->'indicateurs'->'hautes_rémunérations'->>'note')::int,
-                'notComputableReasonRemunerationsScore', (${
+                'notComputableReasonRemunerations', (${
                   this.declaTable
                 }.data->'indicateurs'->'rémunérations'->>'non_calculable')::text,
-                'notComputableReasonSalaryRaisesScore', (${
+                'notComputableReasonSalaryRaises', (${
                   this.declaTable
                 }.data->'indicateurs'->'augmentations'->>'non_calculable')::text,
-                'notComputableReasonPromotionsScore', (${
+                'notComputableReasonPromotions', (${
                   this.declaTable
                 }.data->'indicateurs'->'promotions'->>'non_calculable')::text,
-                'notComputableReasonSalaryRaisesAndPromotionsScore', (${
+                'notComputableReasonSalaryRaisesAndPromotions', (${
                   this.declaTable
                 }.data->'indicateurs'->'augmentations_et_promotions'->>'non_calculable')::text,
-                'notComputableReasonMaternityLeavesScore', (${
+                'notComputableReasonMaternityLeaves', (${
                   this.declaTable
                 }.data->'indicateurs'->'congés_maternité'->>'non_calculable')::text
             )) as results

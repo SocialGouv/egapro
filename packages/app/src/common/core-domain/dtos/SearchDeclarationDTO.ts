@@ -6,6 +6,7 @@ import { consultationSchema } from "./helpers/common";
 
 export interface SearchDeclarationResultDTO {
   company: Record<number, PublicCompanyDTO>;
+  name: string;
   results: Record<
     number,
     {
@@ -23,6 +24,7 @@ export interface SearchDeclarationResultDTO {
       salaryRaisesScore: number | null;
     }
   >;
+  siren: string;
 }
 
 export const searchDeclarationInputDTOSchema = consultationSchema;

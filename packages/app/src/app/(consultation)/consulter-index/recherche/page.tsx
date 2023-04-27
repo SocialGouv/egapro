@@ -1,20 +1,46 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
+import { declarationSearchRepo } from "@api/core-domain/repo";
+import { SearchDeclaration } from "@api/core-domain/useCases/SearchDeclaration";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { type CompaniesType } from "@common/models/company";
+import { type ConsultationDTO } from "@common/core-domain/dtos/helpers/common";
+import {
+  type SearchDeclarationInputDTO,
+  type SearchDeclarationResultDTO,
+} from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Container, Grid, GridCol, Heading, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
-import { fetchSearchV2 } from "@services/apiClient/useSearchV2";
 import { isEmpty } from "lodash";
 import { TileCompanyIndex } from "packages/app/src/design-system/base/client/TileCompanyIndex";
+import QueryString from "querystring";
 import { Suspense } from "react";
 
 import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
 import { NextPageLink } from "../../representation-equilibree/recherche/NextPageLink";
 
 export const dynamic = "force-dynamic";
+
+const useCase = new SearchDeclaration(declarationSearchRepo);
+
+const search = async (input: FormTypeInput, pageIndex = 0) => {
+  const criteria: SearchDeclarationInputDTO = {};
+  const cleaned = new URLSearchParams(QueryString.stringify(input));
+  const q = cleaned.get("q");
+  const region = cleaned.get("region");
+  const departement = cleaned.get("departement");
+  const naf = cleaned.get("naf");
+
+  // clean
+  if (q) criteria.query = q;
+  if (region) criteria.regionCode = region as typeof criteria.regionCode;
+  if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
+  if (naf) criteria.nafSection = naf as typeof criteria.nafSection;
+  if (pageIndex > 0) criteria.offset = pageIndex * 10;
+
+  return useCase.execute(criteria);
+};
 
 type WithPageFormType = FormTypeInput & { page?: string };
 const ConsulterIndexRecherche = ({
@@ -56,20 +82,20 @@ const ConsulterIndexRecherche = ({
 };
 
 const DisplayCompanies = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
-  const companies = await fetchSearchV2(searchParams);
-  const count = companies.count;
+  const dtos = await search(searchParams);
+  const count = dtos.count;
 
   if (count === 0) {
     return <Alert severity="info" title="Aucune entreprise trouvée" description="Veuillez modifier votre recherche." />;
   }
 
-  let totalLength = companies.data.length;
+  let totalLength = dtos.data.length;
   const pages = await Promise.all(
     [...Array(page)].map(async (_, i) => {
-      const companies = await fetchSearchV2(searchParams, i + 1);
-      totalLength += companies.data.length;
+      const dtos = await search(searchParams, i + 1);
+      totalLength += dtos.data.length;
       // @ts-ignore
-      return <Page companies={companies} key={i + 1} />;
+      return <Page dtos={dtos} key={i + 1} />;
     }),
   );
 
@@ -83,7 +109,7 @@ const DisplayCompanies = async ({ page, searchParams }: { page: number; searchPa
         />
         <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
           {/* @ts-ignore */}
-          <Page companies={companies} />
+          <Page dtos={dtos} />
           {pages}
         </ClientAnimate>
       </Container>
@@ -114,12 +140,12 @@ const DisplayCompanies = async ({ page, searchParams }: { page: number; searchPa
   );
 };
 
-const Page = async ({ companies }: { companies: CompaniesType }) => {
+const Page = async ({ dtos }: { dtos: ConsultationDTO<SearchDeclarationResultDTO> }) => {
   return (
     <Suspense>
-      {companies.data.map(company => (
-        <GridCol key={company.entreprise.siren}>
-          <TileCompanyIndex {...company} />
+      {dtos.data.map(dto => (
+        <GridCol key={dto.siren}>
+          <TileCompanyIndex {...dto} />
         </GridCol>
       ))}
     </Suspense>

@@ -1,13 +1,15 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { adressLabel } from "@common/dict";
-import { type CompanyType, type TrancheType } from "@common/models/company";
+import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
+import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
+import { adressLabel, type WORKFORCES } from "@common/dict";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Container } from "../../layout/Container";
 import { Grid, GridCol } from "../Grid";
+import { Icon } from "../Icon";
 import { Stat } from "../Stat";
 import {
   TileCompany,
@@ -26,29 +28,20 @@ import {
 } from "../TileCompany";
 import { Text } from "../Typography";
 
-export type data = { men?: number; women?: number };
-
-export type TileCompanyRepeqsProps = {
-  data: Array<{
-    executivesManagers: data;
-    governingMembers: data;
-    year: number;
-  }>;
-  location: string;
-  siren: string;
-  title: string;
+const mapRange = (range: keyof WORKFORCES | undefined) => {
+  switch (range) {
+    case "1000:":
+      return "1000";
+    case "251:999":
+      return "251 à 999";
+    case "50:250":
+      return "50 à 250";
+    default:
+      return "0";
+  }
 };
 
-const mapTrancheType: Record<TrancheType, string> = {
-  "1000:": "1000",
-  "251:999": "251 à 999",
-  "50:250": "50 à 250",
-};
-
-export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
-  const { département, région, raison_sociale, siren, ues } = entreprise;
-  const isUES = !!ues?.entreprises.length && !!ues?.nom;
-
+export const TileCompanyIndex = ({ company, results, name, siren }: SearchDeclarationResultDTO) => {
   const rowsDefault = 3;
   const [rowsNumber, setRowsNumber] = useState(rowsDefault);
   const handleMoreRows = () => {
@@ -57,26 +50,26 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
 
   const [uesListOpened, setUesListOpened] = useState(false);
 
-  const years = Object.keys(stats.notes)
+  const years = Object.keys(results)
     .map(year => Number(year))
     .sort()
     .reverse();
+
+  const lastYear = years[0];
+  const { countyCode, regionCode, ues, workforce } = company[lastYear];
+  const isUES = !!ues?.companies.length && !!ues?.name;
 
   return (
     <TileCompany>
       <Container fluid>
         <Grid>
           <GridCol sm={9}>
-            <TileCompanyTitle ues={isUES}>{isUES ? ues.nom : raison_sociale}</TileCompanyTitle>
+            <TileCompanyTitle ues={isUES}>{isUES ? ues.name : name}</TileCompanyTitle>
             <TileCompanySiren>{siren}</TileCompanySiren>
-            <TileCompanyLocation>{adressLabel({ county: département, region: région })}</TileCompanyLocation>
+            <TileCompanyLocation>{adressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
           </GridCol>
           <GridCol sm={3}>
-            <Stat
-              text={mapTrancheType[entreprise.effectif.tranche]}
-              helpText="Salariés ou plus"
-              display={{ asText: ["xl", "bold"] }}
-            />
+            <Stat text={mapRange(workforce?.range)} helpText="Salariés ou plus" display={{ asText: ["xl", "bold"] }} />
           </GridCol>
         </Grid>
       </Container>
@@ -99,9 +92,9 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
           </Link>
           {uesListOpened && (
             <ol className={fr.cx("fr-ml-2w")}>
-              {entreprise.ues?.entreprises.map(entreprise => (
-                <li key={entreprise.siren} className={fr.cx("fr-text--sm", "fr-m-0")}>
-                  {entreprise.raison_sociale} ({entreprise.siren})
+              {ues?.companies.map(company => (
+                <li key={company.siren} className={fr.cx("fr-text--sm", "fr-m-0")}>
+                  {company.name} ({company.siren})
                 </li>
               ))}
             </ol>
@@ -118,22 +111,24 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
           {years
             .map(year => ({
               year,
-              note_augmentations: stats.notes_augmentations[year],
-              note_augmentations_et_promotions: stats.notes_augmentations_et_promotions[year],
-              note_conges_maternite: stats.notes_conges_maternite[year],
-              note_hautes_rémunérations: stats.notes_hautes_rémunérations[year],
-              note_promotions: stats.notes_promotions[year],
-              note_remunerations: stats.notes_remunerations[year],
-              note: stats.notes[year],
+              ...results[year],
             }))
             .slice(0, rowsNumber)
             .map(row => (
               <TileCompanyTableBodyRow key={row.year}>
                 <TileCompanyTableBodyRowCol>
                   <TileCompanyYear year={row.year + 1} />
+                  {company[row.year].workforce?.range !== company[lastYear].workforce?.range && (
+                    <Icon
+                      icon="fr-icon-information-fill"
+                      title={`Tranche en ${row.year} : ${mapRange(
+                        company[row.year].workforce?.range,
+                      )} Salariés ou plus`}
+                    />
+                  )}
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  <TileCompanyScore score={`${row.note ?? "NC"}`} />
+                  <TileCompanyScore score={`${row.index ?? "NC"}`} />
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
                   <ul
@@ -141,62 +136,64 @@ export const TileCompanyIndex = ({ entreprise, ...stats }: CompanyType) => {
                     className={fr.cx("fr-m-0", "fr-p-0")}
                   >
                     <li>
-                      Écart rémunérations : <Text inline variant="bold" text={`${row.note_remunerations ?? "NC"}`} />
+                      Écart rémunérations : <Text inline variant="bold" text={`${row.remunerationsScore ?? "NC"}`} />
+                      {row.notComputableReasonRemunerations && (
+                        <Icon
+                          icon="fr-icon-information-fill"
+                          title={NotComputableReason.Label[row.notComputableReasonRemunerations]}
+                        />
+                      )}
                     </li>
                     <li>
                       Écart taux d'augmentation :{" "}
-                      {entreprise.effectif.tranche === "50:250" ? (
-                        <Text inline variant="bold" text={`${row.note_augmentations_et_promotions ?? "NC"}`} />
+                      {company[row.year].workforce?.range === "50:250" ? (
+                        <>
+                          <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
+                          {row.notComputableReasonSalaryRaisesAndPromotions && (
+                            <Icon
+                              icon="fr-icon-information-fill"
+                              title={NotComputableReason.Label[row.notComputableReasonSalaryRaisesAndPromotions]}
+                            />
+                          )}
+                        </>
                       ) : (
-                        <Text inline variant="bold" text={`${row.note_augmentations ?? "NC"}`} />
+                        <>
+                          <Text inline variant="bold" text={`${row.salaryRaisesScore ?? "NC"}`} />
+                          {row.notComputableReasonSalaryRaises && (
+                            <Icon
+                              icon="fr-icon-information-fill"
+                              title={NotComputableReason.Label[row.notComputableReasonSalaryRaises]}
+                            />
+                          )}
+                        </>
                       )}
                     </li>
-                    {entreprise.effectif.tranche !== "50:250" && (
+                    {company[row.year].workforce?.range !== "50:250" && (
                       <li>
-                        Écart taux promotion : <Text inline variant="bold" text={`${row.note_promotions ?? "NC"}`} />
+                        Écart taux promotion : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
+                        {row.notComputableReasonPromotions && (
+                          <Icon
+                            icon="fr-icon-information-fill"
+                            title={NotComputableReason.Label[row.notComputableReasonPromotions]}
+                          />
+                        )}
                       </li>
                     )}
                     <li>
                       Retour congé maternité :{" "}
-                      <Text inline variant="bold" text={`${row.note_conges_maternite ?? "NC"}`} />
+                      <Text inline variant="bold" text={`${row.maternityLeavesScore ?? "NC"}`} />
+                      {row.notComputableReasonMaternityLeaves && (
+                        <Icon
+                          icon="fr-icon-information-fill"
+                          title={NotComputableReason.Label[row.notComputableReasonMaternityLeaves]}
+                        />
+                      )}
                     </li>
                     <li>
                       Hautes rémunérations :{" "}
-                      <Text inline variant="bold" text={`${row.note_hautes_rémunérations ?? "NC"}`} />
+                      <Text inline variant="bold" text={`${row.highRemunerationsScore ?? "NC"}`} />
                     </li>
                   </ul>
-                  {/* <Container fluid style={{ textAlign: "left" }}>
-                    <Grid>
-                      <GridCol xl={6}>
-                        Écart rémunérations : <Text inline variant="bold" text={`${row.note_remunerations ?? "NC"}`} />
-                      </GridCol>
-                      <GridCol xl={6}>
-                        Retour congé maternité :{" "}
-                        <Text inline variant="bold" text={`${row.note_conges_maternite ?? "NC"}`} />
-                      </GridCol>
-                    </Grid>
-                    <Grid>
-                      <GridCol xl={6}>
-                        Écart taux d'augmentation :{" "}
-                        {entreprise.effectif.tranche === "50:250" ? (
-                          <Text inline variant="bold" text={`${row.note_augmentations_et_promotions ?? "NC"}`} />
-                        ) : (
-                          <Text inline variant="bold" text={`${row.note_augmentations ?? "NC"}`} />
-                        )}
-                      </GridCol>
-                      <GridCol xl={6}>
-                        Hautes rémunérations :{" "}
-                        <Text inline variant="bold" text={`${row.note_hautes_rémunérations ?? "NC"}`} />
-                      </GridCol>
-                    </Grid>
-                    {entreprise.effectif.tranche !== "50:250" && (
-                      <Grid>
-                        <GridCol xl={6}>
-                          Écart taux promotion : <Text inline variant="bold" text={`${row.note_promotions ?? "NC"}`} />
-                        </GridCol>
-                      </Grid>
-                    )}
-                  </Container> */}
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>
             ))}

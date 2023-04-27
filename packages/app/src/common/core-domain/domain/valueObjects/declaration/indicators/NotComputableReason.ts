@@ -23,14 +23,16 @@ export namespace NotComputableReason {
     ETSNO5F5H = "etsno5f5h",
   }
 
-  export interface Label {
-    [Enum.ABSAUGI]: "Absence d'augmentations individuelles";
-    [Enum.ABSAUGPDTCM]: "Absence d'augmentations pendant ce congé";
-    [Enum.ABSPROM]: "Absence de promotions";
-    [Enum.ABSRCM]: "Absence de retours de congé maternité";
+  export const Label = {
+    [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
+    [Enum.ABSAUGPDTCM]: "Absence d'augmentations pendant ce congé",
+    [Enum.ABSPROM]: "Absence de promotions",
+    [Enum.ABSRCM]: "Absence de retours de congé maternité",
     /** @deprecated */
-    [Enum.AM]: "vide";
-    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total";
-    [Enum.ETSNO5F5H]: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes";
-  }
+    [Enum.AM]: "vide",
+    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+    [Enum.ETSNO5F5H]: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
+  } as const;
+
+  export type Label = typeof Label;
 }
