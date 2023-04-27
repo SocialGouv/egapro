@@ -1,6 +1,3 @@
-import "@fontsource/cabin";
-import "@fontsource/gabriela";
-
 // should be before react-dsfr
 if (typeof window !== "undefined") {
   const originalAppendChild = document.head.appendChild.bind(document.head);
