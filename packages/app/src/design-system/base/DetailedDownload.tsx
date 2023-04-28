@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Download } from "@codegouvfr/react-dsfr/Download";
+import { FR_DATE_FORMAT } from "@common/utils/date";
 import { format } from "date-fns";
 import mime from "mime";
 
@@ -18,7 +19,7 @@ export const DetailedDownload = async ({ href, label }: DetailedDownloadProps) =
     return null;
   }
 
-  const formattedLastModified = format(new Date(lastModified), "dd/MM/yyyy");
+  const formattedLastModified = format(new Date(lastModified), FR_DATE_FORMAT);
   const details: string[] = [];
   if (contentType) {
     const ext = mime.getExtension(contentType);

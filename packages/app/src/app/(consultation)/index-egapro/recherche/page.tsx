@@ -18,7 +18,7 @@ import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
 import { getStats } from "@services/server/getDeclarationStats";
 import { search } from "@services/server/searchDeclaration";
-import { isEmpty } from "lodash";
+import { isEmpty, times } from "lodash";
 import { TileCompanyIndex } from "packages/app/src/design-system/base/client/TileCompanyIndex";
 import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
 import { Suspense } from "react";
@@ -27,67 +27,65 @@ import { AverageIndicatorForm } from "./AverageIndicatorForm";
 
 export const dynamic = "force-dynamic";
 
-const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
-  async ({
-    searchParams: { limit, page, year, ...partialSearchParams },
-    searchParamsError,
-  }: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
-    const searchParams = { limit, page, ...partialSearchParams };
+const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)((async ({
+  searchParams: { limit, page, year, ...partialSearchParams },
+  searchParamsError,
+}: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
+  const searchParams = { limit, page, ...partialSearchParams };
 
-    const isLandingPage = isEmpty(partialSearchParams) && page === 0;
-    return (
-      <>
-        <Container as="section">
-          <Grid haveGutters align="center">
-            <GridCol sm={12} md={10} lg={8}>
-              {searchParamsError && (
-                <>
-                  <DebugButton obj={searchParamsError} infoText="searchParamsError" />
-                  <Alert
-                    small
-                    closable
-                    severity="error"
-                    description="Les paramètres d'url sont malformés."
-                    className={fr.cx("fr-mb-2w")}
-                  />
-                </>
-              )}
-              <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
-              <SimpleSubmitForm noValidate>
-                <SearchBar
-                  big
-                  label="Rechercher"
-                  nativeInputProps={{
-                    placeholder: "Nom ou numéro de SIREN de l'entreprise",
-                    name: "query",
-                  }}
+  const isLandingPage = isEmpty(partialSearchParams) && page === 0;
+  return (
+    <>
+      <Container as="section">
+        <Grid haveGutters align="center">
+          <GridCol sm={12} md={10} lg={8}>
+            {searchParamsError && (
+              <>
+                <DebugButton obj={searchParamsError} infoText="searchParamsError" />
+                <Alert
+                  small
+                  closable
+                  severity="error"
+                  description="Les paramètres d'url sont malformés."
+                  className={fr.cx("fr-mb-2w")}
                 />
-              </SimpleSubmitForm>
-              {/* @ts-ignore */}
-              <DetailedDownload
-                href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
-                label={date => `Télécharger le fichier des index des entreprises au ${date}`}
+              </>
+            )}
+            <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
+            <SimpleSubmitForm noValidate>
+              <SearchBar
+                big
+                label="Rechercher"
+                nativeInputProps={{
+                  placeholder: "Nom ou numéro de SIREN de l'entreprise",
+                  name: "query",
+                }}
               />
-            </GridCol>
-          </Grid>
-        </Container>
-        <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-4w")}>
-          {!searchParamsError && (
-            <Suspense>
-              {isLandingPage ? (
-                //@ts-ignore
-                <StatsSection {...partialSearchParams} year={year} />
-              ) : (
-                //@ts-ignore
-                <ResultsSection {...searchParams} />
-              )}
-            </Suspense>
-          )}
-        </Box>
-      </>
-    );
-  },
-);
+            </SimpleSubmitForm>
+            {/* @ts-ignore */}
+            <DetailedDownload
+              href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
+              label={date => `Télécharger le fichier des index des entreprises au ${date}`}
+            />
+          </GridCol>
+        </Grid>
+      </Container>
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-4w")}>
+        {!searchParamsError && (
+          <Suspense>
+            {isLandingPage ? (
+              //@ts-ignore
+              <StatsSection {...partialSearchParams} year={year} />
+            ) : (
+              //@ts-ignore
+              <ResultsSection {...searchParams} />
+            )}
+          </Suspense>
+        )}
+      </Box>
+    </>
+  );
+}) as any);
 
 export default Recherche;
 
@@ -156,7 +154,7 @@ const DisplayCompanies = async (dto: SearchConsultationDTO) => {
 
   let totalLength = dtos.data.length;
   const pages = await Promise.all(
-    [...Array(dto.page)].map(async (_, i) => {
+    times(dto.page, async i => {
       const dtos = await search({
         ...dto,
         page: i + 1,

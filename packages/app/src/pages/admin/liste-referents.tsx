@@ -39,7 +39,7 @@ import { type ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
-import { noop, orderBy as _orderBy, sortBy, truncate } from "lodash";
+import { noop, orderBy as _orderBy, sortBy, times, truncate } from "lodash";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
@@ -96,7 +96,7 @@ const ReferentList = ({ referents, editModalId, doDelete }: ReferentListProps) =
         </TableAdminHead>
         <TableAdminBody ref={animationParent}>
           <Suspense
-            fallback={new Array(4).fill(null).map((_, index) => (
+            fallback={times(4, index => (
               <TableAdminBodyRow key={`fallback-referent-${index}`}>
                 <TableAdminBodyRowCol>---</TableAdminBodyRowCol>
               </TableAdminBodyRow>

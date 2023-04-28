@@ -15,7 +15,7 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { NextPageLink } from "@design-system/utils/client/NextPageLink";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { search } from "@services/server/searchRepresentationEquilibree";
-import { isEmpty } from "lodash";
+import { isEmpty, times } from "lodash";
 import { Suspense } from "react";
 
 import { SearchSirenForm } from "../../SearchSirenForm";
@@ -88,7 +88,7 @@ const DisplayRepeqs = async (dto: SearchConsultationDTO) => {
 
   let totalLength = repeqs.data.length;
   const pages = await Promise.all(
-    [...Array(dto.page)].map(async (_, i) => {
+    times(dto.page, async i => {
       const repeqs = await search({
         ...dto,
         page: i + 1,

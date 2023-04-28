@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { type z } from "zod";
 
-import { type ClearObject, type EmptyObject } from "./types";
+import { type Any, type ClearObject, type EmptyObject } from "./types";
 
 type SearchParamsString<T> = [T] extends [infer R extends string]
   ? "" extends R
@@ -42,17 +42,17 @@ type ZodNextPage<TSchema extends z.ZodType> = (
 ) => JSX.Element | Promise<JSX.Element>;
 
 export const withSearchParamsValidation =
-  <TSchema extends z.ZodType>(schema: TSchema, options?: ValidationOptions) =>
-  <TPage extends ZodNextPage<TSchema>>(page: TPage): TPage =>
-    (props => {
-      const parseResult = schema.safeParse((props as SearchParamsZod<TSchema>).searchParams);
-      if (parseResult.success) {
-        return page({ ...props, searchParams: parseResult.data });
-      }
+  <TSchema extends z.ZodType, TPage extends ZodNextPage<TSchema>>(schema: TSchema, options?: ValidationOptions) =>
+  (page: TPage): ((...args: Any[]) => JSX.Element | Promise<JSX.Element>) =>
+  props => {
+    const parseResult = schema.safeParse((props as SearchParamsZod<TSchema>).searchParams);
+    if (parseResult.success) {
+      return page({ ...props, searchParams: parseResult.data });
+    }
 
-      if (options?.notFound) {
-        notFound();
-      }
+    if (options?.notFound) {
+      notFound();
+    }
 
-      return page({ ...props, searchParamsError: parseResult.error.flatten() });
-    }) as TPage;
+    return page({ ...props, searchParamsError: parseResult.error.flatten() });
+  };
