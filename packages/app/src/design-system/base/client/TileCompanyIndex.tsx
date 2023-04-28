@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { adressLabel, type WORKFORCES } from "@common/dict";
+import { DebugButton } from "@components/utils/debug/DebugButton";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -41,7 +42,8 @@ const mapRange = (range: keyof WORKFORCES | undefined) => {
   }
 };
 
-export const TileCompanyIndex = ({ company, results, name, siren }: SearchDeclarationResultDTO) => {
+export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
+  const { company, results, name, siren } = dto;
   const rowsDefault = 3;
   const [rowsNumber, setRowsNumber] = useState(rowsDefault);
   const handleMoreRows = () => {
@@ -64,12 +66,19 @@ export const TileCompanyIndex = ({ company, results, name, siren }: SearchDeclar
       <Container fluid>
         <Grid>
           <GridCol sm={9}>
-            <TileCompanyTitle ues={isUES}>{isUES ? ues.name : name}</TileCompanyTitle>
+            <TileCompanyTitle ues={isUES}>
+              <DebugButton obj={dto} infoText="TileCompanyIndex" />
+              {isUES && ues.name.trim() ? `${ues.name} (${name})` : name}
+            </TileCompanyTitle>
             <TileCompanySiren>{siren}</TileCompanySiren>
             <TileCompanyLocation>{adressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
           </GridCol>
           <GridCol sm={3}>
-            <Stat text={mapRange(workforce?.range)} helpText="Salariés ou plus" display={{ asText: ["xl", "bold"] }} />
+            <Stat
+              text={mapRange(workforce?.range)}
+              helpText={`Salariés${workforce?.range === "1000:" ? " ou plus" : ""}`}
+              display={{ asText: ["xl", "bold"] }}
+            />
           </GridCol>
         </Grid>
       </Container>
@@ -121,14 +130,24 @@ export const TileCompanyIndex = ({ company, results, name, siren }: SearchDeclar
                   {company[row.year].workforce?.range !== company[lastYear].workforce?.range && (
                     <Icon
                       icon="fr-icon-information-fill"
-                      title={`Tranche en ${row.year} : ${mapRange(
-                        company[row.year].workforce?.range,
-                      )} Salariés ou plus`}
+                      title={`Tranche en ${row.year + 1} : ${mapRange(company[row.year].workforce?.range)} salariés${
+                        company[row.year].workforce?.range === "1000:" ? " ou plus" : ""
+                      }`}
                     />
                   )}
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
                   <TileCompanyScore score={`${row.index ?? "NC"}`} />
+                  {row.index === null && (
+                    <Icon
+                      icon="fr-icon-information-fill"
+                      title={
+                        row.highRemunerationsScore === null
+                          ? "Période de réference de 12 mois insuffisante"
+                          : "Les indicateurs calculables représentent moins de 75 points"
+                      }
+                    />
+                  )}
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
                   <ul

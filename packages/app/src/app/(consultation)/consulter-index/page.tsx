@@ -5,8 +5,10 @@ import { GetDeclarationStats } from "@api/core-domain/useCases/GetDeclarationSta
 import { fr } from "@codegouvfr/react-dsfr";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { config } from "@common/config";
+import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { DISPLAY_CURRENT_YEAR, DISPLAY_PUBLIC_YEARS } from "@common/dict";
 import { type NextServerPageProps } from "@common/utils/next";
+import { DebugButton } from "@components/utils/debug/DebugButton";
 import { Box, Container, Grid, GridCol, Heading, Stat } from "@design-system";
 import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
 import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
@@ -29,7 +31,7 @@ const getStats = async (input: AverageIndicatorFormType) => {
   if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
   if (region) criteria.regionCode = region as typeof criteria.regionCode;
   if (section_naf) criteria.nafSection = section_naf as typeof criteria.nafSection;
-  if (year) criteria.year = year as typeof criteria.year;
+  if (year) criteria.year = `${+year - 1}` as typeof criteria.year;
 
   return useCase.execute(criteria);
 };
@@ -38,10 +40,11 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
   const intYear = parseInt(String(searchParams.year)) || DISPLAY_CURRENT_YEAR;
   searchParams.year = String(DISPLAY_PUBLIC_YEARS.includes(intYear) ? intYear : DISPLAY_CURRENT_YEAR);
 
+  let stats = {} as DeclarationStatsDTO;
   let average = "";
   try {
-    const stats = await getStats(searchParams as AverageIndicatorFormType);
-    average = stats?.avg?.toFixed?.(0) ?? "";
+    stats = await getStats(searchParams as AverageIndicatorFormType);
+    average = stats.avg.toFixed(0);
   } catch (e) {
     console.log(e);
   }
@@ -65,7 +68,7 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
             {/* @ts-ignore */}
             <DetailedDownload
               href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
-              label={date => `Télécharger le fichier des entreprises au ${date}`}
+              label={date => `Télécharger le fichier des index des entreprises au ${date}`}
             />
           </GridCol>
         </Grid>
@@ -75,8 +78,16 @@ const ConsulterIndex = async ({ searchParams }: NextServerPageProps<"", AverageI
           <Grid haveGutters align="center">
             <GridCol md={4} lg={5} />
             <GridCol sm={12} md={4} lg={2}>
+              <DebugButton obj={stats} infoText="Stats" />
               {average ? (
-                <Stat display={{ asTitle: "lg" }} text={average} helpText={`Index Moyen ${+searchParams.year}`} />
+                <Stat
+                  display={{ asTitle: "lg" }}
+                  text={average}
+                  label={`Index Moyen ${+searchParams.year}`}
+                  helpText={`Sur ${stats.count} déclaration${stats.count > 1 ? "s" : ""} (min: ${stats.min}, max: ${
+                    stats.max
+                  })`}
+                />
               ) : (
                 <Stat display={{ asTitle: "lg" }} text="N/A" helpText={`Index Moyen ${+searchParams.year}`} />
               )}

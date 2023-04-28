@@ -27,8 +27,8 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     const sqlWhereClause = this.buildStatsWhereClause(criteria);
     const [raw] = await sql<DeclarationStatsRaw[]>`
         WITH subset AS (SELECT siren FROM ${this.table} ${sqlWhereClause}),
-        count AS (SELECT COUNT(DISTINCT(siren)) FROM subset),
-        stats AS (SELECT avg((data->'déclaration'->>'index')::int),
+        count AS (SELECT COUNT(DISTINCT(siren))::int FROM subset),
+        stats AS (SELECT avg((data->'déclaration'->>'index')::real),
                         min((data->'déclaration'->>'index')::int),
                         max((data->'déclaration'->>'index')::int)
                 FROM ${this.declaTable}

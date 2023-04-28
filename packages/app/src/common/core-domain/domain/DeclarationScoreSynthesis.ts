@@ -77,9 +77,11 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
   public fromJson(json: EntityPropsToJson<DeclarationScoreSynthesisProps>) {
     const props: DeclarationScoreSynthesisProps = {};
 
-    if (json.highRemunerationsScore) props.highRemunerationsScore = new PositiveInteger(json.highRemunerationsScore);
-    if (json.index) props.index = new DeclarationIndex(json.index);
-    if (json.maternityLeavesScore) props.maternityLeavesScore = new PositiveInteger(json.maternityLeavesScore);
+    if (typeof json.highRemunerationsScore === "number")
+      props.highRemunerationsScore = new PositiveInteger(json.highRemunerationsScore);
+    if (typeof json.index === "number") props.index = new DeclarationIndex(json.index);
+    if (typeof json.maternityLeavesScore === "number")
+      props.maternityLeavesScore = new PositiveInteger(json.maternityLeavesScore);
     if (json.notComputableReasonMaternityLeaves)
       props.notComputableReasonMaternityLeaves = new NotComputableReason(json.notComputableReasonMaternityLeaves);
     if (json.notComputableReasonPromotions)
@@ -92,11 +94,13 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
       props.notComputableReasonSalaryRaisesAndPromotions = new NotComputableReason(
         json.notComputableReasonSalaryRaisesAndPromotions,
       );
-    if (json.promotionsScore) props.promotionsScore = new PositiveInteger(json.promotionsScore);
-    if (json.remunerationsScore) props.remunerationsScore = new PositiveInteger(json.remunerationsScore);
-    if (json.salaryRaisesAndPromotionsScore)
+    if (typeof json.promotionsScore === "number") props.promotionsScore = new PositiveInteger(json.promotionsScore);
+    if (typeof json.remunerationsScore === "number")
+      props.remunerationsScore = new PositiveInteger(json.remunerationsScore);
+    if (typeof json.salaryRaisesAndPromotionsScore === "number")
       props.salaryRaisesAndPromotionsScore = new PositiveInteger(json.salaryRaisesAndPromotionsScore);
-    if (json.salaryRaisesScore) props.salaryRaisesScore = new PositiveInteger(json.salaryRaisesScore);
+    if (typeof json.salaryRaisesScore === "number")
+      props.salaryRaisesScore = new PositiveInteger(json.salaryRaisesScore);
 
     return new DeclarationScoreSynthesis(props) as this;
   }

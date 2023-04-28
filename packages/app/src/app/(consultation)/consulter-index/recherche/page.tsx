@@ -67,10 +67,18 @@ const ConsulterIndexRecherche = ({
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
                 {!isEmpty(searchParams) && (
-                  <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
-                    {/* @ts-ignore */}
-                    <DisplayCompanies page={pageNumber} searchParams={searchParams} />
-                  </Suspense>
+                  <>
+                    <Alert
+                      severity="warning"
+                      closable
+                      description="Les informations de l'entreprise ou de l'UES correspondent à la dernière déclaration."
+                      small
+                    />
+                    <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
+                      {/* @ts-ignore */}
+                      <DisplayCompanies page={pageNumber} searchParams={searchParams} />
+                    </Suspense>
+                  </>
                 )}
               </ClientAnimate>
             </GridCol>

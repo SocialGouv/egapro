@@ -15,7 +15,6 @@ import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
 import { isEmpty, isFinite } from "lodash";
-import Link from "next/link";
 import QueryString from "querystring";
 import { Suspense } from "react";
 
@@ -80,7 +79,6 @@ const ConsulterRepEq = async ({
                 href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
                 label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
               />
-              <Link href="/consulter-index">Rechercher l'index de l'égalité professionnelle d'une entreprise</Link>
             </GridCol>
           </Grid>
         </Container>
