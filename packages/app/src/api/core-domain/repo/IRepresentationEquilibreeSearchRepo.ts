@@ -8,6 +8,7 @@ export interface RepresentationEquilibreeSearchCriteria extends SearchDefaultCri
   query?: string;
   regionCode?: string;
 }
+
 export type IRepresentationEquilibreeSearchRepo = SearchRepo<
   RepresentationEquilibree,
   RepresentationEquilibreeSearchResult,

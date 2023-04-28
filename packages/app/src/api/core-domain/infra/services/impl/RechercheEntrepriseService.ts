@@ -1,7 +1,8 @@
 import { StatusCodes } from "@api/shared-domain/infra/http/Controller";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type Siret } from "@common/core-domain/domain/valueObjects/Siret";
-import { stringify } from "qs";
+import { type Objectize } from "@common/utils/types";
+import { stringify } from "querystring";
 
 import {
   type Entreprise,
@@ -17,7 +18,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
   public async search(parameters: SearchParameters): Promise<Entreprise[]> {
     // TODO try/catch wrap in decorator
     try {
-      const stringifiedParams = stringify(parameters);
+      const stringifiedParams = stringify(parameters as Objectize<SearchParameters>);
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
       const response = await fetch(url, {

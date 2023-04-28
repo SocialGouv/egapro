@@ -5,6 +5,8 @@ import { type Any } from "./utils/types";
 export type FeatureFlag = keyof typeof config.ff;
 
 export const config = {
+  /** in seconds */
+  searchRevalidate: 60 * 5,
   get nonce() {
     return this.githubSha;
   },

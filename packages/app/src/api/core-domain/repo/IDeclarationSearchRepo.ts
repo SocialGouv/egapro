@@ -14,7 +14,7 @@ export interface DeclarationStatsCriteria {
   countyCode?: string;
   nafSection?: string;
   regionCode?: string;
-  year?: string;
+  year: number;
 }
 
 export interface IDeclarationSearchRepo

@@ -1,9 +1,10 @@
+import { type ClearObject } from "@common/utils/types";
 import { type z } from "zod";
 
 import { type NotComputableReasonExecutiveRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type PublicCompanyDTO } from "./DeclarationDTO";
-import { consultationSchema } from "./helpers/common";
+import { searchConsultationSchema } from "./helpers/common";
 
 export interface SearchRepresentationEquilibreeResultDTO {
   company: PublicCompanyDTO;
@@ -20,6 +21,10 @@ export interface SearchRepresentationEquilibreeResultDTO {
   >;
 }
 
-export const searchRepresentationEquilibreeInputDTOSchema = consultationSchema;
-export type SearchRepresentationEquilibreeInputDTO = z.infer<typeof searchRepresentationEquilibreeInputDTOSchema>;
-export type SearchRepresentationEquilibreeInputSchemaDTO = z.input<typeof searchRepresentationEquilibreeInputDTOSchema>;
+export const searchRepresentationEquilibreeDTOSchema = searchConsultationSchema;
+export type SearchRepresentationEquilibreeDTO = ClearObject<z.infer<typeof searchRepresentationEquilibreeDTOSchema>>;
+
+// db => q / offset / limit + consult
+// usecase => q / page / limit + consult
+// dto => q / page / limit + consult
+// form => consult

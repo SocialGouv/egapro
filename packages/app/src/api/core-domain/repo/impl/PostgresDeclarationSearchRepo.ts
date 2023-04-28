@@ -32,7 +32,7 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
                         min((data->'déclaration'->>'index')::int),
                         max((data->'déclaration'->>'index')::int)
                 FROM ${this.declaTable}
-                WHERE year=${Number(criteria.year) || PUBLIC_CURRENT_YEAR} AND siren IN (SELECT siren FROM subset))
+                WHERE year=${criteria.year} AND siren IN (SELECT siren FROM subset))
         SELECT * FROM count JOIN stats ON true;`;
 
     return raw;

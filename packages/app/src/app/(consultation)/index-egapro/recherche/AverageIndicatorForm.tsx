@@ -3,12 +3,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { type GetDeclarationStatsInput } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import {
-  type COUNTIES,
   FULL_SORTED_REGIONS_TO_COUNTIES,
-  type NAF_SECTIONS,
   PUBLIC_YEARS_DESC,
-  type REGIONS,
   REGIONS_TO_COUNTIES,
   SORTED_COUNTIES,
   SORTED_NAF_SECTIONS,
@@ -21,12 +19,7 @@ import moize from "moize";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-export type AverageIndicatorFormType = {
-  departement?: keyof typeof COUNTIES;
-  naf?: keyof typeof NAF_SECTIONS;
-  region?: keyof typeof REGIONS;
-  year: string;
-};
+type AverageIndicatorFormType = Omit<GetDeclarationStatsInput, "limit" | "page">;
 
 export interface AverageIndicatorFormProps {
   searchParams: AverageIndicatorFormType;
@@ -34,19 +27,20 @@ export interface AverageIndicatorFormProps {
 
 const yearsDisplayed = PUBLIC_YEARS_DESC.map(y => y + 1);
 
+type NoYearAverageIndicatorFormType = Omit<AverageIndicatorFormType, "year">;
 const getQuery = moize(
-  (data: Partial<AverageIndicatorFormType>) => {
+  (data: Partial<GetDeclarationStatsInput>) => {
     const newData = { ...data };
-    if (newData.region && newData.departement) {
-      if (REGIONS_TO_COUNTIES[newData.region].includes(newData.departement)) {
-        // departement is enough for filtering
-        delete newData.region;
+    if (newData.regionCode && newData.countyCode) {
+      if (REGIONS_TO_COUNTIES[newData.regionCode].includes(newData.countyCode)) {
+        // county is enough by itself for filtering
+        delete newData.regionCode;
       } else {
-        delete newData.departement;
+        delete newData.countyCode;
       }
     }
 
-    return new URLSearchParams(omitByRecursively(newData, isUndefined) as Partial<AverageIndicatorFormType>).toString();
+    return new URLSearchParams(omitByRecursively(newData, isUndefined) as NoYearAverageIndicatorFormType).toString();
   },
   { isDeepEqual: true },
 );
@@ -58,12 +52,12 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
     defaultValues: searchParams,
   });
 
-  const regionSelected = watch("region");
+  const regionSelected = watch("regionCode");
 
   const onSubmit = (data: AverageIndicatorFormType) => {
     const { year: _, ...newData } = data;
     const query = getQuery(newData);
-    router.push(`${pathname}/recherche?${query}`);
+    router.push(`${pathname}?${query}`);
   };
   const onChange = (data: AverageIndicatorFormType) => {
     const query = getQuery(data);
@@ -97,7 +91,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur la région",
-                ...register("region", {
+                ...register("regionCode", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
               }}
@@ -115,7 +109,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur le département",
-                ...register("departement", {
+                ...register("countyCode", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
               }}
@@ -135,7 +129,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur le secteur d'activité",
-                ...register("naf", {
+                ...register("nafSection", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
               }}

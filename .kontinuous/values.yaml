@@ -31,7 +31,9 @@ app:
   containerPort: 3000
   host: "{{ .Values.global.host }}"
   ingress:
-    path: /
+    paths:
+      - /
+      - /index-egapro/recherche(/|$)(.*)
     annotations:
       ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt

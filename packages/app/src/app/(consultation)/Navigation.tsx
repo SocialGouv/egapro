@@ -16,11 +16,11 @@ export const Navigation = () => {
           },
         },
         {
-          text: "Index",
+          text: "Index égalité professionnelle",
           linkProps: {
-            href: "/consulter-index",
+            href: "/index-egapro/recherche",
           },
-          isActive: segment === "consulter-index",
+          isActive: segment === "index-egapro",
         },
         {
           text: "Représentation équilibrée",

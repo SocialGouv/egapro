@@ -6,8 +6,8 @@ export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
 }
 
 export interface SearchDefaultCriteria {
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
 }
 export interface SearchRepo<
   T extends Entity<Any, Any> = Any,

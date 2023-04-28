@@ -1,63 +1,54 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
-import { representationEquilibreeSearchRepo } from "@api/core-domain/repo";
-import { SearchRepresentationEquilibree } from "@api/core-domain/useCases/SearchRepresentationEquilibree";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
-import { type ConsultationDTO } from "@common/core-domain/dtos/helpers/common";
+import { type ConsultationDTO, type SearchConsultationDTO } from "@common/core-domain/dtos/helpers/common";
 import {
-  type SearchRepresentationEquilibreeInputDTO,
+  searchRepresentationEquilibreeDTOSchema,
   type SearchRepresentationEquilibreeResultDTO,
 } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
-import { type NextServerPageProps } from "@common/utils/next";
+import { type NextServerPageProps, withSearchParamsValidation } from "@common/utils/next";
+import { DebugButton } from "@components/utils/debug/DebugButton";
 import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Text } from "@design-system";
 import { TileCompanyRepeqs } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { NextPageLink } from "@design-system/utils/client/NextPageLink";
 import { ScrollTopButton } from "@design-system/utils/client/ScrollTopButton";
-import { isEmpty, isFinite } from "lodash";
-import QueryString from "querystring";
+import { search } from "@services/server/searchRepresentationEquilibree";
+import { isEmpty } from "lodash";
 import { Suspense } from "react";
 
-import { FormSearchSiren, type FormTypeInput } from "../../FormSearchSiren";
-import { NextPageLink } from "./NextPageLink";
+import { SearchSirenForm } from "../../SearchSirenForm";
 
 export const dynamic = "force-dynamic";
 
-const useCase = new SearchRepresentationEquilibree(representationEquilibreeSearchRepo);
+const Recherche = async ({
+  searchParams: { limit, page, ...partialSearchParams },
+  searchParamsError,
+}: NextServerPageProps<"", typeof searchRepresentationEquilibreeDTOSchema>) => {
+  const searchParams = { limit, page, ...partialSearchParams };
 
-const search = async (input: FormTypeInput, pageIndex = 0) => {
-  const criteria: SearchRepresentationEquilibreeInputDTO = {};
-  const cleaned = new URLSearchParams(QueryString.stringify(input));
-  const q = cleaned.get("q");
-  const region = cleaned.get("region");
-  const departement = cleaned.get("departement");
-  const naf = cleaned.get("naf");
-
-  // clean
-  if (q) criteria.query = q;
-  if (region) criteria.regionCode = region as typeof criteria.regionCode;
-  if (departement) criteria.countyCode = departement as typeof criteria.countyCode;
-  if (naf) criteria.nafSection = naf as typeof criteria.nafSection;
-  if (pageIndex > 0) criteria.offset = pageIndex * 10;
-
-  return useCase.execute(criteria);
-};
-
-type WithPageFormType = FormTypeInput & { page?: string };
-const ConsulterRepEq = async ({
-  searchParams: { page = "0", ...searchParams },
-}: NextServerPageProps<"", WithPageFormType>) => {
-  let pageNumber = Number(page);
-  pageNumber = isFinite(pageNumber) ? Math.max(0, pageNumber) : 0;
-
+  const isLanding = isEmpty(partialSearchParams) && page === 0;
   return (
     <>
       <Container as="section">
         <Grid haveGutters align="center">
           <GridCol sm={12} md={10} lg={8}>
+            {searchParamsError && (
+              <>
+                <DebugButton obj={searchParamsError} infoText="searchParamsError" />
+                <Alert
+                  small
+                  closable
+                  severity="error"
+                  description="Les paramètres d'url sont malformés."
+                  className={fr.cx("fr-mb-2w")}
+                />
+              </>
+            )}
             <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
             <Suspense>
-              <FormSearchSiren searchParams={searchParams} />
+              <SearchSirenForm searchParams={searchParams} />
             </Suspense>
           </GridCol>
         </Grid>
@@ -67,10 +58,10 @@ const ConsulterRepEq = async ({
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} lg={8}>
               <ClientAnimate>
-                {!isEmpty(searchParams) && (
+                {!searchParamsError && !isLanding && (
                   <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
                     {/* @ts-ignore */}
-                    <DisplayRepeqs page={pageNumber} searchParams={searchParams} />
+                    <DisplayRepeqs {...searchParams} />
                   </Suspense>
                 )}
               </ClientAnimate>
@@ -87,8 +78,8 @@ const ConsulterRepEq = async ({
   );
 };
 
-const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParams: FormTypeInput }) => {
-  const repeqs = await search(searchParams);
+const DisplayRepeqs = async (dto: SearchConsultationDTO) => {
+  const repeqs = await search(dto);
   const count = repeqs.count;
 
   if (count === 0) {
@@ -97,8 +88,11 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
 
   let totalLength = repeqs.data.length;
   const pages = await Promise.all(
-    [...Array(page)].map(async (_, i) => {
-      const repeqs = await search(searchParams, i + 1);
+    [...Array(dto.page)].map(async (_, i) => {
+      const repeqs = await search({
+        ...dto,
+        page: i + 1,
+      });
       totalLength += repeqs.data.length;
       // @ts-ignore
       return <Page repeqs={repeqs} key={i + 1} />;
@@ -145,13 +139,13 @@ const DisplayRepeqs = async ({ page, searchParams }: { page: number; searchParam
   );
 };
 
-const Page = async ({ repeqs }: { repeqs: ConsultationDTO<SearchRepresentationEquilibreeResultDTO> }) => {
+const Page = async ({ dtos }: { dtos: ConsultationDTO<SearchRepresentationEquilibreeResultDTO> }) => {
   return (
     <Suspense>
-      {repeqs.data.map(repeq => {
+      {dtos.data.map(dto => {
         return (
-          <GridCol key={repeq.company.siren}>
-            <TileCompanyRepeqs {...repeq} />
+          <GridCol key={dto.company.siren}>
+            <TileCompanyRepeqs {...dto} />
           </GridCol>
         );
       })}
@@ -159,7 +153,7 @@ const Page = async ({ repeqs }: { repeqs: ConsultationDTO<SearchRepresentationEq
   );
 };
 
-export default ConsulterRepEq;
+export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchema)(Recherche);
 
 /*
 3/

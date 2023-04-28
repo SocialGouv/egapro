@@ -1,4 +1,5 @@
 import { COUNTIES_IDS, NAF_SECTIONS, REGIONS_IDS } from "@common/dict";
+import { type ClearObject } from "@common/utils/types";
 import { z } from "zod";
 
 export const regionSchema = z.enum(REGIONS_IDS);
@@ -10,30 +11,23 @@ export const nafSectionSchema = z.enum(
 /**
  * Usually used against searchParams, so have to deal with string inputs exclusively.
  */
+export const searchSchema = z.object({
+  limit: z.coerce.number().min(1).max(100).default(10),
+  page: z.coerce.number().min(0).default(0),
+});
+
 export const consultationSchema = z.object({
-  limit: z
-    .string()
-    .regex(/^\d+$/)
-    .default("10")
-    .transform(value => {
-      const limit = Number(value);
-      return limit > 0 && limit <= 100 ? limit : 10;
-    })
-    .optional(),
-  offset: z
-    .string()
-    .regex(/^\d+$/)
-    .default("0")
-    .transform(value => {
-      const offset = Number(value);
-      return Math.max(offset, 0);
-    })
-    .optional(),
+  query: z.string().optional(),
   countyCode: countySchema.optional(),
   regionCode: regionSchema.optional(),
   nafSection: nafSectionSchema.optional(),
-  query: z.string().optional(),
 });
+
+export const searchConsultationSchema = consultationSchema.and(searchSchema);
+
+export type SearchInput = z.input<typeof searchSchema>;
+export type ConsultationInput = z.input<typeof consultationSchema>;
+export type SearchConsultationDTO = ClearObject<z.infer<typeof searchConsultationSchema>>;
 
 export interface ConsultationDTO<T> {
   count: number;

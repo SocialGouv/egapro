@@ -1,28 +1,36 @@
+import { config } from "@common/config";
 import { type ConsultationDTO } from "@common/core-domain/dtos/helpers/common";
 import {
-  type SearchRepresentationEquilibreeInputDTO,
+  type SearchRepresentationEquilibreeDTO,
   type SearchRepresentationEquilibreeResultDTO,
 } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { representationEquilibreeSearchResultMap } from "@common/core-domain/mappers/representationEquilibreeSearchResultMap";
 import { AppError } from "@common/shared-domain";
 import { AbstractCachedUsedCase, type CachedUseCaseOptions } from "@common/shared-domain/AbstractCachedUsedCase";
 
-import { type IRepresentationEquilibreeSearchRepo } from "../repo/IRepresentationEquilibreeSearchRepo";
+import {
+  type IRepresentationEquilibreeSearchRepo,
+  type RepresentationEquilibreeSearchCriteria,
+} from "../repo/IRepresentationEquilibreeSearchRepo";
 
-type Input = SearchRepresentationEquilibreeInputDTO;
+type Input = SearchRepresentationEquilibreeDTO;
 type Output = ConsultationDTO<SearchRepresentationEquilibreeResultDTO>;
 export class SearchRepresentationEquilibree extends AbstractCachedUsedCase<Input, Output> {
   protected cacheMasterKey = "SearchRepresentationEquilibree";
   protected defaultOptions: CachedUseCaseOptions = {
-    revalidate: 60 * 5,
+    revalidate: config.searchRevalidate,
   };
 
   constructor(private readonly representationEquilibreeSearchRepo: IRepresentationEquilibreeSearchRepo) {
     super();
   }
 
-  protected async run(criteria: Input): Promise<Output> {
+  protected async run(input: Input): Promise<Output> {
     try {
+      const criteria: RepresentationEquilibreeSearchCriteria = {
+        ...input,
+        offset: input.page > 0 ? input.page * input.limit : 0,
+      };
       const count = await this.representationEquilibreeSearchRepo.count(criteria);
       const results = await this.representationEquilibreeSearchRepo.search(criteria);
 

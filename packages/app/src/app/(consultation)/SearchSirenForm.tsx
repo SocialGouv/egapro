@@ -3,33 +3,22 @@
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
-import {
-  type COUNTIES,
-  FULL_SORTED_REGIONS_TO_COUNTIES,
-  type NAF_SECTIONS,
-  type REGIONS,
-  SORTED_NAF_SECTIONS,
-  SORTED_REGIONS,
-} from "@common/dict";
+import { type ConsultationInput, consultationSchema } from "@common/core-domain/dtos/helpers/common";
+import { FULL_SORTED_REGIONS_TO_COUNTIES, SORTED_NAF_SECTIONS, SORTED_REGIONS } from "@common/dict";
 import { omitByRecursively } from "@common/utils/object";
 import { Grid, GridCol } from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { capitalize, isUndefined } from "lodash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-export type FormTypeInput = {
-  departement?: keyof typeof COUNTIES;
-  naf?: keyof typeof NAF_SECTIONS;
-  q?: string;
-  region?: keyof typeof REGIONS;
-};
-
-export interface FormSearchSirenProps {
-  searchParams: FormTypeInput;
+type SearchSirenFormInput = ConsultationInput;
+export interface SearchSirenFormProps {
+  searchParams: SearchSirenFormInput;
 }
 
-export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
+export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
   const router = useRouter();
 
   const {
@@ -38,17 +27,13 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
     register,
     reset,
     watch,
-    // setValue,
-  } = useForm<FormTypeInput>(); // Using defaultValues would not be enough here, because we fetch params.query which is not present at the first rehydration time (see Next.js docs). So we use reset API below.
+  } = useForm<SearchSirenFormInput>({
+    resolver: zodResolver(consultationSchema),
+  });
 
   const resetInputs = useCallback(
-    (params: FormTypeInput) => {
-      reset({
-        region: params.region,
-        departement: params.departement,
-        naf: params.naf,
-        q: params.q,
-      });
+    (params: SearchSirenFormInput) => {
+      reset(params);
     },
     [reset],
   );
@@ -58,12 +43,12 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
     resetInputs(searchParams);
   }, [resetInputs, searchParams]);
 
-  const regionSelected = watch("region");
+  const regionSelected = watch("regionCode");
 
-  function onSubmit(data: FormTypeInput) {
+  function onSubmit(data: SearchSirenFormInput) {
     router.replace(
       `${location.pathname}?${new URLSearchParams(
-        omitByRecursively(data, isUndefined) as Partial<FormTypeInput>,
+        omitByRecursively(data, isUndefined) as Partial<SearchSirenFormInput>,
       ).toString()}`,
     );
   }
@@ -75,21 +60,23 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
           <Input
             label="Nom ou numéro Siren de l’entreprise"
             nativeInputProps={{
-              id: "q",
+              id: "query",
               title: "Saisissez le nom ou le Siren d'une entreprise",
               autoComplete: "off",
-              ...register("q"),
+              ...register("query"),
             }}
-            stateRelatedMessage={errors.q?.message}
-            state={errors.q ? "error" : "default"}
+            stateRelatedMessage={errors.query?.message}
+            state={errors.query ? "error" : "default"}
           />
         </GridCol>
         <GridCol sm={4}>
           <Select
             label=""
             nativeSelectProps={{
-              id: "region",
-              ...register("region"),
+              id: "regionCode",
+              ...register("regionCode", {
+                setValueAs: value => (value === "" ? void 0 : value),
+              }),
             }}
           >
             <option value="">Région</option>
@@ -105,8 +92,10 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
           <Select
             label=""
             nativeSelectProps={{
-              id: "departement",
-              ...register("departement"),
+              id: "countyCode",
+              ...register("countyCode", {
+                setValueAs: value => (value === "" ? void 0 : value),
+              }),
             }}
           >
             <option value="">Département</option>
@@ -123,8 +112,10 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
           <Select
             label=""
             nativeSelectProps={{
-              id: "naf",
-              ...register("naf"),
+              id: "nafSection",
+              ...register("nafSection", {
+                setValueAs: value => (value === "" ? void 0 : value),
+              }),
             }}
           >
             <option value="">Secteur d'activité</option>
@@ -151,8 +142,7 @@ export const FormSearchSiren = ({ searchParams }: FormSearchSirenProps) => {
                 type: "reset",
                 priority: "secondary",
                 onClick() {
-                  resetInputs({});
-                  router.replace(`${location.origin}${location.pathname}?q=`);
+                  router.replace(`${location.origin}${location.pathname}?query=`);
                 },
               },
             ]}

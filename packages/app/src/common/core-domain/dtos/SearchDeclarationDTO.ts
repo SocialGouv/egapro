@@ -1,8 +1,10 @@
-import { type z } from "zod";
+import { DISPLAY_CURRENT_YEAR, DISPLAY_PUBLIC_YEARS } from "@common/dict";
+import { type ClearObject } from "@common/utils/types";
+import { z } from "zod";
 
 import { type NotComputableReason } from "../domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type PublicCompanyDTO } from "./DeclarationDTO";
-import { consultationSchema } from "./helpers/common";
+import { searchConsultationSchema } from "./helpers/common";
 
 export interface SearchDeclarationResultDTO {
   company: Record<number, PublicCompanyDTO>;
@@ -27,13 +29,25 @@ export interface SearchDeclarationResultDTO {
   siren: string;
 }
 
-export const searchDeclarationInputDTOSchema = consultationSchema;
-export type SearchDeclarationInputDTO = z.infer<typeof searchDeclarationInputDTOSchema>;
-export type SearchDeclarationInputSchemaDTO = z.input<typeof searchDeclarationInputDTOSchema>;
+export const searchDeclarationDTOSchema = searchConsultationSchema;
+export type SearchDeclarationDTO = ClearObject<z.infer<typeof searchDeclarationDTOSchema>>;
+
+export const getDeclarationStatsInputSchema = searchDeclarationDTOSchema.and(
+  z.object({
+    year: z.coerce
+      .number()
+      .refine(
+        year => DISPLAY_PUBLIC_YEARS.includes(year),
+        `L'année doit être incluse dans la liste ${DISPLAY_PUBLIC_YEARS.join(", ")}`,
+      )
+      .default(DISPLAY_CURRENT_YEAR),
+  }),
+);
+export type GetDeclarationStatsInput = ClearObject<z.infer<typeof getDeclarationStatsInputSchema>>;
 
 export interface DeclarationStatsDTO {
-  avg: number;
+  avg: number | null;
   count: number;
-  max: number;
-  min: number;
+  max: number | null;
+  min: number | null;
 }

@@ -3,6 +3,12 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { usePathname, useSearchParams } from "next/navigation";
 
+/**
+ * Uses "useSearchParams", should be Suspense-d in server component.
+ *
+ * @
+ *
+ */
 export const NextPageLink = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();

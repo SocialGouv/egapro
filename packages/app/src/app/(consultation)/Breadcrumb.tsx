@@ -11,7 +11,7 @@ interface SegmentMap {
 }
 
 const segmentMap: SegmentMap = {
-  "consulter-index": {
+  "index-egapro": {
     label: "Index Egapro",
     segments: {
       recherche: {
