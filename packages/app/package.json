@@ -15,7 +15,8 @@
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
     "type-check": "tsc --pretty --noEmit && tsc --pretty --noEmit -p __tests__/tsconfig.json",
     "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts",
-    "generateModelsFromSchema": "ts-node --project scripts/tsconfig.json scripts/generateModelsFromSchema.ts"
+    "generateModelsFromSchema": "ts-node --project scripts/tsconfig.json scripts/generateModelsFromSchema.ts",
+    "migrateSimulations": "ts-node --project scripts/tsconfig.json scripts/sql-scripts/migrate-simulations.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2",
