@@ -21,7 +21,11 @@ export const Matomo = ({ env }: MatomoProps) => {
   const [previousPath, setPreviousPath] = useState("");
 
   useEffect(() => {
-    if (env === "prod" && !inited) {
+    if (env !== "prod") {
+      return;
+    }
+
+    if (!inited) {
       init({
         ...config.matomo,
         onInitialization: () => {
@@ -48,7 +52,7 @@ export const Matomo = ({ env }: MatomoProps) => {
 
   /* The @socialgouv/matomo-next does not work with next 13 */
   useEffect(() => {
-    if (!pathname || !matomoConsent) {
+    if (!pathname || !matomoConsent || env !== "prod") {
       return;
     }
 
@@ -65,7 +69,7 @@ export const Matomo = ({ env }: MatomoProps) => {
     setTimeout(() => {
       push(["setDocumentTitle", document.title]);
       if (pathname.startsWith("/recherche")) {
-        push(["trackSiteSearch", searchParams?.get("keyword") ?? ""]);
+        push(["trackSiteSearch", searchParams?.get("keyword") ?? searchParams?.get("query") ?? ""]);
       } else {
         push(["trackPageView"]);
       }

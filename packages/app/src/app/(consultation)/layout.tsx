@@ -1,14 +1,14 @@
 import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
-import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
+import Display, { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import Footer from "@codegouvfr/react-dsfr/Footer";
-import { Header, type HeaderProps } from "@codegouvfr/react-dsfr/Header";
-import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
+import Header, { type HeaderProps } from "@codegouvfr/react-dsfr/Header";
+import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { Brand } from "@components/Brand";
 import { Container } from "@design-system";
 import { type PropsWithChildren } from "react";
 
-import { Breadcrumb } from "./Breadcrumb";
+import { ConsultationBreadcrumb } from "./Breadcrumb";
 import styles from "./consultation.module.css";
 import { Navigation } from "./Navigation";
 
@@ -53,7 +53,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
       />
       <main role="main" id="content" className={styles.content}>
         <Container>
-          <Breadcrumb />
+          <ConsultationBreadcrumb />
         </Container>
         {children}
       </main>

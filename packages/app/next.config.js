@@ -24,8 +24,8 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: "/healthz",
-        destination: "/api/health",
+        source: "/api/health",
+        destination: "/healthz",
       },
       {
         source: "/index-egapro/recherche",

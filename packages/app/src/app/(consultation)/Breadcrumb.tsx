@@ -1,6 +1,6 @@
 "use client";
 
-import { Breadcrumb as MainBreadcrumb, type BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
+import Breadcrumb, { type BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useSelectedLayoutSegments } from "next/navigation";
 
 interface SegmentMap {
@@ -40,7 +40,7 @@ const defaultSegments: Segments = [
   },
 ];
 
-export const Breadcrumb = () => {
+export const ConsultationBreadcrumb = () => {
   const pathSegments = useSelectedLayoutSegments();
   const segments = defaultSegments.concat(
     pathSegments.reduce(
@@ -66,5 +66,5 @@ export const Breadcrumb = () => {
   );
   const currentPageLabel = segments.pop()?.label;
 
-  return <MainBreadcrumb segments={segments} currentPageLabel={currentPageLabel} />;
+  return <Breadcrumb segments={segments} currentPageLabel={currentPageLabel} />;
 };
