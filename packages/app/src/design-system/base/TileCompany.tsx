@@ -18,7 +18,13 @@ export type TileCompanyTitleProps = PropsWithChildren<{
 export const TileCompanyTitle = ({ children, ues }: TileCompanyTitleProps) => {
   return (
     <Grid valign="middle">
-      <Text inline variant={["xl", "bold"]} className={fr.cx("fr-m-0", "fr-mr-1w")} text={children} />
+      <Text
+        inline
+        variant={["xl", "bold"]}
+        className={fr.cx("fr-m-0", "fr-mr-1w")}
+        style={{ wordWrap: "break-word" }}
+        text={children}
+      />
       {ues && (
         <div>
           <Badge style={{ verticalAlign: "middle" }}>

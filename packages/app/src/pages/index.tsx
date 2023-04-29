@@ -104,9 +104,7 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   <ButtonAsLink href="/representation-equilibree" className="fr-mr-4w">
                     Déclarer mes Écarts
                   </ButtonAsLink>
-                  {ff["repeq-search"] && (
-                    <NextLinkOrA href="/representation-equilibree/recherche">Consulter les Écarts</NextLinkOrA>
-                  )}
+                  <NextLinkOrA href="/representation-equilibree/recherche">Consulter les Écarts</NextLinkOrA>
                 </CardBodyFooter>
               </CardBody>
             </Card>

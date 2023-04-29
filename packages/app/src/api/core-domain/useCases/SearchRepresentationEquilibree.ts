@@ -13,9 +13,10 @@ import {
   type RepresentationEquilibreeSearchCriteria,
 } from "../repo/IRepresentationEquilibreeSearchRepo";
 
-type Input = SearchRepresentationEquilibreeDTO;
-type Output = ConsultationDTO<SearchRepresentationEquilibreeResultDTO>;
-export class SearchRepresentationEquilibree extends AbstractCachedUsedCase<Input, Output> {
+export class SearchRepresentationEquilibree extends AbstractCachedUsedCase<
+  SearchRepresentationEquilibreeDTO,
+  ConsultationDTO<SearchRepresentationEquilibreeResultDTO>
+> {
   protected cacheMasterKey = "SearchRepresentationEquilibree";
   protected defaultOptions: CachedUseCaseOptions = {
     revalidate: config.searchRevalidate,
@@ -25,7 +26,9 @@ export class SearchRepresentationEquilibree extends AbstractCachedUsedCase<Input
     super();
   }
 
-  protected async run(input: Input): Promise<Output> {
+  protected async run(
+    input: SearchRepresentationEquilibreeDTO,
+  ): Promise<ConsultationDTO<SearchRepresentationEquilibreeResultDTO>> {
     try {
       const criteria: RepresentationEquilibreeSearchCriteria = {
         ...input,

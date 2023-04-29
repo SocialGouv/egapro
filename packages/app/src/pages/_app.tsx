@@ -21,7 +21,7 @@ import { fetcher } from "@services/apiClient";
 import { type NextPage } from "next";
 import { type AppProps } from "next/app";
 import Link from "next/link";
-import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "react";
+import { Children, cloneElement, type PropsWithChildren, type ReactNode, Suspense } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
 
@@ -61,7 +61,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
 
   return (
     <>
-      <Matomo env={config.env} />
+      <Suspense>
+        <Matomo env={config.env} />
+      </Suspense>
       <ConsentBanner
         gdprLinkProps={{
           href: "/politique-de-confidentialite#cookies",

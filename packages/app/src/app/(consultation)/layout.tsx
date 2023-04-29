@@ -1,4 +1,6 @@
+import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
+import Footer from "@codegouvfr/react-dsfr/Footer";
 import { Header, type HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
@@ -8,8 +10,17 @@ import { type PropsWithChildren } from "react";
 
 import { Breadcrumb } from "./Breadcrumb";
 import styles from "./consultation.module.css";
-import { ConsultationFooter } from "./Footer";
 import { Navigation } from "./Navigation";
+
+export const metadata = {
+  title: {
+    template: "Recherche - %s",
+    default: "Recherche",
+  },
+  openGraph: {
+    title: { template: "Egapro Recherche - %s", default: "Recherche" },
+  },
+};
 
 const homeLinkProps: HeaderProps["homeLinkProps"] = {
   href: "/",
@@ -35,7 +46,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
       />
       <Header
         brandTop={brand}
-        serviceTitle="Egapro"
+        serviceTitle="Egapro - Consultation"
         serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
         homeLinkProps={homeLinkProps}
         navigation={<Navigation />}
@@ -46,7 +57,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         </Container>
         {children}
       </main>
-      <ConsultationFooter
+      <Footer
         brandTop={brand}
         accessibility="partially compliant"
         accessibilityLinkProps={{
@@ -71,6 +82,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         ]}
         personalDataLinkProps={{ href: "/politique-de-confidentialite" }}
         termsLinkProps={{ href: "/mentions-legales" }}
+        cookiesManagementButtonProps={consentModalButtonProps}
         license={
           <>
             Sauf mention contraire, tous les contenus de ce site sont sous{" "}
@@ -83,14 +95,6 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
           {
             categoryName: "Liens utiles",
             links: [
-              // {
-              //   text: "Télécharger la liste des référents",
-              //   linkProps: {
-              //     href: `${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`,
-              //     download: true,
-              //     target: "_blank",
-              //   },
-              // },
               {
                 text: "Contribuer sur Github",
                 linkProps: {
@@ -99,17 +103,17 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
                   rel: "noreferrer",
                 },
               },
-            ],
-          },
-          {
-            categoryName: " ",
-            links: [
               {
                 text: "Consulter l'aide",
                 linkProps: {
                   href: "/aide-simulation",
                 },
               },
+            ],
+          },
+          {
+            categoryName: " ",
+            links: [
               {
                 text: "index@travail.gouv.fr",
                 linkProps: {
@@ -128,10 +132,3 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
 };
 
 export default ConsultationLayout;
-
-export const metadata = {
-  title: {
-    template: "Recherche - %s",
-    default: "Recherche",
-  },
-};

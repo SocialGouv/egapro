@@ -25,11 +25,11 @@ export const config = {
   env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
   get ff() {
     return {
-      "repeq-search": true,
-      apiv2: {
+      apiV2: {
         enabled: this.env === "dev",
         whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
       },
+      declaV2: this.env === "dev",
     };
   },
   api: {

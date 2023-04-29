@@ -161,7 +161,6 @@ export type EmptyObject = {};
 export type SimpleObject<T = unknown> = Record<string, T>;
 export type AnyFunction = (...args: unknown[]) => unknown;
 export type EveryFunction = (...args: Any[]) => Any;
-export type VoidFunction = () => void;
 export type VoidArgsFunction<TArgs extends Any[] = Any[]> = (...args: TArgs) => void;
 
 export type PartialKeys<T> = {

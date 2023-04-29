@@ -3,6 +3,8 @@ import { type z } from "zod";
 
 import { type Any, type ClearObject, type EmptyObject } from "./types";
 
+export type NextErrorPageProps = { error: Error; reset: VoidFunction };
+
 type SearchParamsString<T> = [T] extends [infer R extends string]
   ? "" extends R
     ? EmptyObject
