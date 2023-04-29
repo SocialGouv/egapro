@@ -24,12 +24,12 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: "/api/health",
-        destination: "/healthz",
+        source: "/healthz",
+        destination: "/api/health",
       },
       {
-        source: "/index-egapro/recherche",
-        destination: "/consulter-index",
+        source: "/consulter-index",
+        destination: "/index-egapro/recherche",
       },
       // TODO: remove when api v2 is enabled
       {
