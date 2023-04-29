@@ -3,9 +3,7 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type NextErrorPageProps } from "@common/utils/next";
 import { DebugButton } from "@components/utils/debug/DebugButton";
-
-import { Grid, GridCol } from "../../design-system/base/Grid";
-import { Container } from "../../design-system/layout/Container";
+import { Container, Grid, GridCol } from "@design-system";
 
 const ConsultationError = ({ error }: NextErrorPageProps) => {
   return (

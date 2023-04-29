@@ -1,9 +1,8 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
+import { Box, Text } from "@design-system";
 import { push } from "@socialgouv/matomo-next";
 import { useEffect } from "react";
 
-import { Box } from "../design-system/base/Box";
-import { Text } from "../design-system/base/Typography";
 import { type NextPageWithLayout } from "./_app";
 
 const NotFoundPage: NextPageWithLayout = () => {

@@ -1,5 +1,6 @@
 import { EntrepriseFooter } from "@components/Footers";
 import { ButtonAsLink, FormButton, Logo, SkipLinks, SkipLinksItem } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { type TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
 import { clsx } from "clsx";
@@ -8,7 +9,6 @@ import { useRouter } from "next/router";
 import { type PropsWithChildren } from "react";
 import { useCallback, useEffect, useState } from "react";
 
-import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import styles from "./App.module.css";
 
 interface ActionButtonGroupsProps {

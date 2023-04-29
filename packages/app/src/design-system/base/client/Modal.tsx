@@ -1,4 +1,4 @@
-import { type NoStringReactNode, type PropsWithoutChildren } from "@common/utils/types";
+import { type NoStringReactNode } from "@common/utils/types";
 import { type ModalInstance } from "@gouvfr/dsfr";
 import { type ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
@@ -14,7 +14,6 @@ import { Icon } from "../Icon";
 export type ModalProps = JSX.IntrinsicElements["dialog"] & {
   backdropCanClose?: boolean;
   buttons?: (param: { closableProps: ClosableModalButtonProps; instance?: ModalInstance }) => ReactNode[];
-  content: ReactNode;
   icon?: IconStyle | NoStringReactNode;
   id: string;
   onClose?: (event: GlobalEventHandlersEventMap["dsfr.conceal"]) => void;
@@ -33,13 +32,13 @@ export const Modal = ({
   onOpen,
   title,
   icon,
-  content,
   buttons: buttonsMaker,
   size,
   id,
   backdropCanClose = true,
+  children,
   ...rest
-}: PropsWithoutChildren<ModalProps>) => {
+}: ModalProps) => {
   const titleId = `fr-modal-title-modal-${useId()}`;
   const loaded = typeof window !== "undefined";
   const dsfr = () => (loaded ? window.dsfr : null);
@@ -89,7 +88,7 @@ export const Modal = ({
                   {icon && typeof icon === "string" ? <Icon icon={icon as IconStyle} size="lg" /> : icon}
                   {title}
                 </h1>
-                {typeof content === "string" ? <p>{content}</p> : content}
+                {typeof children === "string" ? <p>{children}</p> : children}
               </Box>
               {buttons?.length && (
                 <Box className="fr-modal__footer">

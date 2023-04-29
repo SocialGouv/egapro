@@ -18,7 +18,7 @@ const DEFAULT_KEY = "__default_key___";
 /**
  * When extended, give cache capabilities with the stale-while-revalidate pattern.
  *
- * `run()` method must be implemented instead of `execute()` which will be implicitly implemented.
+ * `run()` method must be implemented instead of `execute()` which will be implicitly called.
  *
  * Default revalidate is 30 seconds.
  */

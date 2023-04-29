@@ -23,8 +23,3 @@ export interface SearchRepresentationEquilibreeResultDTO {
 
 export const searchRepresentationEquilibreeDTOSchema = searchConsultationSchema;
 export type SearchRepresentationEquilibreeDTO = ClearObject<z.infer<typeof searchRepresentationEquilibreeDTOSchema>>;
-
-// db => q / offset / limit + consult
-// usecase => q / page / limit + consult
-// dto => q / page / limit + consult
-// form => consult

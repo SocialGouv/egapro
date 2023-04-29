@@ -11,7 +11,7 @@ export type MatomoProps = Pick<typeof config, "env">;
 /**
  * Handle Matomo init and consent.
  *
- * Uses `useSearchParams()` internaly, must be Suspense-d.
+ * Uses `useSearchParams()` internaly, must be Suspense-d in server component.
  */
 export const Matomo = ({ env }: MatomoProps) => {
   const pathname = usePathname();

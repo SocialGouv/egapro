@@ -10,9 +10,10 @@ import { AbstractCachedUsedCase, type CachedUseCaseOptions } from "@common/share
 
 import { type DeclarationSearchCriteria, type IDeclarationSearchRepo } from "../repo/IDeclarationSearchRepo";
 
-type Input = SearchDeclarationDTO;
-type Output = ConsultationDTO<SearchDeclarationResultDTO>;
-export class SearchDeclaration extends AbstractCachedUsedCase<Input, Output> {
+export class SearchDeclaration extends AbstractCachedUsedCase<
+  SearchDeclarationDTO,
+  ConsultationDTO<SearchDeclarationResultDTO>
+> {
   protected cacheMasterKey = "SearchDeclaration";
   protected defaultOptions: CachedUseCaseOptions = {
     revalidate: config.searchRevalidate,
@@ -22,7 +23,7 @@ export class SearchDeclaration extends AbstractCachedUsedCase<Input, Output> {
     super();
   }
 
-  protected async run(input: Input): Promise<Output> {
+  protected async run(input: SearchDeclarationDTO): Promise<ConsultationDTO<SearchDeclarationResultDTO>> {
     try {
       const criteria: DeclarationSearchCriteria = {
         ...input,

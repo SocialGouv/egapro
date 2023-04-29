@@ -46,7 +46,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
       />
       <Header
         brandTop={brand}
-        serviceTitle="Egapro - Consultation"
+        serviceTitle="Egapro - Recherche"
         serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
         homeLinkProps={homeLinkProps}
         navigation={<Navigation />}

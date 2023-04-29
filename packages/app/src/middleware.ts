@@ -23,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: `/((?!api/admin/referent/import|apiv2/admin/referent/import|_next/static|_next/image|favicon.ico).*)`,
+  matcher: "/((?!api/admin/referent/import|apiv2/admin/referent/import|_next/static|_next/image|favicon.ico).*)",
 };

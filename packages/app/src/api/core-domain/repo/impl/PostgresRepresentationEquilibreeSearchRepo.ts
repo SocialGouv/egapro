@@ -13,26 +13,6 @@ import {
   type RepresentationEquilibreeSearchCriteria,
 } from "../IRepresentationEquilibreeSearchRepo";
 
-/*
-
-SELECT
-    array_agg(representation_equilibree.data ORDER BY representation_equilibree.year DESC) as data,
-    jsonb_object_agg(representation_equilibree.year::text, json_build_object(
-        'executiveMenPercent', replace((representation_equilibree.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_hommes_cadres')::text, ',', '.')::real,
-    )) as results
-FROM representation_equilibree
-JOIN search_representation_equilibree ON representation_equilibree.siren=search_representation_equilibree.siren AND representation_equilibree.year=search_representation_equilibree.year
-GROUP BY representation_equilibree.siren
-ORDER BY max(representation_equilibree.year) DESC
-LIMIT $1
-OFFSET $2
-
-CREATE TABLE IF NOT EXISTS search_representation_equilibree
-(siren TEXT, year INT, declared_at TIMESTAMP WITH TIME ZONE, ft TSVECTOR, region VARCHAR(2), departement VARCHAR(3), section_naf CHAR,
-PRIMARY KEY (siren, year));
-
-
-*/
 export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentationEquilibreeSearchRepo {
   private repEqTable = sql("representation_equilibree");
   private table = sql("search_representation_equilibree");

@@ -22,11 +22,11 @@ import {
   TileSuccess,
   TileSuccessTitle,
 } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import { type NextPageWithLayout } from "../_app";
 
 const title = "Votre déclaration a été transmise";
