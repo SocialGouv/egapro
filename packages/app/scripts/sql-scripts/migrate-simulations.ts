@@ -11,9 +11,9 @@ const table = sql("simulation");
 console.log("table", table);
 
 export async function migrateSimulations() {
-  // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated, qui sont donc celles avant la migration.
+  // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated et qui sont valides, qui sont donc celles avant la migration.
   const rows =
-    (await sql`select * from ${table} where data->'indicateurUn'->>'autre' = 'true' and data->'declaration'->>'formValidated' = 'Valid' and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
+    (await sql`select * from ${table} where  (data->'indicateurUn'->>'csp' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'csp' or data->'indicateurUn'->>'coef' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'coef' or data->'indicateurUn'->>'autre' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'autre') and data->'declaration'->>'formValidated' = 'Valid' and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
 
   console.log("nb rows", rows?.length ?? "no rows");
 
@@ -23,6 +23,8 @@ export async function migrateSimulations() {
     console.log("row.id", row.id);
 
     const newIndicateurUn = updateIndicateurUn(row.data.indicateurUn);
+
+    // console.log("newIndicateurUn:", JSON.stringify(newIndicateurUn), ":");
 
     const newIndicateurUnJson = JSON.stringify(newIndicateurUn).replace(/'/g, "''"); // Need to escape single quotes for Postgres.
 
@@ -36,6 +38,8 @@ export async function migrateSimulations() {
       `update simulation set data = jsonb_set(data, '{indicateurUn}', '${newIndicateurUnJson}'::jsonb) where id = '${row.id}'`,
     );
   });
+
+  console.log("nb rows", rows?.length ?? "no rows");
 }
 
 migrateSimulations();

@@ -12,7 +12,6 @@ function expectForUnchangedProperties(
 ) {
   const keys = [
     "coefficientGroupFormValidated",
-    "formValidated",
     "motifNonCalculable",
     "nombreCoefficients",
     "nonCalculable",
@@ -239,6 +238,70 @@ describe("Tests for CSP", () => {
     const indicateurUnDestination = updateIndicateurUn(indicateurUnOrigin);
 
     expectsForCsp(indicateurUnOrigin, indicateurUnDestination);
+  });
+
+  test("csp n°4", () => {
+    // TODO: gérer ce cas. Il a une modaliteCalcul et pas de champ csp, coef, autre. Pourtant, il est dans l'ancien mode.
+    // Donc ajouter les champs modaliteCalculformValidated, coefficientRemuFormValidated, remunerationsAnnuelles, coefficients.
+    // Se baser sur modaliteCalculformValidated pour savoir si on est dans l'ancien mode ou pas.
+    const indicateurUnOrigin: IndicateurUnOrigin = {
+      noteFinale: 40,
+      coefficient: [],
+      formValidated: "Valid",
+      nonCalculable: false,
+      resultatFinal: 0.0257,
+      modaliteCalcul: "csp",
+      sexeSurRepresente: "hommes",
+      motifNonCalculable: "",
+      remunerationAnnuelle: [
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 0,
+        },
+        {
+          tranchesAges: [
+            {
+              trancheAge: 0,
+              ecartTauxRemuneration: -0.044196,
+              remunerationAnnuelleBrutFemmes: 23.0525,
+              remunerationAnnuelleBrutHommes: 22.0768,
+            },
+            {
+              trancheAge: 1,
+              ecartTauxRemuneration: 0.051283,
+              remunerationAnnuelleBrutFemmes: 20.7123,
+              remunerationAnnuelleBrutHommes: 21.8319,
+            },
+            {
+              trancheAge: 2,
+              ecartTauxRemuneration: 0.044369,
+              remunerationAnnuelleBrutFemmes: 19.7356,
+              remunerationAnnuelleBrutHommes: 20.6519,
+            },
+            {
+              trancheAge: 3,
+              ecartTauxRemuneration: 0.044291,
+              remunerationAnnuelleBrutFemmes: 20.5745,
+              remunerationAnnuelleBrutHommes: 21.528,
+            },
+          ],
+          categorieSocioPro: 1,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 2,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 3,
+        },
+      ],
+      coefficientGroupFormValidated: "None",
+      coefficientEffectifFormValidated: "None",
+    };
+
+    const indicateurUnDestination = updateIndicateurUn(indicateurUnOrigin);
+
     expectsForCsp(indicateurUnOrigin, indicateurUnDestination);
   });
 });
@@ -965,4 +1028,64 @@ describe("Tests for coef autre", () => {
     expect(indicateurUnDestination.modaliteCalcul).toBe("autre");
     expect(indicateurUnDestination.formValidated).toBe("Valid");
   });
+});
+
+test("bug", () => {
+  const indicateurUnOrigin: IndicateurUnOrigin = {
+    csp: true,
+    coef: false,
+    autre: false,
+    coefficient: [],
+    coefficients: [],
+    formValidated: "None",
+    nonCalculable: true,
+    motifNonCalculable: "egvi40pcet",
+    remunerationAnnuelle: [
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 0,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 1,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 2,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 3,
+      },
+    ],
+    remunerationsAnnuelles: [
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 0,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 1,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 2,
+      },
+      {
+        tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+        categorieSocioPro: 3,
+      },
+    ],
+    modaliteCalculformValidated: "None",
+    motifNonCalculablePrecision: "",
+    coefficientRemuFormValidated: "None",
+    coefficientGroupFormValidated: "None",
+    coefficientEffectifFormValidated: "None",
+  };
+
+  const indicateurUnDestination = updateIndicateurUn(indicateurUnOrigin);
+
+  console.log("indicateurUnDestination:", indicateurUnDestination);
+
+  expectsForCsp(indicateurUnOrigin, indicateurUnDestination);
 });

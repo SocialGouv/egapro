@@ -58,27 +58,29 @@ export type IndicateurUnDestination = IndicateurUnBase & {
 };
 
 export function updateIndicateurUn(data: IndicateurUnOrigin): IndicateurUnDestination {
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  const { csp, coef, autre, coefficient, remunerationAnnuelle, ...rest } = data;
+  const { csp, coef, autre, coefficient, remunerationAnnuelle, modaliteCalcul, ...rest } = data;
 
   // 1. Recopie des champs inchangés + ajout du champ modaliteCalculformValidated forcément à Valid, puisqu'on ne ne prend en compte que les simulations validées.
-  const newIndicateurUn = { ...rest, modaliteCalculformValidated: "Valid" } as IndicateurUnDestination;
+  const newIndicateurUn = {
+    ...rest,
+    modaliteCalculformValidated: "Valid",
+    formValidated: "Valid",
+  } as IndicateurUnDestination;
 
   // 2. Gestion du nouveau champ modaliteCalcul et suppression des champs csp, coef et autre.
-  if (csp !== undefined) {
-    if (csp === true) {
-      newIndicateurUn.modaliteCalcul = "csp";
-      // 3.1 Gestion du champ coefficientRemuFormValidated pour la modalité csp.
-      newIndicateurUn.coefficientRemuFormValidated = "None";
-    } else if (coef === true) {
-      newIndicateurUn.modaliteCalcul = "coef";
-      // 3.1 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
-      newIndicateurUn.coefficientRemuFormValidated = "Valid";
-    } else {
-      newIndicateurUn.modaliteCalcul = "autre";
-      // 3.2 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
-      newIndicateurUn.coefficientRemuFormValidated = "Valid";
-    }
+  // NB: we don't start with CSP because cases exist with modaliteCalcul="csp" and csp=false. So we check modaliteCalcul === "csp" last.
+  if (coef === true || modaliteCalcul === "coef") {
+    newIndicateurUn.modaliteCalcul = "coef";
+    // 3.1 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
+    newIndicateurUn.coefficientRemuFormValidated = "Valid";
+  } else if (autre === true || modaliteCalcul === "autre") {
+    newIndicateurUn.modaliteCalcul = "autre";
+    // 3.2 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
+    newIndicateurUn.coefficientRemuFormValidated = "Valid";
+  } else if (csp === true || modaliteCalcul === "csp") {
+    newIndicateurUn.modaliteCalcul = "csp";
+    // 3.3 Gestion du champ coefficientRemuFormValidated pour la modalité csp.
+    newIndicateurUn.coefficientRemuFormValidated = "None";
   }
 
   // 3. Gestion du champ remunerationAnnuelle, qui devient remunerationsAnnuelles.
