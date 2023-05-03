@@ -13,5 +13,4 @@ const og = () => {
   return new ImageResponse(<ImgHome />, size);
 };
 
-// eslint-disable-next-line import/no-default-export
 export default og;

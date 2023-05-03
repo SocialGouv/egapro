@@ -9,6 +9,7 @@ import { Matomo } from "@components/utils/Matomo";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
+import { SessionProvider } from "./SessionProvider";
 
 const RootLayout = ({ children }: PropsWithChildren) => (
   <html lang="fr" {...getColorSchemeHtmlAttributes({ defaultColorScheme })}>
@@ -34,22 +35,24 @@ const RootLayout = ({ children }: PropsWithChildren) => (
       </Suspense>
     </head>
     <body>
-      <DsfrProvider defaultColorScheme={defaultColorScheme}>
-        <ConsentBanner
-          gdprLinkProps={{
-            href: "/politique-de-confidentialite#cookies",
-          }}
-          siteName="Egapro"
-          services={[
-            {
-              name: "matomo",
-              title: "Matomo",
-              description: "Outil d’analyse comportementale des utilisateurs.",
-            },
-          ]}
-        />
-        {children}
-      </DsfrProvider>
+      <SessionProvider basePath="/apiv2/auth">
+        <DsfrProvider defaultColorScheme={defaultColorScheme}>
+          <ConsentBanner
+            gdprLinkProps={{
+              href: "/politique-de-confidentialite#cookies",
+            }}
+            siteName="Egapro"
+            services={[
+              {
+                name: "matomo",
+                title: "Matomo",
+                description: "Outil d’analyse comportementale des utilisateurs.",
+              },
+            ]}
+          />
+          {children}
+        </DsfrProvider>
+      </SessionProvider>
     </body>
   </html>
 );

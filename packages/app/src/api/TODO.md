@@ -1,5 +1,5 @@
 - [ ] error handling
 - [ ] sentry
 - [ ] proper logger
-- [ ] security and jwt generation
-- [ ] cors in dev/review
+- [x] security and jwt generation
+- [x] cors in dev/review

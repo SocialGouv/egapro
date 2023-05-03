@@ -14,8 +14,9 @@ import {
   FormLayoutButtonGroup,
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { requestEmailForToken, useUser } from "@services/apiClient";
-import { useRouter } from "next/router";
+import { useUser2 } from "@services/apiClient/useUser2";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -32,10 +33,11 @@ type FormType = z.infer<typeof formSchema>;
 
 const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const searchParams = useSearchParams();
+  const { user } = useUser2();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
   const defaultRedirectTo = "/representation-equilibree/commencer";
-  const { redirectTo } = normalizeRouterQuery(router.query);
+  const { redirectTo } = normalizeRouterQuery(Object.fromEntries(searchParams?.entries() ?? []));
 
   if (user) router.push(redirectTo || defaultRedirectTo);
 
@@ -56,8 +58,19 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${new URL(redirectTo || defaultRedirectTo, window.location.origin)}?token=`);
-      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      const result = await signIn("email", {
+        email,
+        callbackUrl: new URL(redirectTo || defaultRedirectTo, window.location.origin).toString(),
+        redirect: false,
+      });
+      if (result?.ok) {
+        setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      } else {
+        setFeatureStatus({
+          type: "error",
+          message: `Erreur lors de l'envoi de l'email. (${result?.status}) ${result?.error}`,
+        });
+      }
     } catch (error) {
       setFeatureStatus({
         type: "error",

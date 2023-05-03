@@ -21,6 +21,7 @@ import { fetcher } from "@services/apiClient";
 import { type NextPage } from "next";
 import { type AppProps } from "next/app";
 import Link from "next/link";
+import { SessionProvider } from "next-auth/react";
 import { Children, cloneElement, type PropsWithChildren, type ReactNode, Suspense } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
@@ -103,9 +104,11 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
             },
           }}
         >
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <SessionProvider basePath="/apiv2/auth">
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </SessionProvider>
         </SWRConfig>
       </SWRDevTools>
     </>

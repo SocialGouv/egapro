@@ -1,7 +1,9 @@
 import { type MailTemplate } from "@api/shared-domain/infra/mail/type";
 import { config } from "@common/config";
 import path from "path";
-import { renderToStaticMarkup } from "react-dom/server";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires -- Nextjs don't like react-dom/server on routes, so we should "hide it" from him by using require instead of import
+const { renderToStaticMarkup } = require("react-dom/server");
 
 export const ownershipRequest_toAskerAfterValidation = (
   combo: Array<[email: string, siren: string]>,
@@ -101,6 +103,35 @@ ${config.api.mailer.signature}`,
           <p>
             Vous avez maintenant la main pour ajouter un nouveau déclarant ou supprimer un déclarant en vous connectant
             à votre espace, avec cet email, vous trouverez ci-joint la documentation pour le faire.
+          </p>
+          <p>Cordialement,</p>
+          <p>{config.api.mailer.signature}</p>
+        </body>
+      </html>,
+    ),
+});
+
+export const login_sendVerificationUrl = (url: string): MailTemplate => ({
+  subject: "Egapro - Vérification de l'email",
+  text: `Bonjour,
+
+Voici le lien vous permettant de valider votre email :
+
+${url}
+
+Cordialement,
+
+${config.api.mailer.signature}`,
+
+  html:
+    "<!doctype html>" +
+    renderToStaticMarkup(
+      <html>
+        <body>
+          <p>Bonjour,</p>
+          <p>Voici le lien vous permettant de valider votre email :</p>
+          <p>
+            <a href={url}>{url}</a>
           </p>
           <p>Cordialement,</p>
           <p>{config.api.mailer.signature}</p>
