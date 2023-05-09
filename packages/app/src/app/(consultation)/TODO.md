@@ -1,0 +1,4 @@
+- [x] SEO
+- [x] error management
+- [ ] clean design
+- [ ] maybe using slots for "landing" states

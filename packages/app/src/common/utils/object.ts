@@ -1,5 +1,12 @@
-import { type PartialObject, type ValueKeyIteratee } from "lodash";
-import _ from "lodash";
+import {
+  chain,
+  isArray,
+  isObject,
+  map,
+  type Object as _Object,
+  type PartialObject,
+  type ValueKeyIteratee,
+} from "lodash";
 
 /**
  * Return true if the object has no property.
@@ -21,9 +28,9 @@ export const removeEntryBy = (obj: Record<string, unknown>, predicate: (val: unk
 export const omitByRecursively = <T extends object>(
   value: T,
   iteratee: ValueKeyIteratee<T[keyof T]>,
-): _.Object<PartialObject<T>> => {
+): _Object<PartialObject<T>> => {
   const cb = (v: T) => omitByRecursively(v, iteratee);
   return (
-    _.isObject(value) ? (_.isArray(value) ? _.map(value, cb) : _(value).omitBy(iteratee).mapValues(cb).value()) : value
-  ) as _.Object<PartialObject<T>>;
+    isObject(value) ? (isArray(value) ? map(value, cb) : chain(value).omitBy(iteratee).mapValues(cb).value()) : value
+  ) as _Object<PartialObject<T>>;
 };

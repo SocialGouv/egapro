@@ -1,6 +1,7 @@
 import { type AnchorLink } from "@common/utils/url";
 import { type PropsWithChildren } from "react";
 
+/** @deprecated use react-dsfr */
 export const SkipLinks = ({ children }: PropsWithChildren) => (
   <div className="fr-skiplinks">
     <nav className="fr-container" role="navigation" aria-label="Accès rapide">

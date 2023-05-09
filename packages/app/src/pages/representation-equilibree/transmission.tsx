@@ -22,11 +22,11 @@ import {
   TileSuccess,
   TileSuccessTitle,
 } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import { type NextPageWithLayout } from "../_app";
 
 const title = "Votre déclaration a été transmise";
@@ -77,7 +77,7 @@ const Transmission: NextPageWithLayout = () => {
           de courriers indésirables.
         </p>
         <p>Nous vous remercions de votre transmission.</p>
-        <Grid mt="6w" justifyCenter>
+        <Grid mt="6w" align="center">
           <GridCol md={10} lg={8}>
             <form>
               <ButtonGroup>
@@ -92,7 +92,7 @@ const Transmission: NextPageWithLayout = () => {
           </GridCol>
         </Grid>
         {formData.entreprise?.siren && (
-          <Grid mt="6w" justifyCenter>
+          <Grid mt="6w" align="center">
             <GridCol md={10} lg={8}>
               <Card size="sm" isEnlargeLink>
                 <CardBody>
@@ -117,7 +117,7 @@ const Transmission: NextPageWithLayout = () => {
             </GridCol>
           </Grid>
         )}
-        <Grid mt="6w" justifyCenter haveGutters>
+        <Grid mt="6w" align="center" haveGutters>
           <GridCol md={10} lg={8} className="fr-enlarge-link">
             <NextLinkOrA
               isExternal

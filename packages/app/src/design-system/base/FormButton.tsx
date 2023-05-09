@@ -6,7 +6,10 @@ export type FormButtonProps = ButtonStylesProps &
     isDisabled?: boolean;
   };
 
-// NB: by default, a HTML button will submit a form. To not submit it, use type="button"
+/**
+ * NB: by default, a HTML button will submit a form. To not submit it, use type="button"
+ * @deprecated use react-dsfr
+ */
 export const FormButton = ({
   variant,
   size,

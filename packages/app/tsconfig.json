@@ -20,10 +20,16 @@
         "packages/app/src/services/*"
       ],
       "@design-system": [
-        "packages/app/src/design-system/index"
+        "packages/app/src/design-system/server"
       ],
-      "@design-system/theme": [
-        "packages/app/src/design-system/theme"
+      "@design-system/client": [
+        "packages/app/src/design-system/client"
+      ],
+      "@design-system/utils/*": [
+        "packages/app/src/design-system/utils/*"
+      ],
+      "@design-system/hooks/*": [
+        "packages/app/src/design-system/hooks/*"
       ]
     }
   },

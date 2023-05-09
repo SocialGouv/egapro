@@ -1,17 +1,16 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
 import { Container, Grid, GridCol } from "@design-system";
 
-import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 import { type NextPageWithLayout } from "./_app";
 
 const PrivacyPolicy: NextPageWithLayout = () => {
-  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
   return (
     <section>
       <Container py="8w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>Protection des données à caractère personnel – Index Egapro</h1>
             <h2>Responsable de traitements</h2>

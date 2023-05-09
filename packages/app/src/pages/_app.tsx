@@ -1,6 +1,3 @@
-import "@fontsource/cabin";
-import "@fontsource/gabriela";
-
 // should be before react-dsfr
 if (typeof window !== "undefined") {
   const originalAppendChild = document.head.appendChild.bind(document.head);
@@ -15,6 +12,7 @@ if (typeof window !== "undefined") {
   };
 }
 
+import ConsentBanner from "@codegouvfr/react-dsfr/ConsentBanner";
 import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { config } from "@common/config";
 import { excludeType } from "@common/utils/types";
@@ -23,11 +21,9 @@ import { fetcher } from "@services/apiClient";
 import { type NextPage } from "next";
 import { type AppProps } from "next/app";
 import Link from "next/link";
-import { Children, cloneElement, type PropsWithChildren, type ReactNode } from "react";
+import { Children, cloneElement, type PropsWithChildren, type ReactNode, Suspense } from "react";
 import { SWRConfig } from "swr";
 import { SWRDevTools } from "swr-devtools";
-
-import { ConsentBanner } from "../design-system/base/custom/ConsentBanner";
 
 // Only in TypeScript projects
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
@@ -36,8 +32,8 @@ declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   }
 }
 
-declare module "../design-system/base/custom/ConsentBanner" {
-  interface GdprServiceNames {
+declare module "@codegouvfr/react-dsfr/gdpr" {
+  interface RegisterGdprServices {
     matomo: never;
   }
 }
@@ -65,10 +61,13 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
 
   return (
     <>
-      <Matomo env={config.env} />
+      <Suspense>
+        <Matomo env={config.env} />
+      </Suspense>
       <ConsentBanner
-        gdprPageLink="/politique-de-confidentialite#cookies"
-        gdprPageLinkAs={Link}
+        gdprLinkProps={{
+          href: "/politique-de-confidentialite#cookies",
+        }}
         siteName="Egapro"
         services={[
           {

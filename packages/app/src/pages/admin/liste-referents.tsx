@@ -26,7 +26,6 @@ import {
   FormSelect,
   Icon,
   Link,
-  Modal,
   TableAdmin,
   TableAdminBody,
   TableAdminBodyRow,
@@ -34,12 +33,13 @@ import {
   TableAdminHead,
   TableAdminHeadCol,
 } from "@design-system";
+import { Modal } from "@design-system/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { type ModalInstance } from "@gouvfr/dsfr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcherV2 } from "@services/apiClient";
 import { useReferentListStore } from "@services/apiClient/useReferentListStore";
-import _ from "lodash";
+import { noop, orderBy as _orderBy, sortBy, times, truncate } from "lodash";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
@@ -96,7 +96,7 @@ const ReferentList = ({ referents, editModalId, doDelete }: ReferentListProps) =
         </TableAdminHead>
         <TableAdminBody ref={animationParent}>
           <Suspense
-            fallback={new Array(4).fill(null).map((_, index) => (
+            fallback={times(4, index => (
               <TableAdminBodyRow key={`fallback-referent-${index}`}>
                 <TableAdminBodyRowCol>---</TableAdminBodyRowCol>
               </TableAdminBodyRow>
@@ -127,13 +127,13 @@ const ReferentList = ({ referents, editModalId, doDelete }: ReferentListProps) =
                     iconLeft={referent.type === "email" ? "fr-icon-mail-fill" : "fr-icon-link"}
                     href={(referent.type === "email" ? "mailto:" : "") + referent.value}
                   >
-                    {_.truncate(referent.value, { length: 40 })}
+                    {truncate(referent.value, { length: 40 })}
                   </Link>
                   {referent.type === "email" && referent.substitute?.email ? (
                     <>
                       <br />
                       <Link size="sm" href={`mailto:${referent.substitute.email}`}>
-                        <i className="fr-text--xs">{_.truncate(referent.substitute.email, { length: 40 })}</i>
+                        <i className="fr-text--xs">{truncate(referent.substitute.email, { length: 40 })}</i>
                       </Link>
                     </>
                   ) : (
@@ -255,145 +255,6 @@ const ReferentModal = ({ id, mode = "edit" }: EditReferentModalProps) => {
       title={`${mode === "edit" ? "Éditer" : "Créer"} - ${writtenName || "👻"}`}
       icon="fr-icon-arrow-right-line"
       id={id}
-      content={
-        <form onSubmit={handleSubmit(_.noop)}>
-          <input type="hidden" id={`${mode}-form-referent-id`} {...register("id")} />
-          <FormGroup isError={!!errors.principal}>
-            <FormCheckbox
-              id={`${mode}-form-referent-principal`}
-              aria-describedby={errors.principal && "form-referent-principal-error"}
-              {...register("principal")}
-            >
-              {fieldMap.get("principal")}
-            </FormCheckbox>
-            {errors.principal && (
-              <FormGroupMessage id="form-referent-principal-error">{errors.principal.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-
-          <FormGroup isError={!!errors.name}>
-            <FormGroupLabel htmlFor="form-referent-name" hint='Format : "Prénom NOM" ou "Nom du service"'>
-              {fieldMap.get("name")}
-            </FormGroupLabel>
-            <FormInput
-              id={`${mode}-form-referent-name`}
-              aria-describedby={errors.name && "form-referent-name-error"}
-              placeholder="Jean DUPONT"
-              autoComplete="off"
-              {...register("name")}
-            />
-            {errors.name && <FormGroupMessage id="form-referent-name-error">{errors.name.message}</FormGroupMessage>}
-          </FormGroup>
-
-          <FormGroup isError={!!errors.region}>
-            <FormGroupLabel htmlFor="form-referent-region">{fieldMap.get("region")}</FormGroupLabel>
-            <FormSelect
-              id={`${mode}-form-referent-region`}
-              aria-describedby={errors.region && "form-referent-region-error"}
-              defaultValue={mode === "edit" ? currentEdited?.region ?? "" : ""}
-              {...register("region")}
-            >
-              <option value="">Régions</option>
-              {_.sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
-                <option value={code} key={`form-referent-region-option-${code}`}>
-                  {name} ({code})
-                </option>
-              ))}
-            </FormSelect>
-            {errors.region && (
-              <FormGroupMessage id="form-referent-region-error">{errors.region.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-
-          <FormGroup isError={!!errors.county}>
-            <FormGroupLabel htmlFor="form-referent-county" hint="Non obligatoire (ex: coordination régionale)">
-              {fieldMap.get("county")}
-            </FormGroupLabel>
-            <FormSelect
-              id={`${mode}-form-referent-county`}
-              aria-describedby={errors.county && "form-referent-county-error"}
-              defaultValue={mode === "edit" ? currentEdited?.county ?? "" : ""}
-              {...register("county", {
-                disabled: !selectedRegion,
-                setValueAs: value => (value === "" ? void 0 : value),
-              })}
-            >
-              <option value="">{selectedRegion ? "Département" : "Choisir une région d'abord"}</option>
-              {REGIONS_TO_COUNTIES[selectedRegion]?.map(code => (
-                <option value={code} key={`form-referent-county-option-${code}`}>
-                  {COUNTIES[code]} ({code})
-                </option>
-              ))}
-            </FormSelect>
-            {errors.county && (
-              <FormGroupMessage id="form-referent-county-error">{errors.county.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-
-          <FormGroup isError={!!errors.value}>
-            <FormGroupLabel htmlFor="form-referent-substitute-name" hint={`Format : ${selectedType}`}>
-              {fieldMap.get("value")}
-            </FormGroupLabel>
-            <FormInput
-              id={`${mode}-form-referent-value`}
-              aria-describedby={errors.value && "form-referent-value-error"}
-              placeholder={selectedType === "url" ? "https://site.gouv.fr" : "email@gouv.fr"}
-              autoComplete={selectedType === "url" ? "off" : "email"}
-              type={selectedType}
-              spellCheck="false"
-              {...register("value")}
-            />
-            {errors.value && <FormGroupMessage id="form-referent-value-error">{errors.value.message}</FormGroupMessage>}
-          </FormGroup>
-
-          <FormRadioGroup inline>
-            <FormRadioGroupLegend id={`${mode}-form-referent-type`}>Type de la valeur</FormRadioGroupLegend>
-            <FormRadioGroupContent>
-              <FormRadioGroupInput
-                id={`${mode}-form-referent-type-email`}
-                value="email"
-                {...register("type", { deps: "value" })}
-              >
-                Email
-              </FormRadioGroupInput>
-              <FormRadioGroupInput
-                id={`${mode}-form-referent-type-url`}
-                value="url"
-                {...register("type", { deps: "value" })}
-              >
-                URL
-              </FormRadioGroupInput>
-            </FormRadioGroupContent>
-          </FormRadioGroup>
-
-          <FormFieldset
-            legend="Suppléant"
-            hint="Non obligatoire. Peut-être représenté uniquement par le nom ou l'email."
-            error={errors.substitute?.name?.message || errors.substitute?.email?.message}
-            elements={[
-              <FormGroup key="form-referent-substitute-name">
-                <FormGroupLabel htmlFor="form-referent-substitute-name">Nom</FormGroupLabel>
-                <FormInput
-                  id={`${mode}-form-referent-substitute-name`}
-                  placeholder="Jean DUPONT"
-                  autoComplete="off"
-                  {...register("substitute.name", { setValueAs: value => (value === "" ? void 0 : value) })}
-                />
-              </FormGroup>,
-              <FormGroup key="form-referent-substitute-email">
-                <FormGroupLabel htmlFor="form-referent-substitute-email">Email</FormGroupLabel>
-                <FormInput
-                  id={`${mode}-form-referent-substitute-email`}
-                  placeholder="email@gouv.fr"
-                  type="email"
-                  autoComplete="off"
-                  {...register("substitute.email", { setValueAs: value => (value === "" ? void 0 : value) })}
-                />
-              </FormGroup>,
-            ]}
-          />
-        </form>
-      }
       buttons={({ instance }) => [
         <FormButton
           disabled={!isValid || !isDirty}
@@ -403,7 +264,145 @@ const ReferentModal = ({ id, mode = "edit" }: EditReferentModalProps) => {
           Sauvegarder
         </FormButton>,
       ]}
-    />
+    >
+      <form onSubmit={handleSubmit(noop)}>
+        <input type="hidden" id={`${mode}-form-referent-id`} {...register("id")} />
+        <FormGroup isError={!!errors.principal}>
+          <FormCheckbox
+            id={`${mode}-form-referent-principal`}
+            aria-describedby={errors.principal && "form-referent-principal-error"}
+            {...register("principal")}
+          >
+            {fieldMap.get("principal")}
+          </FormCheckbox>
+          {errors.principal && (
+            <FormGroupMessage id="form-referent-principal-error">{errors.principal.message}</FormGroupMessage>
+          )}
+        </FormGroup>
+
+        <FormGroup isError={!!errors.name}>
+          <FormGroupLabel htmlFor="form-referent-name" hint='Format : "Prénom NOM" ou "Nom du service"'>
+            {fieldMap.get("name")}
+          </FormGroupLabel>
+          <FormInput
+            id={`${mode}-form-referent-name`}
+            aria-describedby={errors.name && "form-referent-name-error"}
+            placeholder="Jean DUPONT"
+            autoComplete="off"
+            {...register("name")}
+          />
+          {errors.name && <FormGroupMessage id="form-referent-name-error">{errors.name.message}</FormGroupMessage>}
+        </FormGroup>
+
+        <FormGroup isError={!!errors.region}>
+          <FormGroupLabel htmlFor="form-referent-region">{fieldMap.get("region")}</FormGroupLabel>
+          <FormSelect
+            id={`${mode}-form-referent-region`}
+            aria-describedby={errors.region && "form-referent-region-error"}
+            defaultValue={mode === "edit" ? currentEdited?.region ?? "" : ""}
+            {...register("region")}
+          >
+            <option value="">Régions</option>
+            {sortBy(Object.entries(REGIONS), "0").map(([code, name]) => (
+              <option value={code} key={`form-referent-region-option-${code}`}>
+                {name} ({code})
+              </option>
+            ))}
+          </FormSelect>
+          {errors.region && (
+            <FormGroupMessage id="form-referent-region-error">{errors.region.message}</FormGroupMessage>
+          )}
+        </FormGroup>
+
+        <FormGroup isError={!!errors.county}>
+          <FormGroupLabel htmlFor="form-referent-county" hint="Non obligatoire (ex: coordination régionale)">
+            {fieldMap.get("county")}
+          </FormGroupLabel>
+          <FormSelect
+            id={`${mode}-form-referent-county`}
+            aria-describedby={errors.county && "form-referent-county-error"}
+            defaultValue={mode === "edit" ? currentEdited?.county ?? "" : ""}
+            {...register("county", {
+              disabled: !selectedRegion,
+              setValueAs: value => (value === "" ? void 0 : value),
+            })}
+          >
+            <option value="">{selectedRegion ? "Département" : "Choisir une région d'abord"}</option>
+            {REGIONS_TO_COUNTIES[selectedRegion]?.map(code => (
+              <option value={code} key={`form-referent-county-option-${code}`}>
+                {COUNTIES[code]} ({code})
+              </option>
+            ))}
+          </FormSelect>
+          {errors.county && (
+            <FormGroupMessage id="form-referent-county-error">{errors.county.message}</FormGroupMessage>
+          )}
+        </FormGroup>
+
+        <FormGroup isError={!!errors.value}>
+          <FormGroupLabel htmlFor="form-referent-substitute-name" hint={`Format : ${selectedType}`}>
+            {fieldMap.get("value")}
+          </FormGroupLabel>
+          <FormInput
+            id={`${mode}-form-referent-value`}
+            aria-describedby={errors.value && "form-referent-value-error"}
+            placeholder={selectedType === "url" ? "https://site.gouv.fr" : "email@gouv.fr"}
+            autoComplete={selectedType === "url" ? "off" : "email"}
+            type={selectedType}
+            spellCheck="false"
+            {...register("value")}
+          />
+          {errors.value && <FormGroupMessage id="form-referent-value-error">{errors.value.message}</FormGroupMessage>}
+        </FormGroup>
+
+        <FormRadioGroup inline>
+          <FormRadioGroupLegend id={`${mode}-form-referent-type`}>Type de la valeur</FormRadioGroupLegend>
+          <FormRadioGroupContent>
+            <FormRadioGroupInput
+              id={`${mode}-form-referent-type-email`}
+              value="email"
+              {...register("type", { deps: "value" })}
+            >
+              Email
+            </FormRadioGroupInput>
+            <FormRadioGroupInput
+              id={`${mode}-form-referent-type-url`}
+              value="url"
+              {...register("type", { deps: "value" })}
+            >
+              URL
+            </FormRadioGroupInput>
+          </FormRadioGroupContent>
+        </FormRadioGroup>
+
+        <FormFieldset
+          legend="Suppléant"
+          hint="Non obligatoire. Peut-être représenté uniquement par le nom ou l'email."
+          error={errors.substitute?.name?.message || errors.substitute?.email?.message}
+          elements={[
+            <FormGroup key="form-referent-substitute-name">
+              <FormGroupLabel htmlFor="form-referent-substitute-name">Nom</FormGroupLabel>
+              <FormInput
+                id={`${mode}-form-referent-substitute-name`}
+                placeholder="Jean DUPONT"
+                autoComplete="off"
+                {...register("substitute.name", { setValueAs: value => (value === "" ? void 0 : value) })}
+              />
+            </FormGroup>,
+            <FormGroup key="form-referent-substitute-email">
+              <FormGroupLabel htmlFor="form-referent-substitute-email">Email</FormGroupLabel>
+              <FormInput
+                id={`${mode}-form-referent-substitute-email`}
+                placeholder="email@gouv.fr"
+                type="email"
+                autoComplete="off"
+                {...register("substitute.email", { setValueAs: value => (value === "" ? void 0 : value) })}
+              />
+            </FormGroup>,
+          ]}
+        />
+      </form>
+    </Modal>
   );
 };
 
@@ -455,66 +454,60 @@ const ActionButtons = () => {
         title="Importer des référents"
         icon="fr-icon-download-fill"
         backdropCanClose={!uploading}
-        content={
-          <>
-            <Box>
-              Importer depuis un fichier JSON une liste de référents.
-              <br />
-              Attention, cette opération remplacera les données existantes !
-            </Box>
-            <br />
-            <input disabled={uploading} type="file" accept=".json" name="import-file" onChange={uploadToClient} />
-            {uploading && <Alert mt="2w">Uploading...</Alert>}
-            {errorMessage && (
-              <Alert mt="2w" type="error">
-                {errorMessage}
-              </Alert>
-            )}
-          </>
-        }
         buttons={({ instance }) => [
           <FormButton disabled={!uploadFile || uploading} key="import-modal-button" onClick={() => doImport(instance)}>
             Importer
           </FormButton>,
         ]}
-      />
+      >
+        <Box>
+          Importer depuis un fichier JSON une liste de référents.
+          <br />
+          Attention, cette opération remplacera les données existantes !
+        </Box>
+        <br />
+        <input disabled={uploading} type="file" accept=".json" name="import-file" onChange={uploadToClient} />
+        {uploading && <Alert mt="2w">Uploading...</Alert>}
+        {errorMessage && (
+          <Alert mt="2w" type="error">
+            {errorMessage}
+          </Alert>
+        )}
+      </Modal>
       <Modal
         id="export-modal"
         title="Exporter les référents"
-        content={
-          <>
-            <Box>
-              <ButtonAsLink
-                variant="tertiary-no-outline"
-                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`}
-                target="_blank"
-              >
-                XLSX
-              </ButtonAsLink>
-              <ButtonAsLink
-                variant="tertiary-no-outline"
-                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.csv`}
-                target="_blank"
-              >
-                CSV
-              </ButtonAsLink>
-              <ButtonAsLink
-                variant="tertiary-no-outline"
-                href={`${config.apiv2_url}/public/referents_egalite_professionnelle.json`}
-                target="_blank"
-              >
-                JSON
-              </ButtonAsLink>
-            </Box>
-            <br />
-          </>
-        }
         buttons={({ closableProps }) => [
           <FormButton key="export-modal-button-close" {...closableProps}>
             Fermer
           </FormButton>,
         ]}
-      />
+      >
+        <Box>
+          <ButtonAsLink
+            variant="tertiary-no-outline"
+            href={`${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`}
+            target="_blank"
+          >
+            XLSX
+          </ButtonAsLink>
+          <ButtonAsLink
+            variant="tertiary-no-outline"
+            href={`${config.apiv2_url}/public/referents_egalite_professionnelle.csv`}
+            target="_blank"
+          >
+            CSV
+          </ButtonAsLink>
+          <ButtonAsLink
+            variant="tertiary-no-outline"
+            href={`${config.apiv2_url}/public/referents_egalite_professionnelle.json`}
+            target="_blank"
+          >
+            JSON
+          </ButtonAsLink>
+        </Box>
+        <br />
+      </Modal>
       <ButtonGroup inline="mobile-up" className="fr-mb-4w">
         <FormButton aria-controls="create-modal" data-fr-opened="false">
           Ajouter
@@ -562,7 +555,7 @@ const ReferentListPage: NextPageWithLayout = () => {
   };
 
   const searchString = watch("query");
-  const referents = _.orderBy(data, orderBy, orderDirection).filter(referent => {
+  const referents = _orderBy(data, orderBy, orderDirection).filter(referent => {
     if (!searchString) return true;
     const str = searchString.toLowerCase();
     if (referent.county && COUNTIES[referent.county].toLowerCase().includes(str)) return true;
@@ -586,7 +579,7 @@ const ReferentListPage: NextPageWithLayout = () => {
 
           {data?.length ? (
             <>
-              <form noValidate onSubmit={_.noop}>
+              <form noValidate onSubmit={noop}>
                 <FormGroup>
                   <FormInput id="query-param" placeholder="Rechercher" autoComplete="off" {...register("query")} />
                 </FormGroup>

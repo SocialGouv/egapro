@@ -9,7 +9,7 @@ import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import { ensureRequired } from "@common/utils/types";
-import _ from "lodash";
+import { partition } from "lodash";
 
 import { type IGlobalMailerService } from "../infra/mail/IGlobalMailerService";
 import { type IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
@@ -66,7 +66,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
     const groupByDeclarant = new Map<string, string[]>();
 
     // 1
-    const [processableRequests, alreadyProcessedRequests] = _.partition(
+    const [processableRequests, alreadyProcessedRequests] = partition(
       ownershipRequests,
       request => request.shouldBeProcessed,
     );

@@ -12,7 +12,7 @@ const config = {
     // disable conflicting rules with plugin (not config!)
     "plugin:prettier/recommended",
   ],
-  plugins: ["prettier", "unused-imports", "simple-import-sort"],
+  plugins: ["prettier", "unused-imports", "simple-import-sort", "lodash"],
   ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
   rules: {
     "@next/next/no-html-link-for-pages": ["error", ["src/app", "src/pages"]],
@@ -62,6 +62,7 @@ const config = {
     "import/consistent-type-specifier-style": ["error", "prefer-inline"],
     "import/no-duplicates": ["error", { "prefer-inline": true }],
     "sort-import": "off",
+    "lodash/import-scope": ["error", "member"],
     "prettier/prettier": [
       "error",
       {

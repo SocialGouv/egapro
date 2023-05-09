@@ -1,5 +1,7 @@
-import NAF from "./utils/naf.json";
-import { type SimpleObject } from "./utils/types";
+import { times } from "lodash";
+
+import { NAF, NAF_SECTIONS } from "./utils/naf";
+import { type SimpleObject, type UnknownMapping } from "./utils/types";
 
 export const FIRST_YEAR = 2018 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
@@ -17,25 +19,32 @@ export const CURRENT_YEAR = 2022 as const;
 export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
 // export const PUBLIC_CURRENT_YEAR = 2022 as const;
 
-export const YEARS = new Array(CURRENT_YEAR - FIRST_YEAR + 1).fill(null).map((_, idx) => FIRST_YEAR + idx);
+export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
 export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
   .fill(null)
   .map((_, idx) => FIRST_YEAR + idx);
+export const PUBLIC_YEARS_DESC = PUBLIC_YEARS.reverse();
 export const YEARS_REPEQ = new Array(CURRENT_YEAR - FIRST_YEAR_REPEQ + 1)
   .fill(null)
   .map((_, idx) => FIRST_YEAR_REPEQ + idx);
 export const PUBLIC_YEARS_REPEQ = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR_REPEQ + 1)
   .fill(null)
   .map((_, idx) => FIRST_YEAR_REPEQ + idx);
+export const PUBLIC_YEARS_REPEQ_DESC = PUBLIC_YEARS_REPEQ.reverse();
+
+export const DISPLAY_CURRENT_YEAR = PUBLIC_CURRENT_YEAR + 1;
+export const DISPLAY_PUBLIC_YEARS = PUBLIC_YEARS.map(y => y + 1);
 
 export const INVALID_YEAR = 0 as const;
 
+export type WORKFORCES = typeof WORKFORCES;
 export const WORKFORCES = {
   "50:250": "De 50 à 250 inclus",
   "251:999": "De 251 à 999 inclus",
   "1000:": "De 1000 ou plus",
 } as const;
 
+export type REGIONS = typeof REGIONS;
 export const REGIONS = {
   "01": "Guadeloupe",
   "02": "Martinique",
@@ -78,6 +87,7 @@ export const REGIONS_IDS = [
   "94",
 ] as const;
 
+export type COUNTIES = typeof COUNTIES;
 export const COUNTIES = {
   "01": "Ain",
   "02": "Aisne",
@@ -315,6 +325,23 @@ export const COUNTY_TO_REGION = Object.entries(REGIONS_TO_COUNTIES).reduce(
   {} as Record<keyof typeof COUNTIES, keyof typeof REGIONS>,
 );
 
+export const adressLabel = ({
+  county,
+  region,
+}: {
+  county?: UnknownMapping | keyof typeof COUNTIES;
+  region?: UnknownMapping | keyof typeof REGIONS;
+}) => {
+  let result = "";
+  if (county && county in COUNTIES) {
+    result = COUNTIES[county as keyof typeof COUNTIES];
+  }
+  if (region && region in REGIONS) {
+    result += (county ? ", " : "") + REGIONS[region as keyof typeof REGIONS];
+  }
+  return result;
+};
+
 interface Country {
   COG: string;
   ISO2: string;
@@ -536,4 +563,16 @@ export const COUNTRIES_ISO_TO_LIB: SimpleObject<string> = COUNTRIES.reduce(
   {},
 );
 
-export { NAF };
+export { NAF, NAF_SECTIONS };
+
+const sort = (dict: SimpleObject<string>) => Object.entries(dict).sort((a, b) => a[1].localeCompare(b[1]));
+export const SORTED_COUNTIES = sort(COUNTIES);
+export const SORTED_REGIONS = sort(REGIONS);
+export const SORTED_NAF_SECTIONS = sort(NAF_SECTIONS);
+
+export const FULL_SORTED_REGIONS_TO_COUNTIES = Object.fromEntries(
+  Object.entries(REGIONS_TO_COUNTIES).map(([regionId, counties]) => [
+    regionId,
+    SORTED_COUNTIES.filter(([countyId]) => counties.includes(countyId as (typeof COUNTIES_IDS)[number])),
+  ]),
+) as Record<(typeof REGIONS_IDS)[number], Array<[string, string]>>;

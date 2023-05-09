@@ -5,6 +5,7 @@ import { Container } from "../layout/Container";
 import { type NextLinkOrAProps } from "../utils/NextLinkOrA";
 import { NextLinkOrA } from "../utils/NextLinkOrA";
 
+/** @deprecated use react-dsfr */
 export const Footer = ({ children }: PropsWithChildren) => (
   <footer className="fr-footer" role="contentinfo" id="footer">
     <Container>{children}</Container>

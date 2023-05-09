@@ -1,5 +1,9 @@
+import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
+import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { type DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
+import { type Enum } from "@common/shared-domain/domain/valueObjects";
 
 export interface DeclarationRaw {
   data: DeclarationDataRaw | null;
@@ -20,6 +24,47 @@ export interface RepresentationEquilibreeRaw {
   modified_at: Date;
   siren: string;
   year: number;
+}
+
+type NotComputableReasonString = Enum.ToString<typeof NotComputableReason.Enum>;
+export interface DeclarationSearchResultRaw {
+  data: Record<number, DeclarationDataRaw>;
+  name: string;
+  results: Record<
+    number,
+    {
+      highRemunerationsScore: number | null;
+      index: number | null;
+      maternityLeavesScore: number | null;
+      notComputableReasonMaternityLeaves: NotComputableReasonString | null;
+      notComputableReasonPromotions: NotComputableReasonString | null;
+      notComputableReasonRemunerations: NotComputableReasonString | null;
+      notComputableReasonSalaryRaises: NotComputableReasonString | null;
+      notComputableReasonSalaryRaisesAndPromotions: NotComputableReasonString | null;
+      promotionsScore: number | null;
+      remunerationsScore: number | null;
+      salaryRaisesAndPromotionsScore: number | null;
+      salaryRaisesScore: number | null;
+    }
+  >;
+  siren: string;
+}
+
+export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
+
+export interface RepresentationEquilibreeSearchResultRaw {
+  data: DeclarationDataRaw;
+  results: Record<
+    number,
+    {
+      executiveMenPercent: number | null;
+      executiveWomenPercent: number | null;
+      memberMenPercent: number | null;
+      memberWomenPercent: number | null;
+      notComputableReasonExecutives: Enum.ToString<typeof NotComputableReasonExecutiveRepEq.Enum> | null;
+      notComputableReasonMembers: Enum.ToString<typeof NotComputableReasonMemberRepEq.Enum> | null;
+    }
+  >;
 }
 
 export interface OwnershipRequestRaw {

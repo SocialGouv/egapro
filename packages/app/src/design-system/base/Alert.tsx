@@ -11,6 +11,7 @@ export type AlertProps = PropsWithChildren<
   }
 >;
 
+/** @deprecated use react-dsfr */
 export const Alert = ({ type = "info", size = "md", children, ...rest }: AlertProps) => {
   return (
     <Box

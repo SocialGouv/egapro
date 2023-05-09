@@ -16,6 +16,7 @@ export type FormRadioGroupProps = PropsWithChildren<
   }
 >;
 
+/** @deprecated use react-dsfr */
 export const FormRadioGroup = ({
   children,
   isError,

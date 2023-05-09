@@ -27,6 +27,10 @@ const nextConfig = {
         source: "/healthz",
         destination: "/api/health",
       },
+      {
+        source: "/consulter-index",
+        destination: "/index-egapro/recherche",
+      },
       // TODO: remove when api v2 is enabled
       {
         source: "/apiv2/:path*",

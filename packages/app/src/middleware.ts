@@ -1,21 +1,22 @@
 import { config as _config } from "@common/config";
+import { StatusCodes } from "http-status-codes";
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  // TODO next13 new middleware custom response
-  if (pathname.startsWith("/representation-equilibree/recherche") && !_config.ff["repeq-search"]) {
-    return NextResponse.redirect(new URL("/404", req.url));
-  }
-
   if (
     (pathname.startsWith("/apiv2/") || pathname.startsWith("/api/")) &&
-    !_config.ff.apiv2.whitelist.some(okPath => pathname.startsWith(okPath)) &&
-    !_config.ff.apiv2.enabled
+    !_config.ff.apiV2.whitelist.some(okPath => pathname.startsWith(okPath)) &&
+    !_config.ff.apiV2.enabled
   ) {
     console.log("APIV2 disabled, redirecting 404", pathname);
-    return NextResponse.redirect(new URL("/404", req.url));
+    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
+  }
+
+  if (pathname.startsWith("/_index-egapro/") && !_config.ff.declaV2) {
+    console.log("DeclarationV2 disabled, redirecting 404", pathname);
+    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
 
   return NextResponse.next();

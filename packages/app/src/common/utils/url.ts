@@ -3,7 +3,7 @@ import { type ParsedUrlQuery } from "querystring";
 /**
  * Build an URLSearchParams from an object.
  *
- * @deprecated -- use new URLSearchParams(obj) instead.
+ * Handle array values.
  */
 export const buildUrlParams = (
   params: Record<string, boolean[] | number[] | string[] | boolean | number | string | undefined> = {},
@@ -25,9 +25,6 @@ export const buildUrlParams = (
   return searchParams;
 };
 
-/**
- * @deprecated -- use new URLSearchParams(obj).toString() instead.
- */
 export const buildUrlParamsString = (params: Record<string, string[] | string> = {}): string => {
   return buildUrlParams(params).toString();
 };

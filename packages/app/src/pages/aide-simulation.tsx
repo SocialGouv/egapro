@@ -1,5 +1,6 @@
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { AnchorLink, Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { AnchorLink } from "@design-system/client";
 import Head from "next/head";
 
 import { type NextPageWithLayout } from "./_app";
@@ -12,7 +13,7 @@ const AideSimulation: NextPageWithLayout = () => {
       </Head>
       <section>
         <Container py="8w">
-          <Grid justifyCenter>
+          <Grid align="center">
             <GridCol md={10} lg={8}>
               <h1>Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes</h1>
               <p>
