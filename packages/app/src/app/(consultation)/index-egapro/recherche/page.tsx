@@ -14,7 +14,6 @@ import { Box, Container, Grid, GridCol, Heading, Stat, Text } from "@design-syst
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
 import { getStats } from "@services/server/getDeclarationStats";
-import { isEmpty } from "lodash";
 import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
 import { Suspense } from "react";
 
@@ -34,9 +33,10 @@ export const metadata = {
 
 const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
   async ({ searchParams, searchParamsError }: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
-    const { limit: _, page, ...partialSearchParams } = searchParams;
+    const { limit: _, page, year, ...partialSearchParams } = searchParams;
 
-    const isLandingPage = isEmpty(partialSearchParams) && page === 0;
+    // handle when "onchange" are triggered from stats section form
+    const isLandingPage = typeof year !== "undefined" && typeof partialSearchParams.query === "undefined" && page === 0;
     return (
       <>
         <Container as="section">

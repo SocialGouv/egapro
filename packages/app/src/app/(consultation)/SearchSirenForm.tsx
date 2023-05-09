@@ -4,7 +4,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { type ConsultationInput, consultationSchema } from "@common/core-domain/dtos/helpers/common";
-import { FULL_SORTED_REGIONS_TO_COUNTIES, SORTED_NAF_SECTIONS, SORTED_REGIONS } from "@common/dict";
+import { COUNTY_TO_REGION, FULL_SORTED_REGIONS_TO_COUNTIES, SORTED_NAF_SECTIONS, SORTED_REGIONS } from "@common/dict";
 import { omitByRecursively } from "@common/utils/object";
 import { Grid, GridCol } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,9 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
 
   // Sync form data with URL params.
   useEffect(() => {
+    if (searchParams.countyCode && !searchParams.regionCode) {
+      searchParams.regionCode = COUNTY_TO_REGION[searchParams.countyCode];
+    }
     resetInputs(searchParams);
   }, [resetInputs, searchParams]);
 

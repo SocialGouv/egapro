@@ -1,7 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { type GetDeclarationStatsInput } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import {
@@ -56,6 +56,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
 
   const onSubmit = (data: AverageIndicatorFormType) => {
     const { year: _, ...newData } = data;
+    newData.query = "";
     const query = getQuery(newData);
     router.push(`${pathname}?${query}`);
   };
@@ -143,9 +144,27 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
             </Select>
           </GridCol>
         </Grid>
-        <Button title="Voir les entreprises" className={fr.cx("fr-mt-3w")}>
-          Voir les entreprises
-        </Button>
+        <ButtonsGroup
+          className={fr.cx("fr-mt-3w")}
+          alignment="center"
+          inlineLayoutWhen="sm and up"
+          buttons={[
+            {
+              title: "Voir les entreprises",
+              children: "Voir les entreprises",
+            },
+            {
+              title: "Réinitialiser",
+              children: "Réinitialiser",
+              disabled: !Object.values(watch()).filter(Boolean).length,
+              type: "reset",
+              priority: "secondary",
+              onClick() {
+                router.replace(`${location.origin}${location.pathname}`);
+              },
+            },
+          ]}
+        />
       </Container>
     </form>
   );
