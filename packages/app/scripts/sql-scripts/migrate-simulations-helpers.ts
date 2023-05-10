@@ -21,12 +21,12 @@ export type IndicateurUnBase = {
   coefficientEffectifFormValidated: FormState;
   coefficientGroupFormValidated: FormState;
   formValidated: FormState;
-  motifNonCalculable: string;
+  motifNonCalculable?: string;
   nombreCoefficients?: number;
   nonCalculable?: boolean;
-  noteFinale: number;
-  resultatFinal: number;
-  sexeSurRepresente: "femmes" | "hommes";
+  noteFinale?: number;
+  resultatFinal?: number;
+  sexeSurRepresente?: "femmes" | "hommes";
 };
 
 // Propriétés d'origine.
@@ -58,13 +58,13 @@ export type IndicateurUnDestination = IndicateurUnBase & {
 };
 
 export function updateIndicateurUn(data: IndicateurUnOrigin): IndicateurUnDestination {
-  const { csp, coef, autre, coefficient, remunerationAnnuelle, modaliteCalcul, ...rest } = data;
+  const { csp, coef, autre, coefficient, remunerationAnnuelle, modaliteCalcul, formValidated, ...rest } = data;
 
   // 1. Recopie des champs inchangés + ajout du champ modaliteCalculformValidated forcément à Valid, puisqu'on ne ne prend en compte que les simulations validées.
   const newIndicateurUn = {
     ...rest,
-    modaliteCalculformValidated: "Valid",
-    formValidated: "Valid",
+    formValidated,
+    modaliteCalculformValidated: formValidated,
   } as IndicateurUnDestination;
 
   // 2. Gestion du nouveau champ modaliteCalcul et suppression des champs csp, coef et autre.
@@ -72,11 +72,11 @@ export function updateIndicateurUn(data: IndicateurUnOrigin): IndicateurUnDestin
   if (coef === true || modaliteCalcul === "coef") {
     newIndicateurUn.modaliteCalcul = "coef";
     // 3.1 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
-    newIndicateurUn.coefficientRemuFormValidated = "Valid";
+    newIndicateurUn.coefficientRemuFormValidated = formValidated;
   } else if (autre === true || modaliteCalcul === "autre") {
     newIndicateurUn.modaliteCalcul = "autre";
     // 3.2 Gestion du champ coefficientRemuFormValidated pour les modalités coef et autre.
-    newIndicateurUn.coefficientRemuFormValidated = "Valid";
+    newIndicateurUn.coefficientRemuFormValidated = formValidated;
   } else if (csp === true || modaliteCalcul === "csp") {
     newIndicateurUn.modaliteCalcul = "csp";
     // 3.3 Gestion du champ coefficientRemuFormValidated pour la modalité csp.

@@ -8,16 +8,22 @@ import { type Simulation, updateIndicateurUn } from "./migrate-simulations-helpe
 
 const table = sql("simulation");
 
-console.log("table", table);
+/*
+select * from ${table}
+where (data->'indicateurUn'->>'csp' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'csp' or data->'indicateurUn'->>'coef' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'coef' or data->'indicateurUn'->>'autre' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'autre')
+and data->'declaration'->>'formValidated' = 'Valid'
+and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`)
+*/
 
 export async function migrateSimulations() {
-  // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated et qui sont valides, qui sont donc celles avant la migration.
-  const rows =
-    (await sql`select * from ${table} where  (data->'indicateurUn'->>'csp' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'csp' or data->'indicateurUn'->>'coef' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'coef' or data->'indicateurUn'->>'autre' = 'true' or data->'indicateurUn'->>'modaliteCalcul' = 'autre') and data->'declaration'->>'formValidated' = 'Valid' and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
+  // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated, qui sont donc celles avant la migration.
+  const rows = (await sql`
+      select * from ${table}
+      where not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
 
   console.log("nb rows", rows?.length ?? "no rows");
 
-  rows.forEach(async row => {
+  for (const row of rows) {
     // console.log("row avant", JSON.stringify(row, null, 2));
 
     console.log("row.id", row.id);
@@ -37,9 +43,9 @@ export async function migrateSimulations() {
     await sql.unsafe(
       `update simulation set data = jsonb_set(data, '{indicateurUn}', '${newIndicateurUnJson}'::jsonb) where id = '${row.id}'`,
     );
-  });
+  }
 
   console.log("nb rows", rows?.length ?? "no rows");
 }
 
-migrateSimulations();
+void migrateSimulations();

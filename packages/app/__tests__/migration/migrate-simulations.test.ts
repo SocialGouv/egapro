@@ -4,7 +4,8 @@ import {
   type IndicateurUnDestination,
 } from "@/../scripts/sql-scripts/migrate-simulations-helpers";
 import { type Any } from "@common/utils/types";
-import pick from "lodash/pick";
+// eslint-disable-next-line import/named
+import { pick } from "lodash";
 
 function expectForUnchangedProperties(
   indicateurUnOrigin: IndicateurUnOrigin,
@@ -12,44 +13,41 @@ function expectForUnchangedProperties(
 ) {
   const keys = [
     "coefficientGroupFormValidated",
+    "coefficientEffectifFormValidated",
     "motifNonCalculable",
     "nombreCoefficients",
     "nonCalculable",
     "noteFinale",
     "resultatFinal",
     "sexeSurRepresente",
+    "formValidated",
   ];
 
   expect(pick(indicateurUnOrigin, keys)).toStrictEqual(pick(indicateurUnDestination, keys));
 }
 
-function expectsForCsp(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDestination: IndicateurUnDestination) {
+function expectsCommon(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDestination: IndicateurUnDestination) {
   expectForUnchangedProperties(indicateurUnOrigin, indicateurUnDestination);
 
   expect((indicateurUnDestination as Any).csp).toBeUndefined();
   expect((indicateurUnDestination as Any).coef).toBeUndefined();
   expect((indicateurUnDestination as Any).autre).toBeUndefined();
+  expect(indicateurUnDestination.modaliteCalculformValidated).toBe(indicateurUnOrigin.formValidated);
+}
+
+function expectsForCsp(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDestination: IndicateurUnDestination) {
+  expectsCommon(indicateurUnOrigin, indicateurUnDestination);
+
   expect(indicateurUnDestination.modaliteCalcul).toBe("csp");
-  expect(indicateurUnDestination.modaliteCalculformValidated).toBe("Valid");
-  expect(indicateurUnDestination.formValidated).toBe("Valid");
-  expect(indicateurUnDestination.coefficientGroupFormValidated).toBe("None");
-  expect(indicateurUnDestination.coefficientEffectifFormValidated).toBe("None");
   expect(indicateurUnDestination.coefficientRemuFormValidated).toBe("None");
   expect(indicateurUnDestination.remunerationsAnnuelles).toStrictEqual(indicateurUnOrigin.remunerationAnnuelle);
   expect(indicateurUnDestination.coefficients).toStrictEqual(indicateurUnOrigin.coefficient);
 }
 
 function expectsForCoef(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDestination: IndicateurUnDestination) {
-  expectForUnchangedProperties(indicateurUnOrigin, indicateurUnDestination);
+  expectsCommon(indicateurUnOrigin, indicateurUnDestination);
 
-  expect((indicateurUnDestination as Any).csp).toBeUndefined();
-  expect((indicateurUnDestination as Any).coef).toBeUndefined();
-  expect((indicateurUnDestination as Any).autre).toBeUndefined();
-  expect(indicateurUnDestination.modaliteCalculformValidated).toBe("Valid");
-  expect(indicateurUnDestination.formValidated).toBe("Valid");
-  expect(indicateurUnDestination.coefficientGroupFormValidated).toBe("Valid");
-  expect(indicateurUnDestination.coefficientEffectifFormValidated).toBe("Valid");
-  expect(indicateurUnDestination.coefficientRemuFormValidated).toBe("Valid");
+  expect(indicateurUnDestination.coefficientRemuFormValidated).toBe(indicateurUnOrigin.formValidated);
   expect(indicateurUnDestination.remunerationsAnnuelles).toStrictEqual(indicateurUnOrigin.remunerationAnnuelle);
 
   const coefficients = indicateurUnOrigin.coefficient.map(coefficient => ({
@@ -61,6 +59,88 @@ function expectsForCoef(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDest
 }
 
 describe("Tests for CSP", () => {
+  test.only("mon test", () => {
+    const indicateurUnOrigin: IndicateurUnOrigin = {
+      noteFinale: 40,
+      coefficient: [],
+      formValidated: "Valid",
+      nonCalculable: false,
+      resultatFinal: 0,
+      modaliteCalcul: "csp",
+      motifNonCalculable: "",
+      remunerationAnnuelle: [
+        {
+          tranchesAges: [
+            {
+              trancheAge: 0,
+              ecartTauxRemuneration: 0.003597,
+              remunerationAnnuelleBrutFemmes: 0.1108,
+              remunerationAnnuelleBrutHommes: 0.1112,
+            },
+            { trancheAge: 1 },
+            { trancheAge: 2 },
+            { trancheAge: 3 },
+          ],
+          categorieSocioPro: 0,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 1,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 2,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 3,
+        },
+      ],
+      coefficientGroupFormValidated: "None",
+      coefficientEffectifFormValidated: "None",
+    };
+
+    const indicateurUnDestination = updateIndicateurUn(indicateurUnOrigin);
+
+    console.log("indicateurUnDestination", JSON.stringify(indicateurUnDestination, null, 2));
+
+    expectsForCsp(indicateurUnOrigin, indicateurUnDestination);
+  });
+
+  test("should be ok for indicateurUn with CSP, with an unfinished simulation", () => {
+    const indicateurUnOrigin: IndicateurUnOrigin = {
+      csp: true,
+      coef: false,
+      autre: false,
+      coefficient: [],
+      formValidated: "None",
+      remunerationAnnuelle: [
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 0,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 1,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 2,
+        },
+        {
+          tranchesAges: [{ trancheAge: 0 }, { trancheAge: 1 }, { trancheAge: 2 }, { trancheAge: 3 }],
+          categorieSocioPro: 3,
+        },
+      ],
+      coefficientGroupFormValidated: "None",
+      coefficientEffectifFormValidated: "None",
+    };
+
+    const indicateurUnDestination = updateIndicateurUn(indicateurUnOrigin);
+
+    expectsForCsp(indicateurUnOrigin, indicateurUnDestination);
+  });
+
   test("should be ok for indicateurUn with CSP, old shape (3 booleans instead of modaliteCalcul)", () => {
     const indicateurUnOrigin: IndicateurUnOrigin = {
       csp: true,
