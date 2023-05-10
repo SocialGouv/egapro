@@ -1,21 +1,34 @@
-import { type theme } from "./theme";
-
-export type Props = keyof (typeof theme)["space"];
+import { type FrCxArg, type SpacingToken } from "@codegouvfr/react-dsfr";
 
 export type SpacingProps = {
-  mb?: Props;
-  ml?: Props;
-  mr?: Props;
-  mt?: Props;
-  mx?: Props | "auto";
-  my?: Props;
-  pb?: Props;
-  pl?: Props;
-  pr?: Props;
-  pt?: Props;
-  px?: Props;
-  py?: Props;
+  mb?: SpacingToken;
+  ml?: SpacingToken;
+  mr?: SpacingToken;
+  mt?: SpacingToken;
+  mx?: SpacingToken | "auto";
+  my?: SpacingToken;
+  pb?: SpacingToken;
+  pl?: SpacingToken;
+  pr?: SpacingToken;
+  pt?: SpacingToken;
+  px?: SpacingToken;
+  py?: SpacingToken;
 };
+
+export const buildSpacingClasses = ({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py }: SpacingProps): FrCxArg => [
+  mt && `fr-mt-${mt}`,
+  mb && `fr-mb-${mb}`,
+  ml && `fr-ml-${ml}`,
+  mr && `fr-mr-${mr}`,
+  mx && `fr-mx-${mx}`,
+  my && `fr-my-${my}`,
+  pt && `fr-pt-${pt}`,
+  pb && `fr-pb-${pb}`,
+  pl && `fr-pl-${pl}`,
+  pr && `fr-pr-${pr}`,
+  px && `fr-px-${px}`,
+  py && `fr-py-${py}`,
+];
 
 export type MarginProps = Omit<SpacingProps, "pb" | "pl" | "pr" | "pt" | "px" | "py">;
 

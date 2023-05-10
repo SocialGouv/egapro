@@ -14,6 +14,7 @@ export type CardProps = PropsWithChildren<
   }
 >;
 
+/** @deprecated use react-dsfr */
 export const Card = ({ children, size, isEnlargeLink, noBorder, isHorizontal, ...rest }: CardProps) => {
   return (
     <Box

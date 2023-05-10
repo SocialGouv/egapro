@@ -3,6 +3,7 @@ import { type PropsWithChildren } from "react";
 
 import { type MarginProps } from "../utils/spacing";
 
+/** @deprecated use react-dsfr */
 export type ButtonGroupProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
     as?: "div" | "ul";

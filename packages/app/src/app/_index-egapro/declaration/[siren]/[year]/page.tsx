@@ -22,10 +22,10 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/navigation";
-import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { z } from "zod";
 
 const title = "Récapitulatif de la déclaration d'index egapro";
@@ -71,7 +71,7 @@ const DeclarationWithNavigation = ({ siren, year }: { siren: string; year: numbe
         </FormLayoutButtonGroup>
       </FormLayout>
 
-      <Grid mt="6w" justifyCenter>
+      <Grid mt="6w" align="center">
         <GridCol md={10} lg={8}>
           <Card size="sm" isEnlargeLink>
             <CardBody>

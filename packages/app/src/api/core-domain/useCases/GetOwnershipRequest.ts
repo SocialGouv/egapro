@@ -8,7 +8,7 @@ import {
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
-import _ from "lodash";
+import { sortBy } from "lodash";
 
 import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
 import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
@@ -82,7 +82,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
       );
 
       if (notDbOrderByKeys.includes(originalOrderBy)) {
-        data = _.sortBy(data, originalOrderBy);
+        data = sortBy(data, originalOrderBy);
         if (orderDirection === "desc") {
           data = data.reverse();
         }

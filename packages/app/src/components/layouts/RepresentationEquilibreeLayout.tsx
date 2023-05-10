@@ -51,7 +51,7 @@ export const RepresentationEquilibreeLayout = ({
       </Head>
 
       <Container py="6w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             <ClientOnly>
               <AuthenticatedOnly disableAuth={disableAuth} redirectTo="/representation-equilibree/email">

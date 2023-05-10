@@ -5,6 +5,20 @@ export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
   getAll(): Promise<T[]>;
 }
 
+export interface SearchDefaultCriteria {
+  limit: number;
+  offset: number;
+}
+export interface SearchRepo<
+  T extends Entity<Any, Any> = Any,
+  TSearchEntity extends Entity<Any, Any> = Any,
+  Criteria extends SearchDefaultCriteria = SearchDefaultCriteria,
+> {
+  count(criteria: Criteria): Promise<number>;
+  index?(item: T): Promise<void>;
+  search(criteria: Criteria): Promise<TSearchEntity[]>;
+}
+
 export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo<T> {
   delete(id: ID): Promise<void>;
   exists(id: ID): Promise<boolean>;

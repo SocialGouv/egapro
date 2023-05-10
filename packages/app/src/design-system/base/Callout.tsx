@@ -17,6 +17,7 @@ export type CalloutProps = BoxProps &
     }
   >;
 
+/** @deprecated use react-dsfr */
 export const Callout = ({ children, icon, className, ...rest }: CalloutProps) => {
   return (
     <Box className={clsx("fr-callout", icon, className)} {...rest}>

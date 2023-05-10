@@ -1,12 +1,12 @@
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 /**
- *  Utility hook to know if the page is displayed for the first time.
+ * Utility hook to know if the page is displayed for the first time.
  *
- * Heuristic based on router.query.
+ * Heuristic based on useSearchParams.
  */
 export const useIsFirstRender = () => {
-  const router = useRouter();
+  const query = useSearchParams();
 
-  return Object.keys(router.query).length === 0;
+  return [...(query?.keys() ?? [])].length === 0;
 };

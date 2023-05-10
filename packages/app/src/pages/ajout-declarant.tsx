@@ -136,7 +136,7 @@ const AddDeclarer: NextPageWithLayout = () => {
   return (
     <section>
       <Container py="8w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
 

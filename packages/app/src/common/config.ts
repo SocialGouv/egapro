@@ -5,11 +5,16 @@ import { type Any } from "./utils/types";
 export type FeatureFlag = keyof typeof config.ff;
 
 export const config = {
+  /** in seconds */
+  searchRevalidate: 60 * 5,
   get nonce() {
     return this.githubSha;
   },
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
+  get host() {
+    return new URL(this.api_url).origin;
+  },
   get apiv2_url() {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
   },
@@ -20,11 +25,11 @@ export const config = {
   env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
   get ff() {
     return {
-      "repeq-search": true,
-      apiv2: {
+      apiV2: {
         enabled: this.env === "dev",
         whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
       },
+      declaV2: this.env === "dev",
     };
   },
   api: {

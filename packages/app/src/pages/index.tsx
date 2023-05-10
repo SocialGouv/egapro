@@ -76,7 +76,7 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   <ButtonAsLink href="/index-egapro" className="fr-mr-4w">
                     Calculer - Déclarer mon Index
                   </ButtonAsLink>
-                  <NextLinkOrA href="/consulter-index">Consulter l'Index</NextLinkOrA>
+                  <NextLinkOrA href="/index-egapro/recherche">Rechercher l'Index</NextLinkOrA>
                 </CardBodyFooter>
               </CardBody>
             </Card>
@@ -104,9 +104,7 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
                   <ButtonAsLink href="/representation-equilibree" className="fr-mr-4w">
                     Déclarer mes Écarts
                   </ButtonAsLink>
-                  {ff["repeq-search"] && (
-                    <NextLinkOrA href="/representation-equilibree/recherche">Consulter les Écarts</NextLinkOrA>
-                  )}
+                  <NextLinkOrA href="/representation-equilibree/recherche">Consulter les Écarts</NextLinkOrA>
                 </CardBodyFooter>
               </CardBody>
             </Card>

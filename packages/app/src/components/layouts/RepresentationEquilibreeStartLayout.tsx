@@ -1,4 +1,5 @@
-import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
+import { Container, Grid, GridCol } from "@design-system";
+import { SideMenuLink } from "@design-system/client";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { type PropsWithChildren } from "react";
@@ -35,7 +36,7 @@ export const RepresentationEquilibreeStartLayout = ({
       </Head>
 
       <Container py="6w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             {children}
           </GridCol>

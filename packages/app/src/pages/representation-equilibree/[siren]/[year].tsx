@@ -21,10 +21,10 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { useFormManager, useRepresentationEquilibree } from "@services/apiClient";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
-import { NextLinkOrA } from "packages/app/src/design-system/utils/NextLinkOrA";
 import { useEffect } from "react";
 import { z } from "zod";
 
@@ -80,7 +80,7 @@ const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string
         </FormLayoutButtonGroup>
       </FormLayout>
 
-      <Grid mt="6w" justifyCenter>
+      <Grid mt="6w" align="center">
         <GridCol md={10} lg={8}>
           <Card size="sm" isEnlargeLink>
             <CardBody>

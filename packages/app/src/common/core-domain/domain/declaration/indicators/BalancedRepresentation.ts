@@ -2,13 +2,16 @@ import { type EntityPropsToJson } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
 import { Percentage } from "@common/shared-domain/domain/valueObjects";
 
+import { NotComputableReasonExecutiveRepEq } from "../../valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { NotComputableReasonMemberRepEq } from "../../valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
+
 export interface BalancedRepresentationProps {
   executiveMenPercent?: Percentage;
   executiveWomenPercent?: Percentage;
   memberMenPercent?: Percentage;
   memberWomenPercent?: Percentage;
-  notComputableReasonExecutives?: string;
-  notComputableReasonMembers?: string;
+  notComputableReasonExecutives?: NotComputableReasonExecutiveRepEq;
+  notComputableReasonMembers?: NotComputableReasonMemberRepEq;
 }
 
 export class BalancedRepresentation extends JsonEntity<BalancedRepresentationProps, never> {
@@ -29,23 +32,25 @@ export class BalancedRepresentation extends JsonEntity<BalancedRepresentationPro
     return this.props.memberWomenPercent;
   }
   /** `motif_non_calculabilité_cadres` */
-  get notComputableReasonExecutives(): string | undefined {
+  get notComputableReasonExecutives(): NotComputableReasonExecutiveRepEq | undefined {
     return this.props.notComputableReasonExecutives;
   }
   /** `motif_non_calculabilité_membres` */
-  get notComputableReasonMembers(): string | undefined {
+  get notComputableReasonMembers(): NotComputableReasonMemberRepEq | undefined {
     return this.props.notComputableReasonMembers;
   }
 
   public fromJson(json: EntityPropsToJson<BalancedRepresentationProps>) {
-    const props: BalancedRepresentationProps = {
-      notComputableReasonExecutives: json.notComputableReasonExecutives,
-      notComputableReasonMembers: json.notComputableReasonMembers,
-    };
+    const props: BalancedRepresentationProps = {};
+
     if (json.executiveMenPercent) props.executiveMenPercent = new Percentage(json.executiveMenPercent);
     if (json.executiveWomenPercent) props.executiveWomenPercent = new Percentage(json.executiveWomenPercent);
     if (json.memberMenPercent) props.memberMenPercent = new Percentage(json.memberMenPercent);
     if (json.memberWomenPercent) props.memberWomenPercent = new Percentage(json.memberWomenPercent);
+    if (json.notComputableReasonExecutives)
+      props.notComputableReasonExecutives = new NotComputableReasonExecutiveRepEq(json.notComputableReasonExecutives);
+    if (json.notComputableReasonMembers)
+      props.notComputableReasonMembers = new NotComputableReasonMemberRepEq(json.notComputableReasonMembers);
 
     return new BalancedRepresentation(props) as this;
   }

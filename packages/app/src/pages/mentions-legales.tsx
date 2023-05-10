@@ -7,7 +7,7 @@ const LegalNotice: NextPageWithLayout = () => {
   return (
     <section>
       <Container py="8w">
-        <Grid justifyCenter>
+        <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>Mentions légales</h1>
             <h2>Éditeur de la plateforme</h2>

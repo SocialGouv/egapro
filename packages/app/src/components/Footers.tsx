@@ -1,3 +1,4 @@
+import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { config } from "@common/config";
 import {
   Footer,
@@ -14,13 +15,10 @@ import {
   Logo,
 } from "@design-system";
 
-import { useGdprStore } from "../design-system/base/custom/ConsentBanner";
 import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
 
 /** Footer for entreprise */
 export const EntrepriseFooter = () => {
-  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
-
   return (
     <Footer>
       <FooterBody>
@@ -94,8 +92,6 @@ export const EntrepriseFooter = () => {
 
 /** Footer for the general public */
 export const PublicFooter = () => {
-  const consentModalButtonProps = useGdprStore(state => state.consentModalButtonProps);
-
   return (
     <Footer>
       <FooterBody>

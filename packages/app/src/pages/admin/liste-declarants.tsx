@@ -250,7 +250,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
 
         <form noValidate onSubmit={handleSubmit(submit)}>
           <Grid haveGutters>
-            <GridCol sm={3}>
+            <GridCol base={3}>
               <FormGroup>
                 <FormInput
                   id="query-param"
@@ -260,7 +260,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
                 />
               </FormGroup>
             </GridCol>
-            <GridCol sm={3}>
+            <GridCol base={3}>
               <FormGroup>
                 <FormSelect id="status-param" {...register("status")}>
                   <option value="">Rechercher par Status</option>
@@ -272,7 +272,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
                 </FormSelect>
               </FormGroup>
             </GridCol>
-            <GridCol sm={3}>
+            <GridCol base={3}>
               <ButtonGroup inline="mobile-up">
                 <FormButton isDisabled={isLoading || isSubmitting} type="submit">
                   Rechercher

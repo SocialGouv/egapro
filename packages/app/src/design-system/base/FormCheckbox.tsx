@@ -16,6 +16,8 @@ export interface FormCheckboxGroupProps extends Omit<MarginProps, "ml" | "mr" | 
   singleCheckbox?: boolean;
   size?: "md" | "sm";
 }
+
+/** @deprecated use react-dsfr */
 export const FormCheckboxGroup = ({
   inline,
   children,

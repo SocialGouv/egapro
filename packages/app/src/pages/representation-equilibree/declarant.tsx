@@ -11,6 +11,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
+import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager, useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
@@ -18,7 +19,6 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { NextLinkOrA } from "../../design-system/utils/NextLinkOrA";
 import { type NextPageWithLayout } from "../_app";
 
 const formSchema = z.object({

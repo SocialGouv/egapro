@@ -55,3 +55,5 @@ declare module "@gouvfr/dsfr" {
     stop(): void;
   }
 }
+
+declare module "server-only";
