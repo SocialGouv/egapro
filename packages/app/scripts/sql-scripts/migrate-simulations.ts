@@ -3,6 +3,8 @@ import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd(), true);
 
 import { sql } from "@api/shared-domain/infra/db/postgres";
+import { type Any } from "@common/utils/types";
+import { inspect } from "util";
 
 import { type Simulation, updateIndicateurUn } from "./migrate-simulations-helpers";
 
@@ -18,34 +20,31 @@ and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`)
 export async function migrateSimulations() {
   // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated, qui sont donc celles avant la migration.
   const rows = (await sql`
-      select * from ${table}
-      where not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
+        select * from ${table}
+        where not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
 
   console.log("nb rows", rows?.length ?? "no rows");
 
   for (const row of rows) {
-    // console.log("row avant", JSON.stringify(row, null, 2));
-
     console.log("row.id", row.id);
 
     const newIndicateurUn = updateIndicateurUn(row.data.indicateurUn);
 
-    // console.log("newIndicateurUn:", JSON.stringify(newIndicateurUn), ":");
+    if ((newIndicateurUn as Any)["coefficient"]) {
+      console.log("newIndicateurUn:", row.id, inspect(newIndicateurUn, false, Infinity, true));
+      throw new Error("should not have coefficient");
+    }
+    const newData = { ...row.data, indicateurUn: newIndicateurUn };
 
-    const newIndicateurUnJson = JSON.stringify(newIndicateurUn).replace(/'/g, "''"); // Need to escape single quotes for Postgres.
+    const updateData = sql({ data: newData }, "data");
 
-    // Postgres.js is not able to handle jsonb_set, so we use sql.unsafe instead.
-
-    // const nbUpdates = await sql`update ${table} set data = jsonb_set(data, '{indicateurUn}', ${sql(
-    //   newIndicateurUn,
-    // )}) where id = ${row.id}`;
-
-    await sql.unsafe(
-      `update simulation set data = jsonb_set(data, '{indicateurUn}', '${newIndicateurUnJson}'::jsonb) where id = '${row.id}'`,
-    );
+    await sql`update ${table} set ${updateData} where id = ${row.id}`;
   }
 
   console.log("nb rows", rows?.length ?? "no rows");
 }
 
-void migrateSimulations();
+(async function main() {
+  await migrateSimulations();
+  console.log("end of script");
+})();

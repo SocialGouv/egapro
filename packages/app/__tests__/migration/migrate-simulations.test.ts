@@ -33,6 +33,8 @@ function expectsCommon(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDesti
   expect((indicateurUnDestination as Any).coef).toBeUndefined();
   expect((indicateurUnDestination as Any).autre).toBeUndefined();
   expect(indicateurUnDestination.modaliteCalculformValidated).toBe(indicateurUnOrigin.formValidated);
+  expect((indicateurUnDestination as Any).coefficient).toBeUndefined();
+  expect((indicateurUnDestination as Any).remunerationAnnuelle).toBeUndefined();
 }
 
 function expectsForCsp(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDestination: IndicateurUnDestination) {
@@ -59,7 +61,7 @@ function expectsForCoef(indicateurUnOrigin: IndicateurUnOrigin, indicateurUnDest
 }
 
 describe("Tests for CSP", () => {
-  test.only("mon test", () => {
+  test("mon test", () => {
     const indicateurUnOrigin: IndicateurUnOrigin = {
       noteFinale: 40,
       coefficient: [],
