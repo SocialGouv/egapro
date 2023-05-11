@@ -1,3 +1,36 @@
+# [2.88.0](https://github.com/SocialGouv/egapro/compare/v2.87.2...v2.88.0) (2023-05-11)
+
+
+### Bug Fixes
+
+* add searchs backlinks ([#1607](https://github.com/SocialGouv/egapro/issues/1607)) ([b3351ee](https://github.com/SocialGouv/egapro/commit/b3351ee5e9a98d65cb815ffe3620707aff2cf6c0))
+* bug for datepicker ([#1629](https://github.com/SocialGouv/egapro/issues/1629)) ([d1cf38c](https://github.com/SocialGouv/egapro/commit/d1cf38c06f8ad82935a9c44f2f5bca780f28d8aa))
+* bug when click on the list and update afterwards ([#1627](https://github.com/SocialGouv/egapro/issues/1627)) ([6cb2a9a](https://github.com/SocialGouv/egapro/commit/6cb2a9ac5ea4f2bf0774ebe9850c19961debdcea))
+* **ci:** avoid trivy by locking kontinuous deps ([3fc9e09](https://github.com/SocialGouv/egapro/commit/3fc9e0944d5523c4f308a7496ff33349eb6731f4))
+* **ci:** clean ci config ([a80988c](https://github.com/SocialGouv/egapro/commit/a80988c53dcd2b77f357d2a349e1829964ebcb33))
+* **ci:** trivy local config ([aaa8f8d](https://github.com/SocialGouv/egapro/commit/aaa8f8dbd7f41d5546a90389d002713a64741bd2))
+* **csp:** rollback to unsafe-inline in prevision of next13 ([c3da1e6](https://github.com/SocialGouv/egapro/commit/c3da1e62827edb42afe46cb2411b2781f9d98ab7))
+* **declaration:** remove eval ([45484ca](https://github.com/SocialGouv/egapro/commit/45484cae97ca0696d4b24d2708418093f208b8c3))
+* **footer:** fix cookie button ([0f376d6](https://github.com/SocialGouv/egapro/commit/0f376d63524ccf78dac1bebea32aa3e9ed84e3d3))
+* nc grade in consulter index public export (Fixes [#1598](https://github.com/SocialGouv/egapro/issues/1598)) ([f405716](https://github.com/SocialGouv/egapro/commit/f405716b6fabaa70f6d78a96058a316678a50892))
+* **nextjs:** downgrading and locking next to v13.2.4 ([1d2e414](https://github.com/SocialGouv/egapro/commit/1d2e4148c18da2e13d3493bee3fa1143d134ee20))
+* **opmc:** clean decla object on mapper ([#1626](https://github.com/SocialGouv/egapro/issues/1626)) ([1b8ef6b](https://github.com/SocialGouv/egapro/commit/1b8ef6b45b3fb35bafe6f0b4eead92a1b1444e21))
+* recap page with correct message for indiceteurs ([#1623](https://github.com/SocialGouv/egapro/issues/1623)) ([e13fa7d](https://github.com/SocialGouv/egapro/commit/e13fa7d221c57547f715166b6ce2cd4d09ab6998))
+* remove script integrity on decla direct ([faec906](https://github.com/SocialGouv/egapro/commit/faec906a67f5e086047a2b3396db06bad3d3d6d3))
+* **security:** add more nonces to decla direct ([dffe598](https://github.com/SocialGouv/egapro/commit/dffe598c294fb31de8f2337fefa0328c0c42ccf7))
+* **simu/decla:** add title with year in info box when ref period is to low (Fixes [#1602](https://github.com/SocialGouv/egapro/issues/1602)) ([6dc1e4f](https://github.com/SocialGouv/egapro/commit/6dc1e4fcfbe9af30f60b7fef6f26ccb7dec82e8e))
+* **wording:** change 'consulter' by 'rechercher' (Fixes [#1605](https://github.com/SocialGouv/egapro/issues/1605)) ([991516d](https://github.com/SocialGouv/egapro/commit/991516da56e0735ce21bdc8efd10b4d697496222))
+
+
+### Features
+
+* better indicateur1 navigation and state management ([#1613](https://github.com/SocialGouv/egapro/issues/1613)) ([976b33b](https://github.com/SocialGouv/egapro/commit/976b33bf62cae59b035f1210b23ff2f6a7c19e85))
+* CSP & GDPR & consent banner ([#1612](https://github.com/SocialGouv/egapro/issues/1612)) ([2b0d10c](https://github.com/SocialGouv/egapro/commit/2b0d10cdd02a0b58b9ee4f8e70dfb7b905e7f933))
+* liste referents ([#1593](https://github.com/SocialGouv/egapro/issues/1593)) ([57c1aff](https://github.com/SocialGouv/egapro/commit/57c1aff64150c0b52bd675acf6e00bfb201d3a36))
+* **migration:** search pages next 13 + react-dsfr ([#1619](https://github.com/SocialGouv/egapro/issues/1619)) ([fe4b701](https://github.com/SocialGouv/egapro/commit/fe4b701e3be88e3bbe382ecae8cfe0a8fbbbd167))
+* new script to migrate simulation in db ([#1630](https://github.com/SocialGouv/egapro/issues/1630)) ([56f2789](https://github.com/SocialGouv/egapro/commit/56f2789472ca24744fe149b5daa042fd132e7248))
+* upgrade in Next-13 + reactdsfr ([#1592](https://github.com/SocialGouv/egapro/issues/1592)) ([12fef0c](https://github.com/SocialGouv/egapro/commit/12fef0c4fdd042fbac52a6b6f7f37465bcb45b77))
+
 ## [2.87.2](https://github.com/SocialGouv/egapro/compare/v2.87.1...v2.87.2) (2023-03-30)
 
 
