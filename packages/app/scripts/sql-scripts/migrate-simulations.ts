@@ -21,7 +21,7 @@ export async function migrateSimulations() {
   // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated, qui sont donc celles avant la migration.
   const rows = (await sql`
         select * from ${table}
-        where not(data->'indicateurUn' ? 'modaliteCalculformValidated')`) as Simulation[];
+        where (data->'indicateurUn' ? 'coefficient')`) as Simulation[];
 
   console.log("nb rows", rows?.length ?? "no rows");
 
