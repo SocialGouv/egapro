@@ -1,3 +1,10 @@
+## [2.88.1](https://github.com/SocialGouv/egapro/compare/v2.88.0...v2.88.1) (2023-05-11)
+
+
+### Bug Fixes
+
+* remove open graph files ([1a1b5e4](https://github.com/SocialGouv/egapro/commit/1a1b5e479592ba0055f6fcaa3a3411e5307c114b))
+
 # [2.88.0](https://github.com/SocialGouv/egapro/compare/v2.87.2...v2.88.0) (2023-05-11)
 
 
