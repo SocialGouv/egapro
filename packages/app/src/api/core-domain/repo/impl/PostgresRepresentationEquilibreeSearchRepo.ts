@@ -78,7 +78,7 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
   private buildSearchWhereClause(criteria: RepresentationEquilibreeSearchCriteria) {
     let sqlQuery = sql``;
     if (criteria.query) {
-      if (criteria.query.length === 9 && isFinite(criteria.query)) {
+      if (criteria.query.length === 9 && isFinite(+criteria.query)) {
         sqlQuery = sql`and ${this.table}.siren=${criteria.query}`;
       } else {
         sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${criteria.query})`;
