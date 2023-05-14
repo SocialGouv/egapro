@@ -6,6 +6,7 @@ import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclara
 import { declarationSearchResultMap } from "@common/core-domain/mappers/declarationSearchResultMap";
 import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
+import { cleanFullTextSearch } from "@common/utils/postgres";
 import { isFinite } from "lodash";
 
 import {
@@ -104,7 +105,7 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
       if (criteria.query.length === 9 && isFinite(+criteria.query)) {
         sqlQuery = sql`and ${this.table}.siren=${criteria.query}`;
       } else {
-        sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${criteria.query})`;
+        sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
       }
     }
 
