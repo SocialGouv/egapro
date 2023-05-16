@@ -290,8 +290,9 @@ const Declaration = ({ code }: DeclarationProps) => {
     const data = buildDeclarationFromSimulation({ id: code, state })
 
     try {
-      await putSimulation(code, state)
+      // We save declaration first, because we don't want to display a correct UI in simulateur whereas the declaration is not saved.
       await putDeclaration(data)
+      await putSimulation(code, state)
       // Send email is intentionnaly skipped in API when we update a simulation/delaration.
       // The reason resides in how declaration frontend is written (with draft mode that simu doesn't use)...
       // So for simulation, we need to see if a previous declaration exists, and if so, resend all by ourselves.
