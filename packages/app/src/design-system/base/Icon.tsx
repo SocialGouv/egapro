@@ -8,7 +8,7 @@ import style from "./Icon.module.css";
 export type IconProps = JSX.IntrinsicElements["span"] & {
   color?: TextColorStyle;
   icon: IconStyle;
-  size?: "lg" | "sm";
+  size?: "lg" | "sm" | "xs";
 };
 
 export const Icon = ({ icon, onClick, color, size, ...rest }: PropsWithoutChildren<IconProps>) => (
