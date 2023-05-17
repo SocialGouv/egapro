@@ -97,16 +97,16 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
               uesListOpened ? setUesListOpened(false) : setUesListOpened(true);
             }}
           >
-            Voir les entreprises composant l'UES
+            Voir les autres entreprises composant l'UES
           </Link>
           {uesListOpened && (
-            <ol className={fr.cx("fr-ml-2w")}>
+            <ul className={fr.cx("fr-ml-2w")}>
               {ues?.companies.map(company => (
                 <li key={company.siren} className={fr.cx("fr-text--sm", "fr-m-0")}>
                   {company.name} ({company.siren})
                 </li>
               ))}
-            </ol>
+            </ul>
           )}
         </>
       )}
