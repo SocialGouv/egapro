@@ -5,6 +5,7 @@ import { type RepresentationEquilibreeSearchResult } from "@common/core-domain/d
 import { representationEquilibreeSearchResultMap } from "@common/core-domain/mappers/representationEquilibreeSearchResultMap";
 import { PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
+import { cleanFullTextSearch } from "@common/utils/postgres";
 import { isFinite } from "lodash";
 import { type PostgresError } from "postgres";
 
@@ -78,10 +79,10 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
   private buildSearchWhereClause(criteria: RepresentationEquilibreeSearchCriteria) {
     let sqlQuery = sql``;
     if (criteria.query) {
-      if (criteria.query.length === 9 && isFinite(criteria.query)) {
+      if (criteria.query.length === 9 && isFinite(+criteria.query)) {
         sqlQuery = sql`and ${this.table}.siren=${criteria.query}`;
       } else {
-        sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${criteria.query})`;
+        sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
       }
     }
 
