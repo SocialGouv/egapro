@@ -28,3 +28,12 @@
         font-size: 0.875rem;
     }
 }
+
+.note {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .25rem;
+    margin: auto;
+    width: 3.75rem;
+}

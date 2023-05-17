@@ -133,6 +133,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                     <Icon
                       size="sm"
                       icon="fr-icon-information-fill"
+                      color="text-mention-grey"
                       title={`Tranche en ${row.year + 1} : ${mapRange(company[row.year].workforce?.range)} salariés${
                         company[row.year].workforce?.range === "1000:" ? " ou plus" : ""
                       }`}
@@ -141,6 +142,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
                   <div
+                    className={cx(styles.note)}
                     title={
                       row.highRemunerationsScore === null
                         ? "Période de réference de 12 mois insuffisante"

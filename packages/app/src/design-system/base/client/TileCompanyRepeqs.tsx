@@ -21,7 +21,6 @@ import {
   TileCompanyTitle,
   TileCompanyYear,
 } from "../TileCompany";
-import { Text } from "../Typography";
 
 export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) => {
   const {
@@ -64,25 +63,34 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
                   <TileCompanyYear year={row.year + 1} />
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  {row.notComputableReasonExecutives && (
-                    <Text
-                      variant="lg"
-                      text={NotComputableReasonExecutiveRepEq.Label[row.notComputableReasonExecutives]}
-                    />
+                  {row.notComputableReasonExecutives ? (
+                    <TileCompanyPercent>
+                      <TileCompanyPercentData
+                        number={row.executiveWomenPercent}
+                        legend={NotComputableReasonExecutiveRepEq.Label[row.notComputableReasonExecutives]}
+                      />
+                    </TileCompanyPercent>
+                  ) : (
+                    <TileCompanyPercent>
+                      <TileCompanyPercentData number={null} legend="Femmes" />
+                      <TileCompanyPercentData number={row.executiveMenPercent} legend="Hommes" />
+                    </TileCompanyPercent>
                   )}
-                  <TileCompanyPercent>
-                    <TileCompanyPercentData number={row.executiveWomenPercent} legend="Femmes" />
-                    <TileCompanyPercentData number={row.executiveMenPercent} legend="Hommes" />
-                  </TileCompanyPercent>
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  {row.notComputableReasonMembers && (
-                    <Text variant="lg" text={NotComputableReasonMemberRepEq.Label[row.notComputableReasonMembers]} />
+                  {row.notComputableReasonMembers ? (
+                    <TileCompanyPercent>
+                      <TileCompanyPercentData
+                        number={null}
+                        legend={NotComputableReasonMemberRepEq.Label[row.notComputableReasonMembers]}
+                      />
+                    </TileCompanyPercent>
+                  ) : (
+                    <TileCompanyPercent>
+                      <TileCompanyPercentData number={row.memberWomenPercent} legend="Femmes" />
+                      <TileCompanyPercentData number={row.memberMenPercent} legend="Hommes" />
+                    </TileCompanyPercent>
                   )}
-                  <TileCompanyPercent>
-                    <TileCompanyPercentData number={row.memberWomenPercent} legend="Femmes" />
-                    <TileCompanyPercentData number={row.memberMenPercent} legend="Hommes" />
-                  </TileCompanyPercent>
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>
             ))}

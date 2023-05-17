@@ -91,8 +91,10 @@ export const TileCompanyScore = ({ score }: { score: number | string }) => (
   </>
 );
 
-export const TileCompanyPercent = ({ children }: PropsWithChildren) => (
-  <div className={style.tablePercent}>{children}</div>
+export const TileCompanyPercent = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => (
+  <div className={style.tablePercent} title={title}>
+    {children}
+  </div>
 );
 
 type TileCompanyPercentDataProps = {
