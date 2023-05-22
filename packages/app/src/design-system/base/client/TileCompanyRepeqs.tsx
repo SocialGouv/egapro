@@ -66,13 +66,13 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
                   {row.notComputableReasonExecutives ? (
                     <TileCompanyPercent>
                       <TileCompanyPercentData
-                        number={row.executiveWomenPercent}
+                        number={null}
                         legend={NotComputableReasonExecutiveRepEq.Label[row.notComputableReasonExecutives]}
                       />
                     </TileCompanyPercent>
                   ) : (
                     <TileCompanyPercent>
-                      <TileCompanyPercentData number={null} legend="Femmes" />
+                      <TileCompanyPercentData number={row.executiveWomenPercent} legend="Femmes" />
                       <TileCompanyPercentData number={row.executiveMenPercent} legend="Hommes" />
                     </TileCompanyPercent>
                   )}
