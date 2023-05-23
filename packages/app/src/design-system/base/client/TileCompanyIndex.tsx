@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { adressLabel, type WORKFORCES } from "@common/dict";
@@ -11,7 +12,6 @@ import { useState } from "react";
 import { Container } from "../../layout/Container";
 import { Grid, GridCol } from "../Grid";
 import { Icon } from "../Icon";
-import { Stat } from "../Stat";
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -28,6 +28,7 @@ import {
   TileCompanyYear,
 } from "../TileCompany";
 import { Text } from "../Typography";
+import styles from "./TileCompanyIndex.module.css";
 
 const mapRange = (range: keyof WORKFORCES | undefined) => {
   switch (range) {
@@ -64,7 +65,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
   return (
     <TileCompany>
       <Container fluid>
-        <Grid>
+        <Grid valign="middle" align="center">
           <GridCol sm={9}>
             <TileCompanyTitle ues={isUES}>
               <DebugButton obj={dto} infoText="TileCompanyIndex" />
@@ -74,16 +75,17 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
             <TileCompanyLocation>{adressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
           </GridCol>
           <GridCol sm={3}>
-            <Stat
-              text={mapRange(workforce?.range)}
-              helpText={`Salariés${workforce?.range === "1000:" ? " ou plus" : ""}`}
-              display={{ asText: ["xl", "bold"] }}
-            />
+            <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
+              <span className={styles.numberOfEmployees}>{mapRange(workforce?.range)}</span>
+              <span className={styles.employeeslegend}>{` Salariés${
+                workforce?.range === "1000:" ? " ou plus" : ""
+              }`}</span>
+            </div>
           </GridCol>
         </Grid>
       </Container>
       {isUES && (
-        <>
+        <div className={fr.cx("fr-mt-1v")}>
           <span
             aria-hidden
             className={fr.cx("fr-icon--sm", uesListOpened ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line")}
@@ -102,13 +104,13 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
           {uesListOpened && (
             <ul className={fr.cx("fr-ml-2w")}>
               {ues?.companies.map(company => (
-                <li key={company.siren} className={fr.cx("fr-text--sm", "fr-m-0")}>
-                  {company.name} ({company.siren})
+                <li key={company.siren} className={fr.cx("fr-text--xs", "fr-m-0")}>
+                  <strong>{company.name}</strong> ({company.siren})
                 </li>
               ))}
             </ul>
           )}
-        </>
+        </div>
       )}
       <TileCompanyTable>
         <TileCompanyTableHead>
@@ -129,7 +131,9 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                   <TileCompanyYear year={row.year + 1} />
                   {company[row.year].workforce?.range !== company[lastYear].workforce?.range && (
                     <Icon
+                      size="sm"
                       icon="fr-icon-information-fill"
+                      color="text-mention-grey"
                       title={`Tranche en ${row.year + 1} : ${mapRange(company[row.year].workforce?.range)} salariés${
                         company[row.year].workforce?.range === "1000:" ? " ou plus" : ""
                       }`}
@@ -137,27 +141,26 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                   )}
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  <TileCompanyScore score={`${row.index ?? "NC"}`} />
-                  {row.index === null && (
-                    <Icon
-                      icon="fr-icon-information-fill"
-                      title={
-                        row.highRemunerationsScore === null
-                          ? "Période de réference de 12 mois insuffisante"
-                          : "Les indicateurs calculables représentent moins de 75 points"
-                      }
-                    />
-                  )}
+                  <div
+                    className={cx(styles.note)}
+                    title={
+                      row.highRemunerationsScore === null
+                        ? "Période de réference de 12 mois insuffisante"
+                        : "Les indicateurs calculables représentent moins de 75 points"
+                    }
+                  >
+                    <TileCompanyScore score={`${row.index ?? "NC"}`} />
+                    {row.index === null && <Icon size="sm" icon="fr-icon-information-fill" color="text-mention-grey" />}
+                  </div>
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
-                  <ul
-                    style={{ listStyle: "none", columns: "2 2rem", textAlign: "left" }}
-                    className={fr.cx("fr-m-0", "fr-p-0")}
-                  >
+                  <ul className={cx(fr.cx("fr-m-0", "fr-p-0"), styles.list)}>
                     <li>
                       Écart rémunérations : <Text inline variant="bold" text={`${row.remunerationsScore ?? "NC"}`} />
                       {row.notComputableReasonRemunerations && (
                         <Icon
+                          size="xs"
+                          color="text-mention-grey"
                           icon="fr-icon-information-fill"
                           title={NotComputableReason.Label[row.notComputableReasonRemunerations]}
                         />
@@ -170,6 +173,8 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                           <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
                           {row.notComputableReasonSalaryRaisesAndPromotions && (
                             <Icon
+                              size="xs"
+                              color="text-mention-grey"
                               icon="fr-icon-information-fill"
                               title={NotComputableReason.Label[row.notComputableReasonSalaryRaisesAndPromotions]}
                             />
@@ -180,6 +185,8 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                           <Text inline variant="bold" text={`${row.salaryRaisesScore ?? "NC"}`} />
                           {row.notComputableReasonSalaryRaises && (
                             <Icon
+                              size="xs"
+                              color="text-mention-grey"
                               icon="fr-icon-information-fill"
                               title={NotComputableReason.Label[row.notComputableReasonSalaryRaises]}
                             />
@@ -192,6 +199,8 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                         Écart taux promotion : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
                         {row.notComputableReasonPromotions && (
                           <Icon
+                            size="xs"
+                            color="text-mention-grey"
                             icon="fr-icon-information-fill"
                             title={NotComputableReason.Label[row.notComputableReasonPromotions]}
                           />
@@ -203,6 +212,8 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                       <Text inline variant="bold" text={`${row.maternityLeavesScore ?? "NC"}`} />
                       {row.notComputableReasonMaternityLeaves && (
                         <Icon
+                          size="xs"
+                          color="text-mention-grey"
                           icon="fr-icon-information-fill"
                           title={NotComputableReason.Label[row.notComputableReasonMaternityLeaves]}
                         />

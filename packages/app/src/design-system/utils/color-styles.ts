@@ -11,6 +11,8 @@ export type BackgroundColorStyle =
 export type TextColorStyle =
   | UniqueString
   | "text-default-error"
+  | "text-default-grey"
   | "text-default-success"
+  | "text-mention-grey"
   | "text-title-blue-france"
   | "text-title-grey";

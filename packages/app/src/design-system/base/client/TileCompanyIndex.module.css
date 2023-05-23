@@ -1,0 +1,39 @@
+.list {
+    list-style: none;
+
+    text-align: left;
+}
+
+@media (min-width: 1024px) {
+    .list {
+        columns: 2 2rem;
+    }
+}
+
+.numberOfEmployees {
+    font-weight: 700;
+}
+
+@media (min-width: 576px) {
+    .numberOfEmployees,
+    .employeeslegend {
+        display: block;
+        text-align: center;
+        line-height: 1.5;
+    }
+    .numberOfEmployees {
+        font-weight: 700;
+    }
+    .employeeslegend {
+        font-size: 0.875rem;
+    }
+}
+
+.note {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .25rem;
+    margin: auto;
+    width: 3.75rem;
+}

@@ -39,9 +39,9 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
     const isLandingPage = typeof year !== "undefined" && typeof partialSearchParams.query === "undefined" && page === 0;
     return (
       <>
-        <Container as="section">
+        <Container as="section" className={fr.cx("fr-pb-3w")}>
           <Grid haveGutters align="center">
-            <GridCol sm={12} md={10} lg={8}>
+            <GridCol sm={12} md={10} xl={8}>
               {searchParamsError && (
                 <>
                   <DebugButton obj={searchParamsError} infoText="searchParamsError" />
@@ -64,6 +64,7 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
                       placeholder: "Nom ou numéro de SIREN de l'entreprise",
                       name: "query",
                     }}
+                    className={fr.cx("fr-pb-2w")}
                   />
                 </SimpleSubmitForm>
               ) : (
@@ -73,11 +74,12 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
               <DetailedDownload
                 href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
                 label={date => `Télécharger le fichier des index des entreprises au ${date}`}
+                className={fr.cx("fr-mb-0")}
               />
             </GridCol>
           </Grid>
         </Container>
-        <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-4w")}>
+        <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
           {!searchParamsError && (
             <Suspense>
               {isLandingPage ? (
@@ -104,8 +106,7 @@ const StatsSection = async (statsInput: GetDeclarationStatsInput) => {
   return (
     <Container as="section">
       <Grid haveGutters align="center">
-        <GridCol md={4} lg={5} />
-        <GridCol sm={12} md={4} lg={2}>
+        <GridCol>
           <DebugButton obj={stats} infoText="Stats" />
           {average ? (
             <Stat
@@ -120,7 +121,6 @@ const StatsSection = async (statsInput: GetDeclarationStatsInput) => {
             <Stat display={{ asTitle: "lg" }} text="N/A" helpText={`Index Moyen ${+statsInput.year}`} />
           )}
         </GridCol>
-        <GridCol md={4} lg={5} />
         <GridCol sm={12} md={10} lg={8}>
           <AverageIndicatorForm searchParams={statsInput} />
         </GridCol>
@@ -133,13 +133,14 @@ const ResultsSection = async (searchParams: SearchConsultationDTO) => {
   return (
     <Container as="section">
       <Grid haveGutters align="center">
-        <GridCol sm={12} md={10} lg={8}>
+        <GridCol sm={12} md={10} xl={8}>
           <ClientAnimate>
             <Alert
               severity="warning"
               closable
               description="Les informations de l'entreprise ou de l'UES correspondent à la dernière déclaration."
               small
+              className="fr-mb-3w"
             />
             <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
               {/* @ts-ignore */}

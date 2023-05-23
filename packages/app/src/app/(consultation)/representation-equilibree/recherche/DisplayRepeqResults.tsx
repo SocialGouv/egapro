@@ -17,7 +17,14 @@ export const DisplayRepeqResults = async (inputDto: SearchConsultationDTO) => {
   const totalCount = resultsPage0.count;
 
   if (totalCount === 0) {
-    return <Alert severity="info" title="Aucune entreprise trouvée" description="Veuillez modifier votre recherche." />;
+    return (
+      <Alert
+        severity="info"
+        title="Aucune entreprise trouvée"
+        description="Veuillez modifier votre recherche."
+        className={fr.cx("fr-mb-3w")}
+      />
+    );
   }
 
   let cumulLength = resultsPage0.data.length;
@@ -48,7 +55,7 @@ export const DisplayRepeqResults = async (inputDto: SearchConsultationDTO) => {
           {pages}
         </ClientAnimate>
       </Container>
-      <Box mt="3w">
+      <Box mt="3w" mb="3w">
         <ul
           className={fr.cx(
             "fr-btns-group",
