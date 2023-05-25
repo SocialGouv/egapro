@@ -6,9 +6,15 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
-import { GlobalMessage } from "@components/next13/GlobalMessage";
+import { GlobalMessage, type Message } from "@components/next13/GlobalMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { checkSiren, memoizedFetchSiren } from "@services/apiClient";
+import { fetchDeclaration } from "@services/apiClient/declaration";
+import {
+  DeclarationBuilder,
+  type DeclarationFormState,
+  useDeclarationFormManager,
+} from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -24,31 +30,30 @@ const formSchema = z
   .superRefine(async ({ year, siren }, ctx) => {
     console.log("dans superRefine");
 
-    // TODO: uncomment when useUser is available
-
-    // if (siren && siren.length === 9) {
-    //   try {
-    //     await checkSiren(siren, Number(year));
-    //   } catch (error: unknown) {
-    //     console.error("error", error);
-    //     ctx.addIssue({
-    //       code: z.ZodIssueCode.custom,
-    //       message: error instanceof Error ? error.message : "Le Siren est invalide.",
-    //       path: ["siren"],
-    //     });
-    //     return z.NEVER; // Abort early when there is an error in the first API call.
-    //   }
-    //   try {
-    //     await ownersForSiren(siren);
-    //   } catch (error: unknown) {
-    //     console.error("error", error);
-    //     ctx.addIssue({
-    //       code: z.ZodIssueCode.custom,
-    //       message: OWNER_ERROR,
-    //       path: ["siren"],
-    //     });
-    //   }
-    // }
+    if (siren && siren.length === 9) {
+      try {
+        await checkSiren(siren, Number(year));
+      } catch (error: unknown) {
+        console.error("error", error);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: error instanceof Error ? error.message : "Le Siren est invalide.",
+          path: ["siren"],
+        });
+        return z.NEVER; // Abort early when there is an error in the first API call.
+      }
+      // TODO: uncomment when useUser is available
+      // try {
+      //   await ownersForSiren(siren);
+      // } catch (error: unknown) {
+      //   console.error("error", error);
+      //   ctx.addIssue({
+      //     code: z.ZodIssueCode.custom,
+      //     message: OWNER_ERROR,
+      //     path: ["siren"],
+      //   });
+      // }
+    }
   });
 
 // Infer the TS type according to the zod schema.
@@ -64,7 +69,7 @@ export const SirenYearForm = () => {
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
 
   const sirenInStorage = formData?.commencer?.siren || "";
-  const yearInStorage = formData?.commencer?.year === undefined ? "" : String(formData?.commencer?.year);
+  const yearInStorage = formData?.commencer?.année === undefined ? "" : String(formData?.commencer?.année);
 
   const {
     register,
@@ -84,78 +89,79 @@ export const SirenYearForm = () => {
   const siren = watch("siren");
   const year = watch("year");
 
-  console.log("siren", siren);
-  console.log("isValid", isValid);
-
   useEffect(() => {
+    // Reset global error message.
     setGlobalMessage(undefined);
   }, [siren, year, setGlobalMessage]);
 
   useEffect(() => {
+    // Special case when the user has no ownership on the Siren.
     if (errors.siren && errors.siren.message === OWNER_ERROR) {
       setGlobalMessage({ type: "error", description: <MailtoLinkForNonOwner siren={siren} /> });
     }
   }, [errors.siren, setGlobalMessage, siren]);
 
-  const saveAndGoNext = async (siren: string, year: number) => {
-    try {
-      // Synchronise with potential data in DB.
-      // TODO: uncomment when service is available
-      //const previousDeclaration = await fetchDeclaration(siren, year, { throwErrorOn404: false });
+  /**
+   * Check if declaration exists, merge it with state if any and save the state the in local storage.
+   */
+  const prepareDataWithExistingDeclaration = async (siren: string, year: number): Promise<DeclarationFormState> => {
+    const previousDeclaration = await fetchDeclaration(siren, year, { throwErrorOn404: false });
 
-      // if (previousDeclaration) {
-      //   saveFormData({ ...previousDeclaration, _externalData: { ...formData._externalData, status: "edition" } });
-      //   router.push(`/_index-egapro/declaration/${siren}/${year}`);
-      //   return;
-      // }
-      // // Otherwise, this is a creation, so we begin with fetching firm's data.
-      // const entreprise = await fetchSiren(siren, Number(year));
-      // saveFormData({
-      //   _externalData: {
-      //     status: "creation",
-      //     entreprise,
-      //   },
-      //   commencer: {
-      //     siren,
-      //     year: Number(year),
-      //   },
-      // });
-      router.push("/_index-egapro/declaration/entreprise");
-    } catch (error) {
-      // We can't continue in this case, because the backend is not ready.
-      console.error("Unexpected API error", error);
-      setGlobalMessage({
-        type: "error",
-        description: <>Le service est indisponible pour l'instant. Veuillez réessayer plus tard.</>,
-      });
+    if (previousDeclaration) {
+      const newFormState = DeclarationBuilder.toFormState(previousDeclaration.data);
+
+      return { ...newFormState, _metadata: { ...newFormState._metadata, status: "edition" as const } };
     }
+
+    // Otherwise, this is a creation, so we start with fetching firm's data.
+    const entreprise = await memoizedFetchSiren(siren, Number(year));
+
+    return {
+      _metadata: {
+        status: "creation" as const,
+      },
+      _entrepriseDéclarante: {
+        ...entreprise,
+      },
+      commencer: {
+        siren,
+        année: Number(year),
+      },
+    };
+  };
+
+  const getNextPage = () =>
+    formData._metadata?.status === "edition"
+      ? `/_index-egapro/declaration/${siren}/${year}`
+      : "/_index-egapro/declaration/entreprise";
+
+  const saveAndExit = async ({ year, siren }: FormType) => {
+    saveFormData(await prepareDataWithExistingDeclaration(siren, Number(year)));
+    router.push(getNextPage());
   };
 
   const onSubmit = async ({ year, siren }: FormType) => {
-    console.log("dans onSubmit", year, siren);
     // If no data are present in session storage.
     if (!sirenInStorage) {
-      await saveAndGoNext(siren, Number(year));
+      saveAndExit({ siren, year });
       return;
     }
-    // If data are present in session storage and Siren and year have not changed.
-    if (siren === sirenInStorage && year === yearInStorage) {
-      router.push(
-        formData._externalData?.status === "edition"
-          ? `/_index-egapro/declaration/${siren}/${year}`
-          : "/_index-egapro/declaration/declarant",
-      );
-      return;
+
+    if (siren !== sirenInStorage || year !== yearInStorage) {
+      if (confirm(buildConfirmMessage({ siren: sirenInStorage, year: yearInStorage }))) {
+        // Start a new declaration of representation.
+        resetFormData();
+        saveAndExit({ siren, year });
+        return;
+      } else {
+        // Rollback to the old Siren.
+        setValue("siren", sirenInStorage);
+        return;
+      }
     }
-    // If Siren or year have changed, we ask the user if he really wants to erase the data.
-    if (confirm(buildConfirmMessage({ siren: sirenInStorage, year: yearInStorage }))) {
-      // Start a new declaration of representation.
-      resetFormData();
-      await saveAndGoNext(siren, Number(year));
-    } else {
-      // Rollback to the old Siren.
-      setValue("siren", sirenInStorage);
-    }
+
+    // In this last case, the siren is already in session storage and unchanged and the user wants to continue.
+    router.push(getNextPage());
   };
 
   const confirmResetFormData = () => {
