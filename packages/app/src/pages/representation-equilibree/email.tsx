@@ -1,3 +1,4 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
@@ -137,6 +138,14 @@ const EmailPage: NextPageWithLayout = () => {
                 </FormLayoutButtonGroup>
               </FormLayout>
             </form>
+            <Button
+              onClick={evt => {
+                evt.preventDefault();
+                void signIn("moncomptepro");
+              }}
+            >
+              Mon Compte Pro
+            </Button>
           </>
         )}
       </ClientOnly>

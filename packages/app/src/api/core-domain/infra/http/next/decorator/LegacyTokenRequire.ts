@@ -37,7 +37,7 @@ const readToken = (token: string) => {
  * Ensure given logged user is "owner" of the Siren in an asked resource.
  */
 const checkOwner = async (siren: Siren, email: string, isStaff: boolean) => {
-  const owners = await ownershipRepo.getEmailsAllBySiren(siren);
+  const owners = await ownershipRepo.getAllEmailsBySiren(siren);
 
   if (owners.includes(email)) {
     return true;

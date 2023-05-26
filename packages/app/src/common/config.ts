@@ -37,6 +37,7 @@ export const config = {
         ],
       },
       declaV2: this.env === "dev",
+      moncomptepro: this.env === "dev",
     };
   },
   api: {
@@ -57,6 +58,11 @@ export const config = {
       jwtv1: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
+      },
+      moncomptepro: {
+        clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
+        clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
+        appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, true),
       },
     },
     postgres: {

@@ -44,6 +44,8 @@ app:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
+    - secretRef:
+        name: "moncomptepro"
   vars:
     POSTGRES_HOST: "$(PGHOST)"
     POSTGRES_DB: "$(PGDATABASE)"

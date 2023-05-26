@@ -23,10 +23,15 @@ declare namespace NodeJS {
          */
         NEXT_PUBLIC_MATOMO_SITE_ID?: string;
         /**
-         * No dist value.  
+         * Dist: `<dev>`  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_GITHUB_SHA?: string;
+        /**
+         * Dist: `http://localhost:3000/api/auth`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        NEXTAUTH_URL?: string;
         /**
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
@@ -63,7 +68,7 @@ declare namespace NodeJS {
          */
         MAILER_FROM_EMAIL?: string;
         /**
-         * Dist: `L’équipe Egapro`  
+         * Dist: `L'équipe Egapro`  
          * {@link [Local Env Dist](.env.development)}
          */
         MAILER_EMAIL_SIGNATURE?: string;
@@ -176,6 +181,21 @@ declare namespace NodeJS {
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
+        SECURITY_MONCOMPTEPRO_CLIENT_ID?: string;
+        /**
+         * No dist value.  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        SECURITY_MONCOMPTEPRO_CLIENT_SECRET?: string;
+        /**
+         * Dist: `true`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        SECURITY_MONCOMPTEPRO_TEST?: string;
+        /**
+         * No dist value.  
+         * {@link [Local Env Dist](.env.development)}
+         */
         SENTRY_DSN?: string;
         /**
          * Dist: `local`  
@@ -190,6 +210,7 @@ declare type ProcessEnvCustomKeys =
     | 'NEXT_PUBLIC_MATOMO_URL'
     | 'NEXT_PUBLIC_MATOMO_SITE_ID'
     | 'NEXT_PUBLIC_GITHUB_SHA'
+    | 'NEXTAUTH_URL'
     | 'MAILER_ENABLE'
     | 'MAILER_SMTP_HOST'
     | 'MAILER_SMTP_PORT'
@@ -219,5 +240,8 @@ declare type ProcessEnvCustomKeys =
     | 'SECURITY_JWT_SECRET'
     | 'SECURITY_JWT_ALGORITHM'
     | 'SECURITY_ALLOWED_IPS'
+    | 'SECURITY_MONCOMPTEPRO_CLIENT_ID'
+    | 'SECURITY_MONCOMPTEPRO_CLIENT_SECRET'
+    | 'SECURITY_MONCOMPTEPRO_TEST'
     | 'SENTRY_DSN'
     | 'SENTRY_ENVIRONMENT';

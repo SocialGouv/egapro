@@ -35,7 +35,7 @@ export const egaproNextAuthAdapter: Adapter<true> = {
   },
 
   async linkAccount(_) {
-    return null;
+    return _;
   },
 
   /** Creates a session for the user and returns it. */
