@@ -22,11 +22,6 @@ export const InsideComp = ({ csrfToken }: { csrfToken?: string }) => {
       >
         Logout
       </button>
-      <form action="/apiv2/auth/signout?csrf=true" method="POST">
-        <input type="hidden" value={csrfToken} name="csrfToken" />
-        <input type="hidden" name="callbackUrl" value={callbackUrl} />
-        <button type="submit">Form logout</button>
-      </form>
     </>
   );
 };

@@ -37,7 +37,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
         scope: "openid email profile organizations",
       },
     },
-    checks: [],
+    checks: ["pkce", "state"],
     userinfo: {
       async request({ tokens: { access_token }, client, provider: { issuer } }) {
         if (!issuer || !access_token) {

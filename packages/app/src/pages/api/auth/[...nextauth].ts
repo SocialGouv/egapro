@@ -6,8 +6,6 @@ import { ownershipRepo } from "@api/core-domain/repo";
 import { config } from "@common/config";
 import { UnexpectedError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
-import { type NextRouteHandler } from "@common/utils/next";
-import { StatusCodes } from "http-status-codes";
 import NextAuth, { type Session } from "next-auth";
 import { type DefaultJWT } from "next-auth/jwt";
 import EmailProvider from "next-auth/providers/email";
@@ -57,27 +55,24 @@ const handler = NextAuth({
     ...(config.ff.moncomptepro ? [MonCompteProProvider(config.api.security.moncomptepro)] : []),
   ],
   callbacks: {
-    // prefill JWT encoded data with staff and ownership
+    // prefill JWT encoded data with staff and ownership on signup
+    // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger }) {
       if (trigger !== "signUp") return token;
       if (profile?.email) {
-        console.log("JWT PROFILE", { trigger, profile, token });
         token.ownership = profile.organizations.map(orga => orga.siret.substring(0, 9));
         token.staff = config.api.staff.includes(profile.email);
         token.firstname = profile.given_name ?? void 0;
         token.lastname = profile.family_name ?? void 0;
         token.phoneNumber = profile.phone_number ?? void 0;
       } else {
-        console.log("JWT EMAIL SOON TO BE LEGACY", { trigger, token });
         token.ownership = await ownershipRepo.getAllSirenByEmail(new Email(token.email));
         token.staff = config.api.staff.includes(token.email);
       }
       return token;
     },
-
     // expose data from jwt to front
     session({ session, token }) {
-      console.log("SESSION CHECKED", session, token);
       session.user.staff = token.staff;
       session.user.ownership = token.ownership;
       session.user.firstname = token.firstname;
@@ -88,11 +83,4 @@ const handler = NextAuth({
   },
 });
 
-export { handler as GET, handler as POST };
-
-// make sure mail clients like Outlook will not hit the verification request and invalidate it
-export const HEAD: NextRouteHandler<"...nextauth"> = () => {
-  return new Response(null, {
-    status: StatusCodes.OK,
-  });
-};
+export default handler;

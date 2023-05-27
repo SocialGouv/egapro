@@ -13,7 +13,7 @@ export const config = {
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
   get host() {
-    return new URL(this.api_url).origin;
+    return new URL(this.apiv2_url).origin;
   },
   get apiv2_url() {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
