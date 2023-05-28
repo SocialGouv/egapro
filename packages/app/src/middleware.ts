@@ -1,10 +1,10 @@
 import { authBaseConfig } from "@api/core-domain/infra/auth/config";
 import { config as _config } from "@common/config";
 import { StatusCodes } from "http-status-codes";
-import { type NextMiddleware, NextResponse } from "next/server";
-import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
-const nextMiddleware: NextMiddleware = async req => {
+const nextMiddleware: NextMiddlewareWithAuth = async req => {
   const { pathname } = req.nextUrl;
   if (
     (pathname.startsWith("/apiv2/") || pathname.startsWith("/api/")) &&
