@@ -13,8 +13,7 @@ import {
 } from "@design-system";
 import { NextLinkOrA } from "@design-system/utils/NextLinkOrA";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager } from "@services/apiClient";
-import { useUser2 } from "@services/apiClient/useUser2";
+import { useFormManager, useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -37,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser2();
+  const { user } = useUser();
   const { formData, saveFormData } = useFormManager();
 
   const {

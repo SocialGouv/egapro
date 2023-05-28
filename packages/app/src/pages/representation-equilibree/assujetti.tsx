@@ -8,7 +8,7 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
 } from "@design-system";
-import { useUser2 } from "@services/apiClient/useUser2";
+import { useUser } from "@services/apiClient";
 import { useState } from "react";
 
 import { type NextPageWithLayout } from "../_app";
@@ -17,7 +17,7 @@ const title = "Êtes-vous assujetti ?";
 
 const AssujettiPage: NextPageWithLayout = () => {
   const [isAssujetti, setAssujetti] = useState("oui");
-  const { isAuthenticated } = useUser2();
+  const { isAuthenticated } = useUser();
 
   function handleAssujettiChange(e: React.ChangeEvent<HTMLInputElement>) {
     setAssujetti(e.target.value);

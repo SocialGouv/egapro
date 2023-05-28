@@ -1,4 +1,4 @@
-import { useUser2 } from "@services/apiClient/useUser2";
+import { useUser } from "@services/apiClient";
 import { type PropsWithChildren } from "react";
 
 type Props = PropsWithChildren<unknown> & { disableAuth?: boolean | undefined; redirectTo: string };
@@ -10,12 +10,9 @@ type Props = PropsWithChildren<unknown> & { disableAuth?: boolean | undefined; r
  * @param disableAuth If true, this component simply renders the children (transparent component). Convenient in some situations.
  */
 export const AuthenticatedOnly = ({ children, disableAuth, redirectTo, ...delegated }: Props) => {
-  console.log("AuthenticatedOnly start");
-  const { isAuthenticated, loading, user } = useUser2({
+  const { isAuthenticated, loading } = useUser({
     ...(!disableAuth && { redirectTo }),
-    required: true,
   });
-  console.log("AUTHTOOA", isAuthenticated, loading, user);
 
   if (disableAuth === true) {
     return <div {...delegated}>{children}</div>;

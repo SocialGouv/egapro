@@ -24,6 +24,7 @@ import {
   fetchSiren,
   ownersForSiren,
   useFormManager,
+  useUser,
 } from "@services/apiClient";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -72,6 +73,7 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
+  useUser();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();

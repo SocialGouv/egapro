@@ -1,4 +1,3 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
@@ -15,9 +14,8 @@ import {
   FormLayoutButtonGroup,
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUser2 } from "@services/apiClient/useUser2";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { requestEmailForToken, useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -34,11 +32,10 @@ type FormType = z.infer<typeof formSchema>;
 
 const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user } = useUser2();
+  const { user } = useUser();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
   const defaultRedirectTo = "/representation-equilibree/commencer";
-  const { redirectTo } = normalizeRouterQuery(Object.fromEntries(searchParams?.entries() ?? []));
+  const { redirectTo } = normalizeRouterQuery(router.query);
 
   if (user) router.push(redirectTo || defaultRedirectTo);
 
@@ -59,19 +56,8 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      const result = await signIn("email", {
-        email,
-        callbackUrl: new URL(redirectTo || defaultRedirectTo, window.location.origin).toString(),
-        redirect: false,
-      });
-      if (result?.ok) {
-        setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
-      } else {
-        setFeatureStatus({
-          type: "error",
-          message: `Erreur lors de l'envoi de l'email. (${result?.status}) ${result?.error}`,
-        });
-      }
+      await requestEmailForToken(email, `${new URL(redirectTo || defaultRedirectTo, window.location.origin)}?token=`);
+      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
         type: "error",
@@ -138,14 +124,6 @@ const EmailPage: NextPageWithLayout = () => {
                 </FormLayoutButtonGroup>
               </FormLayout>
             </form>
-            <Button
-              onClick={evt => {
-                evt.preventDefault();
-                void signIn("moncomptepro");
-              }}
-            >
-              Mon Compte Pro
-            </Button>
           </>
         )}
       </ClientOnly>

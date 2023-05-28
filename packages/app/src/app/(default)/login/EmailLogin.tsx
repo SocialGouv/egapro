@@ -41,10 +41,15 @@ export const EmailLogin = ({ callbackUrl }: EmailAuthticatorProps) => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      console.log("before signIn");
-      await signIn("email", { email, callbackUrl, redirect: false });
-      console.log("after signIn");
-      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      const result = await signIn("email", { email, callbackUrl, redirect: false });
+      if (result?.ok) {
+        setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      } else {
+        setFeatureStatus({
+          type: "error",
+          message: `Erreur lors de l'envoi de l'email. (${result?.status}) ${result?.error}`,
+        });
+      }
     } catch (error) {
       setFeatureStatus({
         type: "error",
