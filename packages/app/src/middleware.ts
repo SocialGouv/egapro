@@ -20,6 +20,11 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
 
+  if (pathname.startsWith("/login") && !_config.ff.loginV2) {
+    console.log("LoginV2 disabled, redirecting 404", pathname);
+    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
+  }
+
   return NextResponse.next();
 };
 
@@ -34,9 +39,11 @@ export const middleware = withAuth(
       authorized({ req, token }) {
         const { pathname } = req.nextUrl;
         if (!token?.email) {
-          if (pathname.startsWith("/needauth")) {
+          if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
             return false;
           }
+        } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token.staff) {
+          return false;
         }
 
         return true;

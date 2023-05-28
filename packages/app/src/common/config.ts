@@ -27,17 +27,11 @@ export const config = {
     return {
       apiV2: {
         enabled: this.env === "dev",
-        whitelist: [
-          "/apiv2/ownership",
-          "/apiv2/health",
-          "/apiv2/admin",
-          "/apiv2/declaration",
-          "/apiv2/auth",
-          "/api/auth", // next-auth may use "/api"
-        ],
+        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
       },
       declaV2: this.env === "dev",
       moncomptepro: this.env === "dev",
+      loginV2: this.env === "dev",
     };
   },
   api: {
@@ -63,6 +57,11 @@ export const config = {
         clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
         appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, true),
+      },
+      auth: {
+        secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
+        privateRoutes: ["/needauth"],
+        staffRoutes: ["/needstaff"],
       },
     },
     postgres: {
