@@ -5,10 +5,12 @@ import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getColorSchemeHtmlAttributes";
 import { config } from "@common/config";
+import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
+import { SessionProvider } from "./SessionProvider";
 
 const RootLayout = ({ children }: PropsWithChildren) => (
   <html lang="fr" {...getColorSchemeHtmlAttributes({ defaultColorScheme })}>
@@ -34,22 +36,26 @@ const RootLayout = ({ children }: PropsWithChildren) => (
       </Suspense>
     </head>
     <body>
-      <DsfrProvider defaultColorScheme={defaultColorScheme}>
-        <ConsentBanner
-          gdprLinkProps={{
-            href: "/politique-de-confidentialite#cookies",
-          }}
-          siteName="Egapro"
-          services={[
-            {
-              name: "matomo",
-              title: "Matomo",
-              description: "Outil d’analyse comportementale des utilisateurs.",
-            },
-          ]}
-        />
-        {children}
-      </DsfrProvider>
+      <FeatureStatusProvider>
+        <SessionProvider basePath="/apiv2/auth">
+          <DsfrProvider defaultColorScheme={defaultColorScheme}>
+            <ConsentBanner
+              gdprLinkProps={{
+                href: "/politique-de-confidentialite#cookies",
+              }}
+              siteName="Egapro"
+              services={[
+                {
+                  name: "matomo",
+                  title: "Matomo",
+                  description: "Outil d’analyse comportementale des utilisateurs.",
+                },
+              ]}
+            />
+            {children}
+          </DsfrProvider>
+        </SessionProvider>
+      </FeatureStatusProvider>
     </body>
   </html>
 );

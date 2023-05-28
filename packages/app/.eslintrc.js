@@ -1,3 +1,5 @@
+const nextFiles = ["page", "head", "error", "template", "layout", "route", "loading", "opengraph-image"].join("|");
+
 /** @type {import("eslint").Linter.Config} */
 const config = {
   root: true,
@@ -147,7 +149,7 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)", "src/app/**/+(page|head|error|template|layout).tsx"],
+      files: ["src/pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
       rules: {
         "import/no-default-export": "off",
       },

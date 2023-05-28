@@ -4,6 +4,7 @@ import { type Ownership, type OwnershipPK } from "@common/core-domain/domain/Own
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { ownershipMap } from "@common/core-domain/mappers/ownershipMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
+import { type Email } from "@common/shared-domain/domain/valueObjects";
 import { type Any } from "@common/utils/types";
 
 import { type IOwnershipRepo } from "../IOwnershipRepo";
@@ -13,11 +14,26 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   constructor(private sql = _sql<OwnershipRaw[]>) {}
 
-  public async getEmailsAllBySiren(siren: Siren): Promise<string[]> {
+  public async getAllEmailsBySiren(siren: Siren): Promise<string[]> {
     try {
       const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()}`;
 
       return raws.map(owner => owner.email);
+    } catch (error: unknown) {
+      console.error(error);
+      // TODO better error handling
+      if ((error as Any).code === "ECONNREFUSED") {
+        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      }
+      throw error;
+    }
+  }
+
+  public async getAllSirenByEmail(email: Email): Promise<string[]> {
+    try {
+      const raws = await this.sql`select * from ${this.table} where email=${email.getValue()}`;
+
+      return raws.map(owner => owner.siren);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling

@@ -13,12 +13,19 @@ import { type IGlobalMailerService } from "../IGlobalMailerService";
  * Specific implementation of the global mailer service with nodemailer.
  */
 export class NodemailerGlobalMailerService implements IGlobalMailerService {
+  private inited = false;
   constructor(private readonly templates: Templates) {}
 
   public async init(): Promise<void> {
-    if (!config.api.mailer.enable) return;
+    if (!config.api.mailer.enable) {
+      console.warn("Mailer disabled.");
+      return;
+    }
+    if (this.inited) return;
     try {
       await verifyMailerConnection();
+      console.debug("[NodemailerGlobalMailerService] Mailer ready.");
+      this.inited = true;
     } catch (error: unknown) {
       if (isNodeErrorNoException(error) && getSystemErrorName(error.errno) === "ECONNREFUSED") {
         throw new UnexpectedMailerError("Mailer service could not connect properly.", error);
@@ -34,7 +41,7 @@ export class NodemailerGlobalMailerService implements IGlobalMailerService {
   ): Promise<[accepted: string[], rejected: string[]]> {
     const generated = this.templates[tpl].call(null, ...args);
     if (!config.api.mailer.enable || !mailer) {
-      console.debug("Sending mail", { options, text: generated.text });
+      console.debug("Sending mail", { defaultSendMailConfig, options, text: generated.text });
       return [handleRecipients(options.to), []];
     }
 

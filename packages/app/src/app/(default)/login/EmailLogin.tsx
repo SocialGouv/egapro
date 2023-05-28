@@ -4,14 +4,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { normalizeRouterQuery } from "@common/utils/url";
+import { Container } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { requestEmailForToken } from "@services/apiClient";
-import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { AlertFeatureStatus, useFeatureStatus } from "./FeatureStatusProvider";
+import { AlertFeatureStatus, useFeatureStatus } from "../../../components/rdsfr/FeatureStatusProvider";
 
 const formSchema = z.object({
   email: z.string().min(1, "L'adresse email est requise.").email({ message: "L'adresse email est invalide." }),
@@ -19,12 +18,11 @@ const formSchema = z.object({
 
 type FormType = z.infer<typeof formSchema>;
 
-type Props = { defaultRedirectTo: string };
-
-export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
+export interface EmailAuthticatorProps {
+  callbackUrl: string;
+}
+export const EmailLogin = ({ callbackUrl }: EmailAuthticatorProps) => {
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
-  const query = useSearchParams();
-  const { redirectTo } = normalizeRouterQuery(query as any);
 
   const {
     register,
@@ -43,8 +41,15 @@ export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${new URL(redirectTo || defaultRedirectTo, window.location.origin)}?token=`);
-      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      const result = await signIn("email", { email, callbackUrl, redirect: false });
+      if (result?.ok) {
+        setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
+      } else {
+        setFeatureStatus({
+          type: "error",
+          message: `Erreur lors de l'envoi de l'email. (${result?.status}) ${result?.error}`,
+        });
+      }
     } catch (error) {
       setFeatureStatus({
         type: "error",
@@ -97,8 +102,9 @@ export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div
-              className={fr.cx("fr-container--fluid", "fr-mt-4w")}
+            <Container
+              fluid
+              mt="4w"
               style={{
                 width: 500,
               }}
@@ -116,7 +122,7 @@ export const EmailAuthenticator = ({ defaultRedirectTo }: Props) => {
                 }}
               />
               <Button disabled={featureStatus.type === "loading" || !isValid}>Envoyer</Button>
-            </div>
+            </Container>
           </form>
         </>
       )}

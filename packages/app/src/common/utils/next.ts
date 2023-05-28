@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { type NextRequest, type NextResponse } from "next/server";
 import { type z } from "zod";
 
 import { type Any, type ClearObject, type EmptyObject } from "./types";
@@ -9,7 +10,7 @@ type SearchParamsString<T> = [T] extends [infer R extends string]
   ? "" extends R
     ? EmptyObject
     : {
-        searchParams: Partial<Record<R, string>>;
+        searchParams: Partial<Record<R, string[] | string>>;
       }
   : never;
 
@@ -58,3 +59,12 @@ export const withSearchParamsValidation =
 
     return page({ ...props, searchParamsError: parseResult.error.flatten() });
   };
+
+export type NextRouteHandler<TParams extends string = string> = (
+  req: NextRequest,
+  context: {
+    params: {
+      [T in TParams as T extends `...${infer R extends string}` ? R : T]: T extends `...${string}` ? string[] : string;
+    };
+  },
+) => NextResponse | Promise<NextResponse | Response> | Response;
