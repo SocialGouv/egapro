@@ -39,7 +39,12 @@ export const middleware = withAuth(
   // Next Middleware
   nextMiddleware,
   // Next auth config - will run **before** middleware
-  authBaseConfig,
+  {
+    ...authBaseConfig,
+    callbacks: {
+      authorized: () => true,
+    },
+  },
 );
 
 export const config = {
