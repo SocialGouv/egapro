@@ -1,18 +1,18 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import DsfrHeader, { type HeaderProps as DsfrHeaderProps } from "@codegouvfr/react-dsfr/Header";
+import Header, { type HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { Brand } from "@components/Brand";
 import { signOut, useSession } from "next-auth/react";
 
-export interface HeaderProps {
-  homeLinkProps: DsfrHeaderProps["homeLinkProps"];
+export interface HeaderWithAuthProps {
+  homeLinkProps: HeaderProps["homeLinkProps"];
 }
-export const Header = ({ homeLinkProps }: HeaderProps) => {
+export const HeaderWithAuth = ({ homeLinkProps }: HeaderWithAuthProps) => {
   const session = useSession();
 
   return (
-    <DsfrHeader
+    <Header
       brandTop={<Brand />}
       serviceTitle="Egapro"
       serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
