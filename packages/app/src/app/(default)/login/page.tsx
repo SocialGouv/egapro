@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
+import { notFound } from "next/navigation";
 
 import { CheckLogged } from "./CheckLogged";
 import { EmailLogin } from "./EmailLogin";
@@ -36,6 +37,12 @@ const mailDevUrl = config.host.startsWith("http://localhost")
   : config.host.replace("https://", "https://maildev-");
 
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
+  // not in middleware because next-auth middleware filter this page from our middleware feature flags
+  if (!config.ff.loginV2) {
+    console.log("LoginV2 disabled, redirecting 404");
+    notFound();
+  }
+
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
 

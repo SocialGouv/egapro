@@ -28,6 +28,8 @@ export const NextPageLink = () => {
         router.replace(`${url}#footer`, { forceOptimisticNavigation: true });
         // TODO remove
         // temp hack with #footer because next auto scroll to top with router.replace or Link
+        // https://github.com/vercel/next.js/issues/50398
+        // https://github.com/vercel/next.js/issues/50105
         router.replace(url);
       }}
       priority="secondary"
