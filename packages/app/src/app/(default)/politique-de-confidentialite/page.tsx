@@ -1,12 +1,16 @@
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
-import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { Container, Grid, GridCol } from "@design-system";
+import Link from "next/link";
 
-import { NextLinkOrA } from "../design-system/utils/NextLinkOrA";
-import { type NextPageWithLayout } from "./_app";
+export const metadata = {
+  title: "Politique de confidentialité",
+  openGraph: {
+    title: "Politique de confidentialité",
+  },
+};
 
-const PrivacyPolicy: NextPageWithLayout = () => {
+const PrivacyPolicy = () => {
   return (
     <section>
       <Container py="8w">
@@ -102,23 +106,19 @@ const PrivacyPolicy: NextPageWithLayout = () => {
             </ul>
             <p>
               Vous pouvez exercer ces droits en écrivant à{" "}
-              <NextLinkOrA isExternal href="mailto:index@travail.gouv.fr">
-                index@travail.gouv.fr
-              </NextLinkOrA>
-              .
+              <Link href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</Link>.
             </p>
             <p>
               En raison de l’obligation de sécurité et de confidentialité dans le traitement des données à caractère
               personnel qui incombe à Index Egapro, votre demande sera uniquement traitée si vous rapportez la preuve de
               votre identité. Pour vous aider dans votre démarche, vous trouverez{" "}
-              <NextLinkOrA
-                isExternal
+              <Link
                 href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces"
                 target="_blank"
                 rel="noreferrer"
               >
                 ici
-              </NextLinkOrA>{" "}
+              </Link>{" "}
               un modèle de courrier élaboré par la Cnil.
             </p>
             <p>
@@ -162,14 +162,13 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                     <td>France</td>
                     <td>Hébergement</td>
                     <td>
-                      <NextLinkOrA
-                        isExternal
+                      <Link
                         href="https://privacy.microsoft.com/fr-fr/privacystatement"
                         target="_blank"
                         rel="noreferrer"
                       >
                         https://privacy.microsoft.com/fr-fr/privacystatement
-                      </NextLinkOrA>
+                      </Link>
                     </td>
                   </tr>
                   <tr>
@@ -216,7 +215,15 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>MATOMO</td>
+                    <td>Egapro</td>
+                    <td>Fonctionnement</td>
+                    <td>Assure le fonctionnement basique du site</td>
+                    <td>Site Egapro</td>
+                    <td>Direction générale du Travail</td>
+                    <td>Non</td>
+                  </tr>
+                  <tr>
+                    <td>Matomo</td>
                     <td>Mesure d’audience</td>
                     <td>Outil d’analyse comportementale des utilisateurs</td>
                     <td>MATOMO</td>
@@ -227,8 +234,8 @@ const PrivacyPolicy: NextPageWithLayout = () => {
               </table>
             </div>
             <p>
-              Vous pouvez retirer votre consentement relatif aux cookies{" "}
-              <Button priority="secondary" {...consentModalButtonProps}>
+              Vous pouvez retirer votre consentement relatif aux cookies :{" "}
+              <Button priority="tertiary no outline" nativeButtonProps={consentModalNativeButtonProps}>
                 ici
               </Button>
             </p>
@@ -237,10 +244,6 @@ const PrivacyPolicy: NextPageWithLayout = () => {
       </Container>
     </section>
   );
-};
-
-PrivacyPolicy.getLayout = ({ children }) => {
-  return <BasicLayoutPublic title="Politique de confidentialité">{children}</BasicLayoutPublic>;
 };
 
 export default PrivacyPolicy;

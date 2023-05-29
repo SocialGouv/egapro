@@ -9,14 +9,21 @@ import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
+import type Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
 import { SessionProvider } from "./SessionProvider";
 
+declare module "@codegouvfr/react-dsfr/next-appdir" {
+  interface RegisterLink {
+    Link: typeof Link;
+  }
+}
+
 declare module "@codegouvfr/react-dsfr/gdpr" {
   interface RegisterGdprServices {
-    egapro: never;
+    egapro: true;
     matomo: never;
   }
 }

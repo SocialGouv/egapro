@@ -18,7 +18,7 @@ const githubLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const helpLink = {
-  text: "Consulter l'aide",
+  text: "Aide simulation",
   linkProps: {
     href: "/aide-simulation",
   },

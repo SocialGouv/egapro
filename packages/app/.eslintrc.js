@@ -1,4 +1,19 @@
-const nextFiles = ["page", "head", "error", "template", "layout", "route", "loading", "opengraph-image"].join("|");
+const nextFiles = [
+  "page",
+  "head",
+  "error",
+  "template",
+  "layout",
+  "route",
+  "loading",
+  "opengraph-image",
+  "twitter-image",
+  "not-found",
+  "default",
+  "icon",
+  "apple-icon",
+  "sitemap",
+].join("|");
 
 /** @type {import("eslint").Linter.Config} */
 const config = {

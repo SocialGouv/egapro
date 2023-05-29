@@ -1,9 +1,13 @@
-import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
-import { Container, Grid, GridCol } from "@design-system";
+import { Container, Grid, GridCol, Link } from "@design-system";
 
-import { type NextPageWithLayout } from "./_app";
+export const metadata = {
+  title: "Mentions légales",
+  openGraph: {
+    title: "Mentions légales",
+  },
+};
 
-const LegalNotice: NextPageWithLayout = () => {
+const LegalNotice = () => {
   return (
     <section>
       <Container py="8w">
@@ -38,13 +42,13 @@ const LegalNotice: NextPageWithLayout = () => {
             <h3 className="fr-text--xl">En savoir plus</h3>
             <p>
               Pour en savoir plus sur la politique d’accessibilité numérique de l’État&nbsp;:{" "}
-              <a
+              <Link
                 href="http://references.modernisation.gouv.fr/accessibilite-numerique"
                 target="_blank"
                 rel="noreferrer"
               >
                 http://references.modernisation.gouv.fr/accessibilite-numerique
-              </a>
+              </Link>
             </p>
             <h2>Sécurité</h2>
             <p>
@@ -58,10 +62,6 @@ const LegalNotice: NextPageWithLayout = () => {
       </Container>
     </section>
   );
-};
-
-LegalNotice.getLayout = ({ children }) => {
-  return <BasicLayoutPublic title="Mentions légales">{children}</BasicLayoutPublic>;
 };
 
 export default LegalNotice;
