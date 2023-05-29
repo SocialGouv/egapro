@@ -26,9 +26,9 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
   if (!token?.email) {
     if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
       return NextResponse.redirect(`/login?callbackUrl=${encodeURIComponent(href)}`);
-    } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
-      return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
     }
+  } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
+    return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
   return NextResponse.next();
