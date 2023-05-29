@@ -5,7 +5,8 @@ import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
 const nextMiddleware: NextMiddlewareWithAuth = async req => {
-  const { pathname } = req.nextUrl;
+  const { pathname, href } = req.nextUrl;
+
   if (
     (pathname.startsWith("/apiv2/") || pathname.startsWith("/api/")) &&
     !_config.ff.apiV2.whitelist.some(okPath => pathname.startsWith(okPath)) &&
@@ -20,9 +21,14 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
 
-  if (pathname.startsWith("/login") && !_config.ff.loginV2) {
-    console.log("LoginV2 disabled, redirecting 404", pathname);
-    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
+  // handling authorization by ourselves (and not with authorize callback)
+  const { token } = req.nextauth;
+  if (!token?.email) {
+    if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(`/login?callbackUrl=${encodeURIComponent(href)}`);
+    }
+  } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
+    return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
   return NextResponse.next();
@@ -33,23 +39,7 @@ export const middleware = withAuth(
   // Next Middleware
   nextMiddleware,
   // Next auth config - will run **before** middleware
-  {
-    ...authBaseConfig,
-    callbacks: {
-      authorized({ req, token }) {
-        const { pathname } = req.nextUrl;
-        if (!token?.email) {
-          if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-            return false;
-          }
-        } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token.staff) {
-          return false;
-        }
-
-        return true;
-      },
-    },
-  },
+  authBaseConfig,
 );
 
 export const config = {
