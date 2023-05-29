@@ -73,6 +73,7 @@ const RepresentationEquilibree = () => (
                   href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/",
                   target: "_blank",
                 }}
+                priority="secondary"
               >
                 Consulter le site du Ministère du Travail
               </Button>
