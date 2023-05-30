@@ -60,7 +60,16 @@ export const config = {
       },
       auth: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
-        privateRoutes: ["/needauth"],
+        privateRoutes: [
+          "/representation-equilibree/commencer",
+          "/representation-equilibree/declarant",
+          "/representation-equilibree/ecarts-",
+          "/representation-equilibree/entreprise",
+          "/representation-equilibree/periode-reference",
+          "/representation-equilibree/publication",
+          "/representation-equilibree/transmission",
+          "/representation-equilibree/validation",
+        ],
         staffRoutes: ["/needstaff"],
       },
     },

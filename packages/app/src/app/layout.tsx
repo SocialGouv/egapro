@@ -15,6 +15,22 @@ import { type PropsWithChildren, Suspense } from "react";
 import { defaultColorScheme } from "./defaultColorScheme";
 import { SessionProvider } from "./SessionProvider";
 
+export const metadata = {
+  metadataBase: new URL(config.host),
+  description:
+    "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.",
+  title: {
+    template: "Egapro - %s",
+    default: "Egapro",
+  },
+  openGraph: {
+    title: {
+      template: "Egapro - %s",
+      default: "Egapro",
+    },
+  },
+};
+
 declare module "@codegouvfr/react-dsfr/next-appdir" {
   interface RegisterLink {
     Link: typeof Link;
@@ -96,19 +112,3 @@ const RootLayout = ({ children }: PropsWithChildren) => (
 );
 
 export default RootLayout;
-
-export const metadata = {
-  metadataBase: new URL(config.host),
-  description:
-    "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.",
-  title: {
-    template: "Egapro - %s",
-    default: "Egapro",
-  },
-  openGraph: {
-    title: {
-      template: "Egapro - %s",
-      default: "Egapro",
-    },
-  },
-};

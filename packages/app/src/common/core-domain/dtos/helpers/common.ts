@@ -1,5 +1,7 @@
-import { COUNTIES_IDS, NAF_SECTIONS, REGIONS_IDS } from "@common/dict";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { COUNTIES_IDS, NAF_SECTIONS, REGIONS_IDS, YEARS_REPEQ } from "@common/dict";
 import { type ClearObject } from "@common/utils/types";
+import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
 
 export const regionSchema = z.enum(REGIONS_IDS);
@@ -7,6 +9,15 @@ export const countySchema = z.enum(COUNTIES_IDS);
 export const nafSectionSchema = z.enum(
   Object.keys(NAF_SECTIONS) as [keyof typeof NAF_SECTIONS, ...Array<keyof typeof NAF_SECTIONS>],
 );
+
+export const sirenSchema = z.string().superRefine(zodValueObjectSuperRefine(Siren));
+
+export const repeqYearSchema = z
+  .number()
+  .refine(
+    val => YEARS_REPEQ.includes(val),
+    `L'année de déclaration doit être l'une des suivantes : ${YEARS_REPEQ.join(", ")}`,
+  );
 
 /**
  * Usually used against searchParams, so have to deal with string inputs exclusively.
