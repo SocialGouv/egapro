@@ -1,3 +1,6 @@
+import { authConfig } from "@api/core-domain/infra/auth/config";
+import { getServerSession } from "next-auth";
+
 import { CommencerForm } from "./Form";
 
 const title = "Commencer";
@@ -7,9 +10,13 @@ export const metadata = {
   openGraph: {
     title,
   },
+  robots: "noindex, nofollow",
 };
 
-const CommencerPage = () => {
+const CommencerPage = async () => {
+  const session = await getServerSession(authConfig);
+  if (!session) return null;
+
   return (
     <>
       <p>
@@ -18,7 +25,7 @@ const CommencerPage = () => {
           correspondantes à la déclaration.
         </b>
       </p>
-      <CommencerForm />
+      <CommencerForm session={session} />
     </>
   );
 };

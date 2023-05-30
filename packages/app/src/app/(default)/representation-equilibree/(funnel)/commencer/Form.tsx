@@ -10,7 +10,7 @@ import { FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { type Session } from "next-auth";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,18 +25,15 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
 
-export const CommencerForm = () => {
+export const CommencerForm = ({ session }: { session: Session }) => {
   const router = useRouter();
-  const { data: session } = useSession();
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
 
-  const ownership = session?.user.ownership ?? [];
-  // 130025265
-  // 504920166
+  const companies = session.user.companies;
 
   const schemaWithOwnedSiren = createSteps.commencer.superRefine((val, ctx) => {
-    if (!ownership.includes(val.siren)) {
+    if (!companies.some(company => company.siren === val.siren)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: OWNER_ERROR,
@@ -54,13 +51,8 @@ export const CommencerForm = () => {
   } = useForm<CommencerFormType>({
     mode: "onChange",
     resolver: zodResolver(schemaWithOwnedSiren),
-    defaultValues: {
-      siren: funnel?.siren,
-      year: funnel?.year,
-    },
+    defaultValues: funnel,
   });
-
-  console.log({ isPending, isValid, errors });
 
   const saveAndGoNext = async (siren: string, year: number) =>
     startTransition(async () => {
@@ -148,13 +140,16 @@ export const CommencerForm = () => {
               placeholder: "Ex: 504920166, 403461742, 403696735",
               maxLength: 9,
               minLength: 9,
-              autoComplete: "ownership",
+              autoComplete: "off",
+              list: "companies",
               ...register("siren"),
             }}
           />
-          <datalist id="ownership">
-            {ownership.map(siren => (
-              <option key={siren} value={siren} />
+          <datalist id="companies">
+            {companies.map(company => (
+              <option key={company.siren} value={company.siren}>
+                {company.label ?? ""}
+              </option>
             ))}
           </datalist>
           <ClientAnimate>
@@ -173,13 +168,17 @@ export const CommencerForm = () => {
                 children: "Réinitialiser",
                 priority: "secondary",
                 onClick: confirmReset,
-                disabled: !funnel?.siren,
                 type: "button",
+                nativeButtonProps: {
+                  disabled: funnel ? !funnel.siren : false,
+                },
               },
               {
                 children: "Suivant",
                 type: "submit",
-                disabled: !isValid,
+                nativeButtonProps: {
+                  disabled: !isValid && !isPending,
+                },
               },
             ]}
           />

@@ -69,7 +69,7 @@ const RootLayout = ({ children }: PropsWithChildren) => (
     </head>
     <body>
       <FeatureStatusProvider>
-        <SessionProvider basePath="/apiv2/auth">
+        <SessionProvider basePath="/apiv2/auth" refetchOnWindowFocus>
           <DsfrProvider defaultColorScheme={defaultColorScheme}>
             <SkipLinks
               links={[

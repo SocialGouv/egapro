@@ -1,4 +1,3 @@
-import { authBaseConfig } from "@api/core-domain/infra/auth/config";
 import { config as _config } from "@common/config";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
@@ -40,7 +39,7 @@ export const middleware = withAuth(
   nextMiddleware,
   // Next auth config - will run **before** middleware
   {
-    ...authBaseConfig,
+    secret: _config.api.security.auth.secret,
     callbacks: {
       authorized: () => true,
     },
