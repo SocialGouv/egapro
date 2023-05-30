@@ -56,10 +56,6 @@ const RepresentationEquilibree = () => (
                   entre les femmes et les hommes parmi, d’une part, leurs cadres dirigeants, et d’autre part, les
                   membres de leurs instances dirigeantes, en parallèle de la publication et de la déclaration de leur
                   Index de l’égalité professionnelle."
-            enlargeLink={false}
-            linkProps={{
-              href: "#",
-            }}
           />
         </GridCol>
         <GridCol lg={6}>
@@ -78,10 +74,6 @@ const RepresentationEquilibree = () => (
                 Consulter le site du Ministère du Travail
               </Button>
             }
-            enlargeLink={false}
-            linkProps={{
-              href: "#",
-            }}
           />
         </GridCol>
       </Grid>

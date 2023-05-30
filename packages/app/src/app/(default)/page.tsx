@@ -34,7 +34,6 @@ const Home = () => {
           <GridCol md={6}>
             <Card
               horizontal
-              enlargeLink={false}
               title="Index de l'égalité professionnelle femmes-hommes"
               desc="Calculer et/ou déclarer votre index de l'égalité professionnelle entre les femmes et les hommes."
               linkProps={{
@@ -69,7 +68,6 @@ const Home = () => {
           <GridCol md={6}>
             <Card
               horizontal
-              enlargeLink={false}
               title="Représentation équilibrée femmes-hommes"
               desc="Déclarer vos écarts de représentation entre les femmes et les hommes dans les postes de direction."
               linkProps={{
