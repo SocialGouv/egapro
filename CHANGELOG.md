@@ -1,3 +1,22 @@
+# [2.89.0](https://github.com/SocialGouv/egapro/compare/v2.88.1...v2.89.0) (2023-05-31)
+
+
+### Bug Fixes
+
+* **auth:** make sure auth middleware is not interfering with our logic ([03b80a8](https://github.com/SocialGouv/egapro/commit/03b80a8fa66552b2db7ab29b2a7d5c72b4829eee))
+* desync between simulateur and declaration ([#1640](https://github.com/SocialGouv/egapro/issues/1640)) ([3850616](https://github.com/SocialGouv/egapro/commit/38506169a80f0256b43269e53086364496c451d1)), closes [#1634](https://github.com/SocialGouv/egapro/issues/1634)
+* search layout ([#1645](https://github.com/SocialGouv/egapro/issues/1645)) ([d36e954](https://github.com/SocialGouv/egapro/commit/d36e9549e618f649e5600625bf171fc0aec37c6e))
+* **search:** consultation index wording ues (Fixes [#1636](https://github.com/SocialGouv/egapro/issues/1636)) ([f3ab438](https://github.com/SocialGouv/egapro/commit/f3ab438d42a84fa2ecbf7610ec2ebbe86cb85229))
+* **search:** fix siren search ([8726beb](https://github.com/SocialGouv/egapro/commit/8726beb2bd7c0f34fe2ad571c22b93ef1b679b0a))
+* **search:** full text search escaping (Fixes [#1638](https://github.com/SocialGouv/egapro/issues/1638)) ([9d14a0f](https://github.com/SocialGouv/egapro/commit/9d14a0f9f9fbdb497b9b61ebb0d163f39139fad9))
+* wording landing consulter (Fixes [#1635](https://github.com/SocialGouv/egapro/issues/1635)) ([05aee63](https://github.com/SocialGouv/egapro/commit/05aee633ac4be1e13d12be1a8d4d3c6ceded2805))
+
+
+### Features
+
+* **auth:** next-auth ([#1631](https://github.com/SocialGouv/egapro/issues/1631)) ([eb728d3](https://github.com/SocialGouv/egapro/commit/eb728d3c215a2103d89d8da7b035a6de9985e93a))
+* upgrade next13 and fix consultations next page button ([#1648](https://github.com/SocialGouv/egapro/issues/1648)) ([d8f6caf](https://github.com/SocialGouv/egapro/commit/d8f6caf911f0580b6f011f57347e1fc4e2338e9e))
+
 ## [2.88.1](https://github.com/SocialGouv/egapro/compare/v2.88.0...v2.88.1) (2023-05-11)
 
 
