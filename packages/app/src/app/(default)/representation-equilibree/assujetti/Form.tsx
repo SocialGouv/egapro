@@ -51,7 +51,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
         />
       </form>
       {isAssujetti ? (
-        <Button linkProps={{ href: "commencer" }}>Suivant</Button>
+        <Button linkProps={{ href: "/representation-equilibree/commencer" }}>Suivant</Button>
       ) : (
         <CallOut
           buttonProps={{

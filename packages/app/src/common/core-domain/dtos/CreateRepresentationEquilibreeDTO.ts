@@ -12,7 +12,7 @@ export const createSteps = {
   declarant: z.object({
     lastname: z.string().nonempty("Le nom est requis"),
     firstname: z.string().nonempty("Le prénom est requis"),
-    phone: z
+    phoneNumber: z
       .string()
       .nonempty("Le numéro de téléphone est requis")
       .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide")),
