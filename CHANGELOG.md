@@ -1,3 +1,10 @@
+## [2.89.1](https://github.com/SocialGouv/egapro/compare/v2.89.0...v2.89.1) (2023-05-31)
+
+
+### Bug Fixes
+
+* **cd:** change cpu and memory conf for prod and preprod ([45cb58e](https://github.com/SocialGouv/egapro/commit/45cb58e4ee482208e7d1ad86fd8da97d56225529))
+
 # [2.89.0](https://github.com/SocialGouv/egapro/compare/v2.88.1...v2.89.0) (2023-05-31)
 
 
