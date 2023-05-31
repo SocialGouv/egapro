@@ -2,6 +2,28 @@ global:
   host: egapro.travail.gouv.fr
   sentryFront: "https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
 
+api:
+  autoscale:
+    enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 640M
+    limits:
+      cpu: 1
+      memory: 1G
+  vars:
+    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+    - secretRef:
+        name: "egapro-secret"
+    - secretRef:
+        name: smtp
+
 app:
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
@@ -20,32 +42,10 @@ app:
   resources:
     requests:
       cpu: 20m
-      memory: 196M
+      memory: 256M
     limits:
-      cpu: 125m
+      cpu: 1
       memory: 1G
-
-api:
-  autoscale:
-    enabled: true
-  resources:
-    requests:
-      cpu: 100m
-      memory: 640M
-    limits:
-      cpu: 200m
-      memory: 1G
-  vars:
-    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
-  envFrom:
-    - secretRef:
-        name: "{{ .Values.global.pgSecretName }}"
-    - secretRef:
-        name: "staff"
-    - secretRef:
-        name: "egapro-secret"
-    - secretRef:
-        name: smtp
 
 jobs:
   runs:
