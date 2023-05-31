@@ -7,14 +7,14 @@ import { z } from "zod";
  * Handle (for now) only "simple" value object with direct single constructor parameter.
  */
 export const zodValueObjectSuperRefine =
-  <TType, T extends new (value: TType) => ValueObject<TType>>(voClass: T) =>
+  <TType, T extends new (value: TType) => ValueObject<TType>>(voClass: T, message?: string) =>
   (refinement: TType, ctx: z.RefinementCtx) => {
     try {
       new voClass(refinement);
     } catch (error: unknown) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: (error as Error).message,
+        message: message ?? (error as Error).message,
       });
     }
   };
