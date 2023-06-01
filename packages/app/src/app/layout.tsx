@@ -1,4 +1,5 @@
 import "./StartDsfr";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
 import Display from "@codegouvfr/react-dsfr/Display";
@@ -9,6 +10,7 @@ import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
+import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
 import type Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
@@ -71,39 +73,46 @@ const RootLayout = ({ children }: PropsWithChildren) => (
       <FeatureStatusProvider>
         <SessionProvider basePath="/apiv2/auth" refetchOnWindowFocus>
           <DsfrProvider defaultColorScheme={defaultColorScheme}>
-            <SkipLinks
-              links={[
-                {
-                  anchor: "#content",
-                  label: "Contenu",
-                },
-                {
-                  anchor: "#footer",
-                  label: "Pied de page",
-                },
-              ]}
-            />
-            <ConsentBanner
-              gdprLinkProps={{
-                href: "/politique-de-confidentialite#cookies",
-              }}
-              siteName="Egapro"
-              services={[
-                {
-                  name: "egapro",
-                  title: "Egapro",
-                  description: "Cookies obligatoires permettant de sauvegarder l'état d'authentification.",
-                  mandatory: true,
-                },
-                {
-                  name: "matomo",
-                  title: "Matomo",
-                  description: "Outil d’analyse comportementale des utilisateurs.",
-                },
-              ]}
-            />
-            {children}
-            <Display />
+            <IsomorphicSkeletonTheme
+              baseColor="var(--background-contrast-grey)"
+              highlightColor="var(--background-contrast-grey-active)"
+              borderRadius="0.25rem"
+              duration={2}
+            >
+              <SkipLinks
+                links={[
+                  {
+                    anchor: "#content",
+                    label: "Contenu",
+                  },
+                  {
+                    anchor: "#footer",
+                    label: "Pied de page",
+                  },
+                ]}
+              />
+              <ConsentBanner
+                gdprLinkProps={{
+                  href: "/politique-de-confidentialite#cookies",
+                }}
+                siteName="Egapro"
+                services={[
+                  {
+                    name: "egapro",
+                    title: "Egapro",
+                    description: "Cookies obligatoires permettant de sauvegarder l'état d'authentification.",
+                    mandatory: true,
+                  },
+                  {
+                    name: "matomo",
+                    title: "Matomo",
+                    description: "Outil d’analyse comportementale des utilisateurs.",
+                  },
+                ]}
+              />
+              {children}
+              <Display />
+            </IsomorphicSkeletonTheme>
           </DsfrProvider>
         </SessionProvider>
       </FeatureStatusProvider>

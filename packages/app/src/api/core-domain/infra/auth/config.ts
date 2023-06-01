@@ -32,6 +32,7 @@ declare module "next-auth/jwt" {
   }
 }
 
+export const monCompteProProvider = MonCompteProProvider(config.api.security.moncomptepro);
 export const authConfig: AuthOptions = {
   secret: config.api.security.auth.secret,
   pages: {
@@ -54,7 +55,7 @@ export const authConfig: AuthOptions = {
         }
       },
     }),
-    ...(config.ff.moncomptepro ? [MonCompteProProvider(config.api.security.moncomptepro)] : []),
+    monCompteProProvider,
   ],
   callbacks: {
     // prefill JWT encoded data with staff and ownership on signup

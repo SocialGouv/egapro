@@ -1,14 +1,12 @@
 "use client";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
 import { FormLayout } from "@design-system";
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useTransition } from "react";
@@ -131,36 +129,24 @@ export const CommencerForm = ({ session }: { session: Session }) => {
                 </option>
               ))}
           </Select>
-          <Input
-            label="Numéro Siren de l'entreprise"
-            hintText="9 chiffres"
+          <Select
+            label="Entreprise"
             state={errors.siren && "error"}
             stateRelatedMessage={errors.siren?.message}
-            nativeInputProps={{
-              placeholder: "Ex: 504920166, 403461742, 403696735",
-              maxLength: 9,
-              minLength: 9,
-              autoComplete: "off",
-              list: "companies",
+            nativeSelectProps={{
               ...register("siren"),
             }}
-          />
-          <datalist id="companies">
-            {companies.map(company => (
+          >
+            <option value="" disabled>
+              Sélectionnez une entreprise
+            </option>
+            {sortBy(companies, "siren").map(company => (
               <option key={company.siren} value={company.siren}>
-                {company.label ?? ""}
+                {company.siren}
+                {company.label ? ` (${company.label})` : ""}
               </option>
             ))}
-          </datalist>
-          <ClientAnimate>
-            {errors.siren?.message === OWNER_ERROR && (
-              <Alert
-                title="Siren non associé"
-                severity="warning"
-                description={`Votre compte (${session?.user.email}) n'est pas rattaché au SIREN sélectionné. Si vous pensez qu'il s'agit d'une erreur, merci de vous rapprocher de MonComptePro afin de valider votre appartenance à cette entreprise.`}
-              />
-            )}
-          </ClientAnimate>
+          </Select>
           <ButtonsGroup
             inlineLayoutWhen="sm and up"
             buttons={[

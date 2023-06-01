@@ -30,8 +30,6 @@ export const config = {
         whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
       },
       declaV2: this.env === "dev",
-      moncomptepro: this.env === "dev",
-      loginV2: this.env === "dev",
     };
   },
   api: {

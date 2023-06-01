@@ -1,12 +1,10 @@
-import { fr } from "@codegouvfr/react-dsfr";
+import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { CenteredContainer, Heading } from "@design-system";
-import { notFound } from "next/navigation";
+import { Box, CenteredContainer } from "@design-system";
+import Link from "next/link";
 import { getServerSession } from "next-auth";
 
-import { EmailLogin } from "./EmailLogin";
 import { MonCompteProLogin } from "./MonCompteProLogin";
 
 const title = "Connexion";
@@ -33,18 +31,10 @@ const signinErrors: Record<string, string> = {
   default: "Impossible de se connecter.",
 };
 
-const mailDevUrl = config.host.startsWith("http://localhost")
-  ? "http://localhost:1080/"
-  : config.host.replace("https://", "https://maildev-");
-
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
-  // not in middleware because next-auth middleware filter this page from our middleware feature flags
-  if (!config.ff.loginV2) {
-    console.log("LoginV2 disabled, redirecting 404");
-    notFound();
-  }
+  const session = await getServerSession(authConfig);
+  const monCompteProHost = monCompteProProvider.issuer;
 
-  const session = await getServerSession();
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
 
@@ -52,7 +42,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
     <CenteredContainer>
       <h1>{title}</h1>
       {session?.user ? (
-        <Heading as="h4" text="Vous êtes déjà connecté·e." />
+        <Alert severity="success" title={session?.user.email} description="Vous êtes déjà connecté·e." />
       ) : (
         <>
           {error && (
@@ -65,20 +55,32 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               <br />
             </>
           )}
-
-          <EmailLogin callbackUrl={callbackUrl} />
-          {config.env !== "prod" && (
-            <a href={mailDevUrl} target="_blank">
-              Debug: Ouvrir MailDev
-            </a>
-          )}
-          {config.ff.moncomptepro && (
-            <>
-              <hr className={fr.cx("fr-mt-4w")} />
-              <MonCompteProLogin callbackUrl={callbackUrl} />
-              {/* TODO add "Qu'est-ce que MCP" */}
-            </>
-          )}
+          <Alert
+            severity="info"
+            title="Identification unique"
+            description={
+              <>
+                Afin de simplifier et sécuriser votre parcours, Egapro utilise le service d'identification MonComptePro
+                afin de garantir l'appartenance de ses utilisateurs aux entreprises déclarantes.
+                <br />
+                <br />
+                Le compte utilisé doit correspondre à celui de la personne à contacter par les services de l'inspection
+                du travail en case de besoin. L'email associé sera celui sur lequel sera adressé l'accusé de réception
+                en fin de déclaration.
+                <br />
+                <br />
+                Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez vous assurez que
+                votre compte est{" "}
+                <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+                  rattaché à votre entreprise
+                </Link>
+                .
+              </>
+            }
+          />
+          <Box style={{ textAlign: "center" }} mt="2w">
+            <MonCompteProLogin callbackUrl={callbackUrl} />
+          </Box>
         </>
       )}
     </CenteredContainer>

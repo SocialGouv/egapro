@@ -1837,10 +1837,10 @@
   resolved "https://registry.yarnpkg.com/@chakra-ui/visually-hidden/-/visually-hidden-2.0.12.tgz#e4bb4983ed16dbdb7e8e84c29e81e3e493661284"
   integrity sha512-5Vn21NpAol5tX5OKJlMh4pfTlX98CNhrbA29OGZyfPzNjXw2ZQo0iDUPG4gMNa9EdbVWpbbRmT6l6R6ObatEUw==
 
-"@codegouvfr/react-dsfr@^0.57.4":
-  version "0.57.4"
-  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.57.4.tgz#bf94f2ded60cfd94b76cdd3c909625fdcca9ea2e"
-  integrity sha512-W7aoJJCEZqYYXBHINow6GW6V2BRgpgJj3tduHwLe1kDZYx3l4DdKRFLmKffBHprzJv3KyGkWegE95+dFM9Ik2g==
+"@codegouvfr/react-dsfr@^0.58.5":
+  version "0.58.5"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.58.5.tgz#37dc962afc3fe961a1fe624bc1c1efb4812bed99"
+  integrity sha512-gNhO5mTRAD9oKwvKAxD2lKSUq4rpC+igFyIWmhguNjyvEYV54TaC8Yv4SULU+iONRd8mq7T7Snhuw71BsH8W1g==
   dependencies:
     tsafe "^1.6.3"
 
@@ -13638,6 +13638,11 @@ react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
+
+react-loading-skeleton@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/react-loading-skeleton/-/react-loading-skeleton-3.3.1.tgz#cd6e3a626ee86c76a46c14e2379243f2f8834e1b"
+  integrity sha512-NilqqwMh2v9omN7LteiDloEVpFyMIa0VGqF+ukqp0ncVlYu1sKYbYGX9JEl+GtOT9TKsh04zCHAbavnQ2USldA==
 
 react-onclickoutside@^6.12.0:
   version "6.12.2"
