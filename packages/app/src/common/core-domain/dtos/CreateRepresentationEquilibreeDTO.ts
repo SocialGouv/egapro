@@ -1,3 +1,4 @@
+import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
 
@@ -19,8 +20,13 @@ export const createSteps = {
     gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
     email: z.string().email(),
   }),
+  periodeReference: z.object({
+    endOfPeriod: z.string().nonempty("La date est requise"),
+  }),
 } as const;
 
-export const createRepresentationEquilibreeDTO = createSteps.commencer.and(createSteps.declarant);
+export const createRepresentationEquilibreeDTO = createSteps.commencer
+  .and(createSteps.declarant)
+  .and(createSteps.periodeReference);
 
-export type CreateRepresentationEquilibreeDTO = z.infer<typeof createRepresentationEquilibreeDTO>;
+export type CreateRepresentationEquilibreeDTO = ClearObject<z.infer<typeof createRepresentationEquilibreeDTO>>;

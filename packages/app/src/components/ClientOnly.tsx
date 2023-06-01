@@ -1,13 +1,12 @@
-import { type PropsWithChildren } from "react";
-import { useEffect, useState } from "react";
+import { type SuspenseProps, useEffect, useState } from "react";
 
-export const ClientOnly = ({ children, ...delegated }: PropsWithChildren) => {
+export const ClientOnly = ({ children, fallback }: SuspenseProps) => {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
   }, []);
   if (!hasMounted) {
-    return null;
+    return <>{fallback}</>;
   }
-  return <div {...delegated}>{children}</div>;
+  return <>{children}</>;
 };
