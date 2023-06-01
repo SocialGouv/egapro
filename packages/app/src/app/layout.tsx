@@ -17,10 +17,12 @@ import { type PropsWithChildren, Suspense } from "react";
 import { defaultColorScheme } from "./defaultColorScheme";
 import { SessionProvider } from "./SessionProvider";
 
+const description =
+  "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
+
 export const metadata = {
   metadataBase: new URL(config.host),
-  description:
-    "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.",
+  description,
   title: {
     template: "Egapro - %s",
     default: "Egapro",
@@ -30,6 +32,7 @@ export const metadata = {
       template: "Egapro - %s",
       default: "Egapro",
     },
+    description,
   },
 };
 

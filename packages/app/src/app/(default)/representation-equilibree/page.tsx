@@ -5,14 +5,16 @@ import { ParagrapheList } from "@components/ParagrapheList";
 import { Box, Container, Grid, GridCol, ImgRepresentationEquilibree } from "@design-system";
 import Link from "next/link";
 
+const title = "Déclaration des écarts de représentation F/H dans les postes de direction";
+const description =
+  "La loi du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation équilibrée entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes des grandes entreprises, accompagnée d’une obligation de transparence en la matière.";
+
 export const metadata = {
-  title: "Déclaration des écarts de représentation F/H dans les postes de direction",
-  description:
-    "La loi du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation équilibrée entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes des grandes entreprises, accompagnée d’une obligation de transparence en la matière.",
+  title,
+  description,
   openGraph: {
-    title: "Déclaration des écarts de représentation F/H dans les postes de direction",
-    description:
-      "La loi du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation équilibrée entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes des grandes entreprises, accompagnée d’une obligation de transparence en la matière.",
+    title,
+    description,
   },
 };
 const RepresentationEquilibree = () => (

@@ -325,7 +325,15 @@ export const COUNTY_TO_REGION = Object.entries(REGIONS_TO_COUNTIES).reduce(
   {} as Record<keyof typeof COUNTIES, keyof typeof REGIONS>,
 );
 
-export const adressLabel = ({
+export const inseeCodeToCounty = (code: string) => {
+  const countyCode = code.substring(0, code.startsWith("97") ? 3 : 2) as keyof COUNTIES;
+  if (COUNTIES[countyCode]) {
+    return countyCode;
+  }
+  return null;
+};
+
+export const addressLabel = ({
   county,
   region,
 }: {

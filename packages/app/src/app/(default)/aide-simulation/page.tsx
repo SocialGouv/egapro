@@ -2,10 +2,15 @@ import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } fr
 import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
+const title = "Aide simulation";
+const description = "Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes";
+
 export const metadata = {
-  title: "Aide simulation",
+  title,
+  description,
   openGraph: {
-    title: "Aide simulation",
+    title,
+    description,
   },
 };
 
@@ -14,7 +19,7 @@ const AideSimulation = () => {
     <Container py="8w">
       <Grid align="center">
         <GridCol md={10} lg={8}>
-          <h1>Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes</h1>
+          <h1>{description}</h1>
           <p>
             Pour consulter la FAQ sur le site du ministère du travail, cliquez{" "}
             <Link

@@ -1,9 +1,10 @@
 import { Container, Grid, GridCol, Link } from "@design-system";
 
+const title = "Mentions légales";
 export const metadata = {
-  title: "Mentions légales",
+  title,
   openGraph: {
-    title: "Mentions légales",
+    title,
   },
 };
 
@@ -13,7 +14,7 @@ const LegalNotice = () => {
       <Container py="8w">
         <Grid align="center">
           <GridCol md={10} lg={8}>
-            <h1>Mentions légales</h1>
+            <h1>{title}</h1>
             <h2>Éditeur de la plateforme</h2>
             <p>Index Egapro est édité par la Fabrique Numérique des Ministères sociaux.</p>
             <ul>

@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import { adressLabel, type WORKFORCES } from "@common/dict";
+import { addressLabel, type WORKFORCES } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import Link from "next/link";
 import { useState } from "react";
@@ -72,7 +72,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
               {isUES && ues.name.trim() ? `${ues.name} (${name})` : name}
             </TileCompanyTitle>
             <TileCompanySiren>{siren}</TileCompanySiren>
-            <TileCompanyLocation>{adressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
+            <TileCompanyLocation>{addressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
           </GridCol>
           <GridCol sm={3}>
             <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>

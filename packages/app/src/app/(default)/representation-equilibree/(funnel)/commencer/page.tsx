@@ -13,7 +13,6 @@ export const metadata = {
   openGraph: {
     title,
   },
-  robots: "noindex, nofollow",
 };
 
 const CommencerPage = async () => {

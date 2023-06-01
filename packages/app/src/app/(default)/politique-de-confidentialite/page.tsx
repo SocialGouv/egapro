@@ -3,10 +3,12 @@ import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBan
 import { Container, Grid, GridCol } from "@design-system";
 import Link from "next/link";
 
+const title = "Politique de confidentialité";
+
 export const metadata = {
-  title: "Politique de confidentialité",
+  title,
   openGraph: {
-    title: "Politique de confidentialité",
+    title,
   },
 };
 

@@ -1,14 +1,16 @@
 import { Container, Grid, GridCol } from "@design-system";
 import Link from "next/link";
 
+const title = "Conditions d’utilisation";
+const description =
+  "Les présentes conditions générales d’utilisation (dites «CGU») fixent le cadre juridique de la Plateforme EgaPro et définissent les conditions d’accès et d’utilisation des services par l’Utilisateur.";
+
 export const metadata = {
-  title: "Conditions d’utilisation",
-  description:
-    "Les présentes conditions générales d’utilisation (dites «CGU») fixent le cadre juridique de la Plateforme EgaPro et définissent les conditions d’accès et d’utilisation des services par l’Utilisateur.",
+  title,
+  description,
   openGraph: {
-    title: "Conditions d’utilisation",
-    description:
-      "Les présentes conditions générales d’utilisation (dites «CGU») fixent le cadre juridique de la Plateforme EgaPro et définissent les conditions d’accès et d’utilisation des services par l’Utilisateur.",
+    title,
+    description,
   },
 };
 
@@ -17,7 +19,7 @@ const Cgu = () => {
     <Container py="8w">
       <Grid align="center">
         <GridCol md={10} lg={8}>
-          <h1>Conditions d’utilisation</h1>
+          <h1>{title}</h1>
           <p>
             Les présentes conditions générales d’utilisation (dites «CGU») fixent le cadre juridique de la Plateforme
             EgaPro et définissent les conditions d’accès et d’utilisation des services par l’Utilisateur.

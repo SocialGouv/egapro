@@ -2,6 +2,7 @@ import { CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 const title = "Représentation Équilibrée Egapro";
+
 export const metadata = {
   title: {
     template: `%s - ${title}`,
@@ -13,6 +14,7 @@ export const metadata = {
       default: title,
     },
   },
+  robots: "noindex, nofollow",
 };
 
 const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
