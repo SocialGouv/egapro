@@ -41,18 +41,7 @@ export type DeclarationFormState = {
     prénom: string;
     téléphone: string;
   };
-  entreprise?:
-    | { tranche: TrancheValues } & (
-        | {
-            name: string;
-            sirens: string[];
-
-            type: "ues";
-          }
-        | {
-            type: "entreprise";
-          }
-      );
+  entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
   hautes_rémunerations?: {
     résultat: number;
     sexeSurRepresente: Sexe;
@@ -78,6 +67,10 @@ export type DeclarationFormState = {
   rémunerations?: {
     estCalculable: boolean;
     modalité: "coef autre" | "coef branche" | "csp";
+  };
+  ues?: {
+    name: string;
+    sirens: string[];
   };
   //   endOfPeriod?: string;
   //   hasWebsite: boolean;

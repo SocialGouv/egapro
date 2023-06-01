@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientOnly } from "@components/ClientOnly";
 import {
   RecapSection,
   RecapSectionItem,
@@ -10,7 +11,7 @@ import {
 } from "@components/next13/RecapSection";
 import { fetcher, useConfig } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/declarationFormBuilder";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 
 /**
  * Build address on 2 lines.
@@ -24,16 +25,17 @@ const formatAdresse = (entreprise: DeclarationFormState["_entrepriseDéclarante"
 
 export const InformationEntreprise = () => {
   const { formData } = useDeclarationFormManager();
-  const { config } = useConfig(fetcher);
-  const { nafLabelFromCode } = config;
+
+  const {
+    config: { nafLabelFromCode },
+  } = useConfig(fetcher);
 
   const address = formatAdresse(formData._entrepriseDéclarante);
 
   return (
-    // <div style={{ border: "1px solid red", padding: 10 }}>
-    <div>
-      <RecapSection>
-        <RecapSectionTitle>Informations de l’entreprise déclarante</RecapSectionTitle>
+    <RecapSection>
+      <RecapSectionTitle>Informations de l’entreprise déclarante</RecapSectionTitle>
+      <ClientOnly>
         <RecapSectionItems>
           <RecapSectionItem>
             <RecapSectionItemLegend>Raison sociale</RecapSectionItemLegend>
@@ -57,7 +59,7 @@ export const InformationEntreprise = () => {
             </RecapSectionItemContent>
           </RecapSectionItem>
         </RecapSectionItems>
-      </RecapSection>
-    </div>
+      </ClientOnly>
+    </RecapSection>
   );
 };

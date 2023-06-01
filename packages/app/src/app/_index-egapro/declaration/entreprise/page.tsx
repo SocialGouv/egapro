@@ -26,7 +26,7 @@ const InformationsEntreprisePage = () => {
         ]}
       />
 
-      <Stepper currentStep={2} nextTitle="Informations de l'entreprise / UES" stepCount={3} title={title} />
+      <Stepper currentStep={2} nextTitle="Informations calcul et période de référence" stepCount={3} title={title} />
 
       <Alert
         severity="info"
@@ -42,7 +42,7 @@ const InformationsEntreprisePage = () => {
         className={cx("fr-mb-4w")}
       />
 
-      <InformationEntreprise siren="123456789" />
+      <InformationEntreprise />
 
       <div className={cx("fr-mt-4w")}></div>
 

@@ -1,4 +1,4 @@
-import { type DeclarationFormState } from "@services/form/declaration/declarationFormBuilder";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
