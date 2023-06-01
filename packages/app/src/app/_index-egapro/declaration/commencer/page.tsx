@@ -5,7 +5,7 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
 import { SirenYearForm } from "./SirenYearForm";
 
-const SirenYearPage = () => {
+const CommencerPage = () => {
   return (
     <>
       <Breadcrumb
@@ -43,4 +43,4 @@ const SirenYearPage = () => {
   );
 };
 
-export default SirenYearPage;
+export default CommencerPage;

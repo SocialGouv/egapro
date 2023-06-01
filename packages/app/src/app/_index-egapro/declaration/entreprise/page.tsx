@@ -8,7 +8,7 @@ import { InformationEntreprise } from "./InformationEntreprise";
 
 const title = "Informations de l'entreprise / UES";
 
-const InformationsEntreprise = () => {
+const InformationsEntreprisePage = () => {
   return (
     <>
       <Breadcrumb
@@ -51,4 +51,4 @@ const InformationsEntreprise = () => {
   );
 };
 
-export default InformationsEntreprise;
+export default InformationsEntreprisePage;

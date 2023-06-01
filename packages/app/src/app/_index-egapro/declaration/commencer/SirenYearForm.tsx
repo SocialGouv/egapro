@@ -10,11 +10,9 @@ import { GlobalMessage, type Message } from "@components/next13/GlobalMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkSiren, memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
-import {
-  DeclarationBuilder,
-  type DeclarationFormState,
-  useDeclarationFormManager,
-} from "@services/apiClient/useDeclarationFormManager";
+import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/declarationFormBuilder";
+import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -108,7 +106,7 @@ export const SirenYearForm = () => {
     const previousDeclaration = await fetchDeclaration(siren, year, { throwErrorOn404: false });
 
     if (previousDeclaration) {
-      const newFormState = DeclarationBuilder.toFormState(previousDeclaration.data);
+      const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
 
       return { ...newFormState, _metadata: { ...newFormState._metadata, status: "edition" as const } };
     }
@@ -121,7 +119,7 @@ export const SirenYearForm = () => {
         status: "creation" as const,
       },
       _entrepriseDéclarante: {
-        ...entreprise,
+        ...buildEntreprise(entreprise),
       },
       commencer: {
         siren,
