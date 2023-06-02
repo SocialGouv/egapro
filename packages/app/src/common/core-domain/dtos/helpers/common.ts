@@ -1,5 +1,6 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { COUNTIES_IDS, NAF_SECTIONS, REGIONS_IDS, YEARS_REPEQ } from "@common/dict";
+import { Percentage } from "@common/shared-domain/domain/valueObjects";
 import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
@@ -11,6 +12,12 @@ export const nafSectionSchema = z.enum(
 );
 
 export const sirenSchema = z.string().superRefine(zodValueObjectSuperRefine(Siren));
+
+export const percentageSchema = z
+  .number({ invalid_type_error: "Le pourcentage est requis et doit être valide" })
+  .nonnegative("Le pourcentage doit être positif")
+  .lte(100, "Le pourcentage maximum est de 100%")
+  .superRefine(zodValueObjectSuperRefine(Percentage));
 
 export const repeqYearSchema = z
   .number()

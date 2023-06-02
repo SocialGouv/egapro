@@ -2,8 +2,10 @@ import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
 
+import { NotComputableReasonExecutiveRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { NotComputableReasonMemberRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { FrenchPhoneNumber } from "../domain/valueObjects/FrenchPhoneNumber";
-import { repeqYearSchema, sirenSchema } from "./helpers/common";
+import { percentageSchema, repeqYearSchema, sirenSchema } from "./helpers/common";
 
 export const createSteps = {
   commencer: z.object({
@@ -23,10 +25,36 @@ export const createSteps = {
   periodeReference: z.object({
     endOfPeriod: z.string().nonempty("La date est requise"),
   }),
+  ecartsCadres: z
+    .object({
+      notComputableReasonExecutives: z.nativeEnum(NotComputableReasonExecutiveRepEq.Enum, {
+        required_error: "Un motif de non calculabilité est requis",
+      }),
+    })
+    .or(
+      z.object({
+        executiveWomenPercent: percentageSchema,
+        executiveMenPercent: percentageSchema,
+      }),
+    ),
+  ecartsMembres: z
+    .object({
+      notComputableReasonMembers: z.nativeEnum(NotComputableReasonMemberRepEq.Enum, {
+        required_error: "Un motif de non calculabilité est requis",
+      }),
+    })
+    .or(
+      z.object({
+        memberWomenPercent: percentageSchema,
+        memberMenPercent: percentageSchema,
+      }),
+    ),
 } as const;
 
 export const createRepresentationEquilibreeDTO = createSteps.commencer
   .and(createSteps.declarant)
-  .and(createSteps.periodeReference);
+  .and(createSteps.periodeReference)
+  .and(createSteps.ecartsCadres)
+  .and(createSteps.ecartsMembres);
 
 export type CreateRepresentationEquilibreeDTO = ClearObject<z.infer<typeof createRepresentationEquilibreeDTO>>;

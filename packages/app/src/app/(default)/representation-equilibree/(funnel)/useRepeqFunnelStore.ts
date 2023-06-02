@@ -27,8 +27,8 @@ export const useRepeqFunnelStore = create<RepeqFunnelStore>()(
           funnel: { ...get().funnel, ...funnel },
         }),
       resetFunnel: () =>
-        set(state => {
-          delete state.funnel;
+        set({
+          funnel: void 0,
         }),
     })),
     {
