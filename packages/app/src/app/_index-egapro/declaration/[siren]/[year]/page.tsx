@@ -4,8 +4,6 @@ import { config } from "@common/config";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { DeclarationSummary } from "@components/DeclarationSummary";
 import { FeatureStatusProvider } from "@components/FeatureStatusProvider";
-import { OwnersOnly } from "@components/OwnersOnly";
-import { ParamsChecker } from "@components/ParamsChecker";
 import {
   Alert,
   AlertTitle,
@@ -114,11 +112,11 @@ const RecapitulatifPage = ({ params }: { params: any }) => {
   return (
     <FeatureStatusProvider>
       <h1>{title}</h1>
-      <ParamsChecker schema={schemaParams}>
-        <OwnersOnly siren={siren}>
-          <DeclarationWithNavigation siren={siren} year={year} />
-        </OwnersOnly>
-      </ParamsChecker>
+      {/* <ParamsChecker schema={schemaParams}>
+        <OwnersOnly siren={siren}> */}
+      <DeclarationWithNavigation siren={siren} year={year} />
+      {/* </OwnersOnly>
+      </ParamsChecker> */}
     </FeatureStatusProvider>
   );
 };

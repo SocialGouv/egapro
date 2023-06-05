@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { checkSiren, memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/declarationFormBuilder";
+import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -129,14 +129,21 @@ export const SirenYearForm = () => {
     };
   };
 
-  const getNextPage = () =>
-    formData._metadata?.status === "edition"
+  const getNextPage = (data?: DeclarationFormState) =>
+    data?._metadata?.status === "edition"
       ? `${config.base_declaration_url}/${siren}/${year}`
       : `${config.base_declaration_url}/entreprise`;
 
   const saveAndExit = async ({ year, siren }: FormType) => {
-    saveFormData(await prepareDataWithExistingDeclaration(siren, Number(year)));
-    router.push(getNextPage());
+    const newData = await prepareDataWithExistingDeclaration(siren, Number(year));
+
+    saveFormData(newData);
+
+    const nextPage = getNextPage(newData);
+
+    console.log("nextPage:", nextPage);
+
+    router.push(getNextPage(newData));
   };
 
   const onSubmit = async ({ year, siren }: FormType) => {
