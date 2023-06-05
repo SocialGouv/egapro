@@ -3,6 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { config } from "@common/config";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
@@ -130,8 +131,8 @@ export const SirenYearForm = () => {
 
   const getNextPage = () =>
     formData._metadata?.status === "edition"
-      ? `/_index-egapro/declaration/${siren}/${year}`
-      : "/_index-egapro/declaration/entreprise";
+      ? `${config.base_declaration_url}/${siren}/${year}`
+      : `${config.base_declaration_url}/entreprise`;
 
   const saveAndExit = async ({ year, siren }: FormType) => {
     saveFormData(await prepareDataWithExistingDeclaration(siren, Number(year)));

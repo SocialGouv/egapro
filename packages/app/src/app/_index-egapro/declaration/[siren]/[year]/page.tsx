@@ -60,11 +60,14 @@ const DeclarationWithNavigation = ({ siren, year }: { siren: string; year: numbe
       <DeclarationSummary data={declaration?.data} />
       <FormLayout>
         <FormLayoutButtonGroup>
-          <FormButton onClick={() => router.push("/_index-egapro/declaration/commencer")} variant="secondary">
+          <FormButton onClick={() => router.push(`${config.base_declaration_url}/commencer`)} variant="secondary">
             Précédent
           </FormButton>
           {!olderThanOneYear && (
-            <FormButton onClick={() => router.push("/_index-egapro/declaration/declarant")} disabled={olderThanOneYear}>
+            <FormButton
+              onClick={() => router.push(`${config.base_declaration_url}/declarant`)}
+              disabled={olderThanOneYear}
+            >
               Modifier
             </FormButton>
           )}

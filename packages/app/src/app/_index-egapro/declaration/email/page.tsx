@@ -1,5 +1,6 @@
 "use client";
 
+import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/FeatureStatusProvider";
 import { EmailAuthenticator } from "@components/next13/EmailAuthenticator";
 import { useUserNext13 } from "@services/apiClient/useUserNext13";
@@ -13,7 +14,7 @@ const EmailPage = () => {
   const router = useRouter();
   const { user } = useUserNext13();
 
-  const defaultRedirectTo = "/_index-egapro/declaration/commencer";
+  const defaultRedirectTo = config.base_declaration_url + "/commencer";
 
   if (user) router.push(defaultRedirectTo);
 

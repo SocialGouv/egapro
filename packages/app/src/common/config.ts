@@ -17,6 +17,9 @@ export const config = {
   get apiv2_url() {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
   },
+  get base_declaration_url() {
+    return "/_index-egapro/declaration";
+  },
   matomo: {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),

@@ -1,5 +1,6 @@
 "use client";
 
+import { config } from "@common/config";
 import { AlertEdition } from "@components/AlertEdition";
 import { FeatureStatusProvider } from "@components/FeatureStatusProvider";
 import {
@@ -151,7 +152,7 @@ const DeclarantPage: NextPageWithLayout = () => {
             )}
           </FormGroup>
           <FormLayoutButtonGroup>
-            <ButtonAsLink href="/_index-egapro/declaration/commencer" variant="secondary">
+            <ButtonAsLink href={`${config.base_declaration_url}/commencer`} variant="secondary">
               Précédent
             </ButtonAsLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>

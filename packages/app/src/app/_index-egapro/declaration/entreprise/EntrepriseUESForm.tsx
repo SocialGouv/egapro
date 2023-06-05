@@ -3,6 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { config } from "@common/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -20,7 +21,7 @@ const formSchema = z.object({
 type FormType = z.infer<typeof formSchema>;
 
 export const EntrepriseUESForm = (props: PropsWithChildren) => {
-  const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
+  const { formData, savePageData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
   const router = useRouter();
 
@@ -40,10 +41,10 @@ export const EntrepriseUESForm = (props: PropsWithChildren) => {
   const type = watch("type");
 
   const onSubmit = async (data: FormType) => {
-    saveFormData({ entreprise: data as DeclarationFormState["entreprise"] });
+    savePageData("entreprise", data as DeclarationFormState["entreprise"]);
 
-    if (type === "ues") router.push("/_index-egapro/declaration/ues");
-    else router.push("/_index-egapro/declaration/periode-reference");
+    if (type === "ues") router.push(`${config.base_declaration_url}/ues`);
+    else router.push(`${config.base_declaration_url}/periode-reference`);
   };
 
   return (
@@ -98,8 +99,8 @@ export const EntrepriseUESForm = (props: PropsWithChildren) => {
         ]}
       />
       <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-        <Button type="reset" priority="secondary" disabled={isDirty}>
-          Réinitialiser
+        <Button priority="secondary" onClick={() => router.push("/")}>
+          Précédent
         </Button>
         <Button disabled={!isValid}>Suivant</Button>
       </div>

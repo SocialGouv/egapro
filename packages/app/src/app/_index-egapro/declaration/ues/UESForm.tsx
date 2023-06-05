@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { config } from "@common/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -41,8 +42,8 @@ export const UESForm = (props: PropsWithChildren) => {
   const onSubmit = async (data: FormType) => {
     saveFormData({ entreprise: data as DeclarationFormState["entreprise"] });
 
-    if (type === "ues") router.push("/_index-egapro/declaration/ues");
-    else router.push("/_index-egapro/declaration/periode-reference");
+    if (type === "ues") router.push(`${config.base_declaration_url}/ues`);
+    else router.push(`${config.base_declaration_url}/periode-reference`);
   };
 
   return (
