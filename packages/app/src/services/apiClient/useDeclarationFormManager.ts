@@ -11,6 +11,7 @@ const formDataDefault: DeclarationFormState = {
 type FormActions = {
   resetFormData: () => void;
   saveFormData: (data: Partial<DeclarationFormState>) => void;
+  savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) => void;
 };
 
 /**
@@ -26,6 +27,8 @@ export const useDeclarationFormManager = create<FormActions & { formData: Declar
     (set, get) => ({
       formData: formDataDefault,
       saveFormData: (data: Partial<DeclarationFormState>) => set({ formData: { ...get().formData, ...data } }),
+      savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
+        set({ formData: { ...get().formData, [page]: data } }),
       resetFormData: () =>
         set({
           formData: formDataDefault,
