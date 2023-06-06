@@ -5,7 +5,7 @@ import { type DOMAttributes, type PropsWithChildren, useRef } from "react";
 
 export interface SimpleSubmitFormProps extends PropsWithChildren {
   /** Default to current pathname */
-  action?: string;
+  action?: string | ((formData: FormData) => void);
   noValidate?: boolean;
   /** If `true`, `router.replace` is used instead of `router.push` */
   replace?: boolean;
@@ -28,7 +28,11 @@ export const SimpleSubmitForm = ({ children, action, replace = false, noValidate
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate={noValidate}>
+    <form
+      ref={formRef}
+      noValidate={noValidate}
+      {...(typeof action === "function" ? { action } : { onSubmit: handleSubmit })}
+    >
       {children}
     </form>
   );

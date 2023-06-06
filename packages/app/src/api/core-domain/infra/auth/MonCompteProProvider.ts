@@ -32,6 +32,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
     type: "oauth",
     issuer,
     wellKnown: `${issuer}/.well-known/openid-configuration`,
+    allowDangerousEmailAccountLinking: true,
     authorization: {
       params: {
         scope: "openid email profile organizations",
