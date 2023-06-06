@@ -1,4 +1,3 @@
-import { authBaseConfig } from "@api/core-domain/infra/auth/config";
 import { config as _config } from "@common/config";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
@@ -25,7 +24,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
   const { token } = req.nextauth;
   if (!token?.email) {
     if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.redirect(`/login?callbackUrl=${encodeURIComponent(href)}`);
+      return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
     }
   } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
@@ -40,7 +39,7 @@ export const middleware = withAuth(
   nextMiddleware,
   // Next auth config - will run **before** middleware
   {
-    ...authBaseConfig,
+    secret: _config.api.security.auth.secret,
     callbacks: {
       authorized: () => true,
     },

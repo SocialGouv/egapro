@@ -22,7 +22,7 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { type NextPageWithLayout } from "../../../../pages/_app";
+import { type NextPageWithLayout } from "../../../../_pages/_app";
 
 const title = "Informations déclarant";
 
