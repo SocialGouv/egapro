@@ -21,7 +21,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { type NextPageWithLayout } from "../../../../pages/_app";
+import { type NextPageWithLayout } from "../../../../_pages/_app";
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 

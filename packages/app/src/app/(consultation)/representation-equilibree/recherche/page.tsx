@@ -15,11 +15,15 @@ import { DisplayRepeqResults } from "./DisplayRepeqResults";
 
 export const dynamic = "force-dynamic";
 
+const title = "Représentation équilibrée";
+const description = "Page de recherche de la représentation équilibrée";
+
 export const metadata = {
-  title: "Représentation équilibrée",
-  description: "Page de recherche de la représentation équilibrée",
+  title,
+  description,
   openGraph: {
-    title: "Représentation équilibrée",
+    title,
+    description,
   },
 };
 

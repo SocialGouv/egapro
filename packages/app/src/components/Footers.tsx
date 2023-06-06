@@ -1,4 +1,4 @@
-import { consentModalButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
+import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { config } from "@common/config";
 import {
   Footer,
@@ -77,11 +77,7 @@ export const EntrepriseFooter = () => {
           </FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <button
-            {...consentModalButtonProps.nativeButtonProps}
-            onClick={consentModalButtonProps.onClick}
-            className="fr-footer__bottom-link"
-          >
+          <button {...consentModalNativeButtonProps} className="fr-footer__bottom-link">
             Gestion des cookies
           </button>
         </FooterBottomItem>
@@ -135,11 +131,7 @@ export const PublicFooter = () => {
           <FooterBottomLink href="/politique-de-confidentialite">Politique de confidentialité</FooterBottomLink>
         </FooterBottomItem>
         <FooterBottomItem>
-          <button
-            {...consentModalButtonProps.nativeButtonProps}
-            onClick={consentModalButtonProps.onClick}
-            className="fr-footer__bottom-link"
-          >
+          <button {...consentModalNativeButtonProps} className="fr-footer__bottom-link">
             Gestion des cookies
           </button>
         </FooterBottomItem>
