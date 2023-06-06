@@ -10,7 +10,7 @@ import { storePicker } from "@common/utils/zustand";
 import { PercentagesPairInputs } from "@components/rdsfr/PercentagesPairInputs";
 import { Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
@@ -39,13 +39,13 @@ export const EcartsCadresForm = () => {
   } = methods;
 
   useEffect(() => {
-    console.log({ funnel });
-    if (!funnel) return;
+    if (!funnel) redirect("/representation-equilibree/commencer");
     if ("notComputableReasonExecutives" in funnel) {
       setComputable(false);
     } else if ("executiveWomenPercent" in funnel) {
       setComputable(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- need to be triggered on mount
   }, []);
 
   const onSubmit = (data: EcartsCadresFormType) => {

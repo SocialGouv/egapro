@@ -36,7 +36,7 @@ export const PeriodeReferenceForm = () => {
 
   useEffect(() => {
     if (!funnel?.year) redirect("/representation-equilibree/commencer");
-  }, []);
+  }, [funnel?.year]);
 
   const {
     formState: { errors, isValid },
