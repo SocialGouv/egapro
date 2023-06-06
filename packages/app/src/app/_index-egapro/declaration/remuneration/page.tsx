@@ -4,7 +4,7 @@ import { RemunerationForm } from "./RemunerationForm";
 
 const title = "Écart de rémunération entre les femmes et les hommes";
 
-const InformationsEntreprisePage = () => {
+const RemunerationPage = () => {
   return (
     <>
       <Stepper
@@ -19,4 +19,4 @@ const InformationsEntreprisePage = () => {
   );
 };
 
-export default InformationsEntreprisePage;
+export default RemunerationPage;

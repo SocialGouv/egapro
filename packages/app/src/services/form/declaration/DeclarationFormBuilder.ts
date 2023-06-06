@@ -19,6 +19,13 @@ export type TrancheValues = (typeof TrancheOptions)[number]["value"];
 
 type Sexe = Enum.ToString<typeof FavorablePopulation.Enum>;
 
+type TranchesAge = {
+  "30:39": number;
+  "40:49": number;
+  "50:": number;
+  ":29": number;
+};
+
 /**
  * The shape of the state for declaration form.
  */
@@ -72,6 +79,17 @@ export type DeclarationFormState = {
     estCalculable: OuiNon;
     modalité: "csp" | "niveau_autre" | "niveau_branche";
     motifNC?: "egvi40pcet"; // Effectif des groupes valides inférieur à 40% de l'effectif total;
+  };
+  rémunérations_coefficients?: {
+    coefficients: Array<{ data: TranchesAge; name: string }>;
+  };
+  rémunérations_csp?: {
+    coefficients: [
+      { data: TranchesAge; name: "ouv" },
+      { data: TranchesAge; name: "emp" },
+      { data: TranchesAge; name: "tam" },
+      { data: TranchesAge; name: "ic" },
+    ];
   };
   ues?: {
     name: string;

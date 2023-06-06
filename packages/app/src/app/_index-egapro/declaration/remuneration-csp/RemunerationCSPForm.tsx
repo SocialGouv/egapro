@@ -13,7 +13,6 @@ import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { pick } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -49,22 +48,7 @@ const formSchema = z
 type FormType = z.infer<typeof formSchema>;
 1;
 
-/**
- * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
- */
-const formatData = (data: FormType) => {
-  if (data.estCalculable === "non") {
-    return pick(data, "estCalculable", "déclarationCalculCSP", "motifNC");
-  } else if (data.modalité === "csp") {
-    return pick(data, "estCalculable", "modalité");
-  } else if (data.cse === "oui") {
-    return pick(data, "estCalculable", "modalité", "cse", "dateConsultationCSE");
-  } else {
-    return pick(data, "estCalculable", "modalité", "cse");
-  }
-};
-
-export const RemunerationForm = () => {
+export const RemunerationCSPForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
 
@@ -93,11 +77,7 @@ export const RemunerationForm = () => {
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("rémunérations", formatData(data) as DeclarationFormState["rémunérations"]);
-
-    router.push(
-      `${config.base_declaration_url}/${modalité === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`,
-    );
+    savePageData("rémunérations", data as DeclarationFormState["rémunérations"]);
   };
 
   return (
@@ -206,7 +186,7 @@ export const RemunerationForm = () => {
           </>
         )}
         <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-          <ButtonAsLink href={`${config.base_declaration_url}/periode-reference`} variant="secondary">
+          <ButtonAsLink href={`${config.base_declaration_url}/remuneration`} variant="secondary">
             Précédent
           </ButtonAsLink>
 
