@@ -1,16 +1,53 @@
 import "./StartDsfr";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
+import Display from "@codegouvfr/react-dsfr/Display";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getColorSchemeHtmlAttributes";
+import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
+import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
+import type Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
 import { SessionProvider } from "./SessionProvider";
+
+const description =
+  "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
+
+export const metadata = {
+  metadataBase: new URL(config.host),
+  description,
+  title: {
+    template: "Egapro - %s",
+    default: "Egapro",
+  },
+  openGraph: {
+    title: {
+      template: "Egapro - %s",
+      default: "Egapro",
+    },
+    description,
+  },
+};
+
+declare module "@codegouvfr/react-dsfr/next-appdir" {
+  interface RegisterLink {
+    Link: typeof Link;
+  }
+}
+
+declare module "@codegouvfr/react-dsfr/gdpr" {
+  interface RegisterGdprServices {
+    egapro: true;
+    matomo: never;
+  }
+}
 
 const RootLayout = ({ children }: PropsWithChildren) => (
   <html lang="fr" {...getColorSchemeHtmlAttributes({ defaultColorScheme })}>
@@ -37,22 +74,48 @@ const RootLayout = ({ children }: PropsWithChildren) => (
     </head>
     <body>
       <FeatureStatusProvider>
-        <SessionProvider basePath="/apiv2/auth">
+        <SessionProvider basePath="/apiv2/auth" refetchOnWindowFocus>
           <DsfrProvider defaultColorScheme={defaultColorScheme}>
-            <ConsentBanner
-              gdprLinkProps={{
-                href: "/politique-de-confidentialite#cookies",
-              }}
-              siteName="Egapro"
-              services={[
-                {
-                  name: "matomo",
-                  title: "Matomo",
-                  description: "Outil d’analyse comportementale des utilisateurs.",
-                },
-              ]}
-            />
-            {children}
+            <IsomorphicSkeletonTheme
+              baseColor="var(--background-contrast-grey)"
+              highlightColor="var(--background-contrast-grey-active)"
+              borderRadius="0.25rem"
+              duration={2}
+            >
+              <SkipLinks
+                links={[
+                  {
+                    anchor: "#content",
+                    label: "Contenu",
+                  },
+                  {
+                    anchor: "#footer",
+                    label: "Pied de page",
+                  },
+                ]}
+              />
+              <ConsentBanner
+                gdprLinkProps={{
+                  href: "/politique-de-confidentialite#cookies",
+                }}
+                siteName="Egapro"
+                services={[
+                  {
+                    name: "egapro",
+                    title: "Egapro",
+                    description: "Cookies obligatoires permettant de sauvegarder l'état d'authentification.",
+                    mandatory: true,
+                  },
+                  {
+                    name: "matomo",
+                    title: "Matomo",
+                    description: "Outil d’analyse comportementale des utilisateurs.",
+                  },
+                ]}
+              />
+              {children}
+              <Display />
+            </IsomorphicSkeletonTheme>
           </DsfrProvider>
         </SessionProvider>
       </FeatureStatusProvider>
@@ -61,8 +124,3 @@ const RootLayout = ({ children }: PropsWithChildren) => (
 );
 
 export default RootLayout;
-
-export const metadata = {
-  description:
-    "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.",
-};

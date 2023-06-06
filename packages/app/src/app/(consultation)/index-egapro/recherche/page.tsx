@@ -23,11 +23,14 @@ import { DisplayIndexResults } from "./DisplayIndexResults";
 
 export const dynamic = "force-dynamic";
 
+const description = "Page de recherche de l'index d'égalité professionnelle";
+
 export const metadata = {
   title: "Index Egapro",
-  description: "Page de recherche de l'index d'égalité professionnelle",
+  description,
   openGraph: {
     title: "Index d'égalité professionnelle",
+    description,
   },
 };
 

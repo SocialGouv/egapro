@@ -21,8 +21,6 @@ export interface BaseInfo {
   activitePrincipaleUniteLegale: CodeNaf;
   caractereEmployeurUniteLegale: string; // "N";
   categorieJuridiqueUniteLegale: string; // "1000";
-  codeCommuneEtablissement: string;
-  codePostalEtablissement: string;
   conventions: Convention[];
   dateCessation?: string;
   dateCreationUniteLegale: string;
@@ -31,7 +29,6 @@ export interface BaseInfo {
   etatAdministratifUniteLegale: EtatAdministratif;
   highlightLabel: string;
   label: string;
-  libelleCommuneEtablissement: string;
   matching: number;
   simpleLabel: string;
   siren: string;
@@ -46,8 +43,12 @@ export interface ShortEtablissement {
   activitePrincipaleEtablissement: CodeNaf;
   address: string;
   categorieEntreprise?: string;
+  codeCommuneEtablissement: string;
+  codePaysEtrangerEtablissement?: string;
+  codePostalEtablissement: string;
   etablissementSiege: boolean;
   idccs?: number[];
+  libelleCommuneEtablissement: string;
   siret: string;
 }
 
