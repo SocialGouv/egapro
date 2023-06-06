@@ -1,4 +1,19 @@
-const nextFiles = ["page", "head", "error", "template", "layout", "route", "loading", "opengraph-image"].join("|");
+const nextFiles = [
+  "page",
+  "head",
+  "error",
+  "template",
+  "layout",
+  "route",
+  "loading",
+  "opengraph-image",
+  "twitter-image",
+  "not-found",
+  "default",
+  "icon",
+  "apple-icon",
+  "sitemap",
+].join("|");
 
 /** @type {import("eslint").Linter.Config} */
 const config = {
@@ -149,7 +164,7 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
+      files: ["src/pages/**/*.ts?(x)", "src/_pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
       rules: {
         "import/no-default-export": "off",
       },
