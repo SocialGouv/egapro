@@ -1,4 +1,5 @@
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -40,3 +41,7 @@ export const useDeclarationFormManager = create<FormActions & { formData: Declar
     },
   ),
 );
+
+if (process.env.NODE_ENV === "development") {
+  mountStoreDevtool("useDeclarationFormManager", useDeclarationFormManager);
+}

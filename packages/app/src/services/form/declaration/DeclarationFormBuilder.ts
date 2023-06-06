@@ -7,6 +7,7 @@ import { type Entreprise } from "./entreprise";
 
 type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
 type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];
+type OuiNon = "non" | "oui";
 
 export const TrancheOptions = [
   { label: "De 50 à 250 inclus", value: "50:250" },
@@ -46,15 +47,6 @@ export type DeclarationFormState = {
     résultat: number;
     sexeSurRepresente: Sexe;
   };
-  informations?:
-    | {
-        finPériode: string;
-        nbSalariés: number;
-        périodeSuffisante: true;
-      }
-    | {
-        périodeSuffisante: false;
-      };
   maternité?:
     | {
         estCalculable: false;
@@ -64,9 +56,22 @@ export type DeclarationFormState = {
         estCalculable: true;
         resultat: number;
       };
-  rémunerations?: {
-    estCalculable: boolean;
-    modalité: "coef autre" | "coef branche" | "csp";
+  période_référence?:
+    | {
+        finPériode: string;
+        nbSalariés: number;
+        périodeSuffisante: "oui";
+      }
+    | {
+        périodeSuffisante: "non";
+      };
+  rémunérations?: {
+    cse: OuiNon;
+    dateConsultationCSE: string;
+    déclarationCalculCSP: boolean;
+    estCalculable: OuiNon;
+    modalité: "csp" | "niveau_autre" | "niveau_branche";
+    motifNC?: "egvi40pcet"; // Effectif des groupes valides inférieur à 40% de l'effectif total;
   };
   ues?: {
     name: string;

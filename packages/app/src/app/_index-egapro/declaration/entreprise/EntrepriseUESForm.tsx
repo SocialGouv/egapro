@@ -9,8 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
-import { type PropsWithChildren, useState } from "react";
-import { type Message, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -21,16 +20,15 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-export const EntrepriseUESForm = (props: PropsWithChildren) => {
+export const EntrepriseUESForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
-  const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid, isDirty },
+    formState: { isValid },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,7 +50,6 @@ export const EntrepriseUESForm = (props: PropsWithChildren) => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <RadioButtons
         legend="Vous déclarez votre index en tant que :"
-        name="type"
         options={[
           {
             label: "Entreprise",
@@ -73,7 +70,6 @@ export const EntrepriseUESForm = (props: PropsWithChildren) => {
       />
 
       <RadioButtons
-        name="tranche"
         legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"} :`}
         options={[
           {

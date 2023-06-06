@@ -1,7 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Display, headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Header } from "@codegouvfr/react-dsfr/Header";
+import { config } from "@common/config";
 import { type PropsWithChildren } from "react";
 
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
@@ -128,6 +130,20 @@ const DeclarationLayout = ({ children }: Omit<PropsWithChildren<Props>, "authent
       <DeclarationHeader />
 
       <div className={fr.cx("fr-container")} style={{ maxWidth: 1000 }}>
+        <Breadcrumb
+          currentPageLabel={"Déclaration d'index"}
+          homeLinkProps={{
+            href: "/",
+          }}
+          segments={[
+            {
+              linkProps: {
+                href: `${config.base_declaration_url}/commencer`,
+              },
+              label: "Index",
+            },
+          ]}
+        />
         {children}
       </div>
       <DeclarationFooter />

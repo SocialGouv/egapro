@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
 import { SirenYearForm } from "./SirenYearForm";
@@ -8,21 +7,6 @@ import { SirenYearForm } from "./SirenYearForm";
 const CommencerPage = () => {
   return (
     <>
-      <Breadcrumb
-        currentPageLabel="Déclaration d'index"
-        homeLinkProps={{
-          href: "/",
-        }}
-        segments={[
-          {
-            linkProps: {
-              href: "/too",
-            },
-            label: "Index",
-          },
-        ]}
-      />
-
       <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={3} title="Commencer" />
 
       <Alert
