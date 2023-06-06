@@ -164,7 +164,7 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
+      files: ["src/pages/**/*.ts?(x)", "src/_pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
       rules: {
         "import/no-default-export": "off",
       },

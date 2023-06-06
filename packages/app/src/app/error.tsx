@@ -5,7 +5,7 @@ import { type NextErrorPageProps } from "@common/utils/next";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { Container, Grid, GridCol } from "@design-system";
 
-const ConsultationError = ({ error }: NextErrorPageProps) => {
+const ErrorPage = ({ error }: NextErrorPageProps) => {
   return (
     <Container as="section" mb="8w">
       <Grid haveGutters align="center">
@@ -18,4 +18,4 @@ const ConsultationError = ({ error }: NextErrorPageProps) => {
   );
 };
 
-export default ConsultationError;
+export default ErrorPage;

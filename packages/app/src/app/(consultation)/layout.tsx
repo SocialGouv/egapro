@@ -1,5 +1,4 @@
 import Header, { type HeaderProps } from "@codegouvfr/react-dsfr/Header";
-import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { Brand } from "@components/Brand";
 import { Container } from "@design-system";
 import { type PropsWithChildren } from "react";
@@ -29,18 +28,6 @@ const brand = <Brand />;
 const ConsultationLayout = ({ children }: PropsWithChildren) => {
   return (
     <>
-      <SkipLinks
-        links={[
-          {
-            anchor: "#content",
-            label: "Contenu",
-          },
-          {
-            anchor: "#footer",
-            label: "Pied de page",
-          },
-        ]}
-      />
       <Header
         brandTop={brand}
         serviceTitle="Egapro - Recherche"

@@ -18,6 +18,7 @@ export const metadata = {
 };
 
 const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
+  // stepper
   return <CenteredContainer>{children}</CenteredContainer>;
 };
 
