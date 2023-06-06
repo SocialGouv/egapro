@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import { adressLabel, type WORKFORCES } from "@common/dict";
+import { addressLabel, type WORKFORCES } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import Link from "next/link";
 import { useState } from "react";
@@ -62,7 +62,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
   const { countyCode, regionCode, ues, workforce, countryIsoCode } = company[lastYear];
   const isUES = !!ues?.companies.length && !!ues?.name;
 
-  const adress = adressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
+  const address = addressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
 
   return (
     <TileCompany>
@@ -74,7 +74,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
               {isUES && ues.name.trim() ? `${ues.name} (${name})` : name}
             </TileCompanyTitle>
             <TileCompanySiren>{siren}</TileCompanySiren>
-            {adress && <TileCompanyLocation>{adress}</TileCompanyLocation>}
+            {address && <TileCompanyLocation>{address}</TileCompanyLocation>}
           </GridCol>
           <GridCol sm={3}>
             <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>

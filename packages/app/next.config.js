@@ -6,7 +6,7 @@ const nextConfig = {
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
-    appDir: true,
+    serverActions: true,
     // outputFileTracingRoot: path.join(__dirname, "../../"),
   },
   eslint: {

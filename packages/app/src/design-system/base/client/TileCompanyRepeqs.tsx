@@ -1,7 +1,7 @@
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type SearchRepresentationEquilibreeResultDTO } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
-import { adressLabel } from "@common/dict";
+import { addressLabel } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { useState } from "react";
 
@@ -39,7 +39,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
     .sort()
     .reverse();
 
-  const adress = adressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
+  const address = addressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
 
   return (
     <TileCompany>
@@ -48,7 +48,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
         {name}
       </TileCompanyTitle>
       <TileCompanySiren>{siren}</TileCompanySiren>
-      {adress && <TileCompanyLocation>{adress}</TileCompanyLocation>}
+      {address && <TileCompanyLocation>{address}</TileCompanyLocation>}
       <TileCompanyTable>
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>
