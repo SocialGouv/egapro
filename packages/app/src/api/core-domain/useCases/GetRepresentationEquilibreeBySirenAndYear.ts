@@ -9,7 +9,7 @@ import { type IRepresentationEquilibreeRepo } from "../repo/IRepresentationEquil
 
 interface Input {
   siren: string;
-  year: string;
+  year: number;
 }
 
 export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input, DeclarationDTO | null> {
@@ -18,7 +18,7 @@ export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input,
   public async execute({ siren, year }: Input): Promise<DeclarationDTO | null> {
     try {
       const validatedSiren = new Siren(siren);
-      const validatedYear = new PositiveNumber(+year);
+      const validatedYear = new PositiveNumber(year);
       const representationEquilibree = await this.reprensentationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
       return representationEquilibree ? representationEquilibreeMap.toDTO(representationEquilibree) : null;
     } catch (error: unknown) {

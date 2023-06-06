@@ -21,7 +21,7 @@ export default class RepEqSirenYearController implements BaseController {
     const { siren, year } = req.params;
 
     try {
-      const ret = await useCase.execute({ siren, year });
+      const ret = await useCase.execute({ siren, year: +year });
       if (ret) res.status(StatusCodes.OK).json(ret);
       else res.status(StatusCodes.NOT_FOUND).send(null);
     } catch (error: unknown) {
