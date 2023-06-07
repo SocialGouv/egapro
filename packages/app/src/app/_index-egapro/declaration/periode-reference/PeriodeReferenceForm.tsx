@@ -18,11 +18,11 @@ import { z } from "zod";
 const formSchema = z
   .object({
     annéeIndicateurs: z.number(),
-    finPériode: zodDateSchema,
-    nbSalariés: zodPositiveIntegerSchema,
+    finPériodeRéférence: zodDateSchema,
+    effectifTotal: zodPositiveIntegerSchema,
     périodeSuffisante: zodRadioInputSchema,
   })
-  .superRefine(({ annéeIndicateurs, finPériode }, ctx) => {
+  .superRefine(({ annéeIndicateurs, finPériodeRéférence: finPériode }, ctx) => {
     if (getYear(new Date(finPériode)) !== Number(annéeIndicateurs)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -44,15 +44,15 @@ export const PeriodeReferenceForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       annéeIndicateurs: formData.commencer?.année,
-      finPériode:
-        formData.période_référence?.périodeSuffisante === "oui" && formData?.période_référence?.finPériode
-          ? formData.période_référence.finPériode
+      finPériodeRéférence:
+        formData.périodeRéférence?.périodeSuffisante === "oui" && formData?.périodeRéférence?.finPériodeRéférence
+          ? formData.périodeRéférence.finPériodeRéférence
           : "",
-      nbSalariés:
-        formData.période_référence?.périodeSuffisante === "oui" && formData.période_référence?.nbSalariés
-          ? String(formData.période_référence?.nbSalariés)
+      effectifTotal:
+        formData.périodeRéférence?.périodeSuffisante === "oui" && formData.périodeRéférence?.effectifTotal
+          ? String(formData.périodeRéférence?.effectifTotal)
           : "",
-      périodeSuffisante: formData.période_référence?.périodeSuffisante,
+      périodeSuffisante: formData.périodeRéférence?.périodeSuffisante,
     },
   });
 
@@ -67,7 +67,7 @@ export const PeriodeReferenceForm = () => {
   const périodeSuffisante = watch("périodeSuffisante");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("période_référence", data as DeclarationFormState["période_référence"]);
+    savePageData("périodeRéférence", data as DeclarationFormState["périodeRéférence"]);
 
     router.push(`${config.base_declaration_url}/remuneration`);
   };
@@ -75,7 +75,7 @@ export const PeriodeReferenceForm = () => {
   const selectEndOfYear = () => {
     if (formData?.commencer?.année) {
       setValue(
-        "finPériode",
+        "finPériodeRéférence",
         formatISO(endOfYear(new Date().setFullYear(formData?.commencer.année)), { representation: "date" }),
         { shouldDirty: true, shouldValidate: true },
       );
@@ -107,10 +107,10 @@ export const PeriodeReferenceForm = () => {
               label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
               nativeInputProps={{
                 type: "date",
-                ...register("finPériode"),
+                ...register("finPériodeRéférence"),
               }}
-              state={errors.finPériode ? "error" : "default"}
-              stateRelatedMessage={errors.finPériode?.message}
+              state={errors.finPériodeRéférence ? "error" : "default"}
+              stateRelatedMessage={errors.finPériodeRéférence?.message}
             />
             <Button className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
               Sélectionner la fin de l'année civile
@@ -120,10 +120,10 @@ export const PeriodeReferenceForm = () => {
               nativeInputProps={{
                 type: "number",
                 min: 1,
-                ...register("nbSalariés"),
+                ...register("effectifTotal"),
               }}
-              state={errors.nbSalariés ? "error" : "default"}
-              stateRelatedMessage={errors.nbSalariés?.message}
+              state={errors.effectifTotal ? "error" : "default"}
+              stateRelatedMessage={errors.effectifTotal?.message}
             />
           </>
         )}

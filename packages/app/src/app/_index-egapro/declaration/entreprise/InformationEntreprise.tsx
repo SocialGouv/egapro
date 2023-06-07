@@ -11,12 +11,12 @@ import {
 } from "@components/next13/RecapSection";
 import { fetcher, useConfig } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { type Entreprise } from "@services/form/declaration/entreprise";
 
 /**
  * Build address on 2 lines.
  */
-const formatAdresse = (entreprise: DeclarationFormState["_entrepriseDéclarante"]) => {
+const formatAdresse = (entreprise?: Entreprise) => {
   if (!entreprise) return "";
 
   const { adresse, codePostal, commune } = entreprise;
@@ -30,7 +30,7 @@ export const InformationEntreprise = () => {
     config: { nafLabelFromCode },
   } = useConfig(fetcher);
 
-  const address = formatAdresse(formData._entrepriseDéclarante);
+  const address = formatAdresse(formData.commencer?.entrepriseDéclarante);
 
   return (
     <RecapSection>
@@ -39,16 +39,16 @@ export const InformationEntreprise = () => {
         <RecapSectionItems>
           <RecapSectionItem>
             <RecapSectionItemLegend>Raison sociale</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData._entrepriseDéclarante?.raisonSociale}</RecapSectionItemContent>
+            <RecapSectionItemContent>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Numéro Siren</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData._entrepriseDéclarante?.siren}</RecapSectionItemContent>
+            <RecapSectionItemContent>{formData.commencer?.entrepriseDéclarante?.siren}</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Code NAF</RecapSectionItemLegend>
             <RecapSectionItemContent>
-              {nafLabelFromCode(formData._entrepriseDéclarante?.codeNaf)}
+              {nafLabelFromCode(formData.commencer?.entrepriseDéclarante?.codeNaf)}
             </RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>

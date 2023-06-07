@@ -49,7 +49,7 @@ export const EntrepriseUESForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <RadioButtons
-        legend="Vous déclarez votre index en tant que :"
+        legend="Vous déclarez votre index en tant que"
         options={[
           {
             label: "Entreprise",
@@ -70,7 +70,7 @@ export const EntrepriseUESForm = () => {
       />
 
       <RadioButtons
-        legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"} :`}
+        legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
         options={[
           {
             label: "De 50 à 250 inclus",

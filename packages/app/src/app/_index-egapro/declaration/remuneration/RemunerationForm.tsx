@@ -21,13 +21,13 @@ import { z } from "zod";
 const formSchema = z
   .object({
     estCalculable: zodRadioInputSchema,
-    modalité: z.string().optional(), // No check is necessary as the value is from select options.
+    mode: z.string().optional(), // No check is necessary as the value is from select options.
     cse: zodRadioInputSchema.optional(),
     dateConsultationCSE: zodDateSchema.optional(),
     déclarationCalculCSP: z.boolean().optional(),
-    motifNC: z.string().optional(),
+    motifNonCalculabilité: z.string().optional(),
   })
-  .superRefine(({ estCalculable, déclarationCalculCSP, motifNC }, ctx) => {
+  .superRefine(({ estCalculable, déclarationCalculCSP, motifNonCalculabilité: motifNC }, ctx) => {
     if (estCalculable === "non" && déclarationCalculCSP !== true) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -55,7 +55,7 @@ type FormType = z.infer<typeof formSchema>;
 const formatData = (data: FormType) => {
   if (data.estCalculable === "non") {
     return pick(data, "estCalculable", "déclarationCalculCSP", "motifNC");
-  } else if (data.modalité === "csp") {
+  } else if (data.mode === "csp") {
     return pick(data, "estCalculable", "modalité");
   } else if (data.cse === "oui") {
     return pick(data, "estCalculable", "modalité", "cse", "dateConsultationCSE");
@@ -72,11 +72,11 @@ export const RemunerationForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       estCalculable: formData.rémunérations?.estCalculable,
-      modalité: formData.rémunérations?.modalité,
+      mode: formData.rémunérations?.mode,
       cse: formData.rémunérations?.cse,
       dateConsultationCSE: formData.rémunérations?.dateConsultationCSE,
       déclarationCalculCSP: formData.rémunérations?.déclarationCalculCSP,
-      motifNC: formData.rémunérations?.motifNC,
+      motifNonCalculabilité: formData.rémunérations?.motifNonCalculabilité,
     },
   });
 
@@ -88,16 +88,14 @@ export const RemunerationForm = () => {
   } = methods;
 
   const estCalculable = watch("estCalculable");
-  const modalité = watch("modalité");
+  const mode = watch("mode");
   const cse = watch("cse");
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   const onSubmit = async (data: FormType) => {
     savePageData("rémunérations", formatData(data) as DeclarationFormState["rémunérations"]);
 
-    router.push(
-      `${config.base_declaration_url}/${modalité === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`,
-    );
+    router.push(`${config.base_declaration_url}/${mode === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`);
   };
 
   return (
@@ -126,9 +124,9 @@ export const RemunerationForm = () => {
             {déclarationCalculCSP && (
               <Select
                 label="Précision du motif de non calculabilité de l'indicateur"
-                nativeSelectProps={{ ...register("motifNC") }}
-                state={errors.motifNC ? "error" : "default"}
-                stateRelatedMessage={errors.motifNC?.message}
+                nativeSelectProps={{ ...register("motifNonCalculabilité") }}
+                state={errors.motifNonCalculabilité ? "error" : "default"}
+                stateRelatedMessage={errors.motifNonCalculabilité?.message}
               >
                 <option value="" disabled hidden>
                   Selectionnez une option
@@ -147,7 +145,7 @@ export const RemunerationForm = () => {
                   label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
                   nativeInputProps: {
                     value: "niveau_branche",
-                    ...register("modalité"),
+                    ...register("mode"),
                   },
                 },
                 {
@@ -155,20 +153,20 @@ export const RemunerationForm = () => {
                     "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
                   nativeInputProps: {
                     value: "niveau_autre",
-                    ...register("modalité"),
+                    ...register("mode"),
                   },
                 },
                 {
                   label: "Par catégorie socio-professionnelle",
                   nativeInputProps: {
                     value: "csp",
-                    ...register("modalité"),
+                    ...register("mode"),
                   },
                 },
               ]}
             />
 
-            {modalité !== "csp" && (
+            {mode !== "csp" && (
               <>
                 <RadioButtons
                   legend="Un CSE a-t-il été mis en place ?"

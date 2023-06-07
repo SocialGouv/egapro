@@ -12,7 +12,7 @@ const titleAutre =
 export const ClientStepper = () => {
   const { formData } = useDeclarationFormManager();
 
-  const title = formData.rémunérations?.modalité === "niveau_branche" ? titleBranche : titleAutre;
+  const title = formData.rémunérations?.mode === "niveau_branche" ? titleBranche : titleAutre;
 
   return (
     <>

@@ -1,7 +1,5 @@
-import { type FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
-import { type DeclarationDTO } from "@common/models/generated";
-import { type Enum } from "@common/shared-domain/domain/valueObjects";
+import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
 
 import { type Entreprise } from "./entreprise";
 
@@ -17,8 +15,6 @@ export const TrancheOptions = [
 
 export type TrancheValues = (typeof TrancheOptions)[number]["value"];
 
-type Sexe = Enum.ToString<typeof FavorablePopulation.Enum>;
-
 type TranchesAge = {
   "30:39": number;
   "40:49": number;
@@ -30,7 +26,6 @@ type TranchesAge = {
  * The shape of the state for declaration form.
  */
 export type DeclarationFormState = {
-  _entrepriseDéclarante?: Entreprise;
   // External or meta data.
   _metadata: {
     date?: string | undefined;
@@ -39,7 +34,7 @@ export type DeclarationFormState = {
   };
   commencer?: {
     année: number;
-    siren: string;
+    entrepriseDéclarante?: Entreprise;
   };
   // Only filled by the backend.
   déclarant?: {
@@ -50,9 +45,9 @@ export type DeclarationFormState = {
     téléphone: string;
   };
   entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
-  hautes_rémunerations?: {
+  hautesRémunérations?: {
+    populationFavorable: PopulationFavorable;
     résultat: number;
-    sexeSurRepresente: Sexe;
   };
   maternité?:
     | {
@@ -63,10 +58,10 @@ export type DeclarationFormState = {
         estCalculable: true;
         resultat: number;
       };
-  période_référence?:
+  périodeRéférence?:
     | {
-        finPériode: string;
-        nbSalariés: number;
+        effectifTotal: number;
+        finPériodeRéférence: string;
         périodeSuffisante: "oui";
       }
     | {
@@ -77,19 +72,20 @@ export type DeclarationFormState = {
     dateConsultationCSE: string;
     déclarationCalculCSP: boolean;
     estCalculable: OuiNon;
-    modalité: "csp" | "niveau_autre" | "niveau_branche";
-    motifNC?: "egvi40pcet"; // Effectif des groupes valides inférieur à 40% de l'effectif total;
+    mode: "csp" | "niveau_autre" | "niveau_branche";
+    motifNonCalculabilité?: "egvi40pcet";
+    populationFavorable: PopulationFavorable; // Effectif des groupes valides inférieur à 40% de l'effectif total;
   };
-  rémunérations_coefficients?: {
-    coefficients: Array<{ data: TranchesAge; name: string }>;
-  };
-  rémunérations_csp?: {
-    coefficients: [
-      { data: TranchesAge; name: "ouv" },
-      { data: TranchesAge; name: "emp" },
-      { data: TranchesAge; name: "tam" },
-      { data: TranchesAge; name: "ic" },
+  rémunérationsCSP?: {
+    catégories: [
+      { nom: "ouv"; tranches: TranchesAge },
+      { nom: "emp"; tranches: TranchesAge },
+      { nom: "tam"; tranches: TranchesAge },
+      { nom: "ic"; tranches: TranchesAge },
     ];
+  };
+  rémunérationsCoefficients?: {
+    catégories: Array<{ nom: string; tranches: TranchesAge }>;
   };
   ues?: {
     name: string;
@@ -109,20 +105,19 @@ export const DeclarationFormBuilder = {
         date: declaration.déclaration.date,
         status: "edition",
       },
-      _entrepriseDéclarante: {
-        adresse: declaration.entreprise.adresse,
-        codeNaf: declaration.entreprise.code_naf,
-        codePays: declaration.entreprise.code_pays,
-        codePostal: declaration.entreprise.code_postal,
-        commune: declaration.entreprise.commune,
-        département: declaration.entreprise.département,
-        raisonSociale: declaration.entreprise.raison_sociale,
-        région: declaration.entreprise.région,
-        siren: declaration.entreprise.siren,
-      },
       commencer: {
-        siren: declaration.entreprise.siren,
         année: declaration.déclaration.année_indicateurs,
+        entrepriseDéclarante: {
+          adresse: declaration.entreprise.adresse,
+          codeNaf: declaration.entreprise.code_naf,
+          codePays: declaration.entreprise.code_pays,
+          codePostal: declaration.entreprise.code_postal,
+          commune: declaration.entreprise.commune,
+          département: declaration.entreprise.département,
+          raisonSociale: declaration.entreprise.raison_sociale,
+          région: declaration.entreprise.région,
+          siren: declaration.entreprise.siren,
+        },
       },
     };
   },

@@ -67,7 +67,7 @@ export const SirenYearForm = () => {
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
 
-  const sirenInStorage = formData?.commencer?.siren || "";
+  const sirenInStorage = formData?.commencer?.entrepriseDéclarante?.siren || "";
   const yearInStorage = formData?.commencer?.année === undefined ? "" : String(formData?.commencer?.année);
 
   const {
@@ -119,12 +119,11 @@ export const SirenYearForm = () => {
       _metadata: {
         status: "creation" as const,
       },
-      _entrepriseDéclarante: {
-        ...buildEntreprise(entreprise),
-      },
       commencer: {
-        siren,
         année: Number(year),
+        entrepriseDéclarante: {
+          ...buildEntreprise(entreprise),
+        },
       },
     };
   };
