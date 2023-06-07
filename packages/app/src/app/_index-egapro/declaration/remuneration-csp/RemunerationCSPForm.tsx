@@ -12,7 +12,6 @@ import { RadioOuiNon } from "@components/next13/RadioOuiNon";
 import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -56,11 +55,11 @@ export const RemunerationCSPForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       estCalculable: formData.rémunérations?.estCalculable,
-      modalité: formData.rémunérations?.modalité,
+      modalité: formData.rémunérations?.mode,
       cse: formData.rémunérations?.cse,
       dateConsultationCSE: formData.rémunérations?.dateConsultationCSE,
       déclarationCalculCSP: formData.rémunérations?.déclarationCalculCSP,
-      motifNC: formData.rémunérations?.motifNC,
+      motifNC: formData.rémunérations?.motifNonCalculabilité,
     },
   });
 
@@ -77,7 +76,8 @@ export const RemunerationCSPForm = () => {
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("rémunérations", data as DeclarationFormState["rémunérations"]);
+    // savePageData("rémunérationsCSP", data as DeclarationFormState["rémunérationsCSP"]);
+    router.push(`${config.base_declaration_url}/remuneration-resultat`);
   };
 
   return (
