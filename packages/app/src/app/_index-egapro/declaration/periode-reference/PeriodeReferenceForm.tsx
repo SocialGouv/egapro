@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { endOfYear, formatISO, getYear } from "date-fns";
+import { pick } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,6 +37,22 @@ const formSchema = z
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
+/**
+ * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
+ */
+const formatData = (data: FormType): DeclarationFormState["périodeRéférence"] => {
+  if (data.périodeSuffisante === "non") {
+    return pick(data, "périodeSuffisante") as DeclarationFormState["périodeRéférence"]; // Fix TS pick incorrect guess. In this case, périodeSuffisante is always "non", and is a correct type.
+  } else {
+    return pick(
+      { ...data, effectifTotal: Number(data.effectifTotal) },
+      "périodeSuffisante",
+      "finPériodeRéférence",
+      "effectifTotal",
+    );
+  }
+};
+
 export const PeriodeReferenceForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
@@ -43,7 +60,7 @@ export const PeriodeReferenceForm = () => {
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      annéeIndicateurs: formData.commencer?.année,
+      annéeIndicateurs: formData.commencer?.annéeIndicateurs,
       finPériodeRéférence:
         formData.périodeRéférence?.périodeSuffisante === "oui" && formData?.périodeRéférence?.finPériodeRéférence
           ? formData.périodeRéférence.finPériodeRéférence
@@ -67,16 +84,16 @@ export const PeriodeReferenceForm = () => {
   const périodeSuffisante = watch("périodeSuffisante");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("périodeRéférence", data as DeclarationFormState["périodeRéférence"]);
+    savePageData("périodeRéférence", formatData(data));
 
     router.push(`${config.base_declaration_url}/remuneration`);
   };
 
   const selectEndOfYear = () => {
-    if (formData?.commencer?.année) {
+    if (formData?.commencer?.annéeIndicateurs) {
       setValue(
         "finPériodeRéférence",
-        formatISO(endOfYear(new Date().setFullYear(formData?.commencer.année)), { representation: "date" }),
+        formatISO(endOfYear(new Date().setFullYear(formData?.commencer.annéeIndicateurs)), { representation: "date" }),
         { shouldDirty: true, shouldValidate: true },
       );
     }

@@ -5,7 +5,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
 import { PUBLIC_YEARS } from "@common/dict";
-import { zodSirenSchema } from "@common/utils/form";
+import { zodPositiveIntegerSchema, zodSirenSchema } from "@common/utils/form";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { GlobalMessage, type Message } from "@components/next13/GlobalMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,10 +23,10 @@ const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 
 const formSchema = z
   .object({
-    year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
+    annéeIndicateurs: zodPositiveIntegerSchema, // No control needed because this is a select with options we provide.
     siren: zodSirenSchema,
   })
-  .superRefine(async ({ year, siren }, ctx) => {
+  .superRefine(async ({ annéeIndicateurs: year, siren }, ctx) => {
     console.log("dans superRefine");
 
     if (siren && siren.length === 9) {
@@ -67,8 +67,9 @@ export const SirenYearForm = () => {
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
 
-  const sirenInStorage = formData?.commencer?.entrepriseDéclarante?.siren || "";
-  const yearInStorage = formData?.commencer?.année === undefined ? "" : String(formData?.commencer?.année);
+  const sirenStorage = formData?.commencer?.entrepriseDéclarante?.siren || "";
+  const annéeIndicateursStorage =
+    formData?.commencer?.annéeIndicateurs === undefined ? "" : String(formData?.commencer?.annéeIndicateurs);
 
   const {
     register,
@@ -80,18 +81,18 @@ export const SirenYearForm = () => {
     mode: "onTouched",
     resolver: zodResolver(formSchema),
     defaultValues: {
-      siren: sirenInStorage,
-      year: yearInStorage,
+      siren: sirenStorage,
+      annéeIndicateurs: annéeIndicateursStorage,
     },
   });
 
   const siren = watch("siren");
-  const year = watch("year");
+  const annéeIndicateurs = watch("annéeIndicateurs");
 
   useEffect(() => {
     // Reset global error message.
     setGlobalMessage(undefined);
-  }, [siren, year, setGlobalMessage]);
+  }, [siren, annéeIndicateurs, setGlobalMessage]);
 
   useEffect(() => {
     // Special case when the user has no ownership on the Siren.
@@ -120,7 +121,7 @@ export const SirenYearForm = () => {
         status: "creation" as const,
       },
       commencer: {
-        année: Number(year),
+        annéeIndicateurs: Number(year),
         entrepriseDéclarante: {
           ...buildEntreprise(entreprise),
         },
@@ -130,10 +131,10 @@ export const SirenYearForm = () => {
 
   const getNextPage = (data?: DeclarationFormState) =>
     data?._metadata?.status === "edition"
-      ? `${config.base_declaration_url}/${siren}/${year}`
+      ? `${config.base_declaration_url}/${siren}/${annéeIndicateurs}`
       : `${config.base_declaration_url}/entreprise`;
 
-  const saveAndExit = async ({ year, siren }: FormType) => {
+  const saveAndExit = async ({ annéeIndicateurs: year, siren }: FormType) => {
     const newData = await prepareDataWithExistingDeclaration(siren, Number(year));
 
     saveFormData(newData);
@@ -145,22 +146,22 @@ export const SirenYearForm = () => {
     router.push(getNextPage(newData));
   };
 
-  const onSubmit = async ({ year, siren }: FormType) => {
+  const onSubmit = async ({ annéeIndicateurs: year, siren }: FormType) => {
     // If no data are present in session storage.
-    if (!sirenInStorage) {
-      saveAndExit({ siren, year });
+    if (!sirenStorage) {
+      saveAndExit({ siren, annéeIndicateurs: year });
       return;
     }
 
-    if (siren !== sirenInStorage || year !== yearInStorage) {
-      if (confirm(buildConfirmMessage({ siren: sirenInStorage, year: yearInStorage }))) {
+    if (siren !== sirenStorage || year !== annéeIndicateursStorage) {
+      if (confirm(buildConfirmMessage({ siren: sirenStorage, year: annéeIndicateursStorage }))) {
         // Start a new declaration of representation.
         resetFormData();
-        saveAndExit({ siren, year });
+        saveAndExit({ siren, annéeIndicateurs: year });
         return;
       } else {
         // Rollback to the old Siren.
-        setValue("siren", sirenInStorage);
+        setValue("siren", sirenStorage);
         return;
       }
     }
@@ -173,7 +174,7 @@ export const SirenYearForm = () => {
     if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
       resetFormData();
       setValue("siren", "");
-      setValue("year", "");
+      setValue("annéeIndicateurs", "");
     }
   };
 
@@ -187,7 +188,7 @@ export const SirenYearForm = () => {
 
         <Select
           label="Année au titre de laquelle les indicateurs sont calculés"
-          nativeSelectProps={{ ...register("year") }}
+          nativeSelectProps={{ ...register("annéeIndicateurs") }}
         >
           <option value="" disabled hidden>
             Selectionnez une option
@@ -208,8 +209,7 @@ export const SirenYearForm = () => {
           nativeInputProps={{ ...register("siren"), placeholder: "Ex: 504920166, 403461742, 403696735", maxLength: 9 }}
         />
         <div style={{ display: "flex", gap: 10 }}>
-          {/* <Button disabled={!featureStatus.type === "loading" || !isValid}>Envoyer</Button> */}
-          <Button type="reset" priority="secondary" disabled={!sirenInStorage} onClick={confirmResetFormData}>
+          <Button type="reset" priority="secondary" disabled={!sirenStorage} onClick={confirmResetFormData}>
             Réinitialiser
           </Button>
           <Button disabled={!isValid}>Suivant</Button>

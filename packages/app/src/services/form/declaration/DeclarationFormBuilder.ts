@@ -33,7 +33,7 @@ export type DeclarationFormState = {
     status: "creation" | "edition";
   };
   commencer?: {
-    année: number;
+    annéeIndicateurs: number;
     entrepriseDéclarante?: Entreprise;
   };
   // Only filled by the backend.
@@ -68,13 +68,13 @@ export type DeclarationFormState = {
         périodeSuffisante: "non";
       };
   rémunérations?: {
-    cse: OuiNon;
-    dateConsultationCSE: string;
-    déclarationCalculCSP: boolean;
+    cse?: OuiNon;
+    dateConsultationCSE?: string;
+    déclarationCalculCSP?: boolean;
     estCalculable: OuiNon;
-    mode: "csp" | "niveau_autre" | "niveau_branche";
+    mode?: "csp" | "niveau_autre" | "niveau_branche";
     motifNonCalculabilité?: "egvi40pcet";
-    populationFavorable: PopulationFavorable; // Effectif des groupes valides inférieur à 40% de l'effectif total;
+    populationFavorable?: PopulationFavorable; // Effectif des groupes valides inférieur à 40% de l'effectif total;
   };
   rémunérationsCSP?: {
     catégories: [
@@ -106,7 +106,7 @@ export const DeclarationFormBuilder = {
         status: "edition",
       },
       commencer: {
-        année: declaration.déclaration.année_indicateurs,
+        annéeIndicateurs: declaration.déclaration.année_indicateurs,
         entrepriseDéclarante: {
           adresse: declaration.entreprise.adresse,
           codeNaf: declaration.entreprise.code_naf,

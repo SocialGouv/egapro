@@ -52,16 +52,20 @@ type FormType = z.infer<typeof formSchema>;
 /**
  * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
  */
-const formatData = (data: FormType) => {
+const formatData = (data: FormType): DeclarationFormState["rémunérations"] => {
+  let result;
+
   if (data.estCalculable === "non") {
-    return pick(data, "estCalculable", "déclarationCalculCSP", "motifNC");
+    result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNC");
   } else if (data.mode === "csp") {
-    return pick(data, "estCalculable", "modalité");
+    result = pick(data, "estCalculable", "mode");
   } else if (data.cse === "oui") {
-    return pick(data, "estCalculable", "modalité", "cse", "dateConsultationCSE");
+    result = pick(data, "estCalculable", "mode", "cse", "dateConsultationCSE");
   } else {
-    return pick(data, "estCalculable", "modalité", "cse");
+    result = pick(data, "estCalculable", "mode", "cse");
   }
+
+  return result as DeclarationFormState["rémunérations"]; // Fix limit of pick which can't infer that estCalculable is always present.
 };
 
 export const RemunerationForm = () => {
@@ -93,7 +97,7 @@ export const RemunerationForm = () => {
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("rémunérations", formatData(data) as DeclarationFormState["rémunérations"]);
+    savePageData("rémunérations", formatData(data));
 
     router.push(`${config.base_declaration_url}/${mode === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`);
   };
