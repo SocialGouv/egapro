@@ -5,17 +5,15 @@ import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
-import { ClientOnly } from "@components/ClientOnly";
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
+import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 const formSchema = createSteps.periodeReference.and(createSteps.commencer).superRefine(({ endOfPeriod, year }, ctx) => {
   if (getYear(new Date(endOfPeriod)) !== year) {
@@ -33,10 +31,7 @@ const useStore = storePicker(useRepeqFunnelStore);
 export const PeriodeReferenceForm = () => {
   const router = useRouter();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
-
-  useEffect(() => {
-    if (!funnel?.year) redirect("/representation-equilibree/commencer");
-  }, [funnel?.year]);
+  const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const {
     formState: { errors, isValid },
@@ -53,6 +48,7 @@ export const PeriodeReferenceForm = () => {
     if (!funnel?.year) return;
     setValue("endOfPeriod", formatISO(endOfYear(new Date().setFullYear(funnel.year)), { representation: "date" }), {
       shouldDirty: true,
+      shouldValidate: true,
     });
   };
 
@@ -61,43 +57,25 @@ export const PeriodeReferenceForm = () => {
     router.push("/representation-equilibree/ecarts-cadres");
   };
 
+  if (funnel && !funnel?.year) redirect("/representation-equilibree/commencer");
+
   return (
     <>
-      <ClientOnly
-        fallback={
-          <CallOut
-            title={<Skeleton />}
-            iconId="fr-icon-calendar-line"
-            buttonProps={{
-              priority: "secondary",
-              children: <Skeleton width={200} highlightColor="var(--text-action-high-blue-france)" />,
-              size: "small",
-              disabled: true,
-            }}
-          >
-            <Skeleton />
-          </CallOut>
-        }
+      <CallOut
+        title="Année civile"
+        iconId="fr-icon-calendar-line"
+        buttonProps={{
+          priority: "secondary",
+          children: "Sélectionner la fin de l'année civile",
+          size: "small",
+          onClick: selectEndDateOfFunnelYear,
+        }}
       >
-        <CallOut
-          title="Année civile"
-          iconId="fr-icon-calendar-line"
-          buttonProps={{
-            priority: "secondary",
-            children: "Sélectionner la fin de l'année civile",
-            size: "small",
-            onClick: selectEndDateOfFunnelYear,
-            nativeButtonProps: {
-              disabled: !funnel?.year,
-            },
-          }}
-        >
-          <u>
-            <strong>{funnel?.year}</strong>
-          </u>{" "}
-          est l'année au titre de laquelle les écarts de représentation sont calculés.
-        </CallOut>
-      </ClientOnly>
+        <u>
+          <strong>{hydrated ? funnel?.year : <Skeleton inline width="4ch" />}</strong>
+        </u>{" "}
+        est l'année au titre de laquelle les écarts de représentation sont calculés.
+      </CallOut>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <Input

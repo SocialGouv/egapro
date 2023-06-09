@@ -36,7 +36,7 @@ export interface BaseInfo {
 
 export interface Entreprise extends BaseInfo {
   allMatchingEtablissements: ShortEtablissement[];
-  firstMatchingEtablissement?: ShortEtablissement;
+  firstMatchingEtablissement: ShortEtablissement;
 }
 
 export interface ShortEtablissement {

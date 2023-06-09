@@ -3,42 +3,35 @@
 import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, REGIONS } from "@common/dict";
+import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
+import { COUNTIES, COUNTRIES_COG_TO_ISO, REGIONS } from "@common/dict";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { FormLayout } from "@design-system";
-import { times } from "lodash";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 
 import { getCompany } from "../actions";
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
+import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 export const EntrepriseForm = () => {
   const router = useRouter();
   const [company, setCompany] = useState<Entreprise | null>(null);
   const funnel = useRepeqFunnelStore(state => state.funnel);
+  const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
-    (async () => funnel?.siren && setCompany(await getCompany(funnel.siren)))();
-  }, [funnel?.siren]);
+    if (funnel?.siren && !company) getCompany(funnel.siren).then(setCompany);
+  }, [funnel, company]);
 
-  if (!company?.firstMatchingEtablissement) {
-    return (
-      <FormLayout>
-        {times(9).map(idx => (
-          <div key={idx}>
-            <Skeleton width="70%" />
-            <Skeleton height="2.5rem" />
-          </div>
-        ))}
-      </FormLayout>
-    );
+  if (!hydrated || !company) {
+    return <SkeletonForm fields={9} />;
   }
 
-  const county = inseeCodeToCounty(company.firstMatchingEtablissement.codeCommuneEtablissement);
-  const postalCode = company.firstMatchingEtablissement.codePostalEtablissement;
-  const address = company.firstMatchingEtablissement.address.split(postalCode)[0].trim();
-  const countryCode = company.firstMatchingEtablissement.codePaysEtrangerEtablissement ?? "XXXXX";
+  if (!funnel?.siren) {
+    return redirect("/representation-equilibree/commencer");
+  }
+
+  const { address, countryCode, countyCode, postalCode, regionCode } = getAdditionalMeta(company);
 
   return (
     <FormLayout>
@@ -67,14 +60,14 @@ export const EntrepriseForm = () => {
         label="Région"
         nativeInputProps={{
           readOnly: true,
-          value: county ? REGIONS[COUNTY_TO_REGION[county]] : "",
+          value: regionCode ? REGIONS[regionCode] : "",
         }}
       />
       <Input
         label="Département"
         nativeInputProps={{
           readOnly: true,
-          value: county ? COUNTIES[county] : "",
+          value: countyCode ? COUNTIES[countyCode] : "",
         }}
       />
       <Input

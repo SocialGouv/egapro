@@ -8,6 +8,7 @@ import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquili
 import { type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { PercentagesPairInputs } from "@components/rdsfr/PercentagesPairInputs";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
+import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 type EcartsMembresFormType = UnionToIntersection<z.infer<typeof createSteps.ecartsMembres>>;
 
@@ -24,6 +25,7 @@ export const EcartsMembresForm = () => {
   const router = useRouter();
   const [isComputable, setComputable] = useState<boolean>();
   const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
+  const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const methods = useForm<EcartsMembresFormType>({
     mode: "onChange",
@@ -39,7 +41,7 @@ export const EcartsMembresForm = () => {
   } = methods;
 
   useEffect(() => {
-    if (!funnel) redirect("/representation-equilibree/commencer");
+    if (!funnel) return; // dummy typesafe ; funnel is already available
     if ("notComputableReasonMembers" in funnel) {
       setComputable(false);
     } else if ("memberWomenPercent" in funnel) {
@@ -47,6 +49,14 @@ export const EcartsMembresForm = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- need to be triggered on mount
   }, []);
+
+  if (!hydrated) {
+    return <SkeletonForm fields={1} />;
+  }
+
+  if (funnel && !funnel.year) {
+    redirect("/representation-equilibree/commencer");
+  }
 
   const onSubmit = (data: EcartsMembresFormType) => {
     if (!funnel) return;

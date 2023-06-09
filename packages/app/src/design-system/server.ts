@@ -20,6 +20,7 @@ export * from "./base/Icon";
 export * from "./base/Link";
 export * from "./base/LinkGroup";
 export * from "./base/Logo";
+export * from "./base/RecapCard";
 export * from "./base/RecapSection";
 export * from "./base/SkipLinks";
 export * from "./base/SkipLinks";

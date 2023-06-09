@@ -8,17 +8,15 @@ import { REGEX_URL } from "@common/shared-domain/domain/valueObjects";
 import { formatIsoToFr } from "@common/utils/date";
 import { type ClearObject, type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { ClientOnly } from "@components/ClientOnly";
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isBefore, parseISO } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
+import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
@@ -42,6 +40,7 @@ export const PublicationForm = () => {
   const [previousUrl, setPreviousUrl] = useState<string>();
   const [previousModalities, setPreviousModalities] = useState<string>();
   const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
+  const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const {
     formState: { errors, isValid },
@@ -83,26 +82,18 @@ export const PublicationForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <FormLayout>
-        <ClientOnly
-          fallback={
-            <div>
-              <Skeleton width="70%" />
-              <Skeleton height="2.5rem" />
-            </div>
-          }
-        >
-          <Input
-            label="Date de publication des écarts calculables"
-            state={errors.publishDate && "error"}
-            stateRelatedMessage={errors.publishDate?.message}
-            nativeInputProps={{
-              type: "date",
-              placeholder: "Sélectionner une date",
-              min: funnel?.endOfPeriod, // <= funnel isn't available server side, that why we use ClientOnly
-              ...register("publishDate"),
-            }}
-          />
-        </ClientOnly>
+        <Input
+          label="Date de publication des écarts calculables"
+          state={errors.publishDate && "error"}
+          stateRelatedMessage={errors.publishDate?.message}
+          nativeInputProps={{
+            type: "date",
+            placeholder: "Sélectionner une date",
+            min: hydrated ? funnel?.endOfPeriod : void 0,
+            ...register("publishDate"),
+          }}
+        />
+
         <RadioButtons
           legend="Avez-vous un site Internet pour publier les écarts calculables ?"
           orientation="horizontal"

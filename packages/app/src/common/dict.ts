@@ -355,6 +355,7 @@ interface Country {
   ISO2: string;
   LIB: string;
 }
+export const DEFAULT_COUNTY_CODE = "XXXXX";
 export const COUNTRIES: Country[] = [
   { COG: "99101", ISO2: "DK", LIB: "DANEMARK" },
   { COG: "99102", ISO2: "IS", LIB: "ISLANDE" },
@@ -558,7 +559,7 @@ export const COUNTRIES: Country[] = [
   { COG: "99515", ISO2: "MH", LIB: "MARSHALL (ILES)" },
   { COG: "99516", ISO2: "FM", LIB: "MICRONESIE (ETATS FEDERES DE)" },
   { COG: "99517", ISO2: "PW", LIB: "PALAOS (ILES)" },
-  { COG: "XXXXX", ISO2: "FR", LIB: "FRANCE" },
+  { COG: DEFAULT_COUNTY_CODE, ISO2: "FR", LIB: "FRANCE" },
 ];
 
 export const COUNTRIES_COG_TO_ISO: SimpleObject<string> = COUNTRIES.reduce(
