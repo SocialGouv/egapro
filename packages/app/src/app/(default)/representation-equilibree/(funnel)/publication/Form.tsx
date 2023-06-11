@@ -21,6 +21,15 @@ import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeq
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
   .superRefine(({ endOfPeriod, publishDate }, ctx) => {
+    if (!publishDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La date de publication est obligatoire",
+        path: ["publishDate"],
+      });
+
+      return z.NEVER;
+    }
     if (isBefore(parseISO(publishDate), parseISO(endOfPeriod))) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

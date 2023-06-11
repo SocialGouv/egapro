@@ -1145,7 +1145,7 @@ export type HautesRemunerations = WithPopulationFavorable & {
 
 export interface DeclarationDTO {
   id?: string;
-  source?: "solen" | "simulateur" | "formulaire" | "api";
+  source?: "solen" | "simulateur" | "formulaire" | "api" | "repeqV2";
   déclaration: {
     /**
      * Date de validation et de transmission des résultats au service Egapro

@@ -3,7 +3,7 @@ import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/va
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
-import { COUNTRIES_ISO_TO_LIB, DEFAULT_COUNTY_CODE } from "@common/dict";
+import { COUNTRIES_COG_TO_LIB, DEFAULT_COUNTRY_COG } from "@common/dict";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
 
@@ -13,7 +13,7 @@ export interface DetailRepEqProps {
   repEq: RepresentationEquilibreeDTO;
 }
 export const DetailRepEq = ({ repEq, company, edit }: DetailRepEqProps) => {
-  const { address, countryCode, postalCode } = getAdditionalMeta(company);
+  const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
 
   return (
     <>
@@ -39,7 +39,7 @@ export const DetailRepEq = ({ repEq, company, edit }: DetailRepEqProps) => {
             <strong>{company.simpleLabel}</strong>
             <br />
             {address}, {postalCode} {company.firstMatchingEtablissement.libelleCommuneEtablissement}
-            {countryCode !== DEFAULT_COUNTY_CODE && `, ${COUNTRIES_ISO_TO_LIB[countryCode]}`}
+            {countryCodeCOG !== DEFAULT_COUNTRY_COG && `, ${COUNTRIES_COG_TO_LIB[countryCodeCOG]}`}
             <br />
             Siren : {repEq.siren} - Code NAF : {company.activitePrincipaleUniteLegale} - {company.activitePrincipale}
           </>
@@ -113,24 +113,26 @@ export const DetailRepEq = ({ repEq, company, edit }: DetailRepEqProps) => {
               ]
         }
       />
-      <RecapCard
-        title="Publication de vos écarts"
-        editLink={(edit || void 0) && "/representation-equilibree/publication"}
-        content={
-          <>
-            Résultats publiés le {formatIsoToFr(repEq.publishDate)}
-            <br />
-            {"publishUrl" in repEq ? (
-              `Via le site internet suivant : ${repEq.publishUrl}`
-            ) : (
-              <>
-                Via les modalités de communication suivantes :<br />
-                {repEq.publishModalities}
-              </>
-            )}
-          </>
-        }
-      />
+      {repEq.publishDate && (
+        <RecapCard
+          title="Publication de vos écarts"
+          editLink={(edit || void 0) && "/representation-equilibree/publication"}
+          content={
+            <>
+              Résultats publiés le {formatIsoToFr(repEq.publishDate)}
+              <br />
+              {"publishUrl" in repEq ? (
+                `Via le site internet suivant : ${repEq.publishUrl}`
+              ) : (
+                <>
+                  Via les modalités de communication suivantes :<br />
+                  {repEq.publishModalities}
+                </>
+              )}
+            </>
+          }
+        />
+      )}
     </>
   );
 };

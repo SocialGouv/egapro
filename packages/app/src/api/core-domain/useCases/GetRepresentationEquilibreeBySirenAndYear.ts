@@ -1,5 +1,5 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import { type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
@@ -12,10 +12,10 @@ interface Input {
   year: number;
 }
 
-export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input, DeclarationDTO | null> {
+export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input, RepresentationEquilibreeDTO | null> {
   constructor(private readonly reprensentationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
 
-  public async execute({ siren, year }: Input): Promise<DeclarationDTO | null> {
+  public async execute({ siren, year }: Input): Promise<RepresentationEquilibreeDTO | null> {
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);

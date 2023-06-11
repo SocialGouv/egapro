@@ -20,7 +20,6 @@ export const createSteps = {
       .string()
       .nonempty("Le numéro de téléphone est requis")
       .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide")),
-    gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
     email: z.string().email(),
   }),
   periodeReference: z.object({
@@ -52,7 +51,7 @@ export const createSteps = {
     ),
   publication: z
     .object({
-      publishDate: z.string().nonempty("La date de publication est obligatoire"),
+      publishDate: z.string().optional(),
     })
     .and(
       z

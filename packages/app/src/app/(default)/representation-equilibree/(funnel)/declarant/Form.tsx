@@ -4,6 +4,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { FormLayout } from "@design-system";
@@ -12,11 +13,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useForm } from "react-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
-type DeclarantFormType = z.infer<typeof createSteps.declarant>;
+const formSchema = createSteps.declarant.extend({
+  gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
+});
+
+type DeclarantFormType = ClearObject<z.infer<typeof formSchema>>;
 
 const useStore = storePicker(useRepeqFunnelStore);
 export const DeclarantForm = ({ session }: { session: Session }) => {
@@ -28,10 +33,9 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
     register,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
   } = useForm<DeclarantFormType>({
     mode: "onChange",
-    resolver: zodResolver(createSteps.declarant),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       ...session.user, // first fill with session info (email, username, ...)
       ...funnel, // then, if funnel has data, get them

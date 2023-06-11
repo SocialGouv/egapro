@@ -2,7 +2,14 @@ import { type NotComputableReason } from "@common/core-domain/domain/valueObject
 import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
-import { type DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
+import {
+  type CodeNaf,
+  type CodePays,
+  type DeclarationDTO as DeclarationDataRaw,
+  type Departement,
+  type Region,
+  type RepresentationEquilibree,
+} from "@common/models/generated";
 import { type Enum } from "@common/shared-domain/domain/valueObjects";
 
 export interface DeclarationRaw {
@@ -17,8 +24,37 @@ export interface DeclarationRaw {
   year: number;
 }
 
+export interface RepresentationEquilibreeDataRaw {
+  déclarant: Required<DeclarationDataRaw["déclarant"]>;
+  déclaration: {
+    année_indicateurs: number;
+    date: string;
+    fin_période_référence: string;
+    publication?: {
+      date: string;
+      modalités?: string;
+      url?: string;
+    };
+  };
+  entreprise: {
+    adresse?: string;
+    code_naf?: CodeNaf;
+    code_pays?: CodePays;
+    code_postal?: string;
+    commune?: string;
+    département?: Departement;
+    raison_sociale?: string;
+    région?: Region;
+    siren: string;
+  };
+  indicateurs: {
+    représentation_équilibrée: RepresentationEquilibree;
+  };
+  source?: "repeqV2";
+}
+
 export interface RepresentationEquilibreeRaw {
-  data?: DeclarationDataRaw;
+  data: RepresentationEquilibreeDataRaw;
   declared_at: Date;
   ft: string;
   modified_at: Date;
@@ -53,7 +89,7 @@ export interface DeclarationSearchResultRaw {
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {
-  data: DeclarationDataRaw;
+  company: DeclarationDataRaw["entreprise"];
   results: Record<
     number,
     {

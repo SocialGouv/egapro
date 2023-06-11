@@ -36,6 +36,10 @@ export const ValidationRecapRepEq = () => {
     if (funnel?.siren && !company) getCompany(funnel.siren).then(setCompany);
   }, [funnel, company]);
 
+  if (hydrated && !funnel?.siren) {
+    return redirect("/representation-equilibree/commencer");
+  }
+
   if (!hydrated || !company) {
     return (
       <>
@@ -48,10 +52,6 @@ export const ValidationRecapRepEq = () => {
         ))}
       </>
     );
-  }
-
-  if (!funnel?.siren) {
-    return redirect("/representation-equilibree/commencer");
   }
 
   try {

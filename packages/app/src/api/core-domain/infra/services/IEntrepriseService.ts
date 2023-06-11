@@ -44,6 +44,7 @@ export interface ShortEtablissement {
   address: string;
   categorieEntreprise?: string;
   codeCommuneEtablissement: string;
+  /** COG (Code Officiel Géographique) / Code Insee */
   codePaysEtrangerEtablissement?: string;
   codePostalEtablissement: string;
   etablissementSiege: boolean;

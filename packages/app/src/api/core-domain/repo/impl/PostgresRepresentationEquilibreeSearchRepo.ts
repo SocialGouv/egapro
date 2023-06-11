@@ -28,7 +28,7 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
     const raws = await sql<RepresentationEquilibreeSearchResultRaw[]>`
         SELECT
-            (jsonb_agg(${this.repEqTable}.data ORDER BY ${this.repEqTable}.year DESC) -> 0) as data,
+            (jsonb_agg(${this.repEqTable}.data->'entreprise' ORDER BY ${this.repEqTable}.year DESC) -> 0) as company,
             jsonb_object_agg(${this.repEqTable}.year::text, json_build_object(
                 'executiveMenPercent', replace((${
                   this.repEqTable

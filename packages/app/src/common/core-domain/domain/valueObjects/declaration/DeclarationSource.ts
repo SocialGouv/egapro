@@ -9,6 +9,7 @@ export namespace DeclarationSource {
   export enum Enum {
     API = "api",
     FORMULAIRE = "formulaire",
+    REPEQV2 = "repeqV2",
     SIMULATEUR = "simulateur",
     SOLEN = "solen",
   }

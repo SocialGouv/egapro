@@ -1,4 +1,4 @@
-import { type Any, type Objectize, type SimpleObject } from "../../utils/types";
+import { type Any, type ClearObject, type SimpleObject } from "../../utils/types";
 import { type ValueObject } from "./ValueObject";
 import { type Enum } from "./valueObjects";
 
@@ -27,11 +27,11 @@ type UnboxProp<T> = T extends Any[]
   : T extends Entity<infer TProps, Any>
   ? EntityPropsToJson<TProps>
   : T extends Date
-  ? string
+  ? Date | string
   : T extends SimpleObject
   ? EntityPropsToJson<T>
   : T;
 
-export type EntityPropsToJson<T> = Objectize<{
+export type EntityPropsToJson<T> = ClearObject<{
   [P in keyof T]: UnboxProp<T[P]>;
 }>;

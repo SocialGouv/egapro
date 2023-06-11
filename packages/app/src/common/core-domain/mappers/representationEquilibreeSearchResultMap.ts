@@ -2,8 +2,8 @@ import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/i
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
+import { Company } from "../domain/declaration/Company";
 import { BalancedRepresentation } from "../domain/declaration/indicators/BalancedRepresentation";
-import { RepresentationEquilibreeData } from "../domain/RepresentationEquilibreeData";
 import { RepresentationEquilibreeSearchResult } from "../domain/RepresentationEquilibreeSearchResult";
 import { RepEqIndicatorsYear } from "../domain/valueObjects/declaration/declarationInfo/RepEqIndicatorsYear";
 import { type PublicCompanyDTO } from "../dtos/DeclarationDTO";
@@ -29,81 +29,22 @@ export const representationEquilibreeSearchResultMap: Mapper<
           }),
         ]),
       ),
-      data: RepresentationEquilibreeData.fromJson({
-        id: raw.data.id,
-        company: {
-          address: raw.data.entreprise.adresse,
-          city: raw.data.entreprise.commune,
-          countryCode: raw.data.entreprise.code_pays,
-          county: raw.data.entreprise.département,
-          hasRecoveryPlan: !!raw.data.entreprise.plan_relance,
-          name: raw.data.entreprise.raison_sociale,
-          postalCode: raw.data.entreprise.code_postal,
-          region: raw.data.entreprise.région,
-          siren: raw.data.entreprise.siren,
-          ues: raw.data.entreprise.ues
-            ? {
-                companies:
-                  raw.data.entreprise.ues.entreprises?.map(entreprise => ({
-                    name: entreprise.raison_sociale,
-                    siren: entreprise.siren,
-                  })) ?? [],
-                name: raw.data.entreprise.ues.nom,
-              }
-            : void 0,
-          workforce: {
-            range: raw.data.entreprise.effectif?.tranche,
-            total: raw.data.entreprise.effectif?.total,
-          },
-          nafCode: raw.data.entreprise.code_naf,
-        },
-        declarant: {
-          email: raw.data.déclarant.email,
-          firstname: raw.data.déclarant.prénom,
-          lastname: raw.data.déclarant.nom,
-          phone: raw.data.déclarant.téléphone,
-        },
-        declaration: {
-          computablePoints: raw.data.déclaration.points_calculables,
-          correctiveMeasures: raw.data.déclaration.mesures_correctives,
-          date: raw.data.déclaration.date,
-          draft: !!raw.data.déclaration.brouillon,
-          endReferencePeriod: raw.data.déclaration.fin_période_référence,
-          indicatorsYear: raw.data.déclaration.année_indicateurs,
-          points: raw.data.déclaration.points,
-          publication: raw.data.déclaration.publication
-            ? {
-                date: raw.data.déclaration.publication.date,
-                modalities: raw.data.déclaration.publication.modalités,
-                url: raw.data.déclaration.publication.url,
-                measuresPublishDate: raw.data.déclaration.publication.date_publication_mesures,
-                objectivesMeasuresModalities: raw.data.déclaration.publication.modalités_objectifs_mesures,
-                objectivesPublishDate: raw.data.déclaration.publication.date_publication_objectifs,
-              }
-            : void 0,
-          sufficientPeriod: !!raw.data.déclaration.période_suffisante,
-          index: raw.data.déclaration.index,
-        },
-        indicators: {
-          balancedRepresentation: raw.data.indicateurs?.représentation_équilibrée
-            ? {
-                executiveMenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_hommes_cadres,
-                executiveWomenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_femmes_cadres,
-                memberMenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_hommes_membres,
-                memberWomenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_femmes_membres,
-                notComputableReasonExecutives:
-                  raw.data.indicateurs?.représentation_équilibrée.motif_non_calculabilité_cadres,
-                notComputableReasonMembers:
-                  raw.data.indicateurs?.représentation_équilibrée.motif_non_calculabilité_membres,
-              }
-            : void 0,
-        },
+      company: Company.fromJson({
+        address: raw.company.adresse,
+        city: raw.company.commune,
+        countryCode: raw.company.code_pays,
+        county: raw.company.département,
+        name: raw.company.raison_sociale,
+        postalCode: raw.company.code_postal,
+        region: raw.company.région,
+        siren: raw.company.siren,
+        nafCode: raw.company.code_naf,
       }),
     });
   },
 
   toDTO(obj) {
-    const company = reprensentationEquilibreePublicDataToDTO(obj.data);
+    const company = reprensentationEquilibreePublicDataToDTO(obj.company);
     return {
       company,
       results: [...obj.results].reduce(
@@ -124,32 +65,13 @@ export const representationEquilibreeSearchResultMap: Mapper<
   },
 };
 
-function reprensentationEquilibreePublicDataToDTO(data: RepresentationEquilibreeData): PublicCompanyDTO {
+function reprensentationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
   return {
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
-    nafCode: data.company.nafCode!.getValue(),
-    countyCode: data.company.county!.getValue(),
-    ...(data.company.workforce?.total || data.company.workforce?.range
-      ? {
-          workforce: {
-            total: data.company.workforce?.total?.getValue(),
-            range: data.company.workforce?.range?.getValue(),
-          },
-        }
-      : {}),
-    name: data.company.name!,
-    regionCode: data.company.region!.getValue(),
-    siren: data.company.siren.getValue(),
-    ...(data.company.ues
-      ? {
-          ues: {
-            companies: data.company.ues.companies.map(company => ({
-              name: company.name,
-              siren: company.siren.getValue(),
-            })),
-            name: data.company.ues.name!,
-          },
-        }
-      : {}),
+    nafCode: company.nafCode!.getValue(),
+    countyCode: company.county!.getValue(),
+    name: company.name!,
+    regionCode: company.region!.getValue(),
+    siren: company.siren.getValue(),
   };
 }

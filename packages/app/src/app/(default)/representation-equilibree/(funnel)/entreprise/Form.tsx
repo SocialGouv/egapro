@@ -4,7 +4,7 @@ import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseServ
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
-import { COUNTIES, COUNTRIES_COG_TO_ISO, REGIONS } from "@common/dict";
+import { COUNTIES, COUNTRIES_COG_TO_LIB, REGIONS } from "@common/dict";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { FormLayout } from "@design-system";
 import { redirect, useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ export const EntrepriseForm = () => {
     return redirect("/representation-equilibree/commencer");
   }
 
-  const { address, countryCode, countyCode, postalCode, regionCode } = getAdditionalMeta(company);
+  const { address, countryCodeCOG, countyCode, postalCode, regionCode } = getAdditionalMeta(company);
 
   return (
     <FormLayout>
@@ -95,7 +95,7 @@ export const EntrepriseForm = () => {
         label="Code pays"
         nativeInputProps={{
           readOnly: true,
-          value: COUNTRIES_COG_TO_ISO[countryCode],
+          value: COUNTRIES_COG_TO_LIB[countryCodeCOG],
         }}
       />
       <ButtonsGroup
