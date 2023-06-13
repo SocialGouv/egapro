@@ -35,6 +35,8 @@ export const toISOString = (date: string): string | undefined => {
 
 export const dateObjectToDateISOString = (date: Date) => formatISO(date, { representation: "date" });
 
+export const dateObjectToDateTimeISOString = (date: Date) => formatISO(date);
+
 /**
  * True if the date is older than the current date minus the duration.
  *
