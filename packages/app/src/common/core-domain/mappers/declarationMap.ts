@@ -12,7 +12,7 @@ import {
 } from "@common/models/generated";
 import { type Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
-import { dateObjectToDateISOString } from "@common/utils/date";
+import { dateObjectToDateISOString, dateObjectToDateTimeISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
 import { type Any } from "@common/utils/types";
 import { isUndefined } from "lodash";
@@ -200,7 +200,7 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
     déclaration: {
       année_indicateurs: data.declaration.indicatorsYear.getValue() as AnneeIndicateur,
       brouillon: data.declaration.draft,
-      date: data.declaration.date ? dateObjectToDateISOString(data.declaration.date) : void 0,
+      date: data.declaration.date ? dateObjectToDateTimeISOString(data.declaration.date) : void 0,
       fin_période_référence: data.declaration.endReferencePeriod
         ? dateObjectToDateISOString(data.declaration.endReferencePeriod)
         : void 0,
