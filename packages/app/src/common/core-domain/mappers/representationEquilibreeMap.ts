@@ -64,7 +64,7 @@ export const representationEquilibreeMap: Required<
     const data = reprensentationEquilibreeDataToDTO(obj);
     return {
       declared_at: obj.declaredAt,
-      ft: "", // TODO
+      ft: obj.company.name,
       modified_at: obj.modifiedAt,
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
@@ -91,7 +91,7 @@ export const representationEquilibreeMap: Required<
         entreprise: {
           siren: data.siren,
           adresse: obj.company.address,
-          code_naf: obj.company.nafCode?.getValue(),
+          code_naf: obj.company.nafCode.getValue(),
           code_pays: obj.company.countryCode?.getValue(),
           code_postal: obj.company.postalCode?.getValue(),
           commune: obj.company.city,

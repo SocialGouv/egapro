@@ -2,7 +2,6 @@ import { type DeclarationRaw } from "@api/core-domain/infra/db/raw";
 import {
   type AnneeIndicateur,
   type CategoriesSimples,
-  type CodeNaf,
   type CodePays,
   type Departement,
   type Effectif,
@@ -227,7 +226,7 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
     entreprise: {
       siren: data.company.siren.getValue(),
       adresse: data.company.address,
-      code_naf: data.company.nafCode?.getValue() as CodeNaf,
+      code_naf: data.company.nafCode.getValue(),
       code_pays: data.company.countryCode?.getValue() as CodePays,
       code_postal: data.company.postalCode?.getValue(),
       commune: data.company.city,

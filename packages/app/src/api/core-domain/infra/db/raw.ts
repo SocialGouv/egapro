@@ -38,12 +38,12 @@ export interface RepresentationEquilibreeDataRaw {
   };
   entreprise: {
     adresse?: string;
-    code_naf?: CodeNaf;
+    code_naf: CodeNaf;
     code_pays?: CodePays;
     code_postal?: string;
     commune?: string;
     département?: Departement;
-    raison_sociale?: string;
+    raison_sociale: string;
     région?: Region;
     siren: string;
   };
@@ -89,7 +89,7 @@ export interface DeclarationSearchResultRaw {
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {
-  company: DeclarationDataRaw["entreprise"];
+  company: RepresentationEquilibreeRaw["data"]["entreprise"];
   results: Record<
     number,
     {
@@ -101,6 +101,16 @@ export interface RepresentationEquilibreeSearchResultRaw {
       notComputableReasonMembers: Enum.ToString<typeof NotComputableReasonMemberRepEq.Enum> | null;
     }
   >;
+}
+
+export interface RepresentationEquilibreeSearchRaw {
+  declared_at: Date;
+  departement: string | null;
+  ft: string;
+  region: string | null;
+  section_naf: string;
+  siren: string;
+  year: number;
 }
 
 export interface OwnershipRequestRaw {

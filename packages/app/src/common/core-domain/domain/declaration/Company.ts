@@ -21,8 +21,8 @@ export interface CompanyProps {
   countryCode?: CountryCode;
   county?: County;
   hasRecoveryPlan?: boolean;
-  nafCode?: NafCode;
-  name?: string;
+  nafCode: NafCode;
+  name: string;
   postalCode?: FrenchPostalCode;
   region?: Region;
   siren: Siren;
@@ -57,12 +57,12 @@ export class Company extends JsonEntity<CompanyProps, never> {
   }
 
   /** `code_naf` */
-  get nafCode(): NafCode | undefined {
+  get nafCode(): NafCode {
     return this.props.nafCode;
   }
 
   /** `raison_sociale` */
-  get name(): string | undefined {
+  get name(): string {
     return this.props.name;
   }
 
@@ -95,6 +95,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
       siren: new Siren(json.siren),
       address: json.address,
       city: json.city,
+      nafCode: new NafCode(json.nafCode),
     };
 
     if (typeof json.hasRecoveryPlan === "boolean") {
@@ -107,10 +108,6 @@ export class Company extends JsonEntity<CompanyProps, never> {
 
     if (json.county) {
       props.county = new County(json.county);
-    }
-
-    if (json.nafCode) {
-      props.nafCode = new NafCode(json.nafCode);
     }
 
     if (json.postalCode) {

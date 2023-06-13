@@ -22,6 +22,7 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
   public async execute(repEq: CreateRepresentationEquilibreeDTO): Promise<void> {
     const now = new Date();
     const pk: RepresentationEquilibreePK = [new Siren(repEq.siren), new PositiveNumber(repEq.year)];
+
     try {
       const found = await this.reprensentationEquilibreeRepo.getOne(pk);
 
@@ -89,7 +90,7 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
 
         const specification = new RepresentationEquilibreeSpecification();
         if (specification.isSatisfiedBy(representationEquilibree)) {
-          await this.reprensentationEquilibreeRepo.save(representationEquilibree);
+          await this.reprensentationEquilibreeRepo.saveWithIndex(representationEquilibree);
         } else {
           throw specification.lastError;
         }

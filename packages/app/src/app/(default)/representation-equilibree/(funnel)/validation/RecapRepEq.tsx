@@ -17,7 +17,7 @@ import Skeleton from "react-loading-skeleton";
 import { type ZodError } from "zod";
 
 import { DetailRepEq } from "../../Recap";
-import { getCompany } from "../actions";
+import { getCompany, saveRepresentationEquilibree } from "../actions";
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 function assertRepEq(
@@ -61,19 +61,9 @@ export const ValidationRecapRepEq = () => {
   }
 
   const sendRepresentationEquilibree = async () => {
-    console.log({ funnel });
-    // try {
-    //   invariant(formData.entreprise?.siren !== undefined, "Le Siren doit forcément être présent.");
-    //   invariant(formData.year !== undefined, "L'année doit forcément être présente.");
-    //   await putRepresentationEquilibree(formData);
-    //   const repeq = await fetchRepresentationEquilibree(formData.entreprise.siren, formData.year);
-    //   if (repeq) {
-    //     saveFormData({ ...buildFormState(repeq.data), status: "edition" });
-    //   }
-    //   router.push("/representation-equilibree/transmission");
-    // } catch (error) {
-    //   setFeatureStatus({ type: "error", message: "Problème lors de l'envoi de la représentation équilibrée." });
-    // }
+    await saveRepresentationEquilibree(funnel);
+    setIsEdit(true);
+    router.push("/representation-equilibree/transmission");
   };
 
   const previousPage =

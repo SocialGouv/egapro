@@ -141,7 +141,9 @@
       },
       "additionalProperties": false,
       "required": [
-        "siren"
+        "siren",
+        "raison_sociale",
+        "code_naf"
       ]
     },
     "indicateurs": {
