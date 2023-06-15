@@ -1,4 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { Box, CenteredContainer, Container, Grid, GridCol, ImgJDMA, ImgSuccessLight, Link } from "@design-system";
 import questionImg from "@public/img/question.svg";
@@ -47,21 +46,20 @@ const Transmission = () => {
         </p>
         <p>Nous vous remercions de votre transmission.</p>
         <SendReceipt />
-        <div>
-          <Box className={fr.cx("fr-enlarge-link")} style={{ textAlign: "center" }}>
-            <Link
-              href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ImgJDMA />
-            </Link>
-          </Box>
-        </div>
+        <Box style={{ textAlign: "center" }} mt="6w">
+          <Link
+            href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+            target="_blank"
+            rel="noreferrer"
+            style={{ background: "none" }}
+          >
+            <ImgJDMA />
+          </Link>
+        </Box>
       </CenteredContainer>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }}>
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} py="4w">
         <Container as="section">
-          <Grid haveGutters align="center">
+          <Grid align="center" haveGutters>
             <GridCol md={8}>
               <Card
                 enlargeLink

@@ -1,6 +1,6 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Button from "@codegouvfr/react-dsfr/Button";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { storePicker } from "@common/utils/zustand";
 import { Container, Grid, GridCol } from "@design-system";
@@ -38,39 +38,40 @@ export const SendReceipt = () => {
     // );
   };
   return (
-    <Container as="section">
-      <Grid haveGutters align="center">
-        <GridCol sm={10}>
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttonsEquisized
-            alignment="center"
-            buttons={[
-              {
-                children: receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception",
-                priority: "secondary",
-                onClick: sendReceipt,
-                disabled: receiptProcessing,
-              },
-              {
-                children: "Effectuer une nouvelle déclaration",
-                onClick: initNewRepresentation,
-              },
-            ]}
-          />
-          <Card
-            enlargeLink
-            title="Télécharger le récapitulatif"
-            endDetail="PDF"
-            linkProps={{
-              href: `/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`,
-            }}
-            desc={`Année ${funnel.year + 1} au titre des donées ${funnel.year}`}
-            iconId="fr-icon-download-line"
-            className={style["download-icon"]}
-          />
-        </GridCol>
-      </Grid>
-    </Container>
+    <>
+      <Container as="section">
+        <Grid align="center" haveGutters>
+          <GridCol md={5}>
+            <Button
+              size="small"
+              className={style["send-receipt-button"]}
+              priority="secondary"
+              onClick={sendReceipt}
+              disabled={receiptProcessing}
+            >
+              {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
+            </Button>
+          </GridCol>
+          <GridCol md={5}>
+            <Button size="small" className={style["send-receipt-button"]} onClick={initNewRepresentation}>
+              Effectuer une nouvelle déclaration
+            </Button>
+          </GridCol>
+          <GridCol md={10}>
+            <Card
+              enlargeLink
+              title="Télécharger le récapitulatif"
+              endDetail="PDF"
+              linkProps={{
+                href: `/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`,
+              }}
+              desc={`Année ${funnel.year + 1} au titre des donées ${funnel.year}`}
+              iconId="fr-icon-download-line"
+              className={style["download-icon"]}
+            />
+          </GridCol>
+        </Grid>
+      </Container>
+    </>
   );
 };
