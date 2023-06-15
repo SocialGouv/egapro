@@ -649,6 +649,9 @@ async def get_config(request, response):
         "NAF": dict(NAF.pairs()),
         "SECTIONS_NAF": NAF.section,
         "READONLY": config.READONLY,
+        "DB_NAME": config.DBNAME,
+        "DBHOST": config.DBHOST,
+        "DBPORT": config.DBPORT,
     }
     response.json = {k: v for k, v in data.items() if not keys or k in keys}
 
