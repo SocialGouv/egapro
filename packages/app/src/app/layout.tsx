@@ -2,7 +2,6 @@ import "./StartDsfr";
 import "react-loading-skeleton/dist/skeleton.css";
 
 import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
-import Display from "@codegouvfr/react-dsfr/Display";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getColorSchemeHtmlAttributes";
@@ -114,7 +113,6 @@ const RootLayout = ({ children }: PropsWithChildren) => (
                 ]}
               />
               {children}
-              <Display />
             </IsomorphicSkeletonTheme>
           </DsfrProvider>
         </SessionProvider>

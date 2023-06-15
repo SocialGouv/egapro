@@ -37,6 +37,7 @@ export * from "./img/ImgJDMA";
 export * from "./img/ImgRepresentationEquilibree";
 export * from "./img/ImgRepresentationEquilibree";
 export * from "./img/ImgSuccess";
+export * from "./img/ImgSuccessLight";
 export * from "./layout/CenteredContainer";
 export * from "./layout/Container";
 export * from "./layout/ContentWithAside";
