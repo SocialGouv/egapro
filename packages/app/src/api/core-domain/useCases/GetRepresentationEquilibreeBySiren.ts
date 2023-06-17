@@ -11,12 +11,12 @@ interface Input {
 }
 
 export class GetRepresentationEquilibreeBySiren implements UseCase<Input, RepresentationEquilibreeDTO[]> {
-  constructor(private readonly reprensentationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
+  constructor(private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
 
   public async execute({ siren }: Input): Promise<RepresentationEquilibreeDTO[]> {
     try {
       const validatedSiren = new Siren(siren);
-      const representationEquilibrees = await this.reprensentationEquilibreeRepo.getAllBySiren(validatedSiren);
+      const representationEquilibrees = await this.representationEquilibreeRepo.getAllBySiren(validatedSiren);
       return representationEquilibrees.map(representationEquilibreeMap.toDTO).filter(d => d);
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenError(

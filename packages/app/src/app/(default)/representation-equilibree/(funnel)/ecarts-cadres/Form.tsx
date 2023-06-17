@@ -38,6 +38,7 @@ export const EcartsCadresForm = () => {
     handleSubmit,
     register,
     reset,
+    trigger,
   } = methods;
 
   useEffect(() => {
@@ -88,6 +89,8 @@ export const EcartsCadresForm = () => {
                 onChange() {
                   setComputable(true);
                   reset();
+                  trigger("executiveWomenPercent", { shouldFocus: true });
+                  trigger("executiveMenPercent");
                 },
               },
             },
@@ -147,7 +150,7 @@ export const EcartsCadresForm = () => {
             {
               children: "Suivant",
               type: "submit",
-              disabled: !isValid,
+              disabled: !isValid || typeof isComputable === "undefined",
             },
           ]}
         />

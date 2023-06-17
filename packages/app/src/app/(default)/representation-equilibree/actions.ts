@@ -29,9 +29,15 @@ export async function getCompany(siren: string) {
 
 export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
-  const ret = await useCase.execute(repEq);
+  await useCase.execute(repEq);
 
-  return ret;
+  const receiptUseCase = new SendRepresentationEquilibreeReceipt(
+    representationEquilibreeRepo,
+    globalMailerService,
+    jsxPdfService,
+  );
+
+  await receiptUseCase.execute(repEq);
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {

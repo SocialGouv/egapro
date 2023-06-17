@@ -106,7 +106,7 @@ export const declarationSearchResultMap: Mapper<
     const company = [...obj.data].reduce(
       (acc, [year, data]) => ({
         ...acc,
-        [year.getValue()]: reprensentationEquilibreePublicDataToDTO(data),
+        [year.getValue()]: representationEquilibreePublicDataToDTO(data),
       }),
       {} as SearchDeclarationResultDTO["company"],
     );
@@ -139,7 +139,7 @@ export const declarationSearchResultMap: Mapper<
   },
 };
 
-function reprensentationEquilibreePublicDataToDTO(data: DeclarationData): PublicCompanyDTO {
+function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicCompanyDTO {
   return {
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     nafCode: data.company.nafCode!.getValue(),

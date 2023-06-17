@@ -44,7 +44,7 @@ export const representationEquilibreeSearchResultMap: Mapper<
   },
 
   toDTO(obj) {
-    const company = reprensentationEquilibreePublicDataToDTO(obj.company);
+    const company = representationEquilibreePublicDataToDTO(obj.company);
     return {
       company,
       results: [...obj.results].reduce(
@@ -65,7 +65,7 @@ export const representationEquilibreeSearchResultMap: Mapper<
   },
 };
 
-function reprensentationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
+function representationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
   return {
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     nafCode: company.nafCode!.getValue(),

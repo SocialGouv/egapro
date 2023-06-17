@@ -38,6 +38,7 @@ export const EcartsMembresForm = () => {
     handleSubmit,
     register,
     reset,
+    trigger,
   } = methods;
 
   useEffect(() => {
@@ -91,6 +92,8 @@ export const EcartsMembresForm = () => {
                 onChange() {
                   setComputable(true);
                   reset();
+                  trigger("memberWomenPercent", { shouldFocus: true });
+                  trigger("memberMenPercent");
                 },
               },
             },
@@ -156,7 +159,7 @@ export const EcartsMembresForm = () => {
             {
               children: "Suivant",
               type: "submit",
-              disabled: !isValid,
+              disabled: !isValid || typeof isComputable === "undefined",
             },
           ]}
         />

@@ -13,13 +13,13 @@ interface Input {
 }
 
 export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input, RepresentationEquilibreeDTO | null> {
-  constructor(private readonly reprensentationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
+  constructor(private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
 
   public async execute({ siren, year }: Input): Promise<RepresentationEquilibreeDTO | null> {
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
-      const representationEquilibree = await this.reprensentationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
+      const representationEquilibree = await this.representationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
       return representationEquilibree ? representationEquilibreeMap.toDTO(representationEquilibree) : null;
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenAndYearError(

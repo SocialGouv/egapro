@@ -15,7 +15,7 @@ import { type IRepresentationEquilibreeRepo } from "../repo/IRepresentationEquil
 
 export class SaveRepresentationEquilibree implements UseCase<CreateRepresentationEquilibreeDTO, void> {
   constructor(
-    private readonly reprensentationEquilibreeRepo: IRepresentationEquilibreeRepo,
+    private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo,
     private readonly entrepriseService: IEntrepriseService,
   ) {}
 
@@ -24,7 +24,7 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
     const pk: RepresentationEquilibreePK = [new Siren(repEq.siren), new PositiveNumber(repEq.year)];
 
     try {
-      const found = await this.reprensentationEquilibreeRepo.getOne(pk);
+      const found = await this.representationEquilibreeRepo.getOne(pk);
 
       if (found) {
         // TODO edit mode
@@ -90,7 +90,7 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
 
         const specification = new RepresentationEquilibreeSpecification();
         if (specification.isSatisfiedBy(representationEquilibree)) {
-          await this.reprensentationEquilibreeRepo.saveWithIndex(representationEquilibree);
+          await this.representationEquilibreeRepo.saveWithIndex(representationEquilibree);
         } else {
           throw specification.lastError;
         }

@@ -14,7 +14,7 @@ interface Input {
 
 export class DownloadRepresentationEquilibreeReceipt implements UseCase<Input, Buffer> {
   constructor(
-    private readonly reprensentationEquilibreeRepo: IRepresentationEquilibreeRepo,
+    private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo,
     private readonly jsxPdfService: IJsxPdfService,
   ) {}
 
@@ -22,7 +22,7 @@ export class DownloadRepresentationEquilibreeReceipt implements UseCase<Input, B
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
-      const representationEquilibree = await this.reprensentationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
+      const representationEquilibree = await this.representationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
 
       if (!representationEquilibree) {
         throw new DownloadRepresentationEquilibreeReceiptNotFoundError(

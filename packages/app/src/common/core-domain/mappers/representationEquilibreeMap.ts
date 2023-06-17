@@ -57,11 +57,11 @@ export const representationEquilibreeMap: Required<
   },
 
   toDTO(obj) {
-    return reprensentationEquilibreeDataToDTO(obj);
+    return representationEquilibreeDataToDTO(obj);
   },
 
   toPersistence(obj) {
-    const data = reprensentationEquilibreeDataToDTO(obj);
+    const data = representationEquilibreeDataToDTO(obj);
     return {
       declared_at: obj.declaredAt,
       ft: obj.company.name,
@@ -124,7 +124,7 @@ export const representationEquilibreeMap: Required<
   },
 };
 
-function reprensentationEquilibreeDataToDTO(data: RepresentationEquilibree): RepresentationEquilibreeDTO {
+function representationEquilibreeDataToDTO(data: RepresentationEquilibree): RepresentationEquilibreeDTO {
   return {
     date: dateObjectToDateISOString(data.declaredAt),
     email: data.declarant.email.getValue(),

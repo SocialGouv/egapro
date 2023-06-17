@@ -36,17 +36,6 @@ const Validation = () => {
       <Heading as="h2" mt="6w" text="Récapitulatif" />
 
       <ValidationRecapRepEq />
-
-      {/* {data && <DetailRepresentationEquilibree data={data} />}
-
-      <FormLayout>
-        <FormLayoutButtonGroup>
-          <ButtonAsLink href={previousPage} variant="secondary">
-            Précédent
-          </ButtonAsLink>
-          <FormButton onClick={sendRepresentationEquilibree}>Valider et transmettre les résultats</FormButton>
-        </FormLayoutButtonGroup>
-      </FormLayout> */}
     </>
   );
 };
