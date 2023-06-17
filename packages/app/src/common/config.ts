@@ -92,6 +92,7 @@ if (typeof window !== "undefined") {
 interface ServicesConfig {
   apiEntreprise: "api.gouv" | "data.gouv" | "fabrique";
   db: "mock" | "postgres" | "prisma";
+  jsxPdf: "react-pdf";
   mailer: "nodemailer";
 }
 
@@ -99,4 +100,5 @@ export const services: ServicesConfig = {
   db: "postgres",
   mailer: "nodemailer",
   apiEntreprise: "fabrique",
+  jsxPdf: "react-pdf",
 };

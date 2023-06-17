@@ -10,7 +10,7 @@ import { FormLayout } from "@design-system";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getCompany } from "../actions";
+import { getCompany } from "../../actions";
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 export const EntrepriseForm = () => {

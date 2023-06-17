@@ -13,7 +13,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getRepresentationEquilibree } from "../actions";
+import { getRepresentationEquilibree } from "../../actions";
 import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
 
 type CommencerFormType = z.infer<typeof createSteps.commencer>;

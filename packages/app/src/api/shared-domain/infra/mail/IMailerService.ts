@@ -1,5 +1,5 @@
 import { type Service } from "@common/shared-domain";
-import { type SimpleObject } from "@common/utils/types";
+import { type pvoid, type SimpleObject } from "@common/utils/types";
 import { type SendMailOptions } from "nodemailer";
 
 import { type MailTemplateFunction } from "./type";
@@ -15,7 +15,7 @@ export interface IMailerService<TTemplate extends Templates> extends Service {
   /**
    * Prepare the service. e.g. Preload the internal mailer lib.
    */
-  init(): Promise<void>;
+  init(): pvoid;
 
   /**
    * Send an email based on the given template.

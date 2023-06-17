@@ -16,8 +16,8 @@ import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { type ZodError } from "zod";
 
+import { getCompany, saveRepresentationEquilibree } from "../../actions";
 import { DetailRepEq } from "../../Recap";
-import { getCompany, saveRepresentationEquilibree } from "../actions";
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 function assertRepEq(

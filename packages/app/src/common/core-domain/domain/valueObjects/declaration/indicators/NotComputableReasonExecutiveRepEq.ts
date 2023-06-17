@@ -6,6 +6,10 @@ export class NotComputableReasonExecutiveRepEq extends Enum<typeof NotComputable
   ) {
     super(value, NotComputableReasonExecutiveRepEq.Enum);
   }
+
+  public getLabel() {
+    return NotComputableReasonExecutiveRepEq.Label[this.getValue()];
+  }
 }
 export namespace NotComputableReasonExecutiveRepEq {
   export enum Enum {

@@ -9,6 +9,7 @@ import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../(funnel)/useRepeqFunnelStore";
+import { sendRepresentationEquilibreeReceipt } from "../actions";
 import style from "./style.module.css";
 
 const useStore = storePicker(useRepeqFunnelStore);
@@ -32,11 +33,16 @@ export const SendReceipt = () => {
   };
 
   const sendReceipt = () => {
+    if (!funnel.siren || !funnel.year) {
+      return;
+    }
+
     setReceiptProcessing(true);
-    // fetchRepresentationEquilibreeSendEmail(formData.entreprise.siren, formData.year).finally(() =>
-    //   setReceiptProcessing(false),
-    // );
+    sendRepresentationEquilibreeReceipt(funnel.siren, funnel.year).finally(() => {
+      setReceiptProcessing(false);
+    });
   };
+
   return (
     <>
       <Container as="section">
@@ -64,6 +70,12 @@ export const SendReceipt = () => {
               endDetail="PDF"
               linkProps={{
                 href: `/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`,
+                download: `representation_${funnel.siren}_${funnel.year + 1}.pdf`,
+                prefetch: false,
+                replace: false,
+                target: "_blank",
+                type: "application/pdf",
+                rel: "noopener noreferer",
               }}
               desc={`Année ${funnel.year + 1} au titre des donées ${funnel.year}`}
               iconId="fr-icon-download-line"
