@@ -20,7 +20,7 @@
     "migrateSimulations": "ts-node --project scripts/tsconfig.json scripts/sql-scripts/migrate-simulations.ts"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "0.59.0",
+    "@codegouvfr/react-dsfr": "^0.63.1",
     "@formkit/auto-animate": "^1.0.0-beta.3",
     "@headlessui/react": "^1.7.3",
     "@hookform/resolvers": "^3.0.0",

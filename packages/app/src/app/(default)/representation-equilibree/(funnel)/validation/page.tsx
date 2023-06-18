@@ -1,6 +1,8 @@
 import { Heading } from "@design-system";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import Link from "next/link";
 
+import { AlertEdition } from "../AlertEdition";
 import { ValidationRecapRepEq } from "./RecapRepEq";
 
 const title = "Validation";
@@ -15,11 +17,13 @@ export const metadata = {
 const Validation = () => {
   return (
     <>
-      {/* <AlertEdition /> */}
+      <ClientAnimate>
+        <AlertEdition />
+      </ClientAnimate>
 
       <p>
         Vous êtes sur le point de valider la procédure vous permettant de transmettre aux services du ministre chargé du
-        travail vos écarts éventuels de représentation femmes-hommes conformément aux dispositions de l’
+        travail vos écarts éventuels de représentation femmes‑hommes conformément aux dispositions de l’
         <Link
           href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000045669617"
           target="_blank"

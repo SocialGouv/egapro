@@ -8,6 +8,7 @@ import { REGEX_URL } from "@common/shared-domain/domain/valueObjects";
 import { formatIsoToFr } from "@common/utils/date";
 import { type ClearObject, type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isBefore, parseISO } from "date-fns";
@@ -73,6 +74,10 @@ export const PublicationForm = () => {
     }
   }, [funnel]);
 
+  if (!hydrated) {
+    return <SkeletonForm fields={3} />;
+  }
+
   const onSubmit = async (data: PublicationFormType) => {
     if (!funnel) return;
 
@@ -110,7 +115,7 @@ export const PublicationForm = () => {
             {
               label: "Oui",
               nativeInputProps: {
-                defaultChecked: hasWebsite,
+                defaultChecked: hasWebsite === true,
                 onChange() {
                   setHasWebsite(true);
                   setPreviousModalities(getValues("publishModalities"));

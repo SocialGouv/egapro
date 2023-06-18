@@ -67,24 +67,66 @@ export class RepresentationEquilibree extends JsonAggregateRoot<
     return this.props.year;
   }
 
-  public fromJson(json: EntityPropsToJson<RepresentationEquilibreeProps>) {
-    const props: RepresentationEquilibreeProps = {
-      declaredAt: new Date(json.declaredAt),
-      modifiedAt: new Date(json.modifiedAt),
-      siren: new Siren(json.siren),
-      year: new PositiveNumber(json.year),
-      company: Company.fromJson(json.company),
-      declarant: Declarant.fromJson(json.declarant),
-      indicator: BalancedRepresentation.fromJson(json.indicator),
-      endReferencePeriod: new Date(json.endReferencePeriod),
-    };
-
-    if (json.publication) {
-      props.publication = Publication.fromJson(json.publication);
+  public fromJson(json: Partial<EntityPropsToJson<RepresentationEquilibreeProps>>) {
+    const props = {} as RepresentationEquilibreeProps;
+    if (typeof json.declaredAt !== "undefined") {
+      props.declaredAt = new Date(json.declaredAt);
+    } else if (typeof this.declaredAt !== "undefined") {
+      props.declaredAt = this.declaredAt;
     }
 
-    if (json.source) {
+    if (typeof json.modifiedAt !== "undefined") {
+      props.modifiedAt = new Date(json.modifiedAt);
+    } else if (typeof this.modifiedAt !== "undefined") {
+      props.modifiedAt = this.modifiedAt;
+    }
+
+    if (typeof json.siren !== "undefined") {
+      props.siren = new Siren(json.siren);
+    } else if (typeof this.siren !== "undefined") {
+      props.siren = this.siren;
+    }
+
+    if (typeof json.year !== "undefined") {
+      props.year = new PositiveNumber(json.year);
+    } else if (typeof this.year !== "undefined") {
+      props.year = this.year;
+    }
+
+    if (typeof json.company !== "undefined") {
+      props.company = Company.fromJson(json.company);
+    } else if (typeof this.company !== "undefined") {
+      props.company = this.company;
+    }
+
+    if (typeof json.declarant !== "undefined") {
+      props.declarant = Declarant.fromJson(json.declarant);
+    } else if (typeof this.declarant !== "undefined") {
+      props.declarant = this.declarant;
+    }
+
+    if (typeof json.indicator !== "undefined") {
+      props.indicator = BalancedRepresentation.fromJson(json.indicator);
+    } else if (typeof this.indicator !== "undefined") {
+      props.indicator = this.indicator;
+    }
+
+    if (typeof json.endReferencePeriod !== "undefined") {
+      props.endReferencePeriod = new Date(json.endReferencePeriod);
+    } else if (typeof this.endReferencePeriod !== "undefined") {
+      props.endReferencePeriod = this.endReferencePeriod;
+    }
+
+    if (typeof json.publication !== "undefined") {
+      props.publication = Publication.fromJson(json.publication);
+    } else if (typeof this.publication !== "undefined") {
+      props.publication = this.publication;
+    }
+
+    if (typeof json.source !== "undefined") {
       props.source = new DeclarationSource(json.source);
+    } else if (typeof this.source !== "undefined") {
+      props.source = this.source;
     }
 
     return new RepresentationEquilibree(props) as this;

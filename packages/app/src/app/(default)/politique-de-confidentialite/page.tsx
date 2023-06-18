@@ -32,14 +32,14 @@ const PrivacyPolicy = () => {
                 de téléphone, adresse e-mail.
               </li>
               <li>
-                Pour les utilisateurs de l’Index Egapro concernant la représentation équilibrée femmes-hommes dans les
+                Pour les utilisateurs de l’Index Egapro concernant la représentation équilibrée femmes‑hommes dans les
                 services dirigeants&nbsp;: nom, prénom, numéro de téléphone, adresse e-mail.
               </li>
             </ul>
             <h2>Finalités</h2>
             <p>
               Ces données sont nécessaires et proportionnées pour la réalisation de la mission de la Plateforme. Elles
-              visent à calculer les écarts de rémunération femmes-hommes au sein des entreprises, et à réaliser les
+              visent à calculer les écarts de rémunération femmes‑hommes au sein des entreprises, et à réaliser les
               déclarations qui en sont issues tout comme les écarts de représentation équilibrée entre les femmes et les
               hommes dans les services dirigeants.
             </p>

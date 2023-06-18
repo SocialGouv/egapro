@@ -6,6 +6,7 @@ export * from "./base/Callout";
 export * from "./base/Card";
 export * from "./base/ContentWithChapter";
 export * from "./base/DetailedDownload";
+export * from "./base/DownloadCard";
 export * from "./base/Footer";
 export * from "./base/FormButton";
 export * from "./base/FormCheckbox";

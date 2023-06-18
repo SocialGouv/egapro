@@ -8,6 +8,10 @@ import {
   type CreateRepresentationEquilibreeDTO,
   createRepresentationEquilibreeDTO,
 } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
+import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
+import { COUNTRIES_COG_TO_ISO } from "@common/dict";
+import { storePicker } from "@common/utils/zustand";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { RecapCard } from "@design-system";
 import { times } from "lodash";
@@ -26,10 +30,11 @@ function assertRepEq(
   createRepresentationEquilibreeDTO.parse(repEq);
 }
 
+const useStore = storePicker(useRepeqFunnelStore);
 export const ValidationRecapRepEq = () => {
   const router = useRouter();
   const [company, setCompany] = useState<Entreprise | null>(null);
-  const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
+  const [funnel, setIsEdit] = useStore("funnel", "setIsEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
@@ -44,7 +49,7 @@ export const ValidationRecapRepEq = () => {
     return (
       <>
         <p>
-          Déclaration des écarts de représentation Femmes/Hommes pour l'année <Skeleton inline width="4ch" /> au titre
+          Déclaration des écarts de représentation Femmes‑Hommes pour l'année <Skeleton inline width="4ch" /> au titre
           des données <Skeleton inline width="4ch" /> .
         </p>
         {times(6).map(idx => (
@@ -70,13 +75,30 @@ export const ValidationRecapRepEq = () => {
     "notComputableReasonExecutives" in funnel && "notComputableReasonMembers" in funnel
       ? "/representation-equilibree/ecarts-membres"
       : "/representation-equilibree/publication";
+
+  const { address, countryCodeCOG, countyCode, postalCode, regionCode } = getAdditionalMeta(company);
+  const repEq: RepresentationEquilibreeDTO = {
+    ...funnel,
+    declaredAt: "",
+    modifiedAt: "",
+    company: {
+      address,
+      city: company.firstMatchingEtablissement.libelleCommuneEtablissement,
+      countryCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
+      county: countyCode ?? void 0,
+      nafCode: company.activitePrincipaleUniteLegale,
+      name: company.simpleLabel,
+      postalCode,
+      region: regionCode ?? void 0,
+    },
+  };
   return (
     <>
       <p>
-        Déclaration des écarts de représentation Femmes/Hommes pour l'année {funnel.year + 1} au titre des données{" "}
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {funnel.year + 1} au titre des données{" "}
         {funnel.year}.
       </p>
-      <DetailRepEq edit repEq={{ ...funnel, date: "" }} company={company} />
+      <DetailRepEq edit repEq={repEq} />
       <ButtonsGroup
         className={fr.cx("fr-mt-6w")}
         inlineLayoutWhen="sm and up"

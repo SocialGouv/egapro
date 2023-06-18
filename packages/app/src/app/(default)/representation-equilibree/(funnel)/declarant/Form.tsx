@@ -26,7 +26,7 @@ type DeclarantFormType = ClearObject<z.infer<typeof formSchema>>;
 const useStore = storePicker(useRepeqFunnelStore);
 export const DeclarantForm = ({ session }: { session: Session }) => {
   const router = useRouter();
-  const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
+  const [funnel, saveFunnel, isEdit] = useStore("funnel", "saveFunnel", "isEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const {
@@ -37,6 +37,7 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
+      gdpr: isEdit,
       ...session.user, // first fill with session info (email, username, ...)
       ...funnel, // then, if funnel has data, get them
     },

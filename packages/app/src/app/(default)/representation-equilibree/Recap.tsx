@@ -1,62 +1,62 @@
-import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
-import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
-import { COUNTRIES_COG_TO_LIB, DEFAULT_COUNTRY_COG } from "@common/dict";
+import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
 
 export interface DetailRepEqProps {
-  company: Entreprise;
   edit?: boolean;
+  publicMode?: boolean;
   repEq: RepresentationEquilibreeDTO;
 }
-export const DetailRepEq = ({ repEq, company, edit }: DetailRepEqProps) => {
-  const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
-
+export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
   return (
     <>
-      <RecapCard
-        title="Informations déclarant"
-        editLink={(edit || void 0) && "/representation-equilibree/declarant"}
-        content={
-          <>
-            <strong>
-              {repEq.lastname} {repEq.firstname}
-            </strong>
-            <br />
-            {repEq.email}
-            <br />
-            {repEq.phoneNumber}
-          </>
-        }
-      />
+      {!publicMode && (
+        <RecapCard
+          title="Informations déclarant"
+          editLink={(edit || void 0) && "/representation-equilibree/declarant"}
+          content={
+            <>
+              <strong>
+                {repEq.lastname} {repEq.firstname}
+              </strong>
+              <br />
+              {repEq.email}
+              <br />
+              {repEq.phoneNumber}
+            </>
+          }
+        />
+      )}
       <RecapCard
         title="Informations entreprise"
         content={
           <>
-            <strong>{company.simpleLabel}</strong>
+            <strong>{repEq.company.name}</strong>
             <br />
-            {address}, {postalCode} {company.firstMatchingEtablissement.libelleCommuneEtablissement}
-            {countryCodeCOG !== DEFAULT_COUNTRY_COG && `, ${COUNTRIES_COG_TO_LIB[countryCodeCOG]}`}
+            {repEq.company.address}, {repEq.company.postalCode} {repEq.company.city}
+            {repEq.company.countryCode !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[repEq.company.countryCode]}`}
             <br />
-            Siren : {repEq.siren} - Code NAF : {company.activitePrincipaleUniteLegale} - {company.activitePrincipale}
+            Siren : {repEq.siren} - Code NAF : {repEq.company.nafCode} - {NAF[repEq.company.nafCode].description}
           </>
         }
       />
-      <RecapCard
-        title="Période de référence"
-        editLink={(edit || void 0) && "/representation-equilibree/periode-reference"}
-        content={
-          <>
-            Année au titre de laquelle les écarts sont calculés : <strong>{repEq.year}</strong>
-            <br />
-            Date de fin de la période de douze (12) mois consécutifs correspondant à l'exercice comptable pour le calcul
-            des écarts : <strong>{formatIsoToFr(repEq.endOfPeriod)}</strong>
-          </>
-        }
-      />
+      {!publicMode && (
+        <RecapCard
+          title="Période de référence"
+          editLink={(edit || void 0) && "/representation-equilibree/periode-reference"}
+          content={
+            <>
+              Année au titre de laquelle les écarts sont calculés : <strong>{repEq.year}</strong>
+              <br />
+              Date de fin de la période de douze (12) mois consécutifs correspondant à l'exercice comptable pour le
+              calcul des écarts : <strong>{formatIsoToFr(repEq.endOfPeriod)}</strong>
+            </>
+          }
+        />
+      )}
       <RecapCard
         title="Écart de représentation parmi les cadres dirigeants"
         editLink={(edit || void 0) && "/representation-equilibree/ecarts-cadres"}
@@ -113,7 +113,7 @@ export const DetailRepEq = ({ repEq, company, edit }: DetailRepEqProps) => {
               ]
         }
       />
-      {repEq.publishDate && (
+      {!publicMode && repEq.publishDate && (
         <RecapCard
           title="Publication de vos écarts"
           editLink={(edit || void 0) && "/representation-equilibree/publication"}

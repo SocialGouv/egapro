@@ -141,7 +141,7 @@ ${config.api.mailer.signature}`,
 });
 
 export const balancedRepresentation_receipt = (url: string, year: number): MailTemplate => ({
-  subject: "Egapro - Déclaration des écarts éventuels de représentation femmes-hommes dans les postes de direction",
+  subject: "Egapro - Déclaration des écarts éventuels de représentation femmes‑hommes dans les postes de direction",
   text: `Madame, Monsieur,
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos écarts éventuels de représentation entre les femmes et les hommes pour l'année ${
@@ -152,7 +152,7 @@ Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer su
 
 ${url}
 
-Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
+Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes‑hommes au sein de votre DREETS en répondant à ce message.
 
 Veuillez agréer, Madame, Monsieur, nos salutations distinguées,
 
@@ -175,7 +175,7 @@ Les services de l’administration du travail.
             <a href={url}>{url}</a>
           </p>
           <p>
-            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
+            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes‑hommes au
             sein de votre DREETS en répondant à ce message.
           </p>
           <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>

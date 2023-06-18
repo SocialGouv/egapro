@@ -1,66 +1,104 @@
 import {
   RepresentationEquilibree,
   type RepresentationEquilibreePK,
+  type RepresentationEquilibreeProps,
 } from "@common/core-domain/domain/RepresentationEquilibree";
 import { RepresentationEquilibreeSpecification } from "@common/core-domain/domain/specification/RepresentationEquilibreeSpecification";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
-import { type UseCase } from "@common/shared-domain";
+import { type EntityPropsToJson, type UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { add, isAfter } from "date-fns";
 
 import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
 import { type IRepresentationEquilibreeRepo } from "../repo/IRepresentationEquilibreeRepo";
 
-export class SaveRepresentationEquilibree implements UseCase<CreateRepresentationEquilibreeDTO, void> {
+interface Input {
+  /**
+   * Usually for staff
+   */
+  override?: boolean;
+  repEq: CreateRepresentationEquilibreeDTO;
+}
+
+export class SaveRepresentationEquilibree implements UseCase<Input, void> {
   constructor(
     private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo,
     private readonly entrepriseService: IEntrepriseService,
   ) {}
 
-  public async execute(repEq: CreateRepresentationEquilibreeDTO): Promise<void> {
+  public async execute({ repEq, override }: Input): Promise<void> {
     const now = new Date();
     const pk: RepresentationEquilibreePK = [new Siren(repEq.siren), new PositiveNumber(repEq.year)];
 
+    const partialProps = {
+      source: "repeqV2",
+      modifiedAt: now,
+      endReferencePeriod: repEq.endOfPeriod,
+      indicator: {
+        ...("notComputableReasonExecutives" in repEq
+          ? {
+              notComputableReasonExecutives: repEq.notComputableReasonExecutives,
+            }
+          : {
+              executiveMenPercent: repEq.executiveMenPercent,
+              executiveWomenPercent: repEq.executiveWomenPercent,
+            }),
+        ...("notComputableReasonMembers" in repEq
+          ? {
+              notComputableReasonMembers: repEq.notComputableReasonMembers,
+            }
+          : {
+              memberMenPercent: repEq.memberMenPercent,
+              memberWomenPercent: repEq.memberWomenPercent,
+            }),
+      },
+      declarant: {
+        email: repEq.email,
+        firstname: repEq.firstname,
+        lastname: repEq.lastname,
+        phone: repEq.phoneNumber,
+      },
+      ...(repEq.publishDate
+        ? {
+            publication: {
+              date: repEq.publishDate,
+              ...("publishUrl" in repEq
+                ? {
+                    url: repEq.publishUrl,
+                  }
+                : {
+                    modalities: repEq.publishModalities,
+                  }),
+            },
+          }
+        : {}),
+    } satisfies Partial<EntityPropsToJson<RepresentationEquilibreeProps>>;
+
+    let representationEquilibree: RepresentationEquilibree;
     try {
       const found = await this.representationEquilibreeRepo.getOne(pk);
 
       if (found) {
-        // TODO edit mode
+        console.log("FOUND ! UPDATE MODE");
+        const olderThanOneYear = isAfter(new Date(), add(found.declaredAt, { years: 1 }));
+        console.log({ olderThanOneYear, override });
+
+        if (olderThanOneYear && !override) {
+          throw new SaveRepresentationEquilibreeOverOneYearError("Représentation équilibrée is older than one year.");
+        }
+
+        representationEquilibree = found.fromJson(partialProps);
+        console.log({ representationEquilibree });
       } else {
         const company = companyMap.toDomain(await this.entrepriseService.siren(pk[0]));
-        const representationEquilibree = RepresentationEquilibree.fromJson({
-          source: "repeqV2",
+        representationEquilibree = RepresentationEquilibree.fromJson({
+          ...partialProps,
           declaredAt: now,
-          modifiedAt: now,
           siren: repEq.siren,
           year: repEq.year,
-          endReferencePeriod: repEq.endOfPeriod,
-          indicator: {
-            ...("notComputableReasonExecutives" in repEq
-              ? {
-                  notComputableReasonExecutives: repEq.notComputableReasonExecutives,
-                }
-              : {
-                  executiveMenPercent: repEq.executiveMenPercent,
-                  executiveWomenPercent: repEq.executiveWomenPercent,
-                }),
-            ...("notComputableReasonMembers" in repEq
-              ? {
-                  notComputableReasonMembers: repEq.notComputableReasonMembers,
-                }
-              : {
-                  memberMenPercent: repEq.memberMenPercent,
-                  memberWomenPercent: repEq.memberWomenPercent,
-                }),
-          },
-          declarant: {
-            email: repEq.email,
-            firstname: repEq.firstname,
-            lastname: repEq.lastname,
-            phone: repEq.phoneNumber,
-          },
           company: {
             address: company.address,
             city: company.city,
@@ -72,28 +110,14 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
             region: company.region?.getValue(),
             siren: company.siren?.getValue(),
           },
-          ...(repEq.publishDate
-            ? {
-                publication: {
-                  date: repEq.publishDate,
-                  ...("publishUrl" in repEq
-                    ? {
-                        url: repEq.publishUrl,
-                      }
-                    : {
-                        modalities: repEq.publishModalities,
-                      }),
-                },
-              }
-            : {}),
         });
+      }
 
-        const specification = new RepresentationEquilibreeSpecification();
-        if (specification.isSatisfiedBy(representationEquilibree)) {
-          await this.representationEquilibreeRepo.saveWithIndex(representationEquilibree);
-        } else {
-          throw specification.lastError;
-        }
+      const specification = new RepresentationEquilibreeSpecification();
+      if (specification.isSatisfiedBy(representationEquilibree)) {
+        await this.representationEquilibreeRepo.saveWithIndex(representationEquilibree);
+      } else {
+        throw specification.lastError;
       }
     } catch (error: unknown) {
       throw new SaveRepresentationEquilibreeError("Cannot save representation equilibree", error as Error);
@@ -102,3 +126,4 @@ export class SaveRepresentationEquilibree implements UseCase<CreateRepresentatio
 }
 
 export class SaveRepresentationEquilibreeError extends AppError {}
+export class SaveRepresentationEquilibreeOverOneYearError extends AppError {}

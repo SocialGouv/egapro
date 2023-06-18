@@ -14,8 +14,18 @@ import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { AppError } from "@common/shared-domain";
 import { getServerActionSession } from "@common/utils/next-auth";
+import { revalidatePath } from "next/cache";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
+  const session = await getServerActionSession();
+  if (!session?.user) {
+    throw new AppError("No session found.");
+  }
+
+  if (!session.user.companies.some(company => company.siren === siren)) {
+    throw new AppError("Not authorized to fetch this siren.");
+  }
+
   // handle default errors
   const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
   const ret = await useCase.execute({ siren, year });
@@ -28,8 +38,17 @@ export async function getCompany(siren: string) {
 }
 
 export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {
+  const session = await getServerActionSession();
+  if (!session?.user) {
+    throw new AppError("No session found.");
+  }
+
+  if (!session.user.companies.some(company => company.siren === repEq.siren)) {
+    throw new AppError("Not authorized to fetch this siren.");
+  }
+
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
-  await useCase.execute(repEq);
+  await useCase.execute({ repEq, override: session.user.staff });
 
   const receiptUseCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
@@ -38,6 +57,9 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
   );
 
   await receiptUseCase.execute(repEq);
+
+  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
+  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {

@@ -78,7 +78,7 @@ export const representationEquilibreeMap: Required<
         déclaration: {
           année_indicateurs: data.year,
           fin_période_référence: data.endOfPeriod,
-          date: data.date,
+          date: data.declaredAt,
           ...(data.publishDate
             ? {
                 publication: {
@@ -126,7 +126,8 @@ export const representationEquilibreeMap: Required<
 
 function representationEquilibreeDataToDTO(data: RepresentationEquilibree): RepresentationEquilibreeDTO {
   return {
-    date: dateObjectToDateISOString(data.declaredAt),
+    declaredAt: dateObjectToDateISOString(data.declaredAt),
+    modifiedAt: dateObjectToDateISOString(data.modifiedAt),
     email: data.declarant.email.getValue(),
     endOfPeriod: dateObjectToDateISOString(data.endReferencePeriod),
     firstname: data.declarant.firstname,
@@ -134,6 +135,16 @@ function representationEquilibreeDataToDTO(data: RepresentationEquilibree): Repr
     phoneNumber: data.declarant.phone,
     siren: data.siren.getValue(),
     year: data.year.getValue(),
+    company: {
+      address: data.company.address,
+      city: data.company.city,
+      countryCode: data.company.countryCode?.getValue(),
+      county: data.company.county?.getValue(),
+      nafCode: data.company.nafCode.getValue(),
+      name: data.company.name,
+      postalCode: data.company.postalCode?.getValue(),
+      region: data.company.region?.getValue(),
+    },
     ...(data.indicator.notComputableReasonExecutives
       ? {
           notComputableReasonExecutives: data.indicator.notComputableReasonExecutives.getValue(),

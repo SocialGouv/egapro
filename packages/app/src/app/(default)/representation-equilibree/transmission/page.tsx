@@ -24,7 +24,7 @@ const Transmission = () => {
         <p>
           <strong>
             Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
-            femmes-hommes conformément aux dispositions de{" "}
+            femmes‑hommes conformément aux dispositions de{" "}
             <a
               href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000045669617"
               target="_blank"

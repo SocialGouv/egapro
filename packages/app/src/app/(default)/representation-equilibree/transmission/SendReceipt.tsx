@@ -1,9 +1,8 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import Card from "@codegouvfr/react-dsfr/Card";
 import { storePicker } from "@common/utils/zustand";
-import { Container, Grid, GridCol } from "@design-system";
+import { Container, DownloadCard, Grid, GridCol } from "@design-system";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -64,22 +63,13 @@ export const SendReceipt = () => {
             </Button>
           </GridCol>
           <GridCol md={10}>
-            <Card
-              enlargeLink
+            <DownloadCard
               title="Télécharger le récapitulatif"
               endDetail="PDF"
-              linkProps={{
-                href: `/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`,
-                download: `representation_${funnel.siren}_${funnel.year + 1}.pdf`,
-                prefetch: false,
-                replace: false,
-                target: "_blank",
-                type: "application/pdf",
-                rel: "noopener noreferer",
-              }}
+              href={`/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`}
+              filename={`representation_${funnel.siren}_${funnel.year + 1}.pdf`}
+              fileType="application/pdf"
               desc={`Année ${funnel.year + 1} au titre des donées ${funnel.year}`}
-              iconId="fr-icon-download-line"
-              className={style["download-icon"]}
             />
           </GridCol>
         </Grid>

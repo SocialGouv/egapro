@@ -23,7 +23,7 @@ export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input,
       return representationEquilibree ? representationEquilibreeMap.toDTO(representationEquilibree) : null;
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenAndYearError(
-        "Cannot desired representation equilibree",
+        "Cannot get desired representation equilibree",
         error as Error,
       );
     }
