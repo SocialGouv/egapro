@@ -22,7 +22,7 @@ export async function getRepresentationEquilibree(siren: string, year: number) {
     throw new AppError("No session found.");
   }
 
-  if (!session.user.companies.some(company => company.siren === siren)) {
+  if (!session.user.companies.some(company => company.siren === siren) || !session.user.staff) {
     throw new AppError("Not authorized to fetch this siren.");
   }
 
@@ -43,7 +43,7 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
     throw new AppError("No session found.");
   }
 
-  if (!session.user.companies.some(company => company.siren === repEq.siren)) {
+  if (!session.user.companies.some(company => company.siren === repEq.siren) || !session.user.staff) {
     throw new AppError("Not authorized to fetch this siren.");
   }
 
