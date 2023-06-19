@@ -1,3 +1,4 @@
+import { Email, Url } from "@common/shared-domain/domain/valueObjects";
 import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
@@ -20,7 +21,7 @@ export const createSteps = {
       .nonempty("Le numéro de téléphone est requis")
       .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide")),
     gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
-    email: z.string().email(),
+    email: z.string().superRefine(zodValueObjectSuperRefine(Email)),
   }),
   periodeReference: z.object({
     endOfPeriod: z.string().nonempty("La date est requise"),
@@ -49,12 +50,34 @@ export const createSteps = {
         memberMenPercent: percentageSchema,
       }),
     ),
+  publication: z
+    .object({
+      publishDate: z.string().optional(),
+    })
+    .and(
+      z
+        .object({
+          publishModalities: z
+            .string()
+            .nonempty("La description des modalités de communication des écarts est obligatoire"),
+        })
+        .or(
+          z.object({
+            publishUrl: z
+              .string()
+              .nonempty("L'adresse exacte de la page internet est obligatoire")
+              // can't use built-in zod url() because we can skip "http*://"
+              .superRefine(zodValueObjectSuperRefine(Url, "L'adresse de la page internet est invalide")),
+          }),
+        ),
+    ),
 } as const;
 
 export const createRepresentationEquilibreeDTO = createSteps.commencer
   .and(createSteps.declarant)
   .and(createSteps.periodeReference)
   .and(createSteps.ecartsCadres)
-  .and(createSteps.ecartsMembres);
+  .and(createSteps.ecartsMembres)
+  .and(createSteps.publication);
 
 export type CreateRepresentationEquilibreeDTO = ClearObject<z.infer<typeof createRepresentationEquilibreeDTO>>;

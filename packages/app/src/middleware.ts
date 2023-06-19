@@ -46,6 +46,9 @@ export const middleware = withAuth(
   },
 );
 
+// eslint-disable-next-line import/no-default-export -- don't know why since 13.4.4 next need a default import in addition to named one
+export default middleware;
+
 export const config = {
   matcher: ["/((?!api/admin/referent/import|apiv2/admin/referent/import|_next/static|_next/image|favicon.ico).*)"],
 };

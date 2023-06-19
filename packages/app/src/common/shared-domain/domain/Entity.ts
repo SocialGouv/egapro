@@ -1,4 +1,4 @@
-import { type Any, type Objectize, type SimpleObject } from "../../utils/types";
+import { type Any, type ClearObject, type SimpleObject } from "../../utils/types";
 import { type ValueObject } from "./ValueObject";
 import { type Enum } from "./valueObjects";
 
@@ -8,13 +8,13 @@ export abstract class Entity<P, out Id = UUID> {
 }
 
 export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {
-  public abstract fromJson(json: EntityPropsToJson<P>): this;
+  public abstract fromJson(json: Partial<EntityPropsToJson<P>>): this;
 
   public static fromJson<P, T extends JsonEntity<P, Id>, TJson extends EntityPropsToJson<P>, Id = UUID>(
     this: new (props: P, id?: Id) => T,
     json: TJson,
   ): T {
-    return this.prototype.fromJson.call(null, json);
+    return this.prototype.fromJson.call({}, json);
   }
 }
 
@@ -27,11 +27,11 @@ type UnboxProp<T> = T extends Any[]
   : T extends Entity<infer TProps, Any>
   ? EntityPropsToJson<TProps>
   : T extends Date
-  ? string
+  ? Date | string
   : T extends SimpleObject
   ? EntityPropsToJson<T>
   : T;
 
-export type EntityPropsToJson<T> = Objectize<{
+export type EntityPropsToJson<T> = ClearObject<{
   [P in keyof T]: UnboxProp<T[P]>;
 }>;

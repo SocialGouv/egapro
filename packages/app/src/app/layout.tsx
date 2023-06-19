@@ -1,21 +1,20 @@
-import "./StartDsfr";
 import "react-loading-skeleton/dist/skeleton.css";
 
 import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
-import Display from "@codegouvfr/react-dsfr/Display";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
-import { getColorSchemeHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getColorSchemeHtmlAttributes";
+import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
 import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
-import type Link from "next/link";
+import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
 import { SessionProvider } from "./SessionProvider";
+import { StartDsfr } from "./StartDsfr";
 
 const description =
   "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
@@ -36,24 +35,19 @@ export const metadata = {
   },
 };
 
-declare module "@codegouvfr/react-dsfr/next-appdir" {
-  interface RegisterLink {
-    Link: typeof Link;
-  }
-}
-
-declare module "@codegouvfr/react-dsfr/gdpr" {
-  interface RegisterGdprServices {
-    egapro: true;
-    matomo: never;
-  }
-}
-
 const RootLayout = ({ children }: PropsWithChildren) => (
-  <html lang="fr" {...getColorSchemeHtmlAttributes({ defaultColorScheme })}>
+  <html
+    lang="fr"
+    {...getHtmlAttributes({ defaultColorScheme })}
+    style={{
+      overflow: "-moz-scrollbars-vertical",
+      overflowY: "scroll",
+    }}
+  >
     <head>
+      <StartDsfr />
       <DsfrHead
-        defaultColorScheme={defaultColorScheme}
+        Link={Link}
         preloadFonts={[
           "Marianne-Light",
           "Marianne-Light_Italic",
@@ -75,7 +69,7 @@ const RootLayout = ({ children }: PropsWithChildren) => (
     <body>
       <FeatureStatusProvider>
         <SessionProvider basePath="/apiv2/auth" refetchOnWindowFocus>
-          <DsfrProvider defaultColorScheme={defaultColorScheme}>
+          <DsfrProvider>
             <IsomorphicSkeletonTheme
               baseColor="var(--background-contrast-grey)"
               highlightColor="var(--background-contrast-grey-active)"
@@ -114,7 +108,6 @@ const RootLayout = ({ children }: PropsWithChildren) => (
                 ]}
               />
               {children}
-              <Display />
             </IsomorphicSkeletonTheme>
           </DsfrProvider>
         </SessionProvider>

@@ -43,7 +43,7 @@ const Cgu = () => {
           </p>
           <p>
             Le second Index Egapro est un outil visant à faire progresser au sein des entreprises l’égalité
-            professionnelle et la représentation équilibrée femmes-hommes dans les services dirigeants. Il permet aux
+            professionnelle et la représentation équilibrée femmes‑hommes dans les services dirigeants. Il permet aux
             entreprises de mesurer, en toute transparence, les écarts de représentation dans les services dirigeants et
             de mettre en évidence leurs points de progression.
           </p>

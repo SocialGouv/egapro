@@ -1145,7 +1145,7 @@ export type HautesRemunerations = WithPopulationFavorable & {
 
 export interface DeclarationDTO {
   id?: string;
-  source?: "solen" | "simulateur" | "formulaire" | "api";
+  source?: "solen" | "simulateur" | "formulaire" | "api" | "repeqV2";
   déclaration: {
     /**
      * Date de validation et de transmission des résultats au service Egapro
@@ -1189,14 +1189,14 @@ export interface DeclarationDTO {
     email: string;
   };
   entreprise: {
-    raison_sociale?: string;
+    raison_sociale: string;
     siren: string;
     région?: Region;
     département?: Departement;
     adresse?: string;
     commune?: string;
     code_postal?: string;
-    code_naf?: CodeNaf;
+    code_naf: CodeNaf;
     code_pays?: CodePays;
     /**
      * L'entreprise ou une entreprise de l'UES a-t-elle bénéficié d'une aide dans le cadre du plan de relance

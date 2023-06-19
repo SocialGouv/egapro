@@ -2,9 +2,8 @@ import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBan
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import DsfrFooter, { type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { config } from "@common/config";
-import { Brand } from "@components/Brand";
 
-export interface FooterProps extends Pick<DsfrFooterProps, "homeLinkProps"> {
+export interface FooterProps {
   type: "company" | "public";
 }
 
@@ -43,16 +42,14 @@ const referenteDownloadLink = {
   },
 } satisfies DsfrFooterProps.LinkList.Link;
 
-export const Footer = ({ homeLinkProps, type }: FooterProps) => (
+export const Footer = ({ type }: FooterProps) => (
   <DsfrFooter
-    brandTop={<Brand />}
     accessibility="partially compliant"
     accessibilityLinkProps={{
       href: "https://ara.numerique.gouv.fr/rapports/_YKXqg3aJMpFGmPh1tA0d/resultats",
       target: "_blank",
     }}
     contentDescription={`Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.`}
-    homeLinkProps={homeLinkProps}
     bottomItems={[
       {
         text: "CGU",
