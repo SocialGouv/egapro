@@ -87,7 +87,11 @@ export const RemunerationCoefficientForm = () => {
                       ...register(`catégories.${index}.tranches.:29`, { valueAsNumber: true }),
                     }}
                     state={get(errors, `catégories.${index}.tranches.:29`) ? "error" : "default"}
-                    stateRelatedMessage={get(errors, `catégories.${index}.tranches.:29`)?.message}
+                    stateRelatedMessage={
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      get(errors, `catégories.${index}.tranches.:29`)?.message
+                    }
                   />
                 </td>
                 <td>
@@ -99,7 +103,11 @@ export const RemunerationCoefficientForm = () => {
                       ...register(`catégories.${index}.tranches.30:39`, { valueAsNumber: true }),
                     }}
                     state={get(errors, `catégories.${index}.tranches.30:39`) ? "error" : "default"}
-                    stateRelatedMessage={get(errors, `catégories.${index}.tranches.30:39`)?.message}
+                    stateRelatedMessage={
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      get(errors, `catégories.${index}.tranches.30:39`)?.message
+                    }
                   />
                 </td>
                 <td>
@@ -111,7 +119,11 @@ export const RemunerationCoefficientForm = () => {
                       ...register(`catégories.${index}.tranches.40:49`, { valueAsNumber: true }),
                     }}
                     state={get(errors, `catégories.${index}.tranches.40:49`) ? "error" : "default"}
-                    stateRelatedMessage={get(errors, `catégories.${index}.tranches.40:49`)?.message}
+                    stateRelatedMessage={
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      get(errors, `catégories.${index}.tranches.40:49`)?.message
+                    }
                   />
                 </td>
                 <td>
@@ -123,7 +135,11 @@ export const RemunerationCoefficientForm = () => {
                       ...register(`catégories.${index}.tranches.50:`, { valueAsNumber: true }),
                     }}
                     state={get(errors, `catégories.${index}.tranches.50:`) ? "error" : "default"}
-                    stateRelatedMessage={get(errors, `catégories.${index}.tranches.50:`)?.message}
+                    stateRelatedMessage={
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      get(errors, `catégories.${index}.tranches.50:`)?.message
+                    }
                   />
                 </td>
               </tr>
