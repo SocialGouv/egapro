@@ -68,10 +68,11 @@ export const representationEquilibreeSearchResultMap: Mapper<
 function representationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
   return {
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
+    countryIsoCode: company.countryCode?.getValue(),
     nafCode: company.nafCode!.getValue(),
-    countyCode: company.county!.getValue(),
+    countyCode: company.county?.getValue(),
     name: company.name!,
-    regionCode: company.region!.getValue(),
+    regionCode: company.region?.getValue(),
     siren: company.siren.getValue(),
   };
 }

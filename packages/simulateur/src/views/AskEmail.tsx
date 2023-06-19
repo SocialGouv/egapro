@@ -14,12 +14,13 @@ import InputGroup from "../components/ds/InputGroup"
 import FormError from "../components/FormError"
 import FormSubmit from "../components/FormSubmit"
 import Page from "../components/Page"
+import { EMAIL_REGEX } from "../utils/regex"
 
 const FormInput = z.object({
   email: z
     .string({ required_error: "L'adresse mail est requise" })
     .min(1, { message: "L'adresse mail est requise" })
-    .email({ message: "L'adresse mail est invalide" }),
+    .regex(EMAIL_REGEX, { message: "L'adresse mail est invalide" }),
 })
 
 interface AskEmailProps {

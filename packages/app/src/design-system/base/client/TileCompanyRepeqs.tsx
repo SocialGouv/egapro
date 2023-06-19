@@ -24,7 +24,7 @@ import {
 
 export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) => {
   const {
-    company: { countyCode, regionCode, name, siren },
+    company: { countyCode, regionCode, name, siren, countryIsoCode },
     results,
   } = dto;
 
@@ -39,6 +39,8 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
     .sort()
     .reverse();
 
+  const address = addressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
+
   return (
     <TileCompany>
       <TileCompanyTitle>
@@ -46,7 +48,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
         {name}
       </TileCompanyTitle>
       <TileCompanySiren>{siren}</TileCompanySiren>
-      <TileCompanyLocation>{addressLabel({ county: countyCode, region: regionCode })}</TileCompanyLocation>
+      {address && <TileCompanyLocation>{address}</TileCompanyLocation>}
       <TileCompanyTable>
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>
