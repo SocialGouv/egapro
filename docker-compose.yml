@@ -39,7 +39,7 @@ services:
     depends_on:
       - db
       - test_db
-    restart: "no"
+    restart: always
 
   declaration:
     image: egapro_declaration
