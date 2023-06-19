@@ -1,6 +1,8 @@
 import { CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
+import { Stepper } from "./Stepper";
+
 const title = "Représentation Équilibrée Egapro";
 
 export const metadata = {
@@ -18,8 +20,12 @@ export const metadata = {
 };
 
 const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
-  // stepper
-  return <CenteredContainer>{children}</CenteredContainer>;
+  return (
+    <CenteredContainer>
+      <Stepper />
+      {children}
+    </CenteredContainer>
+  );
 };
 
 export default RepEqFunnelLayout;

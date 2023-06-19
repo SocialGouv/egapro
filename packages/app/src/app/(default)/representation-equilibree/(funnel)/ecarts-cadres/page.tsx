@@ -2,7 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { Grid, GridCol } from "@design-system";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
+import { AlertEdition } from "../AlertEdition";
 import { EcartsCadresForm } from "./Form";
 
 const title = "Écarts de représentation parmi les cadres dirigeants";
@@ -17,12 +19,14 @@ export const metadata = {
 const EcartsCadres = () => {
   return (
     <>
-      {/* <AlertEdition /> */}
+      <ClientAnimate>
+        <AlertEdition />
+      </ClientAnimate>
 
       <Alert
         severity="info"
         title="Motifs de non calculabilité"
-        description="Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y aucun
+        description="Les écarts de représentation Femmes‑Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y aucun
           ou un seul cadre dirigeant."
         className={fr.cx("fr-mb-4w")}
       />

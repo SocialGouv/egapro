@@ -11,4 +11,15 @@ declare module "@codegouvfr/react-dsfr/next-appdir" {
   }
 }
 
+declare module "@codegouvfr/react-dsfr/gdpr" {
+  interface RegisterGdprServices {
+    egapro: true;
+    matomo: never;
+  }
+}
+
 startReactDsfr({ defaultColorScheme, Link });
+
+export function StartDsfr() {
+  return null;
+}

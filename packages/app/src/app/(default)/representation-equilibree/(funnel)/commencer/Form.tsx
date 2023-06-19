@@ -13,7 +13,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getRepresentationEquilibree } from "../actions";
+import { getRepresentationEquilibree } from "../../actions";
 import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
 
 type CommencerFormType = z.infer<typeof createSteps.commencer>;
@@ -63,6 +63,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
         // Otherwise, this is a creation.
         setIsEdit(false);
+        resetFunnel();
         saveFunnel({ year, siren });
         router.push("/representation-equilibree/declarant");
       } catch (error) {
@@ -104,6 +105,8 @@ export const CommencerForm = ({ session }: { session: Session }) => {
     }
   };
 
+  const yearsRepEq = YEARS_REPEQ.sort().reverse();
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -121,13 +124,11 @@ export const CommencerForm = ({ session }: { session: Session }) => {
             <option value="" disabled>
               Sélectionnez une année
             </option>
-            {YEARS_REPEQ.sort()
-              .reverse()
-              .map(year => (
-                <option value={year} key={`year-select-${year}`}>
-                  {year}
-                </option>
-              ))}
+            {yearsRepEq.map(year => (
+              <option value={year} key={`year-select-${year}`}>
+                {year}
+              </option>
+            ))}
           </Select>
           <Select
             label="Entreprise"

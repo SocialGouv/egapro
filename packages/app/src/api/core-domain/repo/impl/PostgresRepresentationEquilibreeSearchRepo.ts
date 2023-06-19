@@ -1,11 +1,16 @@
-import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import {
+  type RepresentationEquilibreeSearchRaw,
+  type RepresentationEquilibreeSearchResultRaw,
+} from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type RepresentationEquilibreeSearchResult } from "@common/core-domain/domain/RepresentationEquilibreeSearchResult";
+import { representationEquilibreeSearchMap } from "@common/core-domain/mappers/representationEquilibreeSearchMap";
 import { representationEquilibreeSearchResultMap } from "@common/core-domain/mappers/representationEquilibreeSearchResultMap";
 import { PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
+import { type Any } from "@common/utils/types";
 import { isFinite } from "lodash";
 import { type PostgresError } from "postgres";
 
@@ -17,18 +22,36 @@ import {
 export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentationEquilibreeSearchRepo {
   private repEqTable = sql("representation_equilibree");
   private table = sql("search_representation_equilibree");
+  private sql = sql;
 
-  public index(_item: RepresentationEquilibree): Promise<void> {
-    throw new Error("Method not implemented.");
+  constructor(sqlInstance?: typeof sql) {
+    if (sqlInstance) {
+      this.sql = sqlInstance;
+    }
+  }
+
+  public async index(item: RepresentationEquilibree): Promise<void> {
+    const raw = representationEquilibreeSearchMap.toPersistence(item);
+
+    const ftRaw = {
+      ...raw,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})` as Any,
+    };
+    const insert = sql(ftRaw);
+    const update = sql(ftRaw, "declared_at", "ft", "region", "departement", "section_naf");
+
+    await this.sql<
+      RepresentationEquilibreeSearchRaw[]
+    >`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
   }
 
   public async search(
     criteria: RepresentationEquilibreeSearchCriteria,
   ): Promise<RepresentationEquilibreeSearchResult[]> {
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
-    const raws = await sql<RepresentationEquilibreeSearchResultRaw[]>`
+    const raws = await this.sql<RepresentationEquilibreeSearchResultRaw[]>`
         SELECT
-            (jsonb_agg(${this.repEqTable}.data ORDER BY ${this.repEqTable}.year DESC) -> 0) as data,
+            (jsonb_agg(${this.repEqTable}.data->'entreprise' ORDER BY ${this.repEqTable}.year DESC) -> 0) as company,
             jsonb_object_agg(${this.repEqTable}.year::text, json_build_object(
                 'executiveMenPercent', replace((${
                   this.repEqTable
@@ -66,8 +89,8 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
 
     try {
-      const [{ count }] =
-        await sql<SQLCount>`select count(distinct(siren)) as count from ${this.table} ${sqlWhereClause}`;
+      const [{ count }] = await this
+        .sql<SQLCount>`select count(distinct(siren)) as count from ${this.table} ${sqlWhereClause}`;
       return +count;
     } catch (e: unknown) {
       const postgreError = e as PostgresError;
