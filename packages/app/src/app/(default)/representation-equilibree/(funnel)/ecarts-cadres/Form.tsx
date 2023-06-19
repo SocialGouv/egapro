@@ -8,25 +8,15 @@ import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquili
 import { type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { PercentagesPairInputs } from "@components/rdsfr/PercentagesPairInputs";
-<<<<<<< HEAD
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
-=======
-import { Box, FormLayout } from "@design-system";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
-<<<<<<< HEAD
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
-=======
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 
 type EcartsCadresFormType = UnionToIntersection<z.infer<typeof createSteps.ecartsCadres>>;
 
@@ -35,10 +25,7 @@ export const EcartsCadresForm = () => {
   const router = useRouter();
   const [isComputable, setComputable] = useState<boolean>();
   const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
-<<<<<<< HEAD
   const hydrated = useRepeqFunnelStoreHasHydrated();
-=======
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 
   const methods = useForm<EcartsCadresFormType>({
     mode: "onChange",
@@ -51,25 +38,16 @@ export const EcartsCadresForm = () => {
     handleSubmit,
     register,
     reset,
-<<<<<<< HEAD
     trigger,
   } = methods;
 
   useEffect(() => {
     if (!funnel) return; // dummy typesafe ; funnel is already available
-=======
-  } = methods;
-
-  useEffect(() => {
-    console.log({ funnel });
-    if (!funnel) return;
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
     if ("notComputableReasonExecutives" in funnel) {
       setComputable(false);
     } else if ("executiveWomenPercent" in funnel) {
       setComputable(true);
     }
-<<<<<<< HEAD
     // eslint-disable-next-line react-hooks/exhaustive-deps -- need to be triggered on mount only
   }, []);
 
@@ -81,10 +59,6 @@ export const EcartsCadresForm = () => {
     redirect("/representation-equilibree/commencer");
   }
 
-=======
-  }, []);
-
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
   const onSubmit = (data: EcartsCadresFormType) => {
     if (!funnel) return;
 
@@ -115,11 +89,8 @@ export const EcartsCadresForm = () => {
                 onChange() {
                   setComputable(true);
                   reset();
-<<<<<<< HEAD
                   trigger("executiveWomenPercent", { shouldFocus: true });
                   trigger("executiveMenPercent");
-=======
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
                 },
               },
             },
@@ -179,11 +150,7 @@ export const EcartsCadresForm = () => {
             {
               children: "Suivant",
               type: "submit",
-<<<<<<< HEAD
               disabled: !isValid || typeof isComputable === "undefined",
-=======
-              disabled: !isValid,
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
             },
           ]}
         />

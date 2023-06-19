@@ -5,27 +5,15 @@ import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
-<<<<<<< HEAD
-=======
-import { ClientOnly } from "@components/ClientOnly";
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
-<<<<<<< HEAD
-=======
-import { useEffect } from "react";
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 import { useForm } from "react-hook-form";
 import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
-<<<<<<< HEAD
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
-=======
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 
 const formSchema = createSteps.periodeReference.and(createSteps.commencer).superRefine(({ endOfPeriod, year }, ctx) => {
   if (getYear(new Date(endOfPeriod)) !== year) {
@@ -43,14 +31,7 @@ const useStore = storePicker(useRepeqFunnelStore);
 export const PeriodeReferenceForm = () => {
   const router = useRouter();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
-<<<<<<< HEAD
   const hydrated = useRepeqFunnelStoreHasHydrated();
-=======
-
-  useEffect(() => {
-    if (!funnel?.year) redirect("/representation-equilibree/commencer");
-  }, []);
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
 
   const {
     formState: { errors, isValid },
@@ -67,10 +48,7 @@ export const PeriodeReferenceForm = () => {
     if (!funnel?.year) return;
     setValue("endOfPeriod", formatISO(endOfYear(new Date().setFullYear(funnel.year)), { representation: "date" }), {
       shouldDirty: true,
-<<<<<<< HEAD
       shouldValidate: true,
-=======
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
     });
   };
 
@@ -79,7 +57,6 @@ export const PeriodeReferenceForm = () => {
     router.push("/representation-equilibree/ecarts-cadres");
   };
 
-<<<<<<< HEAD
   if (funnel && !funnel?.year) redirect("/representation-equilibree/commencer");
 
   return (
@@ -99,45 +76,6 @@ export const PeriodeReferenceForm = () => {
         </u>{" "}
         est l'année au titre de laquelle les écarts de représentation sont calculés.
       </CallOut>
-=======
-  return (
-    <>
-      <ClientOnly
-        fallback={
-          <CallOut
-            title={<Skeleton />}
-            iconId="fr-icon-calendar-line"
-            buttonProps={{
-              priority: "secondary",
-              children: <Skeleton width={200} highlightColor="var(--text-action-high-blue-france)" />,
-              size: "small",
-              disabled: true,
-            }}
-          >
-            <Skeleton />
-          </CallOut>
-        }
-      >
-        <CallOut
-          title="Année civile"
-          iconId="fr-icon-calendar-line"
-          buttonProps={{
-            priority: "secondary",
-            children: "Sélectionner la fin de l'année civile",
-            size: "small",
-            onClick: selectEndDateOfFunnelYear,
-            nativeButtonProps: {
-              disabled: !funnel?.year,
-            },
-          }}
-        >
-          <u>
-            <strong>{funnel?.year}</strong>
-          </u>{" "}
-          est l'année au titre de laquelle les écarts de représentation sont calculés.
-        </CallOut>
-      </ClientOnly>
->>>>>>> 526270801b46296844cd14907305b0eeee086d21
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <Input
