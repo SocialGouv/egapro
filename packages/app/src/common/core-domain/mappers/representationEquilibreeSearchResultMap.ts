@@ -127,8 +127,9 @@ export const representationEquilibreeSearchResultMap: Mapper<
 function reprensentationEquilibreePublicDataToDTO(data: RepresentationEquilibreeData): PublicCompanyDTO {
   return {
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
+    countryIsoCode: data.company.countryCode?.getValue(),
     nafCode: data.company.nafCode!.getValue(),
-    countyCode: data.company.county!.getValue(),
+    countyCode: data.company.county?.getValue(),
     ...(data.company.workforce?.total || data.company.workforce?.range
       ? {
           workforce: {
@@ -138,7 +139,7 @@ function reprensentationEquilibreePublicDataToDTO(data: RepresentationEquilibree
         }
       : {}),
     name: data.company.name!,
-    regionCode: data.company.region!.getValue(),
+    regionCode: data.company.region?.getValue(),
     siren: data.company.siren.getValue(),
     ...(data.company.ues
       ? {

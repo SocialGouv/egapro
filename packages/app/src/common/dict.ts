@@ -1,4 +1,4 @@
-import { times } from "lodash";
+import { times, upperFirst } from "lodash";
 
 import { NAF, NAF_SECTIONS } from "./utils/naf";
 import { type SimpleObject, type UnknownMapping } from "./utils/types";
@@ -326,12 +326,20 @@ export const COUNTY_TO_REGION = Object.entries(REGIONS_TO_COUNTIES).reduce(
 );
 
 export const adressLabel = ({
+  country,
   county,
   region,
 }: {
+  country?: string;
   county?: UnknownMapping | keyof typeof COUNTIES;
   region?: UnknownMapping | keyof typeof REGIONS;
 }) => {
+  if (country && country !== "FR") {
+    const countryName = COUNTRIES_ISO_TO_LIB[country];
+
+    if (countryName) return `${countryName.toLocaleLowerCase().split("-").map(upperFirst).join("-")}`;
+  }
+
   let result = "";
   if (county && county in COUNTIES) {
     result = COUNTIES[county as keyof typeof COUNTIES];

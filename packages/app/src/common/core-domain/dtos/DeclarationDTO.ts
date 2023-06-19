@@ -5,10 +5,11 @@ import { type DeclarationDTO } from "../../models/generated";
 export { DeclarationDTO };
 
 export type PublicCompanyDTO = {
-  countyCode: keyof COUNTIES;
+  countryIsoCode?: string;
+  countyCode?: keyof COUNTIES;
   nafCode: keyof NAF;
   name: string;
-  regionCode: keyof REGIONS;
+  regionCode?: keyof REGIONS;
   siren: string;
   ues?: {
     companies: Array<{
