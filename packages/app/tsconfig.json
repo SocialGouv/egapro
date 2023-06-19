@@ -30,6 +30,9 @@
       ],
       "@design-system/hooks/*": [
         "packages/app/src/design-system/hooks/*"
+      ],
+      "@public/*": [
+        "packages/app/public/*"
       ]
     }
   },

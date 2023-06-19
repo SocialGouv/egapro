@@ -6,15 +6,17 @@ const nextConfig = {
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
+    // typedRoutes: true, // TODO activate <3
     serverActions: true,
     // outputFileTracingRoot: path.join(__dirname, "../../"),
+    serverComponentsExternalPackages: ["@react-pdf/renderer"],
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
   webpack: config => {
     config.module.rules.push({
-      test: /\.woff2$/,
+      test: /\.woff2?$/,
       type: "asset/resource",
     });
     return config;

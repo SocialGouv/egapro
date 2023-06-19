@@ -35,7 +35,7 @@ export const DetailRepresentationEquilibree = ({ data }: { data: RepresentationE
   return (
     <>
       <p>
-        Déclaration des écarts de représentation Femmes/Hommes pour l’année {déclaration.année_indicateurs + 1} au titre
+        Déclaration des écarts de représentation Femmes‑Hommes pour l’année {déclaration.année_indicateurs + 1} au titre
         des données {déclaration.année_indicateurs}.
       </p>
       {déclaration?.date && (

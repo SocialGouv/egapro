@@ -1,6 +1,6 @@
 import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers";
 
-export interface Orgnanization {
+export interface Organization {
   id: number;
   is_collectivite_territoriale: boolean;
   is_external: boolean;
@@ -15,7 +15,7 @@ export interface MonCompteProProfile {
   family_name: string | null;
   given_name: string | null;
   job: string | null;
-  organizations: Orgnanization[];
+  organizations: Organization[];
   phone_number: string | null;
   sub: string;
   updated_at: Date;
