@@ -24,15 +24,16 @@ if (typeof window !== "undefined" && !window._enableEgaproDebug) {
 }
 
 export interface DebugButtonProps {
+  alwaysOn?: boolean;
   infoText?: string;
   obj: Any;
 }
-export const DebugButton = ({ obj, infoText }: DebugButtonProps) => {
+export const DebugButton = ({ obj, infoText, alwaysOn }: DebugButtonProps) => {
   const [isDebugEnabled, setIsDebugEnabled] = useState(false);
 
   useEffect(() => {
-    setIsDebugEnabled(localStorage.getItem(DEBUG_KEY) === DEBUG_KEY);
-  }, []);
+    setIsDebugEnabled(alwaysOn ?? localStorage.getItem(DEBUG_KEY) === DEBUG_KEY);
+  }, [alwaysOn]);
 
   return (
     <>
