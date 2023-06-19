@@ -1,3 +1,13 @@
+## [2.89.2](https://github.com/SocialGouv/egapro/compare/v2.89.1...v2.89.2) (2023-06-19)
+
+
+### Bug Fixes
+
+* bug date declaration ([#1661](https://github.com/SocialGouv/egapro/issues/1661)) ([3f5fa95](https://github.com/SocialGouv/egapro/commit/3f5fa952fe53a7f34569f934cb24479f6a0ccf57)), closes [#1654](https://github.com/SocialGouv/egapro/issues/1654)
+* handle non FR countries and number siren ([dfdbde8](https://github.com/SocialGouv/egapro/commit/dfdbde875742860714e23461665db025a00c57bd))
+* missing time for date in persistance object ([#1659](https://github.com/SocialGouv/egapro/issues/1659)) ([b482379](https://github.com/SocialGouv/egapro/commit/b4823795ff8d118906b7f1b91a4be8efe0b65db9))
+* **simu:** temp fix zod email validation ([7d87074](https://github.com/SocialGouv/egapro/commit/7d870742741f4ed7097e4a29ca4953e21db9b432))
+
 ## [2.89.1](https://github.com/SocialGouv/egapro/compare/v2.89.0...v2.89.1) (2023-05-31)
 
 
