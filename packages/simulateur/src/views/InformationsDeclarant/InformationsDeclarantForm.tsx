@@ -16,6 +16,7 @@ import FormError from "../../components/FormError"
 import { useAppStateContextProvider } from "../../hooks/useAppStateContextProvider"
 import { isFormValid } from "../../utils/formHelpers"
 import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
+import { EMAIL_REGEX } from "../../utils/regex"
 
 const FormInputs = z.object({
   nom: z
@@ -33,7 +34,9 @@ const FormInputs = z.object({
   tel: z.string({ required_error: "Le numéro de téléphone est requis" }).regex(new RegExp("^[0-9]{10}$"), {
     message: "Le numéro de téléphone doit être composé de 10 chiffres",
   }),
-  email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+  email: z
+    .string({ required_error: "L'adresse mail est requise" })
+    .regex(EMAIL_REGEX, { message: "L'adresse mail est invalide" }),
   acceptationCGU: z.literal(true, {
     invalid_type_error: "Veuillez accepter les CGUs",
   }),

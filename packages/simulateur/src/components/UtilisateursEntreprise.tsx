@@ -15,6 +15,7 @@ import { formValidator, InputControl } from "./ds/form-lib"
 import ButtonAction from "./ds/ButtonAction"
 import Modal from "./ds/Modal"
 import { IconDelete, IconDrag } from "./ds/Icons"
+import { EMAIL_REGEX } from "../utils/regex"
 
 function UtilisateurItem({
   owner,
@@ -105,7 +106,9 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
   }
 
   const FormInput = z.object({
-    email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+    email: z
+      .string({ required_error: "L'adresse mail est requise" })
+      .regex(EMAIL_REGEX, { message: "L'adresse mail est invalide" }),
   })
 
   return (

@@ -24,6 +24,7 @@ import FormSubmit from "../../components/FormSubmit"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import { LinkIcon } from "@chakra-ui/icons"
 import { generateImpersonateToken } from "../../utils/api"
+import { EMAIL_REGEX } from "../../utils/regex"
 
 const title = "Générer le token pour un utilisateur"
 
@@ -61,7 +62,7 @@ const GenererTokenUtilisateurPage = () => {
     setValueDecla(linkDecla)
   }, [linkSimu, linkDecla, setValueSimu, setValueDecla])
 
-  const schemaForm = z.string().email()
+  const schemaForm = z.string().regex(EMAIL_REGEX)
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const email = event.target?.value?.trim() || ""
