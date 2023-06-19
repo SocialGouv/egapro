@@ -23,6 +23,10 @@ export abstract class Enum<TEnum extends object> extends ValueObject<TEnum[keyof
       throw new ValidationError(`"${this.value}" is not a valid ${this.constructor.name.toLowerCase()}.`);
     }
   }
+
+  public getLabel(): string {
+    return `${this.getValue()}`;
+  }
 }
 
 export namespace Enum {

@@ -1,6 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
+import { AlertEdition } from "../AlertEdition";
 import { EntrepriseForm } from "./Form";
 
 const title = "Informations entreprise";
@@ -15,7 +17,9 @@ export const metadata = {
 const InformationsEntreprise = () => {
   return (
     <>
-      {/* <AlertEdition /> */}
+      <ClientAnimate>
+        <AlertEdition />
+      </ClientAnimate>
       <Alert
         small
         severity="info"

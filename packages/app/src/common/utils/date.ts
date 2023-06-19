@@ -9,6 +9,8 @@ export const formatTimestampToFr = (timestamp: number) => format(fromUnixTime(ti
 
 export const parseFrDate = (stringDate: string): Date => parse(stringDate, FR_DATE_FORMAT, new Date());
 
+export const formatDateToFr = (date: Date): string => format(date, FR_DATE_FORMAT);
+
 /**
  * Parse an ISO date or a french date.
  *

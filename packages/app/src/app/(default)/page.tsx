@@ -34,7 +34,7 @@ const Home = () => {
           <GridCol md={6}>
             <Card
               horizontal
-              title="Index de l'égalité professionnelle femmes-hommes"
+              title="Index de l'égalité professionnelle femmes‑hommes"
               desc="Calculer et/ou déclarer votre index de l'égalité professionnelle entre les femmes et les hommes."
               linkProps={{
                 href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
@@ -68,7 +68,7 @@ const Home = () => {
           <GridCol md={6}>
             <Card
               horizontal
-              title="Représentation équilibrée femmes-hommes"
+              title="Représentation équilibrée femmes‑hommes"
               desc="Déclarer vos écarts de représentation entre les femmes et les hommes dans les postes de direction."
               linkProps={{
                 href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/",

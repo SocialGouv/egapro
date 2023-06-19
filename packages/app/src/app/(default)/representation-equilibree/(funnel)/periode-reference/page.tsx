@@ -1,3 +1,6 @@
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+
+import { AlertEdition } from "../AlertEdition";
 import { PeriodeReferenceForm } from "./Form";
 
 const title = "Période de référence";
@@ -12,7 +15,10 @@ export const metadata = {
 const PeriodeReference = () => {
   return (
     <>
-      {/* <AlertEdition /> */}
+      <ClientAnimate>
+        <AlertEdition />
+      </ClientAnimate>
+
       <PeriodeReferenceForm />
     </>
   );

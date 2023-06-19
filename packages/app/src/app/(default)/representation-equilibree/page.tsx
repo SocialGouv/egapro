@@ -42,7 +42,7 @@ const RepresentationEquilibree = () => (
             <strong>obligation de transparence</strong> en la matière.
           </p>
           <Button linkProps={{ href: "/representation-equilibree/assujetti/" }}>
-            Déclarer les écarts éventuels de représentation femmes-hommes
+            Déclarer les écarts éventuels de représentation femmes‑hommes
           </Button>
         </GridCol>
         <GridCol lg={5}>
@@ -64,7 +64,7 @@ const RepresentationEquilibree = () => (
           <Card
             title="Besoin d’aide ?"
             desc="Pour avoir plus d'informations sur le calcul et la publication de vos écarts éventuels de
-                  représentation femmes-hommes, vous pouvez consulter le site internet du Ministère du Travail, de l'Emploi et de l'Insertion."
+                  représentation femmes‑hommes, vous pouvez consulter le site internet du Ministère du Travail, de l'Emploi et de l'Insertion."
             footer={
               <Button
                 linkProps={{
@@ -89,7 +89,7 @@ const RepresentationEquilibree = () => (
                 content: (
                   <>
                     <strong>À compter de 2023</strong>, les entreprises devront publier et déclarer leurs écarts
-                    éventuels de représentation femmes-hommes pour les cadres dirigeants et les instances dirigeantes
+                    éventuels de représentation femmes‑hommes pour les cadres dirigeants et les instances dirigeantes
                     selon le même calendrier que l’Index de l’égalité professionnelle, à savoir au plus tard le 1er
                     mars.
                   </>

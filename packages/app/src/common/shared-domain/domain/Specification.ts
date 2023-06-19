@@ -1,10 +1,12 @@
 import { type Any } from "../../utils/types";
 import { type Entity } from "./Entity";
+import { type ValidationError } from "./ValidationError";
 
 type DefaultEntity = Entity<Any, Any>;
 export interface Specification<T extends DefaultEntity> {
   and(spec: Specification<T>): Specification<T>;
   isSatisfiedBy(entity: T): boolean;
+  lastError?: ValidationError;
   not(): Specification<T>;
   or(spec: Specification<T>): Specification<T>;
 }
@@ -31,6 +33,10 @@ export class AndSpecification<T extends DefaultEntity> extends AbstractSpecifica
   public isSatisfiedBy(entity: T): boolean {
     return this.one.isSatisfiedBy(entity) && this.other.isSatisfiedBy(entity);
   }
+
+  get lastError() {
+    return this.one.lastError ?? this.other.lastError;
+  }
 }
 
 export class OrSpecification<T extends DefaultEntity> extends AbstractSpecification<T> {
@@ -41,6 +47,10 @@ export class OrSpecification<T extends DefaultEntity> extends AbstractSpecificat
   public isSatisfiedBy(entity: T): boolean {
     return this.one.isSatisfiedBy(entity) || this.other.isSatisfiedBy(entity);
   }
+
+  get lastError() {
+    return this.one.lastError ?? this.other.lastError;
+  }
 }
 
 export class NotSpecification<T extends DefaultEntity> extends AbstractSpecification<T> {
@@ -50,5 +60,9 @@ export class NotSpecification<T extends DefaultEntity> extends AbstractSpecifica
 
   public isSatisfiedBy(entity: T): boolean {
     return !this.wrapped.isSatisfiedBy(entity);
+  }
+
+  get lastError() {
+    return this.wrapped.lastError;
   }
 }
