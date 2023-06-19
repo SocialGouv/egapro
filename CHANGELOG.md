@@ -1,3 +1,10 @@
+## [2.89.3](https://github.com/SocialGouv/egapro/compare/v2.89.2...v2.89.3) (2023-06-19)
+
+
+### Bug Fixes
+
+* move debug endpoint to appdir locked debug page ([fb9f2f5](https://github.com/SocialGouv/egapro/commit/fb9f2f579fc75ba1175e86300e23bac4718d4c5d))
+
 ## [2.89.2](https://github.com/SocialGouv/egapro/compare/v2.89.1...v2.89.2) (2023-06-19)
 
 
