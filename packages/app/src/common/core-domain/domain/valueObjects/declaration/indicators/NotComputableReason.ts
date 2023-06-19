@@ -4,6 +4,10 @@ export class NotComputableReason extends Enum<typeof NotComputableReason.Enum> {
   constructor(value: Enum.ToString<typeof NotComputableReason.Enum> | NotComputableReason.Enum) {
     super(value, NotComputableReason.Enum);
   }
+
+  public getLabel() {
+    return NotComputableReason.Label[this.getValue()];
+  }
 }
 export namespace NotComputableReason {
   export enum Enum {

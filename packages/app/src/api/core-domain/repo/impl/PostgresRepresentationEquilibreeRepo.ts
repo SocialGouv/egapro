@@ -10,10 +10,17 @@ import { UnexpectedRepositoryError } from "@common/shared-domain";
 import { type Any } from "@common/utils/types";
 
 import { type IRepresentationEquilibreeRepo } from "../IRepresentationEquilibreeRepo";
+import { PostgresRepresentationEquilibreeSearchRepo } from "./PostgresRepresentationEquilibreeSearchRepo";
 
 export class PostgresRepresentationEquilibreeRepo implements IRepresentationEquilibreeRepo {
-  private sql = sql<RepresentationEquilibreeRaw[]>;
   private table = sql("representation_equilibree");
+  private sql = sql<RepresentationEquilibreeRaw[]>;
+
+  constructor(sqlInstance?: typeof sql) {
+    if (sqlInstance) {
+      this.sql = sqlInstance;
+    }
+  }
 
   private nextRequestLimit = 0;
   public limit(limit = 10) {
@@ -64,18 +71,30 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
       throw error;
     }
   }
+
+  public async saveWithIndex(item: RepresentationEquilibree): Promise<void> {
+    await this.sql.begin(async transac => {
+      const thisRepo = new PostgresRepresentationEquilibreeRepo(transac);
+      const searchRepo = new PostgresRepresentationEquilibreeSearchRepo(transac);
+      await thisRepo.save(item);
+      await searchRepo.index(item);
+    });
+  }
+
   public async save(item: RepresentationEquilibree): Promise<RepresentationEquilibreePK> {
     const raw = representationEquilibreeMap.toPersistence(item);
 
-    const insert = sql(raw, "data", "declared_at", "modified_at", "siren", "year");
-    const update = sql(raw, "data", "modified_at");
-    await this.sql`insert into ${this.table} value ${insert} on conflict ${sql([
-      "siren",
-      "year",
-    ])} do update set ${update}`;
+    const ftRaw = {
+      ...raw,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})` as Any,
+    };
+    const insert = sql(ftRaw);
+    const update = sql(ftRaw, "data", "modified_at", "ft");
+    await this.sql`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
 
     return [item.siren, item.year];
   }
+
   public async update(item: RepresentationEquilibree): Promise<void> {
     await this.save(item);
   }

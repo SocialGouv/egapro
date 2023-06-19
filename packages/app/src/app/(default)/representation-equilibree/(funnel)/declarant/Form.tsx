@@ -4,50 +4,48 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 
-import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
+import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
-type DeclarantFormType = z.infer<typeof createSteps.declarant>;
+const formSchema = createSteps.declarant.extend({
+  gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
+});
+
+type DeclarantFormType = ClearObject<z.infer<typeof formSchema>>;
 
 const useStore = storePicker(useRepeqFunnelStore);
 export const DeclarantForm = ({ session }: { session: Session }) => {
   const router = useRouter();
-  const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
+  const [funnel, saveFunnel, isEdit] = useStore("funnel", "saveFunnel", "isEdit");
+  const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
   } = useForm<DeclarantFormType>({
     mode: "onChange",
-    resolver: zodResolver(createSteps.declarant),
-    defaultValues: funnel,
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      gdpr: isEdit,
+      ...session.user, // first fill with session info (email, username, ...)
+      ...funnel, // then, if funnel has data, get them
+    },
   });
 
-  useEffect(() => {
-    if (funnel) {
-      if (!funnel.email && !funnel.firstname && !funnel.lastname && !funnel.phoneNumber) {
-        reset({
-          email: session.user.email,
-          firstname: session.user.firstname,
-          lastname: session.user.lastname,
-          phoneNumber: session.user.phoneNumber,
-          gdpr: funnel.gdpr,
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- no need to listen to session or funnel
-  }, [reset]);
+  if (!hydrated) {
+    return <SkeletonForm fields={5} />;
+  }
 
   const onSubmit = async (form: DeclarantFormType) => {
     saveFunnel(form);

@@ -1,6 +1,6 @@
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 
-const REGEX_URL = /^http.*/i;
+export const REGEX_URL = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
 
 export class Url extends SimpleStringValueObject<Url> {
   constructor(url: string) {

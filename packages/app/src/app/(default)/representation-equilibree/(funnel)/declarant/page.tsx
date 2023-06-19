@@ -2,8 +2,10 @@ import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/co
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Link } from "@design-system";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getServerSession } from "next-auth";
 
+import { AlertEdition } from "../AlertEdition";
 import { DeclarantForm } from "./Form";
 
 const title = "Informations déclarant";
@@ -22,7 +24,9 @@ const DeclarantPage = async () => {
 
   return (
     <>
-      {/* <AlertEdition /> */}
+      <ClientAnimate>
+        <AlertEdition />
+      </ClientAnimate>
       <p>
         <b>
           Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les

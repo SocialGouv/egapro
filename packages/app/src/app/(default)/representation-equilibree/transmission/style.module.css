@@ -1,0 +1,15 @@
+.send-receipt-button {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    display: inline-block;
+}
+
+.download-icon::before {
+    -webkit-mask-image: url(/_next/static/media/download-line.a6b45b28.svg) !important;
+    mask-image: url(/_next/static/media/download-line.a6b45b28.svg) !important;
+}
+
+.download-icon [target=_blank]::after {
+    display: none !important;
+}

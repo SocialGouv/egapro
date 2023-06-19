@@ -36,7 +36,7 @@ export interface BaseInfo {
 
 export interface Entreprise extends BaseInfo {
   allMatchingEtablissements: ShortEtablissement[];
-  firstMatchingEtablissement?: ShortEtablissement;
+  firstMatchingEtablissement: ShortEtablissement;
 }
 
 export interface ShortEtablissement {
@@ -44,6 +44,7 @@ export interface ShortEtablissement {
   address: string;
   categorieEntreprise?: string;
   codeCommuneEtablissement: string;
+  /** COG (Code Officiel Géographique) / Code Insee */
   codePaysEtrangerEtablissement?: string;
   codePostalEtablissement: string;
   etablissementSiege: boolean;

@@ -363,7 +363,8 @@ interface Country {
   ISO2: string;
   LIB: string;
 }
-export const COUNTRIES: Country[] = [
+export const DEFAULT_COUNTRY_COG = "99100";
+export const COUNTRIES = [
   { COG: "99101", ISO2: "DK", LIB: "DANEMARK" },
   { COG: "99102", ISO2: "IS", LIB: "ISLANDE" },
   { COG: "99103", ISO2: "NO", LIB: "NORVEGE" },
@@ -566,11 +567,18 @@ export const COUNTRIES: Country[] = [
   { COG: "99515", ISO2: "MH", LIB: "MARSHALL (ILES)" },
   { COG: "99516", ISO2: "FM", LIB: "MICRONESIE (ETATS FEDERES DE)" },
   { COG: "99517", ISO2: "PW", LIB: "PALAOS (ILES)" },
-  { COG: "XXXXX", ISO2: "FR", LIB: "FRANCE" },
-];
+  { COG: DEFAULT_COUNTRY_COG, ISO2: "FR", LIB: "FRANCE" },
+] as const satisfies readonly Country[];
 
-export const COUNTRIES_COG_TO_ISO: SimpleObject<string> = COUNTRIES.reduce(
+export type CountryIsoCode = (typeof COUNTRIES)[number]["ISO2"];
+
+export const COUNTRIES_COG_TO_ISO: SimpleObject<CountryIsoCode> = COUNTRIES.reduce(
   (acc, country) => ({ ...acc, [country.COG]: country.ISO2 }),
+  {},
+);
+
+export const COUNTRIES_COG_TO_LIB: SimpleObject<string> = COUNTRIES.reduce(
+  (acc, country) => ({ ...acc, [country.COG]: country.LIB }),
   {},
 );
 

@@ -3,7 +3,7 @@ import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
 const title = "Aide simulation";
-const description = "Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes";
+const description = "Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes‑hommes";
 
 export const metadata = {
   title,

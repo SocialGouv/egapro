@@ -1,3 +1,5 @@
+import { type ClearObject } from "./types";
+
 export const NAF = {
   "01.11Z": {
     code: "01.11Z",
@@ -14800,7 +14802,7 @@ type NafExporter<T extends CodeDescKeys> = {
 const nafExporter = <T extends CodeDescKeys>(key: T) =>
   Object.values(NAF).reduce(
     (sections, { [key]: { code, description } }) => ({ ...sections, [code]: description }),
-    {} as NafExporter<T>,
+    {} as ClearObject<NafExporter<T>>,
   );
 
 export const NAF_SECTIONS = nafExporter("section");

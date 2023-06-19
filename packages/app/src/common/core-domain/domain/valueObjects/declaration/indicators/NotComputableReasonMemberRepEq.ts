@@ -4,6 +4,10 @@ export class NotComputableReasonMemberRepEq extends Enum<typeof NotComputableRea
   constructor(value: Enum.ToString<typeof NotComputableReasonMemberRepEq.Enum> | NotComputableReasonMemberRepEq.Enum) {
     super(value, NotComputableReasonMemberRepEq.Enum);
   }
+
+  public getLabel() {
+    return NotComputableReasonMemberRepEq.Label[this.getValue()];
+  }
 }
 export namespace NotComputableReasonMemberRepEq {
   export enum Enum {

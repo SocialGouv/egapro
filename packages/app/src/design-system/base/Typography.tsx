@@ -111,7 +111,7 @@ export type TextProps<Inline extends boolean> = TextAttributes<Inline> &
 
 const textProps = ({ variant, ...rest }: Omit<TextProps<boolean>, "inline" | "text">) => {
   const tagProps = typographyProps(rest);
-  tagProps.className = cx(tagProps.className, fr.cx(variant && [variant].flat().map(v => `fr-text--${v}` as const)));
+  tagProps.className = cx(tagProps.className, cx(variant && [variant].flat().map(v => `fr-text--${v}`)));
 
   return tagProps;
 };

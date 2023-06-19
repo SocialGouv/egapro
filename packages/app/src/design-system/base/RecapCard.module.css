@@ -1,0 +1,60 @@
+.fr-recap-card {
+    border: 1px solid var(--border-default-grey);
+    padding: 0 1.5rem;
+}
+
+.fr-recap-card:has(+ .fr-recap-card) {
+    margin-bottom: 1rem;
+}
+
+.fr-recap-card > hr {
+    background-size: 100% 2px;
+    padding: 0 0 1rem;
+}
+
+.fr-recap-card > hr:has(+ .fr-recap-card__content--stat) {
+    padding: 0 0 2px;
+}
+
+.fr-recap-card__title {
+    display: flex;
+}
+
+.fr-recap-card__title > *:first-child {
+    margin: 1rem 0;
+    flex: 1;
+}
+
+.fr-recap-card__content:not(.fr-recap-card__content--stat) {
+    margin-bottom: 1rem;
+}
+
+.fr-recap-card__content:has(+ .fr-recap-card__content) {
+    border-bottom: 1px solid var(--background-alt-grey);
+}
+
+.fr-recap-card__content--stat {
+    display: flex;
+    padding: 1rem;
+}
+
+/* stat value */
+.fr-recap-card__content--stat > *:first-child {
+    font-size: 1.5rem;
+    margin: .5rem .75rem .5rem 0;
+    align-self: center;
+}
+
+/* stat text */
+.fr-recap-card__content--stat > *:last-child {
+    margin: auto 0;
+}
+
+.fr-recap-card__edit-link {
+    align-self: center;
+}
+
+.fr-hr--vertical {
+    padding: 0 .75rem 0 0;
+    background-size: 1px 100px;
+}

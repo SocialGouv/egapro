@@ -40,14 +40,22 @@ export const PercentagesPairInputs = <FormType extends SimpleObject>({
     formState: { errors },
   } = useFormContext<FakeFormType>();
 
-  const syncPercentages = (first: boolean) => {
-    const [keyA, keyB] = (first ? [firstFormKey, secondFormKey] : [secondFormKey, firstFormKey]) as FakeSyncMapper;
-    const value = truncFloatToOneDecimal(getValues(keyA));
+  const syncPercentages = (firstInput: boolean) => {
+    const [keyA, keyB] = (firstInput ? [firstFormKey, secondFormKey] : [secondFormKey, firstFormKey]) as FakeSyncMapper;
+    const valueA = truncFloatToOneDecimal(getValues(keyA));
 
-    if (isNaN(value)) return;
+    if (isNaN(valueA)) return;
 
-    setValue(keyA, value);
-    setValue(keyB, truncFloatToOneDecimal(100 - value));
+    const valueB = truncFloatToOneDecimal(100 - valueA);
+
+    setValue(keyA, valueA, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue(keyB, valueB, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     // Hack to ensure that focus cursor is on the last character. W/o it, if we type "3,2" and remove the last character, the focus is at the start.
     setFocus(keyB);
     setFocus(keyA);
