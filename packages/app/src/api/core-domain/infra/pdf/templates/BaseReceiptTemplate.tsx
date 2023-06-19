@@ -3,11 +3,11 @@ import { formatDateToFr } from "@common/utils/date";
 import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import path from "path";
 
-let inited = false;
+let initialized = false;
 const logo = path.resolve("./public/logo.jpeg");
 
-if (!inited) {
-  inited = true;
+if (!initialized) {
+  initialized = true;
   Font.registerHyphenationCallback(word => [word]);
   Font.register({
     family: "Marianne",
