@@ -12,7 +12,13 @@ const StaffingSubRow = ({ label, isError, errorMessage }: StaffingSubRowProps) =
       {label}
     </AlternativeTableCell>
     <AlternativeTableCell>
-      <Input label="Nombre de femmes" hideLabel />
+      <Input
+        label="Nombre de femmes"
+        hideLabel
+        state={isError ? "error" : undefined}
+        stateRelatedMessage={errorMessage}
+        classes={{ message: "fr-sr-only" }}
+      />
     </AlternativeTableCell>
     <AlternativeTableCell>
       <Input

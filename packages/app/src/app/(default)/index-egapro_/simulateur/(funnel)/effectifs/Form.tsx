@@ -1,8 +1,6 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { AlternativeTable, AlternativeTableCell, AlternativeTableRow, Link } from "@design-system";
-
-import { RowStaffingTable } from "./RowStaffingTable";
+import { AlternativeTable, Link } from "@design-system";
 
 export const EffectifsForm = () => {
   return (
@@ -53,59 +51,160 @@ export const EffectifsForm = () => {
 
       <AlternativeTable
         classeName="fr-mt-2w"
-        header={
-          <>
-            <AlternativeTableRow>
-              <AlternativeTableCell as="th" scope="col" rowSpan={2}>
-                Catégorie socioprofessionnelle
-              </AlternativeTableCell>
-              <AlternativeTableCell as="th" scope="col" rowSpan={2} align="center">
-                Tranche d’âge
-              </AlternativeTableCell>
-              <AlternativeTableCell as="th" scope="col" colSpan={2} align="center">
-                Nombre de salariés
-              </AlternativeTableCell>
-            </AlternativeTableRow>
-            <AlternativeTableRow>
-              <AlternativeTableCell as="th" align="center">
-                Femmes
-              </AlternativeTableCell>
-              <AlternativeTableCell as="th" align="center">
-                Hommes
-              </AlternativeTableCell>
-            </AlternativeTableRow>
-          </>
-        }
-        body={[
-          <RowStaffingTable key={1} category="Ouvriers" />,
-          <RowStaffingTable key={2} category="Employés" />,
-          <RowStaffingTable key={3} category="Techniciens et agents de maîtrise" />,
-          <RowStaffingTable key={4} category="Ingénieurs et cadres" />,
+        header={[
+          {
+            label: "Catégorie socioprofessionnelle",
+          },
+          {
+            label: "Tranche d’âge",
+          },
+          {
+            label: "Nombre de salariés",
+            subCols: [
+              {
+                label: "Femmes",
+              },
+              {
+                label: "Hommes",
+              },
+            ],
+          },
         ]}
-        footer={
-          <>
-            <AlternativeTableRow>
-              <AlternativeTableCell as="th" scope="row" colSpan={2} rowSpan={2} align="center">
-                Ensemble des salariés
-              </AlternativeTableCell>
+        body={[
+          {
+            categoryLabel: "Ouvriers",
+            subRows: [
+              {
+                label: "Moins de 30 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 30 à 39 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 40 à 49 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "50 ans et plus",
+                cols: ["-", "-"],
+              },
+            ],
+          },
+          {
+            categoryLabel: "Plop",
+            subRows: [
+              {
+                label: "Moins de 30 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 30 à 39 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 40 à 49 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "50 ans et plus",
+                cols: ["-", "-"],
+              },
+            ],
+          },
+        ]}
+        footer={[
+          {
+            label: "Ensemble des salariés",
+            data: "-",
+            colspan: 2,
+          },
+          {
+            label: <>0&nbsp;femme - 0&nbsp;homme</>,
+            data: "-",
+            colspan: 2,
+          },
+        ]}
+      />
 
-              <AlternativeTableCell align="center">
-                Femmes <br />
-                <strong>-</strong>
-              </AlternativeTableCell>
-              <AlternativeTableCell align="center">
-                Hommes <br />
-                <strong>-</strong>
-              </AlternativeTableCell>
-            </AlternativeTableRow>
-            <AlternativeTableRow>
-              <AlternativeTableCell colSpan={2} align="center">
-                Salariés <br />
-                <strong>-</strong>
-              </AlternativeTableCell>
-            </AlternativeTableRow>
-          </>
-        }
+      <AlternativeTable
+        classeName="fr-mt-2w"
+        header={[
+          {
+            label: "Catégorie socioprofessionnelle",
+          },
+          {
+            label: "Tranche d’âge",
+          },
+          {
+            label: "Nombre de salariés",
+            subCols: [
+              {
+                label: "Femmes",
+              },
+              {
+                label: "Hommes",
+              },
+            ],
+          },
+        ]}
+        body={[
+          {
+            categoryLabel: "Ouvriers",
+            subRows: [
+              {
+                label: "Moins de 30 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 30 à 39 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 40 à 49 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "50 ans et plus",
+                cols: ["-", "-"],
+              },
+            ],
+          },
+          {
+            categoryLabel: "Plop",
+            subRows: [
+              {
+                label: "Moins de 30 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 30 à 39 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "De 40 à 49 ans",
+                cols: ["-", "-"],
+              },
+              {
+                label: "50 ans et plus",
+                cols: ["-", "-"],
+              },
+            ],
+          },
+        ]}
+        footer={[
+          {
+            label: "Ensemble des salariés",
+            data: "-",
+            colspan: 2,
+          },
+          {
+            label: <>0&nbsp;femme - 0&nbsp;homme</>,
+            data: "-",
+            colspan: 2,
+          },
+        ]}
       />
     </form>
   );
