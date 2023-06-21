@@ -14,7 +14,7 @@
   "editor.suggest.localityBonus": true,
   "editor.suggestSelection": "recentlyUsed",
   "editor.wordBasedSuggestions": false,
-  "editor.parameterHints.enabled": false,
+  "editor.parameterHints.enabled": true,
   "[typescript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
