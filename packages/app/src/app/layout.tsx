@@ -35,6 +35,38 @@ export const metadata = {
   },
 };
 
+const description =
+  "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
+
+export const metadata = {
+  metadataBase: new URL(config.host),
+  description,
+  title: {
+    template: "Egapro - %s",
+    default: "Egapro",
+  },
+  openGraph: {
+    title: {
+      template: "Egapro - %s",
+      default: "Egapro",
+    },
+    description,
+  },
+};
+
+declare module "@codegouvfr/react-dsfr/next-appdir" {
+  interface RegisterLink {
+    Link: typeof Link;
+  }
+}
+
+declare module "@codegouvfr/react-dsfr/gdpr" {
+  interface RegisterGdprServices {
+    egapro: true;
+    matomo: never;
+  }
+}
+
 const RootLayout = ({ children }: PropsWithChildren) => (
   <html
     lang="fr"
