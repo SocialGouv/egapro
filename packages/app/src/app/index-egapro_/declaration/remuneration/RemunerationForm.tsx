@@ -4,11 +4,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -27,7 +29,7 @@ const formSchema = z
     déclarationCalculCSP: z.boolean().optional(),
     motifNonCalculabilité: z.string().optional(),
   })
-  .superRefine(({ estCalculable, déclarationCalculCSP, motifNonCalculabilité: motifNC }, ctx) => {
+  .superRefine(({ estCalculable, déclarationCalculCSP, motifNonCalculabilité }, ctx) => {
     if (estCalculable === "non" && déclarationCalculCSP !== true) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -36,11 +38,11 @@ const formSchema = z
       });
     }
 
-    if (déclarationCalculCSP === true && !motifNC) {
+    if (déclarationCalculCSP === true && !motifNonCalculabilité) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Le motif de non calculabilité est obligatoire",
-        path: ["motifNC"],
+        path: ["motifNonCalculabilité"],
       });
     }
   });
@@ -56,7 +58,7 @@ const formatData = (data: FormType): DeclarationFormState["rémunérations"] => 
   let result;
 
   if (data.estCalculable === "non") {
-    result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNC");
+    result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNonCalculabilité");
   } else if (data.mode === "csp") {
     result = pick(data, "estCalculable", "mode");
   } else if (data.cse === "oui") {
@@ -109,104 +111,109 @@ export const RemunerationForm = () => {
 
         <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 
-        {estCalculable === "non" && (
-          <>
-            <Checkbox
-              options={[
-                {
-                  label:
-                    "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
-                  nativeInputProps: {
-                    ...register("déclarationCalculCSP"),
-                  },
-                },
-              ]}
-              state={errors.déclarationCalculCSP ? "error" : "default"}
-              stateRelatedMessage={errors.déclarationCalculCSP?.message}
-            />
-
-            {déclarationCalculCSP && (
-              <Select
-                label="Précision du motif de non calculabilité de l'indicateur"
-                nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                state={errors.motifNonCalculabilité ? "error" : "default"}
-                stateRelatedMessage={errors.motifNonCalculabilité?.message}
-              >
-                <option value="" disabled hidden>
-                  Selectionnez une option
-                </option>
-                <option value="egvi40pcet">Effectif des groupes valides inférieur à 40% de l'effectif total</option>
-              </Select>
-            )}
-          </>
-        )}
-        {estCalculable === "oui" && (
-          <>
-            <RadioButtons
-              legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
-              options={[
-                {
-                  label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-                  nativeInputProps: {
-                    value: "niveau_branche",
-                    ...register("mode"),
-                  },
-                },
-                {
-                  label:
-                    "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-                  nativeInputProps: {
-                    value: "niveau_autre",
-                    ...register("mode"),
-                  },
-                },
-                {
-                  label: "Par catégorie socio-professionnelle",
-                  nativeInputProps: {
-                    value: "csp",
-                    ...register("mode"),
-                  },
-                },
-              ]}
-            />
-
-            {mode !== "csp" && (
-              <>
-                <RadioButtons
-                  legend="Un CSE a-t-il été mis en place ?"
-                  options={[
-                    {
-                      label: "Oui",
-                      nativeInputProps: {
-                        value: "oui",
-                        ...register("cse"),
-                      },
+        <ClientOnly fallback={<SkeletonForm fields={2} />}>
+          {estCalculable === "non" && (
+            <>
+              <Checkbox
+                options={[
+                  {
+                    label:
+                      "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
+                    nativeInputProps: {
+                      ...register("déclarationCalculCSP"),
                     },
-                    {
-                      label: "Non",
-                      nativeInputProps: {
-                        value: "non",
-                        ...register("cse"),
-                      },
+                  },
+                ]}
+                state={errors.déclarationCalculCSP ? "error" : "default"}
+                stateRelatedMessage={errors.déclarationCalculCSP?.message}
+              />
+
+              {déclarationCalculCSP && (
+                <Select
+                  label="Précision du motif de non calculabilité de l'indicateur"
+                  nativeSelectProps={{ ...register("motifNonCalculabilité") }}
+                  state={errors.motifNonCalculabilité ? "error" : "default"}
+                  stateRelatedMessage={errors.motifNonCalculabilité?.message}
+                >
+                  <option value="" disabled hidden>
+                    Selectionnez une option
+                  </option>
+                  <option value="egvi40pcet">Effectif des groupes valides inférieur à 40% de l'effectif total</option>
+                </Select>
+              )}
+            </>
+          )}
+        </ClientOnly>
+        <ClientOnly fallback={<SkeletonForm fields={2} />}>
+          {estCalculable === "oui" && (
+            <>
+              <RadioButtons
+                legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
+                options={[
+                  {
+                    label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
+                    nativeInputProps: {
+                      value: "niveau_branche",
+                      ...register("mode"),
                     },
-                  ]}
-                  orientation="horizontal"
-                />
-                {cse === "oui" && (
-                  <Input
-                    label="Date de consultation du CSE pour le choix de cette modalité de calcul"
-                    nativeInputProps={{
-                      type: "date",
-                      ...register("dateConsultationCSE"),
-                    }}
-                    state={errors.dateConsultationCSE ? "error" : "default"}
-                    stateRelatedMessage={errors.dateConsultationCSE?.message}
+                  },
+                  {
+                    label:
+                      "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
+                    nativeInputProps: {
+                      value: "niveau_autre",
+                      ...register("mode"),
+                    },
+                  },
+                  {
+                    label: "Par catégorie socio-professionnelle",
+                    nativeInputProps: {
+                      value: "csp",
+                      ...register("mode"),
+                    },
+                  },
+                ]}
+              />
+
+              {mode !== "csp" && (
+                <>
+                  <RadioButtons
+                    legend="Un CSE a-t-il été mis en place ?"
+                    options={[
+                      {
+                        label: "Oui",
+                        nativeInputProps: {
+                          value: "oui",
+                          ...register("cse"),
+                        },
+                      },
+                      {
+                        label: "Non",
+                        nativeInputProps: {
+                          value: "non",
+                          ...register("cse"),
+                        },
+                      },
+                    ]}
+                    orientation="horizontal"
                   />
-                )}
-              </>
-            )}
-          </>
-        )}
+                  {cse === "oui" && (
+                    <Input
+                      label="Date de consultation du CSE pour le choix de cette modalité de calcul"
+                      nativeInputProps={{
+                        type: "date",
+                        ...register("dateConsultationCSE"),
+                      }}
+                      state={errors.dateConsultationCSE ? "error" : "default"}
+                      stateRelatedMessage={errors.dateConsultationCSE?.message}
+                    />
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </ClientOnly>
+
         <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
           <ButtonAsLink href={`${config.base_declaration_url}/periode-reference`} variant="secondary">
             Précédent
