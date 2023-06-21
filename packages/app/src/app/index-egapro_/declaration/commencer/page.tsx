@@ -1,13 +1,52 @@
+import { monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { getEgaproServerSession } from "@api/core-domain/infra/auth/getEgaproServerSession";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import Link from "next/link";
 
 import { SirenYearForm } from "./SirenYearForm";
 
-const CommencerPage = () => {
+const title = "Commencer";
+
+export const metadata = {
+  title,
+  openGraph: {
+    title,
+  },
+};
+
+const CommencerPage = async () => {
+  const session = await getEgaproServerSession();
+
+  const monCompteProHost = monCompteProProvider.issuer;
+
+  console.log("session.user.tokenApiV1:", session.user.tokenApiV1);
+
+  if (!session.user.companies.length) {
+    return (
+      <Alert
+        severity="warning"
+        className={fr.cx("fr-mb-4w")}
+        title="Aucune entreprise rattachée"
+        description={
+          <>
+            Nous n'avons trouvé aucune entreprise à laquelle votre compte ({session.user.email}) est rattaché. Si vous
+            pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement depuis{" "}
+            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+              votre espace MonComptePro
+            </Link>
+            .<br />
+            Une fois la demande validée par MonComptePro, vous pourrez continuer votre déclaration.
+          </>
+        }
+      />
+    );
+  }
+
   return (
     <>
-      <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={3} title="Commencer" />
+      <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={3} title={title} />
 
       <Alert
         severity="info"
