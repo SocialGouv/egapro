@@ -1,4 +1,3 @@
-import { CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 const title = "Simulateur Index Egapro";
@@ -19,7 +18,7 @@ export const metadata = {
 
 const SimuFunnelLayout = ({ children }: PropsWithChildren) => {
   // stepper
-  return <CenteredContainer>{children}</CenteredContainer>;
+  return <>{children}</>;
 };
 
 export default SimuFunnelLayout;
