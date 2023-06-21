@@ -33,6 +33,7 @@ app:
   ingress:
     paths:
       - /
+      - /api/auth(/|$)(.*)
       - /index-egapro/recherche(/|$)(.*)
     annotations:
       ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
