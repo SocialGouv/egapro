@@ -5,7 +5,9 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
 import { zodDateSchema, zodPositiveIntegerSchema, zodRadioInputSchema } from "@common/utils/form";
+import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -42,7 +44,7 @@ type FormType = z.infer<typeof formSchema>;
  */
 const formatData = (data: FormType): DeclarationFormState["périodeRéférence"] => {
   if (data.périodeSuffisante === "non") {
-    return pick(data, "périodeSuffisante") as DeclarationFormState["périodeRéférence"]; // Fix TS pick incorrect guess. In this case, périodeSuffisante is always "non", and is a correct type.
+    return pick(data, "périodeSuffisante") as DeclarationFormState["périodeRéférence"]; // To fix TS pick incorrect guess. In this case, périodeSuffisante is always "non", and is a correct type.
   } else {
     return pick(
       { ...data, effectifTotal: Number(data.effectifTotal) },
@@ -118,32 +120,34 @@ export const PeriodeReferenceForm = () => {
           name="périodeSuffisante"
         />
 
-        {périodeSuffisante === "oui" && (
-          <>
-            <Input
-              label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
-              nativeInputProps={{
-                type: "date",
-                ...register("finPériodeRéférence"),
-              }}
-              state={errors.finPériodeRéférence ? "error" : "default"}
-              stateRelatedMessage={errors.finPériodeRéférence?.message}
-            />
-            <Button className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
-              Sélectionner la fin de l'année civile
-            </Button>
-            <Input
-              label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique)"
-              nativeInputProps={{
-                type: "number",
-                min: 1,
-                ...register("effectifTotal"),
-              }}
-              state={errors.effectifTotal ? "error" : "default"}
-              stateRelatedMessage={errors.effectifTotal?.message}
-            />
-          </>
-        )}
+        <ClientOnly fallback={<SkeletonForm fields={2} />}>
+          {périodeSuffisante === "oui" && (
+            <>
+              <Input
+                label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
+                nativeInputProps={{
+                  type: "date",
+                  ...register("finPériodeRéférence"),
+                }}
+                state={errors.finPériodeRéférence ? "error" : "default"}
+                stateRelatedMessage={errors.finPériodeRéférence?.message}
+              />
+              <Button className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
+                Sélectionner la fin de l'année civile
+              </Button>
+              <Input
+                label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique)"
+                nativeInputProps={{
+                  type: "number",
+                  min: 1,
+                  ...register("effectifTotal"),
+                }}
+                state={errors.effectifTotal ? "error" : "default"}
+                stateRelatedMessage={errors.effectifTotal?.message}
+              />
+            </>
+          )}
+        </ClientOnly>
         <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
           <ButtonAsLink href={`${config.base_declaration_url}/entreprise`} variant="secondary">
             Précédent
