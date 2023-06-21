@@ -1,18 +1,21 @@
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
-const formDataDefault: DeclarationFormState = {
-  _metadata: {
-    status: "creation",
-  },
-};
+type State = { formData: DeclarationFormState };
 
-type FormActions = {
+type Actions = {
   resetFormData: () => void;
   saveFormData: (data: Partial<DeclarationFormState>) => void;
   savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) => void;
+};
+
+const formDataDefault: State["formData"] = {
+  _metadata: {
+    status: "creation",
+  },
 };
 
 /**
@@ -21,20 +24,23 @@ type FormActions = {
  * @example
  * ```ts
  * const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
+ * const commencer = useDeclarationFormManager(state => state.formData.commencer);
  * ```
  */
-export const useDeclarationFormManager = create<FormActions & { formData: DeclarationFormState }>()(
+export const useDeclarationFormManager = create<Actions & State>()(
   persist(
-    (set, get) => ({
-      formData: formDataDefault,
-      saveFormData: (data: Partial<DeclarationFormState>) => set({ formData: { ...get().formData, ...data } }),
-      savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
-        set({ formData: { ...get().formData, [page]: data } }),
-      resetFormData: () =>
-        set({
-          formData: formDataDefault,
-        }),
-    }),
+    immer(
+      devtools((set, get) => ({
+        formData: formDataDefault,
+        saveFormData: (data: Partial<DeclarationFormState>) => set({ formData: { ...get().formData, ...data } }),
+        savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
+          set({ formData: { ...get().formData, [page]: data } }),
+        resetFormData: () =>
+          set({
+            formData: formDataDefault,
+          }),
+      })),
+    ),
     {
       name: "ega-declaration-form",
       storage: createJSONStorage(() => sessionStorage),
