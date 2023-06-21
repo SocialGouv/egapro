@@ -33,17 +33,6 @@ const DeclarationHeader = () => {
   return (
     <Header
       brandTop={<BrandTop />}
-      quickAccessItems={
-        [
-          // {
-          //   iconId: "fr-icon-lock-fill",
-          //   text: user ? "Se déconnecter" : "Se connecter",
-          //   buttonProps: {
-          //     onClick: user ? logout : () => redirect("/_index-egapro/declaration/email"),
-          //   },
-          // },
-        ]
-      }
       serviceTagline="Index de l’égalité professionnelle et représentation équilibrée femmes – hommes"
       serviceTitle="Egapro"
       homeLinkProps={homeLinkProps}

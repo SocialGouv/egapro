@@ -1,9 +1,9 @@
-import { monCompteProProvider } from "@api/core-domain/infra/auth/config";
-import { getEgaproServerSession } from "@api/core-domain/infra/auth/getEgaproServerSession";
+import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 
 import { SirenYearForm } from "./SirenYearForm";
 
@@ -17,7 +17,8 @@ export const metadata = {
 };
 
 const CommencerPage = async () => {
-  const session = await getEgaproServerSession();
+  const session = await getServerSession(authConfig);
+  if (!session) return null;
 
   const monCompteProHost = monCompteProProvider.issuer;
 

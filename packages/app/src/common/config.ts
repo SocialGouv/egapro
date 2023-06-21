@@ -18,7 +18,7 @@ export const config = {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
   },
   get base_declaration_url() {
-    return "/_index-egapro/declaration";
+    return "/index-egapro_/declaration";
   },
   matomo: {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),

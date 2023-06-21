@@ -15,6 +15,7 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -67,6 +68,8 @@ export const SirenYearForm = () => {
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
 
+  const session = useSession();
+
   const sirenStorage = formData?.commencer?.entrepriseDéclarante?.siren || "";
   const annéeIndicateursStorage =
     formData?.commencer?.annéeIndicateurs === undefined ? "" : String(formData?.commencer?.annéeIndicateurs);
@@ -101,11 +104,22 @@ export const SirenYearForm = () => {
     }
   }, [errors.siren, setGlobalMessage, siren]);
 
+  if (!session || !session.data) return null;
+
   /**
    * Check if declaration exists, merge it with state if any and save the state the in local storage.
    */
-  const prepareDataWithExistingDeclaration = async (siren: string, year: number): Promise<DeclarationFormState> => {
-    const previousDeclaration = await fetchDeclaration(siren, year, { throwErrorOn404: false });
+  const prepareDataWithExistingDeclaration = async (
+    siren: string,
+    year: number,
+    tokenV1: string,
+  ): Promise<DeclarationFormState> => {
+    const previousDeclaration = await fetchDeclaration(siren, year, {
+      headers: {
+        "API-KEY": tokenV1,
+      },
+      throwErrorOn404: false,
+    });
 
     if (previousDeclaration) {
       const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
@@ -135,7 +149,7 @@ export const SirenYearForm = () => {
       : `${config.base_declaration_url}/entreprise`;
 
   const saveAndExit = async ({ annéeIndicateurs: year, siren }: FormType) => {
-    const newData = await prepareDataWithExistingDeclaration(siren, Number(year));
+    const newData = await prepareDataWithExistingDeclaration(siren, Number(year), session.data.user.tokenApiV1);
 
     saveFormData(newData);
 
