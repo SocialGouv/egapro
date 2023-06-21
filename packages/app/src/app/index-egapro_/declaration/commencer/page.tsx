@@ -22,8 +22,6 @@ const CommencerPage = async () => {
 
   const monCompteProHost = monCompteProProvider.issuer;
 
-  console.log("session.user.tokenApiV1:", session.user.tokenApiV1);
-
   if (!session.user.companies.length) {
     return (
       <Alert

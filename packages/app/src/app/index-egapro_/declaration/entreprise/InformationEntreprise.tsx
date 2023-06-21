@@ -9,6 +9,7 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@components/next13/RecapSection";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { fetcher, useConfig } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type Entreprise } from "@services/form/declaration/entreprise";
@@ -24,31 +25,31 @@ const formatAdresse = (entreprise?: Entreprise) => {
 };
 
 export const InformationEntreprise = () => {
-  const { formData } = useDeclarationFormManager();
+  const commencer = useDeclarationFormManager(state => state.formData.commencer);
 
   const {
     config: { nafLabelFromCode },
   } = useConfig(fetcher);
 
-  const address = formatAdresse(formData.commencer?.entrepriseDéclarante);
+  const address = formatAdresse(commencer?.entrepriseDéclarante);
 
   return (
     <RecapSection>
       <RecapSectionTitle>Informations de l’entreprise déclarante</RecapSectionTitle>
-      <ClientOnly>
+      <ClientOnly fallback={<SkeletonForm fields={5} />}>
         <RecapSectionItems>
           <RecapSectionItem>
             <RecapSectionItemLegend>Raison sociale</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</RecapSectionItemContent>
+            <RecapSectionItemContent>{commencer?.entrepriseDéclarante?.raisonSociale}</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Numéro Siren</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.commencer?.entrepriseDéclarante?.siren}</RecapSectionItemContent>
+            <RecapSectionItemContent>{commencer?.entrepriseDéclarante?.siren}</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Code NAF</RecapSectionItemLegend>
             <RecapSectionItemContent>
-              {nafLabelFromCode(formData.commencer?.entrepriseDéclarante?.codeNaf)}
+              {nafLabelFromCode(commencer?.entrepriseDéclarante?.codeNaf)}
             </RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>

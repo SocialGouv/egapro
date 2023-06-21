@@ -28,8 +28,6 @@ const formSchema = z
     siren: zodSirenSchema,
   })
   .superRefine(async ({ annéeIndicateurs: year, siren }, ctx) => {
-    console.log("dans superRefine");
-
     if (siren && siren.length === 9) {
       try {
         await checkSiren(siren, Number(year));
