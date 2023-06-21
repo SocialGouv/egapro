@@ -10,6 +10,7 @@ import { config } from "@common/config";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
+import { ReactHookFormDebug } from "@components/utils/debug/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +25,7 @@ const formSchema = z
   .object({
     estCalculable: zodRadioInputSchema,
     mode: z.string().optional(), // No check is necessary as the value is from select options.
-    cse: zodRadioInputSchema.optional(),
+    cse: zodRadioInputSchema.nullish(),
     dateConsultationCSE: zodDateSchema.optional(),
     déclarationCalculCSP: z.boolean().optional(),
     motifNonCalculabilité: z.string().optional(),
@@ -107,7 +108,7 @@ export const RemunerationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* <ReactHookFormDebug /> */}
+        <ReactHookFormDebug />
 
         <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 

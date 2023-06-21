@@ -66,18 +66,19 @@ export const RemunerationCoefficientForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ReactHookFormDebug />
 
-        <table>
-          <thead>
-            <tr>
-              <th>% moins de 30 ans</th>
-              <th>% de 30 à 39 ans</th>
-              <th>% de 40 à 49 ans</th>
-              <th>% 50 ans et plus</th>
-            </tr>
-          </thead>
-          <tbody>
-            {catégories?.map((catégorie, index) => (
-              <tr key={index}>
+        {catégories?.map((catégorie, index) => (
+          <table key={index} className={fr.cx("fr-mb-4w")}>
+            <caption>{`Coefficient ${index + 1}`}</caption>
+            <thead>
+              <tr>
+                <th>% moins de 30 ans</th>
+                <th>% de 30 à 39 ans</th>
+                <th>% de 40 à 49 ans</th>
+                <th>% 50 ans et plus</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
                 <td>
                   <Input
                     label=""
@@ -143,9 +144,9 @@ export const RemunerationCoefficientForm = () => {
                   />
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        ))}
 
         <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
           <ButtonAsLink href={`${config.base_declaration_url}/remuneration`} variant="secondary">

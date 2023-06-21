@@ -2,50 +2,38 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import Select from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
-import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
-import { RadioOuiNon } from "@components/next13/RadioOuiNon";
+import { zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { ClientOnly } from "@components/ClientOnly";
+import { ReactHookFormDebug } from "@components/utils/debug/ReactHookFormDebug";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { get } from "lodash";
 import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z
-  .object({
-    estCalculable: zodRadioInputSchema,
-    modalité: z.string().optional(), // No check is necessary as the value is from select options.
-    cse: zodRadioInputSchema.optional(),
-    dateConsultationCSE: zodDateSchema.optional(),
-    déclarationCalculCSP: z.boolean().optional(),
-    motifNC: z.string().optional(),
-  })
-  .superRefine(({ estCalculable, déclarationCalculCSP, motifNC }, ctx) => {
-    if (estCalculable === "non" && déclarationCalculCSP !== true) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La confirmation du calcul par CSP est obligatoire",
-        path: ["déclarationCalculCSP"],
-      });
-    }
-
-    if (déclarationCalculCSP === true && !motifNC) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Le motif de non calculabilité est obligatoire",
-        path: ["motifNC"],
-      });
-    }
-  });
+const formSchema = z.object({
+  catégories: z.array(
+    z.object({
+      tranches: z.object({
+        ":29": zodRealPositiveIntegerSchema,
+        "30:39": zodRealPositiveIntegerSchema,
+        "40:49": zodRealPositiveIntegerSchema,
+        "50:": zodRealPositiveIntegerSchema,
+      }),
+    }),
+  ),
+});
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
-1;
+
+const defaultTranch = [{ tranches: { ":29": 0, "30:39": 0, "40:49": 0, "50:": 0 } }];
 
 export const RemunerationCSPForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
@@ -54,137 +42,129 @@ export const RemunerationCSPForm = () => {
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      estCalculable: formData.rémunérations?.estCalculable,
-      modalité: formData.rémunérations?.mode,
-      cse: formData.rémunérations?.cse,
-      dateConsultationCSE: formData.rémunérations?.dateConsultationCSE,
-      déclarationCalculCSP: formData.rémunérations?.déclarationCalculCSP,
-      motifNC: formData.rémunérations?.motifNonCalculabilité,
+      catégories: formData.rémunérationsCoefficients?.catégories,
     },
   });
 
   const {
+    control,
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = methods;
 
-  const estCalculable = watch("estCalculable");
-  const modalité = watch("modalité");
-  const cse = watch("cse");
-  const déclarationCalculCSP = watch("déclarationCalculCSP");
+  const {
+    fields: catégories,
+    append,
+    remove,
+  } = useFieldArray({
+    control, // control props comes from useForm (optional: if you are using FormContext)
+    name: "catégories",
+  });
+
+  console.log("errors", errors);
 
   const onSubmit = async (data: FormType) => {
-    // savePageData("rémunérationsCSP", data as DeclarationFormState["rémunérationsCSP"]);
+    console.log("dans on submit:");
+    savePageData("rémunérationsCoefficients", data as DeclarationFormState["rémunérationsCoefficients"]);
     router.push(`${config.base_declaration_url}/remuneration-resultat`);
   };
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* <ReactHookFormDebug /> */}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <ClientOnly fallback={<SkeletonForm fields={2} />}>
+          <ReactHookFormDebug />
 
-        <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
+          {catégories?.map((catégorie, index) => (
+            <>
+              <h3>{`Coefficient ${index + 1}`}</h3>
+              <Button onClick={() => remove(index)}>Supprimer</Button>
 
-        {estCalculable === "non" && (
-          <>
-            <Checkbox
-              options={[
-                {
-                  label:
-                    "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
-                  nativeInputProps: {
-                    ...register("déclarationCalculCSP"),
-                  },
-                },
-              ]}
-              state={errors.déclarationCalculCSP ? "error" : "default"}
-              stateRelatedMessage={errors.déclarationCalculCSP?.message}
-            />
+              <table key={catégorie.id} className={fr.cx("fr-mb-4w")}>
+                <caption>{`Coefficient ${index + 1}`}</caption>
+                <thead>
+                  <tr>
+                    <th>% moins de 30 ans</th>
+                    <th>% de 30 à 39 ans</th>
+                    <th>% de 40 à 49 ans</th>
+                    <th>% 50 ans et plus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <Input
+                        label=""
+                        nativeInputProps={{
+                          type: "number",
+                          min: 0,
+                          ...register(`catégories.${index}.tranches.:29`, { valueAsNumber: true }),
+                        }}
+                        state={get(errors, `catégories.${index}.tranches.:29`) ? "error" : "default"}
+                        stateRelatedMessage={
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          get(errors, `catégories.${index}.tranches.:29`)?.message
+                        }
+                      />
+                    </td>
+                    <td>
+                      <Input
+                        label=""
+                        nativeInputProps={{
+                          type: "number",
+                          min: 0,
+                          ...register(`catégories.${index}.tranches.30:39`, { valueAsNumber: true }),
+                        }}
+                        state={get(errors, `catégories.${index}.tranches.30:39`) ? "error" : "default"}
+                        stateRelatedMessage={
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          get(errors, `catégories.${index}.tranches.30:39`)?.message
+                        }
+                      />
+                    </td>
+                    <td>
+                      <Input
+                        label=""
+                        nativeInputProps={{
+                          type: "number",
+                          min: 0,
+                          ...register(`catégories.${index}.tranches.40:49`, { valueAsNumber: true }),
+                        }}
+                        state={get(errors, `catégories.${index}.tranches.40:49`) ? "error" : "default"}
+                        stateRelatedMessage={
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          get(errors, `catégories.${index}.tranches.40:49`)?.message
+                        }
+                      />
+                    </td>
+                    <td>
+                      <Input
+                        label=""
+                        nativeInputProps={{
+                          type: "number",
+                          min: 0,
+                          ...register(`catégories.${index}.tranches.50:`, { valueAsNumber: true }),
+                        }}
+                        state={get(errors, `catégories.${index}.tranches.50:`) ? "error" : "default"}
+                        stateRelatedMessage={
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          get(errors, `catégories.${index}.tranches.50:`)?.message
+                        }
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          ))}
+        </ClientOnly>
+        <Button onClick={() => append(defaultTranch)}>Ajouter un coefficient</Button>
 
-            {déclarationCalculCSP && (
-              <Select
-                label="Précision du motif de non calculabilité de l'indicateur"
-                nativeSelectProps={{ ...register("motifNC") }}
-                state={errors.motifNC ? "error" : "default"}
-                stateRelatedMessage={errors.motifNC?.message}
-              >
-                <option value="" disabled hidden>
-                  Selectionnez une option
-                </option>
-                <option value="egvi40pcet">Effectif des groupes valides inférieur à 40% de l'effectif total</option>
-              </Select>
-            )}
-          </>
-        )}
-        {estCalculable === "oui" && (
-          <>
-            <RadioButtons
-              legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
-              options={[
-                {
-                  label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-                  nativeInputProps: {
-                    value: "niveau_branche",
-                    ...register("modalité"),
-                  },
-                },
-                {
-                  label:
-                    "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-                  nativeInputProps: {
-                    value: "niveau_autre",
-                    ...register("modalité"),
-                  },
-                },
-                {
-                  label: "Par catégorie socio-professionnelle",
-                  nativeInputProps: {
-                    value: "csp",
-                    ...register("modalité"),
-                  },
-                },
-              ]}
-            />
-
-            {modalité !== "csp" && (
-              <>
-                <RadioButtons
-                  legend="Un CSE a-t-il été mis en place ?"
-                  options={[
-                    {
-                      label: "Oui",
-                      nativeInputProps: {
-                        value: "oui",
-                        ...register("cse"),
-                      },
-                    },
-                    {
-                      label: "Non",
-                      nativeInputProps: {
-                        value: "non",
-                        ...register("cse"),
-                      },
-                    },
-                  ]}
-                  orientation="horizontal"
-                />
-                {cse === "oui" && (
-                  <Input
-                    label="Date de consultation du CSE pour le choix de cette modalité de calcul"
-                    nativeInputProps={{
-                      type: "date",
-                      ...register("dateConsultationCSE"),
-                    }}
-                    state={errors.dateConsultationCSE ? "error" : "default"}
-                    stateRelatedMessage={errors.dateConsultationCSE?.message}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
         <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
           <ButtonAsLink href={`${config.base_declaration_url}/remuneration`} variant="secondary">
             Précédent

@@ -1,4 +1,5 @@
 import { formatZodErrors } from "@common/utils/debug";
+import { ClientOnly } from "@components/ClientOnly";
 import { useFormContext } from "react-hook-form";
 
 export const ReactHookFormDebug = () => {
@@ -9,8 +10,10 @@ export const ReactHookFormDebug = () => {
 
   return (
     <>
-      <pre>{JSON.stringify(watch(), null, 2)}</pre>
-      <pre>{formatZodErrors(errors)}</pre>
+      <ClientOnly>
+        <pre>{JSON.stringify(watch(), null, 2)}</pre>
+        <pre>{formatZodErrors(errors)}</pre>
+      </ClientOnly>
     </>
   );
 };
