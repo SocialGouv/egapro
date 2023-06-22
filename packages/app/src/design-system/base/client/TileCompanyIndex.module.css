@@ -1,7 +1,10 @@
 .list {
     list-style: none;
-
     text-align: left;
+}
+
+.list li {
+    line-height: 1.25rem;
 }
 
 @media (min-width: 1024px) {

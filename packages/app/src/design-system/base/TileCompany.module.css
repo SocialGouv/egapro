@@ -103,7 +103,6 @@
     font-weight: 400;
     padding: 1rem;
     font-size: 0.875rem;
-    white-space: nowrap;
 }
 
 .tableBodyRowCol:not(:last-child) {
