@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
-import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodDateSchema, zodRadioInputSchema, zodRealPositiveIntegerSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -22,7 +22,7 @@ const formSchema = z
   .object({
     annéeIndicateurs: z.number(), // No need to control the values, since it not saved but useful for zod validation.
     finPériodeRéférence: zodDateSchema,
-    effectifTotal: z.number().positive().int(),
+    effectifTotal: zodRealPositiveIntegerSchema,
     périodeSuffisante: zodRadioInputSchema,
   })
   .superRefine(({ annéeIndicateurs, finPériodeRéférence: finPériode }, ctx) => {
