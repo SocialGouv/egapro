@@ -98,14 +98,14 @@ export const CommencerForm = () => {
     }
 
     // Otherwise, this is a creation, so we start with fetching firm's data.
-    const entreprise = await memoizedFetchSiren(siren, Number(year));
+    const entreprise = await memoizedFetchSiren(siren, year);
 
     return {
       _metadata: {
         status: "creation" as const,
       },
       commencer: {
-        annéeIndicateurs: Number(year),
+        annéeIndicateurs: year,
         entrepriseDéclarante: {
           ...buildEntreprise(entreprise),
         },
