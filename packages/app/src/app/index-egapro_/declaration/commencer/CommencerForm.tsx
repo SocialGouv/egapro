@@ -9,7 +9,7 @@ import { zodPositiveIntegerSchema, zodSirenSchema } from "@common/utils/form";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { GlobalMessage, type Message } from "@components/next13/GlobalMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { checkSiren, memoizedFetchSiren } from "@services/apiClient";
+import { memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -22,37 +22,10 @@ import { z } from "zod";
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 
-const formSchema = z
-  .object({
-    annéeIndicateurs: zodPositiveIntegerSchema, // No control needed because this is a select with options we provide.
-    siren: zodSirenSchema,
-  })
-  .superRefine(async ({ annéeIndicateurs: year, siren }, ctx) => {
-    if (siren && siren.length === 9) {
-      try {
-        await checkSiren(siren, Number(year));
-      } catch (error: unknown) {
-        console.error("error", error);
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: error instanceof Error ? error.message : "Le Siren est invalide.",
-          path: ["siren"],
-        });
-        return z.NEVER; // Abort early when there is an error in the first API call.
-      }
-      // TODO: uncomment when useUser is available
-      // try {
-      //   await ownersForSiren(siren);
-      // } catch (error: unknown) {
-      //   console.error("error", error);
-      //   ctx.addIssue({
-      //     code: z.ZodIssueCode.custom,
-      //     message: OWNER_ERROR,
-      //     path: ["siren"],
-      //   });
-      // }
-    }
-  });
+const formSchema = z.object({
+  annéeIndicateurs: zodPositiveIntegerSchema, // No control needed because this is a select with options we provide.
+  siren: zodSirenSchema,
+});
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
@@ -60,8 +33,7 @@ type FormType = z.infer<typeof formSchema>;
 const buildConfirmMessage = ({ siren, year }: { siren: string; year: string }) =>
   `Vous avez commencé une déclaration avec le Siren ${siren} pour l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
-export const SirenYearForm = () => {
-  // useUserNext13();
+export const CommencerForm = () => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);

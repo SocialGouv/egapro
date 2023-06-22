@@ -5,7 +5,7 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
-import { SirenYearForm } from "./SirenYearForm";
+import { CommencerForm } from "./CommencerForm";
 
 const title = "Commencer";
 
@@ -60,7 +60,7 @@ const CommencerPage = async () => {
         }
         className={fr.cx("fr-mb-4w")}
       />
-      <SirenYearForm />
+      <CommencerForm />
     </>
   );
 };
