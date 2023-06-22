@@ -2,13 +2,13 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
-import { zodDateSchema, zodPositiveIntegerSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -20,9 +20,9 @@ import { z } from "zod";
 
 const formSchema = z
   .object({
-    annéeIndicateurs: z.number(),
+    annéeIndicateurs: z.number(), // No need to control the values, since it not saved but useful for zod validation.
     finPériodeRéférence: zodDateSchema,
-    effectifTotal: zodPositiveIntegerSchema,
+    effectifTotal: z.number().positive().int(),
     périodeSuffisante: zodRadioInputSchema,
   })
   .superRefine(({ annéeIndicateurs, finPériodeRéférence: finPériode }, ctx) => {
@@ -47,7 +47,7 @@ const formatData = (data: FormType): DeclarationFormState["périodeRéférence"]
     return pick(data, "périodeSuffisante") as DeclarationFormState["périodeRéférence"]; // To fix TS pick incorrect guess. In this case, périodeSuffisante is always "non", and is a correct type.
   } else {
     return pick(
-      { ...data, effectifTotal: Number(data.effectifTotal) },
+      { ...data, effectifTotal: data.effectifTotal },
       "périodeSuffisante",
       "finPériodeRéférence",
       "effectifTotal",
@@ -61,18 +61,7 @@ export const PeriodeReferenceForm = () => {
 
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      annéeIndicateurs: formData.commencer?.annéeIndicateurs,
-      finPériodeRéférence:
-        formData.périodeRéférence?.périodeSuffisante === "oui" && formData?.périodeRéférence?.finPériodeRéférence
-          ? formData.périodeRéférence.finPériodeRéférence
-          : "",
-      effectifTotal:
-        formData.périodeRéférence?.périodeSuffisante === "oui" && formData.périodeRéférence?.effectifTotal
-          ? String(formData.périodeRéférence?.effectifTotal)
-          : "",
-      périodeSuffisante: formData.périodeRéférence?.périodeSuffisante,
-    },
+    defaultValues: { ...formData.commencer, ...formData.périodeRéférence },
   });
 
   const {
@@ -80,7 +69,7 @@ export const PeriodeReferenceForm = () => {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isValid },
   } = methods;
 
   const périodeSuffisante = watch("périodeSuffisante");
@@ -90,6 +79,8 @@ export const PeriodeReferenceForm = () => {
 
     router.push(`${config.base_declaration_url}/remuneration`);
   };
+
+  console.log("errors", errors);
 
   const selectEndOfYear = () => {
     if (formData?.commencer?.annéeIndicateurs) {
@@ -111,7 +102,7 @@ export const PeriodeReferenceForm = () => {
           nativeInputProps={{
             title: "Saisissez le nom ou le Siren d'une entreprise",
             readOnly: true,
-            ...register("annéeIndicateurs"),
+            ...register("annéeIndicateurs", { valueAsNumber: true }),
           }}
         />
 
@@ -140,7 +131,7 @@ export const PeriodeReferenceForm = () => {
                 nativeInputProps={{
                   type: "number",
                   min: 1,
-                  ...register("effectifTotal"),
+                  ...register("effectifTotal", { valueAsNumber: true }),
                 }}
                 state={errors.effectifTotal ? "error" : "default"}
                 stateRelatedMessage={errors.effectifTotal?.message}
@@ -148,13 +139,25 @@ export const PeriodeReferenceForm = () => {
             </>
           )}
         </ClientOnly>
-        <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-          <ButtonAsLink href={`${config.base_declaration_url}/entreprise`} variant="secondary">
-            Précédent
-          </ButtonAsLink>
 
-          <Button>Suivant</Button>
-        </div>
+        <ButtonsGroup
+          inlineLayoutWhen="sm and up"
+          buttons={[
+            {
+              children: "Précédent",
+              priority: "secondary",
+              onClick: () => router.push(`${config.base_declaration_url}/entreprise`),
+              type: "button",
+            },
+            {
+              children: "Suivant",
+              type: "submit",
+              nativeButtonProps: {
+                disabled: !isValid,
+              },
+            },
+          ]}
+        />
       </form>
     </FormProvider>
   );

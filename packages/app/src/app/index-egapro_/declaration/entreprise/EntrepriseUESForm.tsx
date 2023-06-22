@@ -1,10 +1,10 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { config } from "@common/config";
-import { ButtonAsLink } from "@design-system";
+import { ClientOnly } from "@components/ClientOnly";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -69,39 +69,52 @@ export const EntrepriseUESForm = () => {
         orientation="horizontal"
       />
 
-      <RadioButtons
-        legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
-        options={[
-          {
-            label: "De 50 à 250 inclus",
-            nativeInputProps: {
-              value: "50:250",
-              ...register("tranche"),
+      <ClientOnly fallback={<SkeletonForm fields={2} />}>
+        <RadioButtons
+          legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
+          options={[
+            {
+              label: "De 50 à 250 inclus",
+              nativeInputProps: {
+                value: "50:250",
+                ...register("tranche"),
+              },
             },
+            {
+              label: "De 251 à 999 inclus",
+              nativeInputProps: {
+                value: "251:999",
+                ...register("tranche"),
+              },
+            },
+            {
+              label: "De 1000 à plus",
+              nativeInputProps: {
+                value: "1000:",
+                ...register("tranche"),
+              },
+            },
+          ]}
+        />
+      </ClientOnly>
+      <ButtonsGroup
+        inlineLayoutWhen="sm and up"
+        buttons={[
+          {
+            children: "Précédent",
+            priority: "secondary",
+            onClick: () => router.push(`${config.base_declaration_url}/commencer`),
+            type: "button",
           },
           {
-            label: "De 251 à 999 inclus",
-            nativeInputProps: {
-              value: "251:999",
-              ...register("tranche"),
-            },
-          },
-          {
-            label: "De 1000 à plus",
-            nativeInputProps: {
-              value: "1000:",
-              ...register("tranche"),
+            children: "Suivant",
+            type: "submit",
+            nativeButtonProps: {
+              disabled: !isValid,
             },
           },
         ]}
       />
-      <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-        <ButtonAsLink href={`${config.base_declaration_url}/commencer`} variant="secondary">
-          Précédent
-        </ButtonAsLink>
-
-        <Button disabled={!isValid}>Suivant</Button>
-      </div>
     </form>
   );
 };

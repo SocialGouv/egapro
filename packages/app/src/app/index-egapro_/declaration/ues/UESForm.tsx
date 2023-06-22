@@ -1,11 +1,9 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { config } from "@common/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
 import { type PropsWithChildren, useState } from "react";
 import { type Message, useForm } from "react-hook-form";
@@ -20,7 +18,7 @@ const formSchema = z.object({
 type FormType = z.infer<typeof formSchema>;
 
 export const UESForm = (props: PropsWithChildren) => {
-  const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
+  const { formData, savePageData, resetFormData } = useDeclarationFormManager();
   const [globalMessage, setGlobalMessage] = useState<Message | undefined>(undefined);
   const router = useRouter();
 
@@ -40,20 +38,31 @@ export const UESForm = (props: PropsWithChildren) => {
   const type = watch("type");
 
   const onSubmit = async (data: FormType) => {
-    saveFormData({ entreprise: data as DeclarationFormState["entreprise"] });
+    // savePageData("ues", data as DeclarationFormState["ues"]);
 
-    if (type === "ues") router.push(`${config.base_declaration_url}/ues`);
-    else router.push(`${config.base_declaration_url}/periode-reference`);
+    router.push(`${config.base_declaration_url}/remuneration`);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-        <Button type="reset" priority="secondary" disabled={isDirty}>
-          Réinitialiser
-        </Button>
-        <Button disabled={!isValid}>Suivant</Button>
-      </div>
+      <ButtonsGroup
+        inlineLayoutWhen="sm and up"
+        buttons={[
+          {
+            children: "Précédent",
+            priority: "secondary",
+            onClick: () => router.push(`${config.base_declaration_url}/entreprise`),
+            type: "button",
+          },
+          {
+            children: "Suivant",
+            type: "submit",
+            nativeButtonProps: {
+              disabled: !isValid,
+            },
+          },
+        ]}
+      />
     </form>
   );
 };

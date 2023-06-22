@@ -191,13 +191,6 @@ export const CommencerForm = () => {
           ))}
         </Select>
 
-        {/* <div style={{ display: "flex", gap: 10 }}>
-          <Button type="reset" priority="secondary" disabled={!sirenStorage} onClick={confirmResetFormData}>
-            Réinitialiser
-          </Button>
-          <Button disabled={!isValid}>Suivant</Button>
-        </div> */}
-
         <ButtonsGroup
           inlineLayoutWhen="sm and up"
           buttons={[
