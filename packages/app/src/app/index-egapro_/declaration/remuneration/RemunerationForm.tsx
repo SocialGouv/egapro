@@ -1,7 +1,6 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -10,9 +9,7 @@ import { config } from "@common/config";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
-import { ReactHookFormDebug } from "@components/utils/debug/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -30,21 +27,40 @@ const formSchema = z
     déclarationCalculCSP: z.boolean().optional(),
     motifNonCalculabilité: z.string().optional(),
   })
-  .superRefine(({ estCalculable, déclarationCalculCSP, motifNonCalculabilité }, ctx) => {
-    if (estCalculable === "non" && déclarationCalculCSP !== true) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La confirmation du calcul par CSP est obligatoire",
-        path: ["déclarationCalculCSP"],
-      });
-    }
-
-    if (déclarationCalculCSP === true && !motifNonCalculabilité) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Le motif de non calculabilité est obligatoire",
-        path: ["motifNonCalculabilité"],
-      });
+  .superRefine(({ cse, estCalculable, déclarationCalculCSP, mode, motifNonCalculabilité }, ctx) => {
+    switch (estCalculable) {
+      case "non": {
+        if (!déclarationCalculCSP) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "La confirmation du calcul par CSP est obligatoire",
+            path: ["déclarationCalculCSP"],
+          });
+        } else if (déclarationCalculCSP === true && !motifNonCalculabilité) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le motif de non calculabilité est obligatoire",
+            path: ["motifNonCalculabilité"],
+          });
+        }
+        break;
+      }
+      case "oui": {
+        if (!mode) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le mode de calcul est obligatoire",
+            path: ["mode"],
+          });
+        } else if (mode !== "csp" && !cse) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Obligatoire",
+            path: ["cse"],
+          });
+        }
+        break;
+      }
     }
   });
 
@@ -77,21 +93,14 @@ export const RemunerationForm = () => {
 
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      estCalculable: formData.rémunérations?.estCalculable,
-      mode: formData.rémunérations?.mode,
-      cse: formData.rémunérations?.cse,
-      dateConsultationCSE: formData.rémunérations?.dateConsultationCSE,
-      déclarationCalculCSP: formData.rémunérations?.déclarationCalculCSP,
-      motifNonCalculabilité: formData.rémunérations?.motifNonCalculabilité,
-    },
+    defaultValues: formData.rémunérations,
   });
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isValid },
   } = methods;
 
   const estCalculable = watch("estCalculable");
@@ -102,13 +111,21 @@ export const RemunerationForm = () => {
   const onSubmit = async (data: FormType) => {
     savePageData("rémunérations", formatData(data));
 
+    if (estCalculable === "non") {
+      if (formData.entreprise?.tranche === "50:250") {
+        return router.push(`${config.base_declaration_url}/augmentations-et-promotions`);
+      } else {
+        return router.push(`${config.base_declaration_url}/augmentations`);
+      }
+    }
+
     router.push(`${config.base_declaration_url}/${mode === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`);
   };
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <ReactHookFormDebug />
+        {/* <ReactHookFormDebug /> */}
 
         <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 
@@ -215,13 +232,24 @@ export const RemunerationForm = () => {
           )}
         </ClientOnly>
 
-        <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-          <ButtonAsLink href={`${config.base_declaration_url}/periode-reference`} variant="secondary">
-            Précédent
-          </ButtonAsLink>
-
-          <Button>Suivant</Button>
-        </div>
+        <ButtonsGroup
+          inlineLayoutWhen="sm and up"
+          buttons={[
+            {
+              children: "Précédent",
+              priority: "secondary",
+              onClick: () => router.push(`${config.base_declaration_url}/periode-reference`),
+              type: "button",
+            },
+            {
+              children: "Suivant",
+              type: "submit",
+              nativeButtonProps: {
+                disabled: !isValid,
+              },
+            },
+          ]}
+        />
       </form>
     </FormProvider>
   );
