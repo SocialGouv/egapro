@@ -1,10 +1,14 @@
+"use client";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { AlternativeTable, CenteredContainer, Container, Link } from "@design-system";
+import { AlternativeTable, CenteredContainer, Link } from "@design-system";
 
 export const EffectifsForm = () => {
+  const handleSubmit = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+  };
   return (
-    <form noValidate>
+    <form noValidate onSubmit={handleSubmit}>
       <CenteredContainer>
         <RadioButtons
           legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)"
@@ -49,94 +53,19 @@ export const EffectifsForm = () => {
             </>
           }
         />
-      </CenteredContainer>
-
-      <Container>
-        {/* <AlternativeTable
-        classeName="fr-mt-2w"
-        header={[
-          {
-            label: "Catégorie socioprofessionnelle",
-          },
-          {
-            label: "Tranche d’âge",
-          },
-          {
-            label: "Nombre de salariés",
-            subCols: [
-              {
-                label: "Femmes",
-              },
-              {
-                label: "Hommes",
-              },
-            ],
-          },
-        ]}
-        body={[
-          {
-            categoryLabel: "Ouvriers",
-            subRows: [
-              {
-                label: "Moins de 30 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "De 30 à 39 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "De 40 à 49 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "50 ans et plus",
-                cols: ["-", "-"],
-              },
-            ],
-          },
-          {
-            categoryLabel: "Plop",
-            subRows: [
-              {
-                label: "Moins de 30 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "De 30 à 39 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "De 40 à 49 ans",
-                cols: ["-", "-"],
-              },
-              {
-                label: "50 ans et plus",
-                cols: ["-", "-"],
-              },
-            ],
-          },
-        ]}
-        footer={[
-          {
-            label: "Ensemble des salariés",
-            data: "-",
-          },
-          {
-            label: <>0&nbsp;femme - 0&nbsp;homme</>,
-            data: "-",
-          },
-        ]}
-      /> */}
 
         <AlternativeTable
           classeName="fr-mt-2w"
           header={[
             {
               label: "Catégorie socioprofessionnelle",
+              informations:
+                "Les caractéristiques individuelles (CSP, âge) sont appréciées au dernier jour de la période de référence ou au dernier jour de présence du salarié dans l’entreprise.",
             },
             {
               label: "Tranche d’âge",
+              informations:
+                "Les caractéristiques individuelles (CSP, âge) sont appréciées au dernier jour de la période de référence ou au dernier jour de présence du salarié dans l’entreprise.",
             },
             {
               label: "Nombre de salariés",
@@ -149,23 +78,6 @@ export const EffectifsForm = () => {
                 },
               ],
             },
-            {
-              label: "Effectifs valides",
-            },
-            {
-              label: "Rémunération annuelle brute azEJAZen azjeojazeo",
-              subCols: [
-                {
-                  label: "Femmes",
-                },
-                {
-                  label: "Hommes",
-                },
-              ],
-            },
-            {
-              label: "Écart pondoazkeoazk",
-            },
           ]}
           body={[
             {
@@ -173,40 +85,103 @@ export const EffectifsForm = () => {
               subRows: [
                 {
                   label: "Moins de 30 ans",
-                  cols: [<strong key="coucou">14</strong>, 78],
-                  mergedLabel: "Bonjour lorem upsosoda lzejazeklazkeola",
+                  cols: ["-", "-"],
                 },
                 {
                   label: "De 30 à 39 ans",
-                  cols: ["-", "-", "-", "-", "-", "-"],
+                  cols: ["-", "-"],
                 },
                 {
                   label: "De 40 à 49 ans",
-                  cols: ["-", "-", "-", "-", "-", "-"],
+                  cols: ["-", "-"],
                 },
                 {
                   label: "50 ans et plus",
-                  mergedLabel: "Aucun effectifs mes tototo",
+                  cols: ["-", "-"],
                 },
               ],
             },
             {
               categoryLabel: "Employés",
-              mergedLabel: "Rien pour cette catégorie",
+              subRows: [
+                {
+                  label: "Moins de 30 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 30 à 39 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 40 à 49 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "50 ans et plus",
+                  cols: ["-", "-"],
+                },
+              ],
+            },
+            {
+              categoryLabel: "Techniciens et agents de maîtrise",
+              subRows: [
+                {
+                  label: "Moins de 30 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 30 à 39 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 40 à 49 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "50 ans et plus",
+                  cols: ["-", "-"],
+                },
+              ],
+            },
+            {
+              categoryLabel: "Ingénieurs et cadres",
+              subRows: [
+                {
+                  label: "Moins de 30 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 30 à 39 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "De 40 à 49 ans",
+                  cols: ["-", "-"],
+                },
+                {
+                  label: "50 ans et plus",
+                  cols: ["-", "-"],
+                },
+              ],
             },
           ]}
           footer={[
             {
               label: "Ensemble des salariés",
               data: "-",
+              colspan: 2,
             },
             {
-              label: <>0&nbsp;femme - 0&nbsp;homme</>,
+              label: `Femme`,
+              data: "-",
+            },
+            {
+              label: `Homme`,
               data: "-",
             },
           ]}
         />
-      </Container>
+      </CenteredContainer>
     </form>
   );
 };

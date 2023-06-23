@@ -6,8 +6,16 @@
     text-align: right !important;
 }
 
+.table {
+    overflow: auto;
+}
+
+.table table {
+    display: table;
+}
+
 .table tbody {
-    background-color: #fff !important;
+    background-color: var(--background-default-grey) !important;
 }
 
 .table tbody tr:nth-child(even),
@@ -27,6 +35,7 @@
 .table tbody th {
     padding: 0.75rem !important;
     border-left: 1px solid var(--border-default-grey) !important;
+    vertical-align: middle;
 }
 
 .table tbody td:last-child,
@@ -101,4 +110,51 @@
     left: 1rem;
     border-radius: 50%;
     color: var(--text-default-error);
+}
+
+.table-cell--with-informations {
+    position: relative;
+    cursor: pointer;
+}
+
+.table-cell--with-informations:hover {
+    background-color: var(--hover);
+}
+
+.table-cell--with-informations:active {
+    background-color: var(--active);
+}
+
+.modale-button {
+    margin-top: -2rem !important;
+    margin-bottom: -2rem !important;
+    transform: translateY(.25rem);
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.modale-button:hover,
+.modale-button:active {
+    background-color: transparent !important;
+}
+
+.modale-button::before {
+    margin: 0 !important;
+}
+
+.modale-button::after {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: transparent;
+    height: 100%;
+    width: 100%;
+}
+
+.modale {
+    font-weight: initial;
 }

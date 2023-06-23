@@ -1,6 +1,8 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import {
   type DetailedHTMLProps,
@@ -19,6 +21,7 @@ export type AlternativeTableCellProps = PropsWithChildren & {
   align?: "center" | "left" | "right";
   as?: `t${"d" | "h"}`;
   colSpan?: number;
+  informations?: ReactNode;
   rowSpan?: number;
   scope?: TableHeaderScope;
 };
@@ -30,35 +33,69 @@ export const AlternativeTableCell = ({
   colSpan,
   rowSpan,
   children,
-}: AlternativeTableCellProps) => (
-  <HtmlTag
-    className={cx(align === "center" && styles["text-align--center"], align === "right" && styles["text-align--right"])}
-    scope={scope}
-    colSpan={colSpan}
-    rowSpan={rowSpan}
-  >
-    {children}
-  </HtmlTag>
-);
+  informations,
+}: AlternativeTableCellProps) => {
+  const modal = createModal({
+    id: `modal${children ? `-${children.toString().toLowerCase().replace(/\s+/g, "-")}` : ""}`,
+    isOpenedByDefault: false,
+  });
+  return (
+    <HtmlTag
+      className={cx(
+        styles["table-cell"],
+        informations ? styles["table-cell--with-informations"] : undefined,
+        align === "center" && styles["text-align--center"],
+        align === "right" && styles["text-align--right"],
+      )}
+      scope={scope}
+      colSpan={colSpan}
+      rowSpan={rowSpan}
+    >
+      <div>{children}</div>
+      {informations && (
+        <>
+          <Button
+            nativeButtonProps={modal.buttonProps}
+            size="small"
+            iconId="fr-icon-information-fill"
+            priority="tertiary"
+            title="Label button"
+            className={styles["modale-button"]}
+          />
+          <modal.Component title={children} className={styles.modale}>
+            {informations}
+          </modal.Component>
+        </>
+      )}
+    </HtmlTag>
+  );
+};
 
 export const AlternativeTableRow = ({ children }: PropsWithChildren) => <tr>{children}</tr>;
 
 export interface AlternativeTableProps {
   body: AlternativeTableProps.BodyContent[];
   classeName?: CxArg;
-  footer?: AlternativeTableProps.Columns[];
+  footer?: AlternativeTableProps.ColumnsFooter[];
   header: AlternativeTableProps.Columns[];
 }
 
 export namespace AlternativeTableProps {
   export interface Columns {
-    data?: string;
+    informations?: ReactNode;
     label: ReactNode;
     subCols?: Array<Omit<Columns, "subCols">>;
   }
 
+  export interface ColumnsFooter {
+    colspan?: number;
+    data?: ReactNode;
+    label: ReactNode;
+  }
+
   export interface BodyContent {
     categoryLabel: ReactNode;
+    isDeletable?: boolean;
     mergedLabel?: ReactNode;
     subRows?: [SubRow, ...SubRow[]];
   }
@@ -74,12 +111,6 @@ export namespace AlternativeTableProps {
 
 function validateProps(props: AlternativeTableProps) {
   const maxCols = props.header.reduce((prev, curr) => prev + (curr.subCols?.length ?? 1), 0);
-  const footerCols = props.footer?.reduce((prev, curr) => prev + (curr.subCols?.length ?? 1), 0) ?? maxCols;
-
-  // footer validation
-  if (footerCols !== footerCols) {
-    throw new Error("Should have the same amount of columns on header and footer.");
-  }
 
   // body validation
   for (const row of props.body) {
@@ -100,7 +131,6 @@ function validateProps(props: AlternativeTableProps) {
 
   return {
     maxCols,
-    footerCols,
   };
 }
 
@@ -117,65 +147,6 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
     return null;
   }
 
-  // const getLargestSubColsLength = (arr: AlternativeTableProps.Columns[]) => {
-  //   let largestSubCols: unknown[] | string = [];
-
-  //   arr.map(item => {
-  //     if (item.subCols && Array.isArray(item.subCols) && item.subCols.length > largestSubCols.length) {
-  //       largestSubCols = item.subCols;
-  //     }
-  //   });
-
-  //   return largestSubCols.length;
-  // };
-
-  // const transformedColumnsData = (data: AlternativeTableProps.Columns[]) => {
-  //   type RowType = Array<{
-  //     colspan?: number;
-  //     data?: string;
-  //     label: ReactNode;
-  //     rowspan?: number;
-  //   }>;
-  //   const firstRow: RowType = [];
-  //   const secondRow: RowType = [];
-
-  //   data.map(item => {
-  //     if (item.subCols) {
-  //       firstRow.push({ label: item.label, colspan: item.subCols.length, data: item.data });
-  //       secondRow.push(...item.subCols.map(subItem => ({ label: subItem.label, data: subItem.data })));
-  //     } else {
-  //       firstRow.push({
-  //         label: item.label,
-  //         rowspan: getLargestSubColsLength(data),
-  //         colspan: item.colspan,
-  //         data: item.data,
-  //       });
-  //     }
-  //   });
-
-  //   return [firstRow, secondRow.flatMap(item => item)];
-  // };
-
-  // const transformedBodyData = (data: AlternativeTableProps.BodyContent[]) => {
-  //   return data.map(item => {
-  //     return item.subRows.map((subItem, index) => {
-  //       if (index === 0) {
-  //         return {
-  //           categoryLabel: item.categoryLabel,
-  //           label: subItem.label,
-  //           cols: subItem.cols,
-  //           colspan: item.colspan,
-  //         };
-  //       } else {
-  //         return {
-  //           label: subItem.label,
-  //           cols: subItem.cols,
-  //         };
-  //       }
-  //     });
-  //   });
-  // };
-
   return (
     <div className={cx(fr.cx("fr-table"), styles.table, classeName)}>
       <table>
@@ -189,6 +160,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                 colSpan={headerCol.subCols?.length ?? void 0}
                 scope={headerCol.subCols ? "colgroup" : "col"}
                 align="center"
+                informations={headerCol.informations}
               >
                 {headerCol.label}
               </AlternativeTableCell>
@@ -213,88 +185,64 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                   <AlternativeTableRow key={j}>
                     {j === 0 && (
                       <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
-                        {row.categoryLabel}
+                        <span>{row.categoryLabel}</span>
+                        {row.isDeletable && (
+                          <Button
+                            iconId="fr-icon-delete-fill"
+                            priority="tertiary"
+                            title="Label button"
+                            className={styles["delete-btn"]}
+                            size="small"
+                          />
+                        )}
                       </AlternativeTableCell>
                     )}
                     <AlternativeTableCell as="th" scope="row">
                       {subItem.label}
                     </AlternativeTableCell>
                     {subItem.cols?.map((col, k) => (
-                      <AlternativeTableCell key={k}>
+                      <AlternativeTableCell key={k} align="right">
                         <>{col}</>
                       </AlternativeTableCell>
                     ))}
                     {subItem.mergedLabel && (
-                      <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)}>
-                        {subItem.mergedLabel}
+                      <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)} align="center">
+                        <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
                       </AlternativeTableCell>
                     )}
                   </AlternativeTableRow>
                 ))
               ) : (
                 <AlternativeTableRow>
-                  <AlternativeTableCell as="th" scope="row">
+                  <AlternativeTableCell as="th" scope="rowgroup">
                     {row.categoryLabel}
                   </AlternativeTableCell>
-                  <AlternativeTableCell colSpan={maxCols - 1}>{row.mergedLabel}</AlternativeTableCell>
+                  <AlternativeTableCell colSpan={maxCols - 1} align="center">
+                    <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
+                  </AlternativeTableCell>
                 </AlternativeTableRow>
               )}
             </tbody>
           );
         })}
 
-        {/* {transformedBodyData(body).map((item, i) => {
-          return (
-            <tbody key={i}>
-              {item.map((subItem, j) => (
-                <AlternativeTableRow key={j}>
-                  {subItem.categoryLabel && (
-                    <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
-                      {subItem.categoryLabel}
-                    </AlternativeTableCell>
-                  )}
-                  <AlternativeTableCell as="th" scope="row" colSpan={subItem.colspan}>
-                    {subItem.label}
-                  </AlternativeTableCell>
-                  {subItem.cols.map((col, k) => (
-                    <AlternativeTableCell key={k}>
-                      <>{col}</>
-                    </AlternativeTableCell>
-                  ))}
-                </AlternativeTableRow>
-              ))}
-            </tbody>
-          );
-        })} */}
-
-        {/* {footer && (
+        {footer && (
           <tfoot>
-            {transformedColumnsData(footer).map((row, index) => (
-              <AlternativeTableRow key={index}>
-                {row.map((item, index) => (
-                  <AlternativeTableCell
-                    key={index}
-                    align="center"
-                    scope="col"
-                    as="td"
-                    rowSpan={item.rowspan}
-                    colSpan={item.colspan}
-                  >
+            <tr>
+              {footer.map((footerCol, index) => (
+                <AlternativeTableCell key={`td-footer-${index}`} colSpan={footerCol.colspan} align="center">
+                  <span className={cx(fr.cx(footerCol.data ? "fr-text--xs" : null))}>{footerCol.label}</span>
+                  {footerCol.data && (
                     <>
-                      <Text text={item.label} inline className={cx(item.data && "fr-text--xs")} />
-                      {item.data && (
-                        <>
-                          <br />
-                          <strong>{item.data}</strong>
-                        </>
-                      )}
+                      <br />
+                      <strong>{footerCol.data}</strong>
                     </>
-                  </AlternativeTableCell>
-                ))}
-              </AlternativeTableRow>
-            ))}
+                  )}
+                </AlternativeTableCell>
+              ))}
+            </tr>
           </tfoot>
-        )} */}
+        )}
       </table>
     </div>
   );
