@@ -52,7 +52,7 @@ export const createSteps = {
     ),
   publication: z
     .object({
-      publishDate: z.string().optional(),
+      publishDate: z.string().nonempty("La date de publication est obligatoire"),
     })
     .and(
       z
@@ -78,6 +78,12 @@ export const createRepresentationEquilibreeDTO = createSteps.commencer
   .and(createSteps.periodeReference)
   .and(createSteps.ecartsCadres)
   .and(createSteps.ecartsMembres)
-  .and(createSteps.publication);
+  .and(
+    z
+      .object({
+        publishDate: z.never().optional(),
+      })
+      .or(createSteps.publication),
+  );
 
 export type CreateRepresentationEquilibreeDTO = ClearObject<z.infer<typeof createRepresentationEquilibreeDTO>>;
