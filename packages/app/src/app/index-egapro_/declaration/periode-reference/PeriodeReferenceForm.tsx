@@ -31,7 +31,7 @@ const formSchema = z
         code: z.ZodIssueCode.custom,
         message:
           "L'année de la date de fin de la période doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
-        path: ["finPériode"],
+        path: ["finPériodeRéférence"],
       });
     }
   });
@@ -153,7 +153,7 @@ export const PeriodeReferenceForm = () => {
               children: "Suivant",
               type: "submit",
               nativeButtonProps: {
-                disabled: !isValid,
+                // disabled: !isValid,
               },
             },
           ]}
