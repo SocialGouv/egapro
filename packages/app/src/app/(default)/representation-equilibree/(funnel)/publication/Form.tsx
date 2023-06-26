@@ -22,15 +22,6 @@ import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeq
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
   .superRefine(({ endOfPeriod, publishDate }, ctx) => {
-    if (!publishDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La date de publication est obligatoire",
-        path: ["publishDate"],
-      });
-
-      return z.NEVER;
-    }
     if (isBefore(parseISO(publishDate), parseISO(endOfPeriod))) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -158,9 +149,7 @@ export const PublicationForm = () => {
           state={errors.publishModalities && "error"}
           stateRelatedMessage={errors.publishModalities?.message}
           style={{ display: hasWebsite === false ? "block" : "none" }}
-          nativeTextAreaProps={{
-            ...register("publishModalities", { disabled: hasWebsite }),
-          }}
+          nativeTextAreaProps={register("publishModalities", { disabled: hasWebsite })}
         />
         <ButtonsGroup
           inlineLayoutWhen="sm and up"

@@ -68,7 +68,7 @@ const RootLayout = ({ children }: PropsWithChildren) => (
     </head>
     <body>
       <FeatureStatusProvider>
-        <SessionProvider basePath="/apiv2/auth" refetchOnWindowFocus>
+        <SessionProvider basePath="/api/auth" refetchOnWindowFocus>
           <DsfrProvider>
             <IsomorphicSkeletonTheme
               baseColor="var(--background-contrast-grey)"
