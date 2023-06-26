@@ -20,7 +20,7 @@ const CommencerPage = async () => {
   if (!session) return null;
   const monCompteProHost = monCompteProProvider.issuer;
 
-  if (!session.user.companies.length) {
+  if (!(session.user.companies.length || session.user.staff)) {
     return (
       <Alert
         severity="warning"

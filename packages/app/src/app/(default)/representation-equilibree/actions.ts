@@ -22,8 +22,9 @@ export async function getRepresentationEquilibree(siren: string, year: number) {
     throw new AppError("No session found.");
   }
 
-  if (!session.user.companies.some(company => company.siren === siren) || !session.user.staff) {
-    throw new AppError("Not authorized to fetch this siren.");
+  const isOwner = session.user.companies.some(company => company.siren === siren);
+  if (!(isOwner || session.user.staff)) {
+    throw new AppError("Not authorized to fetch repeq for this siren.");
   }
 
   // handle default errors
@@ -43,8 +44,9 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
     throw new AppError("No session found.");
   }
 
-  if (!session.user.companies.some(company => company.siren === repEq.siren) || !session.user.staff) {
-    throw new AppError("Not authorized to fetch this siren.");
+  const isOwner = session.user.companies.some(company => company.siren === repEq.siren);
+  if (!(isOwner || session.user.staff)) {
+    throw new AppError("Not authorized to save repeq for this siren.");
   }
 
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
@@ -67,6 +69,12 @@ export async function sendRepresentationEquilibreeReceipt(siren: string, year: n
   if (!session?.user) {
     throw new AppError("No session found.");
   }
+
+  const isOwner = session.user.companies.some(company => company.siren === siren);
+  if (!(isOwner || session.user.staff)) {
+    throw new AppError("Not authorized to send repEq receipt for this siren.");
+  }
+
   const useCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
     globalMailerService,

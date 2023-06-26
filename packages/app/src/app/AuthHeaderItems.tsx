@@ -14,7 +14,7 @@ export const UserHeaderItem = () => {
         <HeaderQuickAccessItem
           key="hqai-authenticated-user"
           quickAccessItem={{
-            iconId: "fr-icon-account-fill",
+            iconId: session.data.user.staff ? "fr-icon-github-line" : "fr-icon-account-fill",
             text: `${session.data.user.email}${session.data.user.staff ? " (staff)" : ""}`,
             linkProps: { href: "/index-egapro/tableauDeBord/mon-profil" },
           }}

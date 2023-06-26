@@ -33,6 +33,7 @@ app:
   ingress:
     paths:
       - /
+      - /api/auth(/|$)(.*)
       - /index-egapro/recherche(/|$)(.*)
     annotations:
       ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
@@ -46,6 +47,8 @@ app:
         name: "egapro-secret"
     - secretRef:
         name: "moncomptepro"
+    - secretRef:
+        name: github-oauth
   vars:
     POSTGRES_HOST: "$(PGHOST)"
     POSTGRES_DB: "$(PGDATABASE)"
@@ -56,7 +59,7 @@ app:
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
     EGAPRO_ENV: "{{ .Values.global.env }}"
-    NEXTAUTH_URL: "https://{{ .Values.global.host }}/apiv2/auth"
+    NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
 
 declaration:
   ~chart: app
@@ -175,7 +178,7 @@ jobs:
         buildArgs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
           NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
-          NEXTAUTH_URL: "https://{{ .Values.global.host }}/apiv2/auth"
+          NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
           NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
           EGAPRO_ENV: "{{ .Values.global.env }}"
 

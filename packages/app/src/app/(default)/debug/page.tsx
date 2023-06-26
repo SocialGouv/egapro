@@ -1,4 +1,4 @@
-import { authBaseConfig } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { config } from "@common/config";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { cloneDeep } from "lodash";
@@ -8,7 +8,7 @@ import { getServerSession } from "next-auth";
 export const revalidate = 0;
 
 const DebugPage = async () => {
-  const session = await getServerSession(authBaseConfig);
+  const session = await getServerSession(authConfig);
 
   if (!(process.env.NODE_ENV === "development" || session?.user.staff)) {
     notFound();
