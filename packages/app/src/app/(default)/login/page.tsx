@@ -5,6 +5,7 @@ import { Box, CenteredContainer } from "@design-system";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
+import { GithubLogin } from "./GithubLogin";
 import { MonCompteProLogin } from "./MonCompteProLogin";
 
 const title = "Connexion";
@@ -28,6 +29,7 @@ const signinErrors: Record<string, string> = {
   EmailSignin: "L'email n'a pas pu être envoyé.",
   CredentialsSignin: "Connexion échouée. Veuillez vérifier vos identifiants.",
   SessionRequired: "Merci de vous connecter pour accéder à cette page.",
+  AccessDenied: "Vous n'êtes pas staff.",
   default: "Impossible de se connecter.",
 };
 
@@ -80,6 +82,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
           />
           <Box style={{ textAlign: "center" }} mt="2w">
             <MonCompteProLogin callbackUrl={callbackUrl} />
+            <GithubLogin callbackUrl={callbackUrl} />
           </Box>
         </>
       )}

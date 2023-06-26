@@ -58,17 +58,13 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
           label="Nom du déclarant"
           state={errors.lastname && "error"}
           stateRelatedMessage={errors.lastname?.message}
-          nativeInputProps={{
-            ...register("lastname"),
-          }}
+          nativeInputProps={register("lastname")}
         />
         <Input
           label="Prénom du déclarant"
           state={errors.firstname && "error"}
           stateRelatedMessage={errors.firstname?.message}
-          nativeInputProps={{
-            ...register("firstname"),
-          }}
+          nativeInputProps={register("firstname")}
         />
         <Input
           label="Numéro de téléphone"
@@ -82,11 +78,13 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
         />
         <Input
           label="Email"
-          hintText="Saisi lors de l'authentification"
+          hintText={session.user.staff ? "Modifiable en tant que staff" : "Saisi lors de l'authentification"}
+          state={errors.email && "error"}
+          stateRelatedMessage={errors.email?.message}
           nativeInputProps={{
             ...register("email"),
             type: "email",
-            readOnly: true,
+            readOnly: !session.user.staff,
           }}
         />
         <Checkbox
@@ -103,9 +101,7 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
                   .
                 </>
               ),
-              nativeInputProps: {
-                ...register("gdpr"),
-              },
+              nativeInputProps: register("gdpr"),
             },
           ]}
           state={errors.gdpr && "error"}

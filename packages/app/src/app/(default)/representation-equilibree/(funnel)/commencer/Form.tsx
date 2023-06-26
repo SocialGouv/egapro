@@ -1,6 +1,7 @@
 "use client";
 
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
@@ -30,15 +31,17 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   const companies = session.user.companies;
 
-  const schemaWithOwnedSiren = createSteps.commencer.superRefine((val, ctx) => {
-    if (!companies.some(company => company.siren === val.siren)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: OWNER_ERROR,
-        path: ["siren"],
+  const schemaWithOwnedSiren = session.user.staff
+    ? createSteps.commencer
+    : createSteps.commencer.superRefine((val, ctx) => {
+        if (!companies.some(company => company.siren === val.siren)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: OWNER_ERROR,
+            path: ["siren"],
+          });
+        }
       });
-    }
-  });
 
   const {
     register,
@@ -115,11 +118,9 @@ export const CommencerForm = ({ session }: { session: Session }) => {
             label="Année au titre de laquelle les écarts de représentation sont calculés"
             state={errors.year && "error"}
             stateRelatedMessage={errors.year?.message}
-            nativeSelectProps={{
-              ...register("year", {
-                valueAsNumber: true,
-              }),
-            }}
+            nativeSelectProps={register("year", {
+              valueAsNumber: true,
+            })}
           >
             <option value="" disabled>
               Sélectionnez une année
@@ -130,24 +131,31 @@ export const CommencerForm = ({ session }: { session: Session }) => {
               </option>
             ))}
           </Select>
-          <Select
-            label="Entreprise"
-            state={errors.siren && "error"}
-            stateRelatedMessage={errors.siren?.message}
-            nativeSelectProps={{
-              ...register("siren"),
-            }}
-          >
-            <option value="" disabled>
-              Sélectionnez une entreprise
-            </option>
-            {sortBy(companies, "siren").map(company => (
-              <option key={company.siren} value={company.siren}>
-                {company.siren}
-                {company.label ? ` (${company.label})` : ""}
+          {session.user.staff ? (
+            <Input
+              label="Siren entreprise (staff)"
+              state={errors.siren && "error"}
+              stateRelatedMessage={errors.siren?.message}
+              nativeInputProps={register("siren")}
+            />
+          ) : (
+            <Select
+              label="Entreprise"
+              state={errors.siren && "error"}
+              stateRelatedMessage={errors.siren?.message}
+              nativeSelectProps={register("siren")}
+            >
+              <option value="" disabled>
+                Sélectionnez une entreprise
               </option>
-            ))}
-          </Select>
+              {sortBy(companies, "siren").map(company => (
+                <option key={company.siren} value={company.siren}>
+                  {company.siren}
+                  {company.label ? ` (${company.label})` : ""}
+                </option>
+              ))}
+            </Select>
+          )}
           <ButtonsGroup
             inlineLayoutWhen="sm and up"
             buttons={[
