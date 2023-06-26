@@ -1,13 +1,11 @@
-import { egaproNextAuthAdapter } from "@api/core-domain/infra/auth/EgaproNextAuthAdapter";
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
-import { globalMailerService } from "@api/core-domain/infra/mail";
-import { ownershipRepo } from "@api/core-domain/repo";
 import { config } from "@common/config";
-import { UnexpectedError } from "@common/shared-domain";
-import { Email } from "@common/shared-domain/domain/valueObjects";
+import { Octokit } from "@octokit/rest";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT } from "next-auth/jwt";
-import EmailProvider from "next-auth/providers/email";
+import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
+
+import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
 declare module "next-auth" {
   interface Session {
@@ -37,43 +35,74 @@ export const authConfig: AuthOptions = {
   secret: config.api.security.auth.secret,
   pages: {
     signIn: "/login",
+    error: "/error?source=login",
   },
   debug: config.env === "dev",
-  // need a very basic adapter for EmailProvider
+  // need a very basic adapter to consider every login as signup
   adapter: egaproNextAuthAdapter,
   // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
   },
   providers: [
-    EmailProvider({
-      async sendVerificationRequest({ identifier: to, url }) {
-        await globalMailerService.init();
-        const [, rejected] = await globalMailerService.sendMail("login_sendVerificationUrl", { to }, url);
-        if (rejected.length) {
-          throw new UnexpectedError(`Cannot send verification request to email(s) : ${rejected.join(", ")}`);
-        }
+    GithubProvider({
+      ...config.api.security.github,
+      authorization: {
+        url: "https://github.com/login/oauth/authorize",
+        params: { scope: "user:email read:user read:org" },
       },
     }),
+    // GithubOAuth2ProxyProvider(config.api.security.github),
     monCompteProProvider,
   ],
   callbacks: {
+    async signIn({ account, profile }) {
+      if (account?.provider !== "github") {
+        return true;
+      }
+
+      const githubProfile = profile as unknown as GithubProfile;
+      if (!account.access_token || !githubProfile?.login) {
+        return false;
+      }
+
+      const octokit = new Octokit({
+        auth: account.access_token,
+      });
+
+      try {
+        const membership = await octokit.teams.getMembershipForUserInOrg({
+          org: "SocialGouv",
+          team_slug: "egapro",
+          username: githubProfile.login,
+        });
+
+        return membership.data.state === "active";
+      } catch {
+        return false;
+      }
+    },
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
-    async jwt({ token, profile, trigger }) {
+    async jwt({ token, profile, trigger, account }) {
       if (trigger !== "signUp") return token;
-      if (profile?.email) {
-        token.companies = profile.organizations.map(orga => ({ siren: orga.siret.substring(0, 9), label: orga.label }));
-        token.staff = config.api.staff.includes(profile.email);
-        token.firstname = profile.given_name ?? void 0;
-        token.lastname = profile.family_name ?? void 0;
-        token.phoneNumber = profile.phone_number ?? void 0;
+      if (account?.provider === "github") {
+        const githubProfile = profile as unknown as GithubProfile;
+        token.staff = true;
+        token.companies = [];
+        const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
+        token.firstname = firstname;
+        token.lastname = lastname;
       } else {
-        token.companies = (await ownershipRepo.getAllSirenByEmail(new Email(token.email))).map(siren => ({
-          siren,
-          label: null,
-        }));
-        token.staff = config.api.staff.includes(token.email);
+        token.companies =
+          profile?.organizations.map(orga => ({
+            siren: orga.siret.substring(0, 9),
+            label: orga.label,
+          })) ?? [];
+        token.staff = false;
+        token.firstname = profile?.given_name ?? void 0;
+        token.lastname = profile?.family_name ?? void 0;
+        token.phoneNumber = profile?.phone_number ?? void 0;
       }
       return token;
     },

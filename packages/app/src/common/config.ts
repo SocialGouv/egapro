@@ -27,7 +27,7 @@ export const config = {
     return {
       apiV2: {
         enabled: this.env === "dev",
-        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration", "/apiv2/public"],
+        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration", "/api/auth"],
       },
       declaV2: this.env === "dev",
     };
@@ -55,6 +55,10 @@ export const config = {
         clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
         appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, true),
+      },
+      github: {
+        clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
+        clientSecret: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_SECRET, ""),
       },
       auth: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
