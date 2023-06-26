@@ -100,11 +100,7 @@ export const CommencerForm = () => {
 
   const saveAndGoNext = async ({ annéeIndicateurs, siren }: FormType) => {
     // Synchronize the data with declaration if any.
-    const newData = await prepareDataWithExistingDeclaration(
-      siren,
-      Number(annéeIndicateurs),
-      session.data.user.tokenApiV1,
-    );
+    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, session.data.user.tokenApiV1);
 
     // Save in storage (savePageData is not used because we want to save commencer page and _metadata).
     saveFormData(newData);
