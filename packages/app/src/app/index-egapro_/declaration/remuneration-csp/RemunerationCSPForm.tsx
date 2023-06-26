@@ -1,25 +1,24 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
 import { zodRealPositiveIntegerSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
-import { ReactHookFormDebug } from "@components/utils/debug/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { ButtonAsLink } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { get } from "lodash";
 import { useRouter } from "next/navigation";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
   catégories: z.array(
     z.object({
+      nom: z.string(),
       tranches: z.object({
         ":29": zodRealPositiveIntegerSchema,
         "30:39": zodRealPositiveIntegerSchema,
@@ -33,7 +32,22 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const defaultTranch = [{ tranches: { ":29": 0, "30:39": 0, "40:49": 0, "50:": 0 } }];
+// TODO: add an enum for the CSP
+const labelCSP = {
+  ouv: "Ouvriers",
+  emp: "Employés",
+  tam: "Techniciens et agents de maîtrise",
+  ic: "Ingénieurs et cadres",
+};
+
+const defaultTranch = { ":29": 0, "30:39": 0, "40:49": 0, "50:": 0 };
+
+const defaultCategoriesCSP = [
+  { nom: "ouv", tranches: { ...defaultTranch } },
+  { nom: "emp", tranches: { ...defaultTranch } },
+  { nom: "tam", tranches: { ...defaultTranch } },
+  { nom: "ic", tranches: { ...defaultTranch } },
+];
 
 export const RemunerationCSPForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
@@ -41,32 +55,22 @@ export const RemunerationCSPForm = () => {
 
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      catégories: formData.rémunérationsCoefficients?.catégories,
-    },
+    defaultValues: formData.rémunérationsCSP || { catégories: defaultCategoriesCSP },
   });
 
   const {
-    control,
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
+    watch,
   } = methods;
-
-  const {
-    fields: catégories,
-    append,
-    remove,
-  } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
-    name: "catégories",
-  });
 
   console.log("errors", errors);
 
+  const catégories = watch("catégories");
+
   const onSubmit = async (data: FormType) => {
-    console.log("dans on submit:");
-    savePageData("rémunérationsCoefficients", data as DeclarationFormState["rémunérationsCoefficients"]);
+    savePageData("rémunérationsCSP", data as DeclarationFormState["rémunérationsCSP"]);
     router.push(`${config.base_declaration_url}/remuneration-resultat`);
   };
 
@@ -74,15 +78,14 @@ export const RemunerationCSPForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
-          {catégories?.map((catégorie, index) => (
+          {catégories.map((catégorie, index) => (
             <>
-              <h3>{`Coefficient ${index + 1}`}</h3>
-              <Button onClick={() => remove(index)}>Supprimer</Button>
-
-              <table key={catégorie.id} className={fr.cx("fr-mb-4w")}>
-                <caption>{`Coefficient ${index + 1}`}</caption>
+              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+              {/* @ts-ignore */}
+              <h3>{labelCSP[catégorie.nom]}</h3>
+              <table key={catégorie.nom} className={fr.cx("fr-mb-4w")}>
                 <thead>
                   <tr>
                     <th>% moins de 30 ans</th>
@@ -163,15 +166,25 @@ export const RemunerationCSPForm = () => {
             </>
           ))}
         </ClientOnly>
-        <Button onClick={() => append(defaultTranch)}>Ajouter un coefficient</Button>
 
-        <div style={{ display: "flex", gap: 10 }} className={fr.cx("fr-mt-4w")}>
-          <ButtonAsLink href={`${config.base_declaration_url}/remuneration`} variant="secondary">
-            Précédent
-          </ButtonAsLink>
-
-          <Button>Suivant</Button>
-        </div>
+        <ButtonsGroup
+          inlineLayoutWhen="sm and up"
+          buttons={[
+            {
+              children: "Précédent",
+              priority: "secondary",
+              onClick: () => router.push(`${config.base_declaration_url}/remuneration`),
+              type: "button",
+            },
+            {
+              children: "Suivant",
+              type: "submit",
+              nativeButtonProps: {
+                disabled: !isValid,
+              },
+            },
+          ]}
+        />
       </form>
     </FormProvider>
   );

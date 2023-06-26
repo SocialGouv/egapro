@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { nextPageAfterRemuneration } from "./nextPageAfterRemuneration";
+
 const formSchema = z
   .object({
     estCalculable: zodRadioInputSchema,
@@ -112,11 +114,7 @@ export const RemunerationForm = () => {
     savePageData("rémunérations", formatData(data));
 
     if (estCalculable === "non") {
-      if (formData.entreprise?.tranche === "50:250") {
-        return router.push(`${config.base_declaration_url}/augmentations-et-promotions`);
-      } else {
-        return router.push(`${config.base_declaration_url}/augmentations`);
-      }
+      return router.push(nextPageAfterRemuneration(formData));
     }
 
     router.push(`${config.base_declaration_url}/${mode === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`);
