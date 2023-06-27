@@ -5,28 +5,27 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
-import { zodDateSchema, zodRadioInputSchema, zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { zodDateSchema, zodRealPositiveIntegerSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { endOfYear, formatISO, getYear } from "date-fns";
-import { pick } from "lodash";
+import { omit } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z
   .object({
-    annéeIndicateurs: z.number(), // No need to control the values, since it not saved but useful for zod validation.
+    périodeSuffisante: z.literal("oui"),
+    annéeIndicateurs: z.number(),
     finPériodeRéférence: zodDateSchema,
     effectifTotal: zodRealPositiveIntegerSchema,
-    périodeSuffisante: zodRadioInputSchema,
   })
-  .superRefine(({ annéeIndicateurs, finPériodeRéférence: finPériode }, ctx) => {
-    if (getYear(new Date(finPériode)) !== Number(annéeIndicateurs)) {
+  .superRefine(({ annéeIndicateurs, finPériodeRéférence }, ctx) => {
+    if (getYear(new Date(finPériodeRéférence)) !== annéeIndicateurs) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
@@ -34,32 +33,22 @@ const formSchema = z
         path: ["finPériodeRéférence"],
       });
     }
-  });
+  })
+  .or(
+    z.object({
+      périodeSuffisante: z.literal("non"),
+    }),
+  );
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
-
-/**
- * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
- */
-const formatData = (data: FormType): DeclarationFormState["périodeRéférence"] => {
-  if (data.périodeSuffisante === "non") {
-    return pick(data, "périodeSuffisante") as DeclarationFormState["périodeRéférence"]; // To fix TS pick incorrect guess. In this case, périodeSuffisante is always "non", and is a correct type.
-  } else {
-    return pick(
-      { ...data, effectifTotal: data.effectifTotal },
-      "périodeSuffisante",
-      "finPériodeRéférence",
-      "effectifTotal",
-    );
-  }
-};
 
 export const PeriodeReferenceForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
 
   const methods = useForm<FormType>({
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: { ...formData.commencer, ...formData.périodeRéférence },
   });
@@ -75,12 +64,10 @@ export const PeriodeReferenceForm = () => {
   const périodeSuffisante = watch("périodeSuffisante");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("périodeRéférence", formatData(data));
+    savePageData("périodeRéférence", data.périodeSuffisante === "oui" ? omit(data, "annéeIndicateurs") : data);
 
     router.push(`${config.base_declaration_url}/remuneration`);
   };
-
-  console.log("errors", errors);
 
   const selectEndOfYear = () => {
     if (formData?.commencer?.annéeIndicateurs) {
@@ -120,7 +107,11 @@ export const PeriodeReferenceForm = () => {
                   type: "date",
                   ...register("finPériodeRéférence"),
                 }}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
                 state={errors.finPériodeRéférence ? "error" : "default"}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
                 stateRelatedMessage={errors.finPériodeRéférence?.message}
               />
               <Button className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
@@ -133,7 +124,11 @@ export const PeriodeReferenceForm = () => {
                   min: 1,
                   ...register("effectifTotal", { valueAsNumber: true }),
                 }}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
                 state={errors.effectifTotal ? "error" : "default"}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
                 stateRelatedMessage={errors.effectifTotal?.message}
               />
             </>
@@ -153,7 +148,7 @@ export const PeriodeReferenceForm = () => {
               children: "Suivant",
               type: "submit",
               nativeButtonProps: {
-                // disabled: !isValid,
+                disabled: !isValid,
               },
             },
           ]}
