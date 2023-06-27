@@ -1,4 +1,4 @@
-FROM jekyll/jekyll:4
+FROM jekyll/jekyll:4.2.0
 
 ARG EGAPRO_API_URL
 
