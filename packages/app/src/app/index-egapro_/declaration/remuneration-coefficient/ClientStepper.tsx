@@ -3,6 +3,8 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
+import { nbSteps } from "../../constants";
+
 const titleBranche =
   "Écart de rémunération entre les femmes et les hommes par niveau ou coefficient hiérarchique en application de la classification de branche";
 
@@ -19,7 +21,7 @@ export const ClientStepper = () => {
       <Stepper
         currentStep={2}
         nextTitle="Résultat final de l’écart de rémunération entre les femmes et les hommes"
-        stepCount={3}
+        stepCount={nbSteps}
         title={title}
       />
     </>

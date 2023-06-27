@@ -1,5 +1,6 @@
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
+import { nbSteps } from "../../constants";
 import { RemunerationCSPForm } from "./RemunerationCSPForm";
 
 const title = "Écart de rémunération entre les femmes et les hommes par catégorie socio-professionnelle";
@@ -10,7 +11,7 @@ const RemunerationCSPPage = () => {
       <Stepper
         currentStep={2}
         nextTitle="Résultat final de l’écart de rémunération entre les femmes et les hommes"
-        stepCount={3}
+        stepCount={nbSteps}
         title={title}
       />
 

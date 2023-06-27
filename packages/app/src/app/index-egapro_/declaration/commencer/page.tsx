@@ -5,6 +5,7 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
+import { nbSteps } from "../../constants";
 import { CommencerForm } from "./CommencerForm";
 
 const title = "Commencer";
@@ -45,7 +46,7 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={3} title={title} />
+      <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={nbSteps} title={title} />
 
       <Alert
         severity="info"

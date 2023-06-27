@@ -74,7 +74,6 @@ export type DeclarationFormState = {
     estCalculable: OuiNon;
     mode?: "csp" | "niveau_autre" | "niveau_branche";
     motifNonCalculabilité?: "egvi40pcet";
-    populationFavorable?: PopulationFavorable; // Effectif des groupes valides inférieur à 40% de l'effectif total;
   };
   rémunérationsCSP?: {
     catégories: [
@@ -86,6 +85,11 @@ export type DeclarationFormState = {
   };
   rémunérationsCoefficients?: {
     catégories: Array<{ nom: string; tranches: TranchesAge }>;
+  };
+  rémunérationsRésultat?: {
+    note: number;
+    populationFavorable: PopulationFavorable;
+    résultat: number;
   };
   ues?: {
     name: string;

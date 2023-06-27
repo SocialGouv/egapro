@@ -33,6 +33,10 @@ export const zodRealPositiveIntegerSchema = z
   .int({ message: "La valeur doit être un entier" })
   .positive({ message: "La valeur doit être positive" });
 
+export const zodRealIntegerSchema = z
+  .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
+  .int({ message: "La valeur doit être un entier" });
+
 export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   if (val !== "oui" && val !== "non") {
     ctx.addIssue({

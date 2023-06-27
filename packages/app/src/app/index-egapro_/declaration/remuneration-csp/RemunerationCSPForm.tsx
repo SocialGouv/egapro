@@ -4,7 +4,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
-import { zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { zodRealIntegerSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,10 +21,10 @@ const formSchema = z.object({
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": zodRealPositiveIntegerSchema,
-        "30:39": zodRealPositiveIntegerSchema,
-        "40:49": zodRealPositiveIntegerSchema,
-        "50:": zodRealPositiveIntegerSchema,
+        ":29": zodRealIntegerSchema,
+        "30:39": zodRealIntegerSchema,
+        "40:49": zodRealIntegerSchema,
+        "50:": zodRealIntegerSchema,
       }),
     }),
   ),
@@ -82,9 +83,7 @@ export const RemunerationCSPForm = () => {
 
           {catégories.map((catégorie, index) => (
             <>
-              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-              {/* @ts-ignore */}
-              <h3>{labelCSP[catégorie.nom]}</h3>
+              <h3>{new CSP(catégorie.nom as CSP.Enum).getLabel()}</h3>
               <table key={catégorie.nom} className={fr.cx("fr-mb-4w")}>
                 <thead>
                   <tr>
