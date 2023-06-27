@@ -2,10 +2,11 @@
 
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { config } from "@common/config";
 import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { ClientOnly } from "@components/ClientOnly";
+import { IndicatorNote } from "@components/IndicatorNote";
+import { PopulationFavorable } from "@components/PopulationFavorable";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -96,34 +97,11 @@ export const RemunerationCSPResultatForm = () => {
             stateRelatedMessage={errors.résultat?.message}
           />
 
-          <RadioButtons
-            legend="Population envers laquelle l'écart est favorable"
-            disabled={populationFavorableDisabled}
-            options={[
-              {
-                label: "Femmes",
-                nativeInputProps: {
-                  value: "femmes",
-                  ...register("populationFavorable"),
-                },
-              },
-              {
-                label: "Hommes",
-                nativeInputProps: {
-                  value: "homme",
-                  ...register("populationFavorable"),
-                },
-              },
-            ]}
-            orientation="horizontal"
-          />
+          <PopulationFavorable disabled={populationFavorableDisabled} />
 
           {note !== undefined && (
             <>
-              <div style={{ border: "1px solid lightgrey", display: "flex", gap: 30, padding: 20, margin: "50px 0" }}>
-                <div style={{ borderRight: "1px solid gray", paddingRight: 20 }}>{note} / 40</div>
-                <div>Nombre de points obtenus à l'indicateur</div>
-              </div>
+              <IndicatorNote note={note} max={40} />
 
               <Input
                 label=""
