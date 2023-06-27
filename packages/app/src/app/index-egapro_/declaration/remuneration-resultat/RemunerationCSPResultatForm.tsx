@@ -4,56 +4,69 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { config } from "@common/config";
+import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { ClientOnly } from "@components/ClientOnly";
-import { ReactHookFormDebug } from "@components/utils/debug/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { get } from "lodash";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z.object({
-  note: z.number(),
-  populationFavorable: z.string(),
-  résultat: z.number(),
-});
+const formSchema = z
+  .object({
+    note: z.number(),
+    populationFavorable: z.string(),
+    résultat: z.number(),
+  })
+  .superRefine(({ note, populationFavorable }, ctx) => {
+    if (note !== 40 && !populationFavorable) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        path: ["populationFavorable"],
+      });
+    }
+  });
 
-// Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
 export const RemunerationCSPResultatForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
+  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
-      console.log("formData", data);
-      console.log("validation result", await zodResolver(formSchema)(data, context, options));
+      // console.log("formData", data);
+      // console.log("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
-
+    mode: "onChange",
     // resolver: zodResolver(formSchema),
     defaultValues: formData.rémunérationsRésultat,
-    mode: "onSubmit",
   });
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    setValue,
     watch,
   } = methods;
 
-  console.log("errors", errors);
-  // console.log("isValid", isValid);
+  const résultat = watch("résultat");
+  const note = watch("note");
 
-  const onBlur = () => {
-    // Calculer la note
-  };
+  useEffect(() => {
+    const note = computeIndicator1Note(résultat);
+    setValue("note", note);
+    setPopulationFavorableDisabled(note === 40);
+    if (note === 40) setValue("populationFavorable", "");
+  }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
     savePageData("rémunérationsRésultat", data as DeclarationFormState["rémunérationsRésultat"]);
@@ -68,7 +81,7 @@ export const RemunerationCSPResultatForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
           <Input
             label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient
@@ -76,18 +89,16 @@ export const RemunerationCSPResultatForm = () => {
             nativeInputProps={{
               type: "number",
               min: 0,
+              max: 100,
               ...register(`résultat`, { valueAsNumber: true }),
             }}
-            state={get(errors, `résultat`) ? "error" : "default"}
-            stateRelatedMessage={
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              get(errors, `résultat`)?.message
-            }
+            state={errors.résultat?.message ? "error" : "default"}
+            stateRelatedMessage={errors.résultat?.message}
           />
 
           <RadioButtons
             legend="Population envers laquelle l'écart est favorable"
+            disabled={populationFavorableDisabled}
             options={[
               {
                 label: "Femmes",
@@ -107,10 +118,23 @@ export const RemunerationCSPResultatForm = () => {
             orientation="horizontal"
           />
 
-          <div style={{ border: "1px solid lightgrey", display: "flex", gap: 30, padding: 20, margin: "50px 0" }}>
-            <div style={{ borderRight: "1px solid gray", paddingRight: 20 }}>19 / 100</div>
-            <div>Nombre de points obtenus à l'indicateur</div>
-          </div>
+          {note !== undefined && (
+            <>
+              <div style={{ border: "1px solid lightgrey", display: "flex", gap: 30, padding: 20, margin: "50px 0" }}>
+                <div style={{ borderRight: "1px solid gray", paddingRight: 20 }}>{note} / 40</div>
+                <div>Nombre de points obtenus à l'indicateur</div>
+              </div>
+
+              <Input
+                label=""
+                nativeInputProps={{
+                  type: "hidden",
+                  value: note,
+                  ...register(`note`, { valueAsNumber: true }),
+                }}
+              />
+            </>
+          )}
         </ClientOnly>
 
         <ButtonsGroup
@@ -126,7 +150,7 @@ export const RemunerationCSPResultatForm = () => {
               children: "Suivant",
               type: "submit",
               nativeButtonProps: {
-                // disabled: !isValid,
+                disabled: !isValid,
               },
             },
           ]}
