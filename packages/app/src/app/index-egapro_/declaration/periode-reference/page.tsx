@@ -9,7 +9,7 @@ const InformationsEntreprisePage = () => {
   return (
     <>
       <Stepper
-        currentStep={2}
+        currentStep={3}
         nextTitle="Écart de rémunération entre les femmes et les hommes"
         stepCount={nbSteps}
         title={title}

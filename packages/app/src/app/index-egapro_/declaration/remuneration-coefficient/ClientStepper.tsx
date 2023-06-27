@@ -19,7 +19,7 @@ export const ClientStepper = () => {
   return (
     <>
       <Stepper
-        currentStep={2}
+        currentStep={5}
         nextTitle="Résultat final de l’écart de rémunération entre les femmes et les hommes"
         stepCount={nbSteps}
         title={title}

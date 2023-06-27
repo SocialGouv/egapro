@@ -9,7 +9,7 @@ const RemunerationPage = () => {
   return (
     <>
       <Stepper
-        currentStep={2}
+        currentStep={4}
         nextTitle="Écart de rémunération entre les femmes et les hommes par niveau ou coefficient hiérarchique"
         stepCount={nbSteps}
         title={title}

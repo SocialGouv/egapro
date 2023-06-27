@@ -18,7 +18,7 @@ const RemunerationResultatPage = () => {
 
   return (
     <ClientOnly>
-      <Stepper currentStep={5} nextTitle={nextTitle} stepCount={nbSteps} title={title} />
+      <Stepper currentStep={6} nextTitle={nextTitle} stepCount={nbSteps} title={title} />
 
       <RemunerationCSPResultatForm />
     </ClientOnly>
