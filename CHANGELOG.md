@@ -1,3 +1,11 @@
+## [2.89.4](https://github.com/SocialGouv/egapro/compare/v2.89.3...v2.89.4) (2023-06-28)
+
+
+### Bug Fixes
+
+* problem with jekyll 4 in docker dev ([#1666](https://github.com/SocialGouv/egapro/issues/1666)) ([196eb53](https://github.com/SocialGouv/egapro/commit/196eb53b01cd27f29d9c21ec4da036ba2cb781d3))
+* remove tileCompany white-space ([#1665](https://github.com/SocialGouv/egapro/issues/1665)) ([9acf4b1](https://github.com/SocialGouv/egapro/commit/9acf4b19026468c19af305f1d685d34121d4c24d))
+
 ## [2.89.3](https://github.com/SocialGouv/egapro/compare/v2.89.2...v2.89.3) (2023-06-19)
 
 
