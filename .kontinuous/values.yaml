@@ -149,8 +149,9 @@ project:
     # DigDash prod 1 and 2
     - "37.187.27.197"
     - "37.187.137.149"
-    # Invenis prod
+    # Invenis prod old and new
     - "217.182.142.112"
+    - "51.38.59.32"
   files:
     public:
       - index-egalite-fh.xlsx
