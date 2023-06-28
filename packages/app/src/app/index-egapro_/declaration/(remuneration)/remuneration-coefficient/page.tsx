@@ -1,5 +1,5 @@
+import { RemunerationGenericForm } from "../RemunerationGenericForm";
 import { ClientStepper } from "./ClientStepper";
-import { RemunerationCoefficientForm } from "./RemunerationCoefficientForm";
 
 const RemunerationCoefficientPage = () => {
   return (
@@ -13,7 +13,7 @@ const RemunerationCoefficientPage = () => {
         des femmes.
       </p>
 
-      <RemunerationCoefficientForm />
+      <RemunerationGenericForm mode="coefficient" />
     </>
   );
 };

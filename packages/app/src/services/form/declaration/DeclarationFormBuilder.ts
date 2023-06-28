@@ -22,6 +22,8 @@ type TranchesAge = {
   ":29": number;
 };
 
+export type Catégorie = { nom: string; tranches: TranchesAge };
+
 /**
  * The shape of the state for declaration form.
  */
@@ -84,7 +86,7 @@ export type DeclarationFormState = {
     ];
   };
   rémunérationsCoefficients?: {
-    catégories: Array<{ nom: string; tranches: TranchesAge }>;
+    catégories: Catégorie[];
   };
   rémunérationsRésultat?: {
     note: number;

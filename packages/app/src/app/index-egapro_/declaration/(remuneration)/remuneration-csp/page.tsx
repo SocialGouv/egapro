@@ -1,7 +1,7 @@
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
-import { nbSteps } from "../../constants";
-import { RemunerationCSPForm } from "./RemunerationCSPForm";
+import { nbSteps } from "../../../constants";
+import { RemunerationGenericForm } from "../RemunerationGenericForm";
 
 const title = "Écart de rémunération entre les femmes et les hommes par catégorie socio-professionnelle";
 
@@ -28,7 +28,7 @@ const RemunerationCSPPage = () => {
         CSP Ouvriers ou soit dans la CSP Employés).
       </p>
 
-      <RemunerationCSPForm />
+      <RemunerationGenericForm mode="csp" />
     </>
   );
 };
