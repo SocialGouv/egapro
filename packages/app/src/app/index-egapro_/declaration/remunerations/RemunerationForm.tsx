@@ -223,6 +223,7 @@ export const RemunerationForm = () => {
                         type: "date",
                         ...register("dateConsultationCSE"),
                       }}
+                      iconId="ri-calendar-line"
                       state={errors.dateConsultationCSE ? "error" : "default"}
                       stateRelatedMessage={errors.dateConsultationCSE?.message}
                     />
