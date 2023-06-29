@@ -1,16 +1,18 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { config } from "@common/config";
 import { ClientOnly } from "@components/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import produce from "immer";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { funnelConfig, type FunnelKey } from "../../declarationFunnelConfiguration";
+import { BackNextButtons } from "../BackNextButtons";
 
 const formSchema = z.object({
   type: z.string(), // No extra control needed because this is a radio button with options we provide.
@@ -20,8 +22,10 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
+const stepName: FunnelKey = "entreprise";
+
 export const EntrepriseUESForm = () => {
-  const { formData, savePageData } = useDeclarationFormManager();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
 
   const {
@@ -40,10 +44,13 @@ export const EntrepriseUESForm = () => {
   const type = watch("type");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("entreprise", data as DeclarationFormState["entreprise"]);
+    const newFormData = produce(formData, draft => {
+      draft[stepName] = data as DeclarationFormState[typeof stepName];
+    });
 
-    if (type === "ues") router.push(`${config.base_declaration_url}/ues`);
-    else router.push(`${config.base_declaration_url}/periode-reference`);
+    saveFormData(newFormData);
+
+    router.push(funnelConfig(newFormData).entreprise.next().url);
   };
 
   return (
@@ -97,24 +104,8 @@ export const EntrepriseUESForm = () => {
           ]}
         />
       </ClientOnly>
-      <ButtonsGroup
-        inlineLayoutWhen="sm and up"
-        buttons={[
-          {
-            children: "Précédent",
-            priority: "secondary",
-            onClick: () => router.push(`${config.base_declaration_url}/commencer`),
-            type: "button",
-          },
-          {
-            children: "Suivant",
-            type: "submit",
-            nativeButtonProps: {
-              disabled: !isValid,
-            },
-          },
-        ]}
-      />
+
+      <BackNextButtons stepName={stepName} disabled={!isValid} />
     </form>
   );
 };

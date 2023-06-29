@@ -2,9 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { config } from "@common/config";
 import { zodDateSchema, zodRealPositiveIntegerSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
@@ -16,6 +14,9 @@ import { omit } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { funnelConfig, type FunnelKey } from "../../declarationFunnelConfiguration";
+import { BackNextButtons } from "../BackNextButtons";
 
 const formSchema = z
   .object({
@@ -43,14 +44,16 @@ const formSchema = z
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
+const stepName: FunnelKey = "periode-reference";
+
 export const PeriodeReferenceForm = () => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
 
   const methods = useForm<FormType>({
-    shouldUnregister: true,
+    shouldUnregister: true, // Don't store the fields that are not displayed.
     resolver: zodResolver(formSchema),
-    defaultValues: { ...formData.commencer, ...formData.périodeRéférence },
+    defaultValues: { ...formData.commencer, ...formData[stepName] },
   });
 
   const {
@@ -64,9 +67,9 @@ export const PeriodeReferenceForm = () => {
   const périodeSuffisante = watch("périodeSuffisante");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("périodeRéférence", data.périodeSuffisante === "oui" ? omit(data, "annéeIndicateurs") : data);
+    savePageData(stepName, data.périodeSuffisante === "oui" ? omit(data, "annéeIndicateurs") : data);
 
-    router.push(`${config.base_declaration_url}/remuneration`);
+    router.push(funnelConfig(formData)[stepName].next().url);
   };
 
   const selectEndOfYear = () => {
@@ -135,24 +138,7 @@ export const PeriodeReferenceForm = () => {
           )}
         </ClientOnly>
 
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              priority: "secondary",
-              onClick: () => router.push(`${config.base_declaration_url}/entreprise`),
-              type: "button",
-            },
-            {
-              children: "Suivant",
-              type: "submit",
-              nativeButtonProps: {
-                disabled: !isValid,
-              },
-            },
-          ]}
-        />
+        <BackNextButtons stepName="periode-reference" disabled={!isValid} />
       </form>
     </FormProvider>
   );

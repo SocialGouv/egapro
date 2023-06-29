@@ -1,11 +1,9 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
-import { config } from "@common/config";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RadioOuiNon } from "@components/next13/RadioOuiNon";
@@ -13,12 +11,13 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { pick } from "lodash";
+import produce from "immer";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { nextPageAfterRemuneration } from "./nextPageAfterRemuneration";
+import { funnelConfig, type FunnelKey } from "../../declarationFunnelConfiguration";
+import { BackNextButtons } from "../BackNextButtons";
 
 const formSchema = z
   .object({
@@ -73,29 +72,32 @@ type FormType = z.infer<typeof formSchema>;
 /**
  * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
  */
-const formatData = (data: FormType): DeclarationFormState["rémunérations"] => {
-  let result;
+// const formatData = (data: FormType): DeclarationFormState["remunerations"] => {
+//   let result;
 
-  if (data.estCalculable === "non") {
-    result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNonCalculabilité");
-  } else if (data.mode === "csp") {
-    result = pick(data, "estCalculable", "mode");
-  } else if (data.cse === "oui") {
-    result = pick(data, "estCalculable", "mode", "cse", "dateConsultationCSE");
-  } else {
-    result = pick(data, "estCalculable", "mode", "cse");
-  }
+//   if (data.estCalculable === "non") {
+//     result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNonCalculabilité");
+//   } else if (data.mode === "csp") {
+//     result = pick(data, "estCalculable", "mode");
+//   } else if (data.cse === "oui") {
+//     result = pick(data, "estCalculable", "mode", "cse", "dateConsultationCSE");
+//   } else {
+//     result = pick(data, "estCalculable", "mode", "cse");
+//   }
 
-  return result as DeclarationFormState["rémunérations"]; // Fix limit of pick which can't infer that estCalculable is always present.
-};
+//   return result as DeclarationFormState["remunerations"]; // Fix limit of pick which can't infer that estCalculable is always present.
+// };
+
+const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {
-  const { formData, savePageData } = useDeclarationFormManager();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
 
   const methods = useForm<FormType>({
+    shouldUnregister: true, // Don't store the fields that are not displayed.
     resolver: zodResolver(formSchema),
-    defaultValues: formData.rémunérations,
+    defaultValues: formData[stepName],
   });
 
   const {
@@ -111,13 +113,14 @@ export const RemunerationForm = () => {
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   const onSubmit = async (data: FormType) => {
-    savePageData("rémunérations", formatData(data));
+    const newFormData = produce(formData, draft => {
+      // draft[stepName] = formatData(data);
+      draft[stepName] = data as DeclarationFormState[typeof stepName];
+    });
 
-    if (estCalculable === "non") {
-      return router.push(nextPageAfterRemuneration(formData));
-    }
+    saveFormData(newFormData);
 
-    router.push(`${config.base_declaration_url}/${mode === "csp" ? "remuneration-csp" : "remuneration-coefficient"}`);
+    return router.push(funnelConfig(newFormData)[stepName].next().url);
   };
 
   return (
@@ -230,24 +233,7 @@ export const RemunerationForm = () => {
           )}
         </ClientOnly>
 
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              priority: "secondary",
-              onClick: () => router.push(`${config.base_declaration_url}/periode-reference`),
-              type: "button",
-            },
-            {
-              children: "Suivant",
-              type: "submit",
-              nativeButtonProps: {
-                disabled: !isValid,
-              },
-            },
-          ]}
-        />
+        <BackNextButtons stepName={stepName} disabled={!isValid} />
       </form>
     </FormProvider>
   );

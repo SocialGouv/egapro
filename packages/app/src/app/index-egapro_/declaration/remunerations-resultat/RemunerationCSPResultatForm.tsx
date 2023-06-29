@@ -1,9 +1,8 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { config } from "@common/config";
 import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { zodRealPercentageSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { IndicatorNote } from "@components/IndicatorNote";
 import { PopulationFavorable } from "@components/PopulationFavorable";
@@ -11,16 +10,20 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import produce from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { funnelConfig, type FunnelKey } from "../../declarationFunnelConfiguration";
+import { BackNextButtons } from "../BackNextButtons";
+
 const formSchema = z
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: z.number(),
+    résultat: zodRealPercentageSchema,
   })
   .superRefine(({ note, populationFavorable }, ctx) => {
     if (note !== 40 && !populationFavorable) {
@@ -34,8 +37,10 @@ const formSchema = z
 
 type FormType = z.infer<typeof formSchema>;
 
+const stepName: FunnelKey = "remunerations-resultat";
+
 export const RemunerationCSPResultatForm = () => {
-  const { formData, savePageData } = useDeclarationFormManager();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
@@ -48,7 +53,7 @@ export const RemunerationCSPResultatForm = () => {
     },
     mode: "onChange",
     // resolver: zodResolver(formSchema),
-    defaultValues: formData.rémunérationsRésultat,
+    defaultValues: formData[stepName],
   });
 
   const {
@@ -70,12 +75,13 @@ export const RemunerationCSPResultatForm = () => {
   }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
-    savePageData("rémunérationsRésultat", data as DeclarationFormState["rémunérationsRésultat"]);
-    router.push(
-      `${config.base_declaration_url}/${
-        formData.entreprise?.tranche === "50:250" ? "augmentations-et-promotions" : "augmentations"
-      }`,
-    );
+    const newFormData = produce(formData, draft => {
+      draft[stepName] = data as DeclarationFormState[typeof stepName];
+    });
+
+    saveFormData(newFormData);
+
+    router.push(funnelConfig(newFormData)[stepName].next().url);
   };
 
   return (
@@ -85,8 +91,7 @@ export const RemunerationCSPResultatForm = () => {
           {/* <ReactHookFormDebug /> */}
 
           <Input
-            label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient
-            9 chiffres"
+            label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient"
             nativeInputProps={{
               type: "number",
               min: 0,
@@ -115,24 +120,7 @@ export const RemunerationCSPResultatForm = () => {
           )}
         </ClientOnly>
 
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              priority: "secondary",
-              onClick: () => router.push(`${config.base_declaration_url}/remuneration`),
-              type: "button",
-            },
-            {
-              children: "Suivant",
-              type: "submit",
-              nativeButtonProps: {
-                disabled: !isValid,
-              },
-            },
-          ]}
-        />
+        <BackNextButtons stepName={stepName} disabled={!isValid} />
       </form>
     </FormProvider>
   );

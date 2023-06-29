@@ -1,14 +1,16 @@
 import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
-import { nbSteps } from "../../constants";
+import { type FunnelKey, funnelStaticConfig } from "../../declarationFunnelConfiguration";
+import { DeclarationStepper } from "../DeclarationStepper";
 import { CommencerForm } from "./CommencerForm";
 
-const title = "Commencer";
+const stepName: FunnelKey = "commencer";
+
+const title = funnelStaticConfig[stepName].title;
 
 export const metadata = {
   title,
@@ -46,7 +48,7 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <Stepper currentStep={1} nextTitle="Informations de l'entreprise / UES" stepCount={nbSteps} title={title} />
+      <DeclarationStepper stepName="commencer" />
 
       <Alert
         severity="info"

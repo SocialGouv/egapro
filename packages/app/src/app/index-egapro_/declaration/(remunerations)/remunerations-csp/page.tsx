@@ -1,19 +1,15 @@
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 
-import { nbSteps } from "../../../constants";
+import { type FunnelKey } from "../../../declarationFunnelConfiguration";
+import { DeclarationStepper } from "../../DeclarationStepper";
 import { RemunerationGenericForm } from "../RemunerationGenericForm";
 
-const title = "Écart de rémunération entre les femmes et les hommes par catégorie socio-professionnelle";
+const stepName: FunnelKey = "remunerations-csp";
 
 const RemunerationCSPPage = () => {
   return (
     <>
-      <Stepper
-        currentStep={5}
-        nextTitle="Résultat final de l’écart de rémunération entre les femmes et les hommes"
-        stepCount={nbSteps}
-        title={title}
-      />
+      <DeclarationStepper stepName={stepName} />
 
       <p>
         Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les CSP
@@ -28,7 +24,7 @@ const RemunerationCSPPage = () => {
         CSP Ouvriers ou soit dans la CSP Employés).
       </p>
 
-      <RemunerationGenericForm mode="csp" />
+      <RemunerationGenericForm mode={RemunerationsMode.Enum.CSP} />
     </>
   );
 };

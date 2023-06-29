@@ -2,7 +2,6 @@
 
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Select } from "@codegouvfr/react-dsfr/Select";
-import { config } from "@common/config";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -17,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { funnelConfig } from "../../declarationFunnelConfiguration";
 
 const formSchema = z.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
@@ -93,11 +94,6 @@ export const CommencerForm = () => {
     };
   };
 
-  const nextPage = (data?: DeclarationFormState) =>
-    data?._metadata?.status === "edition"
-      ? `${config.base_declaration_url}/${data.commencer?.entrepriseDéclarante?.siren}/${data.commencer?.annéeIndicateurs}`
-      : `${config.base_declaration_url}/entreprise`;
-
   const saveAndGoNext = async ({ annéeIndicateurs, siren }: FormType) => {
     // Synchronize the data with declaration if any.
     const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, session.data.user.tokenApiV1);
@@ -105,8 +101,7 @@ export const CommencerForm = () => {
     // Save in storage (savePageData is not used because we want to save commencer page and _metadata).
     saveFormData(newData);
 
-    // Navigate to next page.
-    router.push(nextPage(newData));
+    router.push(funnelConfig(newData).commencer.next().url);
   };
 
   const onSubmit = async ({ annéeIndicateurs, siren }: FormType) => {
@@ -121,7 +116,7 @@ export const CommencerForm = () => {
 
     // In data are present in session storage and siren and year are unchanged.
     if (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage) {
-      return router.push(nextPage());
+      return router.push(funnelConfig(formData).commencer.next().url);
     }
 
     // In data are present in session storage and siren and year are not the same.
@@ -145,9 +140,6 @@ export const CommencerForm = () => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <pre>{JSON.stringify(watch(), null, 2)}</pre> */}
-        {/* <pre>{formatZodErrors(errors)}</pre> */}
-
         <Select
           label="Année au titre de laquelle les indicateurs sont calculés"
           state={errors.annéeIndicateurs && "error"}

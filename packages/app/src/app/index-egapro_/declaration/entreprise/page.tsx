@@ -1,22 +1,17 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 
-import { nbSteps } from "../../constants";
+import { type FunnelKey } from "../../declarationFunnelConfiguration";
+import { DeclarationStepper } from "../DeclarationStepper";
 import { EntrepriseUESForm } from "./EntrepriseUESForm";
 import { InformationEntreprise } from "./InformationEntreprise";
 
-const title = "Informations de l'entreprise / UES";
+const stepName: FunnelKey = "entreprise";
 
 const InformationsEntreprisePage = () => {
   return (
     <>
-      <Stepper
-        currentStep={2}
-        nextTitle="Informations calcul et période de référence"
-        stepCount={nbSteps}
-        title={title}
-      />
+      <DeclarationStepper stepName={stepName} />
 
       <Alert
         severity="info"

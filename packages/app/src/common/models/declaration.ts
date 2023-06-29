@@ -19,14 +19,14 @@ export const buildDeclarationDTO = (formState: DeclarationFormState): Declaratio
     },
     indicateurs: {
       rémunérations: {
-        mode: formState.rémunérations?.mode,
-        population_favorable: formState.rémunérations?.populationFavorable,
-        date_consultation_cse: formState.rémunérations?.dateConsultationCSE,
-        non_calculable: formState.rémunérations?.motifNonCalculabilité,
+        mode: formState.remunerations?.mode,
+        population_favorable: formState.remunerations?.populationFavorable,
+        date_consultation_cse: formState.remunerations?.dateConsultationCSE,
+        non_calculable: formState.remunerations?.motifNonCalculabilité,
         catégories:
-          formState.rémunérations?.mode === "csp"
+          formState.remunerations?.mode === "csp"
             ? formState.rémunérationsCSP?.catégories
-            : formState.rémunérationsCoefficients?.catégories,
+            : formState.remunerations - coefficient - autre?.catégories,
       },
       augmentations: {},
       promotions: {},

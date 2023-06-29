@@ -4,7 +4,7 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { ClientOnly } from "@components/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
-import { nbSteps } from "../../constants";
+import { nbSteps } from "../../declarationFunnelConfiguration";
 import { RemunerationCSPResultatForm } from "./RemunerationCSPResultatForm";
 
 const title = "Résultat final de l’écart de rémunération entre les femmes et les hommes";

@@ -1,17 +1,17 @@
 import { type FunnelKey } from "../../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
-import { UESForm } from "./UESForm";
+import { RemunerationForm } from "./RemunerationForm";
 
-const stepName: FunnelKey = "ues";
+const stepName: FunnelKey = "remunerations";
 
-const InformationsUESPage = () => {
+const RemunerationPage = () => {
   return (
     <>
       <DeclarationStepper stepName={stepName} />
 
-      <UESForm />
+      <RemunerationForm />
     </>
   );
 };
 
-export default InformationsUESPage;
+export default RemunerationPage;

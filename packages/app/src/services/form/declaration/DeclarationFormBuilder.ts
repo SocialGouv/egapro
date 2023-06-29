@@ -1,4 +1,5 @@
 import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
+import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
 
 import { type Entreprise } from "./entreprise";
@@ -34,24 +35,13 @@ export type DeclarationFormState = {
     // entreprise?: EntrepriseType;
     status: "creation" | "edition";
   };
+  augmentations?: {};
+  "augmentations-et-promotions"?: {};
   commencer?: {
     annéeIndicateurs: number;
     entrepriseDéclarante?: Entreprise;
   };
-  // Only filled by the backend.
-  déclarant?: {
-    accordRgpd: boolean;
-    email: string;
-    nom: string;
-    prénom: string;
-    téléphone: string;
-  };
-  entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
-  hautesRémunérations?: {
-    populationFavorable: PopulationFavorable;
-    résultat: number;
-  };
-  maternité?:
+  "conges-maternite"?:
     | {
         estCalculable: false;
         motif: MotifNCMaterniteValue;
@@ -60,7 +50,20 @@ export type DeclarationFormState = {
         estCalculable: true;
         resultat: number;
       };
-  périodeRéférence?:
+  // Only filled by the backend.
+  declarant?: {
+    accordRgpd: boolean;
+    email: string;
+    nom: string;
+    prénom: string;
+    téléphone: string;
+  };
+  entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
+  "hautes-remunerations"?: {
+    populationFavorable: PopulationFavorable;
+    résultat: number;
+  };
+  "periode-reference"?:
     | {
         effectifTotal: number;
         finPériodeRéférence: string;
@@ -69,15 +72,25 @@ export type DeclarationFormState = {
     | {
         périodeSuffisante: "non";
       };
-  rémunérations?: {
+  promotions?: {};
+  publication?: {};
+  remunerations?: {
     cse?: OuiNon;
     dateConsultationCSE?: string;
     déclarationCalculCSP?: boolean;
     estCalculable: OuiNon;
-    mode?: "csp" | "niveau_autre" | "niveau_branche";
+    // mode?: "csp" | "niveau_autre" | "niveau_branche";
+    mode?: RemunerationsMode.Enum;
     motifNonCalculabilité?: "egvi40pcet";
   };
-  rémunérationsCSP?: {
+  "remunerations-coefficient-autre"?: {
+    catégories: Catégorie[];
+  };
+
+  "remunerations-coefficient-branche"?: {
+    catégories: Catégorie[];
+  };
+  "remunerations-csp"?: {
     catégories: [
       { nom: "ouv"; tranches: TranchesAge },
       { nom: "emp"; tranches: TranchesAge },
@@ -85,23 +98,17 @@ export type DeclarationFormState = {
       { nom: "ic"; tranches: TranchesAge },
     ];
   };
-  rémunérationsCoefficients?: {
-    catégories: Catégorie[];
-  };
-  rémunérationsRésultat?: {
+  "remunerations-resultat"?: {
     note: number;
     populationFavorable: PopulationFavorable;
     résultat: number;
   };
+  "resultat-global"?: {};
   ues?: {
     name: string;
     sirens: string[];
   };
-  //   endOfPeriod?: string;
-  //   hasWebsite: boolean;
-  //   publishingContent?: string;
-  //   publishingDate?: string;
-  //   publishingWebsiteUrl?: string;
+  "validation-transmission"?: {};
 };
 
 export const DeclarationFormBuilder = {

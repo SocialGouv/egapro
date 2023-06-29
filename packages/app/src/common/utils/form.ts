@@ -50,6 +50,13 @@ export const zodRadioInputSchema = z.string().transform((val, ctx) => {
 
 const INVALID_PERCENTAGE = "Le champ est requis";
 
+export const zodRealPercentageSchema = z
+  .number()
+  .refine(percentage => percentage >= 0, {
+    message: "Le pourcentage doit être positif",
+  })
+  .refine(percentage => percentage <= 100, { message: "Le pourcentage maximum est 100" });
+
 export const zodPercentageSchema = z
   .string()
   .transform((val, ctx) => {
