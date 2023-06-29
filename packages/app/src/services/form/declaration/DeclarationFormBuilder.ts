@@ -29,7 +29,7 @@ export type Catégorie = { nom: string; tranches: TranchesAge };
  * The shape of the state for declaration form.
  */
 export type DeclarationFormState = {
-  // External or meta data.
+  // External or meta data. //TODO: to be move in declaration-existante maybe ?
   _metadata: {
     date?: string | undefined;
     // entreprise?: EntrepriseType;

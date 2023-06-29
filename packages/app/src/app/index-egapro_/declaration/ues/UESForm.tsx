@@ -11,8 +11,8 @@ import { funnelConfig, type FunnelKey } from "../../declarationFunnelConfigurati
 import { BackNextButtons } from "../BackNextButtons";
 
 const formSchema = z.object({
-  name: z.string(), // No extra control needed because this is a radio button with options we provide.
-  sirens: z.array(z.string()), // No extra control needed because this is a radio button with options we provide.
+  name: z.string(),
+  sirens: z.array(z.string()),
 });
 
 // Infer the TS type according to the zod schema.
