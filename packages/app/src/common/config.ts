@@ -72,7 +72,7 @@ export const config = {
           "/representation-equilibree/transmission",
           "/representation-equilibree/validation",
         ],
-        staffRoutes: ["/needstaff"],
+        staffRoutes: ["/admin/liste-referents"],
       },
     },
     postgres: {

@@ -26,7 +26,9 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
       return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
     }
-  } else if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
+  }
+
+  if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !token?.staff) {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 

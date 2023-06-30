@@ -1,10 +1,13 @@
 "use client";
 
 import { MainNavigation } from "@codegouvfr/react-dsfr/MainNavigation";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useSelectedLayoutSegment, useSelectedLayoutSegments } from "next/navigation";
 
 export const Navigation = () => {
   const segment = useSelectedLayoutSegment();
+  const segments = useSelectedLayoutSegments();
+
+  console.log({ segment, segments });
 
   return (
     <MainNavigation

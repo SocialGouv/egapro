@@ -8,13 +8,13 @@ import styles from "./default.module.css";
 
 const DefaultLayout = async ({ children }: PropsWithChildren) => {
   return (
-    <>
+    <div className={styles.app}>
       <Header auth />
       <main role="main" id="content" className={styles.content}>
         {children}
       </main>
       <Footer type="company" />
-    </>
+    </div>
   );
 };
 
