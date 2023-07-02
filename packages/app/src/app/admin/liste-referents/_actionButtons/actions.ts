@@ -4,6 +4,7 @@ import { referentRepo } from "@api/core-domain/repo";
 import { ImportReferents } from "@api/core-domain/useCases/referent/ImportReferents";
 import { assertSession } from "@api/utils/serverAction";
 import { UnexpectedError } from "@common/shared-domain";
+import { revalidatePath } from "next/cache";
 
 export const importFile = async (formData: FormData) => {
   await assertSession({ staff: true });
@@ -20,6 +21,7 @@ export const importFile = async (formData: FormData) => {
 
   try {
     await useCase.execute(referents);
+    revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
   } catch (error: unknown) {
     console.error(error);
     throw new UnexpectedError("Cannot import referents");
