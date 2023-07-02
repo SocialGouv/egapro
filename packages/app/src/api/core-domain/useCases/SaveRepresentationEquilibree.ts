@@ -82,16 +82,13 @@ export class SaveRepresentationEquilibree implements UseCase<Input, void> {
       const found = await this.representationEquilibreeRepo.getOne(pk);
 
       if (found) {
-        console.log("FOUND ! UPDATE MODE");
         const olderThanOneYear = isAfter(new Date(), add(found.declaredAt, { years: 1 }));
-        console.log({ olderThanOneYear, override });
 
         if (olderThanOneYear && !override) {
           throw new SaveRepresentationEquilibreeOverOneYearError("Représentation équilibrée is older than one year.");
         }
 
         representationEquilibree = found.fromJson(partialProps);
-        console.log({ representationEquilibree });
       } else {
         const company = companyMap.toDomain(await this.entrepriseService.siren(pk[0]));
         representationEquilibree = RepresentationEquilibree.fromJson({

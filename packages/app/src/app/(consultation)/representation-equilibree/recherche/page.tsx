@@ -34,7 +34,7 @@ export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchem
     const isLanding = isEmpty(partialSearchParams) && page === 0;
     return (
       <>
-        <Container as="section" className={fr.cx("fr-pb-3w")}>
+        <Container as="section" pb="3w">
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} xl={8}>
               {searchParamsError && (

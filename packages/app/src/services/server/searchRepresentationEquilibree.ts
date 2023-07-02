@@ -8,6 +8,8 @@ const useCase = new SearchRepresentationEquilibree(representationEquilibreeSearc
 
 /**
  * Server side direct search for représentation équilibrée in database.
+ *
+ * @deprecated convert to server action instead
  */
 export const search = async (input: SearchConsultationDTO) => {
   return useCase.execute({
