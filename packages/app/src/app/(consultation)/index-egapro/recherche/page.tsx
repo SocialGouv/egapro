@@ -10,11 +10,10 @@ import {
 } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { type NextServerPageProps, withSearchParamsValidation } from "@common/utils/next";
 import { DebugButton } from "@components/utils/debug/DebugButton";
-import { Box, Container, Grid, GridCol, Heading, Stat, Text } from "@design-system";
+import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Stat, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
 import { getStats } from "@services/server/getDeclarationStats";
-import { DetailedDownload } from "packages/app/src/design-system/base/DetailedDownload";
 import { Suspense } from "react";
 
 import { SearchSirenForm } from "../../SearchSirenForm";

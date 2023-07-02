@@ -17,6 +17,11 @@
     font-size: 0.875rem;
     white-space: nowrap;
     border-bottom: 2px solid var(--border-plain-grey);
+    cursor: default;
+}
+
+.tableHeadColClickable {
+    cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {

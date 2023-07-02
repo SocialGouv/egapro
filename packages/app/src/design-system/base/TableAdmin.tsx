@@ -1,3 +1,4 @@
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type PropsWithChildren } from "react";
 import { forwardRef } from "react";
 
@@ -26,7 +27,12 @@ export const TableAdminHeadCol = ({
   orderDirection,
   onClick,
 }: PropsWithChildren<TableAdminHeadColProps>) => (
-  <th className={style.tableHeadCol} scope="col" colSpan={colSpan} onClick={onClick}>
+  <th
+    className={cx(style.tableHeadCol, onClick && style.tableHeadColClickable)}
+    scope="col"
+    colSpan={colSpan}
+    onClick={onClick}
+  >
     {children}
     {orderDirection && <span>{orderDirection === "asc" ? "⬆" : "⬇"}</span>}
   </th>

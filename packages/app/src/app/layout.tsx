@@ -6,7 +6,7 @@ import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
-import { FeatureStatusProvider } from "@components/rdsfr/FeatureStatusProvider";
+import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
 import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
 import Link from "next/link";

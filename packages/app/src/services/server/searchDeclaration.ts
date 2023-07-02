@@ -8,6 +8,8 @@ const useCase = new SearchDeclaration(declarationSearchRepo);
 
 /**
  * Server side direct search for declarations in database.
+ *
+ * @deprecated convert to server action instead
  */
 export const search = async (input: SearchConsultationDTO) => {
   return useCase.execute({

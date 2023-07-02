@@ -10,22 +10,19 @@ import {
   SendRepresentationEquilibreeReceiptError,
 } from "@api/core-domain/useCases/SendRepresentationEquilibreeReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
+import { assertSession } from "@api/utils/serverAction";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { AppError } from "@common/shared-domain";
-import { getServerActionSession } from "@common/utils/next-auth";
 import { revalidatePath } from "next/cache";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
-  const session = await getServerActionSession();
-  if (!session?.user) {
-    throw new AppError("No session found.");
-  }
-
-  const isOwner = session.user.companies.some(company => company.siren === siren);
-  if (!(isOwner || session.user.staff)) {
-    throw new AppError("Not authorized to fetch repeq for this siren.");
-  }
+  await assertSession({
+    owner: {
+      check: siren,
+      message: "Not authorized to fetch repeq for this siren.",
+    },
+    staff: true,
+  });
 
   // handle default errors
   const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
@@ -39,15 +36,13 @@ export async function getCompany(siren: string) {
 }
 
 export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {
-  const session = await getServerActionSession();
-  if (!session?.user) {
-    throw new AppError("No session found.");
-  }
-
-  const isOwner = session.user.companies.some(company => company.siren === repEq.siren);
-  if (!(isOwner || session.user.staff)) {
-    throw new AppError("Not authorized to save repeq for this siren.");
-  }
+  const session = await assertSession({
+    owner: {
+      check: repEq.siren,
+      message: "Not authorized to save repeq for this siren.",
+    },
+    staff: true,
+  });
 
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
   await useCase.execute({ repEq, override: session.user.staff });
@@ -65,15 +60,13 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {
-  const session = await getServerActionSession();
-  if (!session?.user) {
-    throw new AppError("No session found.");
-  }
-
-  const isOwner = session.user.companies.some(company => company.siren === siren);
-  if (!(isOwner || session.user.staff)) {
-    throw new AppError("Not authorized to send repEq receipt for this siren.");
-  }
+  const session = await assertSession({
+    owner: {
+      check: siren,
+      message: "Not authorized to send repEq receipt for this siren.",
+    },
+    staff: true,
+  });
 
   const useCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
