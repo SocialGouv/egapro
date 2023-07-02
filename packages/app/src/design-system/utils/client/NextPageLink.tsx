@@ -13,7 +13,7 @@ export const NextPageLink = () => {
   const router = useRouter();
 
   const nextPage = String((parseInt(searchParams?.get("page") ?? "0") || 0) + 1);
-  const cleanSearchParams = new URLSearchParams(searchParams ?? {});
+  const cleanSearchParams = new URLSearchParams([...(searchParams?.entries() ?? [])]);
   cleanSearchParams.set("page", nextPage);
   const url = `${pathname}?${cleanSearchParams.toString()}`;
 

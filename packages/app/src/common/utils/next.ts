@@ -68,3 +68,7 @@ export type NextRouteHandler<TParams extends string = string> = (
     };
   },
 ) => NextResponse | Promise<NextResponse | Response> | Response;
+
+export type GenerateStaticParams<TParams extends string = string> = () => Promise<
+  Array<{ params: Record<TParams, string> }>
+>;

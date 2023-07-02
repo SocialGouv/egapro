@@ -7,9 +7,9 @@ import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/va
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { PercentagesPairInputs } from "@components/rdsfr/PercentagesPairInputs";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, FormLayout } from "@design-system";
+import { PercentagesPairInputs } from "@design-system/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

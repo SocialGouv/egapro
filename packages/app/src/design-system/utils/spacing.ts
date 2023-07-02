@@ -1,12 +1,14 @@
 import { type FrCxArg, type SpacingToken } from "@codegouvfr/react-dsfr";
 
 export type SpacingProps = {
-  mb?: SpacingToken;
-  ml?: SpacingToken;
-  mr?: SpacingToken;
-  mt?: SpacingToken;
+  m?: SpacingToken | "auto";
+  mb?: SpacingToken | "auto";
+  ml?: SpacingToken | "auto";
+  mr?: SpacingToken | "auto";
+  mt?: SpacingToken | "auto";
   mx?: SpacingToken | "auto";
-  my?: SpacingToken;
+  my?: SpacingToken | "auto";
+  p?: SpacingToken;
   pb?: SpacingToken;
   pl?: SpacingToken;
   pr?: SpacingToken;
@@ -30,6 +32,5 @@ export const buildSpacingClasses = ({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px
   py && `fr-py-${py}`,
 ];
 
-export type MarginProps = Omit<SpacingProps, "pb" | "pl" | "pr" | "pt" | "px" | "py">;
-
-export type PaddingProps = Omit<SpacingProps, "mb" | "ml" | "mr" | "mt" | "mx" | "my">;
+export type MarginProps = Omit<SpacingProps, "p" | "pb" | "pl" | "pr" | "pt" | "px" | "py">;
+export type PaddingProps = Omit<SpacingProps, "m" | "mb" | "ml" | "mr" | "mt" | "mx" | "my">;

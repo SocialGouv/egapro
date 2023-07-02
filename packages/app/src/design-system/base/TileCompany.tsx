@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { type Any } from "@common/utils/types";
 import { clsx } from "clsx";
 import { type PropsWithChildren } from "react";
 
-import { FormButton } from "./FormButton";
 import { Grid } from "./Grid";
 import style from "./TileCompany.module.css";
 import { Text } from "./Typography";
@@ -127,8 +127,8 @@ type TileCompanyLoadMoreProps = {
 
 export const TileCompanyLoadMore = ({ onClick }: TileCompanyLoadMoreProps) => (
   <div className={style.tableCompanyLoadMore}>
-    <FormButton size="sm" variant="tertiary-no-outline" onClick={onClick} iconLeft="fr-icon-add-line">
+    <Button size="small" priority="tertiary no outline" onClick={onClick} iconId="fr-icon-add-line" iconPosition="left">
       Afficher plus d’années
-    </FormButton>
+    </Button>
   </div>
 );

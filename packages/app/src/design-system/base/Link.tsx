@@ -1,11 +1,10 @@
+import { type FrIconClassName } from "@codegouvfr/react-dsfr";
 import { clsx } from "clsx";
 import { forwardRef } from "react";
 
-import { type IconStyle } from "../utils/icon-styles";
-
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  iconLeft?: IconStyle;
-  iconRight?: IconStyle;
+  iconLeft?: FrIconClassName;
+  iconRight?: FrIconClassName;
   isCurrent?: boolean;
   isDisabled?: boolean;
   size?: "lg" | "sm";

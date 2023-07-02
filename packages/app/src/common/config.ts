@@ -1,6 +1,5 @@
 import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
-import { type Any } from "./utils/types";
 
 export type FeatureFlag = keyof typeof config.ff;
 
@@ -72,7 +71,7 @@ export const config = {
           "/representation-equilibree/transmission",
           "/representation-equilibree/validation",
         ],
-        staffRoutes: ["/needstaff"],
+        staffRoutes: ["/admin/liste-referents"],
       },
     },
     postgres: {
@@ -90,7 +89,7 @@ export const config = {
 
 // TODO better debug
 if (typeof window !== "undefined") {
-  (window as Any)._egaproConfig = config;
+  window._egaproConfig = config;
 }
 
 interface ServicesConfig {
