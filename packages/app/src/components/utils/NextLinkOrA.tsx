@@ -22,6 +22,9 @@ const removeIsExternal = <T extends NextLinkOrAProps>(props: T) => {
   return rest;
 };
 
+/**
+ * Wrapper around Next.js' Link component that can also be used as a regular <a> tag when no href is provided.
+ */
 export const NextLinkOrA = ({ children, ...rest }: NextLinkOrAProps) =>
   "href" in rest ? (
     rest.isExternal ? (

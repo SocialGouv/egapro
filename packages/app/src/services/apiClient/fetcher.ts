@@ -2,7 +2,6 @@ import { config } from "@common/config";
 import { ApiError } from "next/dist/server/api-utils";
 
 import { type Any } from "../../common/utils/types";
-import { useUserStore } from "./useUser";
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
 
@@ -48,7 +47,7 @@ const genericFetch = async (endpoint: string, options: FetcherOptions = { throwE
       ...(options?.headers ?? {
         "Content-Type": "application/json",
       }),
-      "API-KEY": useUserStore.getState().token,
+      // "API-KEY": useUserStore.getState().token,
     },
   };
 

@@ -6,6 +6,9 @@ export interface ConditionalWrapperProps {
   wrapper: (children: ReactNode) => JSX.Element;
 }
 
+/**
+ * Wrapper component that conditionally wraps its children in a wrapper component.
+ */
 export const ConditionalWrapper = ({
   condition,
   wrapper,

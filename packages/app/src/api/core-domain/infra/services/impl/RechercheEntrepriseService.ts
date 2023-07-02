@@ -1,7 +1,7 @@
-import { StatusCodes } from "@api/shared-domain/infra/http/Controller";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { type Objectize } from "@common/utils/types";
+import { StatusCodes } from "http-status-codes";
 import { stringify } from "querystring";
 
 import {
