@@ -20,15 +20,17 @@ const boxProps = ({
   ml,
   mx,
   my,
+  m,
   pt,
   pr,
   pb,
   pl,
   px,
   py,
+  p,
   ...rest
 }: Omit<BoxProps, "as">): React.HTMLAttributes<HTMLDivElement> => ({
-  className: cx(fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py })), className),
+  className: cx(fr.cx(buildSpacingClasses({ mt, mr, mb, ml, mx, my, m, pt, pr, pb, pl, px, py, p })), className),
   ...rest,
 });
 
