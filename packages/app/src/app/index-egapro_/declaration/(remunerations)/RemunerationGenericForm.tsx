@@ -6,7 +6,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { zodRealIntegerSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
+import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";

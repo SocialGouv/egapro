@@ -1,7 +1,7 @@
 "use client";
 
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
-import { ClientOnly } from "@components/ClientOnly";
+import { ClientOnly } from "@components/utils/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
 import { nbSteps } from "../../declarationFunnelConfiguration";

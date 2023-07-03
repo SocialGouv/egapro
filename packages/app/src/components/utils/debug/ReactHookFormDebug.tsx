@@ -1,6 +1,7 @@
 import { formatZodErrors } from "@common/utils/debug";
-import { ClientOnly } from "@components/ClientOnly";
 import { useFormContext } from "react-hook-form";
+
+import { ClientOnly } from "../ClientOnly";
 
 export const ReactHookFormDebug = () => {
   const {

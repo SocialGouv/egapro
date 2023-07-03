@@ -3,9 +3,9 @@
 import Input from "@codegouvfr/react-dsfr/Input";
 import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodRealPercentageSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
 import { IndicatorNote } from "@components/IndicatorNote";
 import { PopulationFavorable } from "@components/PopulationFavorable";
+import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";

@@ -17,7 +17,7 @@
  * } = useUser();
  * ```
  */
-export const useUserMocked = ({ redirectTo }: { redirectTo?: string } = {}) => {
+export const useUserMocked = ({ redirectTo: _ }: { redirectTo?: string } = {}) => {
   return {
     user: { email: "john.maclane@gmail.com" },
     error: "",

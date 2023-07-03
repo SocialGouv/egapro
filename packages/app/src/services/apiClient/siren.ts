@@ -1,10 +1,12 @@
 import { type DeclarationDTO } from "@common/models/generated";
-import { type Entreprise } from "@common/models/representation-equilibree";
+import { type Any } from "@common/utils/types";
 import moize from "moize";
 
 import { fetcher } from "./fetcher";
 
 export type EntrepriseType = DeclarationDTO["entreprise"];
+
+type Entreprise = Any;
 
 export const formatAdresse = (entreprise: Entreprise | EntrepriseType) => {
   return [entreprise.adresse, entreprise.code_postal, entreprise.commune];

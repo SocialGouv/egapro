@@ -1,6 +1,7 @@
 import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
+import { type EmptyObject } from "@common/utils/types";
 
 import { type Entreprise } from "./entreprise";
 
@@ -35,8 +36,8 @@ export type DeclarationFormState = {
     // entreprise?: EntrepriseType;
     status: "creation" | "edition";
   };
-  augmentations?: {};
-  "augmentations-et-promotions"?: {};
+  augmentations?: EmptyObject;
+  "augmentations-et-promotions"?: EmptyObject;
   commencer?: {
     annéeIndicateurs: number;
     entrepriseDéclarante?: Entreprise;
@@ -72,8 +73,8 @@ export type DeclarationFormState = {
     | {
         périodeSuffisante: "non";
       };
-  promotions?: {};
-  publication?: {};
+  promotions?: EmptyObject;
+  publication?: EmptyObject;
   remunerations?: {
     cse?: OuiNon;
     dateConsultationCSE?: string;
@@ -103,12 +104,12 @@ export type DeclarationFormState = {
     populationFavorable: PopulationFavorable;
     résultat: number;
   };
-  "resultat-global"?: {};
+  "resultat-global"?: EmptyObject;
   ues?: {
     name: string;
     sirens: string[];
   };
-  "validation-transmission"?: {};
+  "validation-transmission"?: EmptyObject;
 };
 
 export const DeclarationFormBuilder = {

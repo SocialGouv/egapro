@@ -113,7 +113,7 @@ const DeclarationFooter = () => {
   );
 };
 
-const DeclarationLayout = ({ children }: Omit<PropsWithChildren<Props>, "authenticated">) => {
+const DeclarationLayout = ({ children }: PropsWithChildren) => {
   return (
     <>
       <DeclarationHeader />

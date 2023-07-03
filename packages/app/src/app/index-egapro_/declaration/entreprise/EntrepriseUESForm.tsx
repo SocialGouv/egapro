@@ -1,7 +1,7 @@
 "use client";
 
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { ClientOnly } from "@components/ClientOnly";
+import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";

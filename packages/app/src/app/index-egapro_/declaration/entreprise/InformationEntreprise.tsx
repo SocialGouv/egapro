@@ -1,6 +1,5 @@
 "use client";
 
-import { ClientOnly } from "@components/ClientOnly";
 import {
   RecapSection,
   RecapSectionItem,
@@ -9,6 +8,7 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@components/next13/RecapSection";
+import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { fetcher, useConfig } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
