@@ -82,14 +82,32 @@ export const EffectifsForm = () => {
           body={[
             {
               categoryLabel: "Ouvriers",
+              isDeletable: true,
               subRows: [
                 {
                   label: "Moins de 30 ans",
-                  cols: ["-", "-"],
+                  cols: [
+                    {
+                      nativeInputProps: {},
+                      label: "Moins de 30 ans, ouvriers, femmes",
+                      state: "error",
+                      stateRelatedMessage: "Erreur",
+                    },
+                    {
+                      nativeInputProps: {},
+                      label: "Moins de 30 ans, ouvriers, hommes",
+                    },
+                  ],
                 },
                 {
                   label: "De 30 à 39 ans",
-                  cols: ["-", "-"],
+                  cols: [
+                    "-",
+                    {
+                      nativeInputProps: {},
+                      label: "30 39, ouvriers, hommes",
+                    },
+                  ],
                 },
                 {
                   label: "De 40 à 49 ans",

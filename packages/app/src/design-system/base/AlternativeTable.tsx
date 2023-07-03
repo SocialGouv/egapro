@@ -2,17 +2,10 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
-import {
-  type DetailedHTMLProps,
-  type InputHTMLAttributes,
-  type PropsWithChildren,
-  type ReactNode,
-  useEffect,
-  useId,
-  useState,
-} from "react";
+import { type PropsWithChildren, type ReactNode, useEffect, useId, useState } from "react";
 
 import styles from "./AlternativeTable.module.css";
 
@@ -104,8 +97,20 @@ export namespace AlternativeTableProps {
     subRows?: [SubRow, ...SubRow[]];
   }
 
-  type InputProps = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-  type ColType = InputProps | ReactNode;
+  export type CellInputProps = Omit<
+    InputProps,
+    | "classes"
+    | "className"
+    | "hideLabel"
+    | "hintText"
+    | "iconId"
+    | "nativeInputProps"
+    | "nativeTextAreaProps"
+    | "style"
+    | "textArea"
+  > &
+    Required<Pick<InputProps, "nativeInputProps">>;
+  export type ColType = CellInputProps | number | string;
   export interface SubRow {
     cols?: [ColType, ...ColType[]];
     label: ReactNode;
@@ -136,6 +141,10 @@ function validateProps(props: AlternativeTableProps) {
   return {
     maxCols,
   };
+}
+
+function isDsfrInputProps(props: AlternativeTableProps.ColType): props is AlternativeTableProps.CellInputProps {
+  return (props as AlternativeTableProps.CellInputProps).nativeInputProps !== undefined;
 }
 
 export const AlternativeTable = (props: AlternativeTableProps) => {
@@ -206,7 +215,11 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                     </AlternativeTableCell>
                     {subItem.cols?.map((col, k) => (
                       <AlternativeTableCell key={k} align="right">
-                        <>{col}</>
+                        {isDsfrInputProps(col) ? (
+                          <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                        ) : (
+                          col
+                        )}
                       </AlternativeTableCell>
                     ))}
                     {subItem.mergedLabel && (
