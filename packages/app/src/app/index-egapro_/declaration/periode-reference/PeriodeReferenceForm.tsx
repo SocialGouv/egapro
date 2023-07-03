@@ -117,7 +117,7 @@ export const PeriodeReferenceForm = () => {
                 // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
                 stateRelatedMessage={errors.finPériodeRéférence?.message}
               />
-              <Button className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
+              <Button type="button" className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
                 Sélectionner la fin de l'année civile
               </Button>
               <Input
