@@ -1,3 +1,5 @@
+"use client";
+
 import Input from "@codegouvfr/react-dsfr/Input";
 import { truncFloatToOneDecimal } from "@common/utils/number";
 import { type SimpleObject } from "@common/utils/types";
