@@ -125,24 +125,23 @@
     background-color: var(--active);
 }
 
-.modale-button {
-    margin-top: -2rem !important;
+.modal-button {
+    margin-top: -.5rem !important;
     margin-bottom: -2rem !important;
-    transform: translateY(.25rem);
     padding: 0 !important;
     box-shadow: none !important;
 }
 
-.modale-button:hover,
-.modale-button:active {
+.modal-button:hover,
+.modal-button:active {
     background-color: transparent !important;
 }
 
-.modale-button::before {
+.modal-button::before {
     margin: 0 !important;
 }
 
-.modale-button::after {
+.modal-button::after {
     display: block;
     content: "";
     position: absolute;
@@ -155,6 +154,6 @@
     width: 100%;
 }
 
-.modale {
+.modal {
     font-weight: initial;
 }

@@ -43,11 +43,6 @@ export const dateObjectToDateISOString = (date: Date) => formatISO(date, { repre
 export const dateObjectToDateTimeISOString = (date: Date) => dateObjectToDateISOString(date) + "T00:00:00+00:00";
 
 /**
- * Return ISO string representation of a date, with time set to 00:00:00, as expected by the API v1.
- */
-export const dateObjectToDateTimeISOString = (date: Date) => dateObjectToDateISOString(date) + "T00:00:00+00:00";
-
-/**
  * True if the date is older than the current date minus the duration.
  *
  * @param duration Duration from date-fns

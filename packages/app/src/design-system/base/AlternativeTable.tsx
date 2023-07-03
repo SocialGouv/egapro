@@ -10,6 +10,7 @@ import {
   type PropsWithChildren,
   type ReactNode,
   useEffect,
+  useId,
   useState,
 } from "react";
 
@@ -35,10 +36,13 @@ export const AlternativeTableCell = ({
   children,
   informations,
 }: AlternativeTableCellProps) => {
-  const modal = createModal({
-    id: `modal${children ? `-${children.toString().toLowerCase().replace(/\s+/g, "-")}` : ""}`,
-    isOpenedByDefault: false,
-  });
+  const id = useId();
+  const modal = informations
+    ? createModal({
+        id: `modal-${id}`,
+        isOpenedByDefault: false,
+      })
+    : null;
   return (
     <HtmlTag
       className={cx(
@@ -55,23 +59,23 @@ export const AlternativeTableCell = ({
       {informations && (
         <>
           <Button
-            nativeButtonProps={modal.buttonProps}
+            nativeButtonProps={modal?.buttonProps}
             size="small"
             iconId="fr-icon-information-fill"
             priority="tertiary"
-            title="Label button"
-            className={styles["modale-button"]}
+            title="Plus d'informations"
+            className={styles["modal-button"]}
           />
-          <modal.Component title={children} className={styles.modale}>
-            {informations}
-          </modal.Component>
+          {modal && (
+            <modal.Component title={children} className={styles.modal}>
+              {informations}
+            </modal.Component>
+          )}
         </>
       )}
     </HtmlTag>
   );
 };
-
-export const AlternativeTableRow = ({ children }: PropsWithChildren) => <tr>{children}</tr>;
 
 export interface AlternativeTableProps {
   body: AlternativeTableProps.BodyContent[];
@@ -182,7 +186,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             <tbody key={index}>
               {row.subRows ? (
                 row.subRows.map((subItem, j) => (
-                  <AlternativeTableRow key={j}>
+                  <tr key={j}>
                     {j === 0 && (
                       <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
                         <span>{row.categoryLabel}</span>
@@ -210,17 +214,17 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                         <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
                       </AlternativeTableCell>
                     )}
-                  </AlternativeTableRow>
+                  </tr>
                 ))
               ) : (
-                <AlternativeTableRow>
+                <tr>
                   <AlternativeTableCell as="th" scope="rowgroup">
                     {row.categoryLabel}
                   </AlternativeTableCell>
                   <AlternativeTableCell colSpan={maxCols - 1} align="center">
                     <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
                   </AlternativeTableCell>
-                </AlternativeTableRow>
+                </tr>
               )}
             </tbody>
           );

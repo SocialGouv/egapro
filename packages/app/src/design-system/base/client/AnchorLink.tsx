@@ -1,3 +1,5 @@
+"use client";
+
 import { type PropsWithChildren } from "react";
 
 export interface AnchorLinkProps {

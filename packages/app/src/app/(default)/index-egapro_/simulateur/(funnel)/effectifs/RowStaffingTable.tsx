@@ -1,5 +1,5 @@
 import Input from "@codegouvfr/react-dsfr/Input";
-import { AlternativeTableCell, AlternativeTableRow } from "@design-system";
+import { AlternativeTableCell } from "@design-system";
 
 export type StaffingSubRowProps = {
   errorMessage?: string;
@@ -38,20 +38,20 @@ export type RowStaffingTableProps = {
 
 export const RowStaffingTable = ({ category }: RowStaffingTableProps) => (
   <>
-    <AlternativeTableRow>
+    <tr>
       <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
         {category}
       </AlternativeTableCell>
       <StaffingSubRow label="Moins de 30 ans" />
-    </AlternativeTableRow>
-    <AlternativeTableRow>
+    </tr>
+    <tr>
       <StaffingSubRow label="De 30 à 39 ans" />
-    </AlternativeTableRow>
-    <AlternativeTableRow>
+    </tr>
+    <tr>
       <StaffingSubRow label="De 40 à 49 ans" />
-    </AlternativeTableRow>
-    <AlternativeTableRow>
+    </tr>
+    <tr>
       <StaffingSubRow label="50 ans et plus" />
-    </AlternativeTableRow>
+    </tr>
   </>
 );
