@@ -35,6 +35,16 @@ export type FetcherOptions = RequestInit & { throwErrorOn404?: boolean };
 /**
  * Fetcher which can use an options and handles error in a generic way.
  *
+ * If API needs a token, add it into the headers like this:
+ *
+ * fetcher(`/url`, {
+ *  headers: {
+ *   "API-KEY": session.data.user.tokenApiV1,
+ *  },
+ * })
+ *
+ * PS: you can get the session with useSession for client component and getServerSession(authConfig) for server component.
+ *
  * @param endpoint the full end point to use
  * @param options the request options (optional) + throwErrorOn404 to consider 404 as an error or not
  * @returns the JSON response

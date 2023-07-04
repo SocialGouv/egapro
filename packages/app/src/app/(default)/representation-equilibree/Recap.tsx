@@ -1,9 +1,9 @@
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
-import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
+import { RecapCardCompany } from "packages/app/src/design-system/base/client/RecapCardCompany";
 
 export interface DetailRepEqProps {
   edit?: boolean;
@@ -30,19 +30,9 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
           }
         />
       )}
-      <RecapCard
-        title="Informations entreprise"
-        content={
-          <>
-            <strong>{repEq.company.name}</strong>
-            <br />
-            {repEq.company.address}, {repEq.company.postalCode} {repEq.company.city}
-            {repEq.company.countryCode !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[repEq.company.countryCode]}`}
-            <br />
-            Siren : {repEq.siren} - Code NAF : {repEq.company.nafCode} - {NAF[repEq.company.nafCode].description}
-          </>
-        }
-      />
+
+      <RecapCardCompany company={repEq.company} />
+
       {!publicMode && (
         <RecapCard
           title="Période de référence"

@@ -1,3 +1,4 @@
+import { type Any } from "@common/utils/types";
 import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
 
@@ -45,8 +46,11 @@ export const filterDepartements = (config: ConfigTypeFormatted, region?: string)
     : DEPARTEMENTS_TRIES.filter(([key, _]) => REGIONS_TO_DEPARTEMENTS[region].includes(key));
 };
 
-export const useConfig = (): FetcherReturnImmutable & { config: ConfigTypeFormatted } => {
-  const { data, error } = useSWRImmutable<ConfigTypeApi>("/config");
+/**
+ * Runtime use of the config API endpoint. The fetcher is optional if SWRConfig wraps the components using this hook.
+ */
+export const useConfig = (fetcher?: Any): FetcherReturnImmutable & { config: ConfigTypeFormatted } => {
+  const { data, error } = useSWRImmutable<ConfigTypeApi>("/config", fetcher);
 
   const isLoading = !data && !error;
   const isError = Boolean(error);
@@ -64,8 +68,9 @@ export const useConfig = (): FetcherReturnImmutable & { config: ConfigTypeFormat
       codeRegion ? (!REGIONS ? codeRegion : REGIONS[codeRegion]) : "",
     departementLabelFromCode: (codeDepartement: string | undefined) =>
       codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "",
-    nafLabelFromCode: (codeNaf: string | undefined) =>
-      codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "",
+    nafLabelFromCode: (codeNaf: string | undefined) => {
+      return codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
+    },
   };
 
   // We want to ensure that the data is always the same object on every render, once there is a value.

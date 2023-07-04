@@ -15,7 +15,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
 
-  if (pathname.startsWith("/_index-egapro/") && !_config.ff.declaV2) {
+  if (pathname.startsWith("/index-egapro_/") && !_config.ff.declaV2) {
     console.log("DeclarationV2 disabled, redirecting 404", pathname);
     return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
