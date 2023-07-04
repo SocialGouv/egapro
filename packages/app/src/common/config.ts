@@ -27,7 +27,7 @@ export const config = {
     return {
       apiV2: {
         enabled: this.env === "dev",
-        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration"],
+        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration", "/apiv2/public"],
       },
       declaV2: this.env === "dev",
       moncomptepro: this.env === "dev",
