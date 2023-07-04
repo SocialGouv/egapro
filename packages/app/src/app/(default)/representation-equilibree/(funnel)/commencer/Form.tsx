@@ -5,13 +5,14 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { getRepresentationEquilibree } from "../../actions";
@@ -34,6 +35,8 @@ export const CommencerForm = ({ session }: { session: Session }) => {
   const schemaWithOwnedSiren = session.user.staff
     ? createSteps.commencer
     : createSteps.commencer.superRefine((val, ctx) => {
+        console.log("companies:", companies);
+
         if (!companies.some(company => company.siren === val.siren)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -43,17 +46,19 @@ export const CommencerForm = ({ session }: { session: Session }) => {
         }
       });
 
+  const methods = useForm<CommencerFormType>({
+    mode: "onChange",
+    resolver: zodResolver(schemaWithOwnedSiren),
+    defaultValues: funnel,
+  });
+
   const {
     register,
     handleSubmit,
     setValue,
     reset: resetForm,
     formState: { errors, isValid },
-  } = useForm<CommencerFormType>({
-    mode: "onChange",
-    resolver: zodResolver(schemaWithOwnedSiren),
-    defaultValues: funnel,
-  });
+  } = methods;
 
   const saveAndGoNext = async (siren: string, year: number) =>
     startTransition(async () => {
@@ -112,73 +117,76 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormLayout>
-          <Select
-            label="Année au titre de laquelle les écarts de représentation sont calculés"
-            state={errors.year && "error"}
-            stateRelatedMessage={errors.year?.message}
-            nativeSelectProps={register("year", {
-              valueAsNumber: true,
-            })}
-          >
-            <option value="" disabled>
-              Sélectionnez une année
-            </option>
-            {yearsRepEq.map(year => (
-              <option value={year} key={`year-select-${year}`}>
-                {year}
-              </option>
-            ))}
-          </Select>
-          {session.user.staff ? (
-            <Input
-              label="Siren entreprise (staff)"
-              state={errors.siren && "error"}
-              stateRelatedMessage={errors.siren?.message}
-              nativeInputProps={register("siren")}
-            />
-          ) : (
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <ReactHookFormDebug />
+          <FormLayout>
             <Select
-              label="Entreprise"
-              state={errors.siren && "error"}
-              stateRelatedMessage={errors.siren?.message}
-              nativeSelectProps={register("siren")}
+              label="Année au titre de laquelle les écarts de représentation sont calculés"
+              state={errors.year && "error"}
+              stateRelatedMessage={errors.year?.message}
+              nativeSelectProps={register("year", {
+                valueAsNumber: true,
+              })}
             >
               <option value="" disabled>
-                Sélectionnez une entreprise
+                Sélectionnez une année
               </option>
-              {sortBy(companies, "siren").map(company => (
-                <option key={company.siren} value={company.siren}>
-                  {company.siren}
-                  {company.label ? ` (${company.label})` : ""}
+              {yearsRepEq.map(year => (
+                <option value={year} key={`year-select-${year}`}>
+                  {year}
                 </option>
               ))}
             </Select>
-          )}
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttons={[
-              {
-                children: "Réinitialiser",
-                priority: "secondary",
-                onClick: confirmReset,
-                type: "button",
-                nativeButtonProps: {
-                  disabled: funnel ? !funnel.siren : false,
+            {session.user.staff ? (
+              <Input
+                label="Siren entreprise (staff)"
+                state={errors.siren && "error"}
+                stateRelatedMessage={errors.siren?.message}
+                nativeInputProps={register("siren")}
+              />
+            ) : (
+              <Select
+                label="Entreprise"
+                state={errors.siren && "error"}
+                stateRelatedMessage={errors.siren?.message}
+                nativeSelectProps={register("siren")}
+              >
+                <option value="" disabled>
+                  Sélectionnez une entreprise
+                </option>
+                {sortBy(companies, "siren").map(company => (
+                  <option key={company.siren} value={company.siren}>
+                    {company.siren}
+                    {company.label ? ` (${company.label})` : ""}
+                  </option>
+                ))}
+              </Select>
+            )}
+            <ButtonsGroup
+              inlineLayoutWhen="sm and up"
+              buttons={[
+                {
+                  children: "Réinitialiser",
+                  priority: "secondary",
+                  onClick: confirmReset,
+                  type: "button",
+                  nativeButtonProps: {
+                    disabled: funnel ? !funnel.siren : false,
+                  },
                 },
-              },
-              {
-                children: "Suivant",
-                type: "submit",
-                nativeButtonProps: {
-                  disabled: !isValid && !isPending,
+                {
+                  children: "Suivant",
+                  type: "submit",
+                  nativeButtonProps: {
+                    disabled: !isValid && !isPending,
+                  },
                 },
-              },
-            ]}
-          />
-        </FormLayout>
-      </form>
+              ]}
+            />
+          </FormLayout>
+        </form>
+      </FormProvider>
     </>
   );
 };

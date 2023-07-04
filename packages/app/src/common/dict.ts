@@ -44,6 +44,13 @@ export const WORKFORCES = {
   "1000:": "De 1000 ou plus",
 } as const;
 
+export const entrepriseTypes = {
+  Entreprise: "entreprise",
+  UES: "ues",
+} as const;
+
+export type EntrepriseTypes = typeof entrepriseTypes;
+
 export type REGIONS = typeof REGIONS;
 export const REGIONS = {
   "01": "Guadeloupe",
