@@ -10,11 +10,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "editor.acceptSuggestionOnCommitCharacter": false,
-  "editor.suggest.localityBonus": true,
-  "editor.suggestSelection": "recentlyUsed",
-  "editor.wordBasedSuggestions": false,
-  "editor.parameterHints.enabled": true,
   "[typescript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
