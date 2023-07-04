@@ -1,3 +1,10 @@
+## [2.89.5](https://github.com/SocialGouv/egapro/compare/v2.89.4...v2.89.5) (2023-07-04)
+
+
+### Bug Fixes
+
+* whiteliste public routes in apiv2 ([9ad7eb8](https://github.com/SocialGouv/egapro/commit/9ad7eb8dfc2f28ecf8113805812378e9b8224ee8))
+
 ## [2.89.4](https://github.com/SocialGouv/egapro/compare/v2.89.3...v2.89.4) (2023-06-28)
 
 
