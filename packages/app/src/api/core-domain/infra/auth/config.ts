@@ -1,6 +1,7 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
 import { config } from "@common/config";
 import { Octokit } from "@octokit/rest";
+import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT } from "next-auth/jwt";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
@@ -16,6 +17,7 @@ declare module "next-auth" {
       lastname?: string;
       phoneNumber?: string;
       staff: boolean;
+      tokenApiV1: string;
     };
   }
 
@@ -104,6 +106,10 @@ export const authConfig: AuthOptions = {
         token.lastname = profile?.family_name ?? void 0;
         token.phoneNumber = profile?.phone_number ?? void 0;
       }
+
+      // Token legacy for usage with API v1.
+      token.tokenApiV1 = createTokenApiV1(token.email);
+
       return token;
     },
     // expose data from jwt to front
@@ -113,7 +119,28 @@ export const authConfig: AuthOptions = {
       session.user.firstname = token.firstname;
       session.user.lastname = token.lastname;
       session.user.phoneNumber = token.phoneNumber;
+      session.user.tokenApiV1 = token.tokenApiV1;
       return session;
     },
   },
+};
+
+/**
+ * Create a token in API v1 expected format.
+ * See packages/api/egapro/tokens.py@create for further details.
+ *
+ * @param email
+ * @returns {string}
+ */
+const createTokenApiV1 = (email: string) => {
+  return jwt.sign(
+    {
+      sub: email,
+    },
+    config.api.security.jwtv1.secret,
+    {
+      algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
+      expiresIn: "7d",
+    },
+  );
 };

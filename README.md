@@ -31,10 +31,11 @@ yarn dev:maildev
 ```
 
 - [api         -> http://localhost:2626](http://localhost:2626)
+    - la configuration vers la DB se fait dans le fichier .env de la racine du monorepo
 - [app         -> http://localhost:3000](http://localhost:3000)
 - `simulateur` a besoin de `api` en local ou de `REACT_APP_EGAPRO_API_URL` d'être renseigné dans le fichier `packages/simulateur/.env` :
   - [simulateur  -> http://localhost:3001/simulateur/nouvelle-simulation](http://localhost:3001/simulateur/nouvelle-simulation)
-- [declaration -> http://localhost:4000](http://localhost:4000)
+- [declaration -> http://localhost:4000/index-egapro/declaration](http://localhost:4000/index-egapro/declaration)
 - [maildev     -> http://localhost:1080](http://localhost:1080)
 
 Tout en un :

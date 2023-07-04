@@ -14,9 +14,28 @@ export const zodYearSchema = z
     message: "L'année doit être un nombre supérieur à 2020",
   });
 
+/**
+ * Représentation d'une date en string.
+ */
 export const zodDateSchema = z.string().refine(val => isValid(parseISO(val)), {
   message: "La date n'est pas valide.",
 });
+
+/**
+ * Représentation d'un nombre en string.
+ */
+export const zodPositiveIntegerSchema = z.string().refine(val => Number.isInteger(Number(val)) && Number(val) > 0, {
+  message: "Un nombre positif est attendu.",
+});
+
+export const zodRealPositiveIntegerSchema = z
+  .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
+  .int({ message: "La valeur doit être un entier" })
+  .positive({ message: "La valeur doit être positive" });
+
+export const zodRealIntegerSchema = z
+  .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
+  .int({ message: "La valeur doit être un entier" });
 
 export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   if (val !== "oui" && val !== "non") {
@@ -30,6 +49,13 @@ export const zodRadioInputSchema = z.string().transform((val, ctx) => {
 });
 
 const INVALID_PERCENTAGE = "Le champ est requis";
+
+export const zodRealPercentageSchema = z
+  .number()
+  .refine(percentage => percentage >= 0, {
+    message: "Le pourcentage doit être positif",
+  })
+  .refine(percentage => percentage <= 100, { message: "Le pourcentage maximum est 100" });
 
 export const zodPercentageSchema = z
   .string()
