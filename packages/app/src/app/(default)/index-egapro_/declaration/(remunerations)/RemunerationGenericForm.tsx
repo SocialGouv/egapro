@@ -18,7 +18,7 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const invalidNumber = "Le champ doit être un nombre";
+const invalidNumber = "La valeur doit être un nombre";
 
 const formSchema = z.object({
   catégories: z.array(

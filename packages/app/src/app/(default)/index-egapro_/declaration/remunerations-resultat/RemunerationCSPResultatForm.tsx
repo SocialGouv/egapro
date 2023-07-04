@@ -2,7 +2,8 @@
 
 import Input from "@codegouvfr/react-dsfr/Input";
 import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodRealPercentageSchema } from "@common/utils/form";
+import { zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -23,7 +24,7 @@ const formSchema = z
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodRealPercentageSchema,
+    résultat: zodRealPositiveIntegerSchema,
   })
   .superRefine(({ note, populationFavorable }, ctx) => {
     if (note !== 40 && !populationFavorable) {
@@ -90,16 +91,10 @@ export const RemunerationCSPResultatForm = () => {
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           {/* <ReactHookFormDebug /> */}
 
-          <Input
+          <PercentageInput
             label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient"
-            nativeInputProps={{
-              type: "number",
-              min: 0,
-              max: 100,
-              ...register(`résultat`, { valueAsNumber: true }),
-            }}
-            state={errors.résultat?.message ? "error" : "default"}
-            stateRelatedMessage={errors.résultat?.message}
+            name="résultat"
+            min={0}
           />
 
           <PopulationFavorable disabled={populationFavorableDisabled} />
