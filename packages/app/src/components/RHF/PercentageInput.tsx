@@ -6,10 +6,12 @@ import { useFormContext } from "react-hook-form";
 type Props = {
   disabled?: boolean;
   label?: string;
+  max?: number;
+  min?: number;
   name: string;
 };
 
-export const PercentageInput = ({ label, name, disabled }: PropsWithChildren<Props>) => {
+export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithChildren<Props>) => {
   const {
     register,
     formState: { errors },
@@ -21,8 +23,8 @@ export const PercentageInput = ({ label, name, disabled }: PropsWithChildren<Pro
         label={label}
         nativeInputProps={{
           type: "number",
-          min: 0,
-          max: 100,
+          min,
+          max,
           step: 0.1,
           ...register(name, {
             valueAsNumber: true,

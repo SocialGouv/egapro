@@ -2,17 +2,15 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import Input from "@codegouvfr/react-dsfr/Input";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { zodRealIntegerSchema } from "@common/utils/form";
+import { PercentageInput } from "@components/RHF/PercentageInput";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type Catégorie, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { get } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -20,15 +18,17 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
+const invalidNumber = "Le champ doit être un nombre";
+
 const formSchema = z.object({
   catégories: z.array(
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": zodRealIntegerSchema,
-        "30:39": zodRealIntegerSchema,
-        "40:49": zodRealIntegerSchema,
-        "50:": zodRealIntegerSchema,
+        ":29": z.number({ invalid_type_error: invalidNumber }),
+        "30:39": z.number({ invalid_type_error: invalidNumber }),
+        "40:49": z.number({ invalid_type_error: invalidNumber }),
+        "50:": z.number({ invalid_type_error: invalidNumber }),
       }),
     }),
   ),
@@ -63,15 +63,15 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
       : "remunerations-coefficient-autre";
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || buildDefaultCategories(mode),
   });
 
   const {
     control,
-    register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors: _errors, isValid },
   } = methods;
 
   const {
@@ -83,9 +83,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
     name: "catégories",
   });
 
-  console.log("errors", errors);
-
-  // const catégories = watch("catégories");
+  // console.log("errors", _errors);
 
   const onSubmit = async (data: FormType) => {
     savePageData(stepName, data as DeclarationFormState[typeof stepName]);
@@ -137,68 +135,16 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
                   <tbody>
                     <tr>
                       <td>
-                        <Input
-                          label=""
-                          nativeInputProps={{
-                            type: "number",
-                            min: 0,
-                            ...register(`catégories.${index}.tranches.:29`, { valueAsNumber: true }),
-                          }}
-                          state={get(errors, `catégories.${index}.tranches.:29`) ? "error" : "default"}
-                          stateRelatedMessage={
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            get(errors, `catégories.${index}.tranches.:29`)?.message
-                          }
-                        />
+                        <PercentageInput name={`catégories.${index}.tranches.:29`} />
                       </td>
                       <td>
-                        <Input
-                          label=""
-                          nativeInputProps={{
-                            type: "number",
-                            min: 0,
-                            ...register(`catégories.${index}.tranches.30:39`, { valueAsNumber: true }),
-                          }}
-                          state={get(errors, `catégories.${index}.tranches.30:39`) ? "error" : "default"}
-                          stateRelatedMessage={
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            get(errors, `catégories.${index}.tranches.30:39`)?.message
-                          }
-                        />
+                        <PercentageInput name={`catégories.${index}.tranches.30:39`} />
                       </td>
                       <td>
-                        <Input
-                          label=""
-                          nativeInputProps={{
-                            type: "number",
-                            min: 0,
-                            ...register(`catégories.${index}.tranches.40:49`, { valueAsNumber: true }),
-                          }}
-                          state={get(errors, `catégories.${index}.tranches.40:49`) ? "error" : "default"}
-                          stateRelatedMessage={
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            get(errors, `catégories.${index}.tranches.40:49`)?.message
-                          }
-                        />
+                        <PercentageInput name={`catégories.${index}.tranches.40:49`} />
                       </td>
                       <td>
-                        <Input
-                          label=""
-                          nativeInputProps={{
-                            type: "number",
-                            min: 0,
-                            ...register(`catégories.${index}.tranches.50:`, { valueAsNumber: true }),
-                          }}
-                          state={get(errors, `catégories.${index}.tranches.50:`) ? "error" : "default"}
-                          stateRelatedMessage={
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            get(errors, `catégories.${index}.tranches.50:`)?.message
-                          }
-                        />
+                        <PercentageInput name={`catégories.${index}.tranches.50:`} />
                       </td>
                     </tr>
                   </tbody>
