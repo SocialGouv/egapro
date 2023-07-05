@@ -53,13 +53,3 @@ jobs:
       with:
         buildArgs:
           REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
-
-    build-declaration:
-      with:
-        buildArgs:
-          EGAPRO_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
-
-    build-simulateur:
-      with:
-        buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"

@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/app"
     ]
   },
   "engines": {
@@ -15,8 +15,6 @@
     "pgadmin": "docker-compose up --build --force-recreate --remove-orphans pgadmin",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
-    "dev:declaration": "docker-compose up --build --renew-anon-volumes --force-recreate --remove-orphans declaration",
-    "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
@@ -26,14 +24,13 @@
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
     "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
-    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
-    "reverse-proxy": "docker-compose up --build --force-recreate --remove-orphans reverse_proxy"
+    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/git": "^10.0.1",
     "@socialgouv/releaserc": "^1.1.1",
-    "concurrently": "^7.2.2",
+    "concurrently": "^8.2.0",
     "semantic-release": "^19"
   }
 }
