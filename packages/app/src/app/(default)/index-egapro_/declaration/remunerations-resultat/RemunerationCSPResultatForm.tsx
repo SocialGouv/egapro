@@ -48,8 +48,8 @@ export const RemunerationCSPResultatForm = () => {
   const methods = useForm<FormType>({
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
-      // console.log("formData", data);
-      // console.log("validation result", await zodResolver(formSchema)(data, context, options));
+      // console.debug("formData", data);
+      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",

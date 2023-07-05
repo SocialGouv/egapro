@@ -1,5 +1,6 @@
 import { type DeclarationDTO } from "@common/models/generated";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import { type FetcherOptions, type FetcherReturn } from "./fetcher";
@@ -61,9 +62,18 @@ export const fetchDeclaration = (siren: string, year: number, options?: FetcherO
 export function useDeclaration(siren?: string, year?: number): FetcherReturn & { declaration?: DeclarationAPI } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined;
 
+  const session = useSession();
+
+  const tokenApiV1 = session.data?.user?.tokenApiV1;
+
   const { data, error, mutate } = useSWR<DeclarationAPI>(
     normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
-    fetcher,
+    url =>
+      fetcher(url, {
+        headers: {
+          "API-KEY": tokenApiV1,
+        } as HeadersInit,
+      }),
     {
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
         // Never retry on 404.

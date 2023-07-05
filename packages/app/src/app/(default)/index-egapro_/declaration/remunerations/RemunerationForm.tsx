@@ -69,25 +69,6 @@ const formSchema = z
 type FormType = z.infer<typeof formSchema>;
 1;
 
-/**
- * The shape of data depends of some conditions on fields. We ensure to always have the correct shape depending on the context.
- */
-// const formatData = (data: FormType): DeclarationFormState["remunerations"] => {
-//   let result;
-
-//   if (data.estCalculable === "non") {
-//     result = pick(data, "estCalculable", "déclarationCalculCSP", "motifNonCalculabilité");
-//   } else if (data.mode === "csp") {
-//     result = pick(data, "estCalculable", "mode");
-//   } else if (data.cse === "oui") {
-//     result = pick(data, "estCalculable", "mode", "cse", "dateConsultationCSE");
-//   } else {
-//     result = pick(data, "estCalculable", "mode", "cse");
-//   }
-
-//   return result as DeclarationFormState["remunerations"]; // Fix limit of pick which can't infer that estCalculable is always present.
-// };
-
 const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {

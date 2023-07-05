@@ -12,7 +12,7 @@ type FunnelStep<FunnelKey> = {
   previous: () => StaticConfigValue;
 };
 
-export type FunnelKey = keyof Omit<DeclarationFormState, "_metadata">;
+export type FunnelKey = keyof DeclarationFormState;
 
 type ExtraFunnelKey = "confirmation" | "declaration-existante";
 
@@ -31,7 +31,7 @@ export const funnelStaticConfig: StaticConfig = {
     url: `${base}/augmentations-et-promotions`,
   },
   declarant: { title: "Déclarant", url: `${base}/declarant` },
-  "declaration-existante": { title: "Commencer", url: `${base}/commencer` },
+  "declaration-existante": { title: "Déclaration existante", url: `${base}/declaration-existante` },
   augmentations: {
     title: "Écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes",
     url: `${base}/augmentations`,
@@ -92,9 +92,8 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
     commencer: {
       indexStep: () => 1,
       next: () =>
-        data?._metadata?.status === "edition"
-          ? // ? `${base}/${data.commencer?.entrepriseDéclarante?.siren}/${data.commencer?.annéeIndicateurs}`
-            funnelStaticConfig[`declaration-existante`]
+        data?.["declaration-existante"]?.status === "consultation"
+          ? funnelStaticConfig[`declaration-existante`]
           : funnelStaticConfig[`entreprise`],
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },

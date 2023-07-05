@@ -83,8 +83,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
     name: "catégories",
   });
 
-  // console.log("errors", _errors);
-
   const onSubmit = async (data: FormType) => {
     savePageData(stepName, data as DeclarationFormState[typeof stepName]);
 

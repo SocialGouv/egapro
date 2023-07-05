@@ -13,7 +13,7 @@ type Actions = {
 };
 
 const formDataDefault: State["formData"] = {
-  _metadata: {
+  "declaration-existante": {
     status: "creation",
   },
 };
