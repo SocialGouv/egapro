@@ -67,7 +67,7 @@
     "@types/dotenv": "^8.2.0",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/mime": "^3.0.1",
-    "@types/node": "16",
+    "@types/node": "^20",
     "@types/nodemailer": "^6.4.6",
     "@types/pg": "^8.6.5",
     "@types/qs": "^6.9.7",

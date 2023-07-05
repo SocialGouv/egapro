@@ -6,9 +6,9 @@ import {
   ExportReferentsError,
   type ValidExportExtension,
 } from "@api/core-domain/useCases/referent/ExportReferents";
-import { nodeToWebStream } from "@api/utils/stream";
 import { ValidationError } from "@common/shared-domain";
 import { type NextRouteHandler } from "@common/utils/next";
+import { type Any } from "@common/utils/types";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
@@ -20,8 +20,7 @@ export const GET: NextRouteHandler<"ext"> = async (_, { params: { ext } }) => {
   try {
     assertExtension(ext);
     const readable = await useCase.execute(ext);
-    const stream = nodeToWebStream(readable);
-    return new NextResponse(stream, {
+    return new NextResponse(readable as Any, {
       status: StatusCodes.OK,
       headers: {
         "Content-Size": `${readable.readableLength}`,

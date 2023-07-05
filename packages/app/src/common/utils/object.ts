@@ -1,9 +1,10 @@
 import {
-  chain,
   isArray,
   isObject,
   map,
+  mapValues,
   type Object as _Object,
+  omitBy,
   type PartialObject,
   type ValueKeyIteratee,
 } from "lodash";
@@ -30,7 +31,13 @@ export const omitByRecursively = <T extends object>(
   iteratee: ValueKeyIteratee<T[keyof T]>,
 ): _Object<PartialObject<T>> => {
   const cb = (v: T) => omitByRecursively(v, iteratee);
-  return (
-    isObject(value) ? (isArray(value) ? map(value, cb) : chain(value).omitBy(iteratee).mapValues(cb).value()) : value
-  ) as _Object<PartialObject<T>>;
+  // return value as _Object<PartialObject<T>>;
+  return (isObject(value)
+    ? isArray(value)
+      ? map(value, cb)
+      : (() => {
+          const omited = omitBy(value, iteratee);
+          return mapValues(omited, cb);
+        })()
+    : value) as unknown as _Object<PartialObject<T>>;
 };
