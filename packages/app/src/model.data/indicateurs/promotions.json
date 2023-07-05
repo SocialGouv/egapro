@@ -13,8 +13,7 @@
           "type": "string",
           "enum": [
             "egvi40pcet",
-            "absprom",
-            "am"
+            "absprom"
           ]
         },
         "catégories": {
