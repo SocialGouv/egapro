@@ -1,9 +1,10 @@
 {
-  "extends": "@tsconfig/next/tsconfig.json",
+  "extends": "@tsconfig/next",
   "compilerOptions": {
     "strict": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
+    "moduleResolution": "node",
     // to trick auto imports
     "baseUrl": "../../",
     "paths": {
