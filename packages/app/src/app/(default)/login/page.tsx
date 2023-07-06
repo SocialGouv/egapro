@@ -41,7 +41,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
 
   return (
-    <CenteredContainer>
+    <CenteredContainer py="6w">
       <h1>{title}</h1>
       {session?.user ? (
         <Alert severity="success" title={session?.user.email} description="Vous êtes déjà connecté·e." />

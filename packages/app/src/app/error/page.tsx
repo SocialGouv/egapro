@@ -27,7 +27,7 @@ const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error
     <>
       <Header />
       <main role="main" id="content" style={{ flexGrow: 1 }}>
-        <CenteredContainer>
+        <CenteredContainer py="6w">
           <Alert title="Erreur" severity="error" description={errorMessage} />
         </CenteredContainer>
       </main>

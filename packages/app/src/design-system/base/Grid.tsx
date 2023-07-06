@@ -39,15 +39,34 @@ Grid.displayName = "Grid";
 type ColsNumberType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 export type GridColProps = PropsWithChildren & {
-  base?: ColsNumberType;
-  className?: string;
-  lg?: ColsNumberType;
-  md?: ColsNumberType;
-  sm?: ColsNumberType;
-  xl?: ColsNumberType;
+  base?: ColsNumberType | `${ColsNumberType}`;
+  className?: CxArg;
+  lg?: ColsNumberType | `${ColsNumberType}`;
+  md?: ColsNumberType | `${ColsNumberType}`;
+  offset?: ColsNumberType | `${ColsNumberType}`;
+  offsetLg?: ColsNumberType | `${ColsNumberType}`;
+  offsetMd?: ColsNumberType | `${ColsNumberType}`;
+  offsetSm?: ColsNumberType | `${ColsNumberType}`;
+  offsetXl?: ColsNumberType | `${ColsNumberType}`;
+  sm?: ColsNumberType | `${ColsNumberType}`;
+  xl?: ColsNumberType | `${ColsNumberType}`;
 };
 
-export const GridCol = ({ base = 12, sm, md, lg, xl, className, children, ...rest }: GridColProps) => (
+export const GridCol = ({
+  base = 12,
+  sm,
+  md,
+  lg,
+  xl,
+  offset,
+  offsetLg,
+  offsetMd,
+  offsetSm,
+  offsetXl,
+  className,
+  children,
+  ...rest
+}: GridColProps) => (
   <Box
     className={cx(
       fr.cx(
@@ -56,6 +75,11 @@ export const GridCol = ({ base = 12, sm, md, lg, xl, className, children, ...res
         md && `fr-col-md-${md}`,
         lg && `fr-col-lg-${lg}`,
         xl && `fr-col-xl-${xl}`,
+        offset && `fr-col-offset-${offset}`,
+        offsetSm && `fr-col-offset-sm-${offsetSm}`,
+        offsetMd && `fr-col-offset-md-${offsetMd}`,
+        offsetLg && `fr-col-offset-lg-${offsetLg}`,
+        offsetXl && `fr-col-offset-xl-${offsetXl}`,
       ),
       className,
     )}

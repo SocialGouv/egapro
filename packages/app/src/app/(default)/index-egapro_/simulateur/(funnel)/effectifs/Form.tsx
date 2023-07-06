@@ -9,7 +9,7 @@ export const EffectifsForm = () => {
   };
   return (
     <form noValidate onSubmit={handleSubmit}>
-      <CenteredContainer>
+      <CenteredContainer py="6w">
         <RadioButtons
           legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)"
           options={[

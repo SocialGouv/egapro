@@ -12,7 +12,7 @@ export const metadata = {
 
 const CommencerPage = async () => {
   return (
-    <CenteredContainer>
+    <CenteredContainer py="6w">
       <Heading as="h1" text={title} />
       <Text
         variant="bold"
