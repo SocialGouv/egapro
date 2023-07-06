@@ -16,7 +16,7 @@ export const metadata = {
 const Transmission = () => {
   return (
     <>
-      <CenteredContainer py="6w">
+      <CenteredContainer pb="6w">
         <Box style={{ textAlign: "center" }}>
           <ImgSuccessLight />
           <h1>Votre déclaration a été transmise</h1>

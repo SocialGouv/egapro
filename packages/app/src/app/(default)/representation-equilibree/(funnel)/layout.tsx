@@ -21,7 +21,7 @@ export const metadata = {
 
 const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
   return (
-    <CenteredContainer py="6w">
+    <CenteredContainer pb="6w">
       <Stepper />
       {children}
     </CenteredContainer>

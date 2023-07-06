@@ -33,13 +33,13 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
     console.error(error);
     if (error instanceof GetRepresentationEquilibreeBySirenAndYearError) {
       return (
-        <CenteredContainer py="6w">
+        <CenteredContainer pb="6w">
           <Alert severity="error" title="Erreur" description={error.message} />
         </CenteredContainer>
       );
     }
     return (
-      <CenteredContainer py="6w">
+      <CenteredContainer pb="6w">
         <Alert severity="error" title="Erreur inattendue" description="Une erreur inattendue est survenue." />
       </CenteredContainer>
     );
@@ -56,7 +56,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const monCompteProHost = monCompteProProvider.issuer;
 
   return (
-    <CenteredContainer py="6w">
+    <CenteredContainer pb="6w">
       <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
       <Highlight>
         Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
