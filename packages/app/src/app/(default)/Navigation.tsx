@@ -1,11 +1,16 @@
 "use client";
 
-import { MainNavigation } from "@codegouvfr/react-dsfr/MainNavigation";
+import { MainNavigation, type MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from "next/navigation";
+import { useSession } from "next-auth/react";
+
+import { adminMenuItems } from "../admin/Navigation";
 
 export const Navigation = () => {
   const segment = useSelectedLayoutSegment();
   const segments = useSelectedLayoutSegments();
+
+  const { data: session } = useSession();
 
   return (
     <MainNavigation
@@ -51,6 +56,19 @@ export const Navigation = () => {
           },
           isActive: segment === "representation-equilibree",
         },
+        ...(session?.user.staff
+          ? [
+              {
+                text: "Admin",
+                menuLinks: adminMenuItems.map(item => ({
+                  text: item.text,
+                  linkProps: {
+                    href: item.href,
+                  },
+                })),
+              } satisfies MainNavigationProps["items"][number],
+            ]
+          : []),
       ]}
     />
   );
