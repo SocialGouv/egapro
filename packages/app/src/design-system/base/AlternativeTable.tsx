@@ -1,11 +1,9 @@
-"use client";
-
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
-import { type PropsWithChildren, type ReactNode, useEffect, useId, useState } from "react";
+import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import styles from "./AlternativeTable.module.css";
 
@@ -152,12 +150,9 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
 
 export const AlternativeTable = (props: AlternativeTableProps) => {
   const { header, footer, body, classeName } = props;
-  const [maxCols, setMaxCols] = useState<number>();
 
-  useEffect(() => {
-    const validated = validateProps(props);
-    setMaxCols(validated.maxCols);
-  }, [props]);
+  const validated = validateProps(props);
+  const maxCols = validated.maxCols;
 
   if (!maxCols) {
     return null;
