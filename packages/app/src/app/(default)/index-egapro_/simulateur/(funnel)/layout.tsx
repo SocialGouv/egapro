@@ -1,6 +1,9 @@
+import { CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
-const title = "Simulateur Index Egapro";
+import { Stepper } from "./Stepper";
+
+const title = "Calcul d'index";
 
 export const metadata = {
   title: {
@@ -16,9 +19,13 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-const SimuFunnelLayout = ({ children }: PropsWithChildren) => {
-  // stepper
-  return <>{children}</>;
+const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
+  return (
+    <CenteredContainer pb="6w">
+      <Stepper />
+      {children}
+    </CenteredContainer>
+  );
 };
 
-export default SimuFunnelLayout;
+export default RepEqFunnelLayout;

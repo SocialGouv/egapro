@@ -10,6 +10,7 @@ export type IconProps = {
   icon: FrIconClassName;
   onClick?: () => void;
   size?: "lg" | "sm" | "xs";
+  title?: string;
 } & (IconProps.WithoutText | IconProps.WithText);
 
 export namespace IconProps {
@@ -32,8 +33,19 @@ export namespace IconProps {
 /**
  * Icon component, based on DSFR's Icon css component.
  */
-export const Icon = ({ icon, onClick, color, size, className, text, iconPosition = "left", valign }: IconProps) => (
+export const Icon = ({
+  icon,
+  onClick,
+  color,
+  size,
+  className,
+  text,
+  iconPosition = "left",
+  valign,
+  ...rest
+}: IconProps) => (
   <span
+    {...rest}
     style={color ? { color: `var(--${color})` } : {}}
     onClick={onClick}
     className={cx(

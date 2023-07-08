@@ -1,12 +1,17 @@
-import Button from "@codegouvfr/react-dsfr/Button";
-import { CenteredContainer, Heading, Text } from "@design-system";
+import { BackNextButtonsGroup, CenteredContainer, Heading, Text } from "@design-system";
 
-const title = "Commencer";
+import { TITLES } from "../(funnel)/titles";
+
+const title = TITLES.commencer;
 
 export const metadata = {
-  title,
+  title: {
+    absolute: `${title} - Calcul d'index`,
+  },
   openGraph: {
-    title,
+    title: {
+      absolute: `${title} - Calcul d'index`,
+    },
   },
 };
 
@@ -19,13 +24,15 @@ const CommencerPage = async () => {
         text="Vous allez commencer le calcul des indicateurs et de l'index de l'égalité professionnelle pour votre entreprise ou unité économique et sociale (UES)."
       />
       <Text text="Suite au calcul, vous pourrez poursuivre vers la déclaration afin de transmettre les résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations nécessaires à la déclaration." />
-      <Button
-        linkProps={{ href: "/index-egapro_/simulateur/effectifs" }}
-        iconId="fr-icon-arrow-right-line"
-        iconPosition="right"
-      >
-        Suivant
-      </Button>
+
+      <BackNextButtonsGroup
+        noBack
+        nextProps={{
+          linkProps: {
+            href: "/index-egapro_/simulateur/effectifs",
+          },
+        }}
+      />
     </CenteredContainer>
   );
 };

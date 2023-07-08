@@ -1,11 +1,10 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
-import { FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -156,26 +155,14 @@ export const CommencerForm = ({ session }: { session: Session }) => {
               ))}
             </Select>
           )}
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttons={[
-              {
-                children: "Réinitialiser",
-                priority: "secondary",
-                onClick: confirmReset,
-                type: "button",
-                nativeButtonProps: {
-                  disabled: funnel ? !funnel.siren : false,
-                },
-              },
-              {
-                children: "Suivant",
-                type: "submit",
-                nativeButtonProps: {
-                  disabled: !isValid && !isPending,
-                },
-              },
-            ]}
+          <BackNextButtonsGroup
+            backProps={{
+              onClick: confirmReset,
+              iconId: void 0,
+            }}
+            nextDisabled={!isValid && !isPending}
+            backDisabled={funnel ? !funnel.siren : false}
+            backLabel="Réinitialiser"
           />
         </FormLayout>
       </form>

@@ -52,7 +52,10 @@ export const AlternativeTableCell = ({
       {informations && (
         <>
           <Button
-            nativeButtonProps={modal?.buttonProps}
+            nativeButtonProps={{
+              ...modal?.buttonProps,
+              type: "button",
+            }}
             size="small"
             iconId="fr-icon-information-fill"
             priority="tertiary"
@@ -248,8 +251,10 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             <tr>
               {footer.map((footerCol, index) => (
                 <AlternativeTableCell key={`td-footer-${index}`} colSpan={footerCol.colspan} align="center">
-                  <span className={cx(fr.cx(footerCol.data ? "fr-text--xs" : null))}>{footerCol.label}</span>
-                  {footerCol.data && (
+                  <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
+                    {footerCol.label}
+                  </span>
+                  {typeof footerCol.data !== "undefined" && (
                     <>
                       <br />
                       <strong>{footerCol.data}</strong>
