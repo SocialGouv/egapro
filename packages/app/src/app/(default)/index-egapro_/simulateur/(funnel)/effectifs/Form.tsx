@@ -2,26 +2,23 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { Object } from "@common/utils/overload";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 
 import { useSimuFunnelStore } from "../useSimuFunnelStore";
-
-Object;
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
 
@@ -45,6 +42,10 @@ export const EffectifsForm = () => {
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const [totalWomen, setTotalWomen] = useState(0);
   const [totalMen, setTotalMen] = useState(0);
+
+  useEffect(() => {
+    updateTotal();
+  }, []);
 
   const {
     formState: { isValid, errors },
@@ -83,7 +84,11 @@ export const EffectifsForm = () => {
     );
   };
 
+  const total = totalMen + totalWomen;
   const onSubmit = (form: EffectifsFormType) => {
+    if (!total) {
+      return;
+    }
     saveFunnel(form);
     router.push("/index-egapro/simulateur/indicateurs-1");
   };
@@ -96,6 +101,17 @@ export const EffectifsForm = () => {
       }
     }
     updateTotal();
+  };
+
+  const resetCSP = () => {
+    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+      for (const ageRange of ageRanges) {
+        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.women`, 0 as never);
+        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.men`, 0 as never);
+      }
+    }
+    setTotalWomen(0);
+    setTotalMen(0);
   };
 
   return (
@@ -167,15 +183,29 @@ export const EffectifsForm = () => {
 
       <ClientAnimate>
         {session?.user.staff && (
-          <Button
-            iconId="fr-icon-github-line"
-            type="button"
-            size="small"
-            onClick={setRandomValues}
-            priority="tertiary no outline"
-          >
-            Staff : Remplir avec des valeurs aléatoires
-          </Button>
+          <ButtonsGroup
+            buttonsEquisized
+            buttonsSize="small"
+            inlineLayoutWhen="sm and up"
+            buttons={[
+              {
+                children: "Staff : Remettre à zéro",
+                onClick: resetCSP,
+                priority: "tertiary no outline",
+                iconId: "fr-icon-delete-fill",
+                className: fr.cx("fr-mb-md-0"),
+                type: "button",
+              },
+              {
+                children: "Staff : Remplir avec des valeurs aléatoires",
+                onClick: setRandomValues,
+                priority: "tertiary no outline",
+                iconId: "fr-icon-github-line",
+                className: fr.cx("fr-mb-md-0"),
+                type: "button",
+              },
+            ]}
+          />
         )}
         <AlternativeTable
           header={[
@@ -243,7 +273,7 @@ export const EffectifsForm = () => {
           footer={[
             {
               label: "Ensemble des salariés",
-              data: totalWomen + totalMen,
+              data: total,
               colspan: 2,
             },
             {
@@ -258,13 +288,22 @@ export const EffectifsForm = () => {
         />
       </ClientAnimate>
 
+      {total === 0 && (
+        <Alert
+          small
+          severity="warning"
+          description="Vous devez renseigner au moins un salarié pour pouvoir continuer."
+          className={fr.cx("fr-mb-4w")}
+        />
+      )}
+
       <BackNextButtonsGroup
         backProps={{
           linkProps: {
             href: "/index-egapro_/simulateur/commencer",
           },
         }}
-        nextDisabled={!isValid}
+        nextDisabled={!isValid || !total}
       />
     </form>
   );
