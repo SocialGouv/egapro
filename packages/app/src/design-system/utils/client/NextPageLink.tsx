@@ -25,7 +25,7 @@ export const NextPageLink = () => {
     <Button
       onClick={e => {
         e.preventDefault();
-        router.replace(`${url}#footer`, { forceOptimisticNavigation: true });
+        router.replace(`${url}#footer`, { scroll: false });
         // TODO remove
         // temp hack with #footer because next auto scroll to top with router.replace or Link
         // https://github.com/vercel/next.js/issues/50398
