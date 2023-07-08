@@ -183,12 +183,13 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             ))}
           </tr>
           <tr>
-            {header.map((headerCol, index) =>
-              headerCol.subCols?.map((headerSubCol, subIndex) => (
-                <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
-                  {headerSubCol.label}
-                </AlternativeTableCell>
-              )),
+            {header.map(
+              (headerCol, index) =>
+                headerCol.subCols?.map((headerSubCol, subIndex) => (
+                  <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
+                    {headerSubCol.label}
+                  </AlternativeTableCell>
+                )),
             )}
           </tr>
         </thead>

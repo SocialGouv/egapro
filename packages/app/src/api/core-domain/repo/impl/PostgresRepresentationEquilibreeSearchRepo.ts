@@ -74,8 +74,8 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
             )) as results
         FROM ${this.repEqTable}
         JOIN ${this.table} ON ${this.repEqTable}.siren=${this.table}.siren AND ${this.repEqTable}.year=${
-      this.table
-    }.year
+          this.table
+        }.year
             ${sqlWhereClause}
         GROUP BY ${this.repEqTable}.siren
         ORDER BY max(${this.repEqTable}.year) DESC
