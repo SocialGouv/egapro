@@ -220,4 +220,4 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       next: () => funnelStaticConfig[`confirmation`],
       previous: () => funnelStaticConfig[`publication`],
     },
-  } as const);
+  }) as const;

@@ -1,9 +1,10 @@
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
 import { AlertEdition } from "../AlertEdition";
+import { TITLES } from "../titles";
 import { PeriodeReferenceForm } from "./Form";
 
-const title = "Période de référence";
+const title = TITLES["periode-reference"];
 
 export const metadata = {
   title,

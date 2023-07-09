@@ -1,6 +1,5 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
@@ -9,7 +8,7 @@ import { formatIsoToFr } from "@common/utils/date";
 import { type ClearObject, type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isBefore, parseISO } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
@@ -151,22 +150,13 @@ export const PublicationForm = () => {
           style={{ display: hasWebsite === false ? "block" : "none" }}
           nativeTextAreaProps={register("publishModalities", { disabled: hasWebsite })}
         />
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              linkProps: {
-                href: "/representation-equilibree/ecarts-membres",
-              },
-              priority: "secondary",
+        <BackNextButtonsGroup
+          backProps={{
+            linkProps: {
+              href: "/representation-equilibree/ecarts-membres",
             },
-            {
-              children: "Suivant",
-              type: "submit",
-              disabled: !isValid,
-            },
-          ]}
+          }}
+          nextDisabled={!isValid}
         />
       </FormLayout>
     </form>

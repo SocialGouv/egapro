@@ -1,11 +1,9 @@
-"use client";
-
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
-import { type PropsWithChildren, type ReactNode, useEffect, useId, useState } from "react";
+import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import styles from "./AlternativeTable.module.css";
 
@@ -52,7 +50,10 @@ export const AlternativeTableCell = ({
       {informations && (
         <>
           <Button
-            nativeButtonProps={modal?.buttonProps}
+            nativeButtonProps={{
+              ...modal?.buttonProps,
+              type: "button",
+            }}
             size="small"
             iconId="fr-icon-information-fill"
             priority="tertiary"
@@ -149,12 +150,9 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
 
 export const AlternativeTable = (props: AlternativeTableProps) => {
   const { header, footer, body, classeName } = props;
-  const [maxCols, setMaxCols] = useState<number>();
 
-  useEffect(() => {
-    const validated = validateProps(props);
-    setMaxCols(validated.maxCols);
-  }, [props]);
+  const validated = validateProps(props);
+  const maxCols = validated.maxCols;
 
   if (!maxCols) {
     return null;
@@ -180,12 +178,13 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             ))}
           </tr>
           <tr>
-            {header.map((headerCol, index) =>
-              headerCol.subCols?.map((headerSubCol, subIndex) => (
-                <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
-                  {headerSubCol.label}
-                </AlternativeTableCell>
-              )),
+            {header.map(
+              (headerCol, index) =>
+                headerCol.subCols?.map((headerSubCol, subIndex) => (
+                  <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
+                    {headerSubCol.label}
+                  </AlternativeTableCell>
+                )),
             )}
           </tr>
         </thead>
@@ -248,8 +247,10 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             <tr>
               {footer.map((footerCol, index) => (
                 <AlternativeTableCell key={`td-footer-${index}`} colSpan={footerCol.colspan} align="center">
-                  <span className={cx(fr.cx(footerCol.data ? "fr-text--xs" : null))}>{footerCol.label}</span>
-                  {footerCol.data && (
+                  <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
+                    {footerCol.label}
+                  </span>
+                  {typeof footerCol.data !== "undefined" && (
                     <>
                       <br />
                       <strong>{footerCol.data}</strong>

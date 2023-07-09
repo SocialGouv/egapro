@@ -1,6 +1,6 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { config } from "@common/config";
+import { CenteredContainer, Container } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
@@ -8,9 +8,9 @@ const DEFAULT_TITLE = "Déclaration d'index Egapro";
 const DeclarationLayout = ({ children }: PropsWithChildren) => {
   return (
     <>
-      <div className={fr.cx("fr-container")} style={{ maxWidth: 1000 }}>
+      <Container>
         <Breadcrumb
-          currentPageLabel={"Déclaration d'index"}
+          currentPageLabel="Déclaration d'index"
           homeLinkProps={{
             href: "/",
           }}
@@ -23,8 +23,8 @@ const DeclarationLayout = ({ children }: PropsWithChildren) => {
             },
           ]}
         />
-        {children}
-      </div>
+      </Container>
+      <CenteredContainer>{children}</CenteredContainer>
     </>
   );
 };

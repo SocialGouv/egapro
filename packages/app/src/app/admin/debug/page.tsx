@@ -1,6 +1,7 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import { config } from "@common/config";
-import { DebugButton } from "@components/utils/debug/DebugButton";
+import { DebugButton, DebugToggleSwitch } from "@components/utils/debug/DebugButton";
+import { CenteredContainer, Heading } from "@design-system";
 import { cloneDeep } from "lodash";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -16,11 +17,15 @@ const DebugPage = async () => {
 
   const clone = cloneDeep(config);
   return (
-    <>
-      <h1>Server Side Config</h1>
+    <CenteredContainer py="6w">
+      <Heading as="h2" variant="h1" text="Admin Debug" />
+      <h3>Activer bouton de debug ?</h3>
+      <DebugToggleSwitch />
+      <hr />
+      <h3>Server Side Config</h3>
       <DebugButton alwaysOn obj={clone} infoText="server side config" />
       <pre>{JSON.stringify(clone, null, 2)}</pre>
-    </>
+    </CenteredContainer>
   );
 };
 

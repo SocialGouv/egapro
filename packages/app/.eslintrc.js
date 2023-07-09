@@ -169,31 +169,6 @@ const config = {
         "import/no-default-export": "off",
       },
     },
-    {
-      files: ["__tests__/**/*.ts?(x)"],
-      extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
-      plugins: ["jest"],
-      env: {
-        jest: true,
-        "jest/globals": true,
-      },
-      parserOptions: {
-        project: ["__tests__/tsconfig.json"],
-        sourceType: "module",
-      },
-      settings: {
-        "import/resolver": {
-          typescript: {
-            alwaysTryTypes: true,
-            project: ["__tests__/tsconfig.json"],
-          },
-        },
-      },
-      rules: {
-        "import/no-default-export": "off",
-        "simple-import-sort/imports": "off",
-      },
-    },
   ],
 };
 

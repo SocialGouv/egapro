@@ -1,6 +1,8 @@
+import "server-only";
+
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { UnexpectedSessionError } from "@common/shared-domain";
-import { getServerActionSession } from "@common/utils/next-auth";
-import { type Session } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 
 type AssertParam<T> = T | { check: T; message?: string };
 type AssertSessionParams = {
@@ -16,19 +18,19 @@ const defaultStaffMessage = "You are not staff.";
 /**
  * Assert that the current session is present and that the user is either owner of the provided Siren or staff.
  */
-export const assertSession = async ({
+export const assertServerSession = async ({
   owner,
   staff,
   message = defaultMessage,
 }: AssertSessionParams = {}): Promise<Session> => {
-  const session = await getServerActionSession();
+  const session = await getServerSession(authConfig);
   if (!session?.user) {
     throw new UnexpectedSessionError(message);
   }
 
   const shouldCheckOwner = typeof owner === "string" || owner?.check;
   const shouldCheckStaff = staff === true || staff?.check;
-  const isOwner = session.user.companies.some(company => company.siren === owner);
+  const isOwner = session.user.companies.some(company => company.siren === shouldCheckOwner);
   const ownerErrorMessage = owner
     ? typeof owner === "string"
       ? defaultOwnerMessage

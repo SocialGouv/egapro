@@ -18,7 +18,7 @@ export const metadata = {
   },
 };
 const RepresentationEquilibree = () => (
-  <Box py="9w" as="section">
+  <Box pb="9w" as="section">
     <Container>
       <Grid>
         <GridCol lg={7}>

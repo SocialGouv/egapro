@@ -13,7 +13,7 @@ const ErrorPage = ({ error }: NextErrorPageProps) => {
     <>
       <Header />
       <main role="main" id="content" style={{ flexGrow: 1 }}>
-        <CenteredContainer>
+        <CenteredContainer py="6w">
           <DebugButton obj={error} infoText="recherche-error" />
           <Alert title="Erreur" severity="error" description={error.message} />
         </CenteredContainer>

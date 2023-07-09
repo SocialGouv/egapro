@@ -26,7 +26,10 @@ export abstract class AbstractSpecification<T extends DefaultEntity> implements 
 }
 
 export class AndSpecification<T extends DefaultEntity> extends AbstractSpecification<T> {
-  constructor(private one: Specification<T>, private other: Specification<T>) {
+  constructor(
+    private one: Specification<T>,
+    private other: Specification<T>,
+  ) {
     super();
   }
 
@@ -40,7 +43,10 @@ export class AndSpecification<T extends DefaultEntity> extends AbstractSpecifica
 }
 
 export class OrSpecification<T extends DefaultEntity> extends AbstractSpecification<T> {
-  constructor(private one: Specification<T>, private other: Specification<T>) {
+  constructor(
+    private one: Specification<T>,
+    private other: Specification<T>,
+  ) {
     super();
   }
 

@@ -1,6 +1,7 @@
-import { type COUNTIES, type NAF, type REGIONS, type WORKFORCES } from "@common/dict";
+import { type COUNTIES, type NAF, type REGIONS } from "@common/dict";
 
 import { type DeclarationDTO } from "../../models/generated";
+import { type CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 
 export { DeclarationDTO };
 
@@ -19,7 +20,7 @@ export type PublicCompanyDTO = {
     name: string;
   };
   workforce?: {
-    range?: keyof WORKFORCES;
+    range?: CompanyWorkforceRange.Enum;
     total?: number;
   };
 };

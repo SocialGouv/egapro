@@ -3,6 +3,8 @@ declare module "js-xlsx" {
   export * from "xlsx";
 }
 
+declare module "server-only";
+
 declare module "*.woff" {
   const content: string;
 
