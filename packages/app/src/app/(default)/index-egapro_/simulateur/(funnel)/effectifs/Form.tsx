@@ -7,7 +7,7 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
-import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { ageRanges, categories, createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -22,24 +22,11 @@ import { useSimuFunnelStore } from "../useSimuFunnelStore";
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
 
-const categories = [
-  CSP.Enum.OUVRIERS,
-  CSP.Enum.EMPLOYES,
-  CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-  CSP.Enum.INGENIEURS_CADRES,
-] as const;
-const ageRanges = [
-  CSPAgeRange.Enum.LESS_THAN_30,
-  CSPAgeRange.Enum.FROM_30_TO_39,
-  CSPAgeRange.Enum.FROM_40_TO_49,
-  CSPAgeRange.Enum.FROM_50_TO_MORE,
-] as const;
-
 const useStore = storePicker(useSimuFunnelStore);
 export const EffectifsForm = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
+  const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
   const [totalWomen, setTotalWomen] = useState(0);
   const [totalMen, setTotalMen] = useState(0);
 
@@ -56,7 +43,7 @@ export const EffectifsForm = () => {
   } = useForm<EffectifsFormType>({
     mode: "onChange",
     resolver: zodResolver(createSteps.effectifs),
-    defaultValues: funnel,
+    defaultValues: funnel?.effectifs,
   });
 
   const updateTotal = () => {
@@ -89,8 +76,10 @@ export const EffectifsForm = () => {
     if (!total) {
       return;
     }
-    saveFunnel(form);
-    router.push("/index-egapro/simulateur/indicateurs-1");
+
+    resetFunnel();
+    saveFunnel({ effectifs: form });
+    router.push("/index-egapro_/simulateur/indicateur-1");
   };
 
   const setRandomValues = () => {

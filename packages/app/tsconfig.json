@@ -50,7 +50,8 @@
     "types/**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/app/(default)/index-egapro_/simulateur/(funnel)/@large/[...catchAll]"
   ],
   "exclude": [
     "node_modules",

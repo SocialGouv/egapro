@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
+import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import styles from "./AlternativeTable.module.css";
@@ -60,10 +61,13 @@ export const AlternativeTableCell = ({
             title="Plus d'informations"
             className={styles["modal-button"]}
           />
+
           {modal && (
-            <modal.Component title={children} className={styles.modal}>
-              {informations}
-            </modal.Component>
+            <ClientBodyPortal>
+              <modal.Component title={children} className={styles.modal}>
+                {informations}
+              </modal.Component>
+            </ClientBodyPortal>
           )}
         </>
       )}

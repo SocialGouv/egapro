@@ -21,10 +21,12 @@ export const metadata = {
 
 const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
   return (
-    <CenteredContainer pb="6w">
-      <Stepper />
+    <>
+      <CenteredContainer>
+        <Stepper />
+      </CenteredContainer>
       {children}
-    </CenteredContainer>
+    </>
   );
 };
 
