@@ -35,21 +35,6 @@ services:
       - test_db
     restart: "no"
 
-  declaration:
-    image: egapro_declaration
-    build:
-      context: ./packages/declaration
-      dockerfile: Dockerfile
-      args:
-        EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
-        EGAPRO_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
-        BASE_URL: "/index-egapro/declaration"
-    ports:
-      - 4000:8080
-    depends_on:
-      - api
-    restart: always
-
   db:
     restart: always
     image: postgres
@@ -81,19 +66,6 @@ services:
       dockerfile: ./packages/app/Dockerfile
     ports:
       - 3000:3000
-    restart: "no"
-
-  simulateur:
-    image: egapro_simulateur
-    build:
-      context: .
-      dockerfile: ./packages/simulateur/Dockerfile
-      args:
-        REACT_APP_EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
-        REACT_APP_DECLARATION_URL: ${REACT_APP_DECLARATION_URL:-http://localhost:4000/}
-        REACT_APP_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
-    ports:
-      - 3001:8080
     restart: "no"
 
 volumes:

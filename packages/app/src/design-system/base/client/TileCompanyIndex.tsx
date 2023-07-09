@@ -2,9 +2,10 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import { addressLabel, type WORKFORCES } from "@common/dict";
+import { addressLabel } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
@@ -30,13 +31,13 @@ import {
 import { Text } from "../Typography";
 import styles from "./TileCompanyIndex.module.css";
 
-const mapRange = (range: keyof WORKFORCES | undefined) => {
+const mapRange = (range: CompanyWorkforceRange.Enum | undefined) => {
   switch (range) {
-    case "1000:":
+    case CompanyWorkforceRange.Enum.FROM_1000_TO_MORE:
       return "1000";
-    case "251:999":
+    case CompanyWorkforceRange.Enum.FROM_251_TO_999:
       return "251 à 999";
-    case "50:250":
+    case CompanyWorkforceRange.Enum.FROM_50_TO_250:
       return "50 à 250";
     default:
       return "0";
@@ -81,7 +82,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
             <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
               <span className={styles.numberOfEmployees}>{mapRange(workforce?.range)}</span>
               <span className={styles.employeeslegend}>{` Salariés${
-                workforce?.range === "1000:" ? " ou plus" : ""
+                workforce?.range === CompanyWorkforceRange.Enum.FROM_1000_TO_MORE ? " ou plus" : ""
               }`}</span>
             </div>
           </GridCol>
@@ -138,7 +139,9 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                       icon="fr-icon-information-fill"
                       color="text-mention-grey"
                       title={`Tranche en ${row.year + 1} : ${mapRange(company[row.year].workforce?.range)} salariés${
-                        company[row.year].workforce?.range === "1000:" ? " ou plus" : ""
+                        company[row.year].workforce?.range === CompanyWorkforceRange.Enum.FROM_1000_TO_MORE
+                          ? " ou plus"
+                          : ""
                       }`}
                     />
                   )}
@@ -171,7 +174,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                     </li>
                     <li>
                       Écart taux d'augmentation :{" "}
-                      {company[row.year].workforce?.range === "50:250" ? (
+                      {company[row.year].workforce?.range === CompanyWorkforceRange.Enum.FROM_251_TO_999 ? (
                         <>
                           <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
                           {row.notComputableReasonSalaryRaisesAndPromotions && (
@@ -197,7 +200,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                         </>
                       )}
                     </li>
-                    {company[row.year].workforce?.range !== "50:250" && (
+                    {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 && (
                       <li>
                         Écart taux promotion : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
                         {row.notComputableReasonPromotions && (

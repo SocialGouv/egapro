@@ -33,71 +33,72 @@ export const metadata = {
   },
 };
 
-const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(
-  async ({ searchParams, searchParamsError }: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
-    const { limit: _, page, year, ...partialSearchParams } = searchParams;
+const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(async ({
+  searchParams,
+  searchParamsError,
+}: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
+  const { limit: _, page, year, ...partialSearchParams } = searchParams;
 
-    // handle when "onchange" are triggered from stats section form
-    const isLandingPage = typeof year !== "undefined" && typeof partialSearchParams.query === "undefined" && page === 0;
-    return (
-      <>
-        <Container as="section" className={fr.cx("fr-pb-3w")}>
-          <Grid haveGutters align="center">
-            <GridCol sm={12} md={10} xl={8}>
-              {searchParamsError && (
-                <>
-                  <DebugButton obj={searchParamsError} infoText="searchParamsError" />
-                  <Alert
-                    small
-                    closable
-                    severity="error"
-                    description="Les paramètres d'url sont malformés."
-                    className={fr.cx("fr-mb-2w")}
-                  />
-                </>
-              )}
-              <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
-              {isLandingPage ? (
-                <SimpleSubmitForm noValidate>
-                  <SearchBar
-                    big
-                    label="Rechercher"
-                    nativeInputProps={{
-                      placeholder: "Nom ou numéro de SIREN de l'entreprise",
-                      name: "query",
-                    }}
-                    className={fr.cx("fr-pb-2w")}
-                  />
-                </SimpleSubmitForm>
-              ) : (
-                <SearchSirenForm searchParams={searchParams} />
-              )}
-              {/* @ts-ignore */}
-              <DetailedDownload
-                href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
-                label={date => `Télécharger le fichier des index des entreprises au ${date}`}
-                className={fr.cx("fr-mb-0")}
-              />
-            </GridCol>
-          </Grid>
-        </Container>
-        <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
-          {!searchParamsError && (
-            <Suspense>
-              {isLandingPage ? (
-                //@ts-ignore
-                <StatsSection {...partialSearchParams} year={year} />
-              ) : (
-                //@ts-ignore
-                <ResultsSection {...searchParams} />
-              )}
-            </Suspense>
-          )}
-        </Box>
-      </>
-    );
-  },
-);
+  // handle when "onchange" are triggered from stats section form
+  const isLandingPage = typeof year !== "undefined" && typeof partialSearchParams.query === "undefined" && page === 0;
+  return (
+    <>
+      <Container as="section" className={fr.cx("fr-pb-3w")}>
+        <Grid haveGutters align="center">
+          <GridCol sm={12} md={10} xl={8}>
+            {searchParamsError && (
+              <>
+                <DebugButton obj={searchParamsError} infoText="searchParamsError" />
+                <Alert
+                  small
+                  closable
+                  severity="error"
+                  description="Les paramètres d'url sont malformés."
+                  className={fr.cx("fr-mb-2w")}
+                />
+              </>
+            )}
+            <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
+            {isLandingPage ? (
+              <SimpleSubmitForm noValidate>
+                <SearchBar
+                  big
+                  label="Rechercher"
+                  nativeInputProps={{
+                    placeholder: "Nom ou numéro de SIREN de l'entreprise",
+                    name: "query",
+                  }}
+                  className={fr.cx("fr-pb-2w")}
+                />
+              </SimpleSubmitForm>
+            ) : (
+              <SearchSirenForm searchParams={searchParams} />
+            )}
+            {/* @ts-ignore */}
+            <DetailedDownload
+              href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
+              label={date => `Télécharger le fichier des index des entreprises au ${date}`}
+              className={fr.cx("fr-mb-0")}
+            />
+          </GridCol>
+        </Grid>
+      </Container>
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
+        {!searchParamsError && (
+          <Suspense>
+            {isLandingPage ? (
+              //@ts-ignore
+              <StatsSection {...partialSearchParams} year={year} />
+            ) : (
+              //@ts-ignore
+              <ResultsSection {...searchParams} />
+            )}
+          </Suspense>
+        )}
+      </Box>
+    </>
+  );
+});
 
 export default Recherche;
 

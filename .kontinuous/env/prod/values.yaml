@@ -41,8 +41,8 @@ app:
     enabled: true
   resources:
     requests:
-      cpu: 50m
-      memory: 512M
+      cpu: 20m
+      memory: 256M
     limits:
       cpu: 1
       memory: 1G
@@ -50,16 +50,6 @@ app:
 jobs:
   runs:
     build-app:
-      with:
-        buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
-
-    build-declaration:
-      with:
-        buildArgs:
-          EGAPRO_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
-
-    build-simulateur:
       with:
         buildArgs:
           REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"

@@ -41,24 +41,6 @@ services:
       - test_db
     restart: always
 
-  declaration:
-    image: egapro_declaration
-    build:
-      context: ./packages/declaration
-      dockerfile: Dockerfile.dev
-      args:
-        EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
-        EGAPRO_SIMU_URL: ${EGAPRO_SIMU_URL:-http://localhost:3001}
-        GITHUB_SHA: "<dev>"
-        BASE_URL: ${BASE_URL-""}
-    volumes:
-      - ./packages/declaration/_doc:/srv/jekyll/_doc
-      - ./packages/declaration/src:/srv/jekyll/src
-      - ./packages/declaration/favicon.ico:/srv/jekyll/_site/favicon.ico
-    ports:
-      - 4000:4000
-    restart: always
-
   db:
     restart: always
     image: postgres
@@ -99,13 +81,6 @@ services:
       POSTGRES_PORT_2: 5432
     volumes:
       - pgadmin:/var/lib/pgadmin
-
-  reverse_proxy:
-    image: nginx:alpine
-    volumes:
-      - ./reverse-proxy.conf:/etc/nginx/nginx.conf
-    ports:
-      - 80:80
 
   #docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:21.1.1 start-dev
   # keycloak:

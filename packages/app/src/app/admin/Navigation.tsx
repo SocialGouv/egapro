@@ -3,6 +3,19 @@
 import { MainNavigation } from "@codegouvfr/react-dsfr/MainNavigation";
 import { useSelectedLayoutSegment } from "next/navigation";
 
+export const adminMenuItems = [
+  {
+    text: "Liste Référents",
+    href: "/admin/liste-referents",
+    segment: "liste-referents",
+  },
+  {
+    text: "Debug",
+    href: "/admin/debug",
+    segment: "debug",
+  },
+];
+
 export const Navigation = () => {
   const segment = useSelectedLayoutSegment();
 
@@ -18,15 +31,13 @@ export const Navigation = () => {
         {
           text: "Admin",
           isActive: true,
-          menuLinks: [
-            {
-              text: "Liste Référents",
-              linkProps: {
-                href: "/admin/liste-referents",
-              },
-              isActive: segment === "liste-referents",
+          menuLinks: adminMenuItems.map(item => ({
+            text: item.text,
+            linkProps: {
+              href: item.href,
             },
-          ],
+            isActive: segment === item.segment,
+          })),
         },
       ]}
     />

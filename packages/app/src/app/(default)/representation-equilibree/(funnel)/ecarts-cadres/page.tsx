@@ -5,9 +5,10 @@ import { Grid, GridCol } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
 import { AlertEdition } from "../AlertEdition";
+import { TITLES } from "../titles";
 import { EcartsCadresForm } from "./Form";
 
-const title = "Écarts de représentation parmi les cadres dirigeants";
+const title = TITLES["ecarts-cadres"];
 
 export const metadata = {
   title,

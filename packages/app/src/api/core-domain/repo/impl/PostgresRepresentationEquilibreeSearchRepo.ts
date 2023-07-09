@@ -33,9 +33,9 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
   public async index(item: RepresentationEquilibree): Promise<void> {
     const raw = representationEquilibreeSearchMap.toPersistence(item);
 
-    const ftRaw = {
+    const ftRaw: Any = {
       ...raw,
-      ft: sql`to_tsvector('ftdict', ${raw.ft})` as Any,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
     };
     const insert = sql(ftRaw);
     const update = sql(ftRaw, "declared_at", "ft", "region", "departement", "section_naf");
@@ -74,8 +74,8 @@ export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentati
             )) as results
         FROM ${this.repEqTable}
         JOIN ${this.table} ON ${this.repEqTable}.siren=${this.table}.siren AND ${this.repEqTable}.year=${
-      this.table
-    }.year
+          this.table
+        }.year
             ${sqlWhereClause}
         GROUP BY ${this.repEqTable}.siren
         ORDER BY max(${this.repEqTable}.year) DESC

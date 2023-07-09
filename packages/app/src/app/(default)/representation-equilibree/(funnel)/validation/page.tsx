@@ -3,9 +3,10 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import Link from "next/link";
 
 import { AlertEdition } from "../AlertEdition";
+import { TITLES } from "../titles";
 import { ValidationRecapRepEq } from "./RecapRepEq";
 
-const title = "Validation";
+const title = TITLES.validation;
 
 export const metadata = {
   title,

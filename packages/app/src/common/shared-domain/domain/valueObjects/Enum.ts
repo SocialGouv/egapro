@@ -5,7 +5,10 @@ import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
 
 export abstract class Enum<TEnum extends object> extends ValueObject<TEnum[keyof TEnum]> {
-  constructor(private value: Enum.ToString<TEnum> | TEnum[keyof TEnum] | UnknownMapping, protected enumObject: TEnum) {
+  constructor(
+    private value: Enum.ToString<TEnum> | TEnum[keyof TEnum] | UnknownMapping,
+    protected enumObject: TEnum,
+  ) {
     super();
     this.validate();
   }

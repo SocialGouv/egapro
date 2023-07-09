@@ -1,13 +1,12 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -107,22 +106,13 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
           state={errors.gdpr && "error"}
           stateRelatedMessage={errors.gdpr?.message}
         />
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              linkProps: {
-                href: "/representation-equilibree/commencer",
-              },
-              priority: "secondary",
+        <BackNextButtonsGroup
+          backProps={{
+            linkProps: {
+              href: "/representation-equilibree/commencer",
             },
-            {
-              children: "Suivant",
-              type: "submit",
-              disabled: !isValid,
-            },
-          ]}
+          }}
+          nextDisabled={!isValid}
         />
       </FormLayout>
     </form>

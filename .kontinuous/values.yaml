@@ -61,34 +61,6 @@ app:
     EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
 
-declaration:
-  ~chart: app
-  ~needs: [build-declaration]
-  imagePackage: declaration
-  probesPath: /index.html
-  containerPort: 8080
-  host: "{{ .Values.global.host }}"
-  ingress:
-    path: /index-egapro/declaration(/|$)(.*)
-    rewriteTarget: /$2
-    annotations:
-      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
-  certSecretName: api-crt
-
-simulateur:
-  ~chart: app
-  ~needs: [build-simulateur]
-  imagePackage: simulateur
-  probesPath: /index.html
-  containerPort: 8080
-  host: "{{ .Values.global.host }}"
-  ingress:
-    path: /index-egapro(/|$)(.*)
-    rewriteTarget: /$2
-    annotations:
-      ~tpl~nginx.ingress.kubernetes.io/configuration-snippet: *headers
-  certSecretName: api-crt
-
 api:
   ~chart: app
   ~needs: [build-api]
@@ -114,9 +86,6 @@ api:
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
-    EGAPRO_DOMAIN: "https://{{ .Values.global.host }}"
-  # addVolumes:
-  #   - files
 
 files:
   ~chart: app
@@ -153,14 +122,8 @@ project:
     # DigDash prod 1 and 2
     - "37.187.27.197"
     - "37.187.137.149"
-    # DigDash new (12/10/2023)
-    - "217.182.225.112"
-    - "217.182.225.29"
-    - "217.182.225.113"
-    - "217.182.225.117"
-    # Invenis prod old
+    # Invenis prod old and new
     - "217.182.142.112"
-    # Invenis prod new (09/10/2023)
     - "51.38.59.32"
   files:
     public:
@@ -194,31 +157,6 @@ jobs:
       with:
         imagePackage: api
         context: packages/api
-
-    build-declaration:
-      use: build
-      with:
-        imagePackage: declaration
-        context: packages/declaration
-        buildArgs:
-          BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
-          EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-          EGAPRO_SIMU_URL: "https://{{ .Values.global.host }}/index-egapro"
-          GITHUB_SHA: "{{ $.Values.global.shortSha }}"
-
-    build-simulateur:
-      use: build
-      memoryLimit: 10Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: simulateur
-        dockerfile: packages/simulateur/Dockerfile
-        buildArgs:
-          REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
-          REACT_APP_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
-          PUBLIC_URL: "/index-egapro"
-          INLINE_RUNTIME_CHUNK: false
 
 deactivate:
   jobs-deactivate:

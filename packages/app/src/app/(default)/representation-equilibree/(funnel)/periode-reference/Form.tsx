@@ -1,11 +1,10 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
-import { FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
@@ -88,22 +87,13 @@ export const PeriodeReferenceForm = () => {
               ...register("endOfPeriod"),
             }}
           />
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttons={[
-              {
-                children: "Précédent",
-                linkProps: {
-                  href: "/representation-equilibree/entreprise",
-                },
-                priority: "secondary",
+          <BackNextButtonsGroup
+            backProps={{
+              linkProps: {
+                href: "/representation-equilibree/entreprise",
               },
-              {
-                children: "Suivant",
-                type: "submit",
-                disabled: !isValid,
-              },
-            ]}
+            }}
+            nextDisabled={!isValid}
           />
         </FormLayout>
       </form>

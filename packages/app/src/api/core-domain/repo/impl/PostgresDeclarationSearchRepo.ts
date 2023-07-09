@@ -44,11 +44,11 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     const raws = await sql<DeclarationSearchResultRaw[]>`
         SELECT
             (array_agg(${this.declaTable}.data ORDER BY ${
-      this.declaTable
-    }.year DESC))[1]->'entreprise'->>'siren' as siren,
+              this.declaTable
+            }.year DESC))[1]->'entreprise'->>'siren' as siren,
                     (array_agg(${this.declaTable}.data ORDER BY ${
-      this.declaTable
-    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
+                      this.declaTable
+                    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
             jsonb_object_agg(${this.declaTable}.year::text, ${this.declaTable}.data) as data,
             jsonb_object_agg(${this.declaTable}.year::text, json_build_object(
                 'index', (${this.declaTable}.data->'déclaration'->>'index')::int,
@@ -80,8 +80,8 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
             )) as results
         FROM ${this.declaTable}
         JOIN ${this.table} ON ${this.declaTable}.siren=${this.table}.siren AND ${this.declaTable}.year=${
-      this.table
-    }.year
+          this.table
+        }.year
             ${sqlWhereClause}
         GROUP BY ${this.declaTable}.siren
         ORDER BY max(${this.declaTable}.year) DESC

@@ -10,13 +10,13 @@ import {
   SendRepresentationEquilibreeReceiptError,
 } from "@api/core-domain/useCases/SendRepresentationEquilibreeReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
-import { assertSession } from "@api/utils/serverAction";
+import { assertServerSession } from "@api/utils/auth";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { revalidatePath } from "next/cache";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
-  await assertSession({
+  await assertServerSession({
     owner: {
       check: siren,
       message: "Not authorized to fetch repeq for this siren.",
@@ -36,7 +36,7 @@ export async function getCompany(siren: string) {
 }
 
 export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {
-  const session = await assertSession({
+  const session = await assertServerSession({
     owner: {
       check: repEq.siren,
       message: "Not authorized to save repeq for this siren.",
@@ -60,7 +60,7 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {
-  const session = await assertSession({
+  const session = await assertServerSession({
     owner: {
       check: siren,
       message: "Not authorized to send repEq receipt for this siren.",
