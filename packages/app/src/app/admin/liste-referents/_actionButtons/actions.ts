@@ -2,12 +2,12 @@
 
 import { referentRepo } from "@api/core-domain/repo";
 import { ImportReferents } from "@api/core-domain/useCases/referent/ImportReferents";
-import { assertSession } from "@api/utils/serverAction";
+import { assertServerSession } from "@api/utils/auth";
 import { UnexpectedError } from "@common/shared-domain";
 import { revalidatePath } from "next/cache";
 
 export const importFile = async (formData: FormData) => {
-  await assertSession({ staff: true });
+  await assertServerSession({ staff: true });
 
   const entry = formData.get("file");
   if (!entry) {

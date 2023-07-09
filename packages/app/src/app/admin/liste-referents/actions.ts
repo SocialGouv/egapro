@@ -4,7 +4,7 @@ import { referentRepo } from "@api/core-domain/repo";
 import { CreateReferent } from "@api/core-domain/useCases/referent/CreateReferent";
 import { DeleteReferent } from "@api/core-domain/useCases/referent/DeleteReferent";
 import { EditReferent } from "@api/core-domain/useCases/referent/EditReferent";
-import { assertSession } from "@api/utils/serverAction";
+import { assertServerSession } from "@api/utils/auth";
 import {
   type CreateReferentDTO,
   createReferentDTOSchema,
@@ -16,7 +16,7 @@ import { UnexpectedError } from "@common/shared-domain";
 import { revalidatePath } from "next/cache";
 
 export async function deleteReferent(referent: ReferentDTO) {
-  await assertSession({ staff: true });
+  await assertServerSession({ staff: true });
 
   if (!referent.id) throw new UnexpectedError("Referent id is required");
 
@@ -32,7 +32,7 @@ export async function deleteReferent(referent: ReferentDTO) {
 }
 
 export async function createReferent(referent: CreateReferentDTO) {
-  await assertSession({ staff: true });
+  await assertServerSession({ staff: true });
 
   const useCase = new CreateReferent(referentRepo);
 
@@ -48,7 +48,7 @@ export async function createReferent(referent: CreateReferentDTO) {
 }
 
 export async function saveReferent(referent: EditReferentDTO) {
-  await assertSession({ staff: true });
+  await assertServerSession({ staff: true });
 
   const useCase = new EditReferent(referentRepo);
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
 import { COUNTIES, COUNTRIES_COG_TO_LIB, REGIONS } from "@common/dict";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -98,25 +97,18 @@ export const EntrepriseForm = () => {
           value: COUNTRIES_COG_TO_LIB[countryCodeCOG],
         }}
       />
-      <ButtonsGroup
-        inlineLayoutWhen="sm and up"
-        buttons={[
-          {
-            children: "Précédent",
-            linkProps: {
-              href: "/representation-equilibree/declarant",
-            },
-            priority: "secondary",
+      <BackNextButtonsGroup
+        backProps={{
+          linkProps: {
+            href: "/representation-equilibree/declarant",
           },
-          {
-            children: "Suivant",
-            nativeButtonProps: {
-              onClick() {
-                router.push("/representation-equilibree/periode-reference");
-              },
-            },
+        }}
+        nextProps={{
+          linkProps: {
+            href: "/representation-equilibree/periode-reference",
           },
-        ]}
+        }}
+        nextType="button"
       />
     </FormLayout>
   );

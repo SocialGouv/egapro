@@ -8,7 +8,10 @@ export abstract class NumberValueObject<
   TShort extends boolean = false,
   TNumType = TShort extends true ? number : num,
 > extends ValueObject<TNumType> {
-  constructor(private value: TNumType, private validator: NumberValueObjectValidator<TNumType> = () => true) {
+  constructor(
+    private value: TNumType,
+    private validator: NumberValueObjectValidator<TNumType> = () => true,
+  ) {
     super();
     this.validate();
   }

@@ -1,6 +1,5 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
@@ -9,7 +8,7 @@ import { type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { PercentagesPairInputs } from "@components/RHF/PercentagesPairInputs";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { Box, FormLayout } from "@design-system";
+import { BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -146,22 +145,13 @@ export const EcartsMembresForm = () => {
             </option>
           ))}
         </Select>
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Précédent",
-              linkProps: {
-                href: "/representation-equilibree/ecarts-cadres",
-              },
-              priority: "secondary",
+        <BackNextButtonsGroup
+          backProps={{
+            linkProps: {
+              href: "/representation-equilibree/ecarts-cadres",
             },
-            {
-              children: "Suivant",
-              type: "submit",
-              disabled: !isValid || typeof isComputable === "undefined",
-            },
-          ]}
+          }}
+          nextDisabled={!isValid || typeof isComputable === "undefined"}
         />
       </FormLayout>
     </form>

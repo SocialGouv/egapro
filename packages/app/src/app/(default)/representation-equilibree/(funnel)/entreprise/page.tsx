@@ -3,9 +3,10 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
 import { AlertEdition } from "../AlertEdition";
+import { TITLES } from "../titles";
 import { EntrepriseForm } from "./Form";
 
-const title = "Informations entreprise";
+const title = TITLES.entreprise;
 
 export const metadata = {
   title,

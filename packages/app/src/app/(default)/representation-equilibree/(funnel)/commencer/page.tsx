@@ -4,9 +4,10 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
+import { TITLES } from "../titles";
 import { CommencerForm } from "./Form";
 
-const title = "Commencer";
+const title = TITLES.commencer;
 
 export const metadata = {
   title,

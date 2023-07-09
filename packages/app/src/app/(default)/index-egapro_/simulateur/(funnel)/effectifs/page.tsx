@@ -1,6 +1,7 @@
+import { TITLES } from "../titles";
 import { EffectifsForm } from "./Form";
 
-const title = "Tranches et effectifs pris en compte";
+const title = TITLES.effectifs;
 
 export const metadata = {
   title,

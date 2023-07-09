@@ -37,13 +37,6 @@ export const DISPLAY_PUBLIC_YEARS = PUBLIC_YEARS.map(y => y + 1);
 
 export const INVALID_YEAR = 0 as const;
 
-export type WORKFORCES = typeof WORKFORCES;
-export const WORKFORCES = {
-  "50:250": "De 50 à 250 inclus",
-  "251:999": "De 251 à 999 inclus",
-  "1000:": "De 1000 ou plus",
-} as const;
-
 export const entrepriseTypes = {
   Entreprise: "entreprise",
   UES: "ues",
