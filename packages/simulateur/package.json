@@ -22,7 +22,7 @@
     "@fontsource/gabriela": "^4.5.10",
     "@heroicons/react": "^1.0.5",
     "@sentry/react": "^6.19.1",
-    "date-fns": "2.29.3",
+    "date-fns": "2.30.0",
     "deepmerge": "4.2.2",
     "final-form": "^4.20.7",
     "final-form-arrays": "3.0.2",
