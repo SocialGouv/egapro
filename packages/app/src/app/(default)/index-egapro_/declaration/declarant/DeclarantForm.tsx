@@ -2,45 +2,45 @@
 
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { zodEmail, zodPhone } from "@common/utils/form";
 import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { type Session } from "next-auth";
 import { type PropsWithChildren } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "declarant";
 
-type Props = {};
+type Props = {
+  session: Session;
+};
 
 const formSchema = z.object({
   accordRgpd: z.boolean().refine(val => !!val, {
     message: "Vous devez accepter les conditions pour continuer",
   }),
-  email: z.string(),
-  nom: z.string(),
-  prénom: z.string(),
-  téléphone: z.string(),
+  email: zodEmail,
+  nom: z.string().nonempty("Le nom est obligatoire"),
+  prénom: z.string().nonempty("Le prénom est obligatoire"),
+  téléphone: zodPhone,
 });
 
 type FormType = z.infer<typeof formSchema>;
 
-export const DeclarantForm = (props: PropsWithChildren<Props>) => {
-  const session = useSession();
-
-  const user = session.data?.user;
+export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
+  const user = session.user;
+  const router = useRouter();
 
   const { formData, savePageData } = useDeclarationFormManager();
 
-  console.log("user:", user);
-  console.log("formData:", formData[stepName]);
-
   const methods = useForm<FormType>({
-    shouldUnregister: true, // Don't store the fields that are not displayed.
+    mode: "onBlur",
     resolver: zodResolver(formSchema),
     defaultValues: {
       nom: formData[stepName]?.nom || user?.lastname,
@@ -58,7 +58,9 @@ export const DeclarantForm = (props: PropsWithChildren<Props>) => {
   } = methods;
 
   const onsubmit = async (data: FormType) => {
-    console.log("dans onSubmit");
+    savePageData(stepName, data);
+
+    router.push(funnelConfig(formData)[stepName].next().url);
   };
 
   return (
@@ -72,13 +74,25 @@ export const DeclarantForm = (props: PropsWithChildren<Props>) => {
             services de l’inspection du travail.
           </p>
 
-          <Input label="Prénom du déclarant" nativeInputProps={{ ...register("prénom") }} />
-          <Input label="Nom du déclarant" nativeInputProps={{ ...register("nom") }} />
+          <Input
+            label="Prénom du déclarant"
+            nativeInputProps={{ ...register("prénom") }}
+            state={errors.prénom ? "error" : "default"}
+            stateRelatedMessage={errors.prénom?.message}
+          />
+          <Input
+            label="Nom du déclarant"
+            nativeInputProps={{ ...register("nom") }}
+            state={errors.nom ? "error" : "default"}
+            stateRelatedMessage={errors.nom?.message}
+          />
 
           <Input
             label="Numéro de téléphone"
             hintText="Format attendu : 01 22 33 44 55"
             nativeInputProps={{ ...register("téléphone") }}
+            state={errors.téléphone ? "error" : "default"}
+            stateRelatedMessage={errors.téléphone?.message}
           />
 
           <Input label="Email du déclarant" disabled={true} nativeInputProps={{ ...register("email") }} />

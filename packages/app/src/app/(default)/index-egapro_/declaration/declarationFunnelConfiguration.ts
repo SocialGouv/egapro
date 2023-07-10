@@ -92,7 +92,7 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
     commencer: {
       indexStep: () => 1,
       next: () =>
-        data?.["declaration-existante"]?.status === "consultation"
+        data?.["declaration-existante"]?.status !== "creation"
           ? funnelStaticConfig[`declaration-existante`]
           : funnelStaticConfig[`entreprise`],
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
@@ -111,7 +111,7 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       indexStep: () => 2,
       next: () =>
         data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`periode-reference`],
-      previous: () => funnelStaticConfig[`commencer`],
+      previous: () => funnelStaticConfig[`declarant`],
     },
     ues: {
       indexStep: () => 3,
