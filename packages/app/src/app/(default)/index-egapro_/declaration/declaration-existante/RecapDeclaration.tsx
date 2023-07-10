@@ -20,8 +20,6 @@ type Props = { déclaration: DeclarationDTO };
 export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => {
   const { déclarant, déclaration: meta, entreprise, indicateurs } = déclaration;
 
-  console.log("foo:", indicateurs?.hautes_rémunérations);
-
   const company: CompanyProps = {
     name: entreprise.raison_sociale,
     address: entreprise.adresse,

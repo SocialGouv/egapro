@@ -66,7 +66,7 @@ const Page = () => {
                 href={`/api/declaration/${siren}/${year}/pdf`}
                 filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
                 fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des donées ${year}`}
+                desc={`Année ${year + 1} au titre des données ${year}`}
               />
             </GridCol>
           </Grid>

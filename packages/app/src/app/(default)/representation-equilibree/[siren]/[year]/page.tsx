@@ -104,6 +104,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
             />
           ))}
       </ClientAnimate>
+
       {isOwner && (
         <Box style={{ textAlign: "right" }} mb="2v">
           <Badge severity="info" noIcon small>
@@ -116,6 +117,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
       )}
 
       <DetailRepEq repEq={repEq} publicMode={!isOwner} />
+
       {isOwner && (
         <>
           <EditButton repEq={repEq} />
@@ -127,7 +129,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
                 href={`/representation-equilibree/${siren}/${year}/pdf`}
                 filename={`representation_${siren}_${year + 1}.pdf`}
                 fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des donées ${year}`}
+                desc={`Année ${year + 1} au titre des données ${year}`}
               />
             </GridCol>
           </Grid>
