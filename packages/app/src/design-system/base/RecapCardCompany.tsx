@@ -10,16 +10,19 @@ export const RecapCardCompany = ({ company }: Props) => {
 
   return (
     <RecapCard
-      title="Informations entreprise"
+      title="Informations entreprise déclarante"
       content={
         <>
           <strong>{name}</strong>
           <br />
-          {address}, {postalCode?.getValue()} {city}
+          {address}
+          <br />
+          {postalCode?.getValue()} {city}
           {countryCode && countryCode.getValue() !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[countryCode.getValue()]}`}
           <br />
-          Siren : {siren.getValue()} - Code NAF : {nafCode.getValue()} -{" "}
-          {nafCode && NAF[nafCode.getValue()].description}
+          Siren : <strong>{siren.getValue()}</strong>
+          <br />
+          Code NAF : <strong>{nafCode.getValue()}</strong> - {nafCode && NAF[nafCode.getValue()].description}
         </>
       }
     />

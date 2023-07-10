@@ -34,10 +34,11 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
     <>
       <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif</h1>
 
-      {/* <p>
-        Déclaration pour l’année {meta.année_indicateurs + 1} au titre des données {meta.année_indicateurs}.
+      <p>
+        Déclaration de l'index de l'égalité professionnelle Femmes/Hommes pour l'année{" "}
+        <strong>{meta.année_indicateurs + 1}</strong> au titre des données <strong>{meta.année_indicateurs}</strong>.
       </p>
-      {meta?.date && <RecapCard title="Date de déclaration" content={meta?.date && formatIsoToFr(meta?.date)} />} */}
+      {/* {meta?.date && <RecapCard title="Date de déclaration" content={meta?.date && formatIsoToFr(meta?.date)} />}  */}
 
       <RecapCard
         title="Informations déclarant"
@@ -61,7 +62,9 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
           title="Informations de l'UES"
           content={
             <>
-              <p>{entreprise.raison_sociale}</p>
+              <p>
+                <strong>{entreprise.raison_sociale}</strong>
+              </p>
             </>
           }
         />
@@ -71,17 +74,19 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
         title="Informations calcul et période de référence"
         content={
           <>
-            <p>Les indicateurs sont calculés au titre de l’année {meta.année_indicateurs}.</p>
+            <p>
+              Les indicateurs sont calculés au titre de l’année <strong>{meta.année_indicateurs}</strong>.
+            </p>
 
             <p>
-              La date de fin de la période de référence choisie pour le calcul des indicateurs est :{" "}
-              {meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}.
+              La date de fin de la période de référence choisie pour le calcul des indicateurs est le&nbsp;
+              <strong>{meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}</strong>.
             </p>
             <p>
               {entreprise.effectif?.total && (
                 <>
-                  {entreprise.effectif?.total} salariés pris en compte pour le calcul des indicateurs sur la période de
-                  référence (en effectif physique).
+                  <strong>{entreprise.effectif?.total}</strong> salariés pris en compte pour le calcul des indicateurs
+                  sur la période de référence (en effectif physique).
                 </>
               )}
             </p>
@@ -129,15 +134,14 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
               <IndicatorNote
                 size="large"
                 note={meta.index}
-                text="Index de"
+                text="Index egapro"
                 max={100}
                 legend={
                   <>
-                    <p>Total des points obtenus aux indicateurs calculables : {meta.points}</p>
-                    <p>
-                      Nombre de points maximum pouvant être obtenus aux indicateurs calculables :{" "}
-                      {meta.points_calculables}
-                    </p>
+                    <br />
+                    <strong>{meta.points}</strong> points obtenus aux indicateurs calculables sur un maximum de{" "}
+                    <strong>{meta.points_calculables}</strong> points maximum pouvant être obtenus aux indicateurs
+                    calculables.
                   </>
                 }
               />

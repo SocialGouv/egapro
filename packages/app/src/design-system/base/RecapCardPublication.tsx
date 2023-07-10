@@ -9,9 +9,9 @@ type Props = {
 };
 
 export const RecapCardPublication = ({ publication }: Props) => {
-  if (!publication?.date) return null;
+  const publicationDate = publication?.date; // Extract variable for TS to understand that publication date is not undefined.
 
-  const messageDate = publication.date ? `Résultats publiés le ${formatIsoToFr(publication?.date)}` : "";
+  if (!publicationDate) return null;
 
   const messageModalité = publication.url
     ? ` via une publication sur le site ${publication?.url}`
@@ -24,7 +24,7 @@ export const RecapCardPublication = ({ publication }: Props) => {
       content={
         <>
           <p>
-            {messageDate} {messageModalité}
+            Résultats publiés le <strong>{formatIsoToFr(publicationDate)}</strong> {messageModalité}.
           </p>
         </>
       }

@@ -46,7 +46,7 @@ const Page = () => {
         </p>
       ) : (
         <Alert
-          severity="warning"
+          severity="info"
           title="Cette déclaration a été validée et transmise."
           description="Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle."
         />
