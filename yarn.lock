@@ -3817,10 +3817,10 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/formidable@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@types/formidable/-/formidable-2.0.5.tgz#e54e31d242ef750ac2d05aa163fa0274c8e6ef9c"
-  integrity sha512-uvMcdn/KK3maPOaVUAc3HEYbCEhjaGFwww4EsX6IJfWIJ1tzHtDHczuImH3GKdusPnAAmzB07St90uabZeCKPA==
+"@types/formidable@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@types/formidable/-/formidable-3.4.0.tgz#5a671de8f88f3f313b31041f4746141e4431f82b"
+  integrity sha512-JXP+LsspYYBIJJxZ9VJsswb5U1hkUUhLmtAb6EB1SWcDDbJQlWRhGoZYasMSnk2NsqtUEHd3uuaiImmSys+8AQ==
   dependencies:
     "@types/node" "*"
 
@@ -8228,15 +8228,14 @@ form-data@^4.0.0:
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
-formidable@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/formidable/-/formidable-2.1.1.tgz#81269cbea1a613240049f5f61a9d97731517414f"
-  integrity sha512-0EcS9wCFEzLvfiks7omJ+SiYJAiD+TzK4Pcw1UlUoGnhUxDcMKjt0P7x8wEb0u6OHu8Nb98WG3nxtlF5C7bvUQ==
+formidable@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/formidable/-/formidable-3.5.0.tgz#3605a9325130d05c550d57be8e81d1757baa12d6"
+  integrity sha512-WwsMWvPmY+Kv37C3+KP3A+2Ym1aZoac4nz4ZEe5z0UPBoCg0O/wHay3eeYkZr4KJIbCzpSUeno+STMhde+KCfw==
   dependencies:
     dezalgo "^1.0.4"
     hexoid "^1.0.0"
     once "^1.4.0"
-    qs "^6.11.0"
 
 forwarded@0.2.0:
   version "0.2.0"
@@ -13408,13 +13407,6 @@ qs@6.11.0:
   version "6.11.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
   integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
-  dependencies:
-    side-channel "^1.0.4"
-
-qs@^6.11.0:
-  version "6.11.1"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.1.tgz#6c29dff97f0c0060765911ba65cbc9764186109f"
-  integrity sha512-0wsrzgTz/kAVIeuxSjnpGC56rzYtr6JT/2BwEvMaPhFIoYa1aGO8LbzuU1R0uUYQkLpWBTOj0l/CLAJB64J6nQ==
   dependencies:
     side-channel "^1.0.4"
 
