@@ -30,7 +30,7 @@ export const funnelStaticConfig: StaticConfig = {
     title: "Écart de taux d’augmentations individuelles entre les femmes et les hommes",
     url: `${base}/augmentations-et-promotions`,
   },
-  declarant: { title: "Déclarant", url: `${base}/declarant` },
+  declarant: { title: "Informations déclarant", url: `${base}/declarant` },
   "declaration-existante": { title: "Déclaration existante", url: `${base}/declaration-existante` },
   augmentations: {
     title: "Écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes",

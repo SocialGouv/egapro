@@ -48,7 +48,7 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <DeclarationStepper stepName="commencer" />
+      <DeclarationStepper stepName={stepName} />
 
       <Alert
         severity="info"

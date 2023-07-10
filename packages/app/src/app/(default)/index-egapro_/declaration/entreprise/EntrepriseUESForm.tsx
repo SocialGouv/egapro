@@ -35,10 +35,7 @@ export const EntrepriseUESForm = () => {
     formState: { isValid },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      type: formData?.entreprise?.type,
-      tranche: formData?.entreprise?.tranche,
-    },
+    defaultValues: formData[stepName],
   });
 
   const type = watch("type");
