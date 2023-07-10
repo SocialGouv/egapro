@@ -10,6 +10,7 @@ type Actions = {
   resetFormData: () => void;
   saveFormData: (data: Partial<DeclarationFormState>) => void;
   savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) => void;
+  setStatus: (status: DeclarationFormState["declaration-existante"]["status"]) => void;
 };
 
 const formDataDefault: State["formData"] = {
@@ -39,6 +40,11 @@ export const useDeclarationFormManager = create<Actions & State>()(
           set({
             formData: formDataDefault,
           }),
+        setStatus: (status: DeclarationFormState["declaration-existante"]["status"]) => {
+          set(state => {
+            state.formData["declaration-existante"].status = status;
+          });
+        },
       })),
     ),
     {

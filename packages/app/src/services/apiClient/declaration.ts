@@ -42,9 +42,6 @@ export const fetchDeclaration = (siren: string, year: number, options?: FetcherO
 //   return { repeq, error, loading };
 // };
 
-/**
- * Helper over {@link fetchRepresentationEquilibree} to manage 404 error as a regular case & transform in a FormState.
- */
 // export const fetchRepresentationEquilibreeAsFormState = async (siren: string, year: number) => {
 //   try {
 //     const repeq = await fetchRepresentationEquilibree(siren, year);

@@ -152,6 +152,7 @@ export const DeclarationFormBuilder = {
         effectifTotal: declaration.entreprise.effectif?.total ?? 0,
         finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
       },
+      // TODO: les autres indicateurs et autres informations
     };
   },
 

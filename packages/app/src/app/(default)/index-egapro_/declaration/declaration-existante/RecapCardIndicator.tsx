@@ -13,13 +13,13 @@ type Props = {
   nom: IndicatorKey;
 };
 
-const title: Record<IndicatorKey, string> = {
-  rémunérations: funnelStaticConfig["remunerations"].title,
-  augmentations: funnelStaticConfig["augmentations"].title,
-  promotions: funnelStaticConfig["promotions"].title,
-  augmentations_et_promotions: funnelStaticConfig["augmentations-et-promotions"].title,
-  congés_maternité: funnelStaticConfig["conges-maternite"].title,
-  hautes_rémunérations: funnelStaticConfig["hautes-remunerations"].title,
+const matchKey: Record<IndicatorKey, keyof typeof funnelStaticConfig> = {
+  rémunérations: "remunerations",
+  augmentations: "augmentations",
+  promotions: "promotions",
+  augmentations_et_promotions: "augmentations-et-promotions",
+  congés_maternité: "conges-maternite",
+  hautes_rémunérations: "hautes-remunerations",
 };
 
 export const RecapCardIndicator = ({ nom, indicateurs, customContent }: PropsWithChildren<Props>) => {
@@ -27,7 +27,8 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent }: PropsWit
 
   return (
     <RecapCard
-      title={title[nom]}
+      title={funnelStaticConfig[matchKey[nom]].title}
+      editLink={funnelStaticConfig[matchKey[nom]].url}
       content={
         <>
           {customContent}
@@ -36,7 +37,7 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent }: PropsWit
             <p>L'indicateur n'est pas calculable.</p>
           )}
 
-          {note && (
+          {note !== undefined && (
             <IndicatorNote
               note={note}
               max={indicatorNoteMax[nom]}
@@ -44,7 +45,8 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent }: PropsWit
               legend={
                 nom === "congés_maternité"
                   ? ""
-                  : indicateurs?.[nom]?.population_favorable === "egalite"
+                  : indicateurs?.[nom]?.population_favorable === undefined ||
+                    indicateurs?.[nom]?.population_favorable === "egalite"
                   ? "Égalité de l'indicateur"
                   : `Écart en faveur des ${indicateurs?.[nom]?.population_favorable}`
               }

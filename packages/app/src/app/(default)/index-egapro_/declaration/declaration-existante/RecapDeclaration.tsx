@@ -1,4 +1,10 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
+import { CountryCode } from "@common/core-domain/domain/valueObjects/CountryCode";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
+import { FrenchPostalCode } from "@common/core-domain/domain/valueObjects/FrenchPostalCode";
+import { NafCode } from "@common/core-domain/domain/valueObjects/NafCode";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { IndicatorNote, RecapCard } from "@design-system";
@@ -11,12 +17,24 @@ import { RecapCardIndicator } from "./RecapCardIndicator";
 
 type Props = { déclaration: DeclarationDTO };
 
-export const DeclarationRecap = ({ déclaration }: PropsWithChildren<Props>) => {
+export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => {
   const { déclarant, déclaration: meta, entreprise, indicateurs } = déclaration;
+
+  console.log("foo:", indicateurs?.hautes_rémunérations);
+
+  const company: CompanyProps = {
+    name: entreprise.raison_sociale,
+    address: entreprise.adresse,
+    postalCode: entreprise.code_postal ? new FrenchPostalCode(entreprise.code_postal) : undefined,
+    city: entreprise.commune,
+    countryCode: entreprise.code_pays !== undefined ? new CountryCode(entreprise.code_pays) : undefined,
+    siren: new Siren(entreprise.siren),
+    nafCode: new NafCode(entreprise.code_naf),
+  };
 
   return (
     <>
-      <h1>Récapitulatif</h1>
+      <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif</h1>
 
       {/* <p>
         Déclaration pour l’année {meta.année_indicateurs + 1} au titre des données {meta.année_indicateurs}.
@@ -27,16 +45,18 @@ export const DeclarationRecap = ({ déclaration }: PropsWithChildren<Props>) => 
         title="Informations déclarant"
         content={
           <>
-            <p>
+            <strong>
               {déclarant?.nom}&nbsp;{déclarant?.prénom}
-            </p>
-            <p>{déclarant?.email}</p>
-            <p>{déclarant.téléphone}</p>
+            </strong>
+            <br />
+            {déclarant?.email}
+            <br />
+            {déclarant.téléphone}
           </>
         }
       />
 
-      <RecapCardCompany company={entreprise} />
+      <RecapCardCompany company={company} />
 
       {entreprise.ues?.nom && (
         <RecapCard
@@ -83,7 +103,7 @@ export const DeclarationRecap = ({ déclaration }: PropsWithChildren<Props>) => 
               </p>
             )}
 
-            {indicateurs?.rémunérations?.date_consultation_cse ? (
+            {!indicateurs?.rémunérations?.date_consultation_cse ? (
               <p> Aucun CSE n’est mis en place. </p>
             ) : (
               <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
@@ -92,9 +112,14 @@ export const DeclarationRecap = ({ déclaration }: PropsWithChildren<Props>) => 
         }
       />
 
-      <RecapCardIndicator nom="augmentations" indicateurs={indicateurs} />
-      <RecapCardIndicator nom="augmentations_et_promotions" indicateurs={indicateurs} />
-      <RecapCardIndicator nom="promotions" indicateurs={indicateurs} />
+      {entreprise.effectif?.tranche === "50:250" ? (
+        <RecapCardIndicator nom="augmentations_et_promotions" indicateurs={indicateurs} />
+      ) : (
+        <>
+          <RecapCardIndicator nom="augmentations" indicateurs={indicateurs} />
+          <RecapCardIndicator nom="promotions" indicateurs={indicateurs} />
+        </>
+      )}
       <RecapCardIndicator nom="congés_maternité" indicateurs={indicateurs} />
       <RecapCardIndicator nom="hautes_rémunérations" indicateurs={indicateurs} />
 

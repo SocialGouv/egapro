@@ -1,4 +1,5 @@
 import { type Publication } from "@common/models/generated";
+import { formatIsoToFr } from "@common/utils/date";
 
 import { funnelStaticConfig } from "../../app/(default)/index-egapro_/declaration/declarationFunnelConfiguration";
 import { RecapCard } from "./RecapCard";
@@ -10,7 +11,7 @@ type Props = {
 export const RecapCardPublication = ({ publication }: Props) => {
   if (!publication?.date) return null;
 
-  const messageDate = publication.date ? `Résultats publiés le ${publication?.date}` : "";
+  const messageDate = publication.date ? `Résultats publiés le ${formatIsoToFr(publication?.date)}` : "";
 
   const messageModalité = publication.url
     ? ` via une publication sur le site ${publication?.url}`

@@ -1,19 +1,9 @@
+import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
 import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
-import { type CodeNaf } from "@common/models/generated";
 
 import { RecapCard } from "./RecapCard";
 
-type Props = {
-  company: {
-    address?: string;
-    city?: string;
-    countryCode?: string;
-    nafCode?: CodeNaf;
-    name?: string;
-    postalCode?: string;
-    siren?: string;
-  };
-};
+type Props = { company: CompanyProps };
 
 export const RecapCardCompany = ({ company }: Props) => {
   const { name, address, postalCode, city, countryCode, siren, nafCode } = company;
@@ -25,10 +15,11 @@ export const RecapCardCompany = ({ company }: Props) => {
         <>
           <strong>{name}</strong>
           <br />
-          {address}, {postalCode} {city}
-          {countryCode && countryCode !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[countryCode]}`}
+          {address}, {postalCode?.getValue()} {city}
+          {countryCode && countryCode.getValue() !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[countryCode.getValue()]}`}
           <br />
-          Siren : {siren} - Code NAF : {nafCode} - {nafCode && NAF[nafCode].description}
+          Siren : {siren.getValue()} - Code NAF : {nafCode.getValue()} -{" "}
+          {nafCode && NAF[nafCode.getValue()].description}
         </>
       }
     />

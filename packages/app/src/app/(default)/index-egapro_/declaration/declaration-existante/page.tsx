@@ -1,24 +1,26 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import Card from "@codegouvfr/react-dsfr/Card";
-import { config } from "@common/config";
-import { NextLinkOrA } from "@components/utils/NextLinkOrA";
-import { Grid, GridCol } from "@design-system";
+import { DownloadCard, Grid, GridCol } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
-import { useRouter } from "next/navigation";
+import { type Session } from "next-auth";
+import { useSession } from "next-auth/react";
 
-import { funnelConfig } from "../declarationFunnelConfiguration";
-import { DeclarationRecap } from "./DeclarationRecap";
+import { type FunnelKey } from "../declarationFunnelConfiguration";
+import { EditButton } from "./EditButton";
+import { RecapDeclaration } from "./RecapDeclaration";
 
-const stepName = "declaration-existante";
+const stepName: FunnelKey = "declaration-existante";
+
+const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
+  if (!siren || !user) return undefined;
+  return user.staff || user.companies.some(company => company.siren === siren);
+};
 
 const Page = () => {
-  const router = useRouter();
+  const session = useSession();
   const { formData } = useDeclarationFormManager();
 
   const siren = formData.commencer?.entrepriseDéclarante?.siren;
@@ -26,13 +28,15 @@ const Page = () => {
 
   const { declaration, error } = useDeclaration(siren, year);
 
+  const canEdit = canEditSiren(session?.data?.user)(siren);
+
   const olderThanOneYear = !declaration?.data.déclaration.date
     ? undefined
     : isAfter(new Date(), add(new Date(declaration.data.déclaration.date), { years: 1 }));
 
   if (!declaration?.data || olderThanOneYear === undefined) return <p>Chargement...</p>;
 
-  if (error) <p>Une erreur a été rencontrée par l'API.</p>;
+  if (error) <p>{"Une erreur a été rencontrée par l'API."}</p>;
 
   return (
     <>
@@ -47,43 +51,27 @@ const Page = () => {
           description="Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle."
         />
       )}
-      <DeclarationRecap déclaration={declaration?.data} />
 
-      <ButtonsGroup
-        className={fr.cx("fr-mb-3w")}
-        inlineLayoutWhen="sm and up"
-        buttons={[
-          {
-            children: "Précédent",
-            priority: "secondary",
-            onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
-            type: "button",
-          },
-          {
-            children: "Suivant",
-            type: "submit",
-            nativeButtonProps: {},
-          },
-        ]}
-      />
+      <RecapDeclaration déclaration={declaration?.data} />
 
-      <Grid mt="6w" align="center">
-        <GridCol md={10} lg={8}>
-          <Card
-            title="xxx"
-            detail={
-              <>
-                <NextLinkOrA href={`${config.api_url}/declaration/${siren}/${year}/pdf`}>
-                  Télécharger le récapitulatif
-                </NextLinkOrA>
-                <br />
-                Année {declaration.data.déclaration.année_indicateurs + 1} au titre des données{" "}
-                {declaration.data.déclaration.année_indicateurs}.
-              </>
-            }
-          />
-        </GridCol>
-      </Grid>
+      {canEdit && year && (
+        <>
+          <EditButton declaration={declaration.data} stepName={stepName} />
+
+          <Grid align="center" mt="6w">
+            <GridCol md={10} lg={8}>
+              <DownloadCard
+                title="Télécharger le récapitulatif"
+                endDetail="PDF"
+                href={`/api/declaration/${siren}/${year}/pdf`}
+                filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
+                fileType="application/pdf"
+                desc={`Année ${year + 1} au titre des donées ${year}`}
+              />
+            </GridCol>
+          </Grid>
+        </>
+      )}
     </>
   );
 };
