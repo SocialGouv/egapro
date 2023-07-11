@@ -1,10 +1,6 @@
 "use client";
 
-import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
-import { CountryCode } from "@common/core-domain/domain/valueObjects/CountryCode";
-import { FrenchPostalCode } from "@common/core-domain/domain/valueObjects/FrenchPostalCode";
-import { NafCode } from "@common/core-domain/domain/valueObjects/NafCode";
-import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -15,19 +11,18 @@ export const InformationEntreprise = () => {
 
   const { entrepriseDéclarante } = commencer ?? {};
 
-  const nafCode = entrepriseDéclarante?.codeNaf;
-  const siren = entrepriseDéclarante?.siren;
+  if (!entrepriseDéclarante) return null;
 
-  if (!nafCode || !siren) return null;
+  const siren = entrepriseDéclarante.siren;
 
-  const company: CompanyProps = {
+  const company: CompanyDTO = {
     address: entrepriseDéclarante?.adresse,
-    city: entrepriseDéclarante?.commune,
-    countryCode: entrepriseDéclarante?.codePays ? new CountryCode(entrepriseDéclarante?.codePays) : undefined,
-    nafCode: new NafCode(nafCode),
-    name: entrepriseDéclarante?.raisonSociale ?? "",
-    postalCode: entrepriseDéclarante?.codePostal ? new FrenchPostalCode(entrepriseDéclarante?.codePostal) : undefined,
-    siren: new Siren(siren),
+    city: entrepriseDéclarante?.commune || "",
+    countryIsoCode: entrepriseDéclarante?.codePays,
+    nafCode: entrepriseDéclarante.codeNaf,
+    name: entrepriseDéclarante.raisonSociale,
+    postalCode: entrepriseDéclarante?.codePostal || "",
+    siren: siren,
   };
 
   return (

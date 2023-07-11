@@ -3,6 +3,8 @@ import { type ClearObject } from "@common/utils/types";
 
 import { type CreateRepresentationEquilibreeDTO } from "./CreateRepresentationEquilibreeDTO";
 
+// TODO: refactor company property with CompanyDTO ?
+
 export type RepresentationEquilibreeDTO = ClearObject<
   CreateRepresentationEquilibreeDTO & {
     company: {

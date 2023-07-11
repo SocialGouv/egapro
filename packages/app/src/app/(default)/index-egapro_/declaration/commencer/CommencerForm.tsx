@@ -82,9 +82,7 @@ const prepareDataWithExistingDeclaration = async (
     },
     [stepName]: {
       annéeIndicateurs: year,
-      entrepriseDéclarante: {
-        ...buildEntreprise(entreprise),
-      },
+      entrepriseDéclarante: buildEntreprise(entreprise),
     },
   };
 };

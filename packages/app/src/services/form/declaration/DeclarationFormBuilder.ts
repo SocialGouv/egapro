@@ -3,7 +3,7 @@ import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/
 import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
 import { type EmptyObject } from "@common/utils/types";
 
-import { type Entreprise } from "./entreprise";
+import { buildEntreprise, type Entreprise } from "./entreprise";
 
 type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
 type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];
@@ -115,17 +115,7 @@ export const DeclarationFormBuilder = {
     return {
       commencer: {
         annéeIndicateurs: declaration.déclaration.année_indicateurs,
-        entrepriseDéclarante: {
-          adresse: declaration.entreprise.adresse,
-          codeNaf: declaration.entreprise.code_naf,
-          codePays: declaration.entreprise.code_pays,
-          codePostal: declaration.entreprise.code_postal,
-          commune: declaration.entreprise.commune,
-          département: declaration.entreprise.département,
-          raisonSociale: declaration.entreprise.raison_sociale,
-          région: declaration.entreprise.région,
-          siren: declaration.entreprise.siren,
-        },
+        entrepriseDéclarante: buildEntreprise(declaration.entreprise),
       },
       "declaration-existante": {
         date: declaration.déclaration.date,

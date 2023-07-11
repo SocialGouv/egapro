@@ -1,10 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
-import { CountryCode } from "@common/core-domain/domain/valueObjects/CountryCode";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { FrenchPostalCode } from "@common/core-domain/domain/valueObjects/FrenchPostalCode";
-import { NafCode } from "@common/core-domain/domain/valueObjects/NafCode";
-import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { IndicatorNote, RecapCard } from "@design-system";
@@ -20,14 +16,14 @@ type Props = { déclaration: DeclarationDTO };
 export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => {
   const { déclarant, déclaration: meta, entreprise, indicateurs } = déclaration;
 
-  const company: CompanyProps = {
+  const company: CompanyDTO = {
     name: entreprise.raison_sociale,
-    address: entreprise.adresse,
-    postalCode: entreprise.code_postal ? new FrenchPostalCode(entreprise.code_postal) : undefined,
-    city: entreprise.commune,
-    countryCode: entreprise.code_pays !== undefined ? new CountryCode(entreprise.code_pays) : undefined,
-    siren: new Siren(entreprise.siren),
-    nafCode: new NafCode(entreprise.code_naf),
+    address: entreprise.adresse || "",
+    postalCode: entreprise.code_postal || "",
+    city: entreprise.commune || "",
+    countryIsoCode: entreprise.code_pays,
+    siren: entreprise.siren,
+    nafCode: entreprise.code_naf,
   };
 
   return (
