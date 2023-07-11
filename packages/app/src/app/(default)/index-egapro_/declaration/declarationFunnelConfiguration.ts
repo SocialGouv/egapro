@@ -6,7 +6,7 @@ export const nbSteps = 12;
 
 const base = config.base_declaration_url;
 
-type FunnelStep<FunnelKey> = {
+type FunnelStep = {
   indexStep: () => number;
   next: () => StaticConfigValue;
   previous: () => StaticConfigValue;

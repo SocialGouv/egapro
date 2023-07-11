@@ -14,7 +14,7 @@ export type DeclarationAPI = {
   year: number;
 };
 
-export const putDeclaration = async (data: DeclarationFormState) => {
+export const putDeclaration = async (_data: DeclarationFormState) => {
   //   const representation = buildRepresentation(data);
   //   const siren = representation.entreprise.siren;
   //   const year = representation.déclaration.année_indicateurs;

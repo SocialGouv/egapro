@@ -8,7 +8,6 @@ import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import assert from "assert";
 import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardCompany";
 
 export const InformationEntreprise = () => {
@@ -19,8 +18,7 @@ export const InformationEntreprise = () => {
   const nafCode = entrepriseDéclarante?.codeNaf;
   const siren = entrepriseDéclarante?.siren;
 
-  assert(nafCode, "Le code NAF est obligatoire");
-  assert(siren, "Le Siren est obligatoire");
+  if (!nafCode || !siren) return null;
 
   const company: CompanyProps = {
     address: entrepriseDéclarante?.adresse,

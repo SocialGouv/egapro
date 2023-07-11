@@ -60,7 +60,7 @@ export const RemunerationCSPResultatForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
     setValue,
     watch,
   } = methods;
