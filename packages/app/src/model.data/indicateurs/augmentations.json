@@ -14,8 +14,7 @@
           "type": "string",
           "enum": [
             "egvi40pcet",
-            "absaugi",
-            "am"
+            "absaugi"
           ],
           "description": "Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)"
         },
