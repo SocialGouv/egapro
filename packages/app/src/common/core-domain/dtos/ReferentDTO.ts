@@ -1,12 +1,13 @@
 import { COUNTIES_IDS, REGIONS_IDS } from "@common/dict";
 import { Email } from "@common/shared-domain/domain/valueObjects";
+import { zodEmail } from "@common/utils/form";
 import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
 
 const substituteSchema = z.object({
   name: z.string().optional(),
-  email: z.string().superRefine(zodValueObjectSuperRefine(Email)).optional(),
+  email: zodEmail.optional(),
 });
 const baseReferentSchema = z.object({
   county: z.enum(COUNTIES_IDS).optional(),

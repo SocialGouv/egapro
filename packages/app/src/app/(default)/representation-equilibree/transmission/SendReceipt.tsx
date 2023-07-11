@@ -69,7 +69,7 @@ export const SendReceipt = () => {
               href={`/representation-equilibree/${funnel.siren}/${funnel.year}/pdf`}
               filename={`representation_${funnel.siren}_${funnel.year + 1}.pdf`}
               fileType="application/pdf"
-              desc={`Année ${funnel.year + 1} au titre des donées ${funnel.year}`}
+              desc={`Année ${funnel.year + 1} au titre des données ${funnel.year}`}
             />
           </GridCol>
         </Grid>
