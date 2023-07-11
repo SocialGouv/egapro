@@ -6,43 +6,24 @@ export const nbSteps = 12;
 
 const base = config.base_declaration_url;
 
-type FunnelStep = {
-  indexStep: () => number;
-  next: () => StaticConfigValue;
-  previous: () => StaticConfigValue;
-};
-
 export type FunnelKey = keyof DeclarationFormState;
 
 type ExtendedFunnelKey = FunnelKey | "confirmation" | "declaration-existante";
 
-// type StaticConfigItem = { name: ExtendedFunnelKey | FunnelKey; title: string; url?: string };
-
-// Page confirmation is the objective of the funnel. It is not part of the funnel itself, but has a title and an url so is included in the static config.
 type StaticConfig = Record<ExtendedFunnelKey, StaticConfigItem>;
 
-type StaticConfigValue = StaticConfig[keyof StaticConfig];
-
-function url(item: StaticConfigItem) {
-  return `${base}/${item.name}`;
-}
+type FunnelStep = {
+  indexStep: () => number;
+  next: () => StaticConfig[keyof StaticConfig];
+  previous: () => StaticConfig[keyof StaticConfig];
+};
 
 class StaticConfigItem {
   constructor(public name: ExtendedFunnelKey, public title: string) {}
 
   get url() {
-    return url(this);
+    return `${base}/${this.name}`;
   }
-
-  // public value() {
-  //   return {
-  //     [this.name]: {
-  //       title: this.title,
-  //       name: this.name,
-  //       url: this.url,
-  //     },
-  //   };
-  // }
 }
 
 /**
@@ -98,37 +79,39 @@ export const funnelStaticConfig: StaticConfig = {
   ),
 } as const;
 
-// Add url getter to static config.
-// for (const key in funnelStaticConfig) {
-//   Object.defineProperty(funnelStaticConfig[key as keyof StaticConfig], "url", {
-//     get: function () {
-//       console.log("on trouve", url(this));
-//       return url(this);
-//     },
-//   });
-// }
-
 /**
  * Dynamic funnel configuration. Reachable client side, after using session storage form data.
  *
  * @param data formData get by useDeclarationFormManager.
  */
-export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, FunnelStep> = (
+export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnelKey, FunnelStep> = (
   data: DeclarationFormState,
 ) =>
   ({
     commencer: {
-      indexStep: () => 5,
+      indexStep: () => 1,
       next: () =>
         data?.["declaration-existante"]?.status !== "creation"
           ? funnelStaticConfig[`declaration-existante`]
           : funnelStaticConfig[`entreprise`],
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
+    confirmation: {
+      // confirmation is the last step and should not be considered as a real step.
+      indexStep: () => {
+        throw new Error("No indexStep for confirmation step");
+      },
+      next: () => {
+        throw new Error("No next step for confirmation step");
+      },
+      previous: () => {
+        throw new Error("No previous step for confirmation step");
+      },
+    },
     "declaration-existante": {
-      indexStep: () => 1, // noop. We declared it to avoid having to complexify the type.
-      next: () => funnelStaticConfig[`declarant`], // noop. We declared it to avoid having to complexify the type.
-      previous: () => funnelStaticConfig[`commencer`], // noop. We declared it to avoid having to complexify the type.
+      indexStep: () => 1, // Not applicable. Not a real step.
+      next: () => funnelStaticConfig[`declarant`],
+      previous: () => funnelStaticConfig[`commencer`],
     },
     declarant: {
       indexStep() {
