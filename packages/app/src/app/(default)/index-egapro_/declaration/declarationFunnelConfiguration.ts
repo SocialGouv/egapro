@@ -16,67 +16,158 @@ export type FunnelKey = keyof DeclarationFormState;
 
 type ExtraFunnelKey = "confirmation" | "declaration-existante";
 
+type StaticConfigItem = { name: FunnelKey; title: string; url: string };
+
 // Page confirmation is the objective of the funnel. It is not part of the funnel itself, but has a title and an url so is included in the static config.
-type StaticConfig = Record<ExtraFunnelKey | FunnelKey, { title: string; url: string }>;
+type StaticConfig = Record<ExtraFunnelKey | FunnelKey, StaticConfigItem>;
 
 type StaticConfigValue = StaticConfig[keyof StaticConfig];
+
+function url(item: StaticConfigItem) {
+  return `${base}/${item.name}`;
+}
 
 /**
  * Static configuration of the funnel. Reachable server side.
  */
 export const funnelStaticConfig: StaticConfig = {
-  commencer: { title: "Commencer", url: `${base}/commencer` },
-  "augmentations-et-promotions": {
-    title: "Écart de taux d’augmentations individuelles entre les femmes et les hommes",
-    url: `${base}/augmentations-et-promotions`,
+  commencer: {
+    title: "Commencer",
+    name: "commencer",
+    get url() {
+      return url(this);
+    },
   },
-  declarant: { title: "Informations déclarant", url: `${base}/declarant` },
-  "declaration-existante": { title: "Déclaration existante", url: `${base}/declaration-existante` },
+  "augmentations-et-promotions": {
+    name: "augmentations-et-promotions",
+    title: "Écart de taux d’augmentations individuelles entre les femmes et les hommes",
+    get url() {
+      return url(this);
+    },
+  },
+  declarant: {
+    title: "Informations déclarant",
+    name: "declarant",
+    get url() {
+      return url(this);
+    },
+  },
+
+  "declaration-existante": {
+    name: "declaration-existante",
+    title: "Déclaration existante",
+    get url() {
+      return url(this);
+    },
+  },
   augmentations: {
+    name: "augmentations",
     title: "Écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes",
-    url: `${base}/augmentations`,
+    get url() {
+      return url(this);
+    },
   },
   confirmation: {
+    name: "confirmation",
     title: "Confirmation",
-    url: `${base}/confirmation`,
+    get url() {
+      return url(this);
+    },
   },
   "conges-maternite": {
+    name: "conges-maternite",
     title:
       "Pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé maternité",
-    url: `${base}/conges-maternite`,
+    get url() {
+      return url(this);
+    },
   },
-  entreprise: { title: "Informations de l'entreprise / UES", url: `${base}/entreprise` },
+  entreprise: {
+    name: "entreprise",
+    title: "Informations de l'entreprise / UES",
+    get url() {
+      return url(this);
+    },
+  },
   "hautes-remunerations": {
+    name: "hautes-remunerations",
     title: "Nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations",
-    url: `${base}/hautes-remunerations`,
+    get url() {
+      return url(this);
+    },
   },
-  "periode-reference": { title: "Période de référence", url: `${base}/periode-reference` },
-  promotions: { title: "Écart de taux de promotions entre les femmes et les hommes", url: `${base}/promotions` },
-  publication: { title: "Publication des résultats obtenus", url: `${base}/publication` },
+  "periode-reference": { name: "periode-reference", title: "Période de référence", url: `${base}/periode-reference` },
+  promotions: {
+    name: "promotions",
+    title: "Écart de taux de promotions entre les femmes et les hommes",
+    get url() {
+      return url(this);
+    },
+  },
+  publication: {
+    name: "publication",
+    title: "Publication des résultats obtenus",
+    get url() {
+      return url(this);
+    },
+  },
   "remunerations-coefficient-autre": {
+    name: "remunerations-coefficient-autre",
     title:
       "Écart de rémunération entre les femmes et les hommes par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-    url: `${base}/remunerations-coefficient-autre`,
+    get url() {
+      return url(this);
+    },
   },
   "remunerations-coefficient-branche": {
+    name: "remunerations-coefficient-branche",
     title:
       "Écart de rémunération entre les femmes et les hommes par niveau ou coefficient hiérarchique en application de la classification de branche",
-    url: `${base}/remunerations-coefficient-branche`,
+    get url() {
+      return url(this);
+    },
   },
   "remunerations-csp": {
+    name: "remunerations-csp",
     title: "Écart de rémunération entre les femmes et les hommes par catégorie socio-professionnelle",
-    url: `${base}/remunerations-csp`,
+    get url() {
+      return url(this);
+    },
   },
   "remunerations-resultat": {
+    name: "remunerations-resultat",
     title: "Résultat final de l’écart de rémunération entre les femmes et les hommes",
-    url: `${base}/remunerations-resultat`,
+    get url() {
+      return url(this);
+    },
   },
-  remunerations: { title: "Écart de rémunération entre les femmes et les hommes", url: `${base}/remunerations` },
-  "resultat-global": { title: "Niveau de résultat global", url: `${base}/resultat-global` },
-  ues: { title: "Informations de l'UES", url: `${base}/ues` },
+  remunerations: {
+    name: "remunerations",
+    title: "Écart de rémunération entre les femmes et les hommes",
+    get url() {
+      return url(this);
+    },
+  },
+  "resultat-global": {
+    name: "resultat-global",
+    title: "Niveau de résultat global",
+    get url() {
+      return url(this);
+    },
+  },
+  ues: {
+    name: "ues",
+    title: "Informations de l'UES",
+    get url() {
+      return url(this);
+    },
+  },
   "validation-transmission": {
+    name: "validation-transmission",
     title: "Validation de la transmission des résultats",
-    url: `${base}/validation-transmission`,
+    get url() {
+      return url(this);
+    },
   },
 } as const;
 
@@ -90,7 +181,7 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
 ) =>
   ({
     commencer: {
-      indexStep: () => 1,
+      indexStep: () => 5,
       next: () =>
         data?.["declaration-existante"]?.status !== "creation"
           ? funnelStaticConfig[`declaration-existante`]
@@ -103,23 +194,31 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       previous: () => funnelStaticConfig[`commencer`], // noop. We declared it to avoid having to complexify the type.
     },
     declarant: {
-      indexStep: () => 2,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`entreprise`],
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
     entreprise: {
-      indexStep: () => 3,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () =>
         data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`periode-reference`],
       previous: () => funnelStaticConfig[`declarant`],
     },
     ues: {
-      indexStep: () => 4,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`periode-reference`],
       previous: () => funnelStaticConfig[`entreprise`],
     },
     "periode-reference": {
-      indexStep: () => (data.entreprise?.type === "ues" ? 5 : 4),
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`remunerations`],
       previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`entreprise`]),
     },
@@ -141,27 +240,30 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       previous: () => funnelStaticConfig[`periode-reference`],
     },
     "remunerations-csp": {
-      indexStep: () => funnelConfig(data)["remunerations"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`remunerations-resultat`],
       previous: () => funnelStaticConfig[`remunerations`],
     },
     "remunerations-coefficient-branche": {
-      indexStep: () => funnelConfig(data)["remunerations"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`remunerations-resultat`],
       previous: () => funnelStaticConfig[`remunerations`],
     },
     "remunerations-coefficient-autre": {
-      indexStep: () => funnelConfig(data)["remunerations"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`remunerations-resultat`],
       previous: () => funnelStaticConfig[`remunerations`],
     },
     "remunerations-resultat": {
-      indexStep: () =>
-        data.remunerations?.mode === RemunerationsMode.Enum.CSP
-          ? funnelConfig(data)["remunerations-csp"].indexStep() + 1
-          : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
-          ? funnelConfig(data)["remunerations-coefficient-branche"].indexStep() + 1
-          : funnelConfig(data)["remunerations-coefficient-autre"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () =>
         data.entreprise?.tranche === "50:250"
           ? funnelStaticConfig[`augmentations-et-promotions`]
@@ -174,25 +276,30 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
           : funnelStaticConfig[`remunerations-coefficient-autre`],
     },
     "augmentations-et-promotions": {
-      indexStep: () => funnelConfig(data)["remunerations-resultat"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`conges-maternite`],
       previous: () => funnelStaticConfig[`remunerations-resultat`],
     },
     augmentations: {
-      indexStep: () => funnelConfig(data)["remunerations-resultat"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`promotions`],
       previous: () => funnelStaticConfig[`remunerations-resultat`],
     },
     promotions: {
-      indexStep: () => funnelConfig(data)["augmentations"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`conges-maternite`],
       previous: () => funnelStaticConfig[`augmentations`],
     },
     "conges-maternite": {
-      indexStep: () =>
-        data.entreprise?.tranche === "50:250"
-          ? funnelConfig(data)["augmentations-et-promotions"].indexStep() + 1
-          : funnelConfig(data)["promotions"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`hautes-remunerations`],
       previous: () =>
         data.entreprise?.tranche === "50:250"
@@ -200,22 +307,30 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
           : funnelStaticConfig[`promotions`],
     },
     "hautes-remunerations": {
-      indexStep: () => funnelConfig(data)["conges-maternite"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`resultat-global`],
       previous: () => funnelStaticConfig[`conges-maternite`],
     },
     "resultat-global": {
-      indexStep: () => funnelConfig(data)["hautes-remunerations"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`publication`],
       previous: () => funnelStaticConfig[`hautes-remunerations`],
     },
     publication: {
-      indexStep: () => funnelConfig(data)["resultat-global"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`validation-transmission`],
       previous: () => funnelStaticConfig[`resultat-global`],
     },
     "validation-transmission": {
-      indexStep: () => funnelConfig(data)["publication"].indexStep() + 1,
+      indexStep() {
+        return funnelConfig(data)[this.previous().name].indexStep() + 1;
+      },
       next: () => funnelStaticConfig[`confirmation`],
       previous: () => funnelStaticConfig[`publication`],
     },
