@@ -3,7 +3,6 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { zodEmail, zodPhone } from "@common/utils/form";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
@@ -67,7 +66,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onsubmit)}>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
           <p>
             Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les

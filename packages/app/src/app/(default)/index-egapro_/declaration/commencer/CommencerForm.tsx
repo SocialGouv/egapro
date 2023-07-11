@@ -5,7 +5,6 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
@@ -160,7 +159,7 @@ export const CommencerForm = () => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
           <Select
             label="Année au titre de laquelle les indicateurs sont calculés"
