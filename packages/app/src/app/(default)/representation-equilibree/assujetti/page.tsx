@@ -13,7 +13,7 @@ export const metadata = {
 
 const AssujettiPage = async () => {
   return (
-    <CenteredContainer>
+    <CenteredContainer pb="6w">
       <h1>{title}</h1>
       <p>
         <strong>

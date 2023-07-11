@@ -1,4 +1,37 @@
-.icon-clickable {
+.fr-icon {
+    display: flex;
+    align-items: center;
+}
+
+.fr-icon--valign-top {
+    align-items: flex-start;
+}
+
+.fr-icon--valign-bottom {
+    align-items: flex-end;
+}
+
+.fr-icon--clickable {
     cursor: pointer;
     text-decoration: none;
+}
+
+.fr-icon--right, .fr-icon--left {
+    overflow: initial;
+    max-width: 100%;
+    max-height: none;
+}
+
+.fr-icon--left::before {
+    content: "";
+    --icon-size: 1rem;
+    margin-left: -.125rem;
+    margin-right: .5rem;
+}
+
+.fr-icon--right::after {
+    content: "";
+    --icon-size: 1rem;
+    margin-right: -.125rem;
+    margin-left: .5rem;
 }

@@ -6,9 +6,10 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getServerSession } from "next-auth";
 
 import { AlertEdition } from "../AlertEdition";
+import { TITLES } from "../titles";
 import { DeclarantForm } from "./Form";
 
-const title = "Informations déclarant";
+const title = TITLES.declarant;
 
 export const metadata = {
   title,

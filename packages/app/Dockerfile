@@ -1,4 +1,4 @@
-ARG NODE_VERSION=16-alpine
+ARG NODE_VERSION=20-alpine
 
 # Builder
 FROM node:$NODE_VERSION AS builder

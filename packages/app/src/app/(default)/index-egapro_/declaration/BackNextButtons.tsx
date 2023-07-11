@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { BackNextButtonsGroup } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
 import { type PropsWithChildren } from "react";
@@ -16,26 +16,12 @@ export const BackNextButtons = ({ stepName, disabled }: PropsWithChildren<Props>
   const { formData } = useDeclarationFormManager();
 
   return (
-    <>
-      <ButtonsGroup
-        className={fr.cx("fr-mb-3w")}
-        inlineLayoutWhen="sm and up"
-        buttons={[
-          {
-            children: "Précédent",
-            priority: "secondary",
-            onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
-            type: "button",
-          },
-          {
-            children: "Suivant",
-            type: "submit",
-            nativeButtonProps: {
-              disabled,
-            },
-          },
-        ]}
-      />
-    </>
+    <BackNextButtonsGroup
+      className={fr.cx("fr-mb-3w")}
+      backProps={{
+        onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
+      }}
+      nextDisabled={disabled}
+    />
   );
 };

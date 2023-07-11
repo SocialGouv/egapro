@@ -3,7 +3,10 @@ import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
 
 export abstract class SimpleStringValueObject<Base extends SimpleStringValueObject<Any>> extends ValueObject<string> {
-  constructor(private value: string, private validator: RegExp) {
+  constructor(
+    private value: string,
+    private validator: RegExp,
+  ) {
     super();
     this.validator = new RegExp(validator.source, validator.flags.replace("g", ""));
     this.validate();

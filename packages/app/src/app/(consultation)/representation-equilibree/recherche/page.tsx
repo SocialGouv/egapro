@@ -27,56 +27,57 @@ export const metadata = {
   },
 };
 
-export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchema)(
-  async ({ searchParams, searchParamsError }) => {
-    const { limit: _, page, ...partialSearchParams } = searchParams;
+export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchema)(async ({
+  searchParams,
+  searchParamsError,
+}) => {
+  const { limit: _, page, ...partialSearchParams } = searchParams;
 
-    const isLanding = isEmpty(partialSearchParams) && page === 0;
-    return (
-      <>
-        <Container as="section" pb="3w">
+  const isLanding = isEmpty(partialSearchParams) && page === 0;
+  return (
+    <>
+      <Container as="section" pb="3w">
+        <Grid haveGutters align="center">
+          <GridCol sm={12} md={10} xl={8}>
+            {searchParamsError && (
+              <>
+                <DebugButton obj={searchParamsError} infoText="searchParamsError" />
+                <Alert
+                  small
+                  closable
+                  severity="error"
+                  description="Les paramètres d'url sont malformés."
+                  className={fr.cx("fr-mb-2w")}
+                />
+              </>
+            )}
+            <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
+            <SearchSirenForm searchParams={searchParams} />
+          </GridCol>
+        </Grid>
+      </Container>
+      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
+        <Container as="section">
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} xl={8}>
-              {searchParamsError && (
-                <>
-                  <DebugButton obj={searchParamsError} infoText="searchParamsError" />
-                  <Alert
-                    small
-                    closable
-                    severity="error"
-                    description="Les paramètres d'url sont malformés."
-                    className={fr.cx("fr-mb-2w")}
-                  />
-                </>
-              )}
-              <Heading as="h1" variant="h5" text="Rechercher la représentation équilibrée d'une entreprise" />
-              <SearchSirenForm searchParams={searchParams} />
+              <ClientAnimate>
+                {!searchParamsError && !isLanding && (
+                  <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
+                    {/* @ts-ignore */}
+                    <DisplayRepeqResults {...searchParams} />
+                  </Suspense>
+                )}
+              </ClientAnimate>
+              {/* @ts-ignore */}
+              <DetailedDownload
+                href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
+                label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
+                className={fr.cx("fr-mb-0")}
+              />
             </GridCol>
           </Grid>
         </Container>
-        <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
-          <Container as="section">
-            <Grid haveGutters align="center">
-              <GridCol sm={12} md={10} xl={8}>
-                <ClientAnimate>
-                  {!searchParamsError && !isLanding && (
-                    <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
-                      {/* @ts-ignore */}
-                      <DisplayRepeqResults {...searchParams} />
-                    </Suspense>
-                  )}
-                </ClientAnimate>
-                {/* @ts-ignore */}
-                <DetailedDownload
-                  href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
-                  label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
-                  className={fr.cx("fr-mb-0")}
-                />
-              </GridCol>
-            </Grid>
-          </Container>
-        </Box>
-      </>
-    );
-  },
-);
+      </Box>
+    </>
+  );
+});

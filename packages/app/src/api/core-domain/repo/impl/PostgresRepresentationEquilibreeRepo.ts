@@ -84,9 +84,9 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
   public async save(item: RepresentationEquilibree): Promise<RepresentationEquilibreePK> {
     const raw = representationEquilibreeMap.toPersistence(item);
 
-    const ftRaw = {
+    const ftRaw: Any = {
       ...raw,
-      ft: sql`to_tsvector('ftdict', ${raw.ft})` as Any,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
     };
     const insert = sql(ftRaw);
     const update = sql(ftRaw, "data", "modified_at", "ft");
