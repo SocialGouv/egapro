@@ -108,18 +108,18 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
     entreprise: {
-      indexStep: () => 2,
+      indexStep: () => 3,
       next: () =>
         data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`periode-reference`],
       previous: () => funnelStaticConfig[`declarant`],
     },
     ues: {
-      indexStep: () => 3,
+      indexStep: () => 4,
       next: () => funnelStaticConfig[`periode-reference`],
       previous: () => funnelStaticConfig[`entreprise`],
     },
     "periode-reference": {
-      indexStep: () => (data.entreprise?.type === "ues" ? 4 : 3),
+      indexStep: () => (data.entreprise?.type === "ues" ? 5 : 4),
       next: () => funnelStaticConfig[`remunerations`],
       previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`entreprise`]),
     },
@@ -219,4 +219,4 @@ export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, Fun
       next: () => funnelStaticConfig[`confirmation`],
       previous: () => funnelStaticConfig[`publication`],
     },
-  }) as const;
+  } as const);
