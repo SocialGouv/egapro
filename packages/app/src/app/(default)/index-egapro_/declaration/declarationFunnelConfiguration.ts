@@ -85,7 +85,7 @@ export const funnelStaticConfig: StaticConfig = {
  *
  * @param data formData get by useDeclarationFormManager.
  */
-export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, FunnelStep<FunnelKey>> = (
+export const funnelConfig: (data: DeclarationFormState) => Record<FunnelKey, FunnelStep> = (
   data: DeclarationFormState,
 ) =>
   ({
