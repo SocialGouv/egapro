@@ -1,5 +1,9 @@
+import { FrenchPhoneNumber } from "@common/core-domain/domain/valueObjects/FrenchPhoneNumber";
+import { Email } from "@common/shared-domain/domain/valueObjects";
 import { isValid, parseISO } from "date-fns";
 import { z } from "zod";
+
+import { zodValueObjectSuperRefine } from "./zod";
 
 export const zodSirenSchema = z
   .string()
@@ -99,6 +103,12 @@ export const zodPercentageSchema = z
     return percentage;
   })
   .optional();
+
+export const zodEmail = z.string().superRefine(zodValueObjectSuperRefine(Email));
+
+export const zodPhone = z
+  .string()
+  .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide"));
 
 export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;
 

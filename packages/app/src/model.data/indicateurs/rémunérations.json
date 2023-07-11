@@ -20,8 +20,7 @@
         "non_calculable": {
           "type": "string",
           "enum": [
-            "egvi40pcet",
-            "am"
+            "egvi40pcet"
           ],
           "description": "Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total"
         },

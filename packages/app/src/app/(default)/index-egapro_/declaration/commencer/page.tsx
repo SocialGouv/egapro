@@ -25,7 +25,7 @@ const CommencerPage = async () => {
 
   const monCompteProHost = monCompteProProvider.issuer;
 
-  if (!session.user.companies.length) {
+  if (!session.user.companies.length && !session.user.staff) {
     return (
       <Alert
         severity="warning"
@@ -48,7 +48,7 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <DeclarationStepper stepName="commencer" />
+      <DeclarationStepper stepName={stepName} />
 
       <Alert
         severity="info"
