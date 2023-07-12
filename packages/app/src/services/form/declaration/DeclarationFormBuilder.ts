@@ -104,8 +104,11 @@ export type DeclarationFormState = {
   };
   "resultat-global"?: EmptyObject;
   ues?: {
-    name: string;
-    sirens: string[];
+    entreprises: Array<{
+      raisonSociale: string;
+      siren: string;
+    }>;
+    nom: string;
   };
   "validation-transmission"?: EmptyObject;
 };
@@ -134,8 +137,12 @@ export const DeclarationFormBuilder = {
         type: declaration.entreprise.ues?.nom ? "ues" : "entreprise",
       },
       ues: {
-        name: declaration.entreprise.ues?.nom ?? "",
-        sirens: declaration.entreprise.ues?.entreprises?.map(entreprise => entreprise.siren) ?? [],
+        nom: declaration.entreprise.ues?.nom ?? "",
+        entreprises:
+          declaration.entreprise.ues?.entreprises?.map(entreprise => ({
+            siren: entreprise.siren,
+            raisonSociale: entreprise.raison_sociale,
+          })) ?? [],
       },
       "periode-reference": {
         périodeSuffisante: declaration.déclaration.période_suffisante ? "oui" : "oui",

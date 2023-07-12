@@ -121,32 +121,35 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
                     </Button>
                   )}
                 </div>
-                <table className={fr.cx("fr-table")}>
-                  <thead>
-                    <tr>
-                      <th>% moins de 30 ans</th>
-                      <th>% de 30 à 39 ans</th>
-                      <th>% de 40 à 49 ans</th>
-                      <th>% 50 ans et plus</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.:29`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.30:39`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.40:49`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.50:`} />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className={fr.cx("fr-table", "fr-table--no-caption")}>
+                  <table>
+                    <caption>Tableau des rémunérations</caption>
+                    <thead>
+                      <tr>
+                        <th>% moins de 30 ans</th>
+                        <th>% de 30 à 39 ans</th>
+                        <th>% de 40 à 49 ans</th>
+                        <th>% 50 ans et plus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.:29`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.30:39`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.40:49`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.50:`} />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
 
