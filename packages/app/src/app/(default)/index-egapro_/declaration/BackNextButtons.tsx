@@ -17,7 +17,7 @@ export const BackNextButtons = ({ stepName, disabled }: PropsWithChildren<Props>
 
   return (
     <BackNextButtonsGroup
-      className={fr.cx("fr-my-4w")}
+      className={fr.cx("fr-my-8w")}
       backProps={{
         onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
       }}

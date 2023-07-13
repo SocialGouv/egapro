@@ -1,11 +1,12 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { BackNextButtonsGroup } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
@@ -183,7 +184,7 @@ export const CommencerForm = () => {
 
           {user.staff ? (
             <Input
-              label="Siren entreprise (staff)"
+              label="Siren de l'entreprise"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeInputProps={register("siren")}
@@ -209,26 +210,16 @@ export const CommencerForm = () => {
             </Select>
           )}
 
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttons={[
-              {
-                children: "Réinitialiser",
-                priority: "secondary",
-                onClick: confirmReset,
-                type: "button",
-                nativeButtonProps: {
-                  disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
-                },
-              },
-              {
-                children: "Suivant",
-                type: "submit",
-                nativeButtonProps: {
-                  disabled: !isValid,
-                },
-              },
-            ]}
+          <BackNextButtonsGroup
+            className={fr.cx("fr-my-8w")}
+            backLabel="Réinitialiser"
+            backProps={{
+              onClick: confirmReset,
+              disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
+            }}
+            nextProps={{
+              disabled: !isValid,
+            }}
           />
         </form>
       </FormProvider>

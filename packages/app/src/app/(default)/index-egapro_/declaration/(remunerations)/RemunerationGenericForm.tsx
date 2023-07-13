@@ -152,27 +152,24 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
                 </div>
               </div>
             ))}
-
-            {mode !== "csp" && (
-              <div
-                className={fr.cx("fr-col")}
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              >
-                <Button
-                  type="button"
-                  className={fr.cx("fr-mb-4w")}
-                  onClick={() => append({ nom: "", tranches: defaultTranch })}
-                >
-                  Ajouter un coefficient
-                </Button>
-                <span>
-                  {`${catégories.length} coefficient${catégories.length > 1 ? "s" : ""} défini${
-                    catégories.length > 1 ? "s" : ""
-                  }`}
-                </span>
-              </div>
-            )}
           </ClientAnimate>
+
+          {mode !== "csp" && (
+            <div
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              className={fr.cx("fr-mb-8w")}
+            >
+              <Button type="button" onClick={() => append({ nom: "", tranches: defaultTranch })}>
+                Ajouter un coefficient
+              </Button>
+
+              <span>
+                {`${catégories.length} coefficient${catégories.length > 1 ? "s" : ""} défini${
+                  catégories.length > 1 ? "s" : ""
+                }`}
+              </span>
+            </div>
+          )}
         </ClientOnly>
 
         <BackNextButtons stepName={stepName} disabled={!isValid} />

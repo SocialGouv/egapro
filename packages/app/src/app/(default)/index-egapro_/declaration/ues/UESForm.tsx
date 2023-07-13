@@ -1,14 +1,15 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { zodSirenSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/utils/ClientOnly";
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
-import { type PropsWithChildren } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -16,34 +17,43 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = z.object({
-  nom: z.string(),
+  nom: z.string().min(1, "Le nom de l'UES est obligatoire"),
   entreprises: z.array(
     z.object({
       raisonSociale: z.string(),
-      siren: z.string(),
+      siren: zodSirenSchema, // Only for typing, the Siren validation is done for each Siren in the form.
     }),
   ),
 });
 
-// Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
 const stepName: FunnelKey = "ues";
 
-export const UESForm = (props: PropsWithChildren) => {
+export const UESForm = () => {
   const { formData, savePageData, resetFormData } = useDeclarationFormManager();
   const router = useRouter();
 
   const methods = useForm<FormType>({
-    resolver: zodResolver(formSchema),
+    mode: "onBlur",
+    resolver: async (data, context, options) => {
+      // console.debug("formDataxxx", data);
+      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+
+      return zodResolver(formSchema)(data, context, options);
+    },
     defaultValues: formData[stepName],
   });
 
   const {
+    clearErrors,
     control,
     register,
     handleSubmit,
+    setValue,
+    setError,
     formState: { errors, isValid, isDirty },
+    watch,
   } = methods;
 
   const {
@@ -55,6 +65,8 @@ export const UESForm = (props: PropsWithChildren) => {
     name: "entreprises",
   });
 
+  const watchedEntreprises = watch("entreprises");
+
   const onSubmit = async (data: FormType) => {
     savePageData("ues", data);
 
@@ -64,8 +76,6 @@ export const UESForm = (props: PropsWithChildren) => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
-        {/* <ReactHookFormDebug /> */}
-
         <p className={fr.cx("fr-mt-4w")}>
           La raison sociale des entreprises composant l'UES est renseignée automatiquement et n'est pas modifiable
           (source : Répertoire Sirene de l'INSEE).
@@ -79,81 +89,139 @@ export const UESForm = (props: PropsWithChildren) => {
             nativeInputProps={{
               ...register("nom"),
             }}
+            state={errors.nom?.message ? "error" : undefined}
+            stateRelatedMessage={errors.nom?.message}
           />
 
-          <ClientAnimate>
-            <div className={fr.cx("fr-table", "fr-table--layout-fixed", "fr-table--no-caption")}>
-              <table>
-                <caption>Liste des entreprises de l'UES</caption>
-                <thead>
-                  <tr>
-                    <th>Siren</th>
-                    <th>Raison sociale</th>
-                    <th></th>
+          <div className={fr.cx("fr-table", "fr-table--layout-fixed", "fr-table--no-caption")}>
+            <table>
+              <caption>Liste des entreprises de l'UES</caption>
+              <thead>
+                <tr>
+                  <th>Siren</th>
+                  <th>Raison sociale</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ paddingTop: 30, paddingBottom: 30 }}>
+                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.siren}</span>
+                  </td>
+                  <td>
+                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</span>
+                  </td>
+                  <td>
+                    <Badge noIcon severity="info">
+                      Entreprise déclarante
+                    </Badge>
+                  </td>
+                </tr>
+                {entreprises.map((_entreprise, index) => (
+                  <tr key={index}>
+                    <td>
+                      <Input
+                        label=""
+                        nativeInputProps={{
+                          ...register(`entreprises.${index}.siren`),
+                          onBlur: async () => {
+                            const result = zodSirenSchema.safeParse(watchedEntreprises[index].siren);
+
+                            if (!result.success) {
+                              setValue(`entreprises.${index}.raisonSociale`, "");
+                              setError(`entreprises.${index}.siren`, {
+                                message: result.error.issues[0].message,
+                              });
+                              return;
+                            }
+
+                            const allSirens = watchedEntreprises.map(entreprise => entreprise.siren);
+
+                            const allOtherSirens = [
+                              ...allSirens.slice(0, index),
+                              ...allSirens.slice(index + 1),
+                              formData.commencer?.entrepriseDéclarante?.siren,
+                            ];
+
+                            if (allOtherSirens.includes(watchedEntreprises[index].siren)) {
+                              setValue(`entreprises.${index}.raisonSociale`, "");
+                              setError(`entreprises.${index}.siren`, {
+                                message: "Le Siren est déjà dans l'UES",
+                              });
+                              return;
+                            }
+
+                            try {
+                              const firm = await memoizedFetchSiren(
+                                watchedEntreprises[index].siren,
+                                formData.commencer?.annéeIndicateurs,
+                              );
+                              setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
+                              clearErrors(`entreprises.${index}.siren`);
+                            } catch (error: unknown) {
+                              console.log("erreur", error);
+
+                              setValue(`entreprises.${index}.raisonSociale`, "");
+                              setError(`entreprises.${index}.siren`, {
+                                message: "Le Siren est invalide",
+                                type: "manual",
+                              });
+                            }
+                          },
+                        }}
+                        state={errors.entreprises?.[index]?.siren ? "error" : undefined}
+                        stateRelatedMessage={errors.entreprises?.[index]?.siren?.message}
+                      />
+                    </td>
+                    <td>
+                      <Input
+                        label=""
+                        disabled={true}
+                        nativeInputProps={{
+                          ...register(`entreprises.${index}.raisonSociale`),
+
+                          title: watchedEntreprises[index].raisonSociale,
+                        }}
+                        state={errors.entreprises?.[index]?.raisonSociale ? "error" : undefined}
+                        stateRelatedMessage={errors.entreprises?.[index]?.raisonSociale?.message}
+                      />
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <Button
+                        type="button"
+                        iconId="fr-icon-delete-bin-line"
+                        priority="tertiary no outline"
+                        iconPosition="right"
+                        onClick={() => remove(index)}
+                      >
+                        {""}
+                      </Button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <span>{formData.commencer?.entrepriseDéclarante?.siren}</span>
-                    </td>
-                    <td>
-                      <span>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</span>
-                    </td>
-                    <td>
-                      <span>Entreprise déclarante</span>
-                    </td>
-                  </tr>
-                  {entreprises.map((entreprise, index) => (
-                    <tr key={index}>
-                      <td>
-                        <Input label="" nativeInputProps={{ ...register(`entreprises.${index}.siren`) }} />
-                      </td>
-                      <td>
-                        <Input
-                          label=""
-                          disabled={true}
-                          nativeInputProps={{ ...register(`entreprises.${index}.raisonSociale`) }}
-                        />
-                      </td>
-                      <td>
-                        <Button
-                          type="button"
-                          iconId="fr-icon-delete-bin-line"
-                          priority="tertiary no outline"
-                          iconPosition="right"
-                          onClick={() => remove(index)}
-                        >
-                          Supprimer
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </ClientAnimate>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </ClientOnly>
 
         <div
-          className={fr.cx("fr-col")}
           style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+          className={fr.cx("fr-mb-8w")}
         >
-          <Button
-            type="button"
-            className={fr.cx("fr-mb-4w")}
-            onClick={() => append({ siren: "", raisonSociale: "" })}
-            iconId="fr-icon-add-line"
-          >
+          <Button type="button" onClick={() => append({ siren: "", raisonSociale: "" })} iconId="fr-icon-add-line">
             Ajouter une entreprise
           </Button>
-          <span>
-            {`${entreprises.length + 1} entreprise${entreprises.length + 1 >= 2 ? "s" : ""} compose${
-              entreprises.length + 1 >= 2 ? "nt" : ""
-            }`}{" "}
-            l'UES
-          </span>
+
+          <ClientOnly>
+            <span>
+              {`${entreprises.length + 1} entreprise${entreprises.length + 1 >= 2 ? "s" : ""} compose${
+                entreprises.length + 1 >= 2 ? "nt" : ""
+              }`}{" "}
+              l'UES
+            </span>
+          </ClientOnly>
         </div>
+
         <BackNextButtons stepName={stepName} disabled={!isValid} />
       </form>
     </FormProvider>
