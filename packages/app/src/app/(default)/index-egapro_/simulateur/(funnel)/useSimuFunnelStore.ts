@@ -14,9 +14,12 @@ interface PrivateState {
   _hasHydrated: boolean;
 }
 
+type DeepPartial<T> = {
+  [K in keyof T]?: DeepPartial<T[K]>;
+};
 interface Actions {
   resetFunnel(): void;
-  saveFunnel(form?: Partial<CreateSimulationDTO>): void;
+  saveFunnel(form?: DeepPartial<CreateSimulationDTO>): void;
   setIsEdit(isEdit: boolean): void;
 }
 

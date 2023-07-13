@@ -5,15 +5,26 @@ import { useFormContext } from "react-hook-form";
 export const ReactHookFormDebug = () => {
   const {
     watch,
-    formState: { errors },
+    formState: { errors, ...rest },
   } = useFormContext();
 
   return (
-    <>
-      <ClientOnly>
-        <pre>{JSON.stringify(watch(), null, 2)}</pre>
-        <pre>{formatZodErrors(errors)}</pre>
-      </ClientOnly>
-    </>
+    <ClientOnly>
+      <fieldset>
+        <legend>React Hook Form Debug</legend>
+        <fieldset>
+          <legend>Form Values</legend>
+          <pre>{JSON.stringify(watch(), null, 2)}</pre>
+        </fieldset>
+        <fieldset>
+          <legend>Form Errors</legend>
+          <pre>{formatZodErrors(errors)}</pre>
+        </fieldset>
+        <fieldset>
+          <legend>Form State</legend>
+          <pre>{JSON.stringify(rest, null, 2)}</pre>
+        </fieldset>
+      </fieldset>
+    </ClientOnly>
   );
 };

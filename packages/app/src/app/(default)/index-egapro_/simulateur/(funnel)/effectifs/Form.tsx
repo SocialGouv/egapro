@@ -4,10 +4,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { ageRanges, categories } from "@common/core-domain/computers/indicateurUn";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
-import { ageRanges, categories, createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -49,22 +50,22 @@ export const EffectifsForm = () => {
   const updateTotal = () => {
     const csp = getValues("csp");
     setTotalWomen(
-      categories.reduce((acc, _, categoryIndex) => {
+      categories.reduce((acc, category) => {
         return (
           acc +
           ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[categoryIndex].ageRange[ageRange]?.women || 0);
+            return acc + (csp?.[category].ageRanges[ageRange].women || 0);
           }, 0)
         );
       }, 0),
     );
 
     setTotalMen(
-      categories.reduce((acc, _, categoryIndex) => {
+      categories.reduce((acc, category) => {
         return (
           acc +
           ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[categoryIndex].ageRange[ageRange]?.men || 0);
+            return acc + (csp?.[category].ageRanges[ageRange].men || 0);
           }, 0)
         );
       }, 0),
@@ -83,20 +84,20 @@ export const EffectifsForm = () => {
   };
 
   const setRandomValues = () => {
-    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+    for (const category of categories) {
       for (const ageRange of ageRanges) {
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.women`, Math.floor(Math.random() * 100) as never);
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.men`, Math.floor(Math.random() * 100) as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, Math.floor(Math.random() * 100) as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, Math.floor(Math.random() * 100) as never);
       }
     }
     updateTotal();
   };
 
   const resetCSP = () => {
-    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+    for (const category of categories) {
       for (const ageRange of ageRanges) {
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.women`, 0 as never);
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.men`, 0 as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, 0 as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, 0 as never);
       }
     }
     setTotalWomen(0);
@@ -220,41 +221,36 @@ export const EffectifsForm = () => {
               ],
             },
           ]}
-          body={categories.map((category, categoryIndex) => ({
+          body={categories.map(category => ({
             categoryLabel: CSP.Label[category],
             subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
-              label: (
-                <>
-                  <input type="hidden" value={category} {...register(`csp.${categoryIndex}.name`)} />
-                  {CSPAgeRange.Label[ageRange]}
-                </>
-              ),
+              label: CSPAgeRange.Label[ageRange],
               cols: [
                 {
                   label: `${category}, ${ageRange}, femmes`,
                   nativeInputProps: {
-                    ...register(`csp.${categoryIndex}.ageRange.${ageRange}.women`, {
+                    ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
                       onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,
                   },
-                  state: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.women && "error",
-                  stateRelatedMessage: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.women?.message,
+                  state: errors.csp?.[category]?.ageRanges?.[ageRange]?.women && "error",
+                  stateRelatedMessage: errors.csp?.[category]?.ageRanges?.[ageRange]?.women?.message,
                 },
                 {
                   label: `${category}, ${ageRange}, hommes`,
                   nativeInputProps: {
-                    ...register(`csp.${categoryIndex}.ageRange.${ageRange}.men`, {
+                    ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
                       onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,
                   },
-                  state: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.men && "error",
-                  stateRelatedMessage: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.men?.message,
+                  state: errors.csp?.[category]?.ageRanges?.[ageRange]?.men && "error",
+                  stateRelatedMessage: errors.csp?.[category]?.ageRanges?.[ageRange]?.men?.message,
                 },
               ],
             })) as [AlternativeTableProps.SubRow, ...AlternativeTableProps.SubRow[]],

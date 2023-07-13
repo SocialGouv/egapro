@@ -6,65 +6,68 @@ import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/Compan
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "../domain/valueObjects/declaration/simulation/CSPAgeRange";
 
-export const categories = [
-  CSP.Enum.OUVRIERS,
-  CSP.Enum.EMPLOYES,
-  CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-  CSP.Enum.INGENIEURS_CADRES,
-] as const;
-export const ageRanges = [
-  CSPAgeRange.Enum.LESS_THAN_30,
-  CSPAgeRange.Enum.FROM_30_TO_39,
-  CSPAgeRange.Enum.FROM_40_TO_49,
-  CSPAgeRange.Enum.FROM_50_TO_MORE,
-] as const;
-
 const nonnegativeNanSafe = z
   .number()
   .nonnegative()
   .default(0)
   .transform(v => (isNaN(v) ? 0 : v));
 
-const cspAgeRangeNumbers = z.array(
-  z.object({
-    name: z.nativeEnum(CSP.Enum),
-    ageRange: z.record(
-      z.nativeEnum(CSPAgeRange.Enum),
-      z.object({ women: nonnegativeNanSafe, men: nonnegativeNanSafe }),
-    ),
+const singleAgeRangeSchema = z.object({
+  women: nonnegativeNanSafe,
+  men: nonnegativeNanSafe,
+});
+const ageRangesSchema = z.object({
+  [CSPAgeRange.Enum.LESS_THAN_30]: singleAgeRangeSchema,
+  [CSPAgeRange.Enum.FROM_30_TO_39]: singleAgeRangeSchema,
+  [CSPAgeRange.Enum.FROM_40_TO_49]: singleAgeRangeSchema,
+  [CSPAgeRange.Enum.FROM_50_TO_MORE]: singleAgeRangeSchema,
+});
+
+const cspAgeRangeNumbers = z.object({
+  [CSP.Enum.OUVRIERS]: z.object({
+    ageRanges: ageRangesSchema,
   }),
-);
+  [CSP.Enum.EMPLOYES]: z.object({
+    ageRanges: ageRangesSchema,
+  }),
+  [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: z.object({
+    ageRanges: ageRangesSchema,
+  }),
+  [CSP.Enum.INGENIEURS_CADRES]: z.object({
+    ageRanges: ageRangesSchema,
+  }),
+});
 
-const otherAgeRangeNumbers = z.array(
+const otherAgeRangesSchema = z
+  .object({
+    womenCount: z.number().positive(),
+    menCount: z.number().positive(),
+    womenSalary: z.number().positive(),
+    menSalary: z.number().positive(),
+  })
+  .superRefine((obj, ctx) => {
+    if (obj.womenCount >= 3 || obj.menCount >= 3) {
+      if (obj.womenSalary === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["womenSalary"],
+        });
+      }
+
+      if (obj.menSalary === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["menSalary"],
+        });
+      }
+    }
+  });
+const otherAgeRangeNumbers = z.record(
   z.object({
-    name: z.string(),
-    ageRange: z.record(
-      z.nativeEnum(CSPAgeRange.Enum),
-      z
-        .object({
-          womenCount: nonnegativeNanSafe,
-          menCount: nonnegativeNanSafe,
-          womenSalary: nonnegativeNanSafe,
-          menSalary: nonnegativeNanSafe,
-        })
-        .superRefine((obj, ctx) => {
-          if (obj.womenCount >= 3 || obj.menCount >= 3) {
-            if (obj.womenSalary === 0) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ["womenSalary"],
-              });
-            }
-
-            if (obj.menSalary === 0) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ["menSalary"],
-              });
-            }
-          }
-        }),
-    ),
+    [CSPAgeRange.Enum.LESS_THAN_30]: otherAgeRangesSchema,
+    [CSPAgeRange.Enum.FROM_30_TO_39]: otherAgeRangesSchema,
+    [CSPAgeRange.Enum.FROM_40_TO_49]: otherAgeRangesSchema,
+    [CSPAgeRange.Enum.FROM_50_TO_MORE]: otherAgeRangesSchema,
   }),
 );
 
@@ -79,7 +82,16 @@ export const createSteps = {
   indicateur1: z.discriminatedUnion("mode", [
     z.object({
       mode: z.literal(RemunerationsMode.Enum.CSP),
-      remunerations: cspAgeRangeNumbers,
+      remunerations: z.record(
+        z.nativeEnum(CSP.Enum),
+        z.record(
+          z.nativeEnum(CSPAgeRange.Enum),
+          z.object({
+            womenSalary: z.number().positive(),
+            menSalary: z.number().positive(),
+          }),
+        ),
+      ),
     }),
     z.object({
       mode: z.literal(RemunerationsMode.Enum.BRANCH_LEVEL),

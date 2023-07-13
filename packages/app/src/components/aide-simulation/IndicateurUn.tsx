@@ -1,9 +1,59 @@
 import Table from "@codegouvfr/react-dsfr/Table";
 
-interface Props {
+const Definition = () => (
+  <>
+    <p>
+      La rémunération doit être reconstituée en <strong>équivalent temps plein</strong> sur toute la durée de la période
+      de référence.
+    </p>
+    <p>
+      <strong>Doivent être pris en compte dans la rémunération :</strong>
+    </p>
+    <ul>
+      <li>
+        les salaires ou traitements ordinaires de base ou minimum et tous les autres avantages et accessoires payés,
+        directement ou indirectement, en espèces ou en nature, par l’employeur au salarié en raison de l’emploi de ce
+        dernier
+      </li>
+      <li>
+        les &quot;bonus&quot;, les commissions sur produits, les primes d’objectif liées aux performances individuelles
+        du salarié, variables d’un individu à l’autre pour un même poste
+      </li>
+      <li>les primes collectives (ex : les primes de transport ou primes de vacances)</li>
+      <li>les indemnités de congés payés.</li>
+    </ul>
+    <p>
+      <strong>Ne doivent pas être pris en compte dans la rémunération :</strong>
+    </p>
+    <ul>
+      <li>les indemnités de fin de CDD (notamment la prime de précarité)</li>
+      <li>les sommes versées dans le cadre du compte épargne-temps (CET)</li>
+      <li>les actions, stock-options, compensations différées en actions</li>
+      <li>
+        les primes liées à une sujétion particulière qui ne concernent pas la personne du salarié (prime de froid, prime
+        de nuit etc.)
+      </li>
+      <li>les heures supplémentaires et complémentaires</li>
+      <li>les indemnités de licenciement</li>
+      <li>les indemnités de départ en retraite</li>
+      <li>les primes d’ancienneté</li>
+      <li>les primes d’intéressement et de participation.</li>
+    </ul>
+    <p>
+      Les groupes ne comportant pas <strong>au moins 3 femmes et 3 hommes</strong> ne doivent pas être retenus pour le
+      calcul de l’indicateur.
+    </p>
+    <p>
+      Si le total des effectifs des groupes pouvant être pris en compte pour le calcul de l’indicateur est inférieur à
+      40% des effectifs totaux, l’indicateur et l’index ne sont pas calculables.
+    </p>
+  </>
+);
+
+interface CommentEstCalculéLIndicateurProps {
   skipRemuDetails?: boolean;
 }
-export const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: Props) => (
+const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLIndicateurProps) => (
   <>
     <p>
       Seuls les groupes comprenant au moins 3 femmes et au moins 3 hommes sont pris en compte pour le calcul de
@@ -35,7 +85,7 @@ export const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: Props) => (
       <li>Les écarts sont additionnés pour obtenir l’écart global de rémunération entre les femmes et les hommes.</li>
       <li>
         Le résultat final obtenu est la valeur absolue de l’écart global de rémunération, arrondie à la première
-        décimale.
+        décimale <u>supérieure</u>.
       </li>
     </ol>
     <p>
@@ -73,3 +123,8 @@ export const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: Props) => (
     />
   </>
 );
+
+export const AideSimulationIndicateurUn = {
+  Definition,
+  CommentEstCalculéLIndicateur,
+};
