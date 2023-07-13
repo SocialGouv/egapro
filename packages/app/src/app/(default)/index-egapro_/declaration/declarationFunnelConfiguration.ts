@@ -19,7 +19,10 @@ type FunnelStep = {
 };
 
 class StaticConfigItem {
-  constructor(public name: ExtendedFunnelKey, public title: string) {}
+  constructor(
+    public name: ExtendedFunnelKey,
+    public title: string,
+  ) {}
 
   get url() {
     return `${base}/${this.name}`;
@@ -254,4 +257,4 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () => funnelStaticConfig[`confirmation`],
       previous: () => funnelStaticConfig[`publication`],
     },
-  } as const);
+  }) as const;

@@ -1,12 +1,9 @@
-import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
 import { type EmptyObject } from "@common/utils/types";
 
 import { buildEntreprise, type Entreprise } from "./entreprise";
 
-type MaternityNotComputableReason = NotComputableReason.Enum.ABSAUGPDTCM | NotComputableReason.Enum.ABSRCM;
-type MotifNCMaterniteValue = NotComputableReason.Label[MaternityNotComputableReason];
 type OuiNon = "non" | "oui";
 
 export const TrancheOptions = [
@@ -26,23 +23,47 @@ type TranchesAge = {
 
 export type Catégorie = { nom: string; tranches: TranchesAge };
 
+export const labelsMotifNC = {
+  egvi40pcet: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+  absaugi: "Absence d'augmentations individuelles",
+  etsno5f5h: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
+  absprom: "Absence de promotions",
+  absaugpdtcm: "Absence d'augmentations pendant ce congé",
+  absrcm: "Absence de retours de congé maternité",
+} as const;
+
+export const motifsNC = {
+  augmentations: ["egvi40pcet", "absaugi"],
+  promotions: ["egvi40pcet", "absprom"],
+  "augmentations-et-promotions": ["absaugi", "egvi40pcet", "etsno5f5h"],
+  remunerations: ["egvi40pcet"],
+  "conges-maternite": ["absrcm", "absaugpdtcm"],
+} as const;
+
 /**
  * The shape of the state for declaration form.
  */
 export type DeclarationFormState = {
   augmentations?: EmptyObject;
-  "augmentations-et-promotions"?: EmptyObject;
+  "augmentations-et-promotions"?: {
+    estCalculable: OuiNon;
+    motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
+    note: number;
+    populationFavorable: PopulationFavorable;
+    résultat: number;
+    résultatEquivalentSalarié: number;
+  };
   commencer?: {
     annéeIndicateurs: number;
     entrepriseDéclarante?: Entreprise;
   };
   "conges-maternite"?:
     | {
-        estCalculable: false;
-        motif: MotifNCMaterniteValue;
+        estCalculable: OuiNon;
+        motifNonCalculabilité: (typeof motifsNC)["conges-maternite"][number];
       }
     | {
-        estCalculable: true;
+        estCalculable: OuiNon;
         resultat: number;
       };
   // Only filled by the backend.
@@ -80,7 +101,7 @@ export type DeclarationFormState = {
     estCalculable: OuiNon;
     // mode?: "csp" | "niveau_autre" | "niveau_branche";
     mode?: RemunerationsMode.Enum;
-    motifNonCalculabilité?: "egvi40pcet";
+    motifNonCalculabilité?: (typeof motifsNC)["remunerations"][number];
   };
   "remunerations-coefficient-autre"?: {
     catégories: Catégorie[];

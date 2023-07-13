@@ -10,7 +10,7 @@ import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
@@ -138,7 +138,12 @@ export const RemunerationForm = () => {
                   <option value="" disabled hidden>
                     Selectionnez une option
                   </option>
-                  <option value="egvi40pcet">Effectif des groupes valides inférieur à 40% de l'effectif total</option>
+
+                  {motifsNC["remunerations"].map(motif => (
+                    <option key={motif} value={motif}>
+                      {labelsMotifNC[motif]}
+                    </option>
+                  ))}
                 </Select>
               )}
             </>
