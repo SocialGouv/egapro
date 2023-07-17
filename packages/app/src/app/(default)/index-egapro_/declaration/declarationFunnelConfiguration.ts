@@ -96,7 +96,7 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () =>
         data?.["declaration-existante"]?.status !== "creation"
           ? funnelStaticConfig[`declaration-existante`]
-          : funnelStaticConfig[`entreprise`],
+          : funnelStaticConfig[`declarant`],
       previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
     confirmation: {
