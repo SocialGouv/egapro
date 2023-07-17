@@ -59,8 +59,9 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
           content={
             <>
               <p>
-                <strong>{entreprise.raison_sociale}</strong>
+                <strong>{entreprise.ues.nom}</strong>
               </p>
+              <p>{entreprise.ues.entreprises?.length} entreprises composent l'UES</p>
             </>
           }
         />
@@ -102,11 +103,21 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
               </p>
             )}
 
-            {!indicateurs?.rémunérations?.date_consultation_cse ? (
+            {indicateurs?.rémunérations?.mode === "csp" && (
+              <>
+                {!entreprise.ues && !indicateurs.rémunérations.date_consultation_cse ? (
+                  <p> Aucun CSE n’est mis en place. </p>
+                ) : (
+                  <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
+                )}
+              </>
+            )}
+
+            {/* {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
               <p> Aucun CSE n’est mis en place. </p>
             ) : (
               <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
-            )}
+            )} */}
           </>
         }
       />
