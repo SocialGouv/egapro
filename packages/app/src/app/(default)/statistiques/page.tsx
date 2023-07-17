@@ -25,7 +25,7 @@ const Stats = () => {
       <Grid align="center">
         <GridCol>
           <h1>{title}</h1>
-          <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Index Egapro</h2>
+          <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Index Egapro 2023</h2>
           <p>Index Egapro dans les entreprises et UES de plus de 50 salariés.</p>
           <Grid haveGutters className={fr.cx("fr-mt-4w")}>
             <GridCol md={12} lg={4}>
@@ -112,7 +112,7 @@ const Stats = () => {
             </GridCol>
           </Grid>
 
-          <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Représentation équilibrée</h2>
+          <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Représentation équilibrée 2023</h2>
           <p>Entreprises de plus de 1000 salariés pendant 3 exercices consécutifs.</p>
 
           <Grid haveGutters className="fr-mt-2w">
