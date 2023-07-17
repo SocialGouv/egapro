@@ -145,6 +145,13 @@ export const DeclarationFormBuilder = {
         date: declaration.déclaration.date,
         status: "edition",
       },
+      declarant: {
+        accordRgpd: true,
+        email: declaration.déclarant.email,
+        nom: declaration.déclarant.nom || "",
+        prénom: declaration.déclarant.prénom || "",
+        téléphone: declaration.déclarant.téléphone || "",
+      },
       remunerations: {
         estCalculable: declaration.indicateurs?.rémunérations?.non_calculable ? "non" : "oui",
         motifNonCalculabilité: declaration.indicateurs?.rémunérations?.non_calculable,

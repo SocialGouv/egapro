@@ -128,14 +128,13 @@ export const CommencerForm = () => {
 
     const sirenStorage = entrepriseDéclarante?.siren;
 
-    // If no data are present in session storage.
-    if (!sirenStorage || !annéeIndicateursStorage) {
+    // If no data are present in session storage or data are present in session storage and siren and year are unchanged.
+    if (
+      !sirenStorage ||
+      !annéeIndicateursStorage ||
+      (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage)
+    ) {
       return await saveAndGoNext({ siren, annéeIndicateurs });
-    }
-
-    // In data are present in session storage and siren and year are unchanged.
-    if (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage) {
-      return router.push(funnelConfig(formData)[stepName].next().url);
     }
 
     // In data are present in session storage and siren and year are not the same.

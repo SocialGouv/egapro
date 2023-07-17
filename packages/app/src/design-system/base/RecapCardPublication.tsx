@@ -5,11 +5,14 @@ import { funnelStaticConfig } from "../../app/(default)/index-egapro_/declaratio
 import { RecapCard } from "./RecapCard";
 
 type Props = {
+  editable?: boolean;
   publication?: Publication;
 };
 
-export const RecapCardPublication = ({ publication }: Props) => {
+export const RecapCardPublication = ({ publication, editable }: Props) => {
   const publicationDate = publication?.date; // Extract variable for TS to understand that publication date is not undefined.
+
+  editable = editable ?? false;
 
   if (!publicationDate) return null;
 
@@ -20,7 +23,7 @@ export const RecapCardPublication = ({ publication }: Props) => {
   return (
     <RecapCard
       title="Publication des résultats obtenus"
-      editLink={funnelStaticConfig["publication"].url}
+      {...{ editLink: editable ? funnelStaticConfig["publication"].url : undefined }}
       content={
         <>
           <p>

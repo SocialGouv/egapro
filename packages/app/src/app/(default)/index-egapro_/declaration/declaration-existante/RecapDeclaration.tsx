@@ -8,7 +8,6 @@ import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardC
 import { RecapCardPublication } from "packages/app/src/design-system/base/RecapCardPublication";
 import { type PropsWithChildren } from "react";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 
 type Props = { déclaration: DeclarationDTO };
@@ -103,21 +102,15 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
               </p>
             )}
 
-            {indicateurs?.rémunérations?.mode === "csp" && (
+            {indicateurs?.rémunérations?.mode !== "csp" && (
               <>
-                {!entreprise.ues && !indicateurs.rémunérations.date_consultation_cse ? (
+                {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
                   <p> Aucun CSE n’est mis en place. </p>
                 ) : (
                   <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
                 )}
               </>
             )}
-
-            {/* {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
-              <p> Aucun CSE n’est mis en place. </p>
-            ) : (
-              <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
-            )} */}
           </>
         }
       />
@@ -161,7 +154,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
 
       <RecapCard
         title="Plan de relance"
-        editLink={funnelStaticConfig["publication"].url}
+        // editLink={funnelStaticConfig["publication"].url}
         content={
           <>
             <p>

@@ -9,6 +9,7 @@ type IndicatorKey = Exclude<keyof NonNullable<DeclarationDTO["indicateurs"]>, "r
 
 type Props = {
   customContent?: React.ReactNode;
+  editable?: boolean;
   indicateurs: DeclarationDTO["indicateurs"];
   nom: IndicatorKey;
 };
@@ -22,13 +23,16 @@ const matchKey: Record<IndicatorKey, keyof typeof funnelStaticConfig> = {
   hautes_rémunérations: "hautes-remunerations",
 };
 
-export const RecapCardIndicator = ({ nom, indicateurs, customContent }: PropsWithChildren<Props>) => {
+export const RecapCardIndicator = ({ nom, indicateurs, customContent, editable }: PropsWithChildren<Props>) => {
   const note = indicateurs?.[nom]?.note;
+
+  editable = editable ?? false;
 
   return (
     <RecapCard
       title={funnelStaticConfig[matchKey[nom]].title}
-      editLink={funnelStaticConfig[matchKey[nom]].url}
+      // editLink={funnelStaticConfig[matchKey[nom]].url}
+      {...{ editLink: editable ? funnelStaticConfig[matchKey[nom]].url : undefined }}
       content={
         <>
           {customContent}

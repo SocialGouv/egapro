@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, DownloadCard, Grid, GridCol } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -36,7 +37,7 @@ const Page = () => {
     ? undefined
     : isAfter(new Date(), add(new Date(declaration.data.déclaration.date), { years: 1 }));
 
-  if (!declaration?.data || olderThanOneYear === undefined) return <p>Chargement...</p>;
+  if (!declaration?.data || olderThanOneYear === undefined) return <SkeletonForm fields={8} />;
 
   if (error) <p>{"Une erreur a été rencontrée par l'API."}</p>;
 
