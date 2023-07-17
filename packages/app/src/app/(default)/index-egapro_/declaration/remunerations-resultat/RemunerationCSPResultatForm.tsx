@@ -30,7 +30,7 @@ const formSchema = z
     populationFavorable: z.string(),
     résultat: z
       .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
-      .positive({ message: "La valeur doit être positive" }),
+      .nonnegative({ message: "La valeur doit être positive ou égale à 0" }),
   })
   .superRefine(({ note, populationFavorable }, ctx) => {
     if (note !== indicatorNoteMax.rémunérations && !populationFavorable) {
@@ -79,6 +79,8 @@ export const RemunerationCSPResultatForm = () => {
     if (note === indicatorNoteMax.rémunérations) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
+    } else {
+      setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
 
