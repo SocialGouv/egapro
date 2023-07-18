@@ -9,7 +9,9 @@ import { ClientOnly } from "@components/utils/ClientOnly";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { produce } from "immer";
 import { useRouter } from "next/navigation";
+import { AlertMessage } from "packages/app/src/design-system/base/client/AlertMessage";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -18,12 +20,16 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 
 const formSchema = z.object({
   nom: z.string().min(1, "Le nom de l'UES est obligatoire"),
-  entreprises: z.array(
-    z.object({
-      raisonSociale: z.string(),
-      siren: zodSirenSchema, // Only for typing, the Siren validation is done for each Siren in the form.
+  entreprises: z
+    .array(
+      z.object({
+        raisonSociale: z.string(),
+        siren: zodSirenSchema, // Only for typing, the Siren validation is done for each Siren in the form.
+      }),
+    )
+    .nonempty({
+      message: "Vous devez ajouter au moins une entreprise à l'UES",
     }),
-  ),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -31,8 +37,15 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "ues";
 
 export const UESForm = () => {
-  const { formData, savePageData, resetFormData } = useDeclarationFormManager();
+  const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
+
+  // We ensure to have at least one entreprise in the form, in order to force the user to fill the form and the validation to be triggered, even if the user delete the only entreprise in the form.
+  const defaultValues = produce(formData[stepName], draft => {
+    if (draft?.entreprises?.length === 0) {
+      draft.entreprises = [{ raisonSociale: "", siren: "" }];
+    }
+  });
 
   const methods = useForm<FormType>({
     mode: "onBlur",
@@ -42,7 +55,7 @@ export const UESForm = () => {
 
       return zodResolver(formSchema)(data, context, options);
     },
-    defaultValues: formData[stepName],
+    defaultValues,
   });
 
   const {
@@ -52,7 +65,7 @@ export const UESForm = () => {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors, isValid, isDirty },
+    formState: { errors, isValid },
     watch,
   } = methods;
 
@@ -75,11 +88,15 @@ export const UESForm = () => {
 
   return (
     <FormProvider {...methods}>
+      <AlertMessage title="Erreur" message={errors.entreprises?.message} />
+
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <p className={fr.cx("fr-mt-4w")}>
           La raison sociale des entreprises composant l'UES est renseignée automatiquement et n'est pas modifiable
           (source : Répertoire Sirene de l'INSEE).
         </p>
+
+        {/* <ReactHookFormDebug /> */}
 
         <ClientOnly>
           <Input
@@ -159,7 +176,7 @@ export const UESForm = () => {
                               setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
                               clearErrors(`entreprises.${index}.siren`);
                             } catch (error: unknown) {
-                              console.log("erreur", error);
+                              // console.log("erreur", error);
 
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
@@ -208,7 +225,14 @@ export const UESForm = () => {
           style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
           className={fr.cx("fr-mb-8w")}
         >
-          <Button type="button" onClick={() => append({ siren: "", raisonSociale: "" })} iconId="fr-icon-add-line">
+          <Button
+            type="button"
+            onClick={() => {
+              clearErrors();
+              append({ siren: "", raisonSociale: "" });
+            }}
+            iconId="fr-icon-add-line"
+          >
             Ajouter une entreprise
           </Button>
 
