@@ -13,6 +13,7 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -85,6 +86,7 @@ export const RemunerationForm = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = methods;
 
@@ -93,9 +95,15 @@ export const RemunerationForm = () => {
   const cse = watch("cse");
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
+  useEffect(() => {
+    if (mode && ["niveau_branche", "niveau_autre"].includes(mode) && formData.ues?.nom) {
+      // CSE question is implicitly yes for UES in mode "niveau_branche" or "niveau_autre".
+      setValue("cse", "oui");
+    }
+  }, [formData, mode, setValue]);
+
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      // draft[stepName] = formatData(data);
       draft[stepName] = data as DeclarationFormState[typeof stepName];
     });
 
@@ -180,10 +188,11 @@ export const RemunerationForm = () => {
                 ]}
               />
 
-              {mode !== "csp" && (
+              {mode && mode !== "csp" && (
                 <>
                   <RadioButtons
                     legend="Un CSE a-t-il été mis en place ?"
+                    disabled={!!formData.ues?.nom}
                     options={[
                       {
                         label: "Oui",

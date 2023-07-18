@@ -43,6 +43,10 @@ export const EntrepriseUESForm = () => {
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
       draft[stepName] = data as DeclarationFormState[typeof stepName];
+
+      if (data.type === "entreprise") {
+        delete draft.ues;
+      }
     });
 
     saveFormData(newFormData);

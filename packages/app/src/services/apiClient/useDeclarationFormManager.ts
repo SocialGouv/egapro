@@ -8,7 +8,7 @@ type State = { formData: DeclarationFormState };
 
 type Actions = {
   resetFormData: () => void;
-  saveFormData: (data: Partial<DeclarationFormState>) => void;
+  saveFormData: (data: DeclarationFormState) => void;
   savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) => void;
   setStatus: (status: DeclarationFormState["declaration-existante"]["status"]) => void;
 };
@@ -33,7 +33,7 @@ export const useDeclarationFormManager = create<Actions & State>()(
     immer(
       devtools((set, get) => ({
         formData: formDataDefault,
-        saveFormData: (data: Partial<DeclarationFormState>) => set({ formData: { ...get().formData, ...data } }),
+        saveFormData: (data: DeclarationFormState) => set({ formData: data }),
         savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
           set({ formData: { ...get().formData, [page]: data } }),
         resetFormData: () =>
