@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
+import { zodNumberOrNaN } from "@common/utils/form";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -18,17 +19,16 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const invalidNumber = "La valeur doit être un nombre";
-
+// z.nan allows us to have a non defined value which is still of type number. Cool trick for TS.
 const formSchema = z.object({
   catégories: z.array(
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": z.number({ invalid_type_error: invalidNumber }),
-        "30:39": z.number({ invalid_type_error: invalidNumber }),
-        "40:49": z.number({ invalid_type_error: invalidNumber }),
-        "50:": z.number({ invalid_type_error: invalidNumber }),
+        ":29": zodNumberOrNaN,
+        "30:39": zodNumberOrNaN,
+        "40:49": zodNumberOrNaN,
+        "50:": zodNumberOrNaN,
       }),
     }),
   ),
@@ -37,7 +37,7 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const defaultTranch = { ":29": 0, "30:39": 0, "40:49": 0, "50:": 0 };
+const defaultTranch = { ":29": NaN, "30:39": NaN, "40:49": NaN, "50:": NaN };
 
 const buildDefaultCategories = (mode: RemunerationsMode.Enum) =>
   mode === RemunerationsMode.Enum.CSP
@@ -50,6 +50,15 @@ const buildDefaultCategories = (mode: RemunerationsMode.Enum) =>
         ],
       }
     : { catégories: [] };
+
+const replaceNullWithNaN = ({ catégories }: FormType) => {
+  return {
+    catégories: catégories.map(({ tranches, ...rest }) => ({
+      ...rest,
+      tranches: Object.fromEntries(Object.entries(tranches).map(([key, value]) => [key, value ?? NaN])),
+    })),
+  } as FormType;
+};
 
 export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum }) => {
   const { formData, savePageData } = useDeclarationFormManager();
@@ -64,7 +73,16 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
 
   const methods = useForm<FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema),
+    // resolver: zodResolver(formSchema),
+    resolver: async (data, context, options) => {
+      // console.debug("formData", data);
+
+      // We need to fix RHF because it replaces NaN with null under the hood...But null is not of type number.
+      const fixedDataWithNaN = replaceNullWithNaN(data);
+      // console.debug("validation result", await zodResolver(formSchema)(fixedDataWithNaN, context, options));
+
+      return zodResolver(formSchema)(fixedDataWithNaN, context, options);
+    },
     defaultValues: formData[stepName] || buildDefaultCategories(mode),
   });
 
