@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import {
-  computeIndicator2And3Note,
+  computeIndicator4Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodRadioInputSchema, zodRealPositiveOrZeroNumberSchema } from "@common/utils/form";
@@ -12,6 +12,7 @@ import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
@@ -30,16 +31,13 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 const formSchema = zodFr
   .object({
     estCalculable: zodRadioInputSchema,
-    motifNonCalculabilité: z.string().optional(),
     populationFavorable: z.string(),
+    motifNonCalculabilité: z.string().optional(),
     résultat: zodRealPositiveOrZeroNumberSchema,
-    résultatEquivalentSalarié: zodRealPositiveOrZeroNumberSchema,
     note: z.number(),
-    noteSurRésultatFinal: z.number(),
-    noteSurNbEqSal: z.number(),
   })
-  .superRefine(({ résultat, résultatEquivalentSalarié, populationFavorable }, ctx) => {
-    if ((résultat !== 0 || résultatEquivalentSalarié !== 0) && !populationFavorable) {
+  .superRefine(({ résultat, populationFavorable }, ctx) => {
+    if (résultat !== 0 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -50,9 +48,9 @@ const formSchema = zodFr
 
 type FormType = z.infer<typeof formSchema>;
 
-const stepName: FunnelKey = "augmentations-et-promotions";
+const stepName: FunnelKey = "conges-maternite";
 
-export const AugmentationEtPromotionsForm = () => {
+export const CongesMaterniteForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
@@ -61,7 +59,7 @@ export const AugmentationEtPromotionsForm = () => {
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
       // console.debug("formData", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
@@ -78,38 +76,24 @@ export const AugmentationEtPromotionsForm = () => {
   } = methods;
 
   const résultat = watch("résultat");
-  const résultatEquivalentSalarié = watch("résultatEquivalentSalarié");
   const note = watch("note");
-  const noteSurRésultatFinal = watch("noteSurRésultatFinal");
-  const noteSurNbEqSal = watch("noteSurNbEqSal");
   const estCalculable = watch("estCalculable");
 
-  // Synchronize noteSurRésultatFinal.
-  useEffect(() => {
-    const noteSurRésultatFinal = computeIndicator2And3Note(résultat);
-    setValue("noteSurRésultatFinal", noteSurRésultatFinal);
-  }, [résultat, setValue]);
-
-  // Synchronize noteSurNbEqSal.
-  useEffect(() => {
-    const noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
-    setValue("noteSurNbEqSal", noteSurNbEqSal);
-  }, [résultatEquivalentSalarié, setValue]);
+  console.log("errors:", errors);
 
   // Compute note.
   useEffect(() => {
-    setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
-  }, [noteSurRésultatFinal, noteSurNbEqSal, setValue]);
+    const note = computeIndicator4Note(résultat);
+    setValue("note", note);
 
-  // Disable populationFavorable where appropriate.
-  useEffect(() => {
-    if (résultat === 0 && résultatEquivalentSalarié === 0) {
+    // Disable populationFavorable where appropriate.
+    if (résultat === 0) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
     } else {
       setPopulationFavorableDisabled(false);
     }
-  }, [résultat, résultatEquivalentSalarié, setValue]);
+  }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -125,7 +109,7 @@ export const AugmentationEtPromotionsForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {/* <ReactHookFormDebug /> */}
+          <ReactHookFormDebug />
 
           <RadioOuiNon
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
@@ -145,7 +129,7 @@ export const AugmentationEtPromotionsForm = () => {
                     <option value="" disabled hidden>
                       Selectionnez une option
                     </option>
-                    {motifsNC["augmentations-et-promotions"].map(motif => (
+                    {motifsNC["conges-maternite"].map(motif => (
                       <option key={motif} value={motif}>
                         {labelsMotifNC[motif]}
                       </option>
@@ -163,23 +147,6 @@ export const AugmentationEtPromotionsForm = () => {
                   />
 
                   <PopulationFavorable disabled={populationFavorableDisabled} />
-
-                  {noteSurRésultatFinal !== undefined && (
-                    <IndicatorNote
-                      note={noteSurRésultatFinal}
-                      max={indicatorNoteMax.augmentations_et_promotions}
-                      text="Nombre de points obtenus sur le résultat final en %"
-                    />
-                  )}
-
-                  {noteSurNbEqSal !== undefined && (
-                    <IndicatorNote
-                      note={noteSurNbEqSal}
-                      max={indicatorNoteMax.augmentations_et_promotions}
-                      text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
-                      className={fr.cx("fr-mt-2w")}
-                    />
-                  )}
 
                   {note !== undefined && (
                     <>
