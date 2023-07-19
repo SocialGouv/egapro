@@ -85,20 +85,24 @@ export const AugmentationEtPromotionsForm = () => {
   const noteSurNbEqSal = watch("noteSurNbEqSal");
   const estCalculable = watch("estCalculable");
 
+  // Synchronize noteSurRésultatFinal.
   useEffect(() => {
     const noteSurRésultatFinal = computeIndicator2And3Note(résultat);
     setValue("noteSurRésultatFinal", noteSurRésultatFinal);
   }, [résultat, setValue]);
 
+  // Synchronize noteSurNbEqSal.
   useEffect(() => {
     const noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
     setValue("noteSurNbEqSal", noteSurNbEqSal);
   }, [résultatEquivalentSalarié, setValue]);
 
+  // Compute note.
   useEffect(() => {
     setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
   }, [noteSurRésultatFinal, noteSurNbEqSal, setValue]);
 
+  // Disable populationFavorable where appropriate.
   useEffect(() => {
     if (résultat === 0 && résultatEquivalentSalarié === 0) {
       setPopulationFavorableDisabled(true);
