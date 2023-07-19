@@ -32,10 +32,13 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
             disabled,
           }),
           onBlur: e => {
+            // It's OK to set no value at all.
+            if (e.target.value === "") return setValue(name, null);
+
             // Round number to 1 decimal.
             const num = Number(e.target.value);
 
-            if (isNaN(num)) return;
+            if (isNaN(num)) return setValue(name, null);
 
             setValue(name, Math.round(num * 10) / 10);
           },

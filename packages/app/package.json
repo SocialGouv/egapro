@@ -28,6 +28,7 @@
     "cors": "^2.8.5",
     "date-fns": "^2.29.3",
     "http-status-codes": "^2.2.0",
+    "i18next": "^23.2.11",
     "immer": "^10.0.2",
     "js-xlsx": "^0.8.22",
     "jsonwebtoken": "^9.0.1",
@@ -54,6 +55,7 @@
     "uuid": "^9.0.0",
     "xlsx": "^0.18.5",
     "zod": "^3.21.4",
+    "zod-i18n-map": "^2.13.2",
     "zustand": "^4.3.7"
   },
   "devDependencies": {

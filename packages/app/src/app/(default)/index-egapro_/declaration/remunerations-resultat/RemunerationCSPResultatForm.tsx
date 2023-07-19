@@ -5,6 +5,7 @@ import {
   computeIndicator1Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -19,18 +20,17 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Import your language translation files
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "remunerations-resultat";
 
-const formSchema = z
+const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: z
-      .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
-      .nonnegative({ message: "La valeur doit être positive ou égale à 0" }),
+    résultat: z.number().nonnegative(),
   })
   .superRefine(({ note, populationFavorable }, ctx) => {
     if (note !== indicatorNoteMax.rémunérations && !populationFavorable) {

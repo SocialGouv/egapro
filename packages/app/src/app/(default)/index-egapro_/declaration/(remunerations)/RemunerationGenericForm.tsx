@@ -4,7 +4,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { zodNumberOrNull } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -19,15 +20,15 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z.object({
+const formSchema = zodFr.object({
   catégories: z.array(
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": zodNumberOrNull,
-        "30:39": zodNumberOrNull,
-        "40:49": zodNumberOrNull,
-        "50:": zodNumberOrNull,
+        ":29": zodNumberOrNaNOrNull,
+        "30:39": zodNumberOrNaNOrNull,
+        "40:49": zodNumberOrNaNOrNull,
+        "50:": zodNumberOrNaNOrNull,
       }),
     }),
   ),
