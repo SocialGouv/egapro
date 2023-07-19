@@ -35,7 +35,9 @@ export const useDeclarationFormManager = create<Actions & State>()(
         formData: formDataDefault,
         saveFormData: (data: DeclarationFormState) => set({ formData: data }),
         savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
-          set({ formData: { ...get().formData, [page]: data } }),
+          set(state => {
+            state.formData[page] = data;
+          }),
         resetFormData: () =>
           set({
             formData: formDataDefault,
