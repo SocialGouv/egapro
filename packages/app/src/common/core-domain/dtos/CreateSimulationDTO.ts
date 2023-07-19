@@ -40,34 +40,39 @@ const cspAgeRangeNumbers = z.object({
 
 const otherAgeRangesSchema = z
   .object({
-    womenCount: z.number().positive(),
-    menCount: z.number().positive(),
-    womenSalary: z.number().positive(),
-    menSalary: z.number().positive(),
+    womenCount: nonnegativeNanSafe,
+    menCount: nonnegativeNanSafe,
+    womenSalary: nonnegativeNanSafe,
+    menSalary: nonnegativeNanSafe,
   })
   .superRefine((obj, ctx) => {
-    if (obj.womenCount >= 3 || obj.menCount >= 3) {
+    if (obj.womenCount >= 3 && obj.menCount >= 3) {
       if (obj.womenSalary === 0) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
           path: ["womenSalary"],
+          code: z.ZodIssueCode.too_small,
+          minimum: 0,
+          inclusive: false,
+          type: "number",
         });
       }
 
       if (obj.menSalary === 0) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
           path: ["menSalary"],
+          code: z.ZodIssueCode.too_small,
+          minimum: 0,
+          inclusive: false,
+          type: "number",
         });
       }
     }
   });
-const otherAgeRangeNumbers = z.record(
+const otherAgeRangeNumbers = z.array(
   z.object({
-    [CSPAgeRange.Enum.LESS_THAN_30]: otherAgeRangesSchema,
-    [CSPAgeRange.Enum.FROM_30_TO_39]: otherAgeRangesSchema,
-    [CSPAgeRange.Enum.FROM_40_TO_49]: otherAgeRangesSchema,
-    [CSPAgeRange.Enum.FROM_50_TO_MORE]: otherAgeRangesSchema,
+    name: z.string().nonempty(),
+    id: z.string().nonempty(),
+    category: z.record(z.nativeEnum(CSPAgeRange.Enum), otherAgeRangesSchema),
   }),
 );
 
@@ -82,15 +87,20 @@ export const createSteps = {
   indicateur1: z.discriminatedUnion("mode", [
     z.object({
       mode: z.literal(RemunerationsMode.Enum.CSP),
-      remunerations: z.record(
-        z.nativeEnum(CSP.Enum),
-        z.record(
-          z.nativeEnum(CSPAgeRange.Enum),
-          z.object({
-            womenSalary: z.number().positive(),
-            menSalary: z.number().positive(),
-          }),
-        ),
+      remunerations: z.array(
+        z.object({
+          name: z.nativeEnum(CSP.Enum),
+          id: z.string().nonempty(),
+          category: z
+            .record(
+              z.nativeEnum(CSPAgeRange.Enum),
+              z.object({
+                womenSalary: z.number().positive(),
+                menSalary: z.number().positive(),
+              }),
+            )
+            .optional(),
+        }),
       ),
     }),
     z.object({

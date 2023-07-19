@@ -1,12 +1,15 @@
 import { formatZodErrors } from "@common/utils/debug";
 import { ClientOnly } from "@components/utils/ClientOnly";
-import { useFormContext } from "react-hook-form";
+import { DebugButton } from "@components/utils/debug/DebugButton";
+import { type FieldValues, type FormState, useFormContext } from "react-hook-form";
 
-export const ReactHookFormDebug = () => {
-  const {
-    watch,
-    formState: { errors, ...rest },
-  } = useFormContext();
+interface Props {
+  formState?: FormState<FieldValues>;
+}
+export const ReactHookFormDebug = (props: Props) => {
+  const { watch, formState } = useFormContext();
+
+  const { errors, ...rest } = props.formState || formState;
 
   return (
     <ClientOnly>
@@ -17,7 +20,9 @@ export const ReactHookFormDebug = () => {
           <pre>{JSON.stringify(watch(), null, 2)}</pre>
         </fieldset>
         <fieldset>
-          <legend>Form Errors</legend>
+          <legend>
+            <DebugButton obj={errors} alwaysOn infoText="Form Errors" /> Form Errors
+          </legend>
           <pre>{formatZodErrors(errors)}</pre>
         </fieldset>
         <fieldset>

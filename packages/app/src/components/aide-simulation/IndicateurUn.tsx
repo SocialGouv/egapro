@@ -85,7 +85,7 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
       <li>Les écarts sont additionnés pour obtenir l’écart global de rémunération entre les femmes et les hommes.</li>
       <li>
         Le résultat final obtenu est la valeur absolue de l’écart global de rémunération, arrondie à la première
-        décimale <u>supérieure</u>.
+        décimale.
       </li>
     </ol>
     <p>

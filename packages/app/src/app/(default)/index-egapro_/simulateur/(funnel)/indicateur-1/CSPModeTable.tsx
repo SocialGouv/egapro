@@ -1,4 +1,6 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import {
   ageRanges,
   categories,
@@ -21,6 +23,7 @@ type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CSPModeTableProps {
   computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP, RemunerationsCSP>;
+  staff?: boolean;
 }
 
 const currencyFormat = new Intl.NumberFormat("fr-FR", {
@@ -33,7 +36,7 @@ const percentFormat = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 1,
 });
 
-export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
+export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
   const funnel = useSimuFunnelStore(state => state.funnel);
   const hydrated = useSimuFunnelStoreHasHydrated();
 
@@ -41,36 +44,37 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
     register,
     formState: { errors, isValid },
     watch,
+    setValue,
+    trigger,
   } = useFormContext<Indic1FormType>();
 
   if (!hydrated || !funnel?.effectifs) {
     return null;
   }
 
-  const remunerations = watch("remunerations");
+  const remunerations = watch("remunerations") as RemunerationsCSP | undefined;
 
-  const remuWithCount = Object.keys(funnel.effectifs.csp).reduce(
-    (newEmployees, category) => ({
-      ...newEmployees,
-      [category]: ageRanges.reduce(
-        (newAgeGroups, ageRange) => ({
-          ...newAgeGroups,
-          [ageRange]: {
-            womenSalary: remunerations?.[category]?.[ageRange]?.womenSalary ?? 0,
-            menSalary: remunerations?.[category]?.[ageRange]?.menSalary ?? 0,
-            womenCount: funnel.effectifs!.csp[category].ageRanges[ageRange].women,
-            menCount: funnel.effectifs!.csp[category].ageRanges[ageRange].men,
-          },
-        }),
-        {},
-      ),
-    }),
-    {} as RemunerationsCSP,
-  );
+  const remuWithCount = Object.keys(funnel.effectifs.csp).map<RemunerationsCSP[number]>(categoryName => ({
+    name: categoryName,
+    id: categoryName,
+    category: ageRanges.reduce(
+      (newAgeGroups, ageRange) => ({
+        ...newAgeGroups,
+        [ageRange]: {
+          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary ?? 0,
+          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary ?? 0,
+          womenCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women,
+          menCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men,
+        },
+      }),
+      {} as RemunerationsCSP[number]["category"],
+    ),
+  }));
 
   computer.setRemunerations(remuWithCount);
-
   const canCompute = computer.canCompute();
+
+  console.log({ isValid, errors, remunerations });
 
   if (remunerations && !canCompute) {
     return (
@@ -88,8 +92,57 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
   const metadata = computer.getTotalMetadata();
   const { result, note, genderAdvantage } = computer.compute();
 
+  const pasteFromExcel = () => {
+    if (!funnel.effectifs) return;
+    const paste = window.prompt("Copiez les colonnes Femmes et Hommes des salaires depuis Excel (sans les en-têtes)");
+    if (!paste) {
+      return;
+    }
+
+    const tab = "	";
+    const lines = paste
+      .replace("\r\n", "\n")
+      .split("\n")
+      .filter(line => line.trim())
+      .map(line => line.split(tab).map(cell => cell.trim().replace(/\s/gi, "")));
+    let lineIndex = 0;
+    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+      const category = categories[categoryIndex];
+      for (const ageRange of ageRanges) {
+        if (
+          funnel.effectifs.csp[category].ageRanges[ageRange].women < 3 ||
+          funnel.effectifs.csp[category].ageRanges[ageRange].men < 3
+        ) {
+          continue;
+        }
+        const [womenSalary, menSalary] = lines[lineIndex];
+        setValue(`remunerations.${categoryIndex}.category.${ageRange}.womenSalary`, +womenSalary as never);
+        setValue(`remunerations.${categoryIndex}.category.${ageRange}.menSalary`, +menSalary as never);
+        lineIndex++;
+      }
+    }
+    trigger("remunerations");
+  };
+
   return (
     <>
+      {staff && (
+        <ButtonsGroup
+          buttonsEquisized
+          buttonsSize="small"
+          inlineLayoutWhen="sm and up"
+          buttons={[
+            {
+              type: "button",
+              priority: "tertiary no outline",
+              onClick: pasteFromExcel,
+              iconId: "fr-icon-github-line",
+              children: "Staff : Coller les salaires depuis Excel",
+              className: fr.cx("fr-mb-md-0"),
+            },
+          ]}
+        />
+      )}
       <AlternativeTable
         header={[
           {
@@ -131,17 +184,23 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
             informations: <AideSimulationIndicateurUn.CommentEstCalculéLIndicateur skipRemuDetails />,
           },
         ]}
-        body={categories.map(category => ({
-          categoryLabel: CSP.Label[category],
+        body={categories.map((categoryName, categoryIndex) => ({
+          categoryLabel: (
+            <>
+              <input type="hidden" {...register(`remunerations.${categoryIndex}.id`)} defaultValue={categoryName} />
+              <input type="hidden" {...register(`remunerations.${categoryIndex}.name`)} defaultValue={categoryName} />
+              {CSP.Label[categoryName]}
+            </>
+          ),
           ...(() => {
-            const categoryContent = funnel?.effectifs?.csp[category];
-            if (!categoryContent) {
+            const effectifsCspCategory = funnel?.effectifs?.csp[categoryName];
+            if (!effectifsCspCategory) {
               return {
                 mergedLabel: "Pas de données",
               };
             }
 
-            const totalCategory = [...Object.values(categoryContent.ageRanges)].reduce(
+            const totalCategory = [...Object.values(effectifsCspCategory.ageRanges)].reduce(
               (acc, ageRange) => acc + ageRange.women + ageRange.men,
               0,
             );
@@ -156,7 +215,7 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
               subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
                 label: CSPAgeRange.Label[ageRange],
                 ...(() => {
-                  const csp = funnel?.effectifs?.csp[category].ageRanges[ageRange];
+                  const csp = funnel?.effectifs?.csp[categoryName].ageRanges[ageRange];
                   if (!csp) {
                     return {
                       mergedLabel: "Calcul en cours",
@@ -189,33 +248,35 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
                       ...cols,
                       csp.women + csp.men,
                       {
-                        label: `Remu moyenne - ${category} - ${ageRange} - Femmes`,
-                        state: errors.remunerations?.[category]?.[ageRange]?.womenSalary && "error",
-                        stateRelatedMessage: errors.remunerations?.[category]?.[ageRange]?.womenSalary?.message,
+                        label: `Remu moyenne - ${categoryName} - ${ageRange} - Femmes`,
+                        state: errors.remunerations?.[categoryIndex]?.category?.[ageRange]?.womenSalary && "error",
+                        stateRelatedMessage:
+                          errors.remunerations?.[categoryIndex]?.category?.[ageRange]?.womenSalary?.message,
                         nativeInputProps: {
                           type: "number",
                           min: 0,
-                          ...register(`remunerations.${category}.${ageRange}.womenSalary`, {
+                          ...register(`remunerations.${categoryIndex}.category.${ageRange}.womenSalary`, {
                             valueAsNumber: true,
-                            deps: `remunerations.${category}.${ageRange}.menSalary`,
+                            deps: `remunerations.${categoryIndex}.category.${ageRange}.menSalary`,
                           }),
                         },
                       },
                       {
-                        label: `Remu moyenne - ${category} - ${ageRange} - Hommes`,
-                        state: errors.remunerations?.[category]?.[ageRange]?.menSalary && "error",
-                        stateRelatedMessage: errors.remunerations?.[category]?.[ageRange]?.menSalary?.message,
+                        label: `Remu moyenne - ${categoryName} - ${ageRange} - Hommes`,
+                        state: errors.remunerations?.[categoryIndex]?.category?.[ageRange]?.menSalary && "error",
+                        stateRelatedMessage:
+                          errors.remunerations?.[categoryIndex]?.category?.[ageRange]?.menSalary?.message,
                         nativeInputProps: {
                           type: "number",
                           min: 0,
-                          ...register(`remunerations.${category}.${ageRange}.menSalary`, {
+                          ...register(`remunerations.${categoryIndex}.category.${ageRange}.menSalary`, {
                             valueAsNumber: true,
-                            deps: `remunerations.${category}.${ageRange}.womenSalary`,
+                            deps: `remunerations.${categoryIndex}.category.${ageRange}.womenSalary`,
                           }),
                         },
                       },
                       (() => {
-                        const { result: groupResult } = computer.computeGroup(category, ageRange);
+                        const { result: groupResult } = computer.computeGroup(categoryName, ageRange);
                         return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
                           ? percentFormat.format(groupResult / 100)
                           : "-";
@@ -242,16 +303,16 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
             data: metadata.totalGroupCount,
           },
           {
-            label: "Salaire total Femmes",
-            data: currencyFormat.format(metadata.totalWomenSalary),
+            label: "Salaire moyen Femmes",
+            data: currencyFormat.format(metadata.averageWomenSalary),
           },
           {
-            label: "Salaire total Hommes",
-            data: currencyFormat.format(metadata.totalMenSalary),
+            label: "Salaire moyen Hommes",
+            data: currencyFormat.format(metadata.averageMenSalary),
           },
           {
             label: "Écart global",
-            data: isValid ? percentFormat.format(result / 100) : "-",
+            data: percentFormat.format(result / 100),
           },
         ]}
       />
@@ -262,11 +323,7 @@ export const CSPModeTable = ({ computer }: CSPModeTableProps) => {
             note={note}
             max={40}
             text="Nombre de points obtenus à l'indicateur"
-            legend={
-              note === 40
-                ? "Les femmes et les hommes sont à égalité"
-                : `Écart en faveur des ${genderAdvantage === "women" ? "femmes" : "hommes"}`
-            }
+            legend={`Écart de rémunération constaté en faveur des ${genderAdvantage === "women" ? "femmes" : "hommes"}`}
           />
         ) : (
           <IndicatorNote
