@@ -15,10 +15,10 @@ export const TrancheOptions = [
 export type TrancheValues = (typeof TrancheOptions)[number]["value"];
 
 type TranchesAge = {
-  "30:39": number;
-  "40:49": number;
-  "50:": number;
-  ":29": number;
+  "30:39": number | null;
+  "40:49": number | null;
+  "50:": number | null;
+  ":29": number | null;
 };
 
 export type Catégorie = { nom: string; tranches: TranchesAge };

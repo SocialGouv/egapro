@@ -61,8 +61,8 @@ export const zodRealPercentageSchema = z
   })
   .refine(percentage => percentage <= 100, { message: "Le pourcentage maximum est 100" });
 
-// Useful for input which could be empty or a number. This way, TS is happy because NaN is still a number.
-export const zodNumberOrNaN = z.nan().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
+// Useful for input which could be empty or a number.
+export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 
 export const zodPercentageSchema = z
   .string()
