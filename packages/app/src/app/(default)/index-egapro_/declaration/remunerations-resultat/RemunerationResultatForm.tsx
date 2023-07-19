@@ -32,8 +32,8 @@ const formSchema = zodFr
     populationFavorable: z.string(),
     résultat: z.number().nonnegative(),
   })
-  .superRefine(({ note, populationFavorable }, ctx) => {
-    if (note !== indicatorNoteMax.rémunérations && !populationFavorable) {
+  .superRefine(({ résultat, populationFavorable }, ctx) => {
+    if (résultat !== 0 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -44,7 +44,7 @@ const formSchema = zodFr
 
 type FormType = z.infer<typeof formSchema>;
 
-export const RemunerationCSPResultatForm = () => {
+export const RemunerationResultatForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
@@ -76,7 +76,7 @@ export const RemunerationCSPResultatForm = () => {
     const note = computeIndicator1Note(résultat);
     setValue("note", note);
 
-    if (note === indicatorNoteMax.rémunérations) {
+    if (résultat === 0) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
     } else {
