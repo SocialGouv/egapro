@@ -1,9 +1,11 @@
 "use client";
 
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
@@ -13,22 +15,79 @@ import { DeclarationFormBuilder, type DeclarationFormState } from "@services/for
 import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
+import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { funnelConfig } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z.object({
+const stepName: FunnelKey = "commencer";
+
+const baseSchema = z.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
   siren: zodSirenSchema,
 });
 
-// Infer the TS type according to the zod schema.
-type FormType = z.infer<typeof formSchema>;
+type FormType = z.infer<typeof baseSchema>;
+
+const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
+
+const buildFormSchema = (isStaffMember: boolean, companies: Session["user"]["companies"] = []) =>
+  isStaffMember
+    ? baseSchema
+    : baseSchema.superRefine((val, ctx) => {
+        if (!companies?.some(company => company.siren === val.siren)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: OWNER_ERROR,
+            path: ["siren"],
+          });
+        }
+      });
 
 const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: number; siren: string }) =>
   `Vous avez commencé une déclaration avec le Siren ${siren} pour l'année ${annéeIndicateurs}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
+
+/**
+ * Check if declaration exists, merge it with state if any and save the state the in local storage.
+ */
+const prepareDataWithExistingDeclaration = async (
+  siren: string,
+  year: number,
+  tokenApiV1: string,
+): Promise<DeclarationFormState> => {
+  const previousDeclaration = await fetchDeclaration(siren, year, {
+    headers: {
+      "API-KEY": tokenApiV1,
+    },
+    throwErrorOn404: false,
+  });
+
+  if (previousDeclaration) {
+    const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
+
+    return {
+      ...newFormState,
+      "declaration-existante": { ...newFormState["declaration-existante"], status: "consultation" },
+    };
+  }
+
+  // Otherwise, this is a creation, so we start with fetching firm's data.
+  const entreprise = await memoizedFetchSiren(siren, year);
+
+  return {
+    "declaration-existante": {
+      status: "creation",
+    },
+    [stepName]: {
+      annéeIndicateurs: year,
+      entrepriseDéclarante: {
+        ...buildEntreprise(entreprise),
+      },
+    },
+  };
+};
 
 export const CommencerForm = () => {
   const router = useRouter();
@@ -36,10 +95,13 @@ export const CommencerForm = () => {
 
   const session = useSession();
 
-  // assert(
-  //   session.data && session.data?.user?.companies.length,
-  //   "User should have companies in session. The parent page should check it.",
-  // );
+  const user = session.data?.user;
+
+  const methods = useForm<FormType>({
+    mode: "onTouched",
+    resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
+    defaultValues: { ...formData[stepName], siren: formData.commencer?.entrepriseDéclarante?.siren },
+  });
 
   const {
     register,
@@ -47,65 +109,24 @@ export const CommencerForm = () => {
     setValue,
     reset: resetForm,
     formState: { errors, isValid },
-  } = useForm<FormType>({
-    mode: "onTouched",
-    resolver: zodResolver(formSchema),
-    defaultValues: formData.commencer,
-  });
+  } = methods;
 
-  if (!session.data || !session.data?.user?.companies.length) return <SkeletonForm fields={2} />;
+  if (!user?.companies.length && !user?.staff) return <SkeletonForm fields={2} />;
 
-  const companies = session.data.user.companies;
-
-  /**
-   * Check if declaration exists, merge it with state if any and save the state the in local storage.
-   */
-  const prepareDataWithExistingDeclaration = async (
-    siren: string,
-    year: number,
-    tokenV1: string,
-  ): Promise<DeclarationFormState> => {
-    const previousDeclaration = await fetchDeclaration(siren, year, {
-      headers: {
-        "API-KEY": tokenV1,
-      },
-      throwErrorOn404: false,
-    });
-
-    if (previousDeclaration) {
-      const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
-
-      return { ...newFormState, _metadata: { ...newFormState._metadata, status: "edition" as const } };
-    }
-
-    // Otherwise, this is a creation, so we start with fetching firm's data.
-    const entreprise = await memoizedFetchSiren(siren, year);
-
-    return {
-      _metadata: {
-        status: "creation" as const,
-      },
-      commencer: {
-        annéeIndicateurs: year,
-        entrepriseDéclarante: {
-          ...buildEntreprise(entreprise),
-        },
-      },
-    };
-  };
+  const companies = user.companies;
 
   const saveAndGoNext = async ({ annéeIndicateurs, siren }: FormType) => {
     // Synchronize the data with declaration if any.
-    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, session.data.user.tokenApiV1);
+    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, user.tokenApiV1);
 
-    // Save in storage (savePageData is not used because we want to save commencer page and _metadata).
+    // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
     saveFormData(newData);
 
-    router.push(funnelConfig(newData).commencer.next().url);
+    router.push(funnelConfig(newData)[stepName].next().url);
   };
 
   const onSubmit = async ({ annéeIndicateurs, siren }: FormType) => {
-    const { entrepriseDéclarante, annéeIndicateurs: annéeIndicateursStorage } = formData.commencer ?? {};
+    const { entrepriseDéclarante, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
 
     const sirenStorage = entrepriseDéclarante?.siren;
 
@@ -116,7 +137,7 @@ export const CommencerForm = () => {
 
     // In data are present in session storage and siren and year are unchanged.
     if (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage) {
-      return router.push(funnelConfig(formData).commencer.next().url);
+      return router.push(funnelConfig(formData)[stepName].next().url);
     }
 
     // In data are present in session storage and siren and year are not the same.
@@ -139,68 +160,81 @@ export const CommencerForm = () => {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Select
-          label="Année au titre de laquelle les indicateurs sont calculés"
-          state={errors.annéeIndicateurs && "error"}
-          stateRelatedMessage={errors.annéeIndicateurs?.message}
-          nativeSelectProps={{
-            ...register("annéeIndicateurs", {
-              valueAsNumber: true,
-            }),
-          }}
-        >
-          <option value="" disabled>
-            Sélectionnez une année
-          </option>
-          {PUBLIC_YEARS.map(year => (
-            <option value={year} key={`year-select-${year}`}>
-              {year}
-            </option>
-          ))}
-        </Select>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <ReactHookFormDebug />
 
-        <Select
-          label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)"
-          state={errors.siren && "error"}
-          stateRelatedMessage={errors.siren?.message}
-          nativeSelectProps={{
-            ...register("siren"),
-          }}
-        >
-          <option value="" disabled>
-            Sélectionnez une entreprise
-          </option>
-          {sortBy(companies, "siren").map(company => (
-            <option key={company.siren} value={company.siren}>
-              {company.siren}
-              {company.label ? ` (${company.label})` : ""}
+          <Select
+            label="Année au titre de laquelle les indicateurs sont calculés"
+            state={errors.annéeIndicateurs && "error"}
+            stateRelatedMessage={errors.annéeIndicateurs?.message}
+            nativeSelectProps={{
+              ...register("annéeIndicateurs", {
+                valueAsNumber: true,
+              }),
+            }}
+          >
+            <option value="" disabled>
+              Sélectionnez une année
             </option>
-          ))}
-        </Select>
+            {PUBLIC_YEARS.map(year => (
+              <option value={year} key={`year-select-${year}`}>
+                {year}
+              </option>
+            ))}
+          </Select>
 
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Réinitialiser",
-              priority: "secondary",
-              onClick: confirmReset,
-              type: "button",
-              nativeButtonProps: {
-                disabled: formData ? !formData.commencer?.entrepriseDéclarante?.siren : false,
+          {user.staff ? (
+            <Input
+              label="Siren entreprise (staff)"
+              state={errors.siren && "error"}
+              stateRelatedMessage={errors.siren?.message}
+              nativeInputProps={register("siren")}
+            />
+          ) : (
+            <Select
+              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)"
+              state={errors.siren && "error"}
+              stateRelatedMessage={errors.siren?.message}
+              nativeSelectProps={{
+                ...register("siren"),
+              }}
+            >
+              <option value="" disabled>
+                Sélectionnez une entreprise
+              </option>
+              {sortBy(companies, "siren").map(company => (
+                <option key={company.siren} value={company.siren}>
+                  {company.siren}
+                  {company.label ? ` (${company.label})` : ""}
+                </option>
+              ))}
+            </Select>
+          )}
+
+          <ButtonsGroup
+            inlineLayoutWhen="sm and up"
+            buttons={[
+              {
+                children: "Réinitialiser",
+                priority: "secondary",
+                onClick: confirmReset,
+                type: "button",
+                nativeButtonProps: {
+                  disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
+                },
               },
-            },
-            {
-              children: "Suivant",
-              type: "submit",
-              nativeButtonProps: {
-                disabled: !isValid,
+              {
+                children: "Suivant",
+                type: "submit",
+                nativeButtonProps: {
+                  disabled: !isValid,
+                },
               },
-            },
-          ]}
-        />
-      </form>
+            ]}
+          />
+        </form>
+      </FormProvider>
     </>
   );
 };

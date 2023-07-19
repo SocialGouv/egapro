@@ -1069,7 +1069,7 @@ export type Remunerations = WithPopulationFavorable & {
   /**
    * Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total
    */
-  non_calculable?: "egvi40pcet" | "am";
+  non_calculable?: "egvi40pcet";
   /**
    * Uniquement pour les modalités de calcul par niveau ou coefficient hiérarchique en application de la classification de branche ou d'une autre méthode de cotation des postes
    */
@@ -1096,7 +1096,7 @@ export type Augmentations = WithPopulationFavorable & {
   /**
    * Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
    */
-  non_calculable?: "egvi40pcet" | "absaugi" | "am";
+  non_calculable?: "egvi40pcet" | "absaugi";
   catégories?: CategoriesSimples;
   résultat?: number;
 };
@@ -1109,7 +1109,7 @@ export type CategoriesSimples = [number | null, number | null, number | null, nu
  * Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
  */
 export type Promotions = WithPopulationFavorable & {
-  non_calculable?: "egvi40pcet" | "absprom" | "am";
+  non_calculable?: "egvi40pcet" | "absprom";
   catégories?: CategoriesSimples;
   résultat?: number;
 };
@@ -1120,7 +1120,7 @@ export type AugmentationsEtPromotions = WithPopulationFavorable & {
   /**
    * Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
    */
-  non_calculable?: "egvi40pcet" | "absaugi" | "etsno5f5h" | "am";
+  non_calculable?: "egvi40pcet" | "absaugi" | "etsno5f5h";
   résultat_nombre_salariés?: number;
   note_en_pourcentage?: number;
   note_nombre_salariés?: number;
@@ -1130,7 +1130,7 @@ export type AugmentationsEtPromotions = WithPopulationFavorable & {
  * Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
  */
 export type CongesMaternite = BaseIndicateurNote & {
-  non_calculable?: "absrcm" | "absaugpdtcm" | "am";
+  non_calculable?: "absrcm" | "absaugpdtcm";
   résultat?: number;
 };
 /**

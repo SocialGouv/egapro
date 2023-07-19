@@ -1,5 +1,6 @@
 import { type DeclarationDTO } from "@common/models/generated";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import { type FetcherOptions, type FetcherReturn } from "./fetcher";
@@ -13,7 +14,7 @@ export type DeclarationAPI = {
   year: number;
 };
 
-export const putDeclaration = async (data: DeclarationFormState) => {
+export const putDeclaration = async (_data: DeclarationFormState) => {
   //   const representation = buildRepresentation(data);
   //   const siren = representation.entreprise.siren;
   //   const year = representation.déclaration.année_indicateurs;
@@ -41,9 +42,6 @@ export const fetchDeclaration = (siren: string, year: number, options?: FetcherO
 //   return { repeq, error, loading };
 // };
 
-/**
- * Helper over {@link fetchRepresentationEquilibree} to manage 404 error as a regular case & transform in a FormState.
- */
 // export const fetchRepresentationEquilibreeAsFormState = async (siren: string, year: number) => {
 //   try {
 //     const repeq = await fetchRepresentationEquilibree(siren, year);
@@ -61,9 +59,18 @@ export const fetchDeclaration = (siren: string, year: number, options?: FetcherO
 export function useDeclaration(siren?: string, year?: number): FetcherReturn & { declaration?: DeclarationAPI } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined;
 
+  const session = useSession();
+
+  const tokenApiV1 = session.data?.user?.tokenApiV1;
+
   const { data, error, mutate } = useSWR<DeclarationAPI>(
     normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
-    fetcher,
+    url =>
+      fetcher(url, {
+        headers: {
+          "API-KEY": tokenApiV1,
+        } as HeadersInit,
+      }),
     {
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
         // Never retry on 404.
