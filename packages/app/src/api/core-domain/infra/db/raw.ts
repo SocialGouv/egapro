@@ -1,3 +1,4 @@
+import { type CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
@@ -139,4 +140,29 @@ export interface ReferentRaw {
   substitute_name: string | null;
   type: string;
   value: string;
+}
+
+type WorkforceRange = Enum.ToString<typeof CompanyWorkforceRange.Enum>;
+export interface PublicStatsRaw {
+  /** Index moyen */
+  "index.average": string;
+  /** Index moyen par tranche d'effectifs assujettis */
+  "index.averageByWorkforceRange": Partial<Record<WorkforceRange, number | null>>;
+  /** Répondants */
+  "index.count": string;
+  /** Répondants par tranche d'effectifs assujettis */
+  "index.countByWorkforceRange": Partial<Record<WorkforceRange, number | null>>;
+  /** Index moyen par année (trois dernières années) */
+  "index.lastThreeYearsAverage": Record<string, number | null>;
+  /** Nombre de répondants */
+  "representation_equilibree.count": string;
+  /** Répartition des femmes dans les instances dirigeantes */
+  "representation_equilibree.countWomen30percentExecutives.gt": string;
+  "representation_equilibree.countWomen30percentExecutives.lte": string;
+  "representation_equilibree.countWomen30percentExecutives.nc": string;
+  /** Répartition des femmes parmi les cadres dirigeants */
+  "representation_equilibree.countWomen30percentMembers.gt": string;
+  "representation_equilibree.countWomen30percentMembers.lte": string;
+  "representation_equilibree.countWomen30percentMembers.nc": string;
+  year: number;
 }

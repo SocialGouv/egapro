@@ -9,13 +9,20 @@ import { ChartTheme, themeDark, themeLight } from "./ChartTheme";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Legend);
 
 export type BarChartProps = {
-  data: Array<{ legend: string; value: number }>;
+  data: Array<{ legend: number | string; value: number }>;
   showValue?: boolean;
   theme?: "monochrome" | "multicolor";
   tooltipLegend: string;
+  xAxisSuggestedMax?: number;
 };
 
-export const BarChart = ({ tooltipLegend, data, showValue = false, theme = "monochrome" }: BarChartProps) => {
+export const BarChart = ({
+  xAxisSuggestedMax = 100,
+  tooltipLegend,
+  data,
+  showValue = false,
+  theme = "monochrome",
+}: BarChartProps) => {
   ChartTheme();
   const { isDark } = useIsDark();
   return (
@@ -24,7 +31,7 @@ export const BarChart = ({ tooltipLegend, data, showValue = false, theme = "mono
         scales: {
           x: {
             suggestedMin: 0,
-            suggestedMax: 100,
+            suggestedMax: xAxisSuggestedMax,
           },
         },
         indexAxis: "y",
