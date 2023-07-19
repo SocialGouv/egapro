@@ -14,6 +14,7 @@ type Props = {
 export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithChildren<Props>) => {
   const {
     register,
+    setValue,
     formState: { errors },
   } = useFormContext();
 
@@ -30,6 +31,14 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
             valueAsNumber: true,
             disabled,
           }),
+          onBlur: e => {
+            // Round number to 1 decimal.
+            const num = Number(e.target.value);
+
+            if (isNaN(num)) return;
+
+            setValue(name, Math.round(num * 10) / 10);
+          },
         }}
         state={get(errors, name) ? "error" : "default"}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
