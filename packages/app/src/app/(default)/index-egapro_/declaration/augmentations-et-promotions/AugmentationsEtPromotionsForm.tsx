@@ -77,6 +77,7 @@ export const AugmentationEtPromotionsForm = () => {
     handleSubmit,
     formState: { isValid, errors },
     setValue,
+    unregister,
     watch,
   } = methods;
 
@@ -107,7 +108,26 @@ export const AugmentationEtPromotionsForm = () => {
     } else {
       setPopulationFavorableDisabled(false);
     }
-  }, [noteSurNbEqSal, noteSurRésultatFinal, résultat, résultatEquivalentSalarié, setValue]);
+
+    if (estCalculable === "non") {
+      unregister("noteSurRésultatFinal");
+      unregister("noteSurNbEqSal");
+      unregister("note");
+    } else if (estCalculable === "oui") {
+      register("noteSurRésultatFinal");
+      register("noteSurNbEqSal");
+      register("note");
+    }
+  }, [
+    estCalculable,
+    noteSurNbEqSal,
+    noteSurRésultatFinal,
+    résultat,
+    résultatEquivalentSalarié,
+    register,
+    setValue,
+    unregister,
+  ]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
