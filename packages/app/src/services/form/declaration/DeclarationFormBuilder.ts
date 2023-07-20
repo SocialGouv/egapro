@@ -34,10 +34,17 @@ export const labelsMotifNC = {
 
 type LabelMotifNCKey = keyof typeof labelsMotifNC;
 
-export type MotifNCKey = keyof Pick<
+export type IndicatorKey = keyof Pick<
   DeclarationFormState,
-  "augmentations-et-promotions" | "augmentations" | "conges-maternite" | "promotions" | "remunerations"
+  | "augmentations-et-promotions"
+  | "augmentations"
+  | "conges-maternite"
+  | "hautes-remunerations"
+  | "promotions"
+  | "remunerations"
 >;
+
+export type MotifNCKey = Exclude<IndicatorKey, "hautes-remunerations">;
 
 export const motifsNC: Record<MotifNCKey, readonly LabelMotifNCKey[]> = {
   augmentations: ["egvi40pcet", "absaugi"],

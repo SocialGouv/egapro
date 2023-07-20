@@ -111,7 +111,7 @@ export const CongesMaterniteForm = () => {
                       <>
                         <IndicatorNote
                           note={note}
-                          max={indicatorNoteMax.congés_maternité}
+                          max={indicatorNoteMax[stepName]}
                           text="Nombre de points obtenus à l'indicateur"
                           className={fr.cx("fr-mt-2w")}
                         />

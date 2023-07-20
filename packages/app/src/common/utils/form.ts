@@ -30,6 +30,11 @@ export const zodPositiveIntegerSchema = z
   .int({ message: "La valeur doit être un entier" })
   .positive({ message: "La valeur doit être positive" });
 
+export const zodPositiveOrZeroIntegerSchema = z
+  .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
+  .int({ message: "La valeur doit être un entier" })
+  .nonnegative({ message: "La valeur doit être positive" });
+
 export const zodPositiveOrZeroNumberSchema = z
   .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
   .nonnegative({ message: "La valeur doit être positive ou égale à 0" });

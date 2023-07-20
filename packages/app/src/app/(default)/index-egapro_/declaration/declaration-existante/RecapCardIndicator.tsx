@@ -1,20 +1,21 @@
 import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/models/generated";
 import { IndicatorNote, RecapCard } from "@design-system";
+import { type IndicatorKey } from "@services/form/declaration/DeclarationFormBuilder";
 import { type PropsWithChildren } from "react";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 
-type IndicatorKey = Exclude<keyof NonNullable<DeclarationDTO["indicateurs"]>, "représentation_équilibrée">;
+type IndicatorKeyFromDTO = Exclude<keyof NonNullable<DeclarationDTO["indicateurs"]>, "représentation_équilibrée">;
 
 type Props = {
   customContent?: React.ReactNode;
   editable?: boolean;
   indicateurs: DeclarationDTO["indicateurs"];
-  nom: IndicatorKey;
+  nom: IndicatorKeyFromDTO;
 };
 
-const matchKey: Record<IndicatorKey, keyof typeof funnelStaticConfig> = {
+const KeyInState: Record<IndicatorKeyFromDTO, IndicatorKey> = {
   rémunérations: "remunerations",
   augmentations: "augmentations",
   promotions: "promotions",
@@ -30,9 +31,9 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent, editable }
 
   return (
     <RecapCard
-      title={funnelStaticConfig[matchKey[nom]].title}
+      title={funnelStaticConfig[KeyInState[nom]].title}
       // editLink={funnelStaticConfig[matchKey[nom]].url}
-      {...{ editLink: editable ? funnelStaticConfig[matchKey[nom]].url : undefined }}
+      {...{ editLink: editable ? funnelStaticConfig[KeyInState[nom]].url : undefined }}
       content={
         <>
           {customContent}
@@ -44,7 +45,7 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent, editable }
           {note !== undefined && (
             <IndicatorNote
               note={note}
-              max={indicatorNoteMax[nom]}
+              max={indicatorNoteMax[KeyInState[nom]]}
               text="Nombre de points obtenus à l'indicateur"
               legend={
                 nom === "congés_maternité"

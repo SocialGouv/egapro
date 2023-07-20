@@ -174,7 +174,7 @@ export const AugmentationEtPromotionsForm = () => {
                   {noteSurRésultatFinal !== undefined && (
                     <IndicatorNote
                       note={noteSurRésultatFinal}
-                      max={indicatorNoteMax.augmentations_et_promotions}
+                      max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus sur le résultat final en %"
                     />
                   )}
@@ -182,7 +182,7 @@ export const AugmentationEtPromotionsForm = () => {
                   {noteSurNbEqSal !== undefined && (
                     <IndicatorNote
                       note={noteSurNbEqSal}
-                      max={indicatorNoteMax.augmentations_et_promotions}
+                      max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
                       className={fr.cx("fr-mt-2w")}
                     />
@@ -192,7 +192,7 @@ export const AugmentationEtPromotionsForm = () => {
                     <>
                       <IndicatorNote
                         note={note}
-                        max={indicatorNoteMax.augmentations_et_promotions}
+                        max={indicatorNoteMax[stepName]}
                         text="Nombre de points obtenus à l'indicateur"
                         className={fr.cx("fr-mt-2w")}
                       />

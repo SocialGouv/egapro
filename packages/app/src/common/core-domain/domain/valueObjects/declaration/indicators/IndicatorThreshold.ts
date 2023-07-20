@@ -1,11 +1,9 @@
 // Thresholds are of form {threshold: note}
 
-import { type DeclarationDTO } from "@common/models/generated";
+import { type IndicatorKey } from "@services/form/declaration/DeclarationFormBuilder";
 import { max } from "lodash";
 
 type THRESHOLD = Map<number, number>;
-
-type IndicatorKey = Exclude<keyof NonNullable<DeclarationDTO["indicateurs"]>, "représentation_équilibrée">;
 
 export const REMUNERATIONS_THRESHOLDS: THRESHOLD = new Map([
   [0.0, 40],
@@ -76,12 +74,12 @@ export const computeGenericIndicatorNote = (result: number, thresholds: THRESHOL
 };
 
 export const indicatorNoteMax: Record<IndicatorKey, number> = {
-  rémunérations: max([...REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
+  remunerations: max([...REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
   augmentations: max([...AUGMENTATIONS_HP_THRESHOLDS].map(([, note]) => note)) as number,
   promotions: max([...PROMOTIONS_THRESHOLDS].map(([, note]) => note)) as number,
-  augmentations_et_promotions: max([...AUGMENTATIONS_PROMOTIONS_THRESHOLDS].map(([, note]) => note)) as number,
-  congés_maternité: max([...CONGES_MATERNITE_THRESHOLDS].map(([, note]) => note)) as number,
-  hautes_rémunérations: max([...HAUTES_REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
+  "augmentations-et-promotions": max([...AUGMENTATIONS_PROMOTIONS_THRESHOLDS].map(([, note]) => note)) as number,
+  "conges-maternite": max([...CONGES_MATERNITE_THRESHOLDS].map(([, note]) => note)) as number,
+  "hautes-remunerations": max([...HAUTES_REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
 };
 
 export const computeIndicator1Note = (result: number) => computeGenericIndicatorNote(result, REMUNERATIONS_THRESHOLDS);

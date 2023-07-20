@@ -1,40 +1,42 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import {
-  computeIndicator1Note,
+  computeIndicator5Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
-import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
+import { get } from "lodash";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-// Import your language translation files
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const stepName: FunnelKey = "remunerations-resultat";
-
 const formSchema = zodFr
   .object({
-    note: z.number(),
-    populationFavorable: z.string(),
-    résultat: zodPositiveOrZeroNumberSchema,
+    populationFavorable: z.string().optional(),
+    résultat: zodPositiveOrZeroIntegerSchema
+      .min(0, { message: "La valeur minimale est 0" })
+      .max(5, { message: "La valeur maximale est 5" })
+      .optional(),
+    note: z.number().optional(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat !== 0 && !populationFavorable) {
+    if (résultat !== 5 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -45,9 +47,12 @@ const formSchema = zodFr
 
 type FormType = z.infer<typeof formSchema>;
 
-export const RemunerationResultatForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
+const stepName: FunnelKey = "hautes-remunerations";
+
+export const HautesRémunérationsForm = () => {
   const router = useRouter();
+  const [animationParent] = useAutoAnimate();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
@@ -55,7 +60,6 @@ export const RemunerationResultatForm = () => {
       // you can debug your validation schema here
       // console.debug("formData", data);
       console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
@@ -65,8 +69,8 @@ export const RemunerationResultatForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid, errors: _errors },
     setValue,
+    formState: { isValid, errors },
     watch,
   } = methods;
 
@@ -74,18 +78,19 @@ export const RemunerationResultatForm = () => {
   const note = watch("note");
 
   useEffect(() => {
-    if (résultat !== null) {
-      const note = computeIndicator1Note(résultat);
+    if (résultat) {
+      const note = computeIndicator5Note(résultat);
       setValue("note", note);
     }
-
-    if (résultat === 0 || résultat === null) {
+    if (résultat === 5) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
     } else {
       setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
+
+  console.log("errors:", errors);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -100,38 +105,59 @@ export const RemunerationResultatForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {/* <ReactHookFormDebug /> */}
+        {/* <ReactHookFormDebug /> */}
 
-          <PercentageInput
-            label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient"
-            name="résultat"
-            min={0}
-          />
-
-          <PopulationFavorable disabled={populationFavorableDisabled} />
-
-          {résultat !== null && (
+        <div ref={animationParent}>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
-              <IndicatorNote
-                note={note}
-                max={indicatorNoteMax.remunerations}
-                text="Nombre de points obtenus à l'indicateur"
-              />
-
               <Input
-                label=""
+                label="Résultat en nombre de salariés du sexe sous-représenté"
                 nativeInputProps={{
-                  type: "hidden",
-                  value: note,
-                  ...register(`note`, { valueAsNumber: true }),
+                  type: "number",
+                  min: 0,
+                  max: 5,
+                  step: 1,
+                  ...register("résultat", {
+                    valueAsNumber: true,
+                    // setValueAs: (value: string) => {
+                    //   // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead.
+                    //   const num = Number(value);
+                    //   return isNaN(num) || value === "" ? null : num;
+                    // },
+                  }),
                 }}
+                state={get(errors, "résultat") ? "error" : "default"}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                stateRelatedMessage={get(errors, "résultat")?.message || ""}
               />
-            </>
-          )}
-        </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+              <PopulationFavorable disabled={populationFavorableDisabled} />
+
+              {note !== undefined && (
+                <>
+                  <IndicatorNote
+                    note={note}
+                    max={indicatorNoteMax[stepName]}
+                    text="Nombre de points obtenus à l'indicateur"
+                    className={fr.cx("fr-mt-2w")}
+                  />
+
+                  <Input
+                    label=""
+                    nativeInputProps={{
+                      type: "hidden",
+                      value: note,
+                      ...register(`note`, { valueAsNumber: true }),
+                    }}
+                  />
+                </>
+              )}
+            </>
+          </ClientOnly>
+
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </div>
       </form>
     </FormProvider>
   );
