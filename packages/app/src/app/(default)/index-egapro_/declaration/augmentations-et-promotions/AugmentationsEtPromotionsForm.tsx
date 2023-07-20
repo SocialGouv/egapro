@@ -87,38 +87,27 @@ export const AugmentationEtPromotionsForm = () => {
   const noteSurRésultatFinal = watch("noteSurRésultatFinal");
   const noteSurNbEqSal = watch("noteSurNbEqSal");
 
-  // Compute noteSurRésultatFinal in sync with résultat.
+  // Sync notes and populationFavorable with result fields.
   useEffect(() => {
+    let noteSurRésultatFinal, noteSurNbEqSal;
     if (résultat !== undefined) {
-      const noteSurRésultatFinal = computeIndicator2And3Note(résultat);
+      noteSurRésultatFinal = computeIndicator2And3Note(résultat);
       setValue("noteSurRésultatFinal", noteSurRésultatFinal);
     }
-  }, [résultat, setValue]);
-
-  // Compute noteSurNbEqSal in sync with résultatEquivalentSalarié.
-  useEffect(() => {
     if (résultatEquivalentSalarié !== undefined) {
-      const noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
+      noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
       setValue("noteSurNbEqSal", noteSurNbEqSal);
     }
-  }, [résultatEquivalentSalarié, setValue]);
-
-  // Compute note in sync with noteSurRésultatFinal and noteSurNbEqSal.
-  useEffect(() => {
     if (noteSurRésultatFinal !== undefined && noteSurNbEqSal !== undefined) {
       setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
     }
-  }, [noteSurRésultatFinal, noteSurNbEqSal, setValue]);
-
-  // Disable populationFavorable where appropriate.
-  useEffect(() => {
     if (résultat === 0 && résultatEquivalentSalarié === 0) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
     } else {
       setPopulationFavorableDisabled(false);
     }
-  }, [résultat, résultatEquivalentSalarié, setValue]);
+  }, [noteSurNbEqSal, noteSurRésultatFinal, résultat, résultatEquivalentSalarié, setValue]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
