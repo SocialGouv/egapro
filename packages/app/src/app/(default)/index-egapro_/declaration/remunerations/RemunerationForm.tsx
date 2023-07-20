@@ -8,6 +8,7 @@ import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
@@ -73,8 +74,9 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const [animationParent] = useAutoAnimate();
+  const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
     shouldUnregister: true, // Don't store the fields that are not displayed.
@@ -117,119 +119,121 @@ export const RemunerationForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* <ReactHookFormDebug /> */}
 
-        <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
+        <div ref={animationParent}>
+          <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {estCalculable === "non" && (
-            <>
-              <Checkbox
-                options={[
-                  {
-                    label:
-                      "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
-                    nativeInputProps: {
-                      ...register("déclarationCalculCSP"),
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {estCalculable === "non" && (
+              <>
+                <Checkbox
+                  options={[
+                    {
+                      label:
+                        "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
+                      nativeInputProps: {
+                        ...register("déclarationCalculCSP"),
+                      },
                     },
-                  },
-                ]}
-                state={errors.déclarationCalculCSP ? "error" : "default"}
-                stateRelatedMessage={errors.déclarationCalculCSP?.message}
-              />
+                  ]}
+                  state={errors.déclarationCalculCSP ? "error" : "default"}
+                  stateRelatedMessage={errors.déclarationCalculCSP?.message}
+                />
 
-              {déclarationCalculCSP && (
-                <Select
-                  label="Précision du motif de non calculabilité de l'indicateur"
-                  nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                  state={errors.motifNonCalculabilité ? "error" : "default"}
-                  stateRelatedMessage={errors.motifNonCalculabilité?.message}
-                >
-                  <option value="" disabled hidden>
-                    Selectionnez une option
-                  </option>
-
-                  {motifsNC["remunerations"].map(motif => (
-                    <option key={motif} value={motif}>
-                      {labelsMotifNC[motif]}
+                {déclarationCalculCSP && (
+                  <Select
+                    label="Précision du motif de non calculabilité de l'indicateur"
+                    nativeSelectProps={{ ...register("motifNonCalculabilité") }}
+                    state={errors.motifNonCalculabilité ? "error" : "default"}
+                    stateRelatedMessage={errors.motifNonCalculabilité?.message}
+                  >
+                    <option value="" disabled hidden>
+                      Selectionnez une option
                     </option>
-                  ))}
-                </Select>
-              )}
-            </>
-          )}
-        </ClientOnly>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {estCalculable === "oui" && (
-            <>
-              <RadioButtons
-                legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
-                options={[
-                  {
-                    label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-                    nativeInputProps: {
-                      value: "niveau_branche",
-                      ...register("mode"),
-                    },
-                  },
-                  {
-                    label:
-                      "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-                    nativeInputProps: {
-                      value: "niveau_autre",
-                      ...register("mode"),
-                    },
-                  },
-                  {
-                    label: "Par catégorie socio-professionnelle",
-                    nativeInputProps: {
-                      value: "csp",
-                      ...register("mode"),
-                    },
-                  },
-                ]}
-              />
 
-              {mode && mode !== "csp" && (
-                <>
-                  <RadioButtons
-                    legend="Un CSE a-t-il été mis en place ?"
-                    disabled={!!formData.ues?.nom}
-                    options={[
-                      {
-                        label: "Oui",
-                        nativeInputProps: {
-                          value: "oui",
-                          ...register("cse"),
-                        },
+                    {motifsNC["remunerations"].map(motif => (
+                      <option key={motif} value={motif}>
+                        {labelsMotifNC[motif]}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </>
+            )}
+          </ClientOnly>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {estCalculable === "oui" && (
+              <>
+                <RadioButtons
+                  legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
+                  options={[
+                    {
+                      label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
+                      nativeInputProps: {
+                        value: "niveau_branche",
+                        ...register("mode"),
                       },
-                      {
-                        label: "Non",
-                        nativeInputProps: {
-                          value: "non",
-                          ...register("cse"),
-                        },
+                    },
+                    {
+                      label:
+                        "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
+                      nativeInputProps: {
+                        value: "niveau_autre",
+                        ...register("mode"),
                       },
-                    ]}
-                    orientation="horizontal"
-                  />
-                  {cse === "oui" && (
-                    <Input
-                      label="Date de consultation du CSE pour le choix de cette modalité de calcul"
-                      nativeInputProps={{
-                        type: "date",
-                        ...register("dateConsultationCSE"),
-                      }}
-                      iconId="ri-calendar-line"
-                      state={errors.dateConsultationCSE ? "error" : "default"}
-                      stateRelatedMessage={errors.dateConsultationCSE?.message}
+                    },
+                    {
+                      label: "Par catégorie socio-professionnelle",
+                      nativeInputProps: {
+                        value: "csp",
+                        ...register("mode"),
+                      },
+                    },
+                  ]}
+                />
+
+                {mode && mode !== "csp" && (
+                  <>
+                    <RadioButtons
+                      legend="Un CSE a-t-il été mis en place ?"
+                      disabled={!!formData.ues?.nom}
+                      options={[
+                        {
+                          label: "Oui",
+                          nativeInputProps: {
+                            value: "oui",
+                            ...register("cse"),
+                          },
+                        },
+                        {
+                          label: "Non",
+                          nativeInputProps: {
+                            value: "non",
+                            ...register("cse"),
+                          },
+                        },
+                      ]}
+                      orientation="horizontal"
                     />
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </ClientOnly>
+                    {cse === "oui" && (
+                      <Input
+                        label="Date de consultation du CSE pour le choix de cette modalité de calcul"
+                        nativeInputProps={{
+                          type: "date",
+                          ...register("dateConsultationCSE"),
+                        }}
+                        iconId="ri-calendar-line"
+                        state={errors.dateConsultationCSE ? "error" : "default"}
+                        stateRelatedMessage={errors.dateConsultationCSE?.message}
+                      />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </div>
       </form>
     </FormProvider>
   );

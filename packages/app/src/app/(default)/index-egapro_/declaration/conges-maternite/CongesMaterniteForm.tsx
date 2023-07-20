@@ -16,6 +16,7 @@ import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
@@ -51,8 +52,9 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "conges-maternite";
 
 export const CongesMaterniteForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const [animationParent] = useAutoAnimate();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
@@ -108,72 +110,74 @@ export const CongesMaterniteForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          <ReactHookFormDebug />
+        <ReactHookFormDebug />
 
+        <div ref={animationParent}>
           <RadioOuiNon
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
             name="estCalculable"
           />
 
-          {estCalculable && (
-            <>
-              {estCalculable === "non" ? (
-                <>
-                  <Select
-                    label="Précision du motif de non calculabilité de l'indicateur"
-                    nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                    state={errors.motifNonCalculabilité ? "error" : "default"}
-                    stateRelatedMessage={errors.motifNonCalculabilité?.message}
-                  >
-                    <option value="" disabled hidden>
-                      Selectionnez une option
-                    </option>
-                    {motifsNC["conges-maternite"].map(motif => (
-                      <option key={motif} value={motif}>
-                        {labelsMotifNC[motif]}
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {estCalculable && (
+              <>
+                {estCalculable === "non" ? (
+                  <>
+                    <Select
+                      label="Précision du motif de non calculabilité de l'indicateur"
+                      nativeSelectProps={{ ...register("motifNonCalculabilité") }}
+                      state={errors.motifNonCalculabilité ? "error" : "default"}
+                      stateRelatedMessage={errors.motifNonCalculabilité?.message}
+                    >
+                      <option value="" disabled hidden>
+                        Selectionnez une option
                       </option>
-                    ))}
-                  </Select>
-                </>
-              ) : (
-                <>
-                  <PercentageInput label="Résultat final en %" name="résultat" min={0} />
+                      {motifsNC["conges-maternite"].map(motif => (
+                        <option key={motif} value={motif}>
+                          {labelsMotifNC[motif]}
+                        </option>
+                      ))}
+                    </Select>
+                  </>
+                ) : (
+                  <>
+                    <PercentageInput label="Résultat final en %" name="résultat" min={0} />
 
-                  <PercentageInput
-                    label="Résultat final en nombre équivalent de salariés"
-                    name="résultatEquivalentSalarié"
-                    min={0}
-                  />
+                    <PercentageInput
+                      label="Résultat final en nombre équivalent de salariés"
+                      name="résultatEquivalentSalarié"
+                      min={0}
+                    />
 
-                  <PopulationFavorable disabled={populationFavorableDisabled} />
+                    <PopulationFavorable disabled={populationFavorableDisabled} />
 
-                  {note !== undefined && (
-                    <>
-                      <IndicatorNote
-                        note={note}
-                        max={indicatorNoteMax.augmentations_et_promotions}
-                        text="Nombre de points obtenus à l'indicateur"
-                        className={fr.cx("fr-mt-2w")}
-                      />
+                    {note !== undefined && (
+                      <>
+                        <IndicatorNote
+                          note={note}
+                          max={indicatorNoteMax.augmentations_et_promotions}
+                          text="Nombre de points obtenus à l'indicateur"
+                          className={fr.cx("fr-mt-2w")}
+                        />
 
-                      <Input
-                        label=""
-                        nativeInputProps={{
-                          type: "hidden",
-                          value: note,
-                          ...register(`note`, { valueAsNumber: true }),
-                        }}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </ClientOnly>
+                        <Input
+                          label=""
+                          nativeInputProps={{
+                            type: "hidden",
+                            value: note,
+                            ...register(`note`, { valueAsNumber: true }),
+                          }}
+                        />
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </div>
       </form>
     </FormProvider>
   );

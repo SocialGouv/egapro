@@ -15,6 +15,7 @@ import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
@@ -31,15 +32,15 @@ const formSchema = zodFr
   .object({
     estCalculable: zodRadioInputSchema,
     motifNonCalculabilité: z.string().optional(),
-    populationFavorable: z.string(),
-    résultat: zodPositiveOrZeroNumberSchema,
-    résultatEquivalentSalarié: zodPositiveOrZeroNumberSchema,
-    note: z.number(),
-    noteSurRésultatFinal: z.number(),
-    noteSurNbEqSal: z.number(),
+    populationFavorable: z.string().optional(),
+    résultat: zodPositiveOrZeroNumberSchema.optional(),
+    résultatEquivalentSalarié: zodPositiveOrZeroNumberSchema.optional(),
+    note: z.number().optional(),
+    noteSurRésultatFinal: z.number().optional(),
+    noteSurNbEqSal: z.number().optional(),
   })
-  .superRefine(({ résultat, résultatEquivalentSalarié, populationFavorable }, ctx) => {
-    if ((résultat !== 0 || résultatEquivalentSalarié !== 0) && !populationFavorable) {
+  .superRefine(({ estCalculable, résultat, résultatEquivalentSalarié, populationFavorable }, ctx) => {
+    if (estCalculable === "oui" && (résultat !== 0 || résultatEquivalentSalarié !== 0) && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -53,11 +54,14 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "augmentations-et-promotions";
 
 export const AugmentationEtPromotionsForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  const { formData, saveFormData } = useDeclarationFormManager();
+
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
+    shouldUnregister: true,
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
       // console.debug("formData", data);
@@ -65,7 +69,6 @@ export const AugmentationEtPromotionsForm = () => {
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
-    // resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -77,28 +80,34 @@ export const AugmentationEtPromotionsForm = () => {
     watch,
   } = methods;
 
+  const estCalculable = watch("estCalculable");
   const résultat = watch("résultat");
   const résultatEquivalentSalarié = watch("résultatEquivalentSalarié");
   const note = watch("note");
   const noteSurRésultatFinal = watch("noteSurRésultatFinal");
   const noteSurNbEqSal = watch("noteSurNbEqSal");
-  const estCalculable = watch("estCalculable");
 
-  // Synchronize noteSurRésultatFinal.
+  // Compute noteSurRésultatFinal in sync with résultat.
   useEffect(() => {
-    const noteSurRésultatFinal = computeIndicator2And3Note(résultat);
-    setValue("noteSurRésultatFinal", noteSurRésultatFinal);
+    if (résultat !== undefined) {
+      const noteSurRésultatFinal = computeIndicator2And3Note(résultat);
+      setValue("noteSurRésultatFinal", noteSurRésultatFinal);
+    }
   }, [résultat, setValue]);
 
-  // Synchronize noteSurNbEqSal.
+  // Compute noteSurNbEqSal in sync with résultatEquivalentSalarié.
   useEffect(() => {
-    const noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
-    setValue("noteSurNbEqSal", noteSurNbEqSal);
+    if (résultatEquivalentSalarié !== undefined) {
+      const noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
+      setValue("noteSurNbEqSal", noteSurNbEqSal);
+    }
   }, [résultatEquivalentSalarié, setValue]);
 
-  // Compute note.
+  // Compute note in sync with noteSurRésultatFinal and noteSurNbEqSal.
   useEffect(() => {
-    setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
+    if (noteSurRésultatFinal !== undefined && noteSurNbEqSal !== undefined) {
+      setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
+    }
   }, [noteSurRésultatFinal, noteSurNbEqSal, setValue]);
 
   // Disable populationFavorable where appropriate.
@@ -124,17 +133,18 @@ export const AugmentationEtPromotionsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {/* <ReactHookFormDebug /> */}
+        {/* <ReactHookFormDebug /> */}
 
+        <div ref={animationParent}>
+          {/* Needs to be outside ClientOnly to not be unregistered by RHF. Be careful! */}
           <RadioOuiNon
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
             name="estCalculable"
           />
 
-          {estCalculable && (
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
-              {estCalculable === "non" ? (
+              {estCalculable === "non" && (
                 <>
                   <Select
                     label="Précision du motif de non calculabilité de l'indicateur"
@@ -152,7 +162,9 @@ export const AugmentationEtPromotionsForm = () => {
                     ))}
                   </Select>
                 </>
-              ) : (
+              )}
+
+              {estCalculable === "oui" && (
                 <>
                   <PercentageInput label="Résultat final en %" name="résultat" min={0} />
 
@@ -203,10 +215,10 @@ export const AugmentationEtPromotionsForm = () => {
                 </>
               )}
             </>
-          )}
-        </ClientOnly>
+          </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </div>
       </form>
     </FormProvider>
   );
