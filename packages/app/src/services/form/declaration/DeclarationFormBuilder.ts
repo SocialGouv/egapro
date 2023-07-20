@@ -73,12 +73,13 @@ export type DeclarationFormState = {
   };
   "conges-maternite"?:
     | {
-        estCalculable: OuiNon;
+        estCalculable: "non";
         motifNonCalculabilité: (typeof motifsNC)["conges-maternite"][number];
       }
     | {
-        estCalculable: OuiNon;
-        resultat: number;
+        estCalculable: "oui";
+        note: number;
+        résultat: number;
       };
   // Only filled by the backend.
   declarant?: {
@@ -174,6 +175,45 @@ export const DeclarationFormBuilder = {
         déclarationCalculCSP: true, // Always true for an existing declaration.
         mode: declaration.indicateurs?.rémunérations?.mode as RemunerationsMode.Enum, // Always present for an existing declaration.
       },
+      "remunerations-csp": {
+        // @ts-ignore TODO: improve types
+        catégories: declaration.indicateurs?.rémunérations?.catégories,
+      },
+      "remunerations-coefficient-autre": {
+        // @ts-ignore TODO: improve types
+        catégories: declaration.indicateurs?.rémunérations?.catégories,
+      },
+      "remunerations-coefficient-branche": {
+        // @ts-ignore TODO: improve types
+        catégories: declaration.indicateurs?.rémunérations?.catégories,
+      },
+      "remunerations-resultat": {
+        note: declaration.indicateurs?.rémunérations?.note ?? 0,
+        populationFavorable: declaration.indicateurs?.rémunérations?.population_favorable ?? "egalite",
+        résultat: declaration.indicateurs?.rémunérations?.résultat ?? 0,
+      },
+      "augmentations-et-promotions": {
+        estCalculable: declaration.indicateurs?.augmentations_et_promotions?.non_calculable ? "non" : "oui",
+        motifNonCalculabilité: declaration.indicateurs?.augmentations_et_promotions?.non_calculable,
+        note: declaration.indicateurs?.augmentations_et_promotions?.note ?? 0,
+        populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "egalite",
+        résultat: declaration.indicateurs?.augmentations_et_promotions?.résultat ?? 0,
+        résultatEquivalentSalarié: declaration.indicateurs?.augmentations_et_promotions?.résultat_nombre_salariés ?? 0,
+      },
+      "conges-maternite": declaration.indicateurs?.congés_maternité?.non_calculable
+        ? {
+            estCalculable: "non",
+            motifNonCalculabilité: declaration.indicateurs?.congés_maternité?.non_calculable,
+          }
+        : {
+            estCalculable: "oui",
+            résultat: declaration.indicateurs?.congés_maternité?.résultat ?? 0,
+            note: declaration.indicateurs?.congés_maternité?.note ?? 0,
+          },
+      "hautes-remunerations": {
+        populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "egalite",
+        résultat: declaration.indicateurs?.hautes_rémunérations?.résultat ?? 0,
+      },
       entreprise: {
         tranche: declaration.entreprise.effectif!.tranche!, // Always present for an existing declaration.
         type: declaration.entreprise.ues?.nom ? "ues" : "entreprise",
@@ -186,11 +226,15 @@ export const DeclarationFormBuilder = {
             raisonSociale: entreprise.raison_sociale,
           })) ?? [],
       },
-      "periode-reference": {
-        périodeSuffisante: declaration.déclaration.période_suffisante ? "oui" : "oui",
-        effectifTotal: declaration.entreprise.effectif?.total ?? 0,
-        finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
-      },
+      "periode-reference": declaration.déclaration.période_suffisante
+        ? {
+            périodeSuffisante: "oui",
+            effectifTotal: declaration.entreprise.effectif?.total ?? 0,
+            finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
+          }
+        : {
+            périodeSuffisante: "non",
+          },
       // TODO: les autres indicateurs et autres informations
     };
   },
