@@ -5,6 +5,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +25,7 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 
 const stepName: FunnelKey = "commencer";
 
-const baseSchema = z.object({
+const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
   siren: zodSirenSchema,
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -15,7 +16,7 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z.object({
+const formSchema = zodFr.object({
   type: z.string(), // No extra control needed because this is a radio button with options we provide.
   tranche: z.string(), // No extra control needed because this is a radio button with options we provide.
 });

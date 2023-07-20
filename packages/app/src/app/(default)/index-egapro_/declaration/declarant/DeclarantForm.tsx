@@ -3,6 +3,7 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { zodEmail, zodPhone } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ type Props = {
   session: Session;
 };
 
-const formSchema = z.object({
+const formSchema = zodFr.object({
   accordRgpd: z.boolean().refine(val => !!val, {
     message: "Vous devez accepter les conditions pour continuer",
   }),

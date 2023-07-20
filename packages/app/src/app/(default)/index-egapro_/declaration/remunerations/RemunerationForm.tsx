@@ -4,6 +4,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -21,7 +22,7 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z
+const formSchema = zodFr
   .object({
     estCalculable: zodRadioInputSchema,
     mode: z.string().optional(), // No check is necessary as the value is from select options.
