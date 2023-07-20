@@ -3,15 +3,15 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import Select from "@codegouvfr/react-dsfr/Select";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { MotifNC } from "@components/RHF/MotifNC";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -139,24 +139,7 @@ export const RemunerationForm = () => {
                   stateRelatedMessage={errors.déclarationCalculCSP?.message}
                 />
 
-                {déclarationCalculCSP && (
-                  <Select
-                    label="Précision du motif de non calculabilité de l'indicateur"
-                    nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                    state={errors.motifNonCalculabilité ? "error" : "default"}
-                    stateRelatedMessage={errors.motifNonCalculabilité?.message}
-                  >
-                    <option value="" disabled hidden>
-                      Selectionnez une option
-                    </option>
-
-                    {motifsNC["remunerations"].map(motif => (
-                      <option key={motif} value={motif}>
-                        {labelsMotifNC[motif]}
-                      </option>
-                    ))}
-                  </Select>
-                )}
+                {déclarationCalculCSP && <MotifNC stepName={stepName} />}
               </>
             )}
           </ClientOnly>

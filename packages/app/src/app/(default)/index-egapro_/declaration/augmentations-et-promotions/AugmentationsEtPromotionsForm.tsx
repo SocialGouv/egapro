@@ -2,13 +2,13 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import Select from "@codegouvfr/react-dsfr/Select";
 import {
   computeIndicator2And3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodPositiveOrZeroNumberSchema, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
@@ -18,7 +18,7 @@ import { IndicatorNote } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState, labelsMotifNC, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -155,21 +155,7 @@ export const AugmentationEtPromotionsForm = () => {
             <>
               {estCalculable === "non" && (
                 <>
-                  <Select
-                    label="Précision du motif de non calculabilité de l'indicateur"
-                    nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                    state={errors.motifNonCalculabilité ? "error" : "default"}
-                    stateRelatedMessage={errors.motifNonCalculabilité?.message}
-                  >
-                    <option value="" disabled hidden>
-                      Selectionnez une option
-                    </option>
-                    {motifsNC["augmentations-et-promotions"].map(motif => (
-                      <option key={motif} value={motif}>
-                        {labelsMotifNC[motif]}
-                      </option>
-                    ))}
-                  </Select>
+                  <MotifNC stepName={stepName} />
                 </>
               )}
 

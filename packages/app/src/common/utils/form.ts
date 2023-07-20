@@ -45,12 +45,9 @@ export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   return val;
 });
 
-export const zodRealPercentageSchema = z
-  .number()
-  .refine(percentage => percentage >= 0, {
-    message: "Le pourcentage doit être positif",
-  })
-  .refine(percentage => percentage <= 100, { message: "Le pourcentage maximum est 100" });
+export const zodPercentageSchema = zodPositiveOrZeroNumberSchema.refine(percentage => percentage <= 100, {
+  message: "La valeur maximale est 100",
+});
 
 // Useful for input which could be empty or a number. NaN is of type number but is not serializable, and is replaced by null with JSON.stringify. So we need to allow null.
 export const zodNumberOrNaNOrNull = z
@@ -60,7 +57,7 @@ export const zodNumberOrNaNOrNull = z
 export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 
 /** @deprecated */
-export const zodPercentageSchema = z
+export const zodPercentageAsStringSchema = z
   .string()
   .transform((val, ctx) => {
     const percentage = parseFloat(val);

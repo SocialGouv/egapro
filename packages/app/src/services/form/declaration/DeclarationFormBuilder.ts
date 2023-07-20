@@ -32,7 +32,14 @@ export const labelsMotifNC = {
   absrcm: "Absence de retours de congé maternité",
 } as const;
 
-export const motifsNC = {
+type LabelMotifNCKey = keyof typeof labelsMotifNC;
+
+export type MotifNCKey = keyof Pick<
+  DeclarationFormState,
+  "augmentations-et-promotions" | "augmentations" | "conges-maternite" | "promotions" | "remunerations"
+>;
+
+export const motifsNC: Record<MotifNCKey, readonly LabelMotifNCKey[]> = {
   augmentations: ["egvi40pcet", "absaugi"],
   promotions: ["egvi40pcet", "absprom"],
   "augmentations-et-promotions": ["absaugi", "egvi40pcet", "etsno5f5h"],
