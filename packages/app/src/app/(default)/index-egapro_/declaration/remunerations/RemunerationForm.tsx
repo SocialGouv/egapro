@@ -8,7 +8,7 @@ import { MotifNC } from "@components/RHF/MotifNC";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -75,7 +75,6 @@ const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
@@ -119,7 +118,7 @@ export const RemunerationForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* <ReactHookFormDebug /> */}
 
-        <div ref={animationParent}>
+        <ClientAnimate>
           <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
@@ -216,7 +215,7 @@ export const RemunerationForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );

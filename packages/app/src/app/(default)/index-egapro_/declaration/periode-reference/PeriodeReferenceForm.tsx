@@ -7,6 +7,7 @@ import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { endOfYear, formatISO, getYear } from "date-fns";
@@ -87,58 +88,60 @@ export const PeriodeReferenceForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* <ReactHookFormDebug /> */}
 
-        <Input
-          label="Année au titre de laquelle les indicateurs sont calculés"
-          nativeInputProps={{
-            title: "Saisissez le nom ou le Siren d'une entreprise",
-            readOnly: true,
-            ...register("annéeIndicateurs", { valueAsNumber: true }),
-          }}
-        />
+        <ClientAnimate>
+          <Input
+            label="Année au titre de laquelle les indicateurs sont calculés"
+            nativeInputProps={{
+              title: "Saisissez le nom ou le Siren d'une entreprise",
+              readOnly: true,
+              ...register("annéeIndicateurs", { valueAsNumber: true }),
+            }}
+          />
 
-        <RadioOuiNon
-          legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ?"
-          name="périodeSuffisante"
-        />
+          <RadioOuiNon
+            legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ?"
+            name="périodeSuffisante"
+          />
 
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {périodeSuffisante === "oui" && (
-            <>
-              <Input
-                label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
-                nativeInputProps={{
-                  type: "date",
-                  ...register("finPériodeRéférence"),
-                }}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                state={errors.finPériodeRéférence ? "error" : "default"}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                stateRelatedMessage={errors.finPériodeRéférence?.message}
-              />
-              <Button type="button" className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
-                Sélectionner la fin de l'année civile
-              </Button>
-              <Input
-                label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique)"
-                nativeInputProps={{
-                  type: "number",
-                  min: 1,
-                  ...register("effectifTotal", { valueAsNumber: true }),
-                }}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                state={errors.effectifTotal ? "error" : "default"}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                stateRelatedMessage={errors.effectifTotal?.message}
-              />
-            </>
-          )}
-        </ClientOnly>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {périodeSuffisante === "oui" && (
+              <>
+                <Input
+                  label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
+                  nativeInputProps={{
+                    type: "date",
+                    ...register("finPériodeRéférence"),
+                  }}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
+                  state={errors.finPériodeRéférence ? "error" : "default"}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
+                  stateRelatedMessage={errors.finPériodeRéférence?.message}
+                />
+                <Button type="button" className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
+                  Sélectionner la fin de l'année civile
+                </Button>
+                <Input
+                  label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique)"
+                  nativeInputProps={{
+                    type: "number",
+                    min: 1,
+                    ...register("effectifTotal", { valueAsNumber: true }),
+                  }}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
+                  state={errors.effectifTotal ? "error" : "default"}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
+                  stateRelatedMessage={errors.effectifTotal?.message}
+                />
+              </>
+            )}
+          </ClientOnly>
 
-        <BackNextButtons stepName="periode-reference" disabled={!isValid} />
+          <BackNextButtons stepName="periode-reference" disabled={!isValid} />
+        </ClientAnimate>
       </form>
     </FormProvider>
   );
