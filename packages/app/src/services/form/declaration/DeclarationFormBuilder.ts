@@ -63,6 +63,8 @@ export type DeclarationFormState = {
     estCalculable: OuiNon;
     motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
     note: number;
+    noteNombreSalaries: number;
+    notePourcentage: number;
     populationFavorable: PopulationFavorable;
     résultat: number;
     résultatEquivalentSalarié: number;

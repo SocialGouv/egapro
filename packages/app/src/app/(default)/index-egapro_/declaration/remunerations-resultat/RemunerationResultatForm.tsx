@@ -1,6 +1,5 @@
 "use client";
 
-import Input from "@codegouvfr/react-dsfr/Input";
 import {
   computeIndicator1Note,
   indicatorNoteMax,
@@ -70,6 +69,11 @@ export const RemunerationResultatForm = () => {
     watch,
   } = methods;
 
+  useEffect(() => {
+    register("note");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const résultat = watch("résultat");
   const note = watch("note");
 
@@ -117,15 +121,6 @@ export const RemunerationResultatForm = () => {
                 note={note}
                 max={indicatorNoteMax.remunerations}
                 text="Nombre de points obtenus à l'indicateur"
-              />
-
-              <Input
-                label=""
-                nativeInputProps={{
-                  type: "hidden",
-                  value: note,
-                  ...register(`note`, { valueAsNumber: true }),
-                }}
               />
             </>
           )}

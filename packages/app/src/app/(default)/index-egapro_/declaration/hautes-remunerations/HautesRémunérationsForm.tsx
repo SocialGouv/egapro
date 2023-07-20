@@ -74,6 +74,11 @@ export const HautesRémunérationsForm = () => {
     watch,
   } = methods;
 
+  useEffect(() => {
+    register("note");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const résultat = watch("résultat");
   const note = watch("note");
 
@@ -141,15 +146,6 @@ export const HautesRémunérationsForm = () => {
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus à l'indicateur"
                     className={fr.cx("fr-mt-2w")}
-                  />
-
-                  <Input
-                    label=""
-                    nativeInputProps={{
-                      type: "hidden",
-                      value: note,
-                      ...register(`note`, { valueAsNumber: true }),
-                    }}
                   />
                 </>
               )}

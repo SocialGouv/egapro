@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Input from "@codegouvfr/react-dsfr/Input";
 import {
   computeIndicator4Note,
   indicatorNoteMax,
@@ -67,6 +66,11 @@ export const CongesMaterniteForm = () => {
   const estCalculable = watch("estCalculable");
 
   useEffect(() => {
+    register("note");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (résultat) {
       const note = computeIndicator4Note(résultat);
       setValue("note", note);
@@ -114,15 +118,6 @@ export const CongesMaterniteForm = () => {
                           max={indicatorNoteMax[stepName]}
                           text="Nombre de points obtenus à l'indicateur"
                           className={fr.cx("fr-mt-2w")}
-                        />
-
-                        <Input
-                          label=""
-                          nativeInputProps={{
-                            type: "hidden",
-                            value: note,
-                            ...register(`note`, { valueAsNumber: true }),
-                          }}
                         />
                       </>
                     )}

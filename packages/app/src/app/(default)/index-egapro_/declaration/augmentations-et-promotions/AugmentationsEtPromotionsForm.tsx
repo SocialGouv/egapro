@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Input from "@codegouvfr/react-dsfr/Input";
 import {
   computeIndicator2And3Note,
   indicatorNoteMax,
@@ -36,8 +35,8 @@ const formSchema = zodFr
     résultat: zodPositiveOrZeroNumberSchema.optional(),
     résultatEquivalentSalarié: zodPositiveOrZeroNumberSchema.optional(),
     note: z.number().optional(),
-    noteSurRésultatFinal: z.number().optional(),
-    noteSurNbEqSal: z.number().optional(),
+    notePourcentage: z.number().optional(),
+    noteNombreSalaries: z.number().optional(),
   })
   .superRefine(({ estCalculable, résultat, résultatEquivalentSalarié, populationFavorable }, ctx) => {
     if (estCalculable === "oui" && (résultat !== 0 || résultatEquivalentSalarié !== 0) && !populationFavorable) {
@@ -85,22 +84,22 @@ export const AugmentationEtPromotionsForm = () => {
   const résultat = watch("résultat");
   const résultatEquivalentSalarié = watch("résultatEquivalentSalarié");
   const note = watch("note");
-  const noteSurRésultatFinal = watch("noteSurRésultatFinal");
-  const noteSurNbEqSal = watch("noteSurNbEqSal");
+  const notePourcentage = watch("notePourcentage");
+  const noteNombreSalaries = watch("noteNombreSalaries");
 
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
-    let noteSurRésultatFinal, noteSurNbEqSal;
+    let notePourcentage, noteNombreSalaries;
     if (résultat !== undefined) {
-      noteSurRésultatFinal = computeIndicator2And3Note(résultat);
-      setValue("noteSurRésultatFinal", noteSurRésultatFinal);
+      notePourcentage = computeIndicator2And3Note(résultat);
+      setValue("notePourcentage", notePourcentage);
     }
     if (résultatEquivalentSalarié !== undefined) {
-      noteSurNbEqSal = computeIndicator2And3Note(résultatEquivalentSalarié);
-      setValue("noteSurNbEqSal", noteSurNbEqSal);
+      noteNombreSalaries = computeIndicator2And3Note(résultatEquivalentSalarié);
+      setValue("noteNombreSalaries", noteNombreSalaries);
     }
-    if (noteSurRésultatFinal !== undefined && noteSurNbEqSal !== undefined) {
-      setValue("note", Math.max(noteSurRésultatFinal, noteSurNbEqSal));
+    if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
+      setValue("note", Math.max(notePourcentage, noteNombreSalaries));
     }
     if (résultat === 0 && résultatEquivalentSalarié === 0) {
       setPopulationFavorableDisabled(true);
@@ -109,19 +108,20 @@ export const AugmentationEtPromotionsForm = () => {
       setPopulationFavorableDisabled(false);
     }
 
+    // RHF recommends to register before using setValue. Seems to work without it though.
     if (estCalculable === "non") {
-      unregister("noteSurRésultatFinal");
-      unregister("noteSurNbEqSal");
+      unregister("notePourcentage");
+      unregister("noteNombreSalaries");
       unregister("note");
     } else if (estCalculable === "oui") {
-      register("noteSurRésultatFinal");
-      register("noteSurNbEqSal");
+      register("notePourcentage");
+      register("noteNombreSalaries");
       register("note");
     }
   }, [
     estCalculable,
-    noteSurNbEqSal,
-    noteSurRésultatFinal,
+    noteNombreSalaries,
+    notePourcentage,
     résultat,
     résultatEquivalentSalarié,
     register,
@@ -171,17 +171,17 @@ export const AugmentationEtPromotionsForm = () => {
 
                   <PopulationFavorable disabled={populationFavorableDisabled} />
 
-                  {noteSurRésultatFinal !== undefined && (
+                  {notePourcentage !== undefined && (
                     <IndicatorNote
-                      note={noteSurRésultatFinal}
+                      note={notePourcentage}
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus sur le résultat final en %"
                     />
                   )}
 
-                  {noteSurNbEqSal !== undefined && (
+                  {noteNombreSalaries !== undefined && (
                     <IndicatorNote
-                      note={noteSurNbEqSal}
+                      note={noteNombreSalaries}
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
                       className={fr.cx("fr-mt-2w")}
@@ -195,15 +195,6 @@ export const AugmentationEtPromotionsForm = () => {
                         max={indicatorNoteMax[stepName]}
                         text="Nombre de points obtenus à l'indicateur"
                         className={fr.cx("fr-mt-2w")}
-                      />
-
-                      <Input
-                        label=""
-                        nativeInputProps={{
-                          type: "hidden",
-                          value: note,
-                          ...register(`note`, { valueAsNumber: true }),
-                        }}
                       />
                     </>
                   )}
