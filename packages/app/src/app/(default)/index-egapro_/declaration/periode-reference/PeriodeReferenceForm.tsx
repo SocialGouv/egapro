@@ -3,7 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { zodDateSchema, zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -23,7 +23,7 @@ const formSchema = z
     périodeSuffisante: z.literal("oui"),
     annéeIndicateurs: z.number(),
     finPériodeRéférence: zodDateSchema,
-    effectifTotal: zodRealPositiveIntegerSchema,
+    effectifTotal: zodPositiveIntegerSchema,
   })
   .superRefine(({ annéeIndicateurs, finPériodeRéférence }, ctx) => {
     if (getYear(new Date(finPériodeRéférence)) !== annéeIndicateurs) {

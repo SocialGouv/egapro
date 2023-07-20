@@ -5,7 +5,7 @@ import {
   computeIndicator1Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodRealPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodPositiveOrZeroNumberSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
@@ -31,7 +31,7 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodRealPositiveOrZeroNumberSchema,
+    résultat: zodPositiveOrZeroNumberSchema,
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat !== 0 && !populationFavorable) {
@@ -54,18 +54,18 @@ export const RemunerationResultatForm = () => {
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
       // console.debug("formData", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
-    // resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors: _errors },
     setValue,
     watch,
   } = methods;
@@ -74,10 +74,12 @@ export const RemunerationResultatForm = () => {
   const note = watch("note");
 
   useEffect(() => {
-    const note = computeIndicator1Note(résultat);
-    setValue("note", note);
+    if (résultat !== null) {
+      const note = computeIndicator1Note(résultat);
+      setValue("note", note);
+    }
 
-    if (résultat === 0) {
+    if (résultat === 0 || résultat === null) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
     } else {
@@ -109,7 +111,7 @@ export const RemunerationResultatForm = () => {
 
           <PopulationFavorable disabled={populationFavorableDisabled} />
 
-          {note !== undefined && (
+          {résultat !== null && (
             <>
               <IndicatorNote
                 note={note}

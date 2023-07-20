@@ -7,7 +7,7 @@ import {
   computeIndicator2And3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodRadioInputSchema, zodRealPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodPositiveOrZeroNumberSchema, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
@@ -32,8 +32,8 @@ const formSchema = zodFr
     estCalculable: zodRadioInputSchema,
     motifNonCalculabilité: z.string().optional(),
     populationFavorable: z.string(),
-    résultat: zodRealPositiveOrZeroNumberSchema,
-    résultatEquivalentSalarié: zodRealPositiveOrZeroNumberSchema,
+    résultat: zodPositiveOrZeroNumberSchema,
+    résultatEquivalentSalarié: zodPositiveOrZeroNumberSchema,
     note: z.number(),
     noteSurRésultatFinal: z.number(),
     noteSurNbEqSal: z.number(),
