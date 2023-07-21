@@ -2,7 +2,8 @@
 
 import Input from "@codegouvfr/react-dsfr/Input";
 import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodRealPercentageSchema } from "@common/utils/form";
+import { zodRealPositiveIntegerSchema } from "@common/utils/form";
+import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -23,7 +24,7 @@ const formSchema = z
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodRealPercentageSchema,
+    résultat: zodRealPositiveIntegerSchema,
   })
   .superRefine(({ note, populationFavorable }, ctx) => {
     if (note !== 40 && !populationFavorable) {
@@ -47,8 +48,8 @@ export const RemunerationCSPResultatForm = () => {
   const methods = useForm<FormType>({
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
-      // console.log("formData", data);
-      // console.log("validation result", await zodResolver(formSchema)(data, context, options));
+      // console.debug("formData", data);
+      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
@@ -59,7 +60,7 @@ export const RemunerationCSPResultatForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
     setValue,
     watch,
   } = methods;
@@ -90,16 +91,10 @@ export const RemunerationCSPResultatForm = () => {
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           {/* <ReactHookFormDebug /> */}
 
-          <Input
+          <PercentageInput
             label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient"
-            nativeInputProps={{
-              type: "number",
-              min: 0,
-              max: 100,
-              ...register(`résultat`, { valueAsNumber: true }),
-            }}
-            state={errors.résultat?.message ? "error" : "default"}
-            stateRelatedMessage={errors.résultat?.message}
+            name="résultat"
+            min={0}
           />
 
           <PopulationFavorable disabled={populationFavorableDisabled} />

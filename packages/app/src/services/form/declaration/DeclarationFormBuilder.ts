@@ -30,12 +30,6 @@ export type Catégorie = { nom: string; tranches: TranchesAge };
  * The shape of the state for declaration form.
  */
 export type DeclarationFormState = {
-  // External or meta data. //TODO: to be move in declaration-existante maybe ?
-  _metadata: {
-    date?: string | undefined;
-    // entreprise?: EntrepriseType;
-    status: "creation" | "edition";
-  };
   augmentations?: EmptyObject;
   "augmentations-et-promotions"?: EmptyObject;
   commencer?: {
@@ -58,6 +52,10 @@ export type DeclarationFormState = {
     nom: string;
     prénom: string;
     téléphone: string;
+  };
+  "declaration-existante": {
+    date?: string | undefined;
+    status: "consultation" | "creation" | "edition";
   };
   entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
   "hautes-remunerations"?: {
@@ -115,10 +113,6 @@ export type DeclarationFormState = {
 export const DeclarationFormBuilder = {
   buildDeclaration: (declaration: DeclarationDTO): DeclarationFormState => {
     return {
-      _metadata: {
-        date: declaration.déclaration.date,
-        status: "edition",
-      },
       commencer: {
         annéeIndicateurs: declaration.déclaration.année_indicateurs,
         entrepriseDéclarante: {
@@ -133,6 +127,32 @@ export const DeclarationFormBuilder = {
           siren: declaration.entreprise.siren,
         },
       },
+      "declaration-existante": {
+        date: declaration.déclaration.date,
+        status: "edition",
+      },
+      remunerations: {
+        estCalculable: declaration.indicateurs?.rémunérations?.non_calculable ? "non" : "oui",
+        motifNonCalculabilité: declaration.indicateurs?.rémunérations?.non_calculable,
+        cse: declaration.indicateurs?.rémunérations?.date_consultation_cse ? "oui" : undefined,
+        dateConsultationCSE: declaration.indicateurs?.rémunérations?.date_consultation_cse,
+        déclarationCalculCSP: true, // Always true for an existing declaration.
+        mode: declaration.indicateurs?.rémunérations?.mode as RemunerationsMode.Enum, // Always present for an existing declaration.
+      },
+      entreprise: {
+        tranche: declaration.entreprise.effectif!.tranche!, // Always present for an existing declaration.
+        type: declaration.entreprise.ues?.nom ? "ues" : "entreprise",
+      },
+      ues: {
+        name: declaration.entreprise.ues?.nom ?? "",
+        sirens: declaration.entreprise.ues?.entreprises?.map(entreprise => entreprise.siren) ?? [],
+      },
+      "periode-reference": {
+        périodeSuffisante: declaration.déclaration.période_suffisante ? "oui" : "oui",
+        effectifTotal: declaration.entreprise.effectif?.total ?? 0,
+        finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
+      },
+      // TODO: les autres indicateurs et autres informations
     };
   },
 
