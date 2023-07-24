@@ -1,5 +1,3 @@
-import { getDeclarationStatsInputSchema } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import { type NextServerPageProps, withSearchParamsValidation } from "@common/utils/next";
 import { Container, Grid, GridCol } from "@design-system";
 import { Suspense } from "react";
 
@@ -18,22 +16,19 @@ export const metadata = {
   },
 };
 
-const Stats = withSearchParamsValidation(getDeclarationStatsInputSchema)(async ({
-  searchParams,
-}: NextServerPageProps<"", typeof getDeclarationStatsInputSchema>) => {
-  const { ...searchParamsRest } = searchParams;
+const Stats = async () => {
   return (
     <Container py="8w">
       <Grid align="center">
         <GridCol>
           <h1>{title}</h1>
           <Suspense>
-            <StatsContent {...searchParamsRest} />
+            <StatsContent />
           </Suspense>
         </GridCol>
       </Grid>
     </Container>
   );
-});
+};
 
 export default Stats;
