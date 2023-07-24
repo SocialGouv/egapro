@@ -3,14 +3,15 @@ import { useFormContext } from "react-hook-form";
 
 type Props = {
   disabled?: boolean;
+  legend?: string;
 };
 
-export const PopulationFavorable = ({ disabled }: Props) => {
+export const PopulationFavorable = ({ legend, disabled }: Props) => {
   const { register } = useFormContext();
 
   return (
     <RadioButtons
-      legend="Population envers laquelle l'écart est favorable"
+      legend={legend || "Population envers laquelle l'écart est favorable"}
       disabled={disabled}
       options={[
         {

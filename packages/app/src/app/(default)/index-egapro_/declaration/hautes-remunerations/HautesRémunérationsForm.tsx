@@ -137,7 +137,7 @@ export const HautesRémunérationsForm = () => {
                 stateRelatedMessage={get(errors, "résultat")?.message || ""}
               />
 
-              <PopulationFavorable disabled={populationFavorableDisabled} />
+              <PopulationFavorable legend="Sexe des salariés sur-représentés" disabled={populationFavorableDisabled} />
 
               {note !== undefined && (
                 <>
