@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import {
   computeIndicator2And3Note,
   indicatorNoteMax,
@@ -74,7 +75,7 @@ export const AugmentationEtPromotionsForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid, errors },
+    formState: { isValid, errors: _errors },
     setValue,
     unregister,
     watch,
@@ -85,7 +86,12 @@ export const AugmentationEtPromotionsForm = () => {
   const résultatEquivalentSalarié = watch("résultatEquivalentSalarié");
   const note = watch("note");
   const notePourcentage = watch("notePourcentage");
+  const populationFavorable = watch("populationFavorable");
   const noteNombreSalaries = watch("noteNombreSalaries");
+
+  const estUnRattrapage =
+    formData["remunerations-resultat"]?.populationFavorable &&
+    formData["remunerations-resultat"]?.populationFavorable !== populationFavorable;
 
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
@@ -101,6 +107,9 @@ export const AugmentationEtPromotionsForm = () => {
     if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
       setValue("note", Math.max(notePourcentage, noteNombreSalaries));
     }
+
+    if (estUnRattrapage) setValue("note", indicatorNoteMax["augmentations-et-promotions"]);
+
     if (résultat === 0 && résultatEquivalentSalarié === 0) {
       setPopulationFavorableDisabled(true);
       setValue("populationFavorable", "");
@@ -120,6 +129,7 @@ export const AugmentationEtPromotionsForm = () => {
     }
   }, [
     estCalculable,
+    estUnRattrapage,
     noteNombreSalaries,
     notePourcentage,
     résultat,
@@ -196,6 +206,15 @@ export const AugmentationEtPromotionsForm = () => {
                         text="Nombre de points obtenus à l'indicateur"
                         className={fr.cx("fr-mt-2w")}
                       />
+
+                      {estUnRattrapage && (
+                        <Alert
+                          severity="info"
+                          title=""
+                          description="Le nombre de points obtenus à l'indicateur est maximal car il y a une politique de rattrapage vis à vis de l'indicateur rémunérations."
+                          className={fr.cx("fr-mt-2w")}
+                        />
+                      )}
                     </>
                   )}
                 </>
