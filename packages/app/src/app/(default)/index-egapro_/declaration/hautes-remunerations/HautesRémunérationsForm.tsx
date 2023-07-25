@@ -7,7 +7,6 @@ import {
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
-import { zodFr } from "@common/utils/zod";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -26,7 +25,7 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = zodFr
+const formSchema = z
   .object({
     populationFavorable: z.string().optional(),
     résultat: zodPositiveOrZeroIntegerSchema
@@ -70,7 +69,7 @@ export const HautesRémunérationsForm = () => {
     register,
     handleSubmit,
     setValue,
-    formState: { isValid, errors },
+    formState: { errors, isValid },
     watch,
   } = methods;
 
@@ -83,7 +82,7 @@ export const HautesRémunérationsForm = () => {
   const note = watch("note");
 
   useEffect(() => {
-    if (résultat) {
+    if (résultat !== undefined) {
       const note = computeIndicator5Note(résultat);
       setValue("note", note);
     }
@@ -94,8 +93,6 @@ export const HautesRémunérationsForm = () => {
       setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
-
-  console.log("errors:", errors);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {

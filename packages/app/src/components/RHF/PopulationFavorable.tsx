@@ -1,4 +1,5 @@
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { get } from "lodash";
 import { useFormContext } from "react-hook-form";
 
 type Props = {
@@ -7,7 +8,10 @@ type Props = {
 };
 
 export const PopulationFavorable = ({ legend, disabled }: Props) => {
-  const { register } = useFormContext();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
 
   return (
     <RadioButtons
@@ -24,12 +28,17 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
         {
           label: "Hommes",
           nativeInputProps: {
-            value: "homme",
+            value: "hommes",
             ...register("populationFavorable"),
           },
         },
       ]}
       orientation="horizontal"
+      // Error in RHF. The error is not detected in onChange validation, because the ref is not found.
+      state={get(errors, "populationFavorable") ? "error" : "default"}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      stateRelatedMessage={get(errors, "populationFavorable")?.message || ""}
     />
   );
 };
