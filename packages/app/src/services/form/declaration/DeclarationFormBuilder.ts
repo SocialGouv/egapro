@@ -111,7 +111,16 @@ export type DeclarationFormState = {
         périodeSuffisante: "non";
       };
   promotions?: EmptyObject;
-  publication?: EmptyObject;
+  publication?: { date: string; planRelance: OuiNon } & (
+    | {
+        choixSiteWeb: "non";
+        modalités: string;
+      }
+    | {
+        choixSiteWeb: "oui";
+        url: string;
+      }
+  );
   remunerations?: {
     cse?: OuiNon;
     dateConsultationCSE?: string;
@@ -207,6 +216,8 @@ export const DeclarationFormBuilder = {
         populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "egalite",
         résultat: declaration.indicateurs?.augmentations_et_promotions?.résultat ?? 0,
         résultatEquivalentSalarié: declaration.indicateurs?.augmentations_et_promotions?.résultat_nombre_salariés ?? 0,
+        noteNombreSalaries: declaration.indicateurs?.augmentations_et_promotions?.note_nombre_salariés ?? 0,
+        notePourcentage: declaration.indicateurs?.augmentations_et_promotions?.note_en_pourcentage ?? 0,
       },
       "conges-maternite": declaration.indicateurs?.congés_maternité?.non_calculable
         ? {
@@ -251,6 +262,19 @@ export const DeclarationFormBuilder = {
         points: declaration.déclaration.points || 0,
         pointsCalculables: declaration.déclaration.points_calculables || 0,
       },
+      publication: declaration.déclaration.publication?.url
+        ? {
+            choixSiteWeb: "oui",
+            date: declaration.déclaration.publication.date || "",
+            url: declaration.déclaration.publication.url,
+            planRelance: declaration.entreprise.plan_relance ? "oui" : "non",
+          }
+        : {
+            choixSiteWeb: "non",
+            date: declaration.déclaration.publication?.date || "",
+            modalités: declaration.déclaration.publication?.modalités || "",
+            planRelance: declaration.entreprise.plan_relance ? "oui" : "non",
+          },
     };
   },
 
