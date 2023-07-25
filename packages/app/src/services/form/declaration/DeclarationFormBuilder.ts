@@ -142,7 +142,7 @@ export type DeclarationFormState = {
     résultat: number;
   };
   "resultat-global"?: {
-    index: number;
+    index?: number;
     mesures: string;
     points: number;
     pointsCalculables: number;
@@ -247,7 +247,7 @@ export const DeclarationFormBuilder = {
       // TODO: les autres indicateurs et autres informations
       "resultat-global": {
         mesures: declaration.déclaration.mesures_correctives || "",
-        index: declaration.déclaration.index || 0,
+        index: declaration.déclaration?.index,
         points: declaration.déclaration.points || 0,
         pointsCalculables: declaration.déclaration.points_calculables || 0,
       },

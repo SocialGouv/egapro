@@ -3,7 +3,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { computeIndex } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodFr } from "@common/utils/zod";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
@@ -13,19 +15,30 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = zodFr.object({
-  mesures: z.string(),
-  index: z.number(),
-  points: z.number(),
-  pointsCalculables: z.number(),
-});
+const formSchema = zodFr
+  .object({
+    mesures: z.string().optional(),
+    index: z.number().optional(),
+    points: z.number(),
+    pointsCalculables: z.number(),
+  })
+  .superRefine(({ index, mesures }, ctx) => {
+    if (index !== undefined && index < 75 && !mesures) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Les mesures de correction prévues à l'article D. 1142-6 sont obligatoires quand l'index est inférieur à 75 points",
+        path: ["mesures"],
+      });
+    }
+  });
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -41,7 +54,14 @@ export const ResultatGlobalForm = () => {
   const router = useRouter();
   const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
+
+  // We don't compute the index if we only read an existing declaration.
+  const defaultValues =
+    formData["declaration-existante"].status === "consultation"
+      ? formData[stepName]
+      : { ...formData[stepName], ...computeIndex(formData) };
+
+  console.log("defaultValues:", defaultValues);
 
   const methods = useForm<FormType>({
     shouldUnregister: true,
@@ -51,8 +71,7 @@ export const ResultatGlobalForm = () => {
       console.debug("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
-    mode: "onChange",
-    defaultValues: formData[stepName],
+    defaultValues,
   });
 
   const index = formData[stepName]?.index;
@@ -62,9 +81,7 @@ export const ResultatGlobalForm = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { isValid, errors },
-    watch,
   } = methods;
 
   console.log("errors:", errors);
@@ -79,13 +96,28 @@ export const ResultatGlobalForm = () => {
     router.push(funnelConfig(newFormData)[stepName].next().url);
   };
 
+  useEffect(() => {
+    register("index");
+    register("points");
+    register("pointsCalculables");
+  }, []);
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
+        <ReactHookFormDebug />
 
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {index == undefined && (
+              <>
+                <p>Non calculable </p>
+                Total des points obtenus aux indicateurs calculables : {points}
+                <br />
+                Nombre de points maximum pouvant être obtenus aux indicateurs calculables : {pointsCalculables}
+              </>
+            )}
+
             {index !== undefined && (
               <>
                 <IndicatorNote
@@ -102,34 +134,36 @@ export const ResultatGlobalForm = () => {
                   }
                 />
                 {index < 75 && (
-                  <Select
-                    label="Mesures de correction prévues à l'article D. 1142-6"
-                    state={errors.mesures && "error"}
-                    stateRelatedMessage={errors.mesures?.message}
-                    nativeSelectProps={{
-                      ...register("mesures"),
-                    }}
-                  >
-                    <option value="" disabled>
-                      Sélectionnez une mesure
-                    </option>
-                    {Object.entries(mesuresLabel).map(([key, value]) => (
-                      <option value={value} key={key}>
-                        {value}
+                  <>
+                    <Select
+                      label="Mesures de correction prévues à l'article D. 1142-6"
+                      state={errors.mesures && "error"}
+                      stateRelatedMessage={errors.mesures?.message}
+                      nativeSelectProps={{
+                        ...register("mesures"),
+                      }}
+                    >
+                      <option value="" disabled>
+                        Sélectionnez une mesure
                       </option>
-                    ))}
-                  </Select>
+                      {Object.entries(mesuresLabel).map(([key, value]) => (
+                        <option value={value} key={key}>
+                          {value}
+                        </option>
+                      ))}
+                    </Select>
+                    <Alert
+                      severity="info"
+                      description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
+                      small={false}
+                      title=""
+                    />
+                  </>
                 )}
               </>
             )}
           </ClientOnly>
 
-          <Alert
-            severity="info"
-            description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
-            small={false}
-            title=""
-          />
           <BackNextButtons stepName={stepName} disabled={!isValid} />
         </div>
       </form>
