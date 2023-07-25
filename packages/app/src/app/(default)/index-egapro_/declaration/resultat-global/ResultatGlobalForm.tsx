@@ -2,9 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
-import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -14,9 +12,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
-import { get } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -24,8 +21,10 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.object({
-  mesure: z.string(),
-  note: z.number().int().min(0).max(100),
+  mesures: z.string(),
+  index: z.number(),
+  points: z.number(),
+  pointsCalculables: z.number(),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -34,7 +33,8 @@ const stepName: FunnelKey = "resultat-global";
 
 const mesuresLabel = {
   mmo: "Mesures mises en oeuvre",
-  me: "Mesures envisagées&mne=Mesures non envisagées",
+  me: "Mesures envisagées",
+  mne: "Mesures non envisagées",
 };
 
 export const ResultatGlobalForm = () => {
@@ -55,6 +55,10 @@ export const ResultatGlobalForm = () => {
     defaultValues: formData[stepName],
   });
 
+  const index = formData[stepName]?.index;
+  const points = formData[stepName]?.points;
+  const pointsCalculables = formData[stepName]?.pointsCalculables;
+
   const {
     register,
     handleSubmit,
@@ -62,13 +66,6 @@ export const ResultatGlobalForm = () => {
     formState: { isValid, errors },
     watch,
   } = methods;
-
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const note = watch("note");
 
   console.log("errors:", errors);
 
@@ -89,65 +86,50 @@ export const ResultatGlobalForm = () => {
 
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            <>
-              <IndicatorNote note={74} max={100} text="Index de" className={fr.cx("fr-mt-2w")} />
-              {note < 75 && (
-                <Select
-                  label="Mesures de correction prévues à l'article D. 1142-6"
-                  state={errors.mesure && "error"}
-                  stateRelatedMessage={errors.mesure?.message}
-                  nativeSelectProps={{
-                    ...register("mesure"),
-                  }}
-                >
-                  <option value="" disabled>
-                    Sélectionnez une mesure
-                  </option>
-                  {Object.entries(mesuresLabel).map(([key, value]) => (
-                    <option value={value} key={key}>
-                      {value}
+            {index !== undefined && (
+              <>
+                <IndicatorNote
+                  note={index}
+                  max={100}
+                  text="Index de"
+                  className={fr.cx("fr-mb-2w")}
+                  legend={
+                    <>
+                      Total des points obtenus aux indicateurs calculables : {points}
+                      <br />
+                      Nombre de points maximum pouvant être obtenus aux indicateurs calculables : {pointsCalculables}
+                    </>
+                  }
+                />
+                {index < 75 && (
+                  <Select
+                    label="Mesures de correction prévues à l'article D. 1142-6"
+                    state={errors.mesures && "error"}
+                    stateRelatedMessage={errors.mesures?.message}
+                    nativeSelectProps={{
+                      ...register("mesures"),
+                    }}
+                  >
+                    <option value="" disabled>
+                      Sélectionnez une mesure
                     </option>
-                  ))}
-                </Select>
-              )}
-              <Input
-                label="Mesures de correction prévues à l'article D. 1142-6"
-                nativeInputProps={{
-                  type: "number",
-                  min: 0,
-                  max: 5,
-                  step: 1,
-                  ...register("résultat", {
-                    valueAsNumber: true,
-                    // setValueAs: (value: string) => {
-                    //   // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead.
-                    //   const num = Number(value);
-                    //   return isNaN(num) || value === "" ? null : num;
-                    // },
-                  }),
-                }}
-                state={get(errors, "résultat") ? "error" : "default"}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                stateRelatedMessage={get(errors, "résultat")?.message || ""}
-              />
-              <Alert
-                severity="info"
-                description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
-              />{" "}
-              {note !== undefined && (
-                <>
-                  <IndicatorNote
-                    note={note}
-                    max={indicatorNoteMax[stepName]}
-                    text="Nombre de points obtenus à l'indicateur"
-                    className={fr.cx("fr-mt-2w")}
-                  />
-                </>
-              )}
-            </>
+                    {Object.entries(mesuresLabel).map(([key, value]) => (
+                      <option value={value} key={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </>
+            )}
           </ClientOnly>
 
+          <Alert
+            severity="info"
+            description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
+            small={false}
+            title=""
+          />
           <BackNextButtons stepName={stepName} disabled={!isValid} />
         </div>
       </form>

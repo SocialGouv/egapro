@@ -6,7 +6,7 @@ import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
 import { ResultatGlobalForm } from "./ResultatGlobalForm";
 
-const stepName: FunnelKey = "hautes-remunerations";
+const stepName: FunnelKey = "resultat-global";
 
 const ResultatGlobalPage = () => {
   return (

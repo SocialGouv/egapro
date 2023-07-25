@@ -97,6 +97,7 @@ export type DeclarationFormState = {
   };
   entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
   "hautes-remunerations"?: {
+    note: number;
     populationFavorable: PopulationFavorable;
     résultat: number;
   };
@@ -140,7 +141,12 @@ export type DeclarationFormState = {
     populationFavorable: PopulationFavorable;
     résultat: number;
   };
-  "resultat-global"?: EmptyObject;
+  "resultat-global"?: {
+    index: number;
+    mesures: string;
+    points: number;
+    pointsCalculables: number;
+  };
   ues?: {
     entreprises: Array<{
       raisonSociale: string;
@@ -215,6 +221,7 @@ export const DeclarationFormBuilder = {
       "hautes-remunerations": {
         populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "egalite",
         résultat: declaration.indicateurs?.hautes_rémunérations?.résultat ?? 0,
+        note: declaration.indicateurs?.hautes_rémunérations?.note ?? 0,
       },
       entreprise: {
         tranche: declaration.entreprise.effectif!.tranche!, // Always present for an existing declaration.
@@ -238,6 +245,12 @@ export const DeclarationFormBuilder = {
             périodeSuffisante: "non",
           },
       // TODO: les autres indicateurs et autres informations
+      "resultat-global": {
+        mesures: declaration.déclaration.mesures_correctives || "",
+        index: declaration.déclaration.index || 0,
+        points: declaration.déclaration.points || 0,
+        pointsCalculables: declaration.déclaration.points_calculables || 0,
+      },
     };
   },
 
