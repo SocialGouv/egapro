@@ -49,7 +49,7 @@ export type MotifNCKey = Exclude<IndicatorKey, "hautes-remunerations">;
 export const motifsNC: Record<MotifNCKey, readonly LabelMotifNCKey[]> = {
   augmentations: ["egvi40pcet", "absaugi"],
   promotions: ["egvi40pcet", "absprom"],
-  "augmentations-et-promotions": ["absaugi", "egvi40pcet", "etsno5f5h"],
+  "augmentations-et-promotions": ["absaugi", "etsno5f5h"],
   remunerations: ["egvi40pcet"],
   "conges-maternite": ["absrcm", "absaugpdtcm"],
 } as const;
