@@ -77,8 +77,6 @@ export const CongesMaterniteForm = () => {
     }
   }, [résultat, setValue]);
 
-  console.log("errors:", errors);
-
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
       draft[stepName] = data as DeclarationFormState[typeof stepName];

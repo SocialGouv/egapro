@@ -29,7 +29,7 @@ import { BackNextButtons } from "../BackNextButtons";
 // Import your language translation files
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const stepName: FunnelKey = "augmentations";
+const stepName: FunnelKey = "promotions";
 
 const zodCategories = z.tuple([
   z.object({ nom: z.literal("ouv"), écarts: zodNumberOrNaNOrNull }),
@@ -74,7 +74,7 @@ const formSchema = zodFr
 
 type FormType = z.infer<typeof formSchema>;
 
-export const AugmentationsForm = () => {
+export const PromotionsForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
@@ -173,7 +173,7 @@ export const AugmentationsForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div ref={animationParent}>
           <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ?"
+            legend="L'indicateur sur l'écart de taux de promotions est-il calculable ?"
             name="estCalculable"
           />
 
@@ -191,7 +191,7 @@ export const AugmentationsForm = () => {
                 </p>
 
                 <p>
-                  Les écarts de taux d’augmentations sont à renseigner uniquement pour les CSP pris en compte pour le
+                  Les écarts de taux de promotions sont à renseigner uniquement pour les CSP pris en compte pour le
                   calcul (zéro signifiant qu'il n'y a pas d'écart entre les femmes et les hommes). Un écart positif est
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>

@@ -5,7 +5,6 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { computeIndex } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodFr } from "@common/utils/zod";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
@@ -61,8 +60,6 @@ export const ResultatGlobalForm = () => {
       ? formData[stepName]
       : { ...formData[stepName], ...computeIndex(formData) };
 
-  console.log("defaultValues:", defaultValues);
-
   const methods = useForm<FormType>({
     shouldUnregister: true,
     resolver: async (data, context, options) => {
@@ -84,8 +81,6 @@ export const ResultatGlobalForm = () => {
     formState: { isValid, errors },
   } = methods;
 
-  console.log("errors:", errors);
-
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
       draft[stepName] = data as DeclarationFormState[typeof stepName];
@@ -105,7 +100,7 @@ export const ResultatGlobalForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ReactHookFormDebug />
+        {/* <ReactHookFormDebug /> */}
 
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>

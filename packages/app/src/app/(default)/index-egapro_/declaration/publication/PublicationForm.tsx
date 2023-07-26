@@ -4,7 +4,6 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -56,8 +55,6 @@ export const PublicationForm = () => {
 
   const choixSiteWeb = watch("choixSiteWeb");
 
-  console.log("errors:", errors);
-
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
       draft[stepName] = data as DeclarationFormState[typeof stepName];
@@ -71,7 +68,7 @@ export const PublicationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ReactHookFormDebug />
+        {/* <ReactHookFormDebug /> */}
 
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>

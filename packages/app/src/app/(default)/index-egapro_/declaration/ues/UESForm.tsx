@@ -177,8 +177,6 @@ export const UESForm = () => {
                               setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
                               clearErrors(`entreprises.${index}.siren`);
                             } catch (error: unknown) {
-                              // console.log("erreur", error);
-
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
                                 message: "Le Siren est invalide",

@@ -126,7 +126,24 @@ export type DeclarationFormState = {
     | {
         périodeSuffisante: "non";
       };
-  promotions?: EmptyObject;
+  promotions?:
+    | {
+        catégories: [
+          { nom: "ouv"; écarts: number | null },
+          { nom: "emp"; écarts: number | null },
+          { nom: "tam"; écarts: number | null },
+          { nom: "ic"; écarts: number | null },
+        ];
+        estCalculable: "oui";
+        note: number;
+        populationFavorable?: PopulationFavorable;
+        résultat: number;
+      }
+    | {
+        estCalculable: "non";
+        motifNonCalculabilité: (typeof motifsNC)["promotions"][number];
+      };
+
   publication?: { date: string; planRelance: OuiNon } & (
     | {
         choixSiteWeb: "non";
@@ -200,6 +217,23 @@ export const DeclarationFormBuilder = {
               { nom: "emp", écarts: declaration.indicateurs?.augmentations?.catégories?.[1] ?? null },
               { nom: "tam", écarts: declaration.indicateurs?.augmentations?.catégories?.[2] ?? null },
               { nom: "ic", écarts: declaration.indicateurs?.augmentations?.catégories?.[3] ?? null },
+            ],
+          },
+      promotions: declaration.indicateurs?.promotions?.non_calculable
+        ? {
+            estCalculable: "non",
+            motifNonCalculabilité: declaration.indicateurs?.promotions?.non_calculable,
+          }
+        : {
+            estCalculable: "oui",
+            note: declaration.indicateurs?.promotions?.note ?? 0,
+            populationFavorable: declaration.indicateurs?.promotions?.population_favorable ?? "egalite",
+            résultat: declaration.indicateurs?.promotions?.résultat ?? 0,
+            catégories: [
+              { nom: "ouv", écarts: declaration.indicateurs?.promotions?.catégories?.[0] ?? null },
+              { nom: "emp", écarts: declaration.indicateurs?.promotions?.catégories?.[1] ?? null },
+              { nom: "tam", écarts: declaration.indicateurs?.promotions?.catégories?.[2] ?? null },
+              { nom: "ic", écarts: declaration.indicateurs?.promotions?.catégories?.[3] ?? null },
             ],
           },
       commencer: {
