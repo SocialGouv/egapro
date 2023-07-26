@@ -1,11 +1,15 @@
 .tile:not(.tile-no-border) {
     box-shadow: 0 0 0 1px var(--border-default-grey);
     padding: 1rem 2rem;
+    .text {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-default-grey);
+    }
 }
 
 .tile {
     text-align: center;
-   
 }
 
 .note {
@@ -16,7 +20,7 @@
 
 .text {
     color: var(--text-title-grey);
-    font-size: 0.875rem !important;
+    font-size: .875rem !important;
     line-height: 1.5rem !important;
     margin-top: .5rem;
     > * {
@@ -30,5 +34,5 @@
 .max {
     font-size: 1.125rem;
     font-weight: 200;
-    transform: translateY(0.313rem);
+    transform: translateY(.313rem);
 }
