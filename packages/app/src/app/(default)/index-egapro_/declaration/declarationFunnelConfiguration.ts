@@ -192,7 +192,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
           ? funnelStaticConfig[`augmentations-et-promotions`]
           : funnelStaticConfig[`augmentations`],
       previous: () =>
-        data.remunerations?.mode === RemunerationsMode.Enum.CSP
+        data.remunerations?.estCalculable === "non"
+          ? funnelStaticConfig[`remunerations`]
+          : data.remunerations?.mode === RemunerationsMode.Enum.CSP
           ? funnelStaticConfig[`remunerations-csp`]
           : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
           ? funnelStaticConfig[`remunerations-coefficient-branche`]

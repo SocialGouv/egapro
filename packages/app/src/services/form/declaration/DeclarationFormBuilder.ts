@@ -352,5 +352,55 @@ export const DeclarationFormBuilder = {
     };
   },
 
-  //   toDeclaration: (formState: DeclarationFormState): DeclarationDTO => {},
+  // toDeclarationDTO: (formState: DeclarationFormState): DeclarationDTO => {
+  //   return {
+  //     source: "formulaire",
+  //     // déclaration: buildDeclaration(formState),
+  //     déclarant: buildDeclarant(formState),
+  //     entreprise: buildEntrepriseDTO(formState),
+  //     // ...(formState.informations.periodeSuffisante && { indicateurs: buildIndicateurs(formState) }),
+  //   };
+  // },
 };
+
+function buildDeclarant(formState: DeclarationFormState): DeclarationDTO["déclarant"] {
+  if (formState.declarant === undefined) throw new Error("Missing declarant");
+
+  return {
+    email: formState.declarant.email,
+    nom: formState.declarant.nom,
+    prénom: formState.declarant.prénom,
+    téléphone: formState.declarant.téléphone,
+  };
+}
+function buildEntrepriseDTO(formState: DeclarationFormState): DeclarationDTO["entreprise"] {
+  if (formState.commencer?.entrepriseDéclarante === undefined) throw new Error("Missing entreprise");
+
+  return {
+    code_naf: formState.commencer?.entrepriseDéclarante.codeNaf,
+    effectif: {
+      total:
+        (formState["periode-reference"]?.périodeSuffisante === "oui" && formState["periode-reference"].effectifTotal) ||
+        undefined,
+      tranche: formState.entreprise?.tranche,
+    },
+    raison_sociale: formState.commencer?.entrepriseDéclarante.raisonSociale,
+    siren: formState.commencer?.entrepriseDéclarante.siren,
+    adresse: formState.commencer?.entrepriseDéclarante.adresse,
+    code_pays: formState.commencer?.entrepriseDéclarante.codePays,
+    code_postal: formState.commencer?.entrepriseDéclarante.codePostal,
+    commune: formState.commencer?.entrepriseDéclarante.commune,
+    département: formState.commencer?.entrepriseDéclarante.département,
+    plan_relance: formState.publication?.planRelance === "oui",
+    région: formState.commencer?.entrepriseDéclarante.région,
+    ...(formState.ues?.nom && {
+      ues: {
+        nom: formState.ues.nom,
+        entreprises: formState.ues.entreprises.map(entreprise => ({
+          raison_sociale: entreprise.raisonSociale,
+          siren: entreprise.siren,
+        })),
+      },
+    }),
+  };
+}
