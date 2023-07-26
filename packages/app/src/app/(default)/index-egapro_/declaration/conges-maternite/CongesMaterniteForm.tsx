@@ -5,7 +5,7 @@ import {
   computeIndicator4Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -29,7 +29,7 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 const formSchema = zodFr.object({
   estCalculable: zodRadioInputSchema,
   motifNonCalculabilité: z.string().optional(),
-  résultat: zodPercentageSchema.optional(),
+  résultat: zodNumberOrNaNOrNull.optional(),
   note: z.number().optional(),
 });
 

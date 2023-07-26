@@ -58,7 +58,23 @@ export const motifsNC: Record<MotifNCKey, readonly LabelMotifNCKey[]> = {
  * The shape of the state for declaration form.
  */
 export type DeclarationFormState = {
-  augmentations?: EmptyObject;
+  augmentations?:
+    | {
+        catégories: [
+          { nom: "ouv"; écarts: number | null },
+          { nom: "emp"; écarts: number | null },
+          { nom: "tam"; écarts: number | null },
+          { nom: "ic"; écarts: number | null },
+        ];
+        estCalculable: "oui";
+        note: number;
+        populationFavorable?: PopulationFavorable;
+        résultat: number;
+      }
+    | {
+        estCalculable: "non";
+        motifNonCalculabilité: (typeof motifsNC)["augmentations"][number];
+      };
   "augmentations-et-promotions"?: {
     estCalculable: OuiNon;
     motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
@@ -169,6 +185,23 @@ export type DeclarationFormState = {
 export const DeclarationFormBuilder = {
   buildDeclaration: (declaration: DeclarationDTO): DeclarationFormState => {
     return {
+      augmentations: declaration.indicateurs?.augmentations?.non_calculable
+        ? {
+            estCalculable: "non",
+            motifNonCalculabilité: declaration.indicateurs?.augmentations?.non_calculable,
+          }
+        : {
+            estCalculable: "oui",
+            note: declaration.indicateurs?.augmentations?.note ?? 0,
+            populationFavorable: declaration.indicateurs?.augmentations?.population_favorable ?? "egalite",
+            résultat: declaration.indicateurs?.augmentations?.résultat ?? 0,
+            catégories: [
+              { nom: "ouv", écarts: declaration.indicateurs?.augmentations?.catégories?.[0] ?? null },
+              { nom: "emp", écarts: declaration.indicateurs?.augmentations?.catégories?.[1] ?? null },
+              { nom: "tam", écarts: declaration.indicateurs?.augmentations?.catégories?.[2] ?? null },
+              { nom: "ic", écarts: declaration.indicateurs?.augmentations?.catégories?.[3] ?? null },
+            ],
+          },
       commencer: {
         annéeIndicateurs: declaration.déclaration.année_indicateurs,
         entrepriseDéclarante: buildEntreprise(declaration.entreprise),

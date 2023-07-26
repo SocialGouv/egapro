@@ -4,7 +4,7 @@ import {
   computeIndicator1Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
@@ -30,7 +30,7 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodPositiveOrZeroNumberSchema,
+    résultat: zodNumberOrNaNOrNull,
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat !== 0 && !populationFavorable) {

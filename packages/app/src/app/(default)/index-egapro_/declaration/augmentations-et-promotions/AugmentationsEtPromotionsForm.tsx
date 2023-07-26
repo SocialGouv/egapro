@@ -6,7 +6,7 @@ import {
   computeIndicator2And3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodPositiveOrZeroNumberSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -33,8 +33,8 @@ const formSchema = zodFr
     estCalculable: zodRadioInputSchema,
     motifNonCalculabilité: z.string().optional(),
     populationFavorable: z.string().optional(),
-    résultat: zodPositiveOrZeroNumberSchema.optional(),
-    résultatEquivalentSalarié: zodPositiveOrZeroNumberSchema.optional(),
+    résultat: zodNumberOrNaNOrNull.optional(),
+    résultatEquivalentSalarié: zodNumberOrNaNOrNull.optional(),
     note: z.number().optional(),
     notePourcentage: z.number().optional(),
     noteNombreSalaries: z.number().optional(),
@@ -91,16 +91,17 @@ export const AugmentationEtPromotionsForm = () => {
 
   const estUnRattrapage =
     formData["remunerations-resultat"]?.populationFavorable &&
+    populationFavorable &&
     formData["remunerations-resultat"]?.populationFavorable !== populationFavorable;
 
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
     let notePourcentage, noteNombreSalaries;
-    if (résultat !== undefined) {
+    if (résultat !== undefined && résultat !== null) {
       notePourcentage = computeIndicator2And3Note(résultat);
       setValue("notePourcentage", notePourcentage);
     }
-    if (résultatEquivalentSalarié !== undefined) {
+    if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== null) {
       noteNombreSalaries = computeIndicator2And3Note(résultatEquivalentSalarié);
       setValue("noteNombreSalaries", noteNombreSalaries);
     }
@@ -108,7 +109,8 @@ export const AugmentationEtPromotionsForm = () => {
       setValue("note", Math.max(notePourcentage, noteNombreSalaries));
     }
 
-    if (estUnRattrapage) setValue("note", indicatorNoteMax["augmentations-et-promotions"]);
+    // If it is a compensation, we set the note to the max value.
+    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
 
     if (résultat === 0 && résultatEquivalentSalarié === 0) {
       setPopulationFavorableDisabled(true);
@@ -162,64 +164,62 @@ export const AugmentationEtPromotionsForm = () => {
           />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            <>
-              {estCalculable === "non" && (
-                <>
-                  <MotifNC stepName={stepName} />
-                </>
-              )}
+            {estCalculable === "non" && (
+              <>
+                <MotifNC stepName={stepName} />
+              </>
+            )}
 
-              {estCalculable === "oui" && (
-                <>
-                  <PercentageInput label="Résultat final en %" name="résultat" min={0} />
+            {estCalculable === "oui" && (
+              <>
+                <PercentageInput label="Résultat final en %" name="résultat" min={0} />
 
-                  <PercentageInput
-                    label="Résultat final en nombre équivalent de salariés"
-                    name="résultatEquivalentSalarié"
-                    min={0}
+                <PercentageInput
+                  label="Résultat final en nombre équivalent de salariés"
+                  name="résultatEquivalentSalarié"
+                  min={0}
+                />
+
+                <PopulationFavorable disabled={populationFavorableDisabled} />
+
+                {notePourcentage !== undefined && (
+                  <IndicatorNote
+                    note={notePourcentage}
+                    max={indicatorNoteMax[stepName]}
+                    text="Nombre de points obtenus sur le résultat final en %"
                   />
+                )}
 
-                  <PopulationFavorable disabled={populationFavorableDisabled} />
+                {noteNombreSalaries !== undefined && (
+                  <IndicatorNote
+                    note={noteNombreSalaries}
+                    max={indicatorNoteMax[stepName]}
+                    text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
+                    className={fr.cx("fr-mt-2w")}
+                  />
+                )}
 
-                  {notePourcentage !== undefined && (
+                {note !== undefined && (
+                  <>
                     <IndicatorNote
-                      note={notePourcentage}
+                      note={note}
                       max={indicatorNoteMax[stepName]}
-                      text="Nombre de points obtenus sur le résultat final en %"
-                    />
-                  )}
-
-                  {noteNombreSalaries !== undefined && (
-                    <IndicatorNote
-                      note={noteNombreSalaries}
-                      max={indicatorNoteMax[stepName]}
-                      text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
+                      text="Nombre de points obtenus à l'indicateur"
                       className={fr.cx("fr-mt-2w")}
                     />
-                  )}
 
-                  {note !== undefined && (
-                    <>
-                      <IndicatorNote
-                        note={note}
-                        max={indicatorNoteMax[stepName]}
-                        text="Nombre de points obtenus à l'indicateur"
+                    {estUnRattrapage && (
+                      <Alert
+                        severity="info"
+                        title=""
+                        description="Le nombre de points obtenus à l'indicateur est maximal car il y a une politique de rattrapage vis à vis de l'indicateur rémunérations."
                         className={fr.cx("fr-mt-2w")}
                       />
-
-                      {estUnRattrapage && (
-                        <Alert
-                          severity="info"
-                          title=""
-                          description="Le nombre de points obtenus à l'indicateur est maximal car il y a une politique de rattrapage vis à vis de l'indicateur rémunérations."
-                          className={fr.cx("fr-mt-2w")}
-                        />
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />

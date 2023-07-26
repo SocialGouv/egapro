@@ -28,8 +28,9 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
           max,
           step: 0.1,
           ...register(name, {
-            setValueAs: (value: string) => {
-              // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead.
+            setValueAs: (value: string | null) => {
+              // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead for consistency.
+              if (value === null) return null;
               const num = Number(value);
               return isNaN(num) || value === "" ? null : num;
             },
@@ -38,7 +39,9 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
           onBlur: e => {
             // Round number to 1 decimal.
             const num = Number(e.target.value);
-            if (!isNaN(num) && e.target.value !== "") setValue(name, Math.round(num * 10) / 10);
+            if (!isNaN(num) && e.target.value !== "") {
+              setValue(name, Math.round(num * 10) / 10);
+            }
           },
         }}
         state={get(errors, name) ? "error" : "default"}
