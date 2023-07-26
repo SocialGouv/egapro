@@ -142,7 +142,7 @@ export const ResultatGlobalForm = () => {
                         Sélectionnez une mesure
                       </option>
                       {Object.entries(mesuresLabel).map(([key, value]) => (
-                        <option value={value} key={key}>
+                        <option value={key} key={key}>
                           {value}
                         </option>
                       ))}

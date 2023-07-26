@@ -68,23 +68,27 @@ export type DeclarationFormState = {
         ];
         estCalculable: "oui";
         note: number;
-        populationFavorable?: PopulationFavorable;
+        populationFavorable: PopulationFavorable;
         résultat: number;
       }
     | {
         estCalculable: "non";
         motifNonCalculabilité: (typeof motifsNC)["augmentations"][number];
       };
-  "augmentations-et-promotions"?: {
-    estCalculable: OuiNon;
-    motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
-    note: number;
-    noteNombreSalaries: number;
-    notePourcentage: number;
-    populationFavorable: PopulationFavorable;
-    résultat: number;
-    résultatEquivalentSalarié: number;
-  };
+  "augmentations-et-promotions"?:
+    | {
+        estCalculable: "non";
+        motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
+      }
+    | {
+        estCalculable: "oui";
+        note: number;
+        noteNombreSalaries: number;
+        notePourcentage: number;
+        populationFavorable: PopulationFavorable;
+        résultat: number;
+        résultatEquivalentSalarié: number;
+      };
   commencer?: {
     annéeIndicateurs: number;
     entrepriseDéclarante?: Entreprise;
@@ -136,7 +140,7 @@ export type DeclarationFormState = {
         ];
         estCalculable: "oui";
         note: number;
-        populationFavorable?: PopulationFavorable;
+        populationFavorable: PopulationFavorable;
         résultat: number;
       }
     | {
@@ -154,15 +158,18 @@ export type DeclarationFormState = {
         url: string;
       }
   );
-  remunerations?: {
-    cse?: OuiNon;
-    dateConsultationCSE?: string;
-    déclarationCalculCSP?: boolean;
-    estCalculable: OuiNon;
-    // mode?: "csp" | "niveau_autre" | "niveau_branche";
-    mode?: RemunerationsMode.Enum;
-    motifNonCalculabilité?: (typeof motifsNC)["remunerations"][number];
-  };
+  remunerations?:
+    | {
+        cse?: OuiNon;
+        dateConsultationCSE?: string;
+        estCalculable: "oui";
+        mode: RemunerationsMode.Enum;
+      }
+    | {
+        déclarationCalculCSP: boolean;
+        estCalculable: "non";
+        motifNonCalculabilité?: (typeof motifsNC)["remunerations"][number];
+      };
   "remunerations-coefficient-autre"?: {
     catégories: Catégorie[];
   };
