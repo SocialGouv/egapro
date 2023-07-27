@@ -3,7 +3,7 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
-import { UnexpectedRepositoryError } from "@common/shared-domain";
+import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
 import { type Any } from "@common/utils/types";
 
 import { type IDeclarationRepo } from "../IDeclarationRepo";
@@ -73,6 +73,11 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async update(item: Declaration): Promise<void> {
     await this.save(item, true);
+  }
+
+  public async count(): Promise<number> {
+    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table}`;
+    return Number(count);
   }
 
   private get requestLimit() {

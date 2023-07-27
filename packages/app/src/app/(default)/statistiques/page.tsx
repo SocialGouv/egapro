@@ -1,5 +1,4 @@
-import { Container, Grid, GridCol } from "@design-system";
-import { Suspense } from "react";
+import { Container } from "@design-system";
 
 import { StatsContent } from "./content";
 
@@ -21,14 +20,8 @@ export const metadata = {
 const Stats = async () => {
   return (
     <Container py="8w">
-      <Grid align="center">
-        <GridCol>
-          <h1>{title}</h1>
-          <Suspense>
-            <StatsContent />
-          </Suspense>
-        </GridCol>
-      </Grid>
+      <h1>{title}</h1>
+      <StatsContent />
     </Container>
   );
 };

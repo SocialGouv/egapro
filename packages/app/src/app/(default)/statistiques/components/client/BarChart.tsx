@@ -2,11 +2,12 @@
 
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Bar } from "react-chartjs-2";
 
 import { ChartTheme, themeDark, themeLight } from "./ChartTheme";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Legend, ChartDataLabels);
 
 export type BarChartProps = {
   data: Array<{ legend: number | string; value: number }>;
@@ -14,10 +15,12 @@ export type BarChartProps = {
   theme?: "monochrome" | "multicolor";
   tooltipLegend: string;
   xAxisSuggestedMax?: number;
+  yAxisMin?: number;
 };
 
 export const BarChart = ({
   xAxisSuggestedMax = 100,
+  yAxisMin = 0,
   tooltipLegend,
   data,
   showValue = false,
@@ -30,7 +33,7 @@ export const BarChart = ({
       options={{
         scales: {
           x: {
-            suggestedMin: 0,
+            min: yAxisMin,
             suggestedMax: xAxisSuggestedMax,
           },
         },
@@ -44,7 +47,9 @@ export const BarChart = ({
             display: false,
           },
           datalabels: {
-            display: showValue,
+            display: showValue ? "auto" : false,
+            clamp: true,
+            clip: true,
           },
         },
       }}
