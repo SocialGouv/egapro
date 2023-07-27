@@ -25,21 +25,19 @@ export const zodDateSchema = z.string().refine(val => isValid(parseISO(val)), {
   message: "La date n'est pas valide.",
 });
 
-/**
- * Représentation d'un nombre en string.
- */
-export const zodPositiveIntegerSchema = z.string().refine(val => Number.isInteger(Number(val)) && Number(val) > 0, {
-  message: "Un nombre positif est attendu.",
-});
-
-export const zodRealPositiveIntegerSchema = z
+export const zodPositiveIntegerSchema = z
   .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
   .int({ message: "La valeur doit être un entier" })
   .positive({ message: "La valeur doit être positive" });
 
-export const zodRealIntegerSchema = z
+export const zodPositiveOrZeroIntegerSchema = z
   .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
-  .int({ message: "La valeur doit être un entier" });
+  .int({ message: "La valeur doit être un entier" })
+  .nonnegative({ message: "La valeur doit être positive" });
+
+export const zodPositiveOrZeroNumberSchema = z
+  .number({ invalid_type_error: "Le champ est requis", required_error: "Le champ est requis" })
+  .nonnegative({ message: "La valeur doit être positive ou égale à 0" });
 
 export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   if (val !== "oui" && val !== "non") {
@@ -52,16 +50,19 @@ export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   return val;
 });
 
-const INVALID_PERCENTAGE = "Le champ est requis";
+export const zodPercentageSchema = zodPositiveOrZeroNumberSchema.refine(percentage => percentage <= 100, {
+  message: "La valeur maximale est 100",
+});
 
-export const zodRealPercentageSchema = z
-  .number()
-  .refine(percentage => percentage >= 0, {
-    message: "Le pourcentage doit être positif",
-  })
-  .refine(percentage => percentage <= 100, { message: "Le pourcentage maximum est 100" });
+// Useful for input which could be empty or a number. NaN is of type number but is not serializable, and is replaced by null with JSON.stringify. So we need to allow null.
+export const zodNumberOrNaNOrNull = z
+  .null()
+  .or(z.nan().or(z.number({ invalid_type_error: "La valeur doit être un nombre" })));
 
-export const zodPercentageSchema = z
+export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
+
+/** @deprecated */
+export const zodPercentageAsStringSchema = z
   .string()
   .transform((val, ctx) => {
     const percentage = parseFloat(val);
@@ -69,7 +70,7 @@ export const zodPercentageSchema = z
     if (isNaN(percentage)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: INVALID_PERCENTAGE,
+        message: "Le champ est requis",
       });
       return z.NEVER;
     }

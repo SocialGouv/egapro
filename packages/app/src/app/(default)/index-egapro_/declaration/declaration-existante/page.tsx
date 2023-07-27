@@ -1,15 +1,17 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { DownloadCard, Grid, GridCol } from "@design-system";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { BackNextButtonsGroup, DownloadCard, Grid, GridCol } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
+import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
 
-import { type FunnelKey } from "../declarationFunnelConfiguration";
-import { EditButton } from "./EditButton";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import { RecapDeclaration } from "./RecapDeclaration";
 
 const stepName: FunnelKey = "declaration-existante";
@@ -21,7 +23,8 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
 
 const Page = () => {
   const session = useSession();
-  const { formData } = useDeclarationFormManager();
+  const router = useRouter();
+  const { formData, setStatus } = useDeclarationFormManager();
 
   const siren = formData.commencer?.entrepriseDéclarante?.siren;
   const year = formData.commencer?.annéeIndicateurs;
@@ -34,7 +37,7 @@ const Page = () => {
     ? undefined
     : isAfter(new Date(), add(new Date(declaration.data.déclaration.date), { years: 1 }));
 
-  if (!declaration?.data || olderThanOneYear === undefined) return <p>Chargement...</p>;
+  if (!declaration?.data || olderThanOneYear === undefined) return <SkeletonForm fields={8} />;
 
   if (error) <p>{"Une erreur a été rencontrée par l'API."}</p>;
 
@@ -56,9 +59,21 @@ const Page = () => {
 
       {canEdit && year && (
         <>
-          <EditButton declaration={declaration.data} stepName={stepName} />
+          <BackNextButtonsGroup
+            className={fr.cx("fr-my-8w")}
+            backProps={{
+              onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
+            }}
+            nextLabel="Modifier"
+            nextProps={{
+              onClick: () => {
+                setStatus("edition");
+                router.push(funnelConfig(formData)[stepName].next().url);
+              },
+            }}
+          />
 
-          <Grid align="center" mt="6w">
+          <Grid align="center" mb="6w">
             <GridCol md={10} lg={8}>
               <DownloadCard
                 title="Télécharger le récapitulatif"

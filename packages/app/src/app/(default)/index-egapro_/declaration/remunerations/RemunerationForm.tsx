@@ -3,23 +3,26 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import Select from "@codegouvfr/react-dsfr/Select";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
+import { MotifNC } from "@components/RHF/MotifNC";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z
+const formSchema = zodFr
   .object({
     estCalculable: zodRadioInputSchema,
     mode: z.string().optional(), // No check is necessary as the value is from select options.
@@ -72,8 +75,8 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
     shouldUnregister: true, // Don't store the fields that are not displayed.
@@ -85,6 +88,7 @@ export const RemunerationForm = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = methods;
 
@@ -93,9 +97,15 @@ export const RemunerationForm = () => {
   const cse = watch("cse");
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
+  useEffect(() => {
+    if (mode && ["niveau_branche", "niveau_autre"].includes(mode) && formData.ues?.nom) {
+      // CSE question is implicitly yes for UES in mode "niveau_branche" or "niveau_autre".
+      setValue("cse", "oui");
+    }
+  }, [formData, mode, setValue]);
+
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      // draft[stepName] = formatData(data);
       draft[stepName] = data as DeclarationFormState[typeof stepName];
     });
 
@@ -109,113 +119,104 @@ export const RemunerationForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* <ReactHookFormDebug /> */}
 
-        <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
+        <ClientAnimate>
+          <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {estCalculable === "non" && (
-            <>
-              <Checkbox
-                options={[
-                  {
-                    label:
-                      "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
-                    nativeInputProps: {
-                      ...register("déclarationCalculCSP"),
-                    },
-                  },
-                ]}
-                state={errors.déclarationCalculCSP ? "error" : "default"}
-                stateRelatedMessage={errors.déclarationCalculCSP?.message}
-              />
-
-              {déclarationCalculCSP && (
-                <Select
-                  label="Précision du motif de non calculabilité de l'indicateur"
-                  nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-                  state={errors.motifNonCalculabilité ? "error" : "default"}
-                  stateRelatedMessage={errors.motifNonCalculabilité?.message}
-                >
-                  <option value="" disabled hidden>
-                    Selectionnez une option
-                  </option>
-                  <option value="egvi40pcet">Effectif des groupes valides inférieur à 40% de l'effectif total</option>
-                </Select>
-              )}
-            </>
-          )}
-        </ClientOnly>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {estCalculable === "oui" && (
-            <>
-              <RadioButtons
-                legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
-                options={[
-                  {
-                    label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-                    nativeInputProps: {
-                      value: "niveau_branche",
-                      ...register("mode"),
-                    },
-                  },
-                  {
-                    label:
-                      "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-                    nativeInputProps: {
-                      value: "niveau_autre",
-                      ...register("mode"),
-                    },
-                  },
-                  {
-                    label: "Par catégorie socio-professionnelle",
-                    nativeInputProps: {
-                      value: "csp",
-                      ...register("mode"),
-                    },
-                  },
-                ]}
-              />
-
-              {mode !== "csp" && (
-                <>
-                  <RadioButtons
-                    legend="Un CSE a-t-il été mis en place ?"
-                    options={[
-                      {
-                        label: "Oui",
-                        nativeInputProps: {
-                          value: "oui",
-                          ...register("cse"),
-                        },
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {estCalculable === "non" && (
+              <>
+                <Checkbox
+                  options={[
+                    {
+                      label:
+                        "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
+                      nativeInputProps: {
+                        ...register("déclarationCalculCSP"),
                       },
-                      {
-                        label: "Non",
-                        nativeInputProps: {
-                          value: "non",
-                          ...register("cse"),
-                        },
+                    },
+                  ]}
+                  state={errors.déclarationCalculCSP ? "error" : "default"}
+                  stateRelatedMessage={errors.déclarationCalculCSP?.message}
+                />
+
+                {déclarationCalculCSP && <MotifNC stepName={stepName} />}
+              </>
+            )}
+          </ClientOnly>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            {estCalculable === "oui" && (
+              <>
+                <RadioButtons
+                  legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
+                  options={[
+                    {
+                      label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
+                      nativeInputProps: {
+                        value: "niveau_branche",
+                        ...register("mode"),
                       },
-                    ]}
-                    orientation="horizontal"
-                  />
-                  {cse === "oui" && (
-                    <Input
-                      label="Date de consultation du CSE pour le choix de cette modalité de calcul"
-                      nativeInputProps={{
-                        type: "date",
-                        ...register("dateConsultationCSE"),
-                      }}
-                      iconId="ri-calendar-line"
-                      state={errors.dateConsultationCSE ? "error" : "default"}
-                      stateRelatedMessage={errors.dateConsultationCSE?.message}
+                    },
+                    {
+                      label:
+                        "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
+                      nativeInputProps: {
+                        value: "niveau_autre",
+                        ...register("mode"),
+                      },
+                    },
+                    {
+                      label: "Par catégorie socio-professionnelle",
+                      nativeInputProps: {
+                        value: "csp",
+                        ...register("mode"),
+                      },
+                    },
+                  ]}
+                />
+
+                {mode && mode !== "csp" && (
+                  <>
+                    <RadioButtons
+                      legend="Un CSE a-t-il été mis en place ?"
+                      disabled={!!formData.ues?.nom}
+                      options={[
+                        {
+                          label: "Oui",
+                          nativeInputProps: {
+                            value: "oui",
+                            ...register("cse"),
+                          },
+                        },
+                        {
+                          label: "Non",
+                          nativeInputProps: {
+                            value: "non",
+                            ...register("cse"),
+                          },
+                        },
+                      ]}
+                      orientation="horizontal"
                     />
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </ClientOnly>
+                    {cse === "oui" && (
+                      <Input
+                        label="Date de consultation du CSE pour le choix de cette modalité de calcul"
+                        nativeInputProps={{
+                          type: "date",
+                          ...register("dateConsultationCSE"),
+                        }}
+                        iconId="ri-calendar-line"
+                        state={errors.dateConsultationCSE ? "error" : "default"}
+                        stateRelatedMessage={errors.dateConsultationCSE?.message}
+                      />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </ClientAnimate>
       </form>
     </FormProvider>
   );

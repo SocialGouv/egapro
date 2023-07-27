@@ -1,10 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
-import { CountryCode } from "@common/core-domain/domain/valueObjects/CountryCode";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { FrenchPostalCode } from "@common/core-domain/domain/valueObjects/FrenchPostalCode";
-import { NafCode } from "@common/core-domain/domain/valueObjects/NafCode";
-import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { IndicatorNote, RecapCard } from "@design-system";
@@ -12,7 +8,6 @@ import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardC
 import { RecapCardPublication } from "packages/app/src/design-system/base/RecapCardPublication";
 import { type PropsWithChildren } from "react";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 
 type Props = { déclaration: DeclarationDTO };
@@ -20,14 +15,14 @@ type Props = { déclaration: DeclarationDTO };
 export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => {
   const { déclarant, déclaration: meta, entreprise, indicateurs } = déclaration;
 
-  const company: CompanyProps = {
+  const company: CompanyDTO = {
     name: entreprise.raison_sociale,
-    address: entreprise.adresse,
-    postalCode: entreprise.code_postal ? new FrenchPostalCode(entreprise.code_postal) : undefined,
-    city: entreprise.commune,
-    countryCode: entreprise.code_pays !== undefined ? new CountryCode(entreprise.code_pays) : undefined,
-    siren: new Siren(entreprise.siren),
-    nafCode: new NafCode(entreprise.code_naf),
+    address: entreprise.adresse || "",
+    postalCode: entreprise.code_postal || "",
+    city: entreprise.commune || "",
+    countryIsoCode: entreprise.code_pays,
+    siren: entreprise.siren,
+    nafCode: entreprise.code_naf,
   };
 
   return (
@@ -63,8 +58,9 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
           content={
             <>
               <p>
-                <strong>{entreprise.raison_sociale}</strong>
+                <strong>{entreprise.ues.nom}</strong>
               </p>
+              <p>{entreprise.ues.entreprises?.length} entreprises composent l'UES</p>
             </>
           }
         />
@@ -106,10 +102,14 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
               </p>
             )}
 
-            {!indicateurs?.rémunérations?.date_consultation_cse ? (
-              <p> Aucun CSE n’est mis en place. </p>
-            ) : (
-              <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
+            {indicateurs?.rémunérations?.mode !== "csp" && (
+              <>
+                {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
+                  <p> Aucun CSE n’est mis en place. </p>
+                ) : (
+                  <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
+                )}
+              </>
             )}
           </>
         }
@@ -154,7 +154,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
 
       <RecapCard
         title="Plan de relance"
-        editLink={funnelStaticConfig["publication"].url}
+        // editLink={funnelStaticConfig["publication"].url}
         content={
           <>
             <p>

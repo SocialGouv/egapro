@@ -60,10 +60,10 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
     .reverse();
 
   const lastYear = years[0];
-  const { countyCode, regionCode, ues, workforce, countryIsoCode } = company[lastYear];
+  const { county, region, ues, workforce, countryIsoCode } = company[lastYear];
   const isUES = !!ues?.companies.length && !!ues?.name;
 
-  const address = addressLabel({ county: countyCode, region: regionCode, country: countryIsoCode });
+  const address = addressLabel({ county, region, country: countryIsoCode });
 
   return (
     <TileCompany>
