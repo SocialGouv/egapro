@@ -1,5 +1,6 @@
 export * from "./base/AlternativeTable";
 export * from "./base/BackNextButtonsGroup";
+export * from "./base/BigNote";
 export * from "./base/Box";
 export * from "./base/ContentWithChapter";
 export * from "./base/DetailedDownload";

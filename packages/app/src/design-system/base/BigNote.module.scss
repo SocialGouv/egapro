@@ -1,0 +1,38 @@
+.tile:not(.tile-no-border) {
+    box-shadow: 0 0 0 1px var(--border-default-grey);
+    padding: 1rem 2rem;
+    .text {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-default-grey);
+    }
+}
+
+.tile {
+    text-align: center;
+}
+
+.note {
+    font-weight: 700;
+    line-height: 1;
+    font-size: 3rem;
+}
+
+.text {
+    color: var(--text-title-grey);
+    font-size: .875rem !important;
+    line-height: 1.5rem !important;
+    margin-top: .5rem;
+    > * {
+        margin-bottom: 0;
+    }
+    > * + *  {
+        margin-top: 0.25rem;
+    }
+}
+
+.max {
+    font-size: 1.125rem;
+    font-weight: 200;
+    transform: translateY(.313rem);
+}
