@@ -1,8 +1,11 @@
 "use client";
 
-import Input from "@codegouvfr/react-dsfr/Input";
-import { computeIndicator1Note } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodRealPositiveIntegerSchema } from "@common/utils/form";
+import {
+  computeIndicator1Note,
+  indicatorNoteMax,
+} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -17,17 +20,20 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Import your language translation files
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = z
+const stepName: FunnelKey = "remunerations-resultat";
+
+const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodRealPositiveIntegerSchema,
+    résultat: zodNumberOrNaNOrNull,
   })
-  .superRefine(({ note, populationFavorable }, ctx) => {
-    if (note !== 40 && !populationFavorable) {
+  .superRefine(({ résultat, populationFavorable }, ctx) => {
+    if (résultat !== 0 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -38,9 +44,7 @@ const formSchema = z
 
 type FormType = z.infer<typeof formSchema>;
 
-const stepName: FunnelKey = "remunerations-resultat";
-
-export const RemunerationCSPResultatForm = () => {
+export const RemunerationResultatForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
@@ -49,30 +53,42 @@ export const RemunerationCSPResultatForm = () => {
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
       // console.debug("formData", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",
-    // resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors: _errors },
     setValue,
     watch,
   } = methods;
+
+  useEffect(() => {
+    register("note");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const résultat = watch("résultat");
   const note = watch("note");
 
   useEffect(() => {
-    const note = computeIndicator1Note(résultat);
-    setValue("note", note);
-    setPopulationFavorableDisabled(note === 40);
-    if (note === 40) setValue("populationFavorable", "");
+    if (résultat !== null) {
+      const note = computeIndicator1Note(résultat);
+      setValue("note", note);
+    }
+
+    if (résultat === 0 || résultat === null) {
+      setPopulationFavorableDisabled(true);
+      setValue("populationFavorable", "");
+    } else {
+      setPopulationFavorableDisabled(false);
+    }
   }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
@@ -99,17 +115,12 @@ export const RemunerationCSPResultatForm = () => {
 
           <PopulationFavorable disabled={populationFavorableDisabled} />
 
-          {note !== undefined && (
+          {résultat !== null && (
             <>
-              <IndicatorNote note={note} max={40} text="Nombre de points obtenus à l'indicateur" />
-
-              <Input
-                label=""
-                nativeInputProps={{
-                  type: "hidden",
-                  value: note,
-                  ...register(`note`, { valueAsNumber: true }),
-                }}
+              <IndicatorNote
+                note={note}
+                max={indicatorNoteMax.remunerations}
+                text="Nombre de points obtenus à l'indicateur"
               />
             </>
           )}

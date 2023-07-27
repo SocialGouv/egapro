@@ -7,7 +7,7 @@ import { DeclarationScoreSynthesis } from "../domain/DeclarationScoreSynthesis";
 import { DeclarationSearchResult } from "../domain/DeclarationSearchResult";
 import { DeclarationIndicatorsYear } from "../domain/valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
 import { Siren } from "../domain/valueObjects/Siren";
-import { type PublicCompanyDTO } from "../dtos/DeclarationDTO";
+import { type PublicCompanyDTO } from "../dtos/CompanyDTO";
 import { type SearchDeclarationResultDTO } from "../dtos/SearchDeclarationDTO";
 
 export const declarationSearchResultMap: Mapper<
@@ -144,7 +144,7 @@ function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicC
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     countryIsoCode: data.company.countryCode?.getValue(),
     nafCode: data.company.nafCode!.getValue(),
-    countyCode: data.company.county?.getValue(),
+    county: data.company.county?.getValue(),
     ...(data.company.workforce?.total || data.company.workforce?.range
       ? {
           workforce: {
@@ -154,7 +154,7 @@ function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicC
         }
       : {}),
     name: data.company.name!,
-    regionCode: data.company.region?.getValue(),
+    region: data.company.region?.getValue(),
     siren: data.company.siren.getValue(),
     ...(data.company.ues
       ? {

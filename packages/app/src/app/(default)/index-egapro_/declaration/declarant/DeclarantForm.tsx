@@ -3,7 +3,7 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { zodEmail, zodPhone } from "@common/utils/form";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
+import { zodFr } from "@common/utils/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,7 @@ type Props = {
   session: Session;
 };
 
-const formSchema = z.object({
+const formSchema = zodFr.object({
   accordRgpd: z.boolean().refine(val => !!val, {
     message: "Vous devez accepter les conditions pour continuer",
   }),
@@ -67,7 +67,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onsubmit)}>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
           <p>
             Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les
