@@ -4,18 +4,18 @@ import { ClientOnly } from "@components/utils/ClientOnly";
 
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
-import { RemunerationResultatForm } from "./RemunerationResultatForm";
+import { CongesMaterniteForm } from "./CongesMaterniteForm";
 
-const stepName: FunnelKey = "remunerations-resultat";
+const stepName: FunnelKey = "conges-maternite";
 
-const RemunerationResultatPage = () => {
+const AugmentationEtPromotionsPage = () => {
   return (
     <ClientOnly>
       <DeclarationStepper stepName={stepName} />
 
-      <RemunerationResultatForm />
+      <CongesMaterniteForm />
     </ClientOnly>
   );
 };
 
-export default RemunerationResultatPage;
+export default AugmentationEtPromotionsPage;

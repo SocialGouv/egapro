@@ -1,12 +1,13 @@
 "use client";
 
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
+import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { BackNextButtonsGroup } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
@@ -24,7 +25,7 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 
 const stepName: FunnelKey = "commencer";
 
-const baseSchema = z.object({
+const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
   siren: zodSirenSchema,
 });
@@ -82,9 +83,7 @@ const prepareDataWithExistingDeclaration = async (
     },
     [stepName]: {
       annéeIndicateurs: year,
-      entrepriseDéclarante: {
-        ...buildEntreprise(entreprise),
-      },
+      entrepriseDéclarante: buildEntreprise(entreprise),
     },
   };
 };
@@ -130,14 +129,13 @@ export const CommencerForm = () => {
 
     const sirenStorage = entrepriseDéclarante?.siren;
 
-    // If no data are present in session storage.
-    if (!sirenStorage || !annéeIndicateursStorage) {
+    // If no data are present in session storage or data are present in session storage and siren and year are unchanged.
+    if (
+      !sirenStorage ||
+      !annéeIndicateursStorage ||
+      (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage)
+    ) {
       return await saveAndGoNext({ siren, annéeIndicateurs });
-    }
-
-    // In data are present in session storage and siren and year are unchanged.
-    if (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage) {
-      return router.push(funnelConfig(formData)[stepName].next().url);
     }
 
     // In data are present in session storage and siren and year are not the same.
@@ -162,7 +160,7 @@ export const CommencerForm = () => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <ReactHookFormDebug />
+          {/* <ReactHookFormDebug /> */}
 
           <Select
             label="Année au titre de laquelle les indicateurs sont calculés"
@@ -186,7 +184,7 @@ export const CommencerForm = () => {
 
           {user.staff ? (
             <Input
-              label="Siren entreprise (staff)"
+              label="Siren de l'entreprise"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeInputProps={register("siren")}
@@ -212,26 +210,16 @@ export const CommencerForm = () => {
             </Select>
           )}
 
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttons={[
-              {
-                children: "Réinitialiser",
-                priority: "secondary",
-                onClick: confirmReset,
-                type: "button",
-                nativeButtonProps: {
-                  disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
-                },
-              },
-              {
-                children: "Suivant",
-                type: "submit",
-                nativeButtonProps: {
-                  disabled: !isValid,
-                },
-              },
-            ]}
+          <BackNextButtonsGroup
+            className={fr.cx("fr-my-8w")}
+            backLabel="Réinitialiser"
+            backProps={{
+              onClick: confirmReset,
+              disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
+            }}
+            nextProps={{
+              disabled: !isValid,
+            }}
           />
         </form>
       </FormProvider>

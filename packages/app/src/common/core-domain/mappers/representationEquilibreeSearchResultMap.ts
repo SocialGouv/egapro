@@ -6,7 +6,7 @@ import { Company } from "../domain/declaration/Company";
 import { BalancedRepresentation } from "../domain/declaration/indicators/BalancedRepresentation";
 import { RepresentationEquilibreeSearchResult } from "../domain/RepresentationEquilibreeSearchResult";
 import { RepEqIndicatorsYear } from "../domain/valueObjects/declaration/declarationInfo/RepEqIndicatorsYear";
-import { type PublicCompanyDTO } from "../dtos/DeclarationDTO";
+import { type PublicCompanyDTO } from "../dtos/CompanyDTO";
 import { type SearchRepresentationEquilibreeResultDTO } from "../dtos/SearchRepresentationEquilibreeDTO";
 
 export const representationEquilibreeSearchResultMap: Mapper<
@@ -70,9 +70,9 @@ function representationEquilibreePublicDataToDTO(company: Company): PublicCompan
     /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     countryIsoCode: company.countryCode?.getValue(),
     nafCode: company.nafCode!.getValue(),
-    countyCode: company.county?.getValue(),
+    county: company.county?.getValue(),
     name: company.name!,
-    regionCode: company.region?.getValue(),
+    region: company.region?.getValue(),
     siren: company.siren.getValue(),
   };
 }

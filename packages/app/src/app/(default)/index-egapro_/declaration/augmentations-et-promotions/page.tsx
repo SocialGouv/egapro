@@ -4,18 +4,18 @@ import { ClientOnly } from "@components/utils/ClientOnly";
 
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
-import { RemunerationResultatForm } from "./RemunerationResultatForm";
+import { AugmentationEtPromotionsForm } from "./AugmentationsEtPromotionsForm";
 
-const stepName: FunnelKey = "remunerations-resultat";
+const stepName: FunnelKey = "augmentations-et-promotions";
 
-const RemunerationResultatPage = () => {
+const AugmentationEtPromotionsPage = () => {
   return (
     <ClientOnly>
       <DeclarationStepper stepName={stepName} />
 
-      <RemunerationResultatForm />
+      <AugmentationEtPromotionsForm />
     </ClientOnly>
   );
 };
 
-export default RemunerationResultatPage;
+export default AugmentationEtPromotionsPage;

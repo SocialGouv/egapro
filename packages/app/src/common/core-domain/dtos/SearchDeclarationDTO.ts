@@ -3,7 +3,7 @@ import { type ClearObject } from "@common/utils/types";
 import { z } from "zod";
 
 import { type NotComputableReason } from "../domain/valueObjects/declaration/indicators/NotComputableReason";
-import { type PublicCompanyDTO } from "./DeclarationDTO";
+import { type PublicCompanyDTO } from "./CompanyDTO";
 import { searchConsultationSchema } from "./helpers/common";
 
 export interface SearchDeclarationResultDTO {

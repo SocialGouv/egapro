@@ -1,10 +1,6 @@
-import { type CompanyProps } from "@common/core-domain/domain/declaration/Company";
-import { CountryCode } from "@common/core-domain/domain/valueObjects/CountryCode";
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
-import { FrenchPostalCode } from "@common/core-domain/domain/valueObjects/FrenchPostalCode";
-import { NafCode } from "@common/core-domain/domain/valueObjects/NafCode";
-import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
@@ -17,18 +13,18 @@ export interface DetailRepEqProps {
 }
 
 // TODO: update RepresentationEquilibreeDTO to use CompanyProps instead.
-const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyProps => {
+const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO => {
   const { address, city, countryCode, nafCode, name, postalCode } = repEq.company;
   const siren = repEq.siren;
 
   return {
     address,
     city,
-    countryCode: new CountryCode(countryCode),
-    nafCode: new NafCode(nafCode),
+    countryIsoCode: countryCode,
+    nafCode: nafCode,
     name,
-    postalCode: new FrenchPostalCode(postalCode),
-    siren: new Siren(siren),
+    postalCode: postalCode,
+    siren,
   };
 };
 

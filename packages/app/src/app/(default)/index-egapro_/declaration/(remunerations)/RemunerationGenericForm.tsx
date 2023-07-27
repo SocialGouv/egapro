@@ -4,6 +4,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -18,17 +20,15 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const invalidNumber = "La valeur doit être un nombre";
-
-const formSchema = z.object({
+const formSchema = zodFr.object({
   catégories: z.array(
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": z.number({ invalid_type_error: invalidNumber }),
-        "30:39": z.number({ invalid_type_error: invalidNumber }),
-        "40:49": z.number({ invalid_type_error: invalidNumber }),
-        "50:": z.number({ invalid_type_error: invalidNumber }),
+        ":29": zodNumberOrNaNOrNull,
+        "30:39": zodNumberOrNaNOrNull,
+        "40:49": zodNumberOrNaNOrNull,
+        "50:": zodNumberOrNaNOrNull,
       }),
     }),
   ),
@@ -37,7 +37,7 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const defaultTranch = { ":29": 0, "30:39": 0, "40:49": 0, "50:": 0 };
+const defaultTranch = { ":29": null, "30:39": null, "40:49": null, "50:": null };
 
 const buildDefaultCategories = (mode: RemunerationsMode.Enum) =>
   mode === RemunerationsMode.Enum.CSP
@@ -64,10 +64,14 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
 
   const methods = useForm<FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema),
+    // resolver: zodResolver(formSchema),
+    resolver: async (data, context, options) => {
+      // console.debug("data", data);
+      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+      return zodResolver(formSchema)(data, context, options);
+    },
     defaultValues: formData[stepName] || buildDefaultCategories(mode),
   });
-
   const {
     control,
     handleSubmit,
@@ -121,55 +125,55 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
                     </Button>
                   )}
                 </div>
-                <table className={fr.cx("fr-table")}>
-                  <thead>
-                    <tr>
-                      <th>% moins de 30 ans</th>
-                      <th>% de 30 à 39 ans</th>
-                      <th>% de 40 à 49 ans</th>
-                      <th>% 50 ans et plus</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.:29`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.30:39`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.40:49`} />
-                      </td>
-                      <td>
-                        <PercentageInput name={`catégories.${index}.tranches.50:`} />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className={fr.cx("fr-table", "fr-table--no-caption")}>
+                  <table>
+                    <caption>Tableau des rémunérations</caption>
+                    <thead>
+                      <tr>
+                        <th>% moins de 30 ans</th>
+                        <th>% de 30 à 39 ans</th>
+                        <th>% de 40 à 49 ans</th>
+                        <th>% 50 ans et plus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.:29`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.30:39`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.40:49`} />
+                        </td>
+                        <td>
+                          <PercentageInput name={`catégories.${index}.tranches.50:`} />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
-
-            {mode !== "csp" && (
-              <div
-                className={fr.cx("fr-col")}
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              >
-                <Button
-                  type="button"
-                  className={fr.cx("fr-mb-4w")}
-                  onClick={() => append({ nom: "", tranches: defaultTranch })}
-                >
-                  Ajouter un coefficient
-                </Button>
-                <span>
-                  {`${catégories.length} coefficient${catégories.length > 1 ? "s" : ""} défini${
-                    catégories.length > 1 ? "s" : ""
-                  }`}
-                </span>
-              </div>
-            )}
           </ClientAnimate>
+
+          {mode !== "csp" && (
+            <div
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              className={fr.cx("fr-mb-8w")}
+            >
+              <Button type="button" onClick={() => append({ nom: "", tranches: defaultTranch })}>
+                Ajouter un coefficient
+              </Button>
+
+              <span>
+                {`${catégories.length} coefficient${catégories.length > 1 ? "s" : ""} défini${
+                  catégories.length > 1 ? "s" : ""
+                }`}
+              </span>
+            </div>
+          )}
         </ClientOnly>
 
         <BackNextButtons stepName={stepName} disabled={!isValid} />

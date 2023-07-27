@@ -4,16 +4,16 @@ import { ClientOnly } from "@components/utils/ClientOnly";
 
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
-import { RemunerationResultatForm } from "./RemunerationResultatForm";
+import { PromotionsForm } from "./PromotionsForm";
 
-const stepName: FunnelKey = "remunerations-resultat";
+const stepName: FunnelKey = "promotions";
 
 const RemunerationResultatPage = () => {
   return (
     <ClientOnly>
       <DeclarationStepper stepName={stepName} />
 
-      <RemunerationResultatForm />
+      <PromotionsForm />
     </ClientOnly>
   );
 };
