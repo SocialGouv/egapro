@@ -11,6 +11,8 @@ export * from "./base/Icon";
 export * from "./base/IndicatorNote";
 export * from "./base/Link";
 export * from "./base/RecapCard";
+export * from "./base/RecapCardCompany";
+export * from "./base/RecapCardPublication";
 export * from "./base/Stat";
 export * from "./base/Summary";
 export * from "./base/TableAdmin";

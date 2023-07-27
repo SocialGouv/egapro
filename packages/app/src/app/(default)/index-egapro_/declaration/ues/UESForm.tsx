@@ -7,12 +7,12 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { zodSirenSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { AlertMessage } from "@design-system/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { AlertMessage } from "packages/app/src/design-system/base/client/AlertMessage";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 

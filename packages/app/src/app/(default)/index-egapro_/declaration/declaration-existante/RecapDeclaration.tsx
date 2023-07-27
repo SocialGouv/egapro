@@ -3,9 +3,7 @@ import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/decla
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
-import { IndicatorNote, RecapCard } from "@design-system";
-import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardCompany";
-import { RecapCardPublication } from "packages/app/src/design-system/base/RecapCardPublication";
+import { IndicatorNote, RecapCard, RecapCardCompany, RecapCardPublication } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 import { RecapCardIndicator } from "./RecapCardIndicator";
