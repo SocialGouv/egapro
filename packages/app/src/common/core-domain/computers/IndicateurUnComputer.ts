@@ -29,7 +29,7 @@ type AgeRanges = Record<CSPAgeRange.Enum, CountAndAverageSalaries>;
 
 interface Remunerations<TName extends string = string> {
   category: AgeRanges;
-  id: string;
+  categoryId: string;
   name: TName;
 }
 
@@ -101,7 +101,7 @@ export class IndicateurUnComputer<
 
     const validGroups: TotalMetadata["validGroups"] = [];
     const fillableGroups: TotalMetadata["fillableGroups"] = [];
-    for (const { id, category } of this.remunerations) {
+    for (const { categoryId, category } of this.remunerations) {
       for (const [ageRange, ageGroup] of Object.entries(category)) {
         const womenCount = ageGroup.womenCount || 0;
         const menCount = ageGroup.menCount || 0;
@@ -112,7 +112,7 @@ export class IndicateurUnComputer<
         // Exclure les groupes qui n'ont pas au moins 3 hommes et 3 femmes,
         // et ceux où les salaires moyens sont à 0.
         if (ageGroup.menCount >= 3 && ageGroup.womenCount >= 3) {
-          fillableGroups.push([id, ageRange as CSPAgeRange.Enum]);
+          fillableGroups.push([categoryId, ageRange as CSPAgeRange.Enum]);
           totalGroupCount += ageGroup.menCount + ageGroup.womenCount;
           if (ageGroup.womenSalary > 0) {
             sumProductWomenSalary += ageGroup.womenSalary * ageGroup.womenCount;
@@ -121,7 +121,7 @@ export class IndicateurUnComputer<
             sumProductMenSalary += ageGroup.menSalary * ageGroup.menCount;
           }
           if (ageGroup.menSalary > 0 && ageGroup.womenSalary > 0) {
-            validGroups.push([id, ageRange as CSPAgeRange.Enum]);
+            validGroups.push([categoryId, ageRange as CSPAgeRange.Enum]);
           }
         }
       }
@@ -157,7 +157,7 @@ export class IndicateurUnComputer<
    */
   public canCompute(): boolean {
     if (!this.remunerations) {
-      throw new Error("remunerations must be set before calling canComputeGroup");
+      return false;
     }
 
     const { totalEmployeeCount, totalGroupCount } = this.getTotalMetadata();
@@ -177,8 +177,8 @@ export class IndicateurUnComputer<
 
     let totalWeightedGap = 0;
     const { validGroups } = this.getTotalMetadata();
-    for (const [id, ageRange] of validGroups) {
-      const weightedGap = this.calculateWeightedGap(id, ageRange);
+    for (const [categoryId, ageRange] of validGroups) {
+      const weightedGap = this.calculateWeightedGap(categoryId, ageRange);
       totalWeightedGap += weightedGap;
     }
 
@@ -191,9 +191,9 @@ export class IndicateurUnComputer<
    */
   public canComputeGroup(categoryId: string, group: keyof AgeRanges): boolean {
     if (!this.remunerations) {
-      throw new Error("remunerations must be set before calling canComputeGroup");
+      return false;
     }
-    const ageGroup = this.remunerations.find(rem => rem.id === categoryId)?.category[group];
+    const ageGroup = this.remunerations.find(rem => rem.categoryId === categoryId)?.category[group];
 
     if (
       !ageGroup ||
@@ -210,7 +210,7 @@ export class IndicateurUnComputer<
    */
   public computeGroup(categoryId: string, ageRange: keyof AgeRanges): Result {
     const weightedGap = this.calculateWeightedGap(categoryId, ageRange);
-    return this.getResult(weightedGap);
+    return this.getResult(weightedGap, true);
   }
 
   /**
@@ -228,7 +228,7 @@ export class IndicateurUnComputer<
       throw new Error("remunerations must be set before calling canComputeGroup");
     }
 
-    group = this.remunerations.find(rem => rem.id === id)?.category[ageRange] ?? {
+    group = this.remunerations.find(rem => rem.categoryId === id)?.category[ageRange] ?? {
       menCount: 0,
       menSalary: 0,
       womenCount: 0,
@@ -250,9 +250,9 @@ export class IndicateurUnComputer<
     return salaryGap * (groupCount / totalGroupCount);
   }
 
-  private getResult(weightedGap: number): Result {
+  private getResult(weightedGap: number, raw?: boolean): Result {
     const sign = Math.sign(weightedGap);
-    const result = Math.round(Math.abs(weightedGap) * 10) / 10;
+    const result = raw ? weightedGap : Math.round(Math.abs(weightedGap) * 10) / 10;
 
     return {
       genderAdvantage: sign === 0 ? "equality" : sign === 1 ? "men" : "women",

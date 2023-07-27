@@ -71,7 +71,7 @@ const otherAgeRangesSchema = z
 const otherAgeRangeNumbers = z.array(
   z.object({
     name: z.string().nonempty(),
-    id: z.string().nonempty(),
+    categoryId: z.string().nonempty(),
     category: z.record(z.nativeEnum(CSPAgeRange.Enum), otherAgeRangesSchema),
   }),
 );
@@ -90,7 +90,7 @@ export const createSteps = {
       remunerations: z.array(
         z.object({
           name: z.nativeEnum(CSP.Enum),
-          id: z.string().nonempty(),
+          categoryId: z.string().nonempty(),
           category: z
             .record(
               z.nativeEnum(CSPAgeRange.Enum),

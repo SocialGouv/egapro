@@ -3,7 +3,7 @@ import { CenteredContainer } from "@design-system";
 import { TITLES } from "../titles";
 import { Indic1Form } from "./Form";
 
-const title = TITLES["indicateur-1"];
+const title = TITLES.indicateur1;
 
 export const metadata = {
   title,
@@ -12,7 +12,7 @@ export const metadata = {
   },
 };
 
-const Indic1Page = () => {
+const Indicateur1Page = () => {
   return (
     <>
       <CenteredContainer>
@@ -27,4 +27,4 @@ const Indic1Page = () => {
   );
 };
 
-export default Indic1Page;
+export default Indicateur1Page;

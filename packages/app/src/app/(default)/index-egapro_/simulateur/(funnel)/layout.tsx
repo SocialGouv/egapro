@@ -19,7 +19,7 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
+const SimulateurFunnelLayout = ({ children }: PropsWithChildren) => {
   return (
     <>
       <CenteredContainer>
@@ -30,4 +30,4 @@ const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
   );
 };
 
-export default RepEqFunnelLayout;
+export default SimulateurFunnelLayout;

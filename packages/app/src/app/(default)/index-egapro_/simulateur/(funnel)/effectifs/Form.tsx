@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { ageRanges, categories } from "@common/core-domain/computers/indicateurUn";
+import { ageRanges, categories } from "@common/core-domain/computers/IndicateurUnComputer";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
@@ -41,6 +41,7 @@ export const EffectifsForm = () => {
     register,
     getValues,
     setValue,
+    trigger,
   } = useForm<EffectifsFormType>({
     mode: "onChange",
     resolver: zodResolver(createSteps.effectifs),
@@ -80,7 +81,7 @@ export const EffectifsForm = () => {
 
     resetFunnel();
     saveFunnel({ effectifs: form });
-    router.push("/index-egapro_/simulateur/indicateur-1");
+    router.push("/index-egapro_/simulateur/indicateur1");
   };
 
   const setRandomValues = () => {
@@ -102,6 +103,34 @@ export const EffectifsForm = () => {
     }
     setTotalWomen(0);
     setTotalMen(0);
+  };
+
+  const pasteFromExcel = () => {
+    const paste = window.prompt(
+      `Copiez les colonnes Femmes et Hommes des effectifs depuis Excel (valeurs "0" incluses et sans les en-têtes)`,
+    );
+    if (!paste) {
+      return;
+    }
+
+    const tab = "	";
+    const lines = paste
+      .replace("\r\n", "\n")
+      .split("\n")
+      .filter(line => line.trim())
+      .map(line => line.split(tab).map(cell => cell.trim().replace(/\s/gi, "")));
+
+    let lineIndex = 0;
+    for (const category of categories) {
+      for (const ageRange of ageRanges) {
+        const [womenSalary, menSalary] = lines[lineIndex];
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, womenSalary as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, menSalary as never);
+        lineIndex++;
+      }
+    }
+    updateTotal();
+    trigger("csp");
   };
 
   return (
@@ -190,7 +219,15 @@ export const EffectifsForm = () => {
                 children: "Staff : Remplir avec des valeurs aléatoires",
                 onClick: setRandomValues,
                 priority: "tertiary no outline",
-                iconId: "fr-icon-github-line",
+                iconId: "fr-icon-refresh-line",
+                className: fr.cx("fr-mb-md-0"),
+                type: "button",
+              },
+              {
+                children: "Staff : Coller depuis Excel",
+                onClick: pasteFromExcel,
+                priority: "tertiary no outline",
+                iconId: "fr-icon-clipboard-line",
                 className: fr.cx("fr-mb-md-0"),
                 type: "button",
               },
