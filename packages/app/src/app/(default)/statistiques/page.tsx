@@ -3,6 +3,8 @@ import { Suspense } from "react";
 
 import { StatsContent } from "./content";
 
+export const dynamic = "force-dynamic";
+
 const title = "Statistiques";
 const description =
   "Visualisez les écarts de rémunération entre les sexes et mettre en évidence leurs points de progression.";
