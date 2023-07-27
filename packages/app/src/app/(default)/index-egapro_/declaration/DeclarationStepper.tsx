@@ -19,7 +19,7 @@ export const DeclarationStepper = ({ stepName }: PropsWithChildren<Props>) => {
     <ClientOnly fallback={<SkeletonForm fields={2} />}>
       <Stepper
         currentStep={funnelConfig(formData)[stepName].indexStep()}
-        stepCount={12}
+        stepCount={14}
         nextTitle={funnelConfig(formData)[stepName].next().title}
         title={funnelStaticConfig[stepName].title}
       />
