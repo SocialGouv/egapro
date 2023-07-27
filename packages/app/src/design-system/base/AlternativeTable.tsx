@@ -213,7 +213,9 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                             size="small"
                             type="button"
                             onClick={row.onClickDelete}
-                          />
+                          >
+                            Supprimer
+                          </Button>
                         )}
                       </AlternativeTableCell>
                     )}

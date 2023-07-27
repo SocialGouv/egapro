@@ -71,7 +71,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
           className="fr-mb-3w"
           severity="warning"
           title="L'indicateur n'est pas calculable par CSP"
-          description="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+          description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
         />
       </CenteredContainer>
     );

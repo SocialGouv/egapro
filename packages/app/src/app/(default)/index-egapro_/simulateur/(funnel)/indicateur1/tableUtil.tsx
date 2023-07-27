@@ -1,7 +1,7 @@
 import { ageRanges, categories, type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { currencyFormat, percentFormat, precisePercentFormat } from "@common/utils/number";
+import { currencyFormat, precisePercentFormat } from "@common/utils/number";
 import { type Any } from "@common/utils/types";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
 import { type AlternativeTableProps } from "@design-system";
@@ -131,7 +131,7 @@ export const getCommonBodyColumns = ({
         },
       },
       (() => {
-        const { result: groupResult } = computer.computeGroup(categoryId, ageRange);
+        const { resultRaw: groupResult } = computer.computeGroup(categoryId, ageRange);
         return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
           ? precisePercentFormat.format(groupResult / 100)
           : "-";
@@ -160,14 +160,14 @@ export const getCommonFooter = ({
       ),
     [0, 0],
   );
-  const { result } = computer.compute();
+  const { resultRaw } = computer.compute();
   const metadata = computer.getTotalMetadata();
   const enoughWomen = metadata.totalWomenCount === totalCspWomen;
   const enoughMen = metadata.totalMenCount === totalCspMen;
 
   return [
     {
-      label: "Ensemble des salariés",
+      label: "",
       colspan: 2,
     },
     {
@@ -196,10 +196,11 @@ export const getCommonFooter = ({
       data: (() => {
         const totalLabel =
           enoughWomen && enoughMen ? (
-            `${metadata.totalEmployeeCount}`
+            `${metadata.totalEmployeeCount} salarié${metadata.totalEmployeeCount > 1 ? "s" : ""}`
           ) : (
             <>
-              <span style={{ color: errorColor }}>{metadata.totalEmployeeCount}</span> / {totalCspWomen + totalCspMen}
+              <span style={{ color: errorColor }}>{metadata.totalEmployeeCount}</span> / {totalCspWomen + totalCspMen}{" "}
+              salarié{metadata.totalEmployeeCount > 1 ? "s" : ""}
             </>
           );
         return totalLabel;
@@ -218,8 +219,8 @@ export const getCommonFooter = ({
       data: currencyFormat.format(metadata.averageMenSalary),
     },
     {
-      label: "Écart global",
-      data: percentFormat.format(result / 100),
+      label: "Écart total",
+      data: precisePercentFormat.format(resultRaw / 100),
     },
   ];
 };

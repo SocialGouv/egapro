@@ -59,6 +59,7 @@ interface Result {
   genderAdvantage: "equality" | "men" | "women";
   note: number;
   result: number;
+  resultRaw: number;
 }
 
 export type IndicateurUnComputerResult = Result;
@@ -210,7 +211,7 @@ export class IndicateurUnComputer<
    */
   public computeGroup(categoryId: string, ageRange: keyof AgeRanges): Result {
     const weightedGap = this.calculateWeightedGap(categoryId, ageRange);
-    return this.getResult(weightedGap, true);
+    return this.getResult(weightedGap);
   }
 
   /**
@@ -250,14 +251,15 @@ export class IndicateurUnComputer<
     return salaryGap * (groupCount / totalGroupCount);
   }
 
-  private getResult(weightedGap: number, raw?: boolean): Result {
+  private getResult(weightedGap: number): Result {
     const sign = Math.sign(weightedGap);
-    const result = raw ? weightedGap : Math.round(Math.abs(weightedGap) * 10) / 10;
+    const result = Math.round(Math.abs(weightedGap) * 10) / 10;
 
     return {
       genderAdvantage: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
       note: IndicateurUnComputer.computeNote(result),
       result,
+      resultRaw: weightedGap,
     };
   }
 }
