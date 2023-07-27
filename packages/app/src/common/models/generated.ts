@@ -1120,7 +1120,7 @@ export type AugmentationsEtPromotions = WithPopulationFavorable & {
   /**
    * Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
    */
-  non_calculable?: "egvi40pcet" | "absaugi" | "etsno5f5h";
+  non_calculable?: "absaugi" | "etsno5f5h";
   résultat_nombre_salariés?: number;
   note_en_pourcentage?: number;
   note_nombre_salariés?: number;

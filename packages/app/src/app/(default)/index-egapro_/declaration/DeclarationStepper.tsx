@@ -6,7 +6,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type PropsWithChildren } from "react";
 
-import { funnelConfig, type FunnelKey, funnelStaticConfig } from "./declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey, funnelStaticConfig, nbStepsMax } from "./declarationFunnelConfiguration";
 
 type Props = {
   stepName: FunnelKey;
@@ -19,7 +19,7 @@ export const DeclarationStepper = ({ stepName }: PropsWithChildren<Props>) => {
     <ClientOnly fallback={<SkeletonForm fields={2} />}>
       <Stepper
         currentStep={funnelConfig(formData)[stepName].indexStep()}
-        stepCount={14}
+        stepCount={nbStepsMax}
         nextTitle={funnelConfig(formData)[stepName].next().title}
         title={funnelStaticConfig[stepName].title}
       />

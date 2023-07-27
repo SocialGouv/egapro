@@ -2,7 +2,7 @@ import { config } from "@common/config";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 
-export const nbSteps = 12;
+export const nbStepsMax = 15;
 
 const base = config.base_declaration_url;
 
