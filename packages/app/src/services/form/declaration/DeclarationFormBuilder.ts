@@ -267,14 +267,17 @@ export const DeclarationFormBuilder = {
         mode: declaration.indicateurs?.rémunérations?.mode as RemunerationsMode.Enum, // Always present for an existing declaration.
       },
       "remunerations-csp": {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore TODO: improve types
         catégories: declaration.indicateurs?.rémunérations?.catégories,
       },
       "remunerations-coefficient-autre": {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore TODO: improve types
         catégories: declaration.indicateurs?.rémunérations?.catégories,
       },
       "remunerations-coefficient-branche": {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore TODO: improve types
         catégories: declaration.indicateurs?.rémunérations?.catégories,
       },
