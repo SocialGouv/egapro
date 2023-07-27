@@ -3,7 +3,7 @@ import { type z } from "zod";
 
 import { type NotComputableReasonExecutiveRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { type NotComputableReasonMemberRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
-import { type PublicCompanyDTO } from "./DeclarationDTO";
+import { type PublicCompanyDTO } from "./CompanyDTO";
 import { searchConsultationSchema } from "./helpers/common";
 
 export interface SearchRepresentationEquilibreeResultDTO {

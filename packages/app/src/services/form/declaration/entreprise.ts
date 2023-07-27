@@ -7,13 +7,13 @@ import {
 } from "@common/models/generated";
 
 export type Entreprise = {
-  adresse?: string;
-  codeNaf?: CodeNaf;
+  adresse: string;
+  codeNaf: CodeNaf;
   codePays?: CodePays;
   codePostal?: string;
   commune?: string;
   département?: Departement;
-  raisonSociale?: string;
+  raisonSociale: string;
   région?: Region;
   siren: string;
 };
@@ -24,7 +24,7 @@ export type Entreprise = {
 export const buildEntreprise = (entreprise: DeclarationDTO["entreprise"]): Entreprise => {
   return {
     siren: entreprise.siren,
-    adresse: entreprise.adresse,
+    adresse: entreprise.adresse || "",
     codeNaf: entreprise.code_naf,
     codePays: entreprise.code_pays,
     codePostal: entreprise.code_postal,
