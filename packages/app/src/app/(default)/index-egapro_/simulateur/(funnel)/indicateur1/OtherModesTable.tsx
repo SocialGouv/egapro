@@ -54,10 +54,9 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
 
   useEffect(() => {
     if (defaultRemunerations) {
-      console.log("REPLACE REMUNERATIONS", defaultRemunerations);
       replaceRemunerations(defaultRemunerations);
     }
-  }, [defaultRemunerations]);
+  }, [defaultRemunerations, replaceRemunerations]);
 
   if (!hydrated || !funnel?.effectifs) {
     return null;

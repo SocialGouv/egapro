@@ -68,10 +68,10 @@ export const Indic1Form = () => {
   const { data: session } = useSession();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const hydrated = useSimuFunnelStoreHasHydrated();
-  const [lastCspRemunerations, setLastCspRemunerations] = useState<RemunerationsCSP | null>(null);
-  const [lastOtherRemunerations, setLastOtherRemunerations] = useState<RemunerationsOther | null>(null);
-  const [lastMode, setLastMode] = useState<RemunerationsMode.Enum | null>(null);
-  const [defaultRemunerations, setDefaultRemunerations] = useState<RemunerationsCSP | RemunerationsOther>();
+  const [lastCspRemunerations, setLastCspRemunerations] = useState<RemunerationsCSP>();
+  const [lastOtherRemunerations, setLastOtherRemunerations] = useState<RemunerationsOther>();
+  const [lastMode, setLastMode] = useState<RemunerationsMode.Enum>();
+  const [defaultRemunerationsOtherModes, setDefaultRemunerationsOtherModes] = useState<RemunerationsOther>();
 
   useEffect(() => {
     if (funnel?.indicateur1?.mode) {
@@ -95,7 +95,6 @@ export const Indic1Form = () => {
     getValues,
     watch,
     resetField,
-    setValue,
     control,
   } = methods;
 
@@ -180,7 +179,6 @@ export const Indic1Form = () => {
                             lastMode &&
                             lastMode !== RemunerationsMode.Enum.CSP
                           ) {
-                            console.log("early return", { lastMode, mode });
                             setLastMode(mode);
                             return field.onChange(mode);
                           }
@@ -198,11 +196,11 @@ export const Indic1Form = () => {
                           }
                           setLastMode(mode);
                           field.onChange(mode);
-                          console.log("reset", { mode, lastMode, defaultValue });
                           if (mode === RemunerationsMode.Enum.CSP || currentRemunerations?.length) {
                             resetField("remunerations", { defaultValue });
                           } else {
-                            setDefaultRemunerations(defaultValue);
+                            // we cannot reset before useFieldArray has been initialized
+                            setDefaultRemunerationsOtherModes(defaultValue);
                           }
                         },
                       },
@@ -223,7 +221,7 @@ export const Indic1Form = () => {
                   <OtherModesTable
                     computer={otherComputer}
                     staff={session?.user.staff}
-                    defaultRemunerations={defaultRemunerations}
+                    defaultRemunerations={defaultRemunerationsOtherModes}
                   />
                 </ClientAnimate>
               )}
