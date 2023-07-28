@@ -1,0 +1,17 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0 2rem;
+    box-shadow: 0 0 0 1px var(--border-default-grey);
+}
+
+.head {
+    border-bottom: 1px solid var(--border-default-grey);
+    padding: 2rem 0;
+    flex-grow: 1;
+}
+
+.body {
+     padding: 2rem 0;
+}
