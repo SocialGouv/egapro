@@ -4,7 +4,7 @@ import { type Declaration } from "@common/core-domain/domain/Declaration";
 import { type DeclarationSearchResult } from "@common/core-domain/domain/DeclarationSearchResult";
 import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { declarationSearchResultMap } from "@common/core-domain/mappers/declarationSearchResultMap";
-import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS_REPEQ } from "@common/dict";
+import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
 import { isFinite } from "lodash";
@@ -44,11 +44,11 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     const raws = await sql<DeclarationSearchResultRaw[]>`
         SELECT
             (array_agg(${this.declaTable}.data ORDER BY ${
-      this.declaTable
-    }.year DESC))[1]->'entreprise'->>'siren' as siren,
+              this.declaTable
+            }.year DESC))[1]->'entreprise'->>'siren' as siren,
                     (array_agg(${this.declaTable}.data ORDER BY ${
-      this.declaTable
-    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
+                      this.declaTable
+                    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
             jsonb_object_agg(${this.declaTable}.year::text, ${this.declaTable}.data) as data,
             jsonb_object_agg(${this.declaTable}.year::text, json_build_object(
                 'index', (${this.declaTable}.data->'déclaration'->>'index')::int,
@@ -80,8 +80,8 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
             )) as results
         FROM ${this.declaTable}
         JOIN ${this.table} ON ${this.declaTable}.siren=${this.table}.siren AND ${this.declaTable}.year=${
-      this.table
-    }.year
+          this.table
+        }.year
             ${sqlWhereClause}
         GROUP BY ${this.declaTable}.siren
         ORDER BY max(${this.declaTable}.year) DESC
@@ -110,7 +110,7 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     }
 
     // no "and" clause because will be first
-    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS_REPEQ)}`;
+    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS)}`;
     const sqlDepartement = criteria.countyCode ? sql`and ${this.table}.departement=${criteria.countyCode}` : sql``;
     const sqlSectionNaf = criteria.nafSection ? sql`and ${this.table}.section_naf=${criteria.nafSection}` : sql``;
     const sqlRegion = criteria.regionCode ? sql`and ${this.table}.region=${criteria.regionCode}` : sql``;

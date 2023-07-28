@@ -6,6 +6,7 @@ import { NotComputableReason } from "@common/core-domain/domain/valueObjects/dec
 import { type SearchDeclarationResultDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { adressLabel, type WORKFORCES } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -19,7 +20,6 @@ import {
   TileCompanyScore,
   TileCompanySiren,
   TileCompanyTable,
-  TileCompanyTableBody,
   TileCompanyTableBodyRow,
   TileCompanyTableBodyRowCol,
   TileCompanyTableHead,
@@ -46,6 +46,7 @@ const mapRange = (range: keyof WORKFORCES | undefined) => {
 export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
   const { company, results, name, siren } = dto;
   const rowsDefault = 3;
+  const [animationTBody] = useAutoAnimate();
   const [rowsNumber, setRowsNumber] = useState(rowsDefault);
   const handleMoreRows = () => {
     setRowsNumber(rowsNumber + rowsDefault);
@@ -120,7 +121,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
           <TileCompanyTableHeadCol size="md">Note</TileCompanyTableHeadCol>
           <TileCompanyTableHeadCol size="md">Détails</TileCompanyTableHeadCol>
         </TileCompanyTableHead>
-        <TileCompanyTableBody>
+        <tbody ref={animationTBody}>
           {years
             .map(year => ({
               year,
@@ -229,7 +230,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>
             ))}
-        </TileCompanyTableBody>
+        </tbody>
       </TileCompanyTable>
       {rowsNumber < years?.length && <TileCompanyLoadMore onClick={handleMoreRows} />}
     </TileCompany>
