@@ -1,3 +1,5 @@
+import { CenteredContainer } from "@design-system";
+
 import { TITLES } from "../titles";
 import { EffectifsForm } from "./Form";
 
@@ -12,9 +14,9 @@ export const metadata = {
 
 const EffectifsPage = () => {
   return (
-    <>
+    <CenteredContainer>
       <EffectifsForm />
-    </>
+    </CenteredContainer>
   );
 };
 

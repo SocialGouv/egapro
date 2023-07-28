@@ -19,13 +19,15 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-const RepEqFunnelLayout = ({ children }: PropsWithChildren) => {
+const SimulateurFunnelLayout = ({ children }: PropsWithChildren) => {
   return (
-    <CenteredContainer pb="6w">
-      <Stepper />
+    <>
+      <CenteredContainer>
+        <Stepper />
+      </CenteredContainer>
       {children}
-    </CenteredContainer>
+    </>
   );
 };
 
-export default RepEqFunnelLayout;
+export default SimulateurFunnelLayout;

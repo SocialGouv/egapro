@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
+import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import styles from "./AlternativeTable.module.css";
@@ -60,10 +61,13 @@ export const AlternativeTableCell = ({
             title="Plus d'informations"
             className={styles["modal-button"]}
           />
+
           {modal && (
-            <modal.Component title={children} className={styles.modal}>
-              {informations}
-            </modal.Component>
+            <ClientBodyPortal>
+              <modal.Component title={children} className={styles.modal}>
+                {informations}
+              </modal.Component>
+            </ClientBodyPortal>
           )}
         </>
       )}
@@ -94,7 +98,9 @@ export namespace AlternativeTableProps {
   export interface BodyContent {
     categoryLabel: ReactNode;
     isDeletable?: boolean;
+    key?: string;
     mergedLabel?: ReactNode;
+    onClickDelete?: () => void;
     subRows?: [SubRow, ...SubRow[]];
   }
 
@@ -191,10 +197,10 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
 
         {body.map((row, index) => {
           return (
-            <tbody key={index}>
+            <tbody key={row.key || index}>
               {row.subRows ? (
                 row.subRows.map((subItem, j) => (
-                  <tr key={j}>
+                  <tr key={`${row.key || index}-${j}`}>
                     {j === 0 && (
                       <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
                         <span>{row.categoryLabel}</span>
@@ -205,7 +211,11 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                             title="Label button"
                             className={styles["delete-btn"]}
                             size="small"
-                          />
+                            type="button"
+                            onClick={row.onClickDelete}
+                          >
+                            Supprimer
+                          </Button>
                         )}
                       </AlternativeTableCell>
                     )}
@@ -213,7 +223,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       {subItem.label}
                     </AlternativeTableCell>
                     {subItem.cols?.map((col, k) => (
-                      <AlternativeTableCell key={k} align="right">
+                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align="right">
                         {isDsfrInputProps(col) ? (
                           <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                         ) : (

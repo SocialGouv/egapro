@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { ageRanges, categories } from "@common/core-domain/computers/IndicateurUnComputer";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
@@ -22,24 +23,11 @@ import { useSimuFunnelStore } from "../useSimuFunnelStore";
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
 
-const categories = [
-  CSP.Enum.OUVRIERS,
-  CSP.Enum.EMPLOYES,
-  CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-  CSP.Enum.INGENIEURS_CADRES,
-] as const;
-const ageRanges = [
-  CSPAgeRange.Enum.LESS_THAN_30,
-  CSPAgeRange.Enum.FROM_30_TO_39,
-  CSPAgeRange.Enum.FROM_40_TO_49,
-  CSPAgeRange.Enum.FROM_50_TO_MORE,
-] as const;
-
 const useStore = storePicker(useSimuFunnelStore);
 export const EffectifsForm = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
+  const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
   const [totalWomen, setTotalWomen] = useState(0);
   const [totalMen, setTotalMen] = useState(0);
 
@@ -53,31 +41,32 @@ export const EffectifsForm = () => {
     register,
     getValues,
     setValue,
+    trigger,
   } = useForm<EffectifsFormType>({
     mode: "onChange",
     resolver: zodResolver(createSteps.effectifs),
-    defaultValues: funnel,
+    defaultValues: funnel?.effectifs,
   });
 
   const updateTotal = () => {
     const csp = getValues("csp");
     setTotalWomen(
-      categories.reduce((acc, _, categoryIndex) => {
+      categories.reduce((acc, category) => {
         return (
           acc +
           ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[categoryIndex].ageRange[ageRange]?.women || 0);
+            return acc + (csp?.[category].ageRanges[ageRange].women || 0);
           }, 0)
         );
       }, 0),
     );
 
     setTotalMen(
-      categories.reduce((acc, _, categoryIndex) => {
+      categories.reduce((acc, category) => {
         return (
           acc +
           ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[categoryIndex].ageRange[ageRange]?.men || 0);
+            return acc + (csp?.[category].ageRanges[ageRange].men || 0);
           }, 0)
         );
       }, 0),
@@ -89,29 +78,59 @@ export const EffectifsForm = () => {
     if (!total) {
       return;
     }
-    saveFunnel(form);
-    router.push("/index-egapro/simulateur/indicateurs-1");
+
+    resetFunnel();
+    saveFunnel({ effectifs: form });
+    router.push("/index-egapro_/simulateur/indicateur1");
   };
 
   const setRandomValues = () => {
-    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+    for (const category of categories) {
       for (const ageRange of ageRanges) {
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.women`, Math.floor(Math.random() * 100) as never);
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.men`, Math.floor(Math.random() * 100) as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, Math.floor(Math.random() * 100) as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, Math.floor(Math.random() * 100) as never);
       }
     }
     updateTotal();
   };
 
   const resetCSP = () => {
-    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+    for (const category of categories) {
       for (const ageRange of ageRanges) {
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.women`, 0 as never);
-        setValue(`csp.${categoryIndex}.ageRange.${ageRange}.men`, 0 as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, 0 as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, 0 as never);
       }
     }
     setTotalWomen(0);
     setTotalMen(0);
+  };
+
+  const pasteFromExcel = () => {
+    const paste = window.prompt(
+      `Copiez les colonnes Femmes et Hommes des effectifs depuis Excel (valeurs "0" incluses et sans les en-têtes)`,
+    );
+    if (!paste) {
+      return;
+    }
+
+    const tab = "	";
+    const lines = paste
+      .replace("\r\n", "\n")
+      .split("\n")
+      .filter(line => line.trim())
+      .map(line => line.split(tab).map(cell => cell.trim().replace(/\s/gi, "")));
+
+    let lineIndex = 0;
+    for (const category of categories) {
+      for (const ageRange of ageRanges) {
+        const [womenSalary, menSalary] = lines[lineIndex];
+        setValue(`csp.${category}.ageRanges.${ageRange}.women`, womenSalary as never);
+        setValue(`csp.${category}.ageRanges.${ageRange}.men`, menSalary as never);
+        lineIndex++;
+      }
+    }
+    updateTotal();
+    trigger("csp");
   };
 
   return (
@@ -200,7 +219,15 @@ export const EffectifsForm = () => {
                 children: "Staff : Remplir avec des valeurs aléatoires",
                 onClick: setRandomValues,
                 priority: "tertiary no outline",
-                iconId: "fr-icon-github-line",
+                iconId: "fr-icon-refresh-line",
+                className: fr.cx("fr-mb-md-0"),
+                type: "button",
+              },
+              {
+                children: "Staff : Coller depuis Excel",
+                onClick: pasteFromExcel,
+                priority: "tertiary no outline",
+                iconId: "fr-icon-clipboard-line",
                 className: fr.cx("fr-mb-md-0"),
                 type: "button",
               },
@@ -231,41 +258,36 @@ export const EffectifsForm = () => {
               ],
             },
           ]}
-          body={categories.map((category, categoryIndex) => ({
+          body={categories.map(category => ({
             categoryLabel: CSP.Label[category],
             subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
-              label: (
-                <>
-                  <input type="hidden" value={category} {...register(`csp.${categoryIndex}.name`)} />
-                  {CSPAgeRange.Label[ageRange]}
-                </>
-              ),
+              label: CSPAgeRange.Label[ageRange],
               cols: [
                 {
                   label: `${category}, ${ageRange}, femmes`,
                   nativeInputProps: {
-                    ...register(`csp.${categoryIndex}.ageRange.${ageRange}.women`, {
+                    ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
                       onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,
                   },
-                  state: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.women && "error",
-                  stateRelatedMessage: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.women?.message,
+                  state: errors.csp?.[category]?.ageRanges?.[ageRange]?.women && "error",
+                  stateRelatedMessage: errors.csp?.[category]?.ageRanges?.[ageRange]?.women?.message,
                 },
                 {
                   label: `${category}, ${ageRange}, hommes`,
                   nativeInputProps: {
-                    ...register(`csp.${categoryIndex}.ageRange.${ageRange}.men`, {
+                    ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
                       onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,
                   },
-                  state: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.men && "error",
-                  stateRelatedMessage: errors.csp?.[categoryIndex]?.ageRange?.[ageRange]?.men?.message,
+                  state: errors.csp?.[category]?.ageRanges?.[ageRange]?.men && "error",
+                  stateRelatedMessage: errors.csp?.[category]?.ageRanges?.[ageRange]?.men?.message,
                 },
               ],
             })) as [AlternativeTableProps.SubRow, ...AlternativeTableProps.SubRow[]],
