@@ -41,6 +41,7 @@ export const PercentagesPairInputs = <FormType extends SimpleObject>({
     setFocus,
     formState: { errors },
   } = useFormContext<FakeFormType>();
+  // TODO use rhf controller instead
 
   const syncPercentages = (firstInput: boolean) => {
     const [keyA, keyB] = (firstInput ? [firstFormKey, secondFormKey] : [secondFormKey, firstFormKey]) as FakeSyncMapper;

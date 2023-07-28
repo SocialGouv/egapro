@@ -108,8 +108,6 @@
     position: absolute;
     bottom: 1rem;
     left: 1rem;
-    border-radius: 50%;
-    color: var(--text-default-error);
 }
 
 .table-cell--with-informations {

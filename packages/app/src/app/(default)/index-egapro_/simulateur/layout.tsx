@@ -2,7 +2,7 @@ import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Container } from "@design-system";
 import { type PropsWithChildren } from "react";
 
-const RepEqLayout = ({ children }: PropsWithChildren) => {
+const SimuFunnelLayout = ({ children }: PropsWithChildren) => {
   return (
     <>
       <Container>
@@ -26,4 +26,4 @@ const RepEqLayout = ({ children }: PropsWithChildren) => {
   );
 };
 
-export default RepEqLayout;
+export default SimuFunnelLayout;

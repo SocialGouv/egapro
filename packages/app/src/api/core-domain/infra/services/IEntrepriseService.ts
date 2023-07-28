@@ -39,6 +39,7 @@ export interface Entreprise extends BaseInfo {
   firstMatchingEtablissement: ShortEtablissement;
 }
 
+// TODO only raison_sociale, naf, and siren
 export interface ShortEtablissement {
   activitePrincipaleEtablissement: CodeNaf;
   address: string;
@@ -46,7 +47,7 @@ export interface ShortEtablissement {
   codeCommuneEtablissement: string;
   /** COG (Code Officiel Géographique) / Code Insee */
   codePaysEtrangerEtablissement?: string;
-  codePostalEtablissement: string;
+  codePostalEtablissement: string; // TODO: may be undefined https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/412653180
   etablissementSiege: boolean;
   idccs?: number[];
   libelleCommuneEtablissement: string;

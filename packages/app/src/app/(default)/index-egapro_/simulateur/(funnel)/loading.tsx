@@ -1,9 +1,9 @@
-import { FormLayout } from "@design-system";
+import { CenteredContainer, FormLayout } from "@design-system";
 import Skeleton from "react-loading-skeleton";
 
 const FunnelLoading = () => {
   return (
-    <>
+    <CenteredContainer pb="6w">
       <p>
         <Skeleton count={2} />
       </p>
@@ -17,7 +17,7 @@ const FunnelLoading = () => {
           <Skeleton height="2.5rem" />
         </div>
       </FormLayout>
-    </>
+    </CenteredContainer>
   );
 };
 

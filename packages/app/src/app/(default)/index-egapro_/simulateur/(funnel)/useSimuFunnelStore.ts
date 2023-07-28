@@ -1,4 +1,5 @@
 import { type CreateSimulationDTO } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { type Any } from "@common/utils/types";
 import { useEffect, useState } from "react";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -13,9 +14,12 @@ interface PrivateState {
   _hasHydrated: boolean;
 }
 
+type DeepPartial<T> = {
+  [K in keyof T]?: DeepPartial<T[K]>;
+};
 interface Actions {
   resetFunnel(): void;
-  saveFunnel(form?: Partial<CreateSimulationDTO>): void;
+  saveFunnel(form?: DeepPartial<CreateSimulationDTO>): void;
   setIsEdit(isEdit: boolean): void;
 }
 
@@ -36,7 +40,7 @@ const usePrivateSimuFunnelStore = create<PrivateSimuFunnelStore>()(
       setIsEdit: isEdit => set({ isEdit }),
       saveFunnel: funnel =>
         set({
-          funnel: { ...get().funnel, ...funnel },
+          funnel: { ...get().funnel, ...(funnel as Any) },
         }),
       resetFunnel: () =>
         set({
@@ -60,7 +64,7 @@ const usePrivateSimuFunnelStore = create<PrivateSimuFunnelStore>()(
 
 export const useSimuFunnelStore = usePrivateSimuFunnelStore as UseSimuFunnelStore;
 
-export const useSimmuFunnelClientStore = ((...args: Parameters<typeof useSimuFunnelStore>) => {
+export const useSimuFunnelClientStore = ((...args: Parameters<typeof useSimuFunnelStore>) => {
   const result = useSimuFunnelStore(...args);
   const [hasMounted, setMounted] = useState(false);
 
@@ -72,4 +76,4 @@ export const useSimmuFunnelClientStore = ((...args: Parameters<typeof useSimuFun
 }) as typeof useSimuFunnelStore;
 
 export const useSimuFunnelStoreHasHydrated = () =>
-  (useSimmuFunnelClientStore as typeof usePrivateSimuFunnelStore)(state => state._hasHydrated);
+  (useSimuFunnelClientStore as typeof usePrivateSimuFunnelStore)(state => state._hasHydrated);

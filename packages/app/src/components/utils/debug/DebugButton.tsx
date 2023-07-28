@@ -3,7 +3,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { type Any } from "@common/utils/types";
-import { useEffect, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
 import { ClientOnly } from "../ClientOnly";
@@ -32,7 +32,7 @@ export interface DebugButtonProps {
   infoText?: string;
   obj: Any;
 }
-export const DebugButton = ({ obj, infoText, alwaysOn }: DebugButtonProps) => {
+export const DebugButton = ({ obj, infoText, alwaysOn, children }: PropsWithChildren<DebugButtonProps>) => {
   const [isDebugEnabled, setIsDebugEnabled] = useState(false);
 
   useEffect(() => {
@@ -50,6 +50,8 @@ export const DebugButton = ({ obj, infoText, alwaysOn }: DebugButtonProps) => {
           }}
           priority="tertiary no outline"
           title={`Debug${infoText ? ` ${infoText}` : ""}`}
+          // eslint-disable-next-line react/no-children-prop
+          children={children}
         />
       )}
     </>
