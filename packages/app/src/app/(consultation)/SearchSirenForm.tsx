@@ -61,10 +61,10 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
       <Grid haveGutters>
         <GridCol>
           <Input
-            label="Nom ou numéro Siren de l’entreprise"
+            label="Nom ou numéro Siren de l’entreprise déclarante"
             nativeInputProps={{
               id: "query",
-              title: "Saisissez le nom ou le Siren d'une entreprise",
+              title: "Saisissez le nom ou le Siren d'une entreprise déclarante",
               autoComplete: "off",
               ...register("query"),
             }}
