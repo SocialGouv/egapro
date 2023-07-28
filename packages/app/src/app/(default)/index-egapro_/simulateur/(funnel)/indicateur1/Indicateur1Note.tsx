@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { type IndicateurUnComputer, type Result } from "@common/core-domain/computers/IndicateurUnComputer";
 import { percentFormat } from "@common/utils/number";
 import { type Any } from "@common/utils/types";
 import { IndicatorNote } from "@design-system";
@@ -15,23 +15,24 @@ export const Indicateur1Note = ({ computer }: Props) => {
     formState: { isValid },
   } = useFormContext();
 
-  const computed = computer.canCompute() ? computer.compute() : null;
-  const advantageText = (() => {
-    if (!computed) return "";
+  let computed: Result | null = null;
+  let isNC = false;
+  let advantageText = "";
+  try {
+    computed = computer.compute();
     if (computed.genderAdvantage === "equality") {
-      return "Les femmes et les hommes sont à égalité";
+      advantageText = "Les femmes et les hommes sont à égalité";
+    } else {
+      advantageText = "Écart de rémunération ";
+      if (computed.note === 40) {
+        advantageText += "constaté ";
+      }
+      advantageText += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
     }
-    let text = "Écart de rémunération ";
-    if (computed.note === 40) {
-      text += "constaté ";
-    }
-    text += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
-
-    return text;
-  })();
-
-  const metadata = computer.canCompute() ? computer.getTotalMetadata() : null;
-  const isNC = metadata ? metadata.totalGroupCount / (metadata.totalWomenCount + metadata.totalMenCount) < 0.4 : true;
+    isNC = !computer.canCompute();
+  } catch {
+    // noop
+  }
 
   return (
     <ClientAnimate>

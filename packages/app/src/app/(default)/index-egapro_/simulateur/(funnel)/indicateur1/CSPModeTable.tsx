@@ -17,6 +17,7 @@ import { useFormContext } from "react-hook-form";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
+import { Indicateur1Note } from "./Indicateur1Note";
 import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableUtil";
 
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
@@ -187,6 +188,10 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
           effectifsCsp: funnel.effectifs.csp,
         })}
       />
+
+      <CenteredContainer fluid py="1w">
+        <Indicateur1Note computer={computer} />
+      </CenteredContainer>
     </>
   );
 };

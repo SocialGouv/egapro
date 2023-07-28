@@ -140,15 +140,20 @@ export const getCommonBodyColumns = ({
   };
 };
 
-interface CommonFooterProps {
+interface IsEnoughEmployeesProps {
   computer: IndicateurUnComputer<Any, Any>;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
-const errorColor = "var(--text-default-error)";
-export const getCommonFooter = ({
-  computer,
+interface IsEnoughEmployeesReturn {
+  enoughMen: boolean;
+  enoughWomen: boolean;
+  totalCspMen: number;
+  totalCspWomen: number;
+}
+export const getIsEnoughEmployees = ({
   effectifsCsp: csp,
-}: CommonFooterProps): AlternativeTableProps["footer"] => {
+  computer,
+}: IsEnoughEmployeesProps): IsEnoughEmployeesReturn => {
   const [totalCspWomen, totalCspMen] = categories.reduce(
     (acc, category) =>
       ageRanges.reduce(
@@ -160,10 +165,26 @@ export const getCommonFooter = ({
       ),
     [0, 0],
   );
-  const { resultRaw } = computer.compute();
+
   const metadata = computer.getTotalMetadata();
   const enoughWomen = metadata.totalWomenCount === totalCspWomen;
   const enoughMen = metadata.totalMenCount === totalCspMen;
+
+  return { enoughWomen, enoughMen, totalCspWomen, totalCspMen };
+};
+
+interface CommonFooterProps {
+  computer: IndicateurUnComputer<Any, Any>;
+  effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
+}
+const errorColor = "var(--text-default-error)";
+export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): AlternativeTableProps["footer"] => {
+  const { resultRaw } = computer.compute();
+  const metadata = computer.getTotalMetadata();
+  const { enoughWomen, enoughMen, totalCspWomen, totalCspMen } = getIsEnoughEmployees({
+    computer,
+    effectifsCsp,
+  });
 
   return [
     {

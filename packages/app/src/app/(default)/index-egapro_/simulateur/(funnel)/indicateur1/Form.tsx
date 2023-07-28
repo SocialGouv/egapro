@@ -3,7 +3,6 @@
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import {
   ageRanges,
-  categories,
   IndicateurUnComputer,
   type RemunerationsCSP,
   type RemunerationsOther,
@@ -25,38 +24,21 @@ import { z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import { CSPModeTable } from "./CSPModeTable";
-import { Indicateur1Note } from "./Indicateur1Note";
 import { OtherModesTable } from "./OtherModesTable";
+import { getIsEnoughEmployees } from "./tableUtil";
 
+const schemaOtherComputer = new IndicateurUnComputer(RemunerationsMode.Enum.OTHER_LEVEL);
 const formSchema = createSteps.indicateur1
   .and(createSteps.effectifs)
   .superRefine(({ mode, remunerations, csp }, ctx) => {
     if (mode !== RemunerationsMode.Enum.CSP) {
       // test if there is the same amount of CSP in effectifs and remunerations
-      const [totalCspWomen, totalCspMen] = categories.reduce(
-        (acc, category) =>
-          ageRanges.reduce(
-            (innerAcc, ageRange) => [
-              innerAcc[0] + (csp[category].ageRanges[ageRange].women || 0),
-              innerAcc[1] + (csp[category].ageRanges[ageRange].men || 0),
-            ],
-            acc,
-          ),
-        [0, 0],
-      );
-      const [totalRemunerationsWomen, totalRemunerationsMen] = remunerations.reduce(
-        (acc, remuneration) =>
-          ageRanges.reduce(
-            (innerAcc, ageRange) => [
-              innerAcc[0] + (remuneration.category[ageRange]?.womenCount || 0),
-              innerAcc[1] + (remuneration.category[ageRange]?.menCount || 0),
-            ],
-            acc,
-          ),
-        [0, 0],
-      );
-      const enoughWomen = totalRemunerationsWomen === totalCspWomen;
-      const enoughMen = totalRemunerationsMen === totalCspMen;
+      schemaOtherComputer.setRemunerations(remunerations as RemunerationsOther);
+
+      const { enoughWomen, enoughMen } = getIsEnoughEmployees({
+        computer: schemaOtherComputer,
+        effectifsCsp: csp,
+      });
 
       if (!enoughWomen || !enoughMen) {
         ctx.addIssue({
@@ -65,6 +47,15 @@ const formSchema = createSteps.indicateur1
           path: ["remunerations"],
         });
       }
+
+      // enable if we want to block the user if there is not enough employees
+      // if (!schemaOtherComputer.canCompute()) {
+      //   ctx.addIssue({
+      //     code: z.ZodIssueCode.custom,
+      //     message: `L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs`,
+      //     path: ["remunerations"],
+      //   });
+      // }
     }
   });
 type Indic1FormType = z.infer<typeof formSchema>;
@@ -80,6 +71,7 @@ export const Indic1Form = () => {
   const [lastCspRemunerations, setLastCspRemunerations] = useState<RemunerationsCSP | null>(null);
   const [lastOtherRemunerations, setLastOtherRemunerations] = useState<RemunerationsOther | null>(null);
   const [lastMode, setLastMode] = useState<RemunerationsMode.Enum | null>(null);
+  const [defaultRemunerations, setDefaultRemunerations] = useState<RemunerationsCSP | RemunerationsOther>();
 
   useEffect(() => {
     if (funnel?.indicateur1?.mode) {
@@ -103,6 +95,7 @@ export const Indic1Form = () => {
     getValues,
     watch,
     resetField,
+    setValue,
     control,
   } = methods;
 
@@ -187,6 +180,7 @@ export const Indic1Form = () => {
                             lastMode &&
                             lastMode !== RemunerationsMode.Enum.CSP
                           ) {
+                            console.log("early return", { lastMode, mode });
                             setLastMode(mode);
                             return field.onChange(mode);
                           }
@@ -202,9 +196,14 @@ export const Indic1Form = () => {
                               setLastOtherRemunerations(currentRemunerations as RemunerationsOther);
                             }
                           }
-                          resetField("remunerations", { defaultValue });
                           setLastMode(mode);
                           field.onChange(mode);
+                          console.log("reset", { mode, lastMode, defaultValue });
+                          if (mode === RemunerationsMode.Enum.CSP || currentRemunerations?.length) {
+                            resetField("remunerations", { defaultValue });
+                          } else {
+                            setDefaultRemunerations(defaultValue);
+                          }
                         },
                       },
                     })),
@@ -215,22 +214,21 @@ export const Indic1Form = () => {
           />
         </CenteredContainer>
         <Container mb="4w">
-          <ClientAnimate>
-            {currentMode && (
-              <div>
-                {currentMode === RemunerationsMode.Enum.CSP ? (
-                  <CSPModeTable computer={cspComputer} staff={session?.user.staff} />
-                ) : (
-                  <OtherModesTable computer={otherComputer} staff={session?.user.staff} />
-                )}
-                <CenteredContainer fluid py="1w">
-                  <Indicateur1Note
-                    computer={currentMode === RemunerationsMode.Enum.CSP ? cspComputer : otherComputer}
+          {currentMode && (
+            <ClientAnimate>
+              {currentMode === RemunerationsMode.Enum.CSP ? (
+                <CSPModeTable computer={cspComputer} staff={session?.user.staff} />
+              ) : (
+                <ClientAnimate>
+                  <OtherModesTable
+                    computer={otherComputer}
+                    staff={session?.user.staff}
+                    defaultRemunerations={defaultRemunerations}
                   />
-                </CenteredContainer>
-              </div>
-            )}
-          </ClientAnimate>
+                </ClientAnimate>
+              )}
+            </ClientAnimate>
+          )}
         </Container>
         <CenteredContainer pb="6w">
           <BackNextButtonsGroup

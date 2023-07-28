@@ -11,11 +11,13 @@ import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { type Any } from "@common/utils/types";
-import { AlternativeTable, type AlternativeTableProps } from "@design-system";
+import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
+import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
+import { Indicateur1Note } from "./Indicateur1Note";
 import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableUtil";
 
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
@@ -25,10 +27,11 @@ interface OtherModesTableProps {
     RemunerationsMode.Enum.BRANCH_LEVEL | RemunerationsMode.Enum.OTHER_LEVEL,
     RemunerationsOther
   >;
+  defaultRemunerations?: RemunerationsOther;
   staff?: boolean;
 }
 
-export const OtherModesTable = ({ computer, staff }: OtherModesTableProps) => {
+export const OtherModesTable = ({ computer, staff, defaultRemunerations }: OtherModesTableProps) => {
   const funnel = useSimuFunnelStore(state => state.funnel);
   const hydrated = useSimuFunnelStoreHasHydrated();
 
@@ -43,10 +46,18 @@ export const OtherModesTable = ({ computer, staff }: OtherModesTableProps) => {
     fields: remunerationsFields,
     append: appendRemunerations,
     remove: removeRemunerations,
+    replace: replaceRemunerations,
   } = useFieldArray({
     control,
     name: "remunerations",
   });
+
+  useEffect(() => {
+    if (defaultRemunerations) {
+      console.log("REPLACE REMUNERATIONS", defaultRemunerations);
+      replaceRemunerations(defaultRemunerations);
+    }
+  }, [defaultRemunerations]);
 
   if (!hydrated || !funnel?.effectifs) {
     return null;
@@ -186,6 +197,10 @@ export const OtherModesTable = ({ computer, staff }: OtherModesTableProps) => {
       >
         Ajouter un niveau ou coefficient hiérarchique
       </Button>
+
+      <CenteredContainer fluid py="1w">
+        <Indicateur1Note computer={computer} />
+      </CenteredContainer>
     </>
   );
 };

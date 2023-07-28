@@ -55,7 +55,7 @@ interface TotalMetadata {
   validGroups: Array<[string, CSPAgeRange.Enum]>;
 }
 
-interface Result {
+export interface Result {
   genderAdvantage: "equality" | "men" | "women";
   note: number;
   result: number;
@@ -89,7 +89,7 @@ export class IndicateurUnComputer<
     }
 
     if (!this.remunerations) {
-      throw new Error("employees must be set before calling totalMetadata");
+      throw new Error("remunerations must be set before calling totalMetadata");
     }
 
     let totalEmployeeCount = 0;
