@@ -8,7 +8,7 @@ type BaseIndicatorNoteProps = {
   className?: string;
   classes?: Partial<Record<"description" | "legend" | "max" | "note" | "root" | "text", string>>;
   noBorder?: boolean;
-  note: number;
+  note: number | string;
   text: NonNullable<ReactNode>;
 };
 
