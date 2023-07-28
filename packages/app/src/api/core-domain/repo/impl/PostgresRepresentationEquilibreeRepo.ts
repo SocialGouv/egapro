@@ -6,7 +6,7 @@ import {
 } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
-import { UnexpectedRepositoryError } from "@common/shared-domain";
+import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
 import { type Any } from "@common/utils/types";
 
 import { type IRepresentationEquilibreeRepo } from "../IRepresentationEquilibreeRepo";
@@ -97,6 +97,11 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
 
   public async update(item: RepresentationEquilibree): Promise<void> {
     await this.save(item);
+  }
+
+  public async count(): Promise<number> {
+    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table}`;
+    return Number(count);
   }
 
   private get requestLimit() {
