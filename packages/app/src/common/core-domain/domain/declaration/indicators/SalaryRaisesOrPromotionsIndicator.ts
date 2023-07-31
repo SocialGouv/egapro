@@ -43,7 +43,7 @@ export class SalaryRaisesOrPromotionsIndicator extends AbstractIndicator<SalaryR
   }
 
   public fromJson(json: EntityPropsToJson<SalaryRaisesOrPromotionsIndicatorProps>): this {
-    const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
+    const categories = json.categories.map(cat => (typeof cat === "number" ? new SimpleNumber(cat) : null));
     const props: SalaryRaisesOrPromotionsIndicatorProps = {
       categories,
       progressObjective: json.progressObjective,
