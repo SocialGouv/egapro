@@ -1,5 +1,5 @@
 import { type DeclarationDTO } from "@common/models/generated";
-import { useSession } from "next-auth/react";
+import { type SessionContextValue, useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import { type FetcherOptions, type FetcherReturn } from "./fetcher";
@@ -145,7 +145,11 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
   };
 }
 
-export const resendReceipt = (siren: string, year: number) =>
-  fetch(`/declaration/${siren}/${year}/receipt`, {
+export const resendReceipt = (session: SessionContextValue) => async (siren: string, year: number) => {
+  return fetcher(`/declaration/${siren}/${year}/receipt`, {
+    headers: {
+      "API-KEY": session.data?.user.tokenApiV1,
+    } as HeadersInit,
     method: "POST",
   });
+};

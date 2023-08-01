@@ -7,6 +7,7 @@ import { Container, Grid, GridCol } from "@design-system";
 import { resendReceipt } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
@@ -17,6 +18,7 @@ export const SendReceipt = () => {
   const { formData, resetFormData } = useDeclarationFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
   const hasMounted = useHasMounted();
+  const session = useSession();
 
   if (
     formData.commencer?.annéeIndicateurs === undefined ||
@@ -42,7 +44,7 @@ export const SendReceipt = () => {
     }
 
     setReceiptProcessing(true);
-    resendReceipt(siren, année).finally(() => {
+    resendReceipt(session)(siren, année).finally(() => {
       setReceiptProcessing(false);
     });
   };
