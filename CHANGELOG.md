@@ -1,3 +1,17 @@
+# [2.90.0](https://github.com/SocialGouv/egapro/compare/v2.89.5...v2.90.0) (2023-08-01)
+
+
+### Bug Fixes
+
+* better decla map for indic 2/3 after opmc (Closes [#1694](https://github.com/SocialGouv/egapro/issues/1694)) ([1c75675](https://github.com/SocialGouv/egapro/commit/1c75675e0b8e2e3d6ec66e1634abe9ab1784eeb7))
+* up k8s cronjob apiversion ([#1683](https://github.com/SocialGouv/egapro/issues/1683)) ([947971a](https://github.com/SocialGouv/egapro/commit/947971a4d6ca924786318a5aa8989f9d89665e06))
+
+
+### Features
+
+* add precision on search input (Closes [#1664](https://github.com/SocialGouv/egapro/issues/1664)) ([a8ceb9c](https://github.com/SocialGouv/egapro/commit/a8ceb9c185c7506992ff432bfe0a2ffcf158024d))
+* display previous years in search results (Closes [#1700](https://github.com/SocialGouv/egapro/issues/1700)) ([719b4a7](https://github.com/SocialGouv/egapro/commit/719b4a7a6231f6c4d2bae7fbf859ace3f8dd0999))
+
 ## [2.89.5](https://github.com/SocialGouv/egapro/compare/v2.89.4...v2.89.5) (2023-07-04)
 
 
