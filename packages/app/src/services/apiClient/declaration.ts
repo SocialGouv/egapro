@@ -1,5 +1,5 @@
 import { type DeclarationDTO } from "@common/models/generated";
-import { type SessionContextValue, useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import { type FetcherOptions, type FetcherReturn } from "./fetcher";
@@ -14,11 +14,18 @@ export type DeclarationAPI = {
 };
 
 export const submitDeclaration = async (dto: DeclarationDTO) => {
+  const session = await getSession();
+
   const siren = dto.entreprise.siren;
   const year = dto.déclaration.année_indicateurs;
-  const url = `/representation-equilibree/${siren}/${year}`;
+  const url = `/declaration/${siren}/${year}`;
+
+  console.log({ dto });
 
   return fetcher(url, {
+    headers: {
+      "API-KEY": session?.user.tokenApiV1,
+    } as HeadersInit,
     method: "PUT",
     body: JSON.stringify(dto),
   });
@@ -145,10 +152,12 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
   };
 }
 
-export const resendReceipt = (session: SessionContextValue) => async (siren: string, year: number) => {
+export const resendReceipt = async (siren: string, year: number) => {
+  const session = await getSession();
+
   return fetcher(`/declaration/${siren}/${year}/receipt`, {
     headers: {
-      "API-KEY": session.data?.user.tokenApiV1,
+      "API-KEY": session?.user.tokenApiV1,
     } as HeadersInit,
     method: "POST",
   });

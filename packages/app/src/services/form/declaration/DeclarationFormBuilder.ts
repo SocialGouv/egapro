@@ -202,7 +202,7 @@ export type DeclarationFormState = {
   };
   "resultat-global"?: {
     index?: number;
-    mesures: string;
+    mesures: DeclarationDTO["déclaration"]["mesures_correctives"];
     points: number;
     pointsCalculables: number;
   };
@@ -344,7 +344,7 @@ export const DeclarationFormBuilder = {
           },
       // TODO: les autres indicateurs et autres informations
       "resultat-global": {
-        mesures: declaration.déclaration.mesures_correctives || "",
+        mesures: declaration.déclaration.mesures_correctives,
         index: declaration.déclaration?.index,
         points: declaration.déclaration.points || 0,
         pointsCalculables: declaration.déclaration.points_calculables || 0,
@@ -395,6 +395,7 @@ function buildDeclaration(formState: DeclarationFormState): DeclarationDTO["déc
       modalités: formState.publication?.choixSiteWeb === "non" ? formState.publication?.modalités : undefined,
       url: formState.publication?.choixSiteWeb === "oui" ? formState.publication?.url : undefined,
     },
+    mesures_correctives: formState["resultat-global"]?.mesures,
   };
 }
 
@@ -440,6 +441,22 @@ function buildEntrepriseDTO(formState: DeclarationFormState): DeclarationDTO["en
   };
 }
 
+// Remove undefined and null values from categories.
+function cleanCategories(categories?: Catégorie[]) {
+  if (categories === undefined) return undefined;
+
+  return categories.map(category => ({
+    nom: category.nom,
+    // Remove tranches with null or undefined values.
+    tranches: (Object.keys(category.tranches) as Array<keyof TranchesAge>)
+      .filter(key => category.tranches[key] !== undefined && category.tranches[key] !== null)
+      .map(key => ({ [key]: category.tranches[key] }))
+      .reduce((acc, curr) => {
+        return { ...acc, ...curr };
+      }, {}),
+  }));
+}
+
 function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indicateurs"] {
   if (formState["periode-reference"]?.périodeSuffisante === "non") return undefined;
 
@@ -457,18 +474,24 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           catégories:
             formState.remunerations?.estCalculable === "oui"
               ? formState.remunerations.mode === RemunerationsMode.Enum.CSP
-                ? (formState["remunerations-csp"]?.catégories as Remunerations["catégories"])
+                ? (cleanCategories(formState["remunerations-csp"]?.catégories) as Remunerations["catégories"])
                 : formState.remunerations.mode === RemunerationsMode.Enum.BRANCH_LEVEL
-                ? (formState["remunerations-coefficient-branche"]?.catégories as Remunerations["catégories"])
-                : (formState["remunerations-coefficient-autre"]?.catégories as Remunerations["catégories"])
+                ? (cleanCategories(
+                    formState["remunerations-coefficient-branche"]?.catégories,
+                  ) as Remunerations["catégories"])
+                : (cleanCategories(
+                    formState["remunerations-coefficient-autre"]?.catégories,
+                  ) as Remunerations["catégories"])
               : undefined,
           date_consultation_cse:
             formState.remunerations?.cse === "oui" ? formState.remunerations?.dateConsultationCSE : undefined,
           mode: formState.remunerations?.mode,
         };
 
-  const augmentations: Augmentations =
-    formState.augmentations?.estCalculable === "non"
+  const augmentations: Augmentations | undefined =
+    formState.entreprise?.tranche === "50:250"
+      ? undefined
+      : formState.augmentations?.estCalculable === "non"
       ? {
           non_calculable: formState.augmentations.motifNonCalculabilité,
         }
@@ -484,8 +507,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           ],
         };
 
-  const promotions: Promotions =
-    formState.promotions?.estCalculable === "non"
+  const promotions: Promotions | undefined =
+    formState.entreprise?.tranche === "50:250"
+      ? undefined
+      : formState.promotions?.estCalculable === "non"
       ? {
           non_calculable: formState.promotions.motifNonCalculabilité,
         }
@@ -501,8 +526,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           ],
         };
 
-  const augmentationsEtPromotions: AugmentationsEtPromotions =
-    formState["augmentations-et-promotions"]?.estCalculable === "non"
+  const augmentationsEtPromotions: AugmentationsEtPromotions | undefined =
+    formState.entreprise?.tranche !== "50:250"
+      ? undefined
+      : formState["augmentations-et-promotions"]?.estCalculable === "non"
       ? {
           non_calculable: formState["augmentations-et-promotions"].motifNonCalculabilité,
         }
@@ -532,9 +559,9 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
   };
 
   return {
-    augmentations,
-    promotions,
-    augmentations_et_promotions: augmentationsEtPromotions,
+    ...(augmentations && { augmentations }),
+    ...(promotions && { promotions }),
+    ...(augmentationsEtPromotions && { augmentations_et_promotions: augmentationsEtPromotions }),
     congés_maternité: congésMaternités,
     hautes_rémunérations: hautesRémunérations,
     rémunérations,
