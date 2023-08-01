@@ -1,5 +1,4 @@
 import { type DeclarationDTO } from "@common/models/generated";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 
@@ -14,18 +13,15 @@ export type DeclarationAPI = {
   year: number;
 };
 
-export const putDeclaration = async (_data: DeclarationFormState) => {
-  //   const representation = buildRepresentation(data);
-  //   const siren = representation.entreprise.siren;
-  //   const year = representation.déclaration.année_indicateurs;
-  //   const url = `/representation-equilibree/${siren}/${year}`;
+export const submitDeclaration = async (dto: DeclarationDTO) => {
+  const siren = dto.entreprise.siren;
+  const year = dto.déclaration.année_indicateurs;
+  const url = `/representation-equilibree/${siren}/${year}`;
 
-  //   return fetcher(url, {
-  //     method: "PUT",
-  //     body: JSON.stringify(representation),
-  //   });
-
-  return "TBD";
+  return fetcher(url, {
+    method: "PUT",
+    body: JSON.stringify(dto),
+  });
 };
 
 export const fetchDeclaration = (siren: string, year: number, options?: FetcherOptions) =>
@@ -148,3 +144,8 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
     mutate,
   };
 }
+
+export const resendReceipt = (siren: string, year: number) =>
+  fetch(`/declaration/${siren}/${year}/receipt`, {
+    method: "POST",
+  });

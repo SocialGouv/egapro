@@ -27,9 +27,9 @@ const Page = () => {
   const { formData, setStatus } = useDeclarationFormManager();
 
   const siren = formData.commencer?.entrepriseDéclarante?.siren;
-  const year = formData.commencer?.annéeIndicateurs;
+  const année = formData.commencer?.annéeIndicateurs;
 
-  const { declaration, error } = useDeclaration(siren, year);
+  const { declaration, error } = useDeclaration(siren, année);
 
   const canEdit = canEditSiren(session?.data?.user)(siren);
 
@@ -57,7 +57,7 @@ const Page = () => {
 
       <RecapDeclaration déclaration={declaration?.data} />
 
-      {canEdit && year && (
+      {canEdit && année && (
         <>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-8w")}
@@ -78,10 +78,10 @@ const Page = () => {
               <DownloadCard
                 title="Télécharger le récapitulatif"
                 endDetail="PDF"
-                href={`/api/declaration/${siren}/${year}/pdf`}
-                filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
+                href={`/api/declaration/${siren}/${année}/pdf`}
+                filename={`declaration_egapro_${siren}_${année + 1}.pdf`}
                 fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des données ${year}`}
+                desc={`Année ${année + 1} au titre des données ${année}`}
               />
             </GridCol>
           </Grid>

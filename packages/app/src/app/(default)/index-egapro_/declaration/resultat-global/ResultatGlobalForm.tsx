@@ -71,15 +71,16 @@ export const ResultatGlobalForm = () => {
     defaultValues,
   });
 
-  const index = formData[stepName]?.index;
-  const points = formData[stepName]?.points;
-  const pointsCalculables = formData[stepName]?.pointsCalculables;
-
   const {
     register,
     handleSubmit,
+    watch,
     formState: { isValid, errors },
   } = methods;
+
+  const index = watch("index");
+  const points = watch("points");
+  const pointsCalculables = watch("pointsCalculables");
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -122,7 +123,7 @@ export const ResultatGlobalForm = () => {
               }
             />
 
-            {index !== undefined && index < 75 && (
+            {index !== undefined && index < 85 && (
               <>
                 <Select
                   label="Mesures de correction prévues à l'article D. 1142-6"
