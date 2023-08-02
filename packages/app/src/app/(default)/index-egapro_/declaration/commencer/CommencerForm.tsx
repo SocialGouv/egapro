@@ -56,6 +56,7 @@ const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: 
 const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
+  formData: DeclarationFormState,
   tokenApiV1: string,
 ): Promise<DeclarationFormState> => {
   const previousDeclaration = await fetchDeclaration(siren, year, {
@@ -65,6 +66,7 @@ const prepareDataWithExistingDeclaration = async (
     throwErrorOn404: false,
   });
 
+  // If there is a declaration, we use it as is.
   if (previousDeclaration) {
     const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
 
@@ -74,14 +76,23 @@ const prepareDataWithExistingDeclaration = async (
     };
   }
 
-  // Otherwise, this is a creation, so we start with fetching firm's data.
+  // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
+  const baseFormData: DeclarationFormState =
+    formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
+      ? formData
+      : {
+          "declaration-existante": {
+            status: "creation",
+          },
+        };
+
+  // We fetch the latest data for the entreprise to fill the entreprise page.
   const entreprise = await memoizedFetchSiren(siren, year);
 
   return {
-    "declaration-existante": {
-      status: "creation",
-    },
+    ...baseFormData,
     entreprise: {
+      ...baseFormData.entreprise,
       entrepriseDéclarante: buildEntreprise(entreprise),
     },
     [stepName]: {
@@ -117,9 +128,9 @@ export const CommencerForm = () => {
 
   const companies = user.companies;
 
-  const saveAndGoNext = async ({ annéeIndicateurs, siren }: FormType) => {
+  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
     // Synchronize the data with declaration if any.
-    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, user.tokenApiV1);
+    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
 
     // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
     saveFormData(newData);
@@ -127,7 +138,7 @@ export const CommencerForm = () => {
     router.push(funnelConfig(newData)[stepName].next().url);
   };
 
-  const onSubmit = async ({ annéeIndicateurs, siren }: FormType) => {
+  const onSubmit = async ({ siren, annéeIndicateurs }: FormType) => {
     const { siren: sirenStorage, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
 
     // If no data are present in session storage or data are present in session storage and siren and year are unchanged.
@@ -136,14 +147,14 @@ export const CommencerForm = () => {
       !annéeIndicateursStorage ||
       (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage)
     ) {
-      return await saveAndGoNext({ siren, annéeIndicateurs });
+      return await saveAndGoNext({ siren, annéeIndicateurs }, formData);
     }
 
     // In data are present in session storage and siren and year are not the same.
     if (confirm(buildConfirmMessage({ siren: sirenStorage, annéeIndicateurs: annéeIndicateursStorage }))) {
       // Start a new declaration of representation.
       resetFormData();
-      await saveAndGoNext({ siren, annéeIndicateurs });
+      await saveAndGoNext({ siren, annéeIndicateurs }, formData);
     } else {
       // Rollback to the old Siren.
       setValue("siren", sirenStorage);
