@@ -490,8 +490,7 @@ async def send_token(request, response):
     if request.ip in config.ALLOWED_IPS:
         response.json = {"token": token}
     else:
-        url = request.json.get("url", f"{request.domain}/index-egapro/declaration/?token=")
-        link = f"{url}{token}"
+        link = f"{os.environ.get('EGAPRO_APPLICATION_URL')}${request.json.get('path', '')}/?token={token}"
         if "localhost" in link or "127.0.0.1" in link:
             print(link)
             loggers.logger.info(link)
