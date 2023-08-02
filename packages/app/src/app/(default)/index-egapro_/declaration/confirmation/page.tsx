@@ -75,7 +75,7 @@ const ConfirmationPage = () => {
               footer={
                 <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                   <li>
-                    <Button onClick={() => alert("coucou")}>Déclarer les objectifs de progression</Button>
+                    <Button onClick={() => alert("TODO")}>Déclarer les objectifs de progression</Button>
                   </li>
                 </ul>
               }
