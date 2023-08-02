@@ -20,12 +20,12 @@ export const SendReceipt = () => {
 
   if (
     formData.commencer?.annéeIndicateurs === undefined ||
-    formData.commencer?.entrepriseDéclarante?.siren === undefined
+    formData.entreprise?.entrepriseDéclarante?.siren === undefined
   )
     throw new Error("Impossible de récupérer les données de l'entreprise");
 
   const année = Number(formData.commencer.annéeIndicateurs);
-  const siren = formData.commencer.entrepriseDéclarante?.siren;
+  const siren = formData.entreprise.entrepriseDéclarante?.siren;
 
   if (!hasMounted) {
     return <SkeletonForm fields={3} />;

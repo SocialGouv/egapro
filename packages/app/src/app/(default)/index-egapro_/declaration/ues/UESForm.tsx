@@ -124,10 +124,10 @@ export const UESForm = () => {
               <tbody>
                 <tr>
                   <td style={{ paddingTop: 30, paddingBottom: 30 }}>
-                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.siren}</span>
+                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.siren}</span>
                   </td>
                   <td>
-                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</span>
+                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.raisonSociale}</span>
                   </td>
                   <td>
                     <Badge noIcon severity="info">
@@ -158,7 +158,7 @@ export const UESForm = () => {
                             const allOtherSirens = [
                               ...allSirens.slice(0, index),
                               ...allSirens.slice(index + 1),
-                              formData.commencer?.entrepriseDéclarante?.siren,
+                              formData.entreprise?.entrepriseDéclarante?.siren,
                             ];
 
                             if (allOtherSirens.includes(watchedEntreprises[index].siren)) {

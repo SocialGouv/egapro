@@ -6,9 +6,9 @@ import { RecapCardCompany } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
 export const InformationEntreprise = () => {
-  const commencer = useDeclarationFormManager(state => state.formData.commencer);
+  const { formData } = useDeclarationFormManager();
 
-  const { entrepriseDéclarante } = commencer ?? {};
+  const entrepriseDéclarante = formData.entreprise?.entrepriseDéclarante;
 
   if (!entrepriseDéclarante) return null;
 

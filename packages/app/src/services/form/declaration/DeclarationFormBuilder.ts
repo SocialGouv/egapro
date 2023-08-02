@@ -1,4 +1,3 @@
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import {
   type AnneeIndicateur,
   type Augmentations,
@@ -101,7 +100,7 @@ export type DeclarationFormState = {
       };
   commencer?: {
     annéeIndicateurs: number;
-    entrepriseDéclarante?: Entreprise;
+    siren: string;
   };
   "conges-maternite"?:
     | {
@@ -113,7 +112,6 @@ export type DeclarationFormState = {
         note: number;
         résultat: number;
       };
-  // Only filled by the backend.
   declarant?: {
     accordRgpd: boolean;
     email: string;
@@ -125,7 +123,7 @@ export type DeclarationFormState = {
     date?: string | undefined;
     status: "consultation" | "creation" | "edition";
   };
-  entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
+  entreprise?: { entrepriseDéclarante: Entreprise; tranche?: TrancheValues; type?: "entreprise" | "ues" };
   "hautes-remunerations"?: {
     note: number;
     populationFavorable: PopulationFavorable;
@@ -173,7 +171,7 @@ export type DeclarationFormState = {
         cse?: OuiNon;
         dateConsultationCSE?: string;
         estCalculable: "oui";
-        mode: RemunerationsMode.Enum;
+        mode: Remunerations["mode"];
       }
     | {
         déclarationCalculCSP: boolean;
@@ -255,7 +253,7 @@ export const DeclarationFormBuilder = {
           },
       commencer: {
         annéeIndicateurs: declaration.déclaration.année_indicateurs,
-        entrepriseDéclarante: buildEntreprise(declaration.entreprise),
+        siren: declaration.entreprise.siren,
       },
       "declaration-existante": {
         date: declaration.déclaration.date,
@@ -274,7 +272,7 @@ export const DeclarationFormBuilder = {
         cse: declaration.indicateurs?.rémunérations?.date_consultation_cse ? "oui" : undefined,
         dateConsultationCSE: declaration.indicateurs?.rémunérations?.date_consultation_cse,
         déclarationCalculCSP: true, // Always true for an existing declaration.
-        mode: declaration.indicateurs?.rémunérations?.mode as RemunerationsMode.Enum, // Always present for an existing declaration.
+        mode: declaration.indicateurs?.rémunérations?.mode, // Always present for an existing declaration.
       },
       "remunerations-csp": {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -324,6 +322,7 @@ export const DeclarationFormBuilder = {
       entreprise: {
         tranche: declaration.entreprise.effectif!.tranche!, // Always present for an existing declaration.
         type: declaration.entreprise.ues?.nom ? "ues" : "entreprise",
+        entrepriseDéclarante: buildEntreprise(declaration.entreprise),
       },
       ues: {
         nom: declaration.entreprise.ues?.nom ?? "",
@@ -410,25 +409,25 @@ function buildDeclarant(formState: DeclarationFormState): DeclarationDTO["décla
   };
 }
 function buildEntrepriseDTO(formState: DeclarationFormState): DeclarationDTO["entreprise"] {
-  if (formState.commencer?.entrepriseDéclarante === undefined) throw new Error("Missing entreprise");
+  if (formState.entreprise?.entrepriseDéclarante === undefined) throw new Error("Missing entreprise");
 
   return {
-    code_naf: formState.commencer?.entrepriseDéclarante.codeNaf,
+    code_naf: formState.entreprise?.entrepriseDéclarante.codeNaf,
     effectif: {
       total:
         (formState["periode-reference"]?.périodeSuffisante === "oui" && formState["periode-reference"].effectifTotal) ||
         undefined,
       tranche: formState.entreprise?.tranche,
     },
-    raison_sociale: formState.commencer?.entrepriseDéclarante.raisonSociale,
-    siren: formState.commencer?.entrepriseDéclarante.siren,
-    adresse: formState.commencer?.entrepriseDéclarante.adresse,
-    code_pays: formState.commencer?.entrepriseDéclarante.codePays,
-    code_postal: formState.commencer?.entrepriseDéclarante.codePostal,
-    commune: formState.commencer?.entrepriseDéclarante.commune,
-    département: formState.commencer?.entrepriseDéclarante.département,
+    raison_sociale: formState.entreprise?.entrepriseDéclarante.raisonSociale,
+    siren: formState.entreprise?.entrepriseDéclarante.siren,
+    adresse: formState.entreprise?.entrepriseDéclarante.adresse,
+    code_pays: formState.entreprise?.entrepriseDéclarante.codePays,
+    code_postal: formState.entreprise?.entrepriseDéclarante.codePostal,
+    commune: formState.entreprise?.entrepriseDéclarante.commune,
+    département: formState.entreprise?.entrepriseDéclarante.département,
     plan_relance: formState.publication?.planRelance === "oui",
-    région: formState.commencer?.entrepriseDéclarante.région,
+    région: formState.entreprise?.entrepriseDéclarante.région,
     ues: !formState.ues?.nom
       ? undefined
       : {
@@ -460,10 +459,6 @@ function cleanCategories(categories?: Catégorie[]) {
 function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indicateurs"] {
   if (formState["periode-reference"]?.périodeSuffisante === "non") return undefined;
 
-  if (formState.remunerations?.estCalculable === "oui") {
-    formState.remunerations.mode === RemunerationsMode.Enum.CSP;
-  }
-
   const rémunérations: Remunerations =
     formState.remunerations?.estCalculable === "non"
       ? { non_calculable: formState.remunerations.motifNonCalculabilité }
@@ -473,9 +468,9 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           résultat: formState["remunerations-resultat"]?.résultat,
           catégories:
             formState.remunerations?.estCalculable === "oui"
-              ? formState.remunerations.mode === RemunerationsMode.Enum.CSP
+              ? formState.remunerations.mode === "csp"
                 ? (cleanCategories(formState["remunerations-csp"]?.catégories) as Remunerations["catégories"])
-                : formState.remunerations.mode === RemunerationsMode.Enum.BRANCH_LEVEL
+                : formState.remunerations.mode === "niveau_branche"
                 ? (cleanCategories(
                     formState["remunerations-coefficient-branche"]?.catégories,
                   ) as Remunerations["catégories"])

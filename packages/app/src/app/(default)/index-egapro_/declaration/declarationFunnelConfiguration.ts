@@ -1,5 +1,4 @@
 import { config } from "@common/config";
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 
 export const nbStepsMax = 15;
@@ -154,9 +153,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
           ? data.entreprise?.tranche === "50:250"
             ? funnelStaticConfig[`augmentations-et-promotions`]
             : funnelStaticConfig[`augmentations`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.CSP
+          : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
+          : data.remunerations?.mode === "niveau_branche"
           ? funnelStaticConfig[`remunerations-coefficient-branche`]
           : funnelStaticConfig[`remunerations-coefficient-autre`],
 
@@ -194,9 +193,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       previous: () =>
         data.remunerations?.estCalculable === "non"
           ? funnelStaticConfig[`remunerations`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.CSP
+          : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
+          : data.remunerations?.mode === "niveau_branche"
           ? funnelStaticConfig[`remunerations-coefficient-branche`]
           : funnelStaticConfig[`remunerations-coefficient-autre`],
     },

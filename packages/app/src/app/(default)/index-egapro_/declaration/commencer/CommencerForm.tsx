@@ -81,9 +81,12 @@ const prepareDataWithExistingDeclaration = async (
     "declaration-existante": {
       status: "creation",
     },
+    entreprise: {
+      entrepriseDéclarante: buildEntreprise(entreprise),
+    },
     [stepName]: {
       annéeIndicateurs: year,
-      entrepriseDéclarante: buildEntreprise(entreprise),
+      siren,
     },
   };
 };
@@ -99,7 +102,7 @@ export const CommencerForm = () => {
   const methods = useForm<FormType>({
     mode: "onTouched",
     resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
-    defaultValues: { ...formData[stepName], siren: formData.commencer?.entrepriseDéclarante?.siren },
+    defaultValues: { ...formData[stepName], siren: formData.entreprise?.entrepriseDéclarante?.siren },
   });
 
   const {
@@ -125,9 +128,7 @@ export const CommencerForm = () => {
   };
 
   const onSubmit = async ({ annéeIndicateurs, siren }: FormType) => {
-    const { entrepriseDéclarante, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
-
-    const sirenStorage = entrepriseDéclarante?.siren;
+    const { siren: sirenStorage, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
 
     // If no data are present in session storage or data are present in session storage and siren and year are unchanged.
     if (
@@ -215,7 +216,7 @@ export const CommencerForm = () => {
             backLabel="Réinitialiser"
             backProps={{
               onClick: confirmReset,
-              disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
+              disabled: formData ? !formData.entreprise?.entrepriseDéclarante?.siren : false,
             }}
             nextProps={{
               disabled: !isValid,

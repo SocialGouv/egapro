@@ -26,7 +26,7 @@ const Page = () => {
   const router = useRouter();
   const { formData, setStatus } = useDeclarationFormManager();
 
-  const siren = formData.commencer?.entrepriseDéclarante?.siren;
+  const siren = formData.entreprise?.entrepriseDéclarante?.siren;
   const année = formData.commencer?.annéeIndicateurs;
 
   const { declaration, error } = useDeclaration(siren, année);
