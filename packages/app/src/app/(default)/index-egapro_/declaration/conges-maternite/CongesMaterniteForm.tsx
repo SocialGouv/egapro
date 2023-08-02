@@ -5,7 +5,7 @@ import {
   computeIndicator4Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull, zodRadioInputSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -26,12 +26,17 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = zodFr.object({
-  estCalculable: zodRadioInputSchema,
-  motifNonCalculabilité: z.string().optional(),
-  résultat: zodNumberOrNaNOrNull.optional(),
-  note: z.number().optional(),
-});
+const formSchema = zodFr.discriminatedUnion("estCalculable", [
+  zodFr.object({
+    estCalculable: z.literal("non"),
+    motifNonCalculabilité: z.string(),
+  }),
+  zodFr.object({
+    estCalculable: z.literal("oui"),
+    résultat: zodNumberOrNaNOrNull.optional(),
+    note: z.number().optional(),
+  }),
+]);
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -57,7 +62,7 @@ export const CongesMaterniteForm = () => {
     register,
     handleSubmit,
     setValue,
-    formState: { isValid, errors },
+    formState: { isValid, errors: _errors },
     watch,
   } = methods;
 
