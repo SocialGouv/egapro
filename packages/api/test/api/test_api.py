@@ -14,7 +14,7 @@ async def test_request_token(client, monkeypatch):
 
     def mock_send(to, subject, body):
         assert to == "foo@bar.org"
-        assert "https://mycustomurl.org/declaration/token/" in body
+        assert "/declaration/token/" in body
         nonlocal calls
         calls += 1
 
@@ -24,7 +24,7 @@ async def test_request_token(client, monkeypatch):
         "/token",
         body={
             "email": "foo@bar.org",
-            "url": "https://mycustomurl.org/declaration/token/",
+            "path": "/declaration/token/",
         },
     )
     assert resp.status == 204
