@@ -104,16 +104,16 @@ export const computeIndex = (formState: DeclarationFormState) => {
 
   if (formState.entreprise?.tranche === "50:250") {
     if (formState["augmentations-et-promotions"]?.estCalculable === "oui") {
-      points += formState["augmentations-et-promotions"]?.note || 0;
+      points += formState["augmentations-et-promotions"].note;
       max += indicatorNoteMax["augmentations-et-promotions"];
     }
   } else {
     if (formState["augmentations"]?.estCalculable === "oui") {
-      points += formState["augmentations"]?.note || 0;
+      points += formState["augmentations"].note;
       max += indicatorNoteMax["augmentations"];
     }
     if (formState["promotions"]?.estCalculable === "oui") {
-      points += formState["promotions"]?.note || 0;
+      points += formState["promotions"].note;
       max += indicatorNoteMax["promotions"];
     }
   }

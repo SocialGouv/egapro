@@ -76,7 +76,7 @@ export const CongesMaterniteForm = () => {
   }, []);
 
   useEffect(() => {
-    if (résultat) {
+    if (résultat !== null && résultat !== undefined) {
       const note = computeIndicator4Note(résultat);
       setValue("note", note);
     }
