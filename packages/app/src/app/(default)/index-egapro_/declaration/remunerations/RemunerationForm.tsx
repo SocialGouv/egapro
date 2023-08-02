@@ -31,7 +31,7 @@ const formSchema = zodFr
     }),
     zodFr.object({
       estCalculable: z.literal("oui"),
-      mode: z.string().optional(), // No check is necessary as the value is from select options.
+      mode: z.string(), // No check is necessary as the value is from select options.
       cse: zodRadioInputSchema.nullish(),
       dateConsultationCSE: zodDateSchema,
     }),
