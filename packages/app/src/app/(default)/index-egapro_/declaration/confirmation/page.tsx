@@ -17,14 +17,11 @@ const ConfirmationPage = () => {
 
   if (!hasMounted) return <SkeletonForm fields={2} />;
 
-  if (
-    formData.commencer?.annéeIndicateurs === undefined ||
-    formData.entreprise?.entrepriseDéclarante?.siren === undefined
-  )
+  if (formData.commencer?.annéeIndicateurs === undefined || formData.commencer?.siren === undefined)
     throw new Error("Impossible de récupérer les données de l'entreprise");
 
   const année = Number(formData.commencer.annéeIndicateurs);
-  const siren = formData.entreprise.entrepriseDéclarante?.siren;
+  const siren = formData.commencer.siren;
   const index = formData["resultat-global"]?.index;
 
   return (
@@ -81,19 +78,19 @@ const ConfirmationPage = () => {
               }
               desc={
                 <>
-                  <p>
-                    <strong>
-                      Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 85
-                      points doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs
-                      de progression de chacun des indicateurs.
-                    </strong>
-                  </p>
-                  <p>
+                  <strong>
+                    Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 85 points
+                    doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs de
+                    progression de chacun des indicateurs.
+                  </strong>
+
+                  <br />
+                  <div>
                     Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de
                     publication doivent être transmis aux services du ministre chargé du travail et au comité social et
                     économique.Vous pouvez déclarer les objectifs de progression ultérieurement en vous connectant à
                     votre espace via le menu "Mes déclarations".
-                  </p>
+                  </div>
                 </>
               }
             />

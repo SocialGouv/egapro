@@ -158,7 +158,7 @@ export const UESForm = () => {
                             const allOtherSirens = [
                               ...allSirens.slice(0, index),
                               ...allSirens.slice(index + 1),
-                              formData.entreprise?.entrepriseDéclarante?.siren,
+                              formData.commencer?.siren,
                             ];
 
                             if (allOtherSirens.includes(watchedEntreprises[index].siren)) {

@@ -102,7 +102,7 @@ export const CommencerForm = () => {
   const methods = useForm<FormType>({
     mode: "onTouched",
     resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
-    defaultValues: { ...formData[stepName], siren: formData.entreprise?.entrepriseDéclarante?.siren },
+    defaultValues: formData[stepName],
   });
 
   const {

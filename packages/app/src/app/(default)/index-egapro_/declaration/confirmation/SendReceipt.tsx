@@ -18,14 +18,11 @@ export const SendReceipt = () => {
   const [receiptProcessing, setReceiptProcessing] = useState(false);
   const hasMounted = useHasMounted();
 
-  if (
-    formData.commencer?.annéeIndicateurs === undefined ||
-    formData.entreprise?.entrepriseDéclarante?.siren === undefined
-  )
+  if (formData.commencer?.annéeIndicateurs === undefined || formData.commencer?.siren === undefined)
     throw new Error("Impossible de récupérer les données de l'entreprise");
 
   const année = Number(formData.commencer.annéeIndicateurs);
-  const siren = formData.entreprise.entrepriseDéclarante?.siren;
+  const siren = formData.commencer.siren;
 
   if (!hasMounted) {
     return <SkeletonForm fields={3} />;
