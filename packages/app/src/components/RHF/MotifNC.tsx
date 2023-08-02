@@ -1,7 +1,7 @@
 import Select from "@codegouvfr/react-dsfr/Select";
 import { labelsMotifNC, type MotifNCKey, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
 import { type PropsWithChildren } from "react";
-import { useController } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 type Props = {
   stepName: MotifNCKey;
@@ -9,19 +9,17 @@ type Props = {
 
 export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
   const {
-    field,
-    fieldState: { error },
-  } = useController({
-    name: "motifNonCalculabilité",
-  });
+    register,
+    formState: { errors },
+  } = useFormContext();
 
   return (
     <>
       <Select
         label="Précision du motif de non calculabilité de l'indicateur"
-        nativeSelectProps={{ ...field }}
-        state={error ? "error" : "default"}
-        stateRelatedMessage={error?.message}
+        nativeSelectProps={{ ...register("motifNonCalculabilité") }}
+        state={errors.motifNonCalculabilité ? "error" : "default"}
+        stateRelatedMessage={errors.motifNonCalculabilité?.message as string | undefined}
       >
         <option value="" disabled hidden>
           Selectionnez une option
