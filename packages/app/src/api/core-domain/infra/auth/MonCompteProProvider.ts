@@ -23,14 +23,13 @@ export interface MonCompteProProfile {
 
 const ISSUER = (appTest: boolean) => `https://app${appTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`;
 export function MonCompteProProvider<P extends MonCompteProProfile>(
-  options: Omit<OAuthUserConfig<P>, "issuer"> & { appTest?: boolean },
+  options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
-  const issuer = ISSUER(options.appTest ?? false);
+  const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
   return {
     id: "moncomptepro",
     name: "Mon Compte Pro",
     type: "oauth",
-    issuer,
     wellKnown: `${issuer}/.well-known/openid-configuration`,
     allowDangerousEmailAccountLinking: true,
     authorization: {
