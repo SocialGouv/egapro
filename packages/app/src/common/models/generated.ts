@@ -1088,7 +1088,7 @@ export type Remunerations = WithPopulationFavorable & {
 export type WithPopulationFavorable = BaseIndicateurNote & {
   population_favorable?: PopulationFavorable;
 };
-export type PopulationFavorable = "femmes" | "hommes" | "egalite";
+export type PopulationFavorable = "femmes" | "hommes" | "";
 /**
  * Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les homme
  */

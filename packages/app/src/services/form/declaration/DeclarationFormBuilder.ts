@@ -462,7 +462,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
       ? { non_calculable: formState.remunerations.motifNonCalculabilité }
       : {
           note: formState["remunerations-resultat"]?.note,
-          population_favorable: formState["remunerations-resultat"]?.populationFavorable,
+          population_favorable:
+            formState["remunerations-resultat"]?.populationFavorable === ""
+              ? undefined
+              : formState["remunerations-resultat"]?.populationFavorable,
           résultat: formState["remunerations-resultat"]?.résultat,
           catégories:
             formState.remunerations?.estCalculable === "oui"
@@ -490,7 +493,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
         }
       : {
           note: formState.augmentations?.note,
-          population_favorable: formState.augmentations?.populationFavorable,
+          population_favorable:
+            formState.augmentations?.populationFavorable === ""
+              ? undefined
+              : formState.augmentations?.populationFavorable,
           résultat: formState.augmentations?.résultat,
           catégories: [
             formState.augmentations?.catégories?.[0].écarts || 0,
@@ -510,7 +516,8 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
       : {
           résultat: formState.promotions?.résultat,
           note: formState.promotions?.note,
-          population_favorable: formState.promotions?.populationFavorable,
+          population_favorable:
+            formState.promotions?.populationFavorable === "" ? undefined : formState.promotions?.populationFavorable,
           catégories: [
             formState.promotions?.catégories?.[0].écarts || 0,
             formState.promotions?.catégories?.[1].écarts || 0,
@@ -530,7 +537,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           note: formState["augmentations-et-promotions"]?.note,
           note_en_pourcentage: formState["augmentations-et-promotions"]?.notePourcentage,
           note_nombre_salariés: formState["augmentations-et-promotions"]?.noteNombreSalaries,
-          population_favorable: formState["augmentations-et-promotions"]?.populationFavorable,
+          population_favorable:
+            formState["augmentations-et-promotions"]?.populationFavorable === ""
+              ? undefined
+              : formState["augmentations-et-promotions"]?.populationFavorable,
           résultat: formState["augmentations-et-promotions"]?.résultat,
           résultat_nombre_salariés: formState["augmentations-et-promotions"]?.résultatEquivalentSalarié,
         };
@@ -548,7 +558,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
   const hautesRémunérations: HautesRemunerations = {
     note: formState["hautes-remunerations"]?.note,
     résultat: formState["hautes-remunerations"]?.résultat,
-    population_favorable: formState["hautes-remunerations"]?.populationFavorable,
+    population_favorable:
+      formState["hautes-remunerations"]?.populationFavorable === ""
+        ? undefined
+        : formState["hautes-remunerations"]?.populationFavorable,
   };
 
   return {
