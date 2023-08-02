@@ -8,7 +8,7 @@ import { Box, DownloadCard, Grid, GridCol, ImgJDMA, ImgSuccessLight } from "@des
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import Link from "next/link";
 
-import { SendReceipt } from "./SendReceipt";
+import { SendReceiptInitButtons } from "./SendReceipt";
 
 const ConfirmationPage = () => {
   const { formData } = useDeclarationFormManager();
@@ -48,7 +48,7 @@ const ConfirmationPage = () => {
       <p>Nous vous remercions de votre transmission.</p>
 
       <Box my="8w">
-        <SendReceipt />
+        <SendReceiptInitButtons />
       </Box>
 
       <Grid align="center" mt="6w">

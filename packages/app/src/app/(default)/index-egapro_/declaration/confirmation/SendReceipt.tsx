@@ -12,7 +12,7 @@ import { useState } from "react";
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import style from "./style.module.css";
 
-export const SendReceipt = () => {
+export const SendReceiptInitButtons = () => {
   const router = useRouter();
   const { formData, resetFormData } = useDeclarationFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
