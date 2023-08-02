@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import { CSPModeTable } from "./CSPModeTable";
 import { OtherModesTable } from "./OtherModesTable";
@@ -59,6 +60,7 @@ const formSchema = createSteps.indicateur1
     }
   });
 type Indic1FormType = z.infer<typeof formSchema>;
+const indicateur1Navigation = NAVIGATION.indicateur1;
 
 const cspComputer = new IndicateurUnComputer(RemunerationsMode.Enum.CSP);
 const otherComputer = new IndicateurUnComputer(RemunerationsMode.Enum.OTHER_LEVEL);
@@ -107,7 +109,7 @@ export const Indic1Form = () => {
   }
 
   if (!funnel?.effectifs) {
-    redirect("/index-egapro_/simulateur/effectifs");
+    redirect(simulateurPath("effectifs"));
   }
 
   const currentMode = watch("mode");
@@ -148,7 +150,7 @@ export const Indic1Form = () => {
 
   const onSubmit = ({ mode, remunerations }: Indic1FormType) => {
     saveFunnel({ indicateur1: { mode, remunerations } as Any });
-    redirect("/index-egapro_/simulateur/indicateur2");
+    redirect(simulateurPath(indicateur1Navigation.next(funnel)));
   };
 
   return (
@@ -232,7 +234,7 @@ export const Indic1Form = () => {
           <BackNextButtonsGroup
             backProps={{
               linkProps: {
-                href: "/index-egapro_/simulateur/effectifs",
+                href: simulateurPath(indicateur1Navigation.prev()),
               },
             }}
             nextDisabled={!isValid}

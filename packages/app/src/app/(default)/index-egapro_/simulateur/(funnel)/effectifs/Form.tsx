@@ -19,20 +19,30 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 
+import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore } from "../useSimuFunnelStore";
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
+const effectifsNav = NAVIGATION.effectifs;
 
 const useStore = storePicker(useSimuFunnelStore);
 export const EffectifsForm = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const [funnel, saveFunnel, resetFunnel] = useStore("funnel", "saveFunnel", "resetFunnel");
+  const [funnel, saveFunnel, resetFunnel, setSelectedCompanyWorkforceRange] = useStore(
+    "funnel",
+    "saveFunnel",
+    "resetFunnel",
+    "setSelectedCompanyWorkforceRange",
+  );
   const [totalWomen, setTotalWomen] = useState(0);
   const [totalMen, setTotalMen] = useState(0);
 
   useEffect(() => {
     updateTotal();
+    if (funnel?.effectifs?.workforceRange) {
+      setSelectedCompanyWorkforceRange(funnel.effectifs.workforceRange);
+    }
   }, []);
 
   const {
@@ -81,7 +91,7 @@ export const EffectifsForm = () => {
 
     resetFunnel();
     saveFunnel({ effectifs: form });
-    router.push("/index-egapro_/simulateur/indicateur1");
+    router.push(simulateurPath(effectifsNav.next()));
   };
 
   const setRandomValues = () => {
@@ -140,28 +150,20 @@ export const EffectifsForm = () => {
         state={errors.workforceRange && "error"}
         stateRelatedMessage={errors.workforceRange?.message}
         options={[
-          {
-            label: "De 50 à 250 inclus",
-            nativeInputProps: {
-              ...register("workforceRange"),
-              value: CompanyWorkforceRange.Enum.FROM_50_TO_250,
-            },
+          CompanyWorkforceRange.Enum.FROM_50_TO_250,
+          CompanyWorkforceRange.Enum.FROM_251_TO_999,
+          CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
+        ].map(workforceRange => ({
+          label: CompanyWorkforceRange.Label[workforceRange],
+          nativeInputProps: {
+            ...register("workforceRange", {
+              onChange(evt) {
+                setSelectedCompanyWorkforceRange(evt.target.value);
+              },
+            }),
+            value: workforceRange,
           },
-          {
-            label: "De 251 à 999 inclus",
-            nativeInputProps: {
-              ...register("workforceRange"),
-              value: CompanyWorkforceRange.Enum.FROM_251_TO_999,
-            },
-          },
-          {
-            label: "De 1000 à plus",
-            nativeInputProps: {
-              ...register("workforceRange"),
-              value: CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
-            },
-          },
-        ]}
+        }))}
       />
       <Alert
         small
@@ -322,7 +324,7 @@ export const EffectifsForm = () => {
       <BackNextButtonsGroup
         backProps={{
           linkProps: {
-            href: "/index-egapro_/simulateur/commencer",
+            href: simulateurPath(effectifsNav.prev()),
           },
         }}
         nextDisabled={!isValid || !total}
