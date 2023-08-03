@@ -207,14 +207,20 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`conges-maternite`],
-      previous: () => funnelStaticConfig[`remunerations-resultat`],
+      previous: () =>
+        data.remunerations?.estCalculable === "non"
+          ? funnelStaticConfig[`remunerations`]
+          : funnelStaticConfig[`remunerations-resultat`],
     },
     augmentations: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`promotions`],
-      previous: () => funnelStaticConfig[`remunerations-resultat`],
+      previous: () =>
+        data.remunerations?.estCalculable === "non"
+          ? funnelStaticConfig[`remunerations`]
+          : funnelStaticConfig[`remunerations-resultat`],
     },
     promotions: {
       indexStep() {
@@ -259,6 +265,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`confirmation`],
-      previous: () => funnelStaticConfig[`publication`],
+      previous: () =>
+        data["periode-reference"]?.périodeSuffisante === "non"
+          ? funnelStaticConfig[`periode-reference`]
+          : funnelStaticConfig[`publication`],
     },
   }) as const;
