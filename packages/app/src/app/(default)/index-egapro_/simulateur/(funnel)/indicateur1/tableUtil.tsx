@@ -37,7 +37,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
   },
   {
     label: "Rémunération annuelle brute moyenne en équivalent temps plein",
-    informations: <AideSimulationIndicateurUn.Definition />,
+    informations: <AideSimulationIndicateurUn.Définition />,
     subCols: [
       {
         label: "Femmes",

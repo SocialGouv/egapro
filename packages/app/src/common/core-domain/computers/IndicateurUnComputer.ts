@@ -172,7 +172,7 @@ export class IndicateurUnComputer<
    * @returns Le résultat, avec la note et l'avantage de genre.
    */
   public compute(): Result {
-    if (typeof this.computed !== "undefined") {
+    if (this.computed) {
       return this.computed;
     }
 
@@ -198,7 +198,7 @@ export class IndicateurUnComputer<
 
     if (
       !ageGroup ||
-      !(ageGroup.menCount >= 3 && ageGroup.womenCount >= 3 && ageGroup.menSalary > 0 && ageGroup.womenSalary > 0)
+      !(ageGroup.menCount >= 3 && ageGroup.womenCount >= 3 && ageGroup.menSalary && ageGroup.womenSalary)
     ) {
       return false;
     }

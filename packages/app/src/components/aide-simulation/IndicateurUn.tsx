@@ -1,6 +1,6 @@
 import Table from "@codegouvfr/react-dsfr/Table";
 
-const Definition = () => (
+const Définition = () => (
   <>
     <p>
       La rémunération doit être reconstituée en <strong>équivalent temps plein</strong> sur toute la durée de la période
@@ -125,6 +125,6 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
 );
 
 export const AideSimulationIndicateurUn = {
-  Definition,
+  Définition,
   CommentEstCalculéLIndicateur,
 };

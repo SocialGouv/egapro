@@ -76,6 +76,23 @@ const otherAgeRangeNumbers = z.array(
   }),
 );
 
+const indicateur2or3 = z.discriminatedUnion("calculable", [
+  z.object({
+    calculable: z.literal(true),
+    pourcentages: z.record(
+      z.nativeEnum(CSP.Enum),
+      z.object({
+        women: z.number().positive().max(100),
+        men: z.number().positive().max(100),
+      }),
+    ),
+  }),
+  z.object({
+    calculable: z.literal(false),
+    pourcentages: z.never().optional(),
+  }),
+]);
+
 export const createSteps = {
   effectifs: z.object({
     workforceRange: z.nativeEnum(CompanyWorkforceRange.Enum, {
@@ -112,18 +129,10 @@ export const createSteps = {
       remunerations: otherAgeRangeNumbers,
     }),
   ]),
+  indicateur2: indicateur2or3,
+  indicateur3: indicateur2or3,
 } as const;
 
 export const createSimulationDTO = z.object(createSteps);
-// .and(createSteps.periodeReference)
-// .and(createSteps.ecartsCadres)
-// .and(createSteps.ecartsMembres)
-// .and(
-//   z
-//     .object({
-//       publishDate: z.never().optional(),
-//     })
-//     .or(createSteps.publication),
-// );
 
 export type CreateSimulationDTO = ClearObject<z.infer<typeof createSimulationDTO>>;

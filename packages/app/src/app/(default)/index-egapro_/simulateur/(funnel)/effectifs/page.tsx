@@ -14,7 +14,7 @@ export const metadata = {
 
 const EffectifsPage = () => {
   return (
-    <CenteredContainer>
+    <CenteredContainer pb="4w">
       <EffectifsForm />
     </CenteredContainer>
   );

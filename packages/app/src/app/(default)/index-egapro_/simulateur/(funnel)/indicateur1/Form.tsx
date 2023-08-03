@@ -16,7 +16,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, CenteredContainer, Container } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -67,6 +67,7 @@ const otherComputer = new IndicateurUnComputer(RemunerationsMode.Enum.OTHER_LEVE
 
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic1Form = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const hydrated = useSimuFunnelStoreHasHydrated();
@@ -150,7 +151,7 @@ export const Indic1Form = () => {
 
   const onSubmit = ({ mode, remunerations }: Indic1FormType) => {
     saveFunnel({ indicateur1: { mode, remunerations } as Any });
-    redirect(simulateurPath(indicateur1Navigation.next(funnel)));
+    router.push(simulateurPath(indicateur1Navigation.next(funnel)));
   };
 
   return (

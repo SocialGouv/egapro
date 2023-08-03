@@ -13,6 +13,7 @@ import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -89,8 +90,10 @@ export const EffectifsForm = () => {
       return;
     }
 
-    resetFunnel();
-    saveFunnel({ effectifs: form });
+    if (!isEqual(form, funnel?.effectifs)) {
+      resetFunnel();
+      saveFunnel({ effectifs: form });
+    }
     router.push(simulateurPath(effectifsNav.next()));
   };
 

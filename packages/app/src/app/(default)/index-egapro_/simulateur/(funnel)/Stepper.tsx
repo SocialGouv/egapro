@@ -18,6 +18,13 @@ export const Stepper = () => {
   const [funnel, selectedWorkforceRange] = useStore("funnel", "selectedWorkforceRange");
   const hydrated = useSimuFunnelStoreHasHydrated();
   const segment = useSelectedLayoutSegment();
+  const currentNavigation = NAVIGATION[segment as NavigationPath] || {};
+
+  if (!hydrated) {
+    return (
+      <BaseStepper stepCount={8} currentStep={0} title={currentNavigation.title} nextTitle={<Skeleton width={200} />} />
+    );
+  }
 
   const steps = getFullNavigation(
     {
@@ -28,18 +35,6 @@ export const Stepper = () => {
     "commencer",
   );
   const currentStep = steps.findIndex(step => step === segment) + 1; // 1-based
-  const currentNavigation = NAVIGATION[segment as NavigationPath] || {};
-
-  if (!hydrated) {
-    return (
-      <BaseStepper
-        stepCount={8}
-        currentStep={currentStep}
-        title={currentNavigation.title}
-        nextTitle={<Skeleton width={200} />}
-      />
-    );
-  }
   const nextNavigation = (
     "next" in currentNavigation ? NAVIGATION[currentNavigation.next(funnel)] : {}
   ) as (typeof NAVIGATION)[NavigationPath];

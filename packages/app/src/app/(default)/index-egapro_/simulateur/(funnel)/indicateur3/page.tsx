@@ -12,7 +12,7 @@ export const metadata = {
   },
 };
 
-const Indicateur2Page = () => {
+const Indicateur3Page = () => {
   return (
     <>
       <CenteredContainer>
@@ -25,4 +25,4 @@ const Indicateur2Page = () => {
   );
 };
 
-export default Indicateur2Page;
+export default Indicateur3Page;
