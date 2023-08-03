@@ -93,7 +93,9 @@ export const computeIndicator4Note = (result: number) =>
 export const computeIndicator5Note = (result: number) =>
   computeGenericIndicatorNote(result, HAUTES_REMUNERATIONS_THRESHOLDS);
 
-export const computeIndex = (formState: DeclarationFormState) => {
+export const computeIndex = (
+  formState: DeclarationFormState,
+): { index: number | undefined; points: number; pointsCalculables: number } => {
   let points = 0;
   let max = 0;
 
@@ -129,6 +131,6 @@ export const computeIndex = (formState: DeclarationFormState) => {
   return {
     points,
     pointsCalculables: max,
-    index: Math.floor((points / max) * 100),
+    index: max >= 75 ? Math.floor((points / max) * 100) : undefined, // undefined means "Non calculable".
   };
 };
