@@ -118,6 +118,24 @@ export const RemunerationForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
+      // We clean if user has switched between modes.
+      if (data.estCalculable === "oui") {
+        const selectedMode =
+          data.mode === "csp"
+            ? "remunerations-csp"
+            : mode === "niveau_branche"
+            ? "remunerations-coefficient-branche"
+            : "remunerations-coefficient-autre";
+
+        const formStateStepToRemove = (
+          ["remunerations-coefficient-autre", "remunerations-coefficient-branche", "remunerations-csp"] as const
+        ).filter(mode => mode !== selectedMode);
+
+        formStateStepToRemove.forEach(mode => {
+          draft[mode] = undefined;
+        });
+      }
+
       draft[stepName] = data as DeclarationFormState[typeof stepName];
     });
 
