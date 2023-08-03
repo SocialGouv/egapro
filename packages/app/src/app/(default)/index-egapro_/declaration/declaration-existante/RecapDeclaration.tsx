@@ -72,57 +72,65 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
               Les indicateurs sont calculés au titre de l’année <strong>{meta.année_indicateurs}</strong>.
             </p>
 
-            <p>
-              La date de fin de la période de référence choisie pour le calcul des indicateurs est le&nbsp;
-              <strong>{meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}</strong>.
-            </p>
-            <p>
-              {entreprise.effectif?.total && (
-                <>
-                  <strong>{entreprise.effectif?.total}</strong> salariés pris en compte pour le calcul des indicateurs
-                  sur la période de référence (en effectif physique).
-                </>
-              )}
-            </p>
-          </>
-        }
-      />
-
-      <RecapCardIndicator
-        nom="rémunérations"
-        indicateurs={indicateurs}
-        customContent={
-          <>
-            {indicateurs?.rémunérations?.mode && (
-              <p>
-                La modalité choisie pour le calcul de l'indicateur est{" "}
-                {new RemunerationsMode(indicateurs?.rémunérations?.mode).getLabel().toLowerCase()}.
-              </p>
-            )}
-
-            {indicateurs?.rémunérations?.mode !== "csp" && (
+            {meta.période_suffisante && (
               <>
-                {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
-                  <p> Aucun CSE n’est mis en place. </p>
-                ) : (
-                  <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
-                )}
+                <p>
+                  La date de fin de la période de référence choisie pour le calcul des indicateurs est le&nbsp;
+                  <strong>{meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}</strong>.
+                </p>
+                <p>
+                  {entreprise.effectif?.total && (
+                    <>
+                      <strong>{entreprise.effectif?.total}</strong> salariés pris en compte pour le calcul des
+                      indicateurs sur la période de référence (en effectif physique).
+                    </>
+                  )}
+                </p>
               </>
             )}
           </>
         }
       />
 
-      {entreprise.effectif?.tranche === "50:250" ? (
-        <RecapCardIndicator nom="augmentations_et_promotions" indicateurs={indicateurs} />
-      ) : (
+      {meta.période_suffisante && (
         <>
-          <RecapCardIndicator nom="augmentations" indicateurs={indicateurs} />
-          <RecapCardIndicator nom="promotions" indicateurs={indicateurs} />
+          <RecapCardIndicator
+            nom="rémunérations"
+            indicateurs={indicateurs}
+            customContent={
+              <>
+                {indicateurs?.rémunérations?.mode && (
+                  <p>
+                    La modalité choisie pour le calcul de l'indicateur est{" "}
+                    {new RemunerationsMode(indicateurs?.rémunérations?.mode).getLabel().toLowerCase()}.
+                  </p>
+                )}
+
+                {indicateurs?.rémunérations?.mode !== "csp" && (
+                  <>
+                    {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
+                      <p> Aucun CSE n’est mis en place. </p>
+                    ) : (
+                      <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
+                    )}
+                  </>
+                )}
+              </>
+            }
+          />
+
+          {entreprise.effectif?.tranche === "50:250" ? (
+            <RecapCardIndicator nom="augmentations_et_promotions" indicateurs={indicateurs} />
+          ) : (
+            <>
+              <RecapCardIndicator nom="augmentations" indicateurs={indicateurs} />
+              <RecapCardIndicator nom="promotions" indicateurs={indicateurs} />
+            </>
+          )}
+          <RecapCardIndicator nom="congés_maternité" indicateurs={indicateurs} />
+          <RecapCardIndicator nom="hautes_rémunérations" indicateurs={indicateurs} />
         </>
       )}
-      <RecapCardIndicator nom="congés_maternité" indicateurs={indicateurs} />
-      <RecapCardIndicator nom="hautes_rémunérations" indicateurs={indicateurs} />
 
       <BigNote
         className={fr.cx("fr-mb-4w")}
@@ -144,18 +152,20 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
 
       <RecapCardPublication publication={meta.publication} />
 
-      <RecapCard
-        title="Plan de relance"
-        // editLink={funnelStaticConfig["publication"].url}
-        content={
-          <>
-            <p>
-              Votre entreprise {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue par
-              la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance ».
-            </p>
-          </>
-        }
-      />
+      {meta.période_suffisante && (
+        <RecapCard
+          title="Plan de relance"
+          // editLink={funnelStaticConfig["publication"].url}
+          content={
+            <>
+              <p>
+                Votre entreprise {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue
+                par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance ».
+              </p>
+            </>
+          }
+        />
+      )}
     </>
   );
 };
