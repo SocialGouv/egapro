@@ -330,15 +330,16 @@ export const DeclarationFormBuilder = {
             raisonSociale: entreprise.raison_sociale,
           })) ?? [],
       },
-      "periode-reference": declaration.déclaration.période_suffisante
-        ? {
-            périodeSuffisante: "oui",
-            effectifTotal: declaration.entreprise.effectif?.total ?? 0,
-            finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
-          }
-        : {
-            périodeSuffisante: "non",
-          },
+      "periode-reference":
+        declaration.déclaration.période_suffisante === false // Value undefined (for old declaration) is considered as true.
+          ? {
+              périodeSuffisante: "non",
+            }
+          : {
+              périodeSuffisante: "oui",
+              effectifTotal: declaration.entreprise.effectif?.total ?? 0,
+              finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
+            },
       // TODO: les autres indicateurs et autres informations
       "resultat-global": {
         mesures: declaration.déclaration.mesures_correctives,

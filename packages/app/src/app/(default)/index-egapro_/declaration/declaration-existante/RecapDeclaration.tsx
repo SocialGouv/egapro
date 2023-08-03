@@ -23,6 +23,8 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
     nafCode: entreprise.code_naf,
   };
 
+  console.log("déclaration", déclaration);
+
   return (
     <>
       <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif</h1>
@@ -92,7 +94,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
         }
       />
 
-      {meta.période_suffisante && (
+      {meta.période_suffisante !== false && (
         <>
           <RecapCardIndicator
             nom="rémunérations"
