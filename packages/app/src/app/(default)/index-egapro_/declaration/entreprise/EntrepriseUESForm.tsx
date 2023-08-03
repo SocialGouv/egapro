@@ -49,6 +49,11 @@ export const EntrepriseUESForm = () => {
       if (data.type === "entreprise") {
         delete draft.ues;
       }
+
+      // Preserve entrepriseDeclarante which is supposed to be entered in commencer page.
+      if (draft[stepName] && formData.entreprise?.entrepriseDéclarante) {
+        draft[stepName].entrepriseDéclarante = formData.entreprise.entrepriseDéclarante;
+      }
     });
 
     saveFormData(newFormData);

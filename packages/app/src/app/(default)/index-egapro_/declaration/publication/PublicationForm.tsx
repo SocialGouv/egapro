@@ -49,6 +49,7 @@ export const PublicationForm = () => {
   const {
     register,
     handleSubmit,
+    trigger,
     watch,
     formState: { isValid, errors },
   } = methods;
@@ -93,7 +94,13 @@ export const PublicationForm = () => {
             {choixSiteWeb === "oui" && (
               <Input
                 label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus"
-                nativeInputProps={{ ...register("url"), type: "url" }}
+                nativeInputProps={{
+                  ...register("url"),
+                  type: "url",
+                  onBlur: () => trigger("url"),
+                }}
+                state={errors.url ? "error" : "default"}
+                stateRelatedMessage={errors.url?.message}
               />
             )}
             {choixSiteWeb === "non" && (

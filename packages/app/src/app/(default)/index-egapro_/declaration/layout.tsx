@@ -3,6 +3,8 @@ import { config } from "@common/config";
 import { CenteredContainer, Container } from "@design-system";
 import { type PropsWithChildren } from "react";
 
+import { AlertExistingDeclaration } from "./AlertExistingDeclaration";
+
 const DEFAULT_TITLE = "Déclaration d'index Egapro";
 
 const DeclarationLayout = ({ children }: PropsWithChildren) => {
@@ -24,7 +26,10 @@ const DeclarationLayout = ({ children }: PropsWithChildren) => {
           ]}
         />
       </Container>
-      <CenteredContainer>{children}</CenteredContainer>
+      <CenteredContainer>
+        <AlertExistingDeclaration />
+        {children}
+      </CenteredContainer>
     </>
   );
 };

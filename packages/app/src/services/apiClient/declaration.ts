@@ -1,6 +1,5 @@
 import { type DeclarationDTO } from "@common/models/generated";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import { type FetcherOptions, type FetcherReturn } from "./fetcher";
@@ -14,18 +13,22 @@ export type DeclarationAPI = {
   year: number;
 };
 
-export const putDeclaration = async (_data: DeclarationFormState) => {
-  //   const representation = buildRepresentation(data);
-  //   const siren = representation.entreprise.siren;
-  //   const year = representation.déclaration.année_indicateurs;
-  //   const url = `/representation-equilibree/${siren}/${year}`;
+export const submitDeclaration = async (dto: DeclarationDTO) => {
+  const session = await getSession();
 
-  //   return fetcher(url, {
-  //     method: "PUT",
-  //     body: JSON.stringify(representation),
-  //   });
+  const siren = dto.entreprise.siren;
+  const year = dto.déclaration.année_indicateurs;
+  const url = `/declaration/${siren}/${year}`;
 
-  return "TBD";
+  console.log({ dto });
+
+  return fetcher(url, {
+    headers: {
+      "API-KEY": session?.user.tokenApiV1,
+    } as HeadersInit,
+    method: "PUT",
+    body: JSON.stringify(dto),
+  });
 };
 
 export const fetchDeclaration = (siren: string, year: number, options?: FetcherOptions) =>
@@ -148,3 +151,14 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
     mutate,
   };
 }
+
+export const resendReceipt = async (siren: string, year: number) => {
+  const session = await getSession();
+
+  return fetcher(`/declaration/${siren}/${year}/receipt`, {
+    headers: {
+      "API-KEY": session?.user.tokenApiV1,
+    } as HeadersInit,
+    method: "POST",
+  });
+};

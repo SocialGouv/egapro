@@ -2,13 +2,13 @@
 
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { RecapCardCompany } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardCompany";
 
 export const InformationEntreprise = () => {
-  const commencer = useDeclarationFormManager(state => state.formData.commencer);
+  const { formData } = useDeclarationFormManager();
 
-  const { entrepriseDéclarante } = commencer ?? {};
+  const entrepriseDéclarante = formData.entreprise?.entrepriseDéclarante;
 
   if (!entrepriseDéclarante) return null;
 

@@ -1,5 +1,3 @@
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-
 import { type FunnelKey } from "../../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../../DeclarationStepper";
 import { RemunerationGenericForm } from "../RemunerationGenericForm";
@@ -24,7 +22,7 @@ const RemunerationCSPPage = () => {
         CSP Ouvriers ou soit dans la CSP Employés).
       </p>
 
-      <RemunerationGenericForm mode={RemunerationsMode.Enum.CSP} />
+      <RemunerationGenericForm mode="csp" />
     </>
   );
 };
