@@ -21,6 +21,8 @@ export const AlertExistingDeclaration = () => {
 
   const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
+  if (segment === "commencer") return null;
+
   return (
     <Alert
       severity="info"

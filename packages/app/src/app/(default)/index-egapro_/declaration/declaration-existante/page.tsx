@@ -5,6 +5,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, DownloadCard, Grid, GridCol } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { add, isAfter } from "date-fns";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
@@ -29,9 +30,13 @@ const Page = () => {
 
   const { declaration, error } = useDeclaration(siren, annéeIndicateurs);
 
+  const declarationDate = declaration?.data.déclaration.date;
+
   const canEdit = canEditSiren(session?.data?.user)(siren);
 
-  if (!declaration?.data) return <SkeletonForm fields={8} />;
+  if (!declaration?.data || !declarationDate) return <SkeletonForm fields={8} />;
+
+  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   if (error) <p>{"Une erreur a été rencontrée par l'API."}</p>;
 
@@ -52,6 +57,7 @@ const Page = () => {
                 setStatus("edition");
                 router.push(funnelConfig(formData)[stepName].next().url);
               },
+              disabled: olderThanOneYear,
             }}
           />
 
