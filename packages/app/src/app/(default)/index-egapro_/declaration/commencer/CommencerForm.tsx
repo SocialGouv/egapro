@@ -163,8 +163,12 @@ export const CommencerForm = () => {
 
   const confirmReset = () => {
     if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
+      setValue("siren", "");
+      if (PUBLIC_YEARS[0]) {
+        setValue("annéeIndicateurs", PUBLIC_YEARS[0]);
+      }
+
       resetFormData();
-      resetForm();
     }
   };
 
