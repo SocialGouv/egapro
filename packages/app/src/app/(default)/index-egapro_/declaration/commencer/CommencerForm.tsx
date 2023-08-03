@@ -232,6 +232,7 @@ export const CommencerForm = () => {
             backProps={{
               onClick: confirmReset,
               disabled: formData ? !formData.entreprise?.entrepriseDéclarante?.siren : false,
+              iconId: undefined,
             }}
             nextProps={{
               disabled: !isValid,
