@@ -3,7 +3,7 @@ import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/decla
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
-import { IndicatorNote, RecapCard, RecapCardCompany, RecapCardPublication } from "@design-system";
+import { BigNote, RecapCard, RecapCardCompany, RecapCardPublication } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 import { RecapCardIndicator } from "./RecapCardIndicator";
@@ -124,26 +124,20 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
       <RecapCardIndicator nom="congés_maternité" indicateurs={indicateurs} />
       <RecapCardIndicator nom="hautes_rémunérations" indicateurs={indicateurs} />
 
-      <RecapCard
-        title="Niveau de résultat global"
-        content={
+      <BigNote
+        className={fr.cx("fr-mb-4w")}
+        note={meta.index}
+        max={100}
+        legend={meta.index !== undefined ? "Index de" : "Index non calculable"}
+        text={
           <>
-            {meta.index && (
-              <IndicatorNote
-                size="large"
-                note={meta.index}
-                text="Index egapro"
-                max={100}
-                legend={
-                  <>
-                    <br />
-                    <strong>{meta.points}</strong> points obtenus aux indicateurs calculables sur un maximum de{" "}
-                    <strong>{meta.points_calculables}</strong> points maximum pouvant être obtenus aux indicateurs
-                    calculables.
-                  </>
-                }
-              />
-            )}
+            <p>
+              Total des points obtenus aux indicateurs calculables&nbsp;: <strong>{meta.points}</strong>
+            </p>
+            <p>
+              Nombre de points maximum pouvant être obtenus aux indicateurs calculables&nbsp;:{" "}
+              <strong>{meta.points_calculables}</strong>
+            </p>
           </>
         }
       />
