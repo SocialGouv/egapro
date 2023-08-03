@@ -32,6 +32,8 @@ export const AlertExistingDeclaration = () => {
         <>
           {olderThanOneYear
             ? "Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé."
+            : formData["declaration-existante"].status === "consultation"
+            ? "Cette déclaration a été validée et transmise. Vous pouvez la modifier en cliquant sur le bouton Modifier."
             : "Vous êtes en train de modifier une déclaration validée et transmise. Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
           <br />
 
