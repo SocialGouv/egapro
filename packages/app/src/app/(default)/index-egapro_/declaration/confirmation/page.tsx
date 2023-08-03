@@ -7,13 +7,23 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, DownloadCard, Grid, GridCol, ImgJDMA, ImgSuccessLight } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
+import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import { SendReceiptInitButtons } from "./SendReceipt";
 
 const ConfirmationPage = () => {
   const { formData } = useDeclarationFormManager();
+  const router = useRouter();
 
   const hasMounted = useHasMounted();
+
+  useEffect(() => {
+    if (formData.commencer?.annéeIndicateurs === undefined) {
+      router.push(funnelStaticConfig["commencer"].url);
+    }
+  }, [formData, router]);
 
   if (!hasMounted) return <SkeletonForm fields={2} />;
 

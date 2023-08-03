@@ -6,14 +6,11 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Container, Grid, GridCol } from "@design-system";
 import { resendReceipt } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import style from "./style.module.css";
 
 export const SendReceiptInitButtons = () => {
-  const router = useRouter();
   const { formData, resetFormData } = useDeclarationFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
   const hasMounted = useHasMounted();
@@ -29,7 +26,6 @@ export const SendReceiptInitButtons = () => {
 
   const initNewDeclaration = () => {
     resetFormData();
-    router.push(funnelStaticConfig["commencer"].url);
   };
 
   const sendReceipt = () => {
