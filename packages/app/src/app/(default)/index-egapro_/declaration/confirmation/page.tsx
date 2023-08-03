@@ -17,8 +17,7 @@ const ConfirmationPage = () => {
 
   if (!hasMounted) return <SkeletonForm fields={2} />;
 
-  if (formData.commencer?.annéeIndicateurs === undefined || formData.commencer?.siren === undefined)
-    throw new Error("Impossible de récupérer les données de l'entreprise");
+  if (formData.commencer?.annéeIndicateurs === undefined || formData.commencer?.siren === undefined) return null;
 
   const année = Number(formData.commencer.annéeIndicateurs);
   const siren = formData.commencer.siren;
