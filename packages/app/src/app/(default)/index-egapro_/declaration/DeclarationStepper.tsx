@@ -14,12 +14,13 @@ type Props = {
 
 export const DeclarationStepper = ({ stepName }: PropsWithChildren<Props>) => {
   const { formData } = useDeclarationFormManager();
+  const currentStep = funnelConfig(formData)[stepName].indexStep();
 
   return (
     <ClientOnly fallback={<SkeletonForm fields={2} />}>
       <Stepper
-        currentStep={funnelConfig(formData)[stepName].indexStep()}
-        stepCount={nbStepsMax}
+        currentStep={currentStep}
+        stepCount={Math.max(nbStepsMax, currentStep)}
         nextTitle={funnelConfig(formData)[stepName].next().title}
         title={funnelStaticConfig[stepName].title}
       />

@@ -1,7 +1,7 @@
 import { config } from "@common/config";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 
-export const nbStepsMax = 15;
+export const nbStepsMax = 13;
 
 const base = config.base_declaration_url;
 
