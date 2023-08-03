@@ -141,7 +141,10 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () => funnelStaticConfig[`remunerations`],
+      next: () =>
+        data["periode-reference"]?.périodeSuffisante === "non"
+          ? funnelStaticConfig[`validation-transmission`]
+          : funnelStaticConfig[`remunerations`],
       previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`entreprise`]),
     },
     remunerations: {
