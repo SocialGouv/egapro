@@ -33,7 +33,7 @@ const formSchema = zodFr
       estCalculable: z.literal("oui"),
       mode: z.string(), // No check is necessary as the value is from select options.
       cse: zodRadioInputSchema.nullish(),
-      dateConsultationCSE: zodDateSchema,
+      dateConsultationCSE: zodDateSchema.optional(),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -66,6 +66,13 @@ const formSchema = zodFr
             code: z.ZodIssueCode.custom,
             message: "Obligatoire",
             path: ["cse"],
+          });
+        }
+        if (value.cse === "oui" && !value.dateConsultationCSE) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Obligatoire",
+            path: ["dateConsultationCSE"],
           });
         }
         break;
