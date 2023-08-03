@@ -223,7 +223,7 @@ export const DeclarationFormBuilder = {
         : {
             estCalculable: "oui",
             note: declaration.indicateurs?.augmentations?.note ?? 0,
-            populationFavorable: declaration.indicateurs?.augmentations?.population_favorable ?? "egalite",
+            populationFavorable: declaration.indicateurs?.augmentations?.population_favorable ?? "",
             résultat: declaration.indicateurs?.augmentations?.résultat ?? 0,
             catégories: [
               { nom: "ouv", écarts: declaration.indicateurs?.augmentations?.catégories?.[0] ?? null },
@@ -240,7 +240,7 @@ export const DeclarationFormBuilder = {
         : {
             estCalculable: "oui",
             note: declaration.indicateurs?.promotions?.note ?? 0,
-            populationFavorable: declaration.indicateurs?.promotions?.population_favorable ?? "egalite",
+            populationFavorable: declaration.indicateurs?.promotions?.population_favorable ?? "",
             résultat: declaration.indicateurs?.promotions?.résultat ?? 0,
             catégories: [
               { nom: "ouv", écarts: declaration.indicateurs?.promotions?.catégories?.[0] ?? null },
@@ -289,14 +289,14 @@ export const DeclarationFormBuilder = {
       },
       "remunerations-resultat": {
         note: declaration.indicateurs?.rémunérations?.note ?? 0,
-        populationFavorable: declaration.indicateurs?.rémunérations?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.rémunérations?.population_favorable ?? "",
         résultat: declaration.indicateurs?.rémunérations?.résultat ?? 0,
       },
       "augmentations-et-promotions": {
         estCalculable: declaration.indicateurs?.augmentations_et_promotions?.non_calculable ? "non" : "oui",
         motifNonCalculabilité: declaration.indicateurs?.augmentations_et_promotions?.non_calculable,
         note: declaration.indicateurs?.augmentations_et_promotions?.note ?? 0,
-        populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "",
         résultat: declaration.indicateurs?.augmentations_et_promotions?.résultat ?? 0,
         résultatEquivalentSalarié: declaration.indicateurs?.augmentations_et_promotions?.résultat_nombre_salariés ?? 0,
         noteNombreSalaries: declaration.indicateurs?.augmentations_et_promotions?.note_nombre_salariés ?? 0,
@@ -313,7 +313,7 @@ export const DeclarationFormBuilder = {
             note: declaration.indicateurs?.congés_maternité?.note ?? 0,
           },
       "hautes-remunerations": {
-        populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "",
         résultat: declaration.indicateurs?.hautes_rémunérations?.résultat ?? 0,
         note: declaration.indicateurs?.hautes_rémunérations?.note ?? 0,
       },
