@@ -3,8 +3,7 @@ import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/value
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
-import { RecapCard } from "@design-system";
-import { RecapCardCompany } from "packages/app/src/design-system/base/RecapCardCompany";
+import { RecapCard, RecapCardCompany } from "@design-system";
 
 export interface DetailRepEqProps {
   edit?: boolean;

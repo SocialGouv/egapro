@@ -7,7 +7,7 @@ import { computeIndex } from "@common/core-domain/domain/valueObjects/declaratio
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
+import { BigNote } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -71,15 +71,16 @@ export const ResultatGlobalForm = () => {
     defaultValues,
   });
 
-  const index = formData[stepName]?.index;
-  const points = formData[stepName]?.points;
-  const pointsCalculables = formData[stepName]?.pointsCalculables;
-
   const {
     register,
     handleSubmit,
+    watch,
     formState: { isValid, errors },
   } = methods;
+
+  const index = watch("index");
+  const points = watch("points");
+  const pointsCalculables = watch("pointsCalculables");
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -104,57 +105,49 @@ export const ResultatGlobalForm = () => {
 
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            {index == undefined && (
-              <>
-                <p>Non calculable </p>
-                Total des points obtenus aux indicateurs calculables : {points}
-                <br />
-                Nombre de points maximum pouvant être obtenus aux indicateurs calculables : {pointsCalculables}
-              </>
-            )}
+            <BigNote
+              className={fr.cx("fr-mb-4w")}
+              note={index}
+              max={100}
+              legend={index !== undefined ? "Index de" : "Index non calculable"}
+              text={
+                <>
+                  <p>
+                    Total des points obtenus aux indicateurs calculables&nbsp;: <strong>{points}</strong>
+                  </p>
+                  <p>
+                    Nombre de points maximum pouvant être obtenus aux indicateurs calculables&nbsp;:{" "}
+                    <strong>{pointsCalculables}</strong>
+                  </p>
+                </>
+              }
+            />
 
-            {index !== undefined && (
+            {index !== undefined && index < 85 && (
               <>
-                <IndicatorNote
-                  note={index}
-                  max={100}
-                  text="Index de"
-                  className={fr.cx("fr-mb-2w")}
-                  legend={
-                    <>
-                      Total des points obtenus aux indicateurs calculables : {points}
-                      <br />
-                      Nombre de points maximum pouvant être obtenus aux indicateurs calculables : {pointsCalculables}
-                    </>
-                  }
+                <Select
+                  label="Mesures de correction prévues à l'article D. 1142-6"
+                  state={errors.mesures && "error"}
+                  stateRelatedMessage={errors.mesures?.message}
+                  nativeSelectProps={{
+                    ...register("mesures"),
+                  }}
+                >
+                  <option value="" disabled>
+                    Sélectionnez une mesure
+                  </option>
+                  {Object.entries(mesuresLabel).map(([key, value]) => (
+                    <option value={key} key={key}>
+                      {value}
+                    </option>
+                  ))}
+                </Select>
+                <Alert
+                  severity="info"
+                  description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
+                  small={false}
+                  title=""
                 />
-                {index < 75 && (
-                  <>
-                    <Select
-                      label="Mesures de correction prévues à l'article D. 1142-6"
-                      state={errors.mesures && "error"}
-                      stateRelatedMessage={errors.mesures?.message}
-                      nativeSelectProps={{
-                        ...register("mesures"),
-                      }}
-                    >
-                      <option value="" disabled>
-                        Sélectionnez une mesure
-                      </option>
-                      {Object.entries(mesuresLabel).map(([key, value]) => (
-                        <option value={key} key={key}>
-                          {value}
-                        </option>
-                      ))}
-                    </Select>
-                    <Alert
-                      severity="info"
-                      description="Dès lors que l'index est inférieur à 75 points, des mesures adéquates et pertinentes de correction doivent être définies par accord ou, à défaut, par décision unilatérale après consultation du comité social et économique."
-                      small={false}
-                      title=""
-                    />
-                  </>
-                )}
               </>
             )}
           </ClientOnly>

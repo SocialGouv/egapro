@@ -12,7 +12,6 @@
         "non_calculable": {
           "type": "string",
           "enum": [
-            "egvi40pcet",
             "absaugi",
             "etsno5f5h"
           ],

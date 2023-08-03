@@ -1,5 +1,3 @@
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-
 import { type FunnelKey } from "../../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../../DeclarationStepper";
 import { RemunerationGenericForm } from "../RemunerationGenericForm";
@@ -18,7 +16,7 @@ const RemunerationCoefficientBranchePage = () => {
         des femmes.
       </p>
 
-      <RemunerationGenericForm mode={RemunerationsMode.Enum.BRANCH_LEVEL} />
+      <RemunerationGenericForm mode="niveau_branche" />
     </>
   );
 };

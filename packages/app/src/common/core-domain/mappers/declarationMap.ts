@@ -6,6 +6,7 @@ import {
   type Departement,
   type Effectif,
   type Entreprise as Entreprises,
+  type PopulationFavorable,
   type Region,
   type Remunerations,
 } from "@common/models/generated";
@@ -18,6 +19,7 @@ import { isUndefined } from "lodash";
 
 import { Declaration } from "../domain/Declaration";
 import { DeclarationData } from "../domain/DeclarationData";
+import { FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { Siren } from "../domain/valueObjects/Siren";
 import { type DeclarationDTO } from "../dtos/DeclarationDTO";
 
@@ -90,7 +92,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
             indicators: {
               highRemunerations: raw.data.indicateurs?.hautes_rémunérations
                 ? {
-                    favorablePopulation: raw.data.indicateurs?.hautes_rémunérations.population_favorable,
+                    favorablePopulation:
+                      raw.data.indicateurs?.hautes_rémunérations.population_favorable === ""
+                        ? "egalite"
+                        : raw.data.indicateurs?.hautes_rémunérations.population_favorable,
                     result: raw.data.indicateurs?.hautes_rémunérations.résultat,
                     score: raw.data.indicateurs?.hautes_rémunérations.note,
                     progressObjective: raw.data.indicateurs?.hautes_rémunérations.objectif_de_progression,
@@ -111,7 +116,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
                     progressObjective: raw.data.indicateurs?.promotions.objectif_de_progression,
                     notComputableReason: raw.data.indicateurs?.promotions.non_calculable,
                     categories: raw.data.indicateurs?.promotions.catégories ?? [null, null, null, null],
-                    favorablePopulation: raw.data.indicateurs?.promotions.population_favorable,
+                    favorablePopulation:
+                      raw.data.indicateurs?.promotions.population_favorable === ""
+                        ? "egalite"
+                        : raw.data.indicateurs?.promotions.population_favorable,
                   }
                 : void 0,
               remunerations: raw.data.indicateurs?.rémunérations
@@ -125,7 +133,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
                         name: cat.nom,
                         ranges: cat.tranches,
                       })) ?? [],
-                    favorablePopulation: raw.data.indicateurs?.rémunérations.population_favorable,
+                    favorablePopulation:
+                      raw.data.indicateurs?.rémunérations.population_favorable === ""
+                        ? "egalite"
+                        : raw.data.indicateurs?.rémunérations.population_favorable,
                     cseConsultationDate: raw.data.indicateurs?.rémunérations.date_consultation_cse,
                     mode: raw.data.indicateurs?.rémunérations.mode,
                   }
@@ -137,7 +148,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
                     progressObjective: raw.data.indicateurs?.augmentations.objectif_de_progression,
                     notComputableReason: raw.data.indicateurs?.augmentations.non_calculable,
                     categories: raw.data.indicateurs?.augmentations.catégories ?? [null, null, null, null],
-                    favorablePopulation: raw.data.indicateurs?.augmentations.population_favorable,
+                    favorablePopulation:
+                      raw.data.indicateurs?.augmentations.population_favorable === ""
+                        ? "egalite"
+                        : raw.data.indicateurs?.augmentations.population_favorable,
                   }
                 : void 0,
               salaryRaisesAndPromotions: raw.data.indicateurs?.augmentations_et_promotions
@@ -146,7 +160,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
                     score: raw.data.indicateurs?.augmentations_et_promotions.note,
                     progressObjective: raw.data.indicateurs?.augmentations_et_promotions.objectif_de_progression,
                     notComputableReason: raw.data.indicateurs?.augmentations_et_promotions.non_calculable,
-                    favorablePopulation: raw.data.indicateurs?.augmentations_et_promotions.population_favorable,
+                    favorablePopulation:
+                      raw.data.indicateurs?.augmentations_et_promotions.population_favorable === ""
+                        ? "egalite"
+                        : raw.data.indicateurs?.augmentations_et_promotions.population_favorable,
                     employeesCountResult: raw.data.indicateurs?.augmentations_et_promotions.résultat_nombre_salariés,
                     employeesCountScore: raw.data.indicateurs?.augmentations_et_promotions.note_nombre_salariés,
                     percentScore: raw.data.indicateurs?.augmentations_et_promotions.note_en_pourcentage,
@@ -263,7 +280,10 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         non_calculable: data.indicators.salaryRaises.notComputableReason?.getValue() as Any,
         note: data.indicators.salaryRaises.score?.getValue(),
         objectif_de_progression: data.indicators.salaryRaises.progressObjective,
-        population_favorable: data.indicators.salaryRaises.favorablePopulation?.getValue(),
+        population_favorable:
+          data.indicators.salaryRaises.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.indicators.salaryRaises.favorablePopulation?.getValue() as PopulationFavorable),
         résultat: data.indicators.salaryRaises.result?.getValue(),
       };
 
@@ -275,7 +295,11 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         note_en_pourcentage: data.indicators.salaryRaisesAndPromotions.percentScore?.getValue(),
         note_nombre_salariés: data.indicators.salaryRaisesAndPromotions.employeesCountScore?.getValue(),
         objectif_de_progression: data.indicators.salaryRaisesAndPromotions.progressObjective,
-        population_favorable: data.indicators.salaryRaisesAndPromotions.favorablePopulation?.getValue(),
+        population_favorable:
+          data.indicators.salaryRaisesAndPromotions.favorablePopulation?.getValue() ===
+          FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.indicators.salaryRaisesAndPromotions.favorablePopulation?.getValue() as PopulationFavorable),
         résultat_nombre_salariés: data.indicators.salaryRaisesAndPromotions.employeesCountResult?.getValue(),
       };
 
@@ -292,7 +316,10 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         note: data.indicators.highRemunerations.score?.getValue(),
         résultat: data.indicators.highRemunerations.result?.getValue(),
         objectif_de_progression: data.indicators.highRemunerations.progressObjective,
-        population_favorable: data.indicators.highRemunerations.favorablePopulation?.getValue(),
+        population_favorable:
+          data.indicators.highRemunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.indicators.highRemunerations.favorablePopulation?.getValue() as PopulationFavorable),
       };
 
     if (data.indicators.promotions)
@@ -301,7 +328,10 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         non_calculable: data.indicators.promotions.notComputableReason?.getValue() as Any,
         résultat: data.indicators.promotions.result?.getValue(),
         objectif_de_progression: data.indicators.promotions.progressObjective,
-        population_favorable: data.indicators.promotions.favorablePopulation?.getValue(),
+        population_favorable:
+          data.indicators.promotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.indicators.promotions.favorablePopulation?.getValue() as PopulationFavorable),
         catégories: data.indicators.promotions.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
       };
 
@@ -311,7 +341,10 @@ function declarationDataToDTO(data: DeclarationData, skipUndefined = false): Dec
         non_calculable: data.indicators.remunerations.notComputableReason?.getValue() as Any,
         résultat: data.indicators.remunerations.result?.getValue(),
         objectif_de_progression: data.indicators.remunerations.progressObjective,
-        population_favorable: data.indicators.remunerations.favorablePopulation?.getValue(),
+        population_favorable:
+          data.indicators.remunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.indicators.remunerations.favorablePopulation?.getValue() as PopulationFavorable),
         catégories: data.indicators.remunerations.categories.map<Categories>(cat => ({
           nom: cat.name,
           tranches: {

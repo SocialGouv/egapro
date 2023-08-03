@@ -1,5 +1,6 @@
 "use client";
 
+export * from "./base/client/AlertMessage";
 export * from "./base/client/AnchorLink";
 export * from "./base/client/TileCompanyIndex";
 export * from "./base/client/TileCompanyRepeqs";
