@@ -3,7 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
+import { type Remunerations } from "@common/models/generated";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -39,8 +39,8 @@ type FormType = z.infer<typeof formSchema>;
 
 const defaultTranch = { ":29": null, "30:39": null, "40:49": null, "50:": null };
 
-const buildDefaultCategories = (mode: RemunerationsMode.Enum) =>
-  mode === RemunerationsMode.Enum.CSP
+const buildDefaultCategories = (mode: Remunerations["mode"]) =>
+  mode === "csp"
     ? {
         catégories: [
           { nom: "ouv", tranches: { ...defaultTranch } },
@@ -51,14 +51,14 @@ const buildDefaultCategories = (mode: RemunerationsMode.Enum) =>
       }
     : { catégories: [] };
 
-export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum }) => {
+export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] }) => {
   const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
 
   const stepName: FunnelKey =
-    mode === RemunerationsMode.Enum.CSP
+    mode === "csp"
       ? "remunerations-csp"
-      : mode === RemunerationsMode.Enum.BRANCH_LEVEL
+      : mode === "niveau_branche"
       ? "remunerations-coefficient-branche"
       : "remunerations-coefficient-autre";
 
@@ -94,7 +94,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: RemunerationsMode.Enum
   };
 
   const getCSPTitle = (catégorie: Catégorie) =>
-    mode === RemunerationsMode.Enum.CSP ? new CSP(catégorie.nom as CSP.Enum).getLabel() : undefined;
+    mode === "csp" ? new CSP(catégorie.nom as CSP.Enum).getLabel() : undefined;
 
   return (
     <FormProvider {...methods}>

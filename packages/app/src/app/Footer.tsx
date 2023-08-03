@@ -17,7 +17,7 @@ const githubLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const helpLink = {
-  text: "Aide simulation",
+  text: "Consulter l'aide",
   linkProps: {
     href: "/aide-simulation",
   },
@@ -80,7 +80,7 @@ export const Footer = ({ type }: FooterProps) => (
     linkList={[
       {
         categoryName: "Liens utiles",
-        links: [githubLink, type === "company" ? referenteDownloadLink : helpLink],
+        links: [type === "company" ? referenteDownloadLink : helpLink, githubLink],
       },
       {
         categoryName: " ",

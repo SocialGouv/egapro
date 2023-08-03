@@ -1,5 +1,14 @@
-import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { type DeclarationDTO, type PopulationFavorable } from "@common/models/generated";
+import {
+  type AnneeIndicateur,
+  type Augmentations,
+  type AugmentationsEtPromotions,
+  type CongesMaternite,
+  type DeclarationDTO,
+  type HautesRemunerations,
+  type PopulationFavorable,
+  type Promotions,
+  type Remunerations,
+} from "@common/models/generated";
 import { type EmptyObject } from "@common/utils/types";
 
 import { buildEntreprise, type Entreprise } from "./entreprise";
@@ -32,8 +41,6 @@ export const labelsMotifNC = {
   absrcm: "Absence de retours de congé maternité",
 } as const;
 
-type LabelMotifNCKey = keyof typeof labelsMotifNC;
-
 export type IndicatorKey = keyof Pick<
   DeclarationFormState,
   | "augmentations-et-promotions"
@@ -46,7 +53,7 @@ export type IndicatorKey = keyof Pick<
 
 export type MotifNCKey = Exclude<IndicatorKey, "hautes-remunerations">;
 
-export const motifsNC: Record<MotifNCKey, readonly LabelMotifNCKey[]> = {
+export const motifsNC = {
   augmentations: ["egvi40pcet", "absaugi"],
   promotions: ["egvi40pcet", "absprom"],
   "augmentations-et-promotions": ["absaugi", "etsno5f5h"],
@@ -91,7 +98,7 @@ export type DeclarationFormState = {
       };
   commencer?: {
     annéeIndicateurs: number;
-    entrepriseDéclarante?: Entreprise;
+    siren: string;
   };
   "conges-maternite"?:
     | {
@@ -103,7 +110,6 @@ export type DeclarationFormState = {
         note: number;
         résultat: number;
       };
-  // Only filled by the backend.
   declarant?: {
     accordRgpd: boolean;
     email: string;
@@ -115,7 +121,7 @@ export type DeclarationFormState = {
     date?: string | undefined;
     status: "consultation" | "creation" | "edition";
   };
-  entreprise?: { tranche: TrancheValues; type: "entreprise" | "ues" };
+  entreprise?: { entrepriseDéclarante: Entreprise; tranche?: TrancheValues; type?: "entreprise" | "ues" };
   "hautes-remunerations"?: {
     note: number;
     populationFavorable: PopulationFavorable;
@@ -163,7 +169,7 @@ export type DeclarationFormState = {
         cse?: OuiNon;
         dateConsultationCSE?: string;
         estCalculable: "oui";
-        mode: RemunerationsMode.Enum;
+        mode: Remunerations["mode"];
       }
     | {
         déclarationCalculCSP: boolean;
@@ -192,7 +198,7 @@ export type DeclarationFormState = {
   };
   "resultat-global"?: {
     index?: number;
-    mesures: string;
+    mesures: DeclarationDTO["déclaration"]["mesures_correctives"];
     points: number;
     pointsCalculables: number;
   };
@@ -217,7 +223,7 @@ export const DeclarationFormBuilder = {
         : {
             estCalculable: "oui",
             note: declaration.indicateurs?.augmentations?.note ?? 0,
-            populationFavorable: declaration.indicateurs?.augmentations?.population_favorable ?? "egalite",
+            populationFavorable: declaration.indicateurs?.augmentations?.population_favorable ?? "",
             résultat: declaration.indicateurs?.augmentations?.résultat ?? 0,
             catégories: [
               { nom: "ouv", écarts: declaration.indicateurs?.augmentations?.catégories?.[0] ?? null },
@@ -234,7 +240,7 @@ export const DeclarationFormBuilder = {
         : {
             estCalculable: "oui",
             note: declaration.indicateurs?.promotions?.note ?? 0,
-            populationFavorable: declaration.indicateurs?.promotions?.population_favorable ?? "egalite",
+            populationFavorable: declaration.indicateurs?.promotions?.population_favorable ?? "",
             résultat: declaration.indicateurs?.promotions?.résultat ?? 0,
             catégories: [
               { nom: "ouv", écarts: declaration.indicateurs?.promotions?.catégories?.[0] ?? null },
@@ -245,7 +251,7 @@ export const DeclarationFormBuilder = {
           },
       commencer: {
         annéeIndicateurs: declaration.déclaration.année_indicateurs,
-        entrepriseDéclarante: buildEntreprise(declaration.entreprise),
+        siren: declaration.entreprise.siren,
       },
       "declaration-existante": {
         date: declaration.déclaration.date,
@@ -264,7 +270,7 @@ export const DeclarationFormBuilder = {
         cse: declaration.indicateurs?.rémunérations?.date_consultation_cse ? "oui" : undefined,
         dateConsultationCSE: declaration.indicateurs?.rémunérations?.date_consultation_cse,
         déclarationCalculCSP: true, // Always true for an existing declaration.
-        mode: declaration.indicateurs?.rémunérations?.mode as RemunerationsMode.Enum, // Always present for an existing declaration.
+        mode: declaration.indicateurs?.rémunérations?.mode, // Always present for an existing declaration.
       },
       "remunerations-csp": {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -283,14 +289,14 @@ export const DeclarationFormBuilder = {
       },
       "remunerations-resultat": {
         note: declaration.indicateurs?.rémunérations?.note ?? 0,
-        populationFavorable: declaration.indicateurs?.rémunérations?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.rémunérations?.population_favorable ?? "",
         résultat: declaration.indicateurs?.rémunérations?.résultat ?? 0,
       },
       "augmentations-et-promotions": {
         estCalculable: declaration.indicateurs?.augmentations_et_promotions?.non_calculable ? "non" : "oui",
         motifNonCalculabilité: declaration.indicateurs?.augmentations_et_promotions?.non_calculable,
         note: declaration.indicateurs?.augmentations_et_promotions?.note ?? 0,
-        populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.augmentations_et_promotions?.population_favorable ?? "",
         résultat: declaration.indicateurs?.augmentations_et_promotions?.résultat ?? 0,
         résultatEquivalentSalarié: declaration.indicateurs?.augmentations_et_promotions?.résultat_nombre_salariés ?? 0,
         noteNombreSalaries: declaration.indicateurs?.augmentations_et_promotions?.note_nombre_salariés ?? 0,
@@ -307,13 +313,14 @@ export const DeclarationFormBuilder = {
             note: declaration.indicateurs?.congés_maternité?.note ?? 0,
           },
       "hautes-remunerations": {
-        populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "egalite",
+        populationFavorable: declaration.indicateurs?.hautes_rémunérations?.population_favorable ?? "",
         résultat: declaration.indicateurs?.hautes_rémunérations?.résultat ?? 0,
         note: declaration.indicateurs?.hautes_rémunérations?.note ?? 0,
       },
       entreprise: {
         tranche: declaration.entreprise.effectif!.tranche!, // Always present for an existing declaration.
         type: declaration.entreprise.ues?.nom ? "ues" : "entreprise",
+        entrepriseDéclarante: buildEntreprise(declaration.entreprise),
       },
       ues: {
         nom: declaration.entreprise.ues?.nom ?? "",
@@ -323,18 +330,19 @@ export const DeclarationFormBuilder = {
             raisonSociale: entreprise.raison_sociale,
           })) ?? [],
       },
-      "periode-reference": declaration.déclaration.période_suffisante
-        ? {
-            périodeSuffisante: "oui",
-            effectifTotal: declaration.entreprise.effectif?.total ?? 0,
-            finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
-          }
-        : {
-            périodeSuffisante: "non",
-          },
+      "periode-reference":
+        declaration.déclaration.période_suffisante === false // Value undefined (for old declaration) is considered as true.
+          ? {
+              périodeSuffisante: "non",
+            }
+          : {
+              périodeSuffisante: "oui",
+              effectifTotal: declaration.entreprise.effectif?.total ?? 0,
+              finPériodeRéférence: declaration.déclaration.fin_période_référence ?? "",
+            },
       // TODO: les autres indicateurs et autres informations
       "resultat-global": {
-        mesures: declaration.déclaration.mesures_correctives || "",
+        mesures: declaration.déclaration.mesures_correctives,
         index: declaration.déclaration?.index,
         points: declaration.déclaration.points || 0,
         pointsCalculables: declaration.déclaration.points_calculables || 0,
@@ -355,16 +363,39 @@ export const DeclarationFormBuilder = {
     };
   },
 
-  // toDeclarationDTO: (formState: DeclarationFormState): DeclarationDTO => {
-  //   return {
-  //     source: "formulaire",
-  //     // déclaration: buildDeclaration(formState),
-  //     déclarant: buildDeclarant(formState),
-  //     entreprise: buildEntrepriseDTO(formState),
-  //     // ...(formState.informations.periodeSuffisante && { indicateurs: buildIndicateurs(formState) }),
-  //   };
-  // },
+  toDeclarationDTO: (formState: DeclarationFormState): DeclarationDTO => {
+    return {
+      source: "formulaire",
+      déclaration: buildDeclaration(formState),
+      déclarant: buildDeclarant(formState),
+      entreprise: buildEntrepriseDTO(formState),
+      indicateurs: buildIndicateurs(formState),
+    };
+  },
 };
+
+function buildDeclaration(formState: DeclarationFormState): DeclarationDTO["déclaration"] {
+  if (formState.commencer?.annéeIndicateurs === undefined) throw new Error("Missing annéeIndicateurs");
+
+  return {
+    brouillon: false,
+    année_indicateurs: formState.commencer?.annéeIndicateurs as AnneeIndicateur,
+    fin_période_référence:
+      formState["periode-reference"]?.périodeSuffisante === "oui"
+        ? formState["periode-reference"].finPériodeRéférence
+        : undefined,
+    index: formState["resultat-global"]?.index,
+    points: formState["resultat-global"]?.points,
+    points_calculables: formState["resultat-global"]?.pointsCalculables,
+    période_suffisante: formState["periode-reference"]?.périodeSuffisante === "oui",
+    publication: {
+      date: formState.publication?.date,
+      modalités: formState.publication?.choixSiteWeb === "non" ? formState.publication?.modalités : undefined,
+      url: formState.publication?.choixSiteWeb === "oui" ? formState.publication?.url : undefined,
+    },
+    mesures_correctives: formState["resultat-global"]?.mesures,
+  };
+}
 
 function buildDeclarant(formState: DeclarationFormState): DeclarationDTO["déclarant"] {
   if (formState.declarant === undefined) throw new Error("Missing declarant");
@@ -377,33 +408,169 @@ function buildDeclarant(formState: DeclarationFormState): DeclarationDTO["décla
   };
 }
 function buildEntrepriseDTO(formState: DeclarationFormState): DeclarationDTO["entreprise"] {
-  if (formState.commencer?.entrepriseDéclarante === undefined) throw new Error("Missing entreprise");
+  if (formState.entreprise?.entrepriseDéclarante === undefined) throw new Error("Missing entreprise");
 
   return {
-    code_naf: formState.commencer?.entrepriseDéclarante.codeNaf,
+    code_naf: formState.entreprise?.entrepriseDéclarante.codeNaf,
     effectif: {
       total:
         (formState["periode-reference"]?.périodeSuffisante === "oui" && formState["periode-reference"].effectifTotal) ||
         undefined,
       tranche: formState.entreprise?.tranche,
     },
-    raison_sociale: formState.commencer?.entrepriseDéclarante.raisonSociale,
-    siren: formState.commencer?.entrepriseDéclarante.siren,
-    adresse: formState.commencer?.entrepriseDéclarante.adresse,
-    code_pays: formState.commencer?.entrepriseDéclarante.codePays,
-    code_postal: formState.commencer?.entrepriseDéclarante.codePostal,
-    commune: formState.commencer?.entrepriseDéclarante.commune,
-    département: formState.commencer?.entrepriseDéclarante.département,
+    raison_sociale: formState.entreprise?.entrepriseDéclarante.raisonSociale,
+    siren: formState.entreprise?.entrepriseDéclarante.siren,
+    adresse: formState.entreprise?.entrepriseDéclarante.adresse,
+    code_pays: formState.entreprise?.entrepriseDéclarante.codePays,
+    code_postal: formState.entreprise?.entrepriseDéclarante.codePostal,
+    commune: formState.entreprise?.entrepriseDéclarante.commune,
+    département: formState.entreprise?.entrepriseDéclarante.département,
     plan_relance: formState.publication?.planRelance === "oui",
-    région: formState.commencer?.entrepriseDéclarante.région,
-    ...(formState.ues?.nom && {
-      ues: {
-        nom: formState.ues.nom,
-        entreprises: formState.ues.entreprises.map(entreprise => ({
-          raison_sociale: entreprise.raisonSociale,
-          siren: entreprise.siren,
-        })),
-      },
-    }),
+    région: formState.entreprise?.entrepriseDéclarante.région,
+    ues: !formState.ues?.nom
+      ? undefined
+      : {
+          nom: formState.ues.nom,
+          entreprises: formState.ues.entreprises.map(entreprise => ({
+            raison_sociale: entreprise.raisonSociale,
+            siren: entreprise.siren,
+          })),
+        },
+  };
+}
+
+// Remove undefined and null values from categories.
+function cleanCategories(categories?: Catégorie[]) {
+  if (categories === undefined) return undefined;
+
+  return categories.map(category => ({
+    nom: category.nom,
+    // Remove tranches with null or undefined values.
+    tranches: (Object.keys(category.tranches) as Array<keyof TranchesAge>)
+      .filter(key => category.tranches[key] !== undefined && category.tranches[key] !== null)
+      .map(key => ({ [key]: category.tranches[key] }))
+      .reduce((acc, curr) => {
+        return { ...acc, ...curr };
+      }, {}),
+  }));
+}
+
+function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indicateurs"] {
+  if (formState["periode-reference"]?.périodeSuffisante === "non") return undefined;
+
+  const rémunérations: Remunerations =
+    formState.remunerations?.estCalculable === "non"
+      ? { non_calculable: formState.remunerations.motifNonCalculabilité }
+      : {
+          note: formState["remunerations-resultat"]?.note,
+          population_favorable:
+            formState["remunerations-resultat"]?.populationFavorable === ""
+              ? undefined
+              : formState["remunerations-resultat"]?.populationFavorable,
+          résultat: formState["remunerations-resultat"]?.résultat,
+          catégories:
+            formState.remunerations?.estCalculable === "oui"
+              ? formState.remunerations.mode === "csp"
+                ? (cleanCategories(formState["remunerations-csp"]?.catégories) as Remunerations["catégories"])
+                : formState.remunerations.mode === "niveau_branche"
+                ? (cleanCategories(
+                    formState["remunerations-coefficient-branche"]?.catégories,
+                  ) as Remunerations["catégories"])
+                : (cleanCategories(
+                    formState["remunerations-coefficient-autre"]?.catégories,
+                  ) as Remunerations["catégories"])
+              : undefined,
+          date_consultation_cse:
+            formState.remunerations?.cse === "oui" ? formState.remunerations?.dateConsultationCSE : undefined,
+          mode: formState.remunerations?.mode,
+        };
+
+  const augmentations: Augmentations | undefined =
+    formState.entreprise?.tranche === "50:250"
+      ? undefined
+      : formState.augmentations?.estCalculable === "non"
+      ? {
+          non_calculable: formState.augmentations.motifNonCalculabilité,
+        }
+      : {
+          note: formState.augmentations?.note,
+          population_favorable:
+            formState.augmentations?.populationFavorable === ""
+              ? undefined
+              : formState.augmentations?.populationFavorable,
+          résultat: formState.augmentations?.résultat,
+          catégories: [
+            formState.augmentations?.catégories?.[0].écarts || 0,
+            formState.augmentations?.catégories?.[1].écarts || 0,
+            formState.augmentations?.catégories?.[2].écarts || 0,
+            formState.augmentations?.catégories?.[3].écarts || 0,
+          ],
+        };
+
+  const promotions: Promotions | undefined =
+    formState.entreprise?.tranche === "50:250"
+      ? undefined
+      : formState.promotions?.estCalculable === "non"
+      ? {
+          non_calculable: formState.promotions.motifNonCalculabilité,
+        }
+      : {
+          résultat: formState.promotions?.résultat,
+          note: formState.promotions?.note,
+          population_favorable:
+            formState.promotions?.populationFavorable === "" ? undefined : formState.promotions?.populationFavorable,
+          catégories: [
+            formState.promotions?.catégories?.[0].écarts || 0,
+            formState.promotions?.catégories?.[1].écarts || 0,
+            formState.promotions?.catégories?.[2].écarts || 0,
+            formState.promotions?.catégories?.[3].écarts || 0,
+          ],
+        };
+
+  const augmentationsEtPromotions: AugmentationsEtPromotions | undefined =
+    formState.entreprise?.tranche !== "50:250"
+      ? undefined
+      : formState["augmentations-et-promotions"]?.estCalculable === "non"
+      ? {
+          non_calculable: formState["augmentations-et-promotions"].motifNonCalculabilité,
+        }
+      : {
+          note: formState["augmentations-et-promotions"]?.note,
+          note_en_pourcentage: formState["augmentations-et-promotions"]?.notePourcentage,
+          note_nombre_salariés: formState["augmentations-et-promotions"]?.noteNombreSalaries,
+          population_favorable:
+            formState["augmentations-et-promotions"]?.populationFavorable === ""
+              ? undefined
+              : formState["augmentations-et-promotions"]?.populationFavorable,
+          résultat: formState["augmentations-et-promotions"]?.résultat,
+          résultat_nombre_salariés: formState["augmentations-et-promotions"]?.résultatEquivalentSalarié,
+        };
+
+  const congésMaternités: CongesMaternite =
+    formState["conges-maternite"]?.estCalculable === "non"
+      ? {
+          non_calculable: formState["conges-maternite"].motifNonCalculabilité,
+        }
+      : {
+          résultat: formState["conges-maternite"]?.résultat,
+          note: formState["conges-maternite"]?.note,
+        };
+
+  const hautesRémunérations: HautesRemunerations = {
+    note: formState["hautes-remunerations"]?.note,
+    résultat: formState["hautes-remunerations"]?.résultat,
+    population_favorable:
+      formState["hautes-remunerations"]?.populationFavorable === ""
+        ? undefined
+        : formState["hautes-remunerations"]?.populationFavorable,
+  };
+
+  return {
+    ...(augmentations && { augmentations }),
+    ...(promotions && { promotions }),
+    ...(augmentationsEtPromotions && { augmentations_et_promotions: augmentationsEtPromotions }),
+    congés_maternité: congésMaternités,
+    hautes_rémunérations: hautesRémunérations,
+    rémunérations,
   };
 }

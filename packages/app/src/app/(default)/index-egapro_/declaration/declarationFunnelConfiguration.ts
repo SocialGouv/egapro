@@ -1,8 +1,7 @@
 import { config } from "@common/config";
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 
-export const nbSteps = 12;
+export const nbStepsMax = 13;
 
 const base = config.base_declaration_url;
 
@@ -142,7 +141,10 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () => funnelStaticConfig[`remunerations`],
+      next: () =>
+        data["periode-reference"]?.périodeSuffisante === "non"
+          ? funnelStaticConfig[`validation-transmission`]
+          : funnelStaticConfig[`remunerations`],
       previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`entreprise`]),
     },
     remunerations: {
@@ -154,9 +156,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
           ? data.entreprise?.tranche === "50:250"
             ? funnelStaticConfig[`augmentations-et-promotions`]
             : funnelStaticConfig[`augmentations`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.CSP
+          : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
+          : data.remunerations?.mode === "niveau_branche"
           ? funnelStaticConfig[`remunerations-coefficient-branche`]
           : funnelStaticConfig[`remunerations-coefficient-autre`],
 
@@ -194,9 +196,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       previous: () =>
         data.remunerations?.estCalculable === "non"
           ? funnelStaticConfig[`remunerations`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.CSP
+          : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
-          : data.remunerations?.mode === RemunerationsMode.Enum.BRANCH_LEVEL
+          : data.remunerations?.mode === "niveau_branche"
           ? funnelStaticConfig[`remunerations-coefficient-branche`]
           : funnelStaticConfig[`remunerations-coefficient-autre`],
     },
@@ -205,14 +207,20 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`conges-maternite`],
-      previous: () => funnelStaticConfig[`remunerations-resultat`],
+      previous: () =>
+        data.remunerations?.estCalculable === "non"
+          ? funnelStaticConfig[`remunerations`]
+          : funnelStaticConfig[`remunerations-resultat`],
     },
     augmentations: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`promotions`],
-      previous: () => funnelStaticConfig[`remunerations-resultat`],
+      previous: () =>
+        data.remunerations?.estCalculable === "non"
+          ? funnelStaticConfig[`remunerations`]
+          : funnelStaticConfig[`remunerations-resultat`],
     },
     promotions: {
       indexStep() {
@@ -257,6 +265,9 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`confirmation`],
-      previous: () => funnelStaticConfig[`publication`],
+      previous: () =>
+        data["periode-reference"]?.périodeSuffisante === "non"
+          ? funnelStaticConfig[`periode-reference`]
+          : funnelStaticConfig[`publication`],
     },
   }) as const;

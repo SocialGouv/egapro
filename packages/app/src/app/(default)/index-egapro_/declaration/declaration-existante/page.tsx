@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, DownloadCard, Grid, GridCol } from "@design-system";
 import { useDeclaration } from "@services/apiClient/declaration";
@@ -26,38 +25,26 @@ const Page = () => {
   const router = useRouter();
   const { formData, setStatus } = useDeclarationFormManager();
 
-  const siren = formData.commencer?.entrepriseDéclarante?.siren;
-  const year = formData.commencer?.annéeIndicateurs;
+  const siren = formData.commencer?.siren;
+  const annéeIndicateurs = formData.commencer?.annéeIndicateurs;
 
-  const { declaration, error } = useDeclaration(siren, year);
+  const { declaration, error } = useDeclaration(siren, annéeIndicateurs);
+
+  const declarationDate = declaration?.data.déclaration.date;
 
   const canEdit = canEditSiren(session?.data?.user)(siren);
 
-  const olderThanOneYear = !declaration?.data.déclaration.date
-    ? undefined
-    : isAfter(new Date(), add(new Date(declaration.data.déclaration.date), { years: 1 }));
+  if (!declaration?.data || !declarationDate) return <SkeletonForm fields={8} />;
 
-  if (!declaration?.data || olderThanOneYear === undefined) return <SkeletonForm fields={8} />;
+  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   if (error) <p>{"Une erreur a été rencontrée par l'API."}</p>;
 
   return (
     <>
-      {olderThanOneYear ? (
-        <p>
-          Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé.
-        </p>
-      ) : (
-        <Alert
-          severity="info"
-          title="Cette déclaration a été validée et transmise."
-          description="Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle."
-        />
-      )}
-
       <RecapDeclaration déclaration={declaration?.data} />
 
-      {canEdit && year && (
+      {canEdit && annéeIndicateurs && (
         <>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-8w")}
@@ -70,6 +57,7 @@ const Page = () => {
                 setStatus("edition");
                 router.push(funnelConfig(formData)[stepName].next().url);
               },
+              disabled: olderThanOneYear,
             }}
           />
 
@@ -78,10 +66,10 @@ const Page = () => {
               <DownloadCard
                 title="Télécharger le récapitulatif"
                 endDetail="PDF"
-                href={`/api/declaration/${siren}/${year}/pdf`}
-                filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
+                href={`/api/declaration/${siren}/${annéeIndicateurs}/pdf`}
+                filename={`declaration_egapro_${siren}_${annéeIndicateurs + 1}.pdf`}
                 fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des données ${year}`}
+                desc={`Année ${annéeIndicateurs + 1} au titre des données ${annéeIndicateurs}`}
               />
             </GridCol>
           </Grid>

@@ -1,16 +1,12 @@
-"use client";
-
-import { ClientOnly } from "@components/utils/ClientOnly";
-
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
-import { RecapFunnel } from "./RecapFunnel";
+import { Recap } from "./Recap";
 
 const stepName: FunnelKey = "validation-transmission";
 
 const ResultatGlobalPage = () => {
   return (
-    <ClientOnly>
+    <>
       <DeclarationStepper stepName={stepName} />
 
       <p>
@@ -20,8 +16,8 @@ const ResultatGlobalPage = () => {
         transmettre les résultats” ci-dessous. Vous recevrez un accusé de réception.
       </p>
 
-      <RecapFunnel />
-    </ClientOnly>
+      <Recap />
+    </>
   );
 };
 

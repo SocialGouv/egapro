@@ -50,8 +50,7 @@ export const RecapCardIndicator = ({ nom, indicateurs, customContent, editable }
               legend={
                 nom === "congés_maternité"
                   ? ""
-                  : indicateurs?.[nom]?.population_favorable === undefined ||
-                    indicateurs?.[nom]?.population_favorable === "egalite"
+                  : indicateurs?.[nom]?.population_favorable === ""
                   ? "Égalité de l'indicateur"
                   : `Écart en faveur des ${indicateurs?.[nom]?.population_favorable}`
               }

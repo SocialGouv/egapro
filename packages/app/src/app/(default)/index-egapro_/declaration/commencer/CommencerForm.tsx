@@ -56,6 +56,7 @@ const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: 
 const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
+  formData: DeclarationFormState,
   tokenApiV1: string,
 ): Promise<DeclarationFormState> => {
   const previousDeclaration = await fetchDeclaration(siren, year, {
@@ -65,6 +66,7 @@ const prepareDataWithExistingDeclaration = async (
     throwErrorOn404: false,
   });
 
+  // If there is a declaration, we use it as is.
   if (previousDeclaration) {
     const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
 
@@ -74,16 +76,28 @@ const prepareDataWithExistingDeclaration = async (
     };
   }
 
-  // Otherwise, this is a creation, so we start with fetching firm's data.
+  // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
+  const baseFormData: DeclarationFormState =
+    formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
+      ? formData
+      : {
+          "declaration-existante": {
+            status: "creation",
+          },
+        };
+
+  // We fetch the latest data for the entreprise to fill the entreprise page.
   const entreprise = await memoizedFetchSiren(siren, year);
 
   return {
-    "declaration-existante": {
-      status: "creation",
+    ...baseFormData,
+    entreprise: {
+      ...baseFormData.entreprise,
+      entrepriseDéclarante: buildEntreprise(entreprise),
     },
     [stepName]: {
       annéeIndicateurs: year,
-      entrepriseDéclarante: buildEntreprise(entreprise),
+      siren,
     },
   };
 };
@@ -99,7 +113,7 @@ export const CommencerForm = () => {
   const methods = useForm<FormType>({
     mode: "onTouched",
     resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
-    defaultValues: { ...formData[stepName], siren: formData.commencer?.entrepriseDéclarante?.siren },
+    defaultValues: formData[stepName],
   });
 
   const {
@@ -114,9 +128,9 @@ export const CommencerForm = () => {
 
   const companies = user.companies;
 
-  const saveAndGoNext = async ({ annéeIndicateurs, siren }: FormType) => {
+  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
     // Synchronize the data with declaration if any.
-    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, user.tokenApiV1);
+    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
 
     // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
     saveFormData(newData);
@@ -124,10 +138,8 @@ export const CommencerForm = () => {
     router.push(funnelConfig(newData)[stepName].next().url);
   };
 
-  const onSubmit = async ({ annéeIndicateurs, siren }: FormType) => {
-    const { entrepriseDéclarante, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
-
-    const sirenStorage = entrepriseDéclarante?.siren;
+  const onSubmit = async ({ siren, annéeIndicateurs }: FormType) => {
+    const { siren: sirenStorage, annéeIndicateurs: annéeIndicateursStorage } = formData[stepName] ?? {};
 
     // If no data are present in session storage or data are present in session storage and siren and year are unchanged.
     if (
@@ -135,14 +147,14 @@ export const CommencerForm = () => {
       !annéeIndicateursStorage ||
       (siren === sirenStorage && annéeIndicateurs === annéeIndicateursStorage)
     ) {
-      return await saveAndGoNext({ siren, annéeIndicateurs });
+      return await saveAndGoNext({ siren, annéeIndicateurs }, formData);
     }
 
     // In data are present in session storage and siren and year are not the same.
     if (confirm(buildConfirmMessage({ siren: sirenStorage, annéeIndicateurs: annéeIndicateursStorage }))) {
       // Start a new declaration of representation.
       resetFormData();
-      await saveAndGoNext({ siren, annéeIndicateurs });
+      await saveAndGoNext({ siren, annéeIndicateurs }, formData);
     } else {
       // Rollback to the old Siren.
       setValue("siren", sirenStorage);
@@ -151,8 +163,12 @@ export const CommencerForm = () => {
 
   const confirmReset = () => {
     if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
+      setValue("siren", "");
+      if (PUBLIC_YEARS[0]) {
+        setValue("annéeIndicateurs", PUBLIC_YEARS[0]);
+      }
+
       resetFormData();
-      resetForm();
     }
   };
 
@@ -215,7 +231,8 @@ export const CommencerForm = () => {
             backLabel="Réinitialiser"
             backProps={{
               onClick: confirmReset,
-              disabled: formData ? !formData[stepName]?.entrepriseDéclarante?.siren : false,
+              disabled: formData ? !formData.entreprise?.entrepriseDéclarante?.siren : false,
+              iconId: undefined,
             }}
             nextProps={{
               disabled: !isValid,

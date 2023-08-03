@@ -11,7 +11,9 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { endOfYear, formatISO, getYear } from "date-fns";
+import { produce } from "immer";
 import { omit } from "lodash";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
@@ -49,7 +51,7 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "periode-reference";
 
 export const PeriodeReferenceForm = () => {
-  const { formData, savePageData } = useDeclarationFormManager();
+  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
 
   const methods = useForm<FormType>({
@@ -69,9 +71,30 @@ export const PeriodeReferenceForm = () => {
   const périodeSuffisante = watch("périodeSuffisante");
 
   const onSubmit = async (data: FormType) => {
-    savePageData(stepName, data.périodeSuffisante === "oui" ? omit(data, "annéeIndicateurs") : data);
+    const newFormData = produce(formData, draft => {
+      const stepData = data.périodeSuffisante === "oui" ? omit(data, "annéeIndicateurs") : data;
 
-    router.push(funnelConfig(formData)[stepName].next().url);
+      // We clean potential data for some pages after in the flow.
+      if (data.périodeSuffisante === "non") {
+        draft["remunerations"] = undefined;
+        draft["remunerations-coefficient-autre"] = undefined;
+        draft["remunerations-coefficient-branche"] = undefined;
+        draft["remunerations-csp"] = undefined;
+        draft["remunerations-resultat"] = undefined;
+        draft["augmentations-et-promotions"] = undefined;
+        draft["augmentations"] = undefined;
+        draft["promotions"] = undefined;
+        draft["conges-maternite"] = undefined;
+        draft["hautes-remunerations"] = undefined;
+        draft["publication"] = undefined;
+      }
+
+      draft[stepName] = stepData as DeclarationFormState[typeof stepName];
+    });
+
+    saveFormData(newFormData);
+
+    router.push(funnelConfig(newFormData)[stepName].next().url);
   };
 
   const selectEndOfYear = () => {
