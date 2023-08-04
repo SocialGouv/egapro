@@ -1,3 +1,10 @@
+# [2.91.0](https://github.com/SocialGouv/egapro/compare/v2.90.0...v2.91.0) (2023-08-04)
+
+
+### Features
+
+* add 'how to' pdf for opmc ([cda1a54](https://github.com/SocialGouv/egapro/commit/cda1a5410734740852d200cdd53b9e1a6424e71e))
+
 # [2.90.0](https://github.com/SocialGouv/egapro/compare/v2.89.5...v2.90.0) (2023-08-01)
 
 
