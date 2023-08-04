@@ -56,7 +56,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, redirectTo || defaultRedirectTo);
+      await requestEmailForToken(email, "representation-equilibree");
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({

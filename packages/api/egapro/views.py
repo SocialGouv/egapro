@@ -491,7 +491,10 @@ async def send_token(request, response):
     if request.ip in config.ALLOWED_IPS:
         response.json = {"token": token}
     else:
-        link = f"{os.environ.get('EGAPRO_APPLICATION_URL')}{request.json.get('path', '')}/?token={token}"
+        if request.json.get('target') == "simulation":
+            link = f"{os.environ.get('EGAPRO_APPLICATION_URL')}/index-egapro/tableauDeBord/me-connecter/?token={token}"
+        elif request.json.get('target') == "representation-equilibree":
+            link = f"{os.environ.get('EGAPRO_APPLICATION_URL')}/representation-equilibree/commencer/?token={token}"
         if "localhost" in link or "127.0.0.1" in link:
             print(link)
             loggers.logger.info(link)

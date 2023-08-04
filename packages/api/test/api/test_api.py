@@ -14,7 +14,7 @@ async def test_request_token(client, monkeypatch):
 
     def mock_send(to, subject, body):
         assert to == "foo@bar.org"
-        assert "/declaration/token/" in body
+        assert "index-egapro/tableauDeBord/me-connecter" in body
         nonlocal calls
         calls += 1
 
@@ -24,7 +24,7 @@ async def test_request_token(client, monkeypatch):
         "/token",
         body={
             "email": "foo@bar.org",
-            "path": "/declaration/token/",
+            "target": "simulation",
         },
     )
     assert resp.status == 204

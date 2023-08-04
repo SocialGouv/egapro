@@ -1,11 +1,11 @@
 import { fetcher } from "./fetcher";
 
 //
-export const requestEmailForToken = (email: string, path: string) =>
+export const requestEmailForToken = (email: string, target: string) =>
   fetcher("/token", {
     method: "POST",
     body: JSON.stringify({
       email,
-      path,
+      target,
     }),
   });

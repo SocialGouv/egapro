@@ -118,7 +118,7 @@ export const sendReceiptObjectifsMesures = (siren: string, year?: number) =>
 export const sendValidationEmail = (email: string) =>
   postResource("/token", {
     email,
-    path: window.location.pathname,
+    target: "simulation",
   })
 
 export const getTokenInfo = () => getResource(`/me`)
