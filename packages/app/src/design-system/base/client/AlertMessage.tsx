@@ -1,3 +1,5 @@
+"use client";
+
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert, { type AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
