@@ -79,13 +79,15 @@ const otherAgeRangeNumbers = z.array(
 const indicateur2or3 = z.discriminatedUnion("calculable", [
   z.object({
     calculable: z.literal(true),
-    pourcentages: z.record(
-      z.nativeEnum(CSP.Enum),
-      z.object({
-        women: z.number().positive().max(100),
-        men: z.number().positive().max(100),
-      }),
-    ),
+    pourcentages: z
+      .record(
+        z.nativeEnum(CSP.Enum),
+        z.object({
+          women: z.number().positive().max(100),
+          men: z.number().positive().max(100),
+        }),
+      )
+      .default({}),
   }),
   z.object({
     calculable: z.literal(false),
@@ -104,21 +106,23 @@ export const createSteps = {
   indicateur1: z.discriminatedUnion("mode", [
     z.object({
       mode: z.literal(RemunerationsMode.Enum.CSP),
-      remunerations: z.array(
-        z.object({
-          name: z.nativeEnum(CSP.Enum),
-          categoryId: z.string().nonempty(),
-          category: z
-            .record(
-              z.nativeEnum(CSPAgeRange.Enum),
-              z.object({
-                womenSalary: z.number().positive(),
-                menSalary: z.number().positive(),
-              }),
-            )
-            .optional(),
-        }),
-      ),
+      remunerations: z
+        .array(
+          z.object({
+            name: z.nativeEnum(CSP.Enum),
+            categoryId: z.string().nonempty(),
+            category: z
+              .record(
+                z.nativeEnum(CSPAgeRange.Enum),
+                z.object({
+                  womenSalary: z.number().positive(),
+                  menSalary: z.number().positive(),
+                }),
+              )
+              .optional(),
+          }),
+        )
+        .default([]),
     }),
     z.object({
       mode: z.literal(RemunerationsMode.Enum.BRANCH_LEVEL),

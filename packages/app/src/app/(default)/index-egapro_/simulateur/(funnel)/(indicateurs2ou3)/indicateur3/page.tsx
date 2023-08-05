@@ -1,7 +1,7 @@
 import { CenteredContainer } from "@design-system";
 
 import { NAVIGATION } from "../../navigation";
-import { Indic3Form } from "./Form";
+import { Indic2or3Form } from "../Form";
 
 const { title } = NAVIGATION.indicateur3;
 
@@ -15,7 +15,7 @@ export const metadata = {
 const Indicateur3Page = () => {
   return (
     <CenteredContainer pb="4w">
-      <Indic3Form />
+      <Indic2or3Form indicateur={3} />
     </CenteredContainer>
   );
 };

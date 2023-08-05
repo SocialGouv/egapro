@@ -25,8 +25,10 @@ export type ExternalRemunerations = Array<{
 export function flattenRemunerations(remunerations: ExternalRemunerations): InputRemunerations {
   const flattened: InputRemunerations = {};
   for (const { categoryId, category } of remunerations) {
-    for (const [ageRange, ageGroup] of Object.entries(category)) {
-      flattened[buildRemunerationKey(categoryId, ageRange as CSPAgeRange.Enum)] = ageGroup;
+    if (category) {
+      for (const [ageRange, ageGroup] of Object.entries(category)) {
+        flattened[buildRemunerationKey(categoryId, ageRange as CSPAgeRange.Enum)] = ageGroup;
+      }
     }
   }
   return flattened;

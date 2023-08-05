@@ -8,7 +8,7 @@ export interface ComputedResult {
 }
 
 export abstract class AbstractComputer<Input = Any> {
-  public abstract NOTE_TABLE: number[];
+  public abstract NOTE_TABLE: readonly number[];
   protected input?: Input;
   protected computed?: ComputedResult;
 
