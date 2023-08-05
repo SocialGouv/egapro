@@ -1,12 +1,8 @@
 "use client";
 
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import {
-  ageRanges,
-  IndicateurUnComputer,
-  type RemunerationsCSP,
-  type RemunerationsOther,
-} from "@common/core-domain/computers/IndicateurUnComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
@@ -34,7 +30,7 @@ const formSchema = createSteps.indicateur1
   .superRefine(({ mode, remunerations, csp }, ctx) => {
     if (mode !== RemunerationsMode.Enum.CSP) {
       // test if there is the same amount of CSP in effectifs and remunerations
-      schemaOtherComputer.setRemunerations(remunerations as RemunerationsOther);
+      schemaOtherComputer.setInput(flattenRemunerations(remunerations as ExternalRemunerations));
 
       const { enoughWomen, enoughMen } = getIsEnoughEmployees({
         computer: schemaOtherComputer,
@@ -48,15 +44,6 @@ const formSchema = createSteps.indicateur1
           path: ["remunerations"],
         });
       }
-
-      // enable if we want to block the user if there is not enough employees
-      // if (!schemaOtherComputer.canCompute()) {
-      //   ctx.addIssue({
-      //     code: z.ZodIssueCode.custom,
-      //     message: `L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs`,
-      //     path: ["remunerations"],
-      //   });
-      // }
     }
   });
 type Indic1FormType = z.infer<typeof formSchema>;
@@ -71,10 +58,10 @@ export const Indic1Form = () => {
   const { data: session } = useSession();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const hydrated = useSimuFunnelStoreHasHydrated();
-  const [lastCspRemunerations, setLastCspRemunerations] = useState<RemunerationsCSP>();
-  const [lastOtherRemunerations, setLastOtherRemunerations] = useState<RemunerationsOther>();
+  const [lastCspRemunerations, setLastCspRemunerations] = useState<ExternalRemunerations>();
+  const [lastOtherRemunerations, setLastOtherRemunerations] = useState<ExternalRemunerations>();
   const [lastMode, setLastMode] = useState<RemunerationsMode.Enum>();
-  const [defaultRemunerationsOtherModes, setDefaultRemunerationsOtherModes] = useState<RemunerationsOther>();
+  const [defaultRemunerationsOtherModes, setDefaultRemunerationsOtherModes] = useState<ExternalRemunerations>();
 
   useEffect(() => {
     if (funnel?.indicateur1?.mode) {
@@ -116,25 +103,27 @@ export const Indic1Form = () => {
   const currentMode = watch("mode");
 
   // default values for CSP mode, set category to empty if no data only if count is >= 3
-  const defaultCspModeRemunerations = Object.keys(funnel.effectifs.csp).map<RemunerationsCSP[number]>(categoryName => ({
-    name: categoryName,
-    categoryId: categoryName,
-    category: ageRanges.reduce(
-      (newAgeGroups, ageRange) => ({
-        ...newAgeGroups,
-        ...(funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women >= 3 &&
-        funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men >= 3
-          ? {
-              [ageRange]: {
-                womenCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women,
-                menCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men,
-              },
-            }
-          : {}),
-      }),
-      {} as RemunerationsCSP[number]["category"],
-    ),
-  }));
+  const defaultCspModeRemunerations = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(
+    categoryName => ({
+      name: categoryName,
+      categoryId: categoryName,
+      category: ageRanges.reduce(
+        (newAgeGroups, ageRange) => ({
+          ...newAgeGroups,
+          ...(funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women >= 3 &&
+          funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men >= 3
+            ? {
+                [ageRange]: {
+                  womenCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women,
+                  menCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men,
+                },
+              }
+            : {}),
+        }),
+        {} as ExternalRemunerations[number]["category"],
+      ),
+    }),
+  );
 
   const defaultOtherModesRemunerations = [
     {
@@ -146,7 +135,7 @@ export const Indic1Form = () => {
         }),
         {},
       ),
-    } as RemunerationsOther[number],
+    } as ExternalRemunerations[number],
   ];
 
   const onSubmit = ({ mode, remunerations }: Indic1FormType) => {
@@ -192,9 +181,9 @@ export const Indic1Form = () => {
                           const currentRemunerations = getValues("remunerations");
                           if (lastMode && currentRemunerations?.length) {
                             if (lastMode === RemunerationsMode.Enum.CSP) {
-                              setLastCspRemunerations(currentRemunerations as RemunerationsCSP);
+                              setLastCspRemunerations(currentRemunerations as ExternalRemunerations);
                             } else {
-                              setLastOtherRemunerations(currentRemunerations as RemunerationsOther);
+                              setLastOtherRemunerations(currentRemunerations as ExternalRemunerations);
                             }
                           }
                           setLastMode(mode);

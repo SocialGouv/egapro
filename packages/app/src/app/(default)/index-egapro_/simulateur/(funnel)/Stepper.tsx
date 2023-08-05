@@ -3,7 +3,8 @@
 import { Stepper as BaseStepper, type StepperProps as BaseStepperProps } from "@codegouvfr/react-dsfr/Stepper";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { last } from "lodash";
+import { useSelectedLayoutSegments } from "next/navigation";
 import Skeleton from "react-loading-skeleton";
 
 import { getFullNavigation, NAVIGATION } from "./navigation";
@@ -17,8 +18,9 @@ const useStore = storePicker(useSimuFunnelStore);
 export const Stepper = () => {
   const [funnel, selectedWorkforceRange] = useStore("funnel", "selectedWorkforceRange");
   const hydrated = useSimuFunnelStoreHasHydrated();
-  const segment = useSelectedLayoutSegment();
-  const currentNavigation = NAVIGATION[segment as NavigationPath] || {};
+  const layoutSegments = useSelectedLayoutSegments();
+  const segment = last(layoutSegments) as NavigationPath;
+  const currentNavigation = NAVIGATION[segment] || {};
 
   if (!hydrated) {
     return (

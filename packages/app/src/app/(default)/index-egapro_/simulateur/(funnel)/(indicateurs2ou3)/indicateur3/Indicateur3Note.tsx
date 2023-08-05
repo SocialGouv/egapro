@@ -1,17 +1,19 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
-import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { type IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { percentFormat } from "@common/utils/number";
-import { type Any } from "@common/utils/types";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { useFormContext } from "react-hook-form";
 
 interface Props {
-  computer: IndicateurUnComputer<Any>;
+  computer: IndicateurTroisComputer;
+  resultIndicateurUn: ComputedResult;
 }
 
-export const Indicateur1Note = ({ computer }: Props) => {
+const NOTE_MAX = 15;
+
+export const Indicateur3Note = ({ computer, resultIndicateurUn }: Props) => {
   const {
     formState: { isValid },
   } = useFormContext();
@@ -24,8 +26,8 @@ export const Indicateur1Note = ({ computer }: Props) => {
     if (computed.genderAdvantage === "equality") {
       advantageText = "Les femmes et les hommes sont à égalité";
     } else {
-      advantageText = "Écart de rémunération ";
-      if (computed.note === 40) {
+      advantageText = "Écart de taux de promotions ";
+      if (computed.note === NOTE_MAX) {
         advantageText += "constaté ";
       }
       advantageText += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
@@ -35,14 +37,27 @@ export const Indicateur1Note = ({ computer }: Props) => {
     // noop
   }
 
+  const remunerationsCompensated =
+    computed &&
+    resultIndicateurUn.note < 40 &&
+    computed.note < NOTE_MAX &&
+    resultIndicateurUn.genderAdvantage !== computed.genderAdvantage;
+
   return (
     <ClientAnimate>
       {isNC ? (
         <IndicatorNote
           note={"NC"}
           size="small"
-          text="L'indicateur écart de rémunération est non calculable"
-          legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs"
+          text="L'indicateur écart de taux de promotions est non calculable"
+          legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
+        />
+      ) : remunerationsCompensated ? (
+        <IndicatorNote
+          note={NOTE_MAX}
+          max={NOTE_MAX}
+          text="L'écart de promotions réduit l'écart de rémunération. Tous les points sont accordés."
+          legend={advantageText}
         />
       ) : (
         <>
@@ -50,14 +65,14 @@ export const Indicateur1Note = ({ computer }: Props) => {
             className={fr.cx("fr-mb-2w")}
             size="small"
             note={percentFormat.format((computed?.result ?? 0) / 100)}
-            text="Résultat final de l'indicateur écart de rémunération"
+            text="Résultat final de l'indicateur écart de taux de promotions"
             legend="Arrondi à la première décimale"
           />
           <IndicatorNote
             note={isValid && computed ? computed.note : "-"}
-            max={40}
-            text="Nombre de points obtenus à l'indicateur écart de rémunération"
-            legend={isValid ? advantageText : "Veuillez remplir le reste des rémunérations pour avoir votre note"}
+            max={NOTE_MAX}
+            text="Nombre de points obtenus à l'indicateur écart de taux de promotions"
+            legend={isValid ? advantageText : "Veuillez remplir le reste des taux de promotions pour avoir votre note"}
           />
         </>
       )}

@@ -1,21 +1,7 @@
-import { CSP } from "../domain/valueObjects/CSP";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { CSPAgeRange } from "../domain/valueObjects/declaration/simulation/CSPAgeRange";
+import { AbstractGroupComputer, type TotalMetadata } from "./AbstractGroupComputer";
 
-export const categories = [
-  CSP.Enum.OUVRIERS,
-  CSP.Enum.EMPLOYES,
-  CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-  CSP.Enum.INGENIEURS_CADRES,
-] as const;
-export const ageRanges = [
-  CSPAgeRange.Enum.LESS_THAN_30,
-  CSPAgeRange.Enum.FROM_30_TO_39,
-  CSPAgeRange.Enum.FROM_40_TO_49,
-  CSPAgeRange.Enum.FROM_50_TO_MORE,
-] as const;
-
-type CountAndAverageSalaries = {
+export type CountAndAverageSalaries = {
   menCount: number;
   // default: 0 nonnegative
   menSalary: number;
@@ -24,181 +10,79 @@ type CountAndAverageSalaries = {
   womenSalary: number;
 };
 
-// ---
-type AgeRanges = Record<CSPAgeRange.Enum, CountAndAverageSalaries>;
-
-interface Remunerations<TName extends string = string> {
-  category: AgeRanges;
-  categoryId: string;
-  name: TName;
-}
-
-// cas où RemunerationsMode.Enum = "csp"
-export type RemunerationsCSP = Array<Remunerations<CSP.Enum>>;
-// autres cas - "string" car la catégorie est libre
-export type RemunerationsOther = Remunerations[];
-export type RemunerationsCountAndAverageSalaries = CountAndAverageSalaries;
+export type InputRemunerations = Record<string, CountAndAverageSalaries>;
 
 const CSP_THRESHOLD = 5;
 const OTHER_THRESHOLD = 2;
 
-const NOTE_TABLE = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0];
-
-interface TotalMetadata {
+interface AdditionalMetadata {
   averageMenSalary: number;
   averageWomenSalary: number;
-  fillableGroups: Array<[string, CSPAgeRange.Enum]>;
-  totalEmployeeCount: number;
-  totalGroupCount: number;
-  totalMenCount: number;
-  totalWomenCount: number;
-  validGroups: Array<[string, CSPAgeRange.Enum]>;
+  sumProductMenSalary: number;
+  sumProductWomenSalary: number;
 }
 
-export interface Result {
-  genderAdvantage: "equality" | "men" | "women";
-  note: number;
-  result: number;
-  resultRaw: number;
-}
+export type IndicateurUnComputerTotalMetadata = TotalMetadata<string, AdditionalMetadata>;
 
-export type IndicateurUnComputerResult = Result;
-export type IndicateurUnComputerTotalMetadata = TotalMetadata;
-
-export class IndicateurUnComputer<
-  TMode extends RemunerationsMode.Enum,
-  TRemunerations extends TMode extends RemunerationsMode.Enum.CSP ? RemunerationsCSP : RemunerationsOther,
+export class IndicateurUnComputer<TMode extends RemunerationsMode.Enum> extends AbstractGroupComputer<
+  InputRemunerations,
+  AdditionalMetadata
 > {
-  private remunerations?: RemunerationsOther;
-  private totalMetadata?: TotalMetadata;
-  private computed?: Result;
-  private groupWeightedGaps: Map<`${string}:${CSPAgeRange.Enum}`, CountAndAverageSalaries> = new Map();
+  public NOTE_TABLE = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0];
+  public VALID_GROUPS_THRESHOLD = 0.4;
+  public GROUP_COUNT_THRESHOLD = 3;
 
-  constructor(private readonly mode: TMode) {}
-
-  public setRemunerations(remunerations: TRemunerations) {
-    this.remunerations = remunerations;
-    delete this.totalMetadata;
-    delete this.computed;
-    this.groupWeightedGaps.clear();
+  constructor(private readonly mode: TMode) {
+    super();
   }
 
-  public getTotalMetadata(): TotalMetadata {
-    if (this.totalMetadata) {
-      return this.totalMetadata;
+  protected addAdditionalMetadata(
+    category: CountAndAverageSalaries,
+    currentMetadata: IndicateurUnComputerTotalMetadata,
+  ): void {
+    if (typeof currentMetadata.additionalMetadata.averageMenSalary === "undefined") {
+      currentMetadata.additionalMetadata.averageMenSalary = 0;
+    }
+    if (typeof currentMetadata.additionalMetadata.averageWomenSalary === "undefined") {
+      currentMetadata.additionalMetadata.averageWomenSalary = 0;
+    }
+    if (typeof currentMetadata.additionalMetadata.sumProductMenSalary === "undefined") {
+      currentMetadata.additionalMetadata.sumProductMenSalary = 0;
+    }
+    if (typeof currentMetadata.additionalMetadata.sumProductWomenSalary === "undefined") {
+      currentMetadata.additionalMetadata.sumProductWomenSalary = 0;
     }
 
-    if (!this.remunerations) {
-      throw new Error("remunerations must be set before calling totalMetadata");
+    if (category.menCount < this.GROUP_COUNT_THRESHOLD || category.womenCount < this.GROUP_COUNT_THRESHOLD) {
+      return;
     }
 
-    let totalEmployeeCount = 0;
-    let totalWomenCount = 0;
-    let totalMenCount = 0;
-    let totalGroupCount = 0;
+    currentMetadata.additionalMetadata.sumProductMenSalary += category.menSalary * category.menCount;
+    currentMetadata.additionalMetadata.sumProductWomenSalary += category.womenSalary * category.womenCount;
 
-    let sumProductWomenSalary = 0;
-    let sumProductMenSalary = 0;
-
-    const validGroups: TotalMetadata["validGroups"] = [];
-    const fillableGroups: TotalMetadata["fillableGroups"] = [];
-    for (const { categoryId, category } of this.remunerations) {
-      for (const [ageRange, ageGroup] of Object.entries(category)) {
-        const womenCount = ageGroup.womenCount || 0;
-        const menCount = ageGroup.menCount || 0;
-        totalEmployeeCount += menCount + womenCount;
-        totalWomenCount += womenCount;
-        totalMenCount += menCount;
-
-        // Exclure les groupes qui n'ont pas au moins 3 hommes et 3 femmes,
-        // et ceux où les salaires moyens sont à 0.
-        if (ageGroup.menCount >= 3 && ageGroup.womenCount >= 3) {
-          fillableGroups.push([categoryId, ageRange as CSPAgeRange.Enum]);
-          totalGroupCount += ageGroup.menCount + ageGroup.womenCount;
-          if (ageGroup.womenSalary > 0) {
-            sumProductWomenSalary += ageGroup.womenSalary * ageGroup.womenCount;
-          }
-          if (ageGroup.menSalary > 0) {
-            sumProductMenSalary += ageGroup.menSalary * ageGroup.menCount;
-          }
-          if (ageGroup.menSalary > 0 && ageGroup.womenSalary > 0) {
-            validGroups.push([categoryId, ageRange as CSPAgeRange.Enum]);
-          }
-        }
-      }
-    }
-
-    return {
-      averageMenSalary: sumProductMenSalary / totalMenCount || 0,
-      averageWomenSalary: sumProductWomenSalary / totalWomenCount || 0,
-      totalEmployeeCount,
-      totalGroupCount,
-      totalMenCount,
-      totalWomenCount,
-      validGroups,
-      fillableGroups,
-    };
-  }
-
-  /**
-   * Calcule la note correspondant à l'écart de rémunération.
-   */
-  public static computeNote(result: number): number {
-    const index = Math.ceil(result);
-
-    if (index < 0 || index >= NOTE_TABLE.length) {
-      return 0;
-    }
-
-    return NOTE_TABLE[index];
-  }
-
-  /**
-   * Vérifie si l'écart de rémunération peut être calculé.
-   */
-  public canCompute(): boolean {
-    if (!this.remunerations) {
-      return false;
-    }
-
-    const { totalEmployeeCount, totalGroupCount } = this.getTotalMetadata();
-
-    return totalGroupCount / totalEmployeeCount >= 0.4;
-  }
-
-  /**
-   * Calcule l'écart global de rémunération entre les femmes et les hommes.
-   *
-   * @returns Le résultat, avec la note et l'avantage de genre.
-   */
-  public compute(): Result {
-    if (this.computed) {
-      return this.computed;
-    }
-
-    let totalWeightedGap = 0;
-    const { validGroups } = this.getTotalMetadata();
-    for (const [categoryId, ageRange] of validGroups) {
-      const weightedGap = this.calculateWeightedGap(categoryId, ageRange);
-      totalWeightedGap += weightedGap;
-    }
-
-    this.computed = this.getResult(totalWeightedGap);
-    return this.computed;
+    currentMetadata.additionalMetadata.averageMenSalary =
+      currentMetadata.additionalMetadata.sumProductMenSalary / currentMetadata.totalMenCount || 0;
+    currentMetadata.additionalMetadata.averageWomenSalary =
+      currentMetadata.additionalMetadata.sumProductWomenSalary / currentMetadata.totalWomenCount || 0;
   }
 
   /**
    * Vériie si l'écart de rémunération peut être calculé pour un groupe spécifique.
    */
-  public canComputeGroup(categoryId: string, group: keyof AgeRanges): boolean {
-    if (!this.remunerations) {
+  public canComputeGroup(key: string): boolean {
+    if (!this.input) {
       return false;
     }
-    const ageGroup = this.remunerations.find(rem => rem.categoryId === categoryId)?.category[group];
+    const ageGroup = this.input[key];
 
     if (
       !ageGroup ||
-      !(ageGroup.menCount >= 3 && ageGroup.womenCount >= 3 && ageGroup.menSalary && ageGroup.womenSalary)
+      !(
+        ageGroup.menCount >= this.GROUP_COUNT_THRESHOLD &&
+        ageGroup.womenCount >= this.GROUP_COUNT_THRESHOLD &&
+        ageGroup.menSalary &&
+        ageGroup.womenSalary
+      )
     ) {
       return false;
     }
@@ -207,29 +91,19 @@ export class IndicateurUnComputer<
   }
 
   /**
-   * Calcule l'écart de rémunération pondéré pour un groupe spécifique.
-   */
-  public computeGroup(categoryId: string, ageRange: keyof AgeRanges): Result {
-    const weightedGap = this.calculateWeightedGap(categoryId, ageRange);
-    return this.getResult(weightedGap);
-  }
-
-  /**
    * Calcule l'écart pondéré pour un groupe donné.
    */
-  private calculateWeightedGap(id: string, ageRange: keyof AgeRanges): number {
-    const key = `${id}:${ageRange}` as const;
-
+  protected calculateWeightedGap(key: string): number {
     let group: CountAndAverageSalaries;
     if (this.groupWeightedGaps.has(key)) {
       group = this.groupWeightedGaps.get(key)!;
     }
 
-    if (!this.remunerations) {
-      throw new Error("remunerations must be set before calling canComputeGroup");
+    if (!this.input) {
+      throw new Error("remunerations must be set before calling calculateWeightedGap");
     }
 
-    group = this.remunerations.find(rem => rem.categoryId === id)?.category[ageRange] ?? {
+    group = this.input[key] ?? {
       menCount: 0,
       menSalary: 0,
       womenCount: 0,
@@ -249,17 +123,5 @@ export class IndicateurUnComputer<
     const groupCount = group.menCount + group.womenCount;
     const { totalGroupCount } = this.getTotalMetadata();
     return salaryGap * (groupCount / totalGroupCount);
-  }
-
-  private getResult(weightedGap: number): Result {
-    const sign = Math.sign(weightedGap);
-    const result = Math.round(Math.abs(weightedGap) * 10) / 10;
-
-    return {
-      genderAdvantage: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
-      note: IndicateurUnComputer.computeNote(result),
-      result,
-      resultRaw: weightedGap,
-    };
   }
 }

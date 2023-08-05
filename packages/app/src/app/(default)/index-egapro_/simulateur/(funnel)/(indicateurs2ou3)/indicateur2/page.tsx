@@ -1,9 +1,9 @@
 import { CenteredContainer } from "@design-system";
 
-import { NAVIGATION } from "../navigation";
+import { NAVIGATION } from "../../navigation";
 import { Indic2Form } from "./Form";
 
-const { title } = NAVIGATION.indicateur2;
+const { title } = NAVIGATION.indicateur3;
 
 export const metadata = {
   title,

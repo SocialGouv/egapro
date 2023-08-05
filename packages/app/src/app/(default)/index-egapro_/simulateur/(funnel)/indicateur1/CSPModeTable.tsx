@@ -1,12 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import {
   ageRanges,
   categories,
-  type IndicateurUnComputer,
-  type RemunerationsCSP,
-} from "@common/core-domain/computers/IndicateurUnComputer";
+  type ExternalRemunerations,
+  flattenRemunerations,
+} from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
@@ -23,7 +24,7 @@ import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableU
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CSPModeTableProps {
-  computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP, RemunerationsCSP>;
+  computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP>;
   staff?: boolean;
 }
 
@@ -43,9 +44,9 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
     return null;
   }
 
-  const remunerations = watch("remunerations") as RemunerationsCSP | undefined;
+  const remunerations = watch("remunerations") as ExternalRemunerations | undefined;
 
-  const remuWithCount = Object.keys(funnel.effectifs.csp).map<RemunerationsCSP[number]>(categoryName => ({
+  const remuWithCount = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(categoryName => ({
     name: categoryName,
     categoryId: categoryName,
     category: ageRanges.reduce(
@@ -58,11 +59,11 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
           menCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men,
         },
       }),
-      {} as RemunerationsCSP[number]["category"],
+      {} as ExternalRemunerations[number]["category"],
     ),
   }));
 
-  computer.setRemunerations(remuWithCount);
+  computer.setInput(flattenRemunerations(remuWithCount));
   const canCompute = computer.canCompute();
 
   if (remunerations && !canCompute) {
