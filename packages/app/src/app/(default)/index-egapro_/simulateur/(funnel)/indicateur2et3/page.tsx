@@ -1,6 +1,7 @@
 import { CenteredContainer } from "@design-system";
 
 import { NAVIGATION } from "../navigation";
+import { Indic2and3Form } from "./Form";
 // import { Indic1Form } from "./Form";
 
 const { title } = NAVIGATION.indicateur2et3;
@@ -21,7 +22,7 @@ const Indicateur2et3Page = () => {
           augmentations individuelles du salaire de base, y compris celles liées à une promotion.
         </p>
       </CenteredContainer>
-      {/* <Indic1Form /> */}
+      <Indic2and3Form />
     </>
   );
 };

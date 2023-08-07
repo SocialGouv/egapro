@@ -138,7 +138,7 @@ export const createSteps = {
   indicateur2and3: z.discriminatedUnion("calculable", [
     z.object({
       calculable: z.literal(true),
-      raises: z
+      raisedCount: z
         .object({
           women: z.number().nonnegative(),
           men: z.number().nonnegative(),
@@ -149,7 +149,7 @@ export const createSteps = {
     }),
     z.object({
       calculable: z.literal(false),
-      raises: z.never().optional(),
+      raisedCount: z.never().optional(),
     }),
   ]),
 } as const;
@@ -178,4 +178,13 @@ export const createSimulationDTO = createSimulationWorkforceRangeLessThan250.or(
   createSimulationWorkforceRangeMoreThan250,
 );
 
-export type CreateSimulationDTO = ClearObject<z.infer<typeof createSimulationDTO>>;
+export type CreateSimulationWorkforceRangeLessThan250DTO = ClearObject<
+  z.infer<typeof createSimulationWorkforceRangeLessThan250>
+>;
+export type CreateSimulationWorkforceRangeMoreThan250DTO = ClearObject<
+  z.infer<typeof createSimulationWorkforceRangeMoreThan250>
+>;
+
+export type CreateSimulationDTO =
+  | CreateSimulationWorkforceRangeLessThan250DTO
+  | CreateSimulationWorkforceRangeMoreThan250DTO;

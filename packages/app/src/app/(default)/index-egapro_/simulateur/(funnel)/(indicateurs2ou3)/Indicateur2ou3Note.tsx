@@ -78,8 +78,6 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
           text={texts.ncText}
           legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
         />
-      ) : remunerationsCompensated ? (
-        <IndicatorNote note={NOTE_MAX} max={NOTE_MAX} text={texts.balanceText} legend={advantageText} />
       ) : (
         <>
           <IndicatorNote
@@ -89,12 +87,29 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
             text={texts.resultText}
             legend="Arrondi à la première décimale"
           />
-          <IndicatorNote
-            note={isValid && computed ? computed.note : "-"}
-            max={NOTE_MAX}
-            text={texts.noteText}
-            legend={isValid ? advantageText : texts.missingDataLegend}
-          />
+          {remunerationsCompensated ? (
+            <IndicatorNote
+              note={NOTE_MAX}
+              max={NOTE_MAX}
+              text={texts.balanceText}
+              legend={
+                <>
+                  {advantageText}
+                  <br />
+                  Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de
+                  rémunération), la note maximale de {NOTE_MAX} points est attribuée à l’entreprise (considérant que
+                  l’employeur a mis en place une politique de rattrapage adaptée).
+                </>
+              }
+            />
+          ) : (
+            <IndicatorNote
+              note={isValid && computed ? computed.note : "-"}
+              max={NOTE_MAX}
+              text={texts.noteText}
+              legend={isValid ? advantageText : texts.missingDataLegend}
+            />
+          )}
         </>
       )}
     </ClientAnimate>
