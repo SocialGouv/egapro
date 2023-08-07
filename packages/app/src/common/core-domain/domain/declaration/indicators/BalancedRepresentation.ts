@@ -43,10 +43,12 @@ export class BalancedRepresentation extends JsonEntity<BalancedRepresentationPro
   public fromJson(json: EntityPropsToJson<BalancedRepresentationProps>) {
     const props: BalancedRepresentationProps = {};
 
-    if (json.executiveMenPercent) props.executiveMenPercent = new Percentage(json.executiveMenPercent);
-    if (json.executiveWomenPercent) props.executiveWomenPercent = new Percentage(json.executiveWomenPercent);
-    if (json.memberMenPercent) props.memberMenPercent = new Percentage(json.memberMenPercent);
-    if (json.memberWomenPercent) props.memberWomenPercent = new Percentage(json.memberWomenPercent);
+    if (typeof json.executiveMenPercent === "number")
+      props.executiveMenPercent = new Percentage(json.executiveMenPercent);
+    if (typeof json.executiveWomenPercent === "number")
+      props.executiveWomenPercent = new Percentage(json.executiveWomenPercent);
+    if (typeof json.memberMenPercent === "number") props.memberMenPercent = new Percentage(json.memberMenPercent);
+    if (typeof json.memberWomenPercent === "number") props.memberWomenPercent = new Percentage(json.memberWomenPercent);
     if (json.notComputableReasonExecutives)
       props.notComputableReasonExecutives = new NotComputableReasonExecutiveRepEq(json.notComputableReasonExecutives);
     if (json.notComputableReasonMembers)
