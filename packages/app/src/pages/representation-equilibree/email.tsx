@@ -1,3 +1,4 @@
+import { REGEX_EMAIL } from "@common/shared-domain/domain/valueObjects";
 import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
@@ -24,7 +25,10 @@ import { type NextPageWithLayout } from "../_app";
 const title = "Validation de l'email";
 
 const formSchema = z.object({
-  email: z.string().min(1, "L'adresse email est requise.").email({ message: "L'adresse email est invalide." }),
+  email: z
+    .string()
+    .min(1, "L'adresse email est requise.")
+    .regex(REGEX_EMAIL, { message: "L'adresse email est invalide." }),
 });
 
 // Infer the TS type according to the zod schema.

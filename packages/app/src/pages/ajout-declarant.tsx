@@ -1,6 +1,7 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
 import { type ValidationError } from "@common/shared-domain";
+import { REGEX_EMAIL } from "@common/shared-domain/domain/valueObjects";
 import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayoutPublic } from "@components/layouts/BasicLayoutPublic";
@@ -34,7 +35,7 @@ const zodUniqueEmailArray = z.string().transform((val, ctx) => {
   const messages: string[] = [];
   for (const v of splitted) {
     try {
-      z.string().email().parse(v);
+      z.string().regex(REGEX_EMAIL).parse(v);
     } catch {
       messages.push(`L'adresse email "${v}" est invalide.`);
     }
@@ -92,7 +93,7 @@ const zodUniqueSirenArray = z.string().transform((val, ctx) => {
 });
 
 const formSchema = z.object({
-  askerEmail: z.string().email({ message: "L'adresse email est invalide." }),
+  askerEmail: z.string().regex(REGEX_EMAIL, { message: "L'adresse email est invalide." }),
   emails: zodUniqueEmailArray,
   sirens: zodUniqueSirenArray,
 });

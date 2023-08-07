@@ -1,3 +1,4 @@
+import { REGEX_EMAIL } from "@common/shared-domain/domain/valueObjects";
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -28,7 +29,7 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Le téléphone est requis" })
     .regex(/\d{10}/gi, "Le numéro de téléphone doit être composé de 10 chiffres"),
-  email: z.string().email(),
+  email: z.string().regex(REGEX_EMAIL, { message: "L'adresse email est invalide." }),
   accord_rgpd: z.boolean().refine(accord_rgpd => accord_rgpd, { message: "L'accord est requis" }),
 });
 

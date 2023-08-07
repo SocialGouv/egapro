@@ -1,9 +1,10 @@
 import { COUNTIES_IDS, REGIONS_IDS } from "@common/dict";
+import { REGEX_EMAIL } from "@common/shared-domain/domain/valueObjects";
 import { z } from "zod";
 
 const substituteSchema = z.object({
   name: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().regex(REGEX_EMAIL, { message: "L'adresse email est invalide." }).optional(),
 });
 const baseReferentSchema = z.object({
   county: z.enum(COUNTIES_IDS).optional(),
@@ -14,7 +15,7 @@ const baseReferentSchema = z.object({
 });
 const emailReferentSubSchema = {
   type: z.literal("email"),
-  value: z.string().email(),
+  value: z.string().regex(REGEX_EMAIL, { message: "L'adresse email est invalide." }),
 };
 const emailReferentSchema = baseReferentSchema.extend(emailReferentSubSchema);
 const emailReferentPartialSchema = baseReferentSchema.partial().extend(emailReferentSubSchema);
