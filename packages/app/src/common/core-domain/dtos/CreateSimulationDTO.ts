@@ -135,15 +135,47 @@ export const createSteps = {
   ]),
   indicateur2: indicateur2or3,
   indicateur3: indicateur2or3,
-  indicateur2and3: z.object({
-    calculable: z.boolean(),
-    raises: z.object({
-      women: z.number().positive(),
-      men: z.number().positive(),
+  indicateur2and3: z.discriminatedUnion("calculable", [
+    z.object({
+      calculable: z.literal(true),
+      raises: z
+        .object({
+          women: z.number().nonnegative(),
+          men: z.number().nonnegative(),
+        })
+        .refine(({ women, men }) => !(!women && !men), {
+          message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+        }),
     }),
-  }),
+    z.object({
+      calculable: z.literal(false),
+      raises: z.never().optional(),
+    }),
+  ]),
 } as const;
 
-export const createSimulationDTO = z.object(createSteps);
+const { effectifs, indicateur2, indicateur2and3, indicateur3, ...otherSteps } = createSteps;
+const createSimulationWorkforceRangeLessThan250 = z.object({
+  effectifs: effectifs.omit({ workforceRange: true }).extend({
+    workforceRange: z.literal(CompanyWorkforceRange.Enum.FROM_50_TO_250),
+  }),
+  indicateur2and3,
+  ...otherSteps,
+});
+
+const createSimulationWorkforceRangeMoreThan250 = z.object({
+  effectifs: effectifs.omit({ workforceRange: true }).extend({
+    workforceRange: z
+      .literal(CompanyWorkforceRange.Enum.FROM_251_TO_999)
+      .or(z.literal(CompanyWorkforceRange.Enum.FROM_1000_TO_MORE)),
+  }),
+  indicateur2,
+  indicateur3,
+  ...otherSteps,
+});
+
+export const createSimulationDTO = createSimulationWorkforceRangeLessThan250.or(
+  createSimulationWorkforceRangeMoreThan250,
+);
 
 export type CreateSimulationDTO = ClearObject<z.infer<typeof createSimulationDTO>>;
