@@ -135,6 +135,13 @@ export const createSteps = {
   ]),
   indicateur2: indicateur2or3,
   indicateur3: indicateur2or3,
+  indicateur2and3: z.object({
+    calculable: z.boolean(),
+    raises: z.object({
+      women: z.number().positive(),
+      men: z.number().positive(),
+    }),
+  }),
 } as const;
 
 export const createSimulationDTO = z.object(createSteps);
