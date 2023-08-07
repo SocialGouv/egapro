@@ -1,3 +1,10 @@
+## [2.91.1](https://github.com/SocialGouv/egapro/compare/v2.91.0...v2.91.1) (2023-08-07)
+
+
+### Bug Fixes
+
+* replace zod email validation with regex ([aa4383e](https://github.com/SocialGouv/egapro/commit/aa4383eb7c63a654b22c4b21efc4b4ab7e5c8938))
+
 # [2.91.0](https://github.com/SocialGouv/egapro/compare/v2.90.0...v2.91.0) (2023-08-04)
 
 
