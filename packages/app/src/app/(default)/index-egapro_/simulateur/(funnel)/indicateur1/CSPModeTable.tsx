@@ -39,8 +39,8 @@ const getRemuWithCount = (
       (newAgeGroups, ageRange) => ({
         ...newAgeGroups,
         [ageRange]: {
-          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary ?? 0,
-          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary ?? 0,
+          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary || 0,
+          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary || 0,
           womenCount: funnelCsp[categoryName].ageRanges[ageRange].women,
           menCount: funnelCsp[categoryName].ageRanges[ageRange].men,
         },
@@ -82,7 +82,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
   }
 
   const remunerations = watch("remunerations") as ExternalRemunerations;
-  computer.setInput(flattenRemunerations(remunerations));
+  computer.setInput(flattenRemunerations(getRemuWithCount(funnel.effectifs.csp, remunerations)));
 
   computer.compute();
 

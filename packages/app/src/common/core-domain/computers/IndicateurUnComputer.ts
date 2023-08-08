@@ -110,7 +110,8 @@ export class IndicateurUnComputer<TMode extends RemunerationsMode.Enum> extends 
       womenSalary: 0,
     };
 
-    const gap = ((group.menSalary - group.womenSalary) / group.menSalary) * 100;
+    let gap = ((group.menSalary - group.womenSalary) / group.menSalary) * 100;
+    gap = isFinite(gap) ? gap : 0;
     const threshold = this.mode === RemunerationsMode.Enum.CSP ? CSP_THRESHOLD : OTHER_THRESHOLD;
 
     let salaryGap;
