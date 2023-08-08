@@ -9,6 +9,7 @@ import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -16,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 
@@ -25,6 +26,40 @@ import { useSimuFunnelStore } from "../useSimuFunnelStore";
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
 const effectifsNav = NAVIGATION.effectifs;
+
+let miniComputerCache: { total: number; totalMen: number; totalWomen: number };
+const lastCspMiniComputer = {} as EffectifsFormType["csp"];
+const miniComputer = (csp: EffectifsFormType["csp"]) => {
+  if (isEqual(csp, lastCspMiniComputer) && miniComputerCache) {
+    return miniComputerCache;
+  }
+
+  const totalWomen = categories.reduce((acc, category) => {
+    return (
+      acc +
+      ageRanges.reduce((acc, ageRange) => {
+        return acc + (csp?.[category].ageRanges[ageRange].women || 0);
+      }, 0)
+    );
+  }, 0);
+
+  const totalMen = categories.reduce((acc, category) => {
+    return (
+      acc +
+      ageRanges.reduce((acc, ageRange) => {
+        return acc + (csp?.[category].ageRanges[ageRange].men || 0);
+      }, 0)
+    );
+  }, 0);
+
+  const total = totalMen + totalWomen;
+
+  return (miniComputerCache = {
+    total,
+    totalWomen,
+    totalMen,
+  });
+};
 
 const useStore = storePicker(useSimuFunnelStore);
 export const EffectifsForm = () => {
@@ -36,11 +71,9 @@ export const EffectifsForm = () => {
     "resetFunnel",
     "setSelectedCompanyWorkforceRange",
   );
-  const [totalWomen, setTotalWomen] = useState(0);
-  const [totalMen, setTotalMen] = useState(0);
 
   useEffect(() => {
-    updateTotal();
+    // updateTotal();
     if (funnel?.effectifs?.workforceRange) {
       setSelectedCompanyWorkforceRange(funnel.effectifs.workforceRange);
     }
@@ -50,41 +83,17 @@ export const EffectifsForm = () => {
     formState: { isValid, errors },
     handleSubmit,
     register,
-    getValues,
     setValue,
     trigger,
+    watch,
   } = useForm<EffectifsFormType>({
     mode: "onChange",
     resolver: zodResolver(createSteps.effectifs),
     defaultValues: funnel?.effectifs,
   });
 
-  const updateTotal = () => {
-    const csp = getValues("csp");
-    setTotalWomen(
-      categories.reduce((acc, category) => {
-        return (
-          acc +
-          ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[category].ageRanges[ageRange].women || 0);
-          }, 0)
-        );
-      }, 0),
-    );
+  const { total, totalMen, totalWomen } = miniComputer(watch("csp"));
 
-    setTotalMen(
-      categories.reduce((acc, category) => {
-        return (
-          acc +
-          ageRanges.reduce((acc, ageRange) => {
-            return acc + (csp?.[category].ageRanges[ageRange].men || 0);
-          }, 0)
-        );
-      }, 0),
-    );
-  };
-
-  const total = totalMen + totalWomen;
   const onSubmit = (form: EffectifsFormType) => {
     if (!total) {
       return;
@@ -92,7 +101,7 @@ export const EffectifsForm = () => {
 
     if (!isEqual(form, funnel?.effectifs)) {
       resetFunnel();
-      saveFunnel({ effectifs: form });
+      saveFunnel({ effectifs: form as Any });
     }
     router.push(simulateurPath(effectifsNav.next()));
   };
@@ -104,7 +113,6 @@ export const EffectifsForm = () => {
         setValue(`csp.${category}.ageRanges.${ageRange}.men`, Math.floor(Math.random() * 100) as never);
       }
     }
-    updateTotal();
   };
 
   const resetCSP = () => {
@@ -114,8 +122,6 @@ export const EffectifsForm = () => {
         setValue(`csp.${category}.ageRanges.${ageRange}.men`, 0 as never);
       }
     }
-    setTotalWomen(0);
-    setTotalMen(0);
   };
 
   const pasteFromExcel = () => {
@@ -142,7 +148,6 @@ export const EffectifsForm = () => {
         lineIndex++;
       }
     }
-    updateTotal();
     trigger("csp");
   };
 
@@ -273,7 +278,6 @@ export const EffectifsForm = () => {
                   nativeInputProps: {
                     ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
-                      onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,
@@ -286,7 +290,6 @@ export const EffectifsForm = () => {
                   nativeInputProps: {
                     ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
                       setValueAs: (value: string) => parseInt(value, 10) || 0,
-                      onBlur: updateTotal,
                     }),
                     type: "number",
                     min: 0,

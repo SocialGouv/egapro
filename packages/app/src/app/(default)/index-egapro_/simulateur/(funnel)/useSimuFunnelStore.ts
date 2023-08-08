@@ -1,6 +1,6 @@
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CreateSimulationDTO } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { type Any } from "@common/utils/types";
+import { type Any, type DeepPartial } from "@common/utils/types";
 import { useEffect, useState } from "react";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -16,9 +16,6 @@ interface PrivateState {
   _hasHydrated: boolean;
 }
 
-type DeepPartial<T> = {
-  [K in keyof T]?: DeepPartial<T[K]>;
-};
 interface Actions {
   resetFunnel(): void;
   saveFunnel(form?: DeepPartial<CreateSimulationDTO>): void;
