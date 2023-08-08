@@ -1,44 +1,45 @@
 import { type ClearObject } from "@common/utils/types";
-import { z } from "zod";
+import { zodFr } from "@common/utils/zod";
+import { type z } from "zod";
 
 import { CSP } from "../domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "../domain/valueObjects/declaration/simulation/CSPAgeRange";
 
-const nonnegativeNanSafe = z
+const nonnegativeNanSafe = zodFr
   .number()
   .nonnegative()
   .default(0)
   .transform(v => (isNaN(v) ? 0 : v));
 
-const singleAgeRangeSchema = z.object({
+const singleAgeRangeSchema = zodFr.object({
   women: nonnegativeNanSafe,
   men: nonnegativeNanSafe,
 });
-const ageRangesSchema = z.object({
+const ageRangesSchema = zodFr.object({
   [CSPAgeRange.Enum.LESS_THAN_30]: singleAgeRangeSchema,
   [CSPAgeRange.Enum.FROM_30_TO_39]: singleAgeRangeSchema,
   [CSPAgeRange.Enum.FROM_40_TO_49]: singleAgeRangeSchema,
   [CSPAgeRange.Enum.FROM_50_TO_MORE]: singleAgeRangeSchema,
 });
 
-const cspAgeRangeNumbers = z.object({
-  [CSP.Enum.OUVRIERS]: z.object({
+const cspAgeRangeNumbers = zodFr.object({
+  [CSP.Enum.OUVRIERS]: zodFr.object({
     ageRanges: ageRangesSchema,
   }),
-  [CSP.Enum.EMPLOYES]: z.object({
+  [CSP.Enum.EMPLOYES]: zodFr.object({
     ageRanges: ageRangesSchema,
   }),
-  [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: z.object({
+  [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: zodFr.object({
     ageRanges: ageRangesSchema,
   }),
-  [CSP.Enum.INGENIEURS_CADRES]: z.object({
+  [CSP.Enum.INGENIEURS_CADRES]: zodFr.object({
     ageRanges: ageRangesSchema,
   }),
 });
 
-const otherAgeRangesSchema = z
+const otherAgeRangesSchema = zodFr
   .object({
     womenCount: nonnegativeNanSafe,
     menCount: nonnegativeNanSafe,
@@ -50,7 +51,7 @@ const otherAgeRangesSchema = z
       if (obj.womenSalary === 0) {
         ctx.addIssue({
           path: ["womenSalary"],
-          code: z.ZodIssueCode.too_small,
+          code: zodFr.ZodIssueCode.too_small,
           minimum: 0,
           inclusive: false,
           type: "number",
@@ -60,7 +61,7 @@ const otherAgeRangesSchema = z
       if (obj.menSalary === 0) {
         ctx.addIssue({
           path: ["menSalary"],
-          code: z.ZodIssueCode.too_small,
+          code: zodFr.ZodIssueCode.too_small,
           minimum: 0,
           inclusive: false,
           type: "number",
@@ -68,55 +69,55 @@ const otherAgeRangesSchema = z
       }
     }
   });
-const otherAgeRangeNumbers = z.array(
-  z.object({
-    name: z.string().nonempty(),
-    categoryId: z.string().nonempty(),
-    category: z.record(z.nativeEnum(CSPAgeRange.Enum), otherAgeRangesSchema),
+const otherAgeRangeNumbers = zodFr.array(
+  zodFr.object({
+    name: zodFr.string().nonempty(),
+    categoryId: zodFr.string().nonempty(),
+    category: zodFr.record(zodFr.nativeEnum(CSPAgeRange.Enum), otherAgeRangesSchema),
   }),
 );
 
-const indicateur2or3 = z.discriminatedUnion("calculable", [
-  z.object({
-    calculable: z.literal(true),
-    pourcentages: z
+const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
+  zodFr.object({
+    calculable: zodFr.literal(true),
+    pourcentages: zodFr
       .record(
-        z.nativeEnum(CSP.Enum),
-        z.object({
-          women: z.number().positive().max(100),
-          men: z.number().positive().max(100),
+        zodFr.nativeEnum(CSP.Enum),
+        zodFr.object({
+          women: zodFr.number().positive().max(100),
+          men: zodFr.number().positive().max(100),
         }),
       )
       .default({}),
   }),
-  z.object({
-    calculable: z.literal(false),
-    pourcentages: z.never().optional(),
+  zodFr.object({
+    calculable: zodFr.literal(false),
+    pourcentages: zodFr.never().optional(),
   }),
 ]);
 
 export const createSteps = {
-  effectifs: z.object({
-    workforceRange: z.nativeEnum(CompanyWorkforceRange.Enum, {
+  effectifs: zodFr.object({
+    workforceRange: zodFr.nativeEnum(CompanyWorkforceRange.Enum, {
       required_error: "La tranche d'effectif est requise",
       invalid_type_error: "La tranche d'effectif est requise",
     }),
     csp: cspAgeRangeNumbers,
   }),
-  indicateur1: z.discriminatedUnion("mode", [
-    z.object({
-      mode: z.literal(RemunerationsMode.Enum.CSP),
-      remunerations: z
+  indicateur1: zodFr.discriminatedUnion("mode", [
+    zodFr.object({
+      mode: zodFr.literal(RemunerationsMode.Enum.CSP),
+      remunerations: zodFr
         .array(
-          z.object({
-            name: z.nativeEnum(CSP.Enum),
-            categoryId: z.string().nonempty(),
-            category: z
+          zodFr.object({
+            name: zodFr.nativeEnum(CSP.Enum),
+            categoryId: zodFr.string().nonempty(),
+            category: zodFr
               .record(
-                z.nativeEnum(CSPAgeRange.Enum),
-                z.object({
-                  womenSalary: z.number().positive(),
-                  menSalary: z.number().positive(),
+                zodFr.nativeEnum(CSPAgeRange.Enum),
+                zodFr.object({
+                  womenSalary: zodFr.number().positive(),
+                  menSalary: zodFr.number().positive(),
                 }),
               )
               .optional(),
@@ -124,50 +125,50 @@ export const createSteps = {
         )
         .default([]),
     }),
-    z.object({
-      mode: z.literal(RemunerationsMode.Enum.BRANCH_LEVEL),
+    zodFr.object({
+      mode: zodFr.literal(RemunerationsMode.Enum.BRANCH_LEVEL),
       remunerations: otherAgeRangeNumbers,
     }),
-    z.object({
-      mode: z.literal(RemunerationsMode.Enum.OTHER_LEVEL),
+    zodFr.object({
+      mode: zodFr.literal(RemunerationsMode.Enum.OTHER_LEVEL),
       remunerations: otherAgeRangeNumbers,
     }),
   ]),
   indicateur2: indicateur2or3,
   indicateur3: indicateur2or3,
-  indicateur2and3: z.discriminatedUnion("calculable", [
-    z.object({
-      calculable: z.literal(true),
-      raisedCount: z
+  indicateur2and3: zodFr.discriminatedUnion("calculable", [
+    zodFr.object({
+      calculable: zodFr.literal(true),
+      raisedCount: zodFr
         .object({
-          women: z.number().nonnegative(),
-          men: z.number().nonnegative(),
+          women: zodFr.number().nonnegative(),
+          men: zodFr.number().nonnegative(),
         })
         .refine(({ women, men }) => !(!women && !men), {
           message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
         }),
     }),
-    z.object({
-      calculable: z.literal(false),
-      raisedCount: z.never().optional(),
+    zodFr.object({
+      calculable: zodFr.literal(false),
+      raisedCount: zodFr.never().optional(),
     }),
   ]),
 } as const;
 
 const { effectifs, indicateur2, indicateur2and3, indicateur3, ...otherSteps } = createSteps;
-const createSimulationWorkforceRangeLessThan250 = z.object({
+const createSimulationWorkforceRangeLessThan250 = zodFr.object({
   effectifs: effectifs.omit({ workforceRange: true }).extend({
-    workforceRange: z.literal(CompanyWorkforceRange.Enum.FROM_50_TO_250),
+    workforceRange: zodFr.literal(CompanyWorkforceRange.Enum.FROM_50_TO_250),
   }),
   indicateur2and3,
   ...otherSteps,
 });
 
-const createSimulationWorkforceRangeMoreThan250 = z.object({
+const createSimulationWorkforceRangeMoreThan250 = zodFr.object({
   effectifs: effectifs.omit({ workforceRange: true }).extend({
-    workforceRange: z
+    workforceRange: zodFr
       .literal(CompanyWorkforceRange.Enum.FROM_251_TO_999)
-      .or(z.literal(CompanyWorkforceRange.Enum.FROM_1000_TO_MORE)),
+      .or(zodFr.literal(CompanyWorkforceRange.Enum.FROM_1000_TO_MORE)),
   }),
   indicateur2,
   indicateur3,

@@ -1,10 +1,11 @@
+import Summary from "@codegouvfr/react-dsfr/Summary";
 import { AideSimulationIndicateurCinq } from "@components/aide-simulation/IndicateurCinq";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurDeuxEtTrois } from "@components/aide-simulation/IndicateurDeuxEtTrois";
 import { AideSimulationIndicateurQuatre } from "@components/aide-simulation/IndicateurQuatre";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
-import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { Container, ContentWithChapter, Grid, GridCol } from "@design-system";
 import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
@@ -38,29 +39,66 @@ const AideSimulation = () => {
             .
           </p>
 
-          <Summary className="fr-my-6w">
-            <SummaryLink href="#champ-d-application-entree-en-vigueur-et-periode-de-reference">
-              Champ d'application, entrée en vigueur et période de référence
-            </SummaryLink>
-            <SummaryLink href="#effectifs-pris-en-compte">Effectifs pris en compte</SummaryLink>
-            <SummaryLink href="#indicateur-ecart-de-remuneration">Indicateur - écart de rémunération</SummaryLink>
-            <SummaryLink href="#indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
-              Indicateur - écart de taux d’augmentation (50 à 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
-              Indicateur - écart de taux d’augmentation (plus de 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
-              Indicateur - écart de taux de promotion (plus de 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite">
-              Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
-            </SummaryLink>
-            <SummaryLink href="#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations">
-              Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
-            </SummaryLink>
-            <SummaryLink href="#publication-et-transmission">Publication et transmission</SummaryLink>
-          </Summary>
+          <Summary
+            className="fr-my-6w"
+            links={[
+              {
+                text: "Champ d'application, entrée en vigueur et période de référence",
+                linkProps: {
+                  href: "#champ-d-application-entree-en-vigueur-et-periode-de-reference",
+                },
+              },
+              {
+                text: "Effectifs pris en compte",
+                linkProps: {
+                  href: "#effectifs-pris-en-compte",
+                },
+              },
+              {
+                text: "Indicateur - écart de rémunération",
+                linkProps: {
+                  href: "#indicateur-ecart-de-remuneration",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux d’augmentation (50 à 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-ecart-de-taux-d-augmentation-50-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux d’augmentation (plus de 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux de promotion (plus de 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité",
+                linkProps: {
+                  href: "#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite",
+                },
+              },
+              {
+                text: "Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations",
+                linkProps: {
+                  href: "#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations",
+                },
+              },
+              {
+                text: "Publication et transmission",
+                linkProps: {
+                  href: "#publication-et-transmission",
+                },
+              },
+            ]}
+          />
+
           <ContentWithChapter>
             <AnchorLink as="h2" anchor="champ-d-application-entree-en-vigueur-et-periode-de-reference">
               Champ d'application, entrée en vigueur et période de référence

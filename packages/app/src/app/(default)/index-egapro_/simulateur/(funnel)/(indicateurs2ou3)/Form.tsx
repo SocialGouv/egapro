@@ -114,20 +114,23 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const remuWithCount = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(categoryName => ({
     name: categoryName,
     categoryId: categoryName,
-    category: ageRanges.reduce((newAgeGroups, ageRange) => {
-      const remunerations = funnel.indicateur1!.remunerations as ExternalRemunerations;
-      const effectifs = funnel.effectifs!;
-      const currentAgeRange = remunerations.find(rem => rem?.name === categoryName)?.category?.[ageRange];
-      return {
-        ...newAgeGroups,
-        [ageRange]: {
-          womenSalary: currentAgeRange?.womenSalary ?? 0,
-          menSalary: currentAgeRange?.menSalary ?? 0,
-          womenCount: currentAgeRange?.womenCount ?? effectifs.csp[categoryName].ageRanges[ageRange].women,
-          menCount: currentAgeRange?.menCount ?? effectifs.csp[categoryName].ageRanges[ageRange].men,
-        },
-      };
-    }, {} as ExternalRemunerations[number]["category"]),
+    category: ageRanges.reduce(
+      (newAgeGroups, ageRange) => {
+        const remunerations = funnel.indicateur1!.remunerations as ExternalRemunerations;
+        const effectifs = funnel.effectifs!;
+        const currentAgeRange = remunerations.find(rem => rem?.name === categoryName)?.category?.[ageRange];
+        return {
+          ...newAgeGroups,
+          [ageRange]: {
+            womenSalary: currentAgeRange?.womenSalary ?? 0,
+            menSalary: currentAgeRange?.menSalary ?? 0,
+            womenCount: currentAgeRange?.womenCount ?? effectifs.csp[categoryName].ageRanges[ageRange].women,
+            menCount: currentAgeRange?.menCount ?? effectifs.csp[categoryName].ageRanges[ageRange].men,
+          },
+        };
+      },
+      {} as ExternalRemunerations[number]["category"],
+    ),
   }));
   computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
 
