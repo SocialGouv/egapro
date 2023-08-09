@@ -1,20 +1,24 @@
 import { type Any } from "@common/utils/types";
 
-export interface ComputedResult {
+export type ComputedResult<Additional = object> = Additional & {
   genderAdvantage: "equality" | "men" | "women";
   note: number;
   result: number;
   resultRaw: number;
-}
+};
 
-export abstract class AbstractComputer<Input = Any> {
+export abstract class AbstractComputer<Input = Any, AdditionalOutput = Any> {
   public abstract NOTE_TABLE: readonly number[];
   protected input?: Input;
-  protected computed?: ComputedResult;
+  protected computed?: ComputedResult<AdditionalOutput>;
 
   public setInput(input: Input) {
     this.input = input;
     delete this.computed;
+  }
+
+  public getInput() {
+    return this.input;
   }
 
   /**
@@ -30,6 +34,6 @@ export abstract class AbstractComputer<Input = Any> {
     return this.NOTE_TABLE[index];
   }
 
-  public abstract compute(): ComputedResult;
+  public abstract compute(): ComputedResult<AdditionalOutput>;
   public abstract canCompute(): boolean;
 }

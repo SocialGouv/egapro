@@ -39,7 +39,7 @@ export const Indicateur1Note = ({ computer }: Props) => {
     <ClientAnimate>
       {isNC ? (
         <IndicatorNote
-          note={"NC"}
+          note="NC"
           size="small"
           text="L'indicateur écart de rémunération est non calculable"
           legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs"

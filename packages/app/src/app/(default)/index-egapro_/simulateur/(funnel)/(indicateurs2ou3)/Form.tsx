@@ -4,13 +4,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
-import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import {
-  ageRanges,
-  categories,
-  type ExternalRemunerations,
-  flattenRemunerations,
-} from "@common/core-domain/computers/utils";
+import { ageRanges, categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import {
   type CreateSimulationDTO,
@@ -33,6 +27,7 @@ import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
+import { getResultIndicateurUn } from "../utils";
 import { Indicateur2ou3Note } from "./Indicateur2ou3Note";
 
 type Indic2or3FormType = z.infer<typeof createSteps.indicateur2>;
@@ -110,31 +105,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     redirect(simulateurPath("indicateur1"));
   }
 
-  const computerIndicateurUn = new IndicateurUnComputer(funnel.indicateur1.mode);
-  const remuWithCount = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(categoryName => ({
-    name: categoryName,
-    categoryId: categoryName,
-    category: ageRanges.reduce(
-      (newAgeGroups, ageRange) => {
-        const remunerations = funnel.indicateur1!.remunerations as ExternalRemunerations;
-        const effectifs = funnel.effectifs!;
-        const currentAgeRange = remunerations.find(rem => rem?.name === categoryName)?.category?.[ageRange];
-        return {
-          ...newAgeGroups,
-          [ageRange]: {
-            womenSalary: currentAgeRange?.womenSalary ?? 0,
-            menSalary: currentAgeRange?.menSalary ?? 0,
-            womenCount: currentAgeRange?.womenCount ?? effectifs.csp[categoryName].ageRanges[ageRange].women,
-            menCount: currentAgeRange?.menCount ?? effectifs.csp[categoryName].ageRanges[ageRange].men,
-          },
-        };
-      },
-      {} as ExternalRemunerations[number]["category"],
-    ),
-  }));
-  computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
-
-  const resultIndicateurUn = computerIndicateurUn.compute();
+  const resultIndicateurUn = getResultIndicateurUn(funnel as CreateSimulationDTO);
 
   const computableCheck = watch("calculable");
   const pourcentages = watch("pourcentages");

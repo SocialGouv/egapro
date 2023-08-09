@@ -73,7 +73,7 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
     <ClientAnimate>
       {isNC ? (
         <IndicatorNote
-          note={"NC"}
+          note="NC"
           size="small"
           text={texts.ncText}
           legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"

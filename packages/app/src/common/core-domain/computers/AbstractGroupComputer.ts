@@ -111,7 +111,7 @@ export abstract class AbstractGroupComputer<
    *
    * @returns Le résultat, avec la note et l'avantage de genre.
    */
-  public compute() {
+  public compute(): ComputedResult {
     if (this.computed) {
       return this.computed;
     }
