@@ -151,7 +151,7 @@ export const Indic2and3Form = () => {
                 className="fr-mb-3w"
                 severity="warning"
                 title="L'indicateur n'est pas calculable"
-                description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+                description="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
               />
             ) : (
               <>
@@ -228,7 +228,7 @@ export const Indic2and3Form = () => {
                                 deps: "raisedCount.men",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.men > 0 ? 1 : 0,
+                              min: raisedCount && raisedCount.men > 0 ? 0 : 1,
                               max: totalCspWomen,
                             }}
                           />
@@ -245,7 +245,7 @@ export const Indic2and3Form = () => {
                                 deps: "raisedCount.women",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.women > 0 ? 1 : 0,
+                              min: raisedCount && raisedCount.women > 0 ? 0 : 1,
                               max: totalCspMen,
                             }}
                           />
