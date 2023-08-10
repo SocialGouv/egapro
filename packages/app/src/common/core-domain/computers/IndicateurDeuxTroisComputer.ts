@@ -10,6 +10,9 @@ interface RaisedCount {
 interface AdditionalOutput {
   equivalentEmployeeCountGap: number;
   equivalentEmployeeCountGapRaw: number;
+  /**
+   * Message accompagnant l'écart en nombre équivalent de salariés
+   */
   ifadvantage: "equality" | "men-men" | "men-women" | "women-men" | "women-women";
   noteEquivalentEmployeeCountGap: number;
 }

@@ -2,6 +2,7 @@
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { ageRanges, categories } from "@common/core-domain/computers/utils";
@@ -114,9 +115,14 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const pourcentagesWithCount = getPourcentagesWithCount(funnel.effectifs.csp, pourcentages as Percentages);
 
   computer.setInput(pourcentagesWithCount);
-  const canCompute = computer.canCompute();
 
-  const result = computer.compute();
+  let result = {} as ComputedResult;
+  const canCompute = computer.canCompute();
+  if (canCompute) {
+    result = computer.compute();
+  } else {
+    register("calculable", { value: false });
+  }
 
   const onSubmit = async (indicateur2or3: Indic2or3FormType) => {
     saveFunnel({ [`indicateur${indicateur}`]: indicateur2or3 });
@@ -126,63 +132,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
-        <FormLayout>
-          <Controller
-            control={control}
-            name="calculable"
-            render={({ field, fieldState }) => (
-              <RadioButtons
-                orientation="horizontal"
-                legend={
-                  indicateur === 2
-                    ? "Y a-t-il eu des augmentations individuelles (hors promotions) durant la période de référence ?"
-                    : "Y a-t-il eu des promotions durant la période de référence ?"
-                }
-                hintText={
-                  indicateur === 2 &&
-                  "Il s'agit des augmentations individuelles du salaire de base, en excluant celles liées à une promotion."
-                }
-                state={fieldState.error && "error"}
-                stateRelatedMessage={fieldState.error?.message}
-                options={[
-                  {
-                    label: "Oui",
-                    nativeInputProps: {
-                      ...field,
-                      value: 1,
-                      defaultChecked: field.value === true,
-                      onChange() {
-                        reset({
-                          calculable: true,
-                          pourcentages: lastPourcentages,
-                        });
-                        trigger("pourcentages");
-                        setLastPourcentages(void 0);
-                        field.onChange(true);
-                      },
-                    },
-                  },
-                  {
-                    label: "Non",
-                    nativeInputProps: {
-                      ...field,
-                      value: 0,
-                      defaultChecked: field.value === false,
-                      onChange() {
-                        setLastPourcentages(getValues("pourcentages"));
-                        reset({
-                          calculable: false,
-                        });
-                        field.onChange(false);
-                      },
-                    },
-                  },
-                ]}
-              />
-            )}
-          />
-        </FormLayout>
-
         <ClientAnimate>
           {!canCompute ? (
             <Alert
@@ -191,135 +140,195 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               title="L'indicateur n'est pas calculable"
               description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
             />
-          ) : computableCheck ? (
-            <>
-              <p>
-                Le pourcentage de femmes et d’hommes ayant été {indicateur === 2 ? "augmentés" : "promus"} durant la
-                période de référence, doit être renseigné par CSP.
-              </p>
-              <AlternativeTable
-                header={[
-                  {
-                    label: "Catégories socioprofessionnelles",
-                  },
-                  {
-                    label: `Pourcentage de salariés ${indicateur === 2 ? "augmentés" : "promus"}`,
-                    subCols: [
-                      {
-                        label: "Femmes",
-                      },
-                      {
-                        label: "Hommes",
-                      },
-                    ],
-                  },
-                  {
-                    label: "Écarts pondérés",
-                    informations: <AideSimulationIndicateurDeuxOurTrois.CommentEstCalculéLIndicateur />,
-                  },
-                ]}
-                body={categories.map<AlternativeTableProps.BodyContent>(category => ({
-                  categoryLabel: CSP.Label[category],
-                  ...(() => {
-                    const womenCount = pourcentagesWithCount[category]?.womenCount ?? 0;
-                    const menCount = pourcentagesWithCount[category]?.menCount ?? 0;
-
-                    if (womenCount < 10 && menCount < 10) {
-                      return {
-                        mergedLabel: "Non pris en compte car moins de 10 femmes / hommes",
-                      };
-                    } else if (womenCount < 10) {
-                      return {
-                        mergedLabel: "Non pris en compte car moins de 10 femmes",
-                      };
-                    } else if (menCount < 10) {
-                      return {
-                        mergedLabel: "Non pris en compte car moins de 10 hommes",
-                      };
-                    }
-                    type ColsType = [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]];
-                    const categoryError = (errors as FieldErrors<Indic2or3FormTypeWhenCalculable>).pourcentages?.[
-                      category
-                    ];
-                    return {
-                      cols: [
-                        {
-                          label: `${category} - Femmes`,
-                          state: categoryError?.women && "error",
-                          stateRelatedMessage: categoryError?.women?.message,
-                          nativeInputProps: {
-                            ...register(`pourcentages.${category}.women`, {
-                              setValueAs: value => (value === "" ? void 0 : +value),
-                              deps: `pourcentages.${category}.men`,
-                            }),
-                            title: categoryError?.women?.message,
-                            type: "number",
-                            min: 1,
-                            max: 100,
-                          },
-                        },
-                        {
-                          label: `${category} - Hommes`,
-                          state: categoryError?.men && "error",
-                          stateRelatedMessage: categoryError?.men?.message,
-                          nativeInputProps: {
-                            ...register(`pourcentages.${category}.men`, {
-                              setValueAs: value => (value === "" ? void 0 : +value),
-                              deps: `pourcentages.${category}.women`,
-                            }),
-                            title: categoryError?.men?.message,
-                            type: "number",
-                            min: 1,
-                            max: 100,
-                          },
-                        },
-                        (() => {
-                          const { resultRaw: groupResult } = computer.computeGroup(category);
-                          return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
-                            ? precisePercentFormat.format(groupResult / 100)
-                            : "-";
-                        })(),
-                      ] satisfies ColsType,
-                    };
-                  })(),
-                }))}
-                footer={[
-                  {
-                    label: "Écart global",
-                    colspan: 3,
-                    align: "right",
-                  },
-                  {
-                    label: (
-                      <strong>
-                        {!Number.isNaN(result.resultRaw) && Number.isFinite(result.resultRaw)
-                          ? precisePercentFormat.format(result.resultRaw / 100)
-                          : "-"}
-                      </strong>
-                    ),
-                  },
-                ]}
-              />
-
-              <Box mb="4w">
-                <Indicateur2ou3Note
-                  computer={computer}
-                  resultIndicateurUn={resultIndicateurUn}
-                  indicateur={indicateur}
-                />
-              </Box>
-            </>
           ) : (
-            computableCheck === false && (
-              <Alert
-                className="fr-mb-3w"
-                severity="info"
-                title="L'indicateur n'est pas calculable"
-                description={`Il n'y a pas eu ${
-                  indicateur === 2 ? "d'augmentations" : "de promotions"
-                } durant la période de référence.`}
-              />
-            )
+            <>
+              <FormLayout>
+                <Controller
+                  control={control}
+                  name="calculable"
+                  render={({ field, fieldState }) => (
+                    <RadioButtons
+                      orientation="horizontal"
+                      legend={
+                        indicateur === 2
+                          ? "Y a-t-il eu des augmentations individuelles (hors promotions) durant la période de référence ?"
+                          : "Y a-t-il eu des promotions durant la période de référence ?"
+                      }
+                      hintText={
+                        indicateur === 2 &&
+                        "Il s'agit des augmentations individuelles du salaire de base, en excluant celles liées à une promotion."
+                      }
+                      state={fieldState.error && "error"}
+                      stateRelatedMessage={fieldState.error?.message}
+                      options={[
+                        {
+                          label: "Oui",
+                          nativeInputProps: {
+                            ...field,
+                            value: 1,
+                            defaultChecked: field.value === true,
+                            onChange() {
+                              reset({
+                                calculable: true,
+                                pourcentages: lastPourcentages,
+                              });
+                              trigger("pourcentages");
+                              setLastPourcentages(void 0);
+                              field.onChange(true);
+                            },
+                          },
+                        },
+                        {
+                          label: "Non",
+                          nativeInputProps: {
+                            ...field,
+                            value: 0,
+                            defaultChecked: field.value === false,
+                            onChange() {
+                              setLastPourcentages(getValues("pourcentages"));
+                              reset({
+                                calculable: false,
+                              });
+                              field.onChange(false);
+                            },
+                          },
+                        },
+                      ]}
+                    />
+                  )}
+                />
+              </FormLayout>
+              {computableCheck ? (
+                <>
+                  <p>
+                    Le pourcentage de femmes et d’hommes ayant été {indicateur === 2 ? "augmentés" : "promus"} durant la
+                    période de référence, doit être renseigné par CSP.
+                  </p>
+                  <AlternativeTable
+                    header={[
+                      {
+                        label: "Catégories socioprofessionnelles",
+                      },
+                      {
+                        label: `Pourcentage de salariés ${indicateur === 2 ? "augmentés" : "promus"}`,
+                        subCols: [
+                          {
+                            label: "Femmes",
+                          },
+                          {
+                            label: "Hommes",
+                          },
+                        ],
+                      },
+                      {
+                        label: "Écarts pondérés",
+                        informations: <AideSimulationIndicateurDeuxOurTrois.CommentEstCalculéLIndicateur />,
+                      },
+                    ]}
+                    body={categories.map<AlternativeTableProps.BodyContent>(category => ({
+                      categoryLabel: CSP.Label[category],
+                      ...(() => {
+                        const womenCount = pourcentagesWithCount[category]?.womenCount ?? 0;
+                        const menCount = pourcentagesWithCount[category]?.menCount ?? 0;
+
+                        if (womenCount < 10 && menCount < 10) {
+                          return {
+                            mergedLabel: "Non pris en compte car moins de 10 femmes / hommes",
+                          };
+                        } else if (womenCount < 10) {
+                          return {
+                            mergedLabel: "Non pris en compte car moins de 10 femmes",
+                          };
+                        } else if (menCount < 10) {
+                          return {
+                            mergedLabel: "Non pris en compte car moins de 10 hommes",
+                          };
+                        }
+                        type ColsType = [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]];
+                        const categoryError = (errors as FieldErrors<Indic2or3FormTypeWhenCalculable>).pourcentages?.[
+                          category
+                        ];
+                        return {
+                          cols: [
+                            {
+                              label: `${category} - Femmes`,
+                              state: categoryError?.women && "error",
+                              stateRelatedMessage: categoryError?.women?.message,
+                              nativeInputProps: {
+                                ...register(`pourcentages.${category}.women`, {
+                                  setValueAs: value => (value === "" ? void 0 : +value),
+                                  deps: `pourcentages.${category}.men`,
+                                }),
+                                title: categoryError?.women?.message,
+                                type: "number",
+                                min: 1,
+                                max: 100,
+                              },
+                            },
+                            {
+                              label: `${category} - Hommes`,
+                              state: categoryError?.men && "error",
+                              stateRelatedMessage: categoryError?.men?.message,
+                              nativeInputProps: {
+                                ...register(`pourcentages.${category}.men`, {
+                                  setValueAs: value => (value === "" ? void 0 : +value),
+                                  deps: `pourcentages.${category}.women`,
+                                }),
+                                title: categoryError?.men?.message,
+                                type: "number",
+                                min: 1,
+                                max: 100,
+                              },
+                            },
+                            (() => {
+                              const { resultRaw: groupResult } = computer.computeGroup(category);
+                              return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
+                                ? precisePercentFormat.format(groupResult / 100)
+                                : "-";
+                            })(),
+                          ] satisfies ColsType,
+                        };
+                      })(),
+                    }))}
+                    footer={[
+                      {
+                        label: "Écart global",
+                        colspan: 3,
+                        align: "right",
+                      },
+                      {
+                        label: (
+                          <strong>
+                            {!Number.isNaN(result.resultRaw) && Number.isFinite(result.resultRaw)
+                              ? precisePercentFormat.format(result.resultRaw / 100)
+                              : "-"}
+                          </strong>
+                        ),
+                      },
+                    ]}
+                  />
+
+                  <Box mb="4w">
+                    <Indicateur2ou3Note
+                      computer={computer}
+                      resultIndicateurUn={resultIndicateurUn}
+                      indicateur={indicateur}
+                    />
+                  </Box>
+                </>
+              ) : (
+                computableCheck === false && (
+                  <Alert
+                    className="fr-mb-3w"
+                    severity="info"
+                    title="L'indicateur n'est pas calculable"
+                    description={`Il n'y a pas eu ${
+                      indicateur === 2 ? "d'augmentations" : "de promotions"
+                    } durant la période de référence.`}
+                  />
+                )
+              )}
+            </>
           )}
         </ClientAnimate>
 
