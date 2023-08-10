@@ -153,6 +153,25 @@ export const createSteps = {
       raisedCount: zodFr.never().optional(),
     }),
   ]),
+  indicateur4: zodFr.discriminatedUnion("calculable", [
+    zodFr.object({
+      calculable: zodFr.literal(true),
+      count: zodFr
+        .object({
+          total: zodFr.number().positive(),
+          raised: zodFr.number().nonnegative(),
+        })
+        .refine(({ total, raised }) => raised <= total, {
+          message:
+            "Le nombre de salariées augmentées ne peut pas être supérieur au nombre de salariés de retour de congé maternité.",
+          path: ["raised"],
+        }),
+    }),
+    zodFr.object({
+      calculable: zodFr.literal(false),
+      count: zodFr.never().optional(),
+    }),
+  ]),
 } as const;
 
 const { effectifs, indicateur2, indicateur2and3, indicateur3, ...otherSteps } = createSteps;
