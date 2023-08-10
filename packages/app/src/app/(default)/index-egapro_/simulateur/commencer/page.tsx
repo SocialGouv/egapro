@@ -1,6 +1,6 @@
 import { BackNextButtonsGroup, CenteredContainer, Heading, Text } from "@design-system";
 
-import { TITLES } from "../(funnel)/titles";
+import { TITLES } from "../(funnel)/navigation";
 
 const title = TITLES.commencer;
 

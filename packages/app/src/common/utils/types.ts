@@ -163,6 +163,9 @@ export type AnyFunction = (...args: unknown[]) => unknown;
 export type EveryFunction = (...args: Any[]) => Any;
 export type VoidArgsFunction<TArgs extends Any[] = Any[]> = (...args: TArgs) => void;
 
+export type DeepPartial<T> = {
+  [K in keyof T]?: DeepPartial<T[K]>;
+};
 export type PartialKeys<T> = {
   [K in keyof T]-?: undefined extends T[K] ? K : never;
 }[keyof T];

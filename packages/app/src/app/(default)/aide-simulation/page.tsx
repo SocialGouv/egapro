@@ -1,5 +1,11 @@
+import Summary from "@codegouvfr/react-dsfr/Summary";
+import { AideSimulationIndicateurCinq } from "@components/aide-simulation/IndicateurCinq";
+import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
+import { AideSimulationIndicateurDeuxEtTrois } from "@components/aide-simulation/IndicateurDeuxEtTrois";
+import { AideSimulationIndicateurQuatre } from "@components/aide-simulation/IndicateurQuatre";
+import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
-import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { Container, ContentWithChapter, Grid, GridCol } from "@design-system";
 import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
@@ -33,29 +39,66 @@ const AideSimulation = () => {
             .
           </p>
 
-          <Summary className="fr-my-6w">
-            <SummaryLink href="#champ-d-application-entree-en-vigueur-et-periode-de-reference">
-              Champ d'application, entrée en vigueur et période de référence
-            </SummaryLink>
-            <SummaryLink href="#effectifs-pris-en-compte">Effectifs pris en compte</SummaryLink>
-            <SummaryLink href="#indicateur-ecart-de-remuneration">Indicateur - écart de rémunération</SummaryLink>
-            <SummaryLink href="#indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
-              Indicateur - écart de taux d’augmentation (50 à 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
-              Indicateur - écart de taux d’augmentation (plus de 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
-              Indicateur - écart de taux de promotion (plus de 250 salariés)
-            </SummaryLink>
-            <SummaryLink href="#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite">
-              Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
-            </SummaryLink>
-            <SummaryLink href="#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations">
-              Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
-            </SummaryLink>
-            <SummaryLink href="#publication-et-transmission">Publication et transmission</SummaryLink>
-          </Summary>
+          <Summary
+            className="fr-my-6w"
+            links={[
+              {
+                text: "Champ d'application, entrée en vigueur et période de référence",
+                linkProps: {
+                  href: "#champ-d-application-entree-en-vigueur-et-periode-de-reference",
+                },
+              },
+              {
+                text: "Effectifs pris en compte",
+                linkProps: {
+                  href: "#effectifs-pris-en-compte",
+                },
+              },
+              {
+                text: "Indicateur - écart de rémunération",
+                linkProps: {
+                  href: "#indicateur-ecart-de-remuneration",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux d’augmentation (50 à 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-ecart-de-taux-d-augmentation-50-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux d’augmentation (plus de 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - écart de taux de promotion (plus de 250 salariés)",
+                linkProps: {
+                  href: "#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries",
+                },
+              },
+              {
+                text: "Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité",
+                linkProps: {
+                  href: "#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite",
+                },
+              },
+              {
+                text: "Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations",
+                linkProps: {
+                  href: "#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations",
+                },
+              },
+              {
+                text: "Publication et transmission",
+                linkProps: {
+                  href: "#publication-et-transmission",
+                },
+              },
+            ]}
+          />
+
           <ContentWithChapter>
             <AnchorLink as="h2" anchor="champ-d-application-entree-en-vigueur-et-periode-de-reference">
               Champ d'application, entrée en vigueur et période de référence
@@ -113,390 +156,57 @@ const AideSimulation = () => {
             <AnchorLink as="h2" anchor="indicateur-ecart-de-remuneration">
               Indicateur - écart de rémunération
             </AnchorLink>
-            <AideSimulationIndicateurUn.Definition />
+            <AideSimulationIndicateurUn.Définition />
             <AnchorLink anchor="comment-est-calcul-l-indicateur-1">Comment est calculé l’indicateur</AnchorLink>
             <AideSimulationIndicateurUn.CommentEstCalculéLIndicateur />
 
             <AnchorLink as="h2" anchor="indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
               Indicateur - écart de taux d’augmentation (50 à 250 salariés)
             </AnchorLink>
-            <p>
-              La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
-              salarié concerné.
-            </p>
-            <p>
-              La notion d’augmentation individuelle pour le calcul de cet indicateur inclut les augmentations de salaire
-              liées à une promotion.
-            </p>
-            <p>
-              L’indicateur est calculé{" "}
-              <strong>au niveau de l’entreprise ou de l’unité économique et sociale (UES)</strong>, et non par groupes
-              de salariés.
-            </p>
-            <p>
-              Pour le calcul de l’indicateur, l’employeur peut choisir une période de référence pluriannuelle, à partir
-              des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les
-              trois ans.
-            </p>
-            <p>L’indicateur n’est pas calculable :</p>
-            <ul>
-              <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence</li>
-              <li>
-                Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes et 5
-                hommes
-              </li>
-            </ul>
+            <AideSimulationIndicateurDeuxEtTrois.Définition />
             <AnchorLink anchor="comment-est-calcul-l-indicateur-2-50-250">Comment est calculé l’indicateur</AnchorLink>
-            <p>
-              Le calcul est possible si les effectifs pris en compte pour le calcul des indicateurs comptent au moins 5
-              femmes et 5 hommes.
-            </p>
-            <ol>
-              <li>
-                <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé. </p>
-              </li>
-              <li>
-                Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre
-                total de femmes pris en compte pour le calcul. Le taux d’augmentation des hommes est calculé en
-                rapportant le nombre d’hommes augmentées au nombre total d’hommes pris en compte pour le calcul.
-              </li>
-              <li>
-                Un premier résultat est &quot;l’écart en points de pourcentage&quot; : il s’agit de la valeur absolue de
-                l’écart entre les deux taux calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13%
-                et le taux d’augmentation des hommes est de 30,00%, l’écart est ainsi de 3,13 points de pourcentage.
-              </li>
-              <li>
-                Un second résultat est &quot;l’écart en nombre équivalent de salariés&quot; : l’écart de taux calculé en
-                3 est appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre
-                de salariés qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux
-                d’augmentation. Par exemple, l’écart est de 3,13 points de pourcentage dans une entreprise employant 15
-                femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre équivalent de salariés est ainsi de
-                0,4695.
-              </li>
-              <li>
-                L’écart en points de pourcentage et le nombre équivalent de salariés sont arrondis à la première
-                décimale.{" "}
-              </li>
-              <li>
-                Le barème est appliqué à l’écart en points de pourcentage et à l’écart en nombre équivalent de salariés,
-                et le résultat correspondant au nombre de points le plus élevé est retenu. En reprenant l’exemple en 4,
-                c’est le résultat obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui sera conservée, la note
-                finale obtenu à l’indicateur est ainsi de 35 points.
-              </li>
-            </ol>
-            <p>
-              Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de rémunération), la
-              note maximale de 35 points est attribuée à l’entreprise (considérant que l’employeur a mis en place une
-              politique de rattrapage adaptée).
-            </p>
-            <p>
-              <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
-            </p>
-            <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Résultats obtenus</th>
-                    <th>Nombre de points (Note sur 35)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>inférieur ou égal à 2 points de % Ou à 2 salariés</td>
-                    <td>35 points</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      supérieur à 2 et inférieur ou égal à 5 points de % Ou supérieur à 2 salariés et inférieur ou égal
-                      à 5 salariés
-                    </td>
-                    <td>25 points</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      supérieur à 5 et inférieur ou égal à 10 points de % Ou supérieur à 5 salariés et inférieur ou égal
-                      à 10 salariés
-                    </td>
-                    <td>15 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 10 points de % ou plus de 10 salariés</td>
-                    <td>0 point</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <AideSimulationIndicateurDeuxEtTrois.CommentEstCalculéLIndicateur />
+
             <AnchorLink as="h2" anchor="indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
               Indicateur - écart de taux d’augmentation (plus de 250 salariés)
             </AnchorLink>
-            <p>
-              La notion d’
-              <strong>
-                augmentation individuelle correspond à une augmentation individuelle du salaire de base du salarié
-                concerné
-              </strong>
-              .
-            </p>
-            <p>
-              La notion d’augmentation individuelle pour le calcul de l’indicateur exclut les augmentations de salaires
-              liées à une promotion.
-            </p>
-            <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
-            <p>
-              Les groupes ne comportant pas <strong>au moins 10 femmes et 10 hommes</strong> ne sont pas retenus pour le
-              calcul de l’indicateur.
-            </p>
-            <p>L’indicateur n’est pas calculable :</p>
-            <ul>
-              <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence.</li>
-              <li>
-                Ou si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul des
-                indicateurs.
-              </li>
-            </ul>
+            <AideSimulationIndicateurDeux.Définition />
             <AnchorLink anchor="comment-est-calcul-l-indicateur-2-250-plus">
               Comment est calculé l’indicateur
             </AnchorLink>
-            <p>
-              Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
-              l’indicateur.
-            </p>
-            <ol>
-              <li>
-                Le pourcentage de femmes et d’hommes augmentés au cours de la période de référence est calculé par
-                catégorie socio-professionnelle.
-              </li>
-              <li>
-                L’écart de taux d’augmentations est calculé, en points de pourcentage, pour chacun des groupes, en
-                soustrayant le pourcentage de femmes augmentées à celui des hommes augmentés.
-              </li>
-              <li>
-                Les écarts obtenus sont multipliés par le ratio de l’effectif du groupe à l’effectif total des groupes
-                pris en compte.
-              </li>
-              <li>
-                Les écarts des différents groupes sont ensuite additionnés pour obtenir l’écart global de taux
-                d’augmentations entre les femmes et les hommes.{" "}
-              </li>
-              <li>
-                Le résultat final est la valeur absolue de l’écart global de taux d’augmentations, arrondie à la
-                première décimale.
-              </li>
-            </ol>
-            <p>
-              Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de rémunération), la
-              note maximale de 20 points est attribuée à l’entreprise (considérant que l’employeur a mis en place une
-              politique de rattrapage adaptée).
-            </p>
-            <p>
-              <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
-            </p>
-            <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Résultats obtenus</th>
-                    <th>Nombre de points (Note sur 20)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>inférieur ou égal à 2 points de %</td>
-                    <td>20 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 2 et inférieur ou égal à 5 points de %</td>
-                    <td>10 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 5 et inférieur ou égal à 10 points de %</td>
-                    <td>5 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 10 points de %</td>
-                    <td>0 point</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <AideSimulationIndicateurDeux.CommentEstCalculéLIndicateur />
+
             <AnchorLink as="h2" anchor="indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
               Indicateur - écart de taux de promotion (plus de 250 salariés)
             </AnchorLink>
-            <p>La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.</p>
-            <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
-            <p>
-              Les groupes ne comportant pas <strong>au moins 10 femmes et 10 hommes</strong> ne sont pas retenus pour le
-              calcul de l’indicateur.
-            </p>
-            <p>L’indicateur n’est pas calculable :</p>
-            <ul>
-              <li>Si aucune promotion n’est intervenue au cours de la période de référence.</li>
-              <li>
-                Ou si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul des
-                indicateurs.
-              </li>
-            </ul>
-            <AnchorLink anchor="comment-est-calcul-l-indicateur-4-250-plus">
+            <AideSimulationIndicateurTrois.Définition />
+            <AnchorLink anchor="comment-est-calcul-l-indicateur-3-250-plus">
               Comment est calculé l’indicateur
             </AnchorLink>
-            <p>
-              Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
-              l’indicateur.
-            </p>
-            <ol>
-              <li>
-                Le pourcentage de femmes et d’hommes promus au cours de la période de référence est calculé par
-                catégorie socio-professionnelle.
-              </li>
-              <li>
-                L’écart de taux de promotions est calculé, en points de pourcentage, pour chacun des groupes, en
-                soustrayant le pourcentage de femmes promues à celui des hommes promus.
-              </li>
-              <li>
-                Les écarts obtenus sont multipliés par le ratio de l’effectif du groupe à l’effectif total des groupes
-                pris en compte.
-              </li>
-              <li>
-                Les écarts des différents groupes sont ensuite additionnés pour obtenir l’écart global de taux
-                d’augmentations entre les femmes et les hommes.{" "}
-              </li>
-              <li>
-                Le résultat final est la valeur absolue de l’écart global de taux d’augmentations, arrondie à la
-                première décimale.
-              </li>
-            </ol>
-            <p>
-              Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de rémunération), la
-              note maximale de 15 points est attribuée à l’entreprise (considérant que l’employeur a mis en place une
-              politique de rattrapage adaptée).
-            </p>
-            <p>
-              <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
-            </p>
-            <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Résultats obtenus</th>
-                    <th>Nombre de points (Note sur 15)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>inférieur ou égal à 2 points de %</td>
-                    <td>15 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 2 et inférieur ou égal à 5 points de %</td>
-                    <td>10 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 5 et inférieur ou égal à 10 points de %</td>
-                    <td>5 points</td>
-                  </tr>
-                  <tr>
-                    <td>supérieur à 10 points de %</td>
-                    <td>0 point</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <AideSimulationIndicateurTrois.CommentEstCalculéLIndicateur />
+
             <AnchorLink
               as="h2"
               anchor="indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
             >
               Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
             </AnchorLink>
-            <p>
-              Seules les salariées qui sont rentrées de congé maternité (ou d’adoption) durant la période de référence
-              sont prises en considération.
-            </p>
-            <p>
-              Sont considérées <strong>comme augmentées</strong> toutes salariées <strong>revenues de congé</strong>{" "}
-              maternité pendant l’année de référence et ayant bénéficié d’une augmentation (générale ou individuelle) à
-              leur retour avant la fin de cette même période.
-            </p>
-            <p>L’indicateur n’est pas calculable :</p>
-            <ul>
-              <li>S’il n’y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence.</li>
-              <li>S’il n’y a eu aucune augmentation (individuelle ou collective) au cours des congés maternité.</li>
-            </ul>
+            <AideSimulationIndicateurQuatre.Définition />
+            <AnchorLink anchor="comment-est-calcul-l-indicateur-4">Comment est calculé l’indicateur</AnchorLink>
+            <AideSimulationIndicateurQuatre.CommentEstCalculéLIndicateur />
 
-            <AnchorLink anchor="comment-est-calcul-l-indicateur-5">Comment est calculé l’indicateur</AnchorLink>
-            <p>
-              L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou d’adoption
-              pendant la période de référence et ayant bénéficié d’une augmentation, avant la fin de celle-ci, si des
-              augmentations ont eu lieu pendant leur congé, d’une part, et, d’autre part, le nombre de salariés revenus,
-              pendant la période de référence, de congé maternité ou d’adoption, durant lequel il y a eu des
-              augmentations salariales.
-            </p>
-            <p>
-              <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
-            </p>
-            <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Résultats obtenus</th>
-                    <th>Nombre de points (Note sur 15)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>égal à 100%</td>
-                    <td>15 points</td>
-                  </tr>
-                  <tr>
-                    <td>inférieur à 100%</td>
-                    <td>0 point</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
             <AnchorLink
               as="h2"
               anchor="indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations"
             >
               Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
             </AnchorLink>
-            <p>
-              Le nombre de femmes et d’hommes parmi les dix plus hautes rémunérations de l’entreprise ou de l’unité
-              économique et sociale (UES).
-            </p>
+            <AideSimulationIndicateurCinq.Définition />
             <AnchorLink anchor="comment-est-calcul-l-indicateur-10-plus-hautes-remunerations">
               Comment est calculé l’indicateur
             </AnchorLink>
-            <p>
-              Le nombre de salariés du sexe sous-représenté est calculé en comparant le nombre de femmes et le nombre
-              d’hommes parmi les 10 plus hautes rémunérations.
-            </p>
-            <p>
-              <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
-            </p>
-            <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Résultats obtenus (nombre de salariés du sexe sous-représenté)</th>
-                    <th>Nombre de points (Note sur 10)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>4 ou 5 salariés</td>
-                    <td>10 points</td>
-                  </tr>
-                  <tr>
-                    <td>2 ou 3 salariés</td>
-                    <td>5 points</td>
-                  </tr>
-                  <tr>
-                    <td>0 ou 1 salarié</td>
-                    <td>0 point</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <AideSimulationIndicateurCinq.CommentEstCalculéLIndicateur />
+
             <AnchorLink as="h2" anchor="publication-et-transmission">
               Publication et transmission
             </AnchorLink>
