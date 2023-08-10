@@ -20,7 +20,7 @@ export namespace CompanyWorkforceRange {
   export const Label = {
     [Enum.FROM_50_TO_250]: "De 50 à 250 inclus",
     [Enum.FROM_251_TO_999]: "De 251 à 999 inclus",
-    [Enum.FROM_1000_TO_MORE]: "De 1000 ou plus",
+    [Enum.FROM_1000_TO_MORE]: "De 1000 à plus",
   } as const;
 
   export type Label = typeof Label;

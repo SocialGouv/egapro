@@ -9,9 +9,10 @@ import { type PropsWithChildren, type ReactNode, useId } from "react";
 import styles from "./AlternativeTable.module.css";
 
 type TableHeaderScope = "col" | "colgroup" | "row" | "rowgroup";
+type TableCellAlign = "center" | "left" | "right";
 
 export type AlternativeTableCellProps = PropsWithChildren & {
-  align?: "center" | "left" | "right";
+  align?: TableCellAlign;
   as?: `t${"d" | "h"}`;
   colSpan?: number;
   informations?: ReactNode;
@@ -90,17 +91,28 @@ export namespace AlternativeTableProps {
   }
 
   export interface ColumnsFooter {
+    align?: TableCellAlign;
     colspan?: number;
     data?: ReactNode;
     label: ReactNode;
   }
 
-  export interface BodyContent {
+  export type BodyContent = BodyContentBase & (BodyContentWithCols | BodyContentWithSubRows);
+  interface BodyContentBase {
     categoryLabel: ReactNode;
     isDeletable?: boolean;
     key?: string;
     mergedLabel?: ReactNode;
     onClickDelete?: () => void;
+  }
+
+  interface BodyContentWithCols {
+    cols?: [ColType, ...ColType[]];
+    subRows?: never;
+  }
+
+  interface BodyContentWithSubRows {
+    cols?: never;
     subRows?: [SubRow, ...SubRow[]];
   }
 
@@ -127,12 +139,20 @@ export namespace AlternativeTableProps {
 
 function validateProps(props: AlternativeTableProps) {
   const maxCols = props.header.reduce((prev, curr) => prev + (curr.subCols?.length ?? 1), 0);
-
   // body validation
   for (const row of props.body) {
     if (!row.subRows) {
-      if (!row.mergedLabel)
-        throw new Error(`For row {${row.categoryLabel}}, should either have columns or merged label.`);
+      if (!row.cols) {
+        if (!row.mergedLabel)
+          throw new Error(`For row {${row.categoryLabel}}, should either have columns or merged label.`);
+      } else {
+        // "-1" because we remove the count of categoryLabel
+        if (row.cols.length < maxCols - 1) {
+          throw new Error(
+            `For row {${row.categoryLabel}}, should either have the same amount of columns than header, or at least have merged labels.`,
+          );
+        }
+      }
     } else {
       for (const subRow of row.subRows) {
         // "-2" because we remove the count of categoryLabel and subRow label
@@ -238,6 +258,24 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                     )}
                   </tr>
                 ))
+              ) : row.cols ? (
+                <tr>
+                  <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
+                  {row.cols.map((col, k) => (
+                    <AlternativeTableCell key={`${row.key || index}-${k}`} align="right">
+                      {isDsfrInputProps(col) ? (
+                        <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                      ) : (
+                        col
+                      )}
+                    </AlternativeTableCell>
+                  ))}
+                  {row.mergedLabel && (
+                    <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
+                      <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
+                    </AlternativeTableCell>
+                  )}
+                </tr>
               ) : (
                 <tr>
                   <AlternativeTableCell as="th" scope="rowgroup">
@@ -256,7 +294,11 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
           <tfoot>
             <tr>
               {footer.map((footerCol, index) => (
-                <AlternativeTableCell key={`td-footer-${index}`} colSpan={footerCol.colspan} align="center">
+                <AlternativeTableCell
+                  key={`td-footer-${index}`}
+                  colSpan={footerCol.colspan}
+                  align={footerCol.align ?? "center"}
+                >
                   <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
                     {footerCol.label}
                   </span>

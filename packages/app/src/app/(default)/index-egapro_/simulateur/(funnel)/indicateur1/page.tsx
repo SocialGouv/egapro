@@ -1,6 +1,6 @@
 import { CenteredContainer } from "@design-system";
 
-import { TITLES } from "../titles";
+import { TITLES } from "../navigation";
 import { Indic1Form } from "./Form";
 
 const title = TITLES.indicateur1;

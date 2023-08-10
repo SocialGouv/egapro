@@ -65,7 +65,6 @@ export const BackNextButtonsGroup = ({
       className={cx(className)}
       inlineLayoutWhen="sm and up"
       buttonsEquisized
-      alignment="right"
       buttons={
         [
           ...(noBack

@@ -2,11 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import {
-  ageRanges,
+  type CountAndAverageSalaries,
   type IndicateurUnComputer,
-  type RemunerationsCountAndAverageSalaries,
-  type RemunerationsOther,
 } from "@common/core-domain/computers/IndicateurUnComputer";
+import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
 import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
@@ -23,11 +22,8 @@ import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableU
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface OtherModesTableProps {
-  computer: IndicateurUnComputer<
-    RemunerationsMode.Enum.BRANCH_LEVEL | RemunerationsMode.Enum.OTHER_LEVEL,
-    RemunerationsOther
-  >;
-  defaultRemunerations?: RemunerationsOther;
+  computer: IndicateurUnComputer<RemunerationsMode.Enum.BRANCH_LEVEL | RemunerationsMode.Enum.OTHER_LEVEL>;
+  defaultRemunerations?: ExternalRemunerations;
   staff?: boolean;
 }
 
@@ -62,9 +58,9 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
     return null;
   }
 
-  const remunerations = watch("remunerations") as RemunerationsOther;
+  const remunerations = watch("remunerations") as ExternalRemunerations;
 
-  computer.setRemunerations(remunerations);
+  computer.setInput(flattenRemunerations(remunerations));
   computer.compute();
 
   return (
@@ -101,7 +97,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
               ...(() => {
                 const categoryContent = remunerationsField.category as Record<
                   CSPAgeRange.Enum,
-                  RemunerationsCountAndAverageSalaries
+                  CountAndAverageSalaries
                 >;
 
                 return {
@@ -188,7 +184,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
         iconId="fr-icon-add-line"
         className={fr.cx("fr-mb-4w")}
         onClick={() => {
-          appendRemunerations({ name: "", category: {} } as RemunerationsOther[number], {
+          appendRemunerations({ name: "", category: {} } as ExternalRemunerations[number], {
             shouldFocus: true,
             focusName: `remunerations.${remunerationsFields.length}.name`,
           });
