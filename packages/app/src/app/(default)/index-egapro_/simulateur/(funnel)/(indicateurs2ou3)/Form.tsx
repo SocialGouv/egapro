@@ -7,6 +7,7 @@ import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/co
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { ageRanges, categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import {
   type CreateSimulationDTO,
   type CreateSimulationWorkforceRangeMoreThan250DTO,
@@ -104,6 +105,10 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
 
   if (!funnel.indicateur1) {
     redirect(simulateurPath("indicateur1"));
+  }
+
+  if (_funnel?.effectifs?.workforceRange === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+    redirect(simulateurPath("indicateur2et3"));
   }
 
   const resultIndicateurUn = getResultIndicateurUn(funnel as CreateSimulationDTO);

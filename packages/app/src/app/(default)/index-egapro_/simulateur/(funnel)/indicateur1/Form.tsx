@@ -80,7 +80,7 @@ export const Indic1Form = () => {
   });
 
   const {
-    formState: { isValid, errors },
+    formState: { isValid },
     handleSubmit,
     getValues,
     watch,

@@ -15,9 +15,8 @@ import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, IndicatorNote, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
@@ -42,8 +41,6 @@ export const Indic4Form = () => {
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const hydrated = useSimuFunnelStoreHasHydrated();
   const [lastCount, setLastCount] = useState<Indic4FormTypeWhenCalculable["count"]>();
-  const [gridCardAnimate] = useAutoAnimate();
-  const [formLayoutAnimate] = useAutoAnimate();
 
   const methods = useForm<Indic4FormType>({
     mode: "onChange",
@@ -66,6 +63,10 @@ export const Indic4Form = () => {
     return <SkeletonForm fields={2} />;
   }
 
+  if (!funnel?.effectifs) {
+    redirect(simulateurPath("effectifs"));
+  }
+
   const computableCheck = watch("calculable");
   const count = watch("count");
 
@@ -76,7 +77,8 @@ export const Indic4Form = () => {
   const hasTotal = !!count?.total;
 
   const onSubmit = async (formData: Indic4FormType) => {
-    console.log("formData", formData);
+    saveFunnel({ indicateur4: formData });
+    router.push(simulateurPath(indicateur4Nav.next()));
   };
 
   const whenCalculableErrors = errors as FieldErrors<Indic4FormTypeWhenCalculable>;
