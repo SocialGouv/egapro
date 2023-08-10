@@ -1,16 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import {
   ageRanges,
   categories,
-  type IndicateurUnComputer,
-  type RemunerationsCSP,
-} from "@common/core-domain/computers/IndicateurUnComputer";
+  type ExternalRemunerations,
+  flattenRemunerations,
+} from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
-import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { type CreateSimulationDTO, type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useFormContext } from "react-hook-form";
@@ -23,9 +24,30 @@ import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableU
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CSPModeTableProps {
-  computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP, RemunerationsCSP>;
+  computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP>;
   staff?: boolean;
 }
+
+const getRemuWithCount = (
+  funnelCsp: CreateSimulationDTO["effectifs"]["csp"],
+  remunerations: ExternalRemunerations | undefined,
+) =>
+  Object.keys(funnelCsp).map<ExternalRemunerations[number]>(categoryName => ({
+    name: categoryName,
+    categoryId: categoryName,
+    category: ageRanges.reduce(
+      (newAgeGroups, ageRange) => ({
+        ...newAgeGroups,
+        [ageRange]: {
+          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary || 0,
+          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary || 0,
+          womenCount: funnelCsp[categoryName].ageRanges[ageRange].women,
+          menCount: funnelCsp[categoryName].ageRanges[ageRange].men,
+        },
+      }),
+      {} as ExternalRemunerations[number]["category"],
+    ),
+  }));
 
 export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
   const funnel = useSimuFunnelStore(state => state.funnel);
@@ -43,29 +65,10 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
     return null;
   }
 
-  const remunerations = watch("remunerations") as RemunerationsCSP | undefined;
-
-  const remuWithCount = Object.keys(funnel.effectifs.csp).map<RemunerationsCSP[number]>(categoryName => ({
-    name: categoryName,
-    categoryId: categoryName,
-    category: ageRanges.reduce(
-      (newAgeGroups, ageRange) => ({
-        ...newAgeGroups,
-        [ageRange]: {
-          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary ?? 0,
-          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary ?? 0,
-          womenCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women,
-          menCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men,
-        },
-      }),
-      {} as RemunerationsCSP[number]["category"],
-    ),
-  }));
-
-  computer.setRemunerations(remuWithCount);
+  const countOnly = getRemuWithCount(funnel.effectifs.csp, []);
+  computer.setInput(flattenRemunerations(countOnly));
   const canCompute = computer.canCompute();
-
-  if (remunerations && !canCompute) {
+  if (!canCompute) {
     return (
       <CenteredContainer fluid>
         <Alert
@@ -77,6 +80,9 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       </CenteredContainer>
     );
   }
+
+  const remunerations = watch("remunerations") as ExternalRemunerations;
+  computer.setInput(flattenRemunerations(getRemuWithCount(funnel.effectifs.csp, remunerations)));
 
   computer.compute();
 

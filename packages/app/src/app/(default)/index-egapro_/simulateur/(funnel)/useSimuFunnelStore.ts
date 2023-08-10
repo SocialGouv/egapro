@@ -1,5 +1,6 @@
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CreateSimulationDTO } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { type Any } from "@common/utils/types";
+import { type Any, type DeepPartial } from "@common/utils/types";
 import { useEffect, useState } from "react";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -8,19 +9,18 @@ import { immer } from "zustand/middleware/immer";
 interface State {
   funnel?: Partial<CreateSimulationDTO>;
   isEdit: boolean;
+  selectedWorkforceRange: CompanyWorkforceRange.Enum;
 }
 
 interface PrivateState {
   _hasHydrated: boolean;
 }
 
-type DeepPartial<T> = {
-  [K in keyof T]?: DeepPartial<T[K]>;
-};
 interface Actions {
   resetFunnel(): void;
   saveFunnel(form?: DeepPartial<CreateSimulationDTO>): void;
   setIsEdit(isEdit: boolean): void;
+  setSelectedCompanyWorkforceRange(workforceRange: CompanyWorkforceRange.Enum): void;
 }
 
 type PrivateActions = {
@@ -37,6 +37,7 @@ const usePrivateSimuFunnelStore = create<PrivateSimuFunnelStore>()(
     immer((set, get) => ({
       isEdit: false,
       _hasHydrated: false,
+      selectedWorkforceRange: CompanyWorkforceRange.Enum.FROM_50_TO_250,
       setIsEdit: isEdit => set({ isEdit }),
       saveFunnel: funnel =>
         set({
@@ -49,6 +50,11 @@ const usePrivateSimuFunnelStore = create<PrivateSimuFunnelStore>()(
       setHasHydrated(hydrated: boolean) {
         set({
           _hasHydrated: hydrated,
+        });
+      },
+      setSelectedCompanyWorkforceRange(workforceRange) {
+        set({
+          selectedWorkforceRange: workforceRange,
         });
       },
     })),

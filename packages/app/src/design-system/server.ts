@@ -14,7 +14,6 @@ export * from "./base/RecapCard";
 export * from "./base/RecapCardCompany";
 export * from "./base/RecapCardPublication";
 export * from "./base/Stat";
-export * from "./base/Summary";
 export * from "./base/TableAdmin";
 export * from "./base/TileCompany";
 export * from "./base/Typography";
