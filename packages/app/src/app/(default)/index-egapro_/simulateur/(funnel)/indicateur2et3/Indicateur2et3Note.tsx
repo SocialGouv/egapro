@@ -4,7 +4,6 @@ import { type ComputedResult } from "@common/core-domain/computers/AbstractCompu
 import { type IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { percentFormat } from "@common/utils/number";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { useFormContext } from "react-hook-form";
@@ -13,18 +12,6 @@ interface Props {
   computer: IndicateurDeuxTroisComputer;
   resultIndicateurUn: ComputedResult;
 }
-
-const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadvantage"], string> = {
-  "men-men":
-    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
-  "men-women":
-    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
-  "women-men":
-    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
-  "women-women":
-    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
-  equality: "Les femmes et les hommes sont à égalité",
-};
 
 const NOTE_MAX_INDICATEUR1 = new IndicateurUnComputer(RemunerationsMode.Enum.CSP).NOTE_TABLE[0];
 
@@ -91,12 +78,6 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
             }}
             note={isValid ? computed?.note ?? 0 : "-"}
             text="Nombre de points obtenus sur le résultat en points de pourcentage"
-            legend={
-              <>
-                Pour un écart de taux d'augmentation de{" "}
-                <strong>{percentFormat.format(computed?.resultRaw ?? 0)}</strong>
-              </>
-            }
           />
           <IndicatorNote
             className={fr.cx("fr-mb-2w")}
@@ -106,18 +87,6 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
             }}
             note={isValid ? computed?.noteEquivalentEmployeeCountGap ?? 0 : "-"}
             text="Nombre de points obtenus sur le résultat en nombre de salariés"
-            legend={
-              <>
-                Pour un écart en nombre équivalent de salariés de{" "}
-                <strong>{computed?.equivalentEmployeeCountGap ?? 0}</strong>
-                {computed?.ifadvantage && (
-                  <>
-                    <br />
-                    {ifAdvantageText[computed.ifadvantage]}
-                  </>
-                )}
-              </>
-            }
           />
           {remunerationsCompensated ? (
             <IndicatorNote

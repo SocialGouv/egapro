@@ -1,7 +1,7 @@
 import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
 import { NAF } from "@common/dict";
 import { formatDateToFr } from "@common/utils/date";
-import { formatPrettyFloat, truncFloatToOneDecimal } from "@common/utils/number";
+import { formatPrettyFloat, truncFloatToDecimal } from "@common/utils/number";
 import { isEqual } from "date-fns";
 
 import { BaseReceiptTemplate, type BaseReceiptTemplateProps } from "./BaseReceiptTemplate";
@@ -73,13 +73,11 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         : [
             {
               key: "Pourcentage de femmes",
-              value: `${formatPrettyFloat(
-                truncFloatToOneDecimal(repEq.indicator.executiveWomenPercent!.getValue()),
-              )} %`,
+              value: `${formatPrettyFloat(truncFloatToDecimal(repEq.indicator.executiveWomenPercent!.getValue()))} %`,
             },
             {
               key: "Pourcentage d'hommes",
-              value: `${formatPrettyFloat(truncFloatToOneDecimal(repEq.indicator.executiveMenPercent!.getValue()))} %`,
+              value: `${formatPrettyFloat(truncFloatToDecimal(repEq.indicator.executiveMenPercent!.getValue()))} %`,
             },
           ],
     },
@@ -95,11 +93,11 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         : [
             {
               key: "Pourcentage de femmes",
-              value: `${formatPrettyFloat(truncFloatToOneDecimal(repEq.indicator.memberWomenPercent!.getValue()))} %`,
+              value: `${formatPrettyFloat(truncFloatToDecimal(repEq.indicator.memberWomenPercent!.getValue()))} %`,
             },
             {
               key: "Pourcentage d'hommes",
-              value: `${formatPrettyFloat(truncFloatToOneDecimal(repEq.indicator.memberMenPercent!.getValue()))} %`,
+              value: `${formatPrettyFloat(truncFloatToDecimal(repEq.indicator.memberMenPercent!.getValue()))} %`,
             },
           ],
     },

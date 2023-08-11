@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
-import { type PropsWithChildren } from "react";
+import { forwardRef, type PropsWithChildren } from "react";
 
-import { Box } from "../base/Box";
+import { BoxRef } from "../base/Box";
 import { type MarginProps } from "../utils/spacing";
 import styles from "./FormLayout.module.css";
 
@@ -11,10 +11,12 @@ export type FormLayoutProps = PropsWithChildren<
   }
 >;
 
-export const FormLayout = ({ className, children, ...rest }: FormLayoutProps) => {
+export const FormLayout = forwardRef<HTMLDivElement, FormLayoutProps>(({ className, children, ...rest }, ref) => {
   return (
-    <Box className={clsx(styles.form, className)} {...rest}>
+    <BoxRef ref={ref} className={clsx(styles.form, className)} {...rest}>
       {children}
-    </Box>
+    </BoxRef>
   );
-};
+});
+
+FormLayout.displayName = "FormLayout";
