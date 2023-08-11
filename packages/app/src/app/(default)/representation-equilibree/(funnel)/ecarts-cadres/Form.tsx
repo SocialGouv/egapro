@@ -6,7 +6,7 @@ import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/va
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { type UnionToIntersection } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { PercentagesPairInputs } from "@components/RHF/PercentagesPairInputs";
+import { NumberPairInputs } from "@components/RHF/NumbersPairInputs";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -107,11 +107,14 @@ export const EcartsCadresForm = () => {
         />
         <Box style={{ display: isComputable ? "block" : "none" }}>
           <FormProvider {...methods}>
-            <PercentagesPairInputs<EcartsCadresFormType>
+            <NumberPairInputs<EcartsCadresFormType>
               first={{ formKey: "executiveWomenPercent", label: "Pourcentage de femmes parmi les cadres dirigeants" }}
               second={{ formKey: "executiveMenPercent", label: "Pourcentage d'hommes parmi les cadres dirigeants" }}
               options={{
                 disabled: isComputable === false,
+                max: 100,
+                min: 0,
+                step: 0.1,
               }}
             />
           </FormProvider>
