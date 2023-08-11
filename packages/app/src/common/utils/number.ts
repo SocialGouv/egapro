@@ -9,9 +9,9 @@
 export const formatPrettyFloat = (float: number) => (Number.isInteger(float) ? float.toFixed(0) : float.toFixed(1));
 
 /**
- * Truncate a float to only have 1 decimal.
+ * Truncate a float to only have 1 decimal by default.
  */
-export const truncFloatToOneDecimal = (float: number) => Math.trunc(float * 10) / 10;
+export const truncFloatToDecimal = (float: number, mask = 0.1) => Math.trunc(float * (1 / mask)) / (1 / mask);
 
 /**
  * Format a float to a currency string.

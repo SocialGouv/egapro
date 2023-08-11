@@ -8,11 +8,13 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import {
   type CreateSimulationDTO,
   type CreateSimulationWorkforceRangeLessThan250DTO,
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { percentFormat } from "@common/utils/number";
 import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeuxEtTrois } from "@components/aide-simulation/IndicateurDeuxEtTrois";
@@ -37,6 +39,18 @@ type Indic2and3FormWhenCalculated = Extract<Indic2and3FormType, { calculable: tr
 
 const indicateur2and3Computer = new IndicateurDeuxTroisComputer();
 const indicateur2and3Nav = NAVIGATION.indicateur2et3;
+
+const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadvantage"], string> = {
+  "men-men":
+    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+  "men-women":
+    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+  "women-men":
+    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+  "women-women":
+    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+  equality: "Les femmes et les hommes sont à égalité",
+};
 
 const infoModal = createModal({
   id: "info-modal",
@@ -109,6 +123,10 @@ export const Indic2and3Form = () => {
     redirect(simulateurPath("indicateur1"));
   }
 
+  if (funnel.effectifs.workforceRange !== CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+    redirect(simulateurPath("indicateur2"));
+  }
+
   const computableCheck = watch("calculable");
   const [totalCspWomen, totalCspMen] = getTotalsCsp(funnel as CreateSimulationDTO);
   const resultIndicateurUn = getResultIndicateurUn(funnel as CreateSimulationDTO);
@@ -122,9 +140,10 @@ export const Indic2and3Form = () => {
     womenCount: totalCspWomen,
   });
 
+  let result = {} as IndicateurDeuxTroisComputer.ComputedResult;
   const canCompute = indicateur2and3Computer.canCompute();
   if (canCompute) {
-    indicateur2and3Computer.compute();
+    result = indicateur2and3Computer.compute();
   } else {
     register("calculable", { value: false });
   }
@@ -151,7 +170,7 @@ export const Indic2and3Form = () => {
                 className="fr-mb-3w"
                 severity="warning"
                 title="L'indicateur n'est pas calculable"
-                description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+                description="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
               />
             ) : (
               <>
@@ -228,7 +247,7 @@ export const Indic2and3Form = () => {
                                 deps: "raisedCount.men",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.men > 0 ? 1 : 0,
+                              min: raisedCount && raisedCount.men > 0 ? 0 : 1,
                               max: totalCspWomen,
                             }}
                           />
@@ -245,10 +264,44 @@ export const Indic2and3Form = () => {
                                 deps: "raisedCount.women",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.women > 0 ? 1 : 0,
+                              min: raisedCount && raisedCount.women > 0 ? 0 : 1,
                               max: totalCspMen,
                             }}
                           />
+                        </GridCol>
+                        <GridCol sm={12}>
+                          <Text
+                            mb="1w"
+                            text={
+                              <>
+                                L'écart en points de pourcentage est de{" "}
+                                <strong>{percentFormat.format(result?.resultRaw ?? 0)}</strong>
+                              </>
+                            }
+                          />
+                          <Text
+                            mb="1w"
+                            text={
+                              <>
+                                L'écart en nombre équivalent de salariés
+                                <strong>
+                                  <sup>*</sup>
+                                </strong>{" "}
+                                est de <strong>{result?.equivalentEmployeeCountGap}</strong>
+                              </>
+                            }
+                          />
+                          <i>
+                            <Text
+                              mb="1w"
+                              variant={["sm"]}
+                              text={
+                                <>
+                                  <strong>*</strong> {ifAdvantageText[result.ifadvantage]}
+                                </>
+                              }
+                            />
+                          </i>
                         </GridCol>
                       </Grid>
                     </Container>
