@@ -158,8 +158,8 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       count: zodFr
         .object({
-          total: zodFr.number().positive(),
-          raised: zodFr.number().nonnegative(),
+          total: zodFr.number().nonnegative(),
+          raised: zodFr.number().nonnegative().default(0),
         })
         .refine(({ total, raised }) => raised <= total, {
           message:
@@ -172,6 +172,15 @@ export const createSteps = {
       count: zodFr.never().optional(),
     }),
   ]),
+  indicateur5: zodFr
+    .object({
+      women: zodFr.number().nonnegative().max(10),
+      men: zodFr.number().nonnegative().max(10),
+    })
+    .refine(({ women, men }) => women + men <= 10, {
+      message:
+        "La somme des nombres de salariés parmi les 10 plus hautes rémunérations ne peut pas être supérieure à 10.",
+    }),
 } as const;
 
 const { effectifs, indicateur2, indicateur2and3, indicateur3, ...otherSteps } = createSteps;

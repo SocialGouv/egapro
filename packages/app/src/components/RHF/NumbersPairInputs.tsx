@@ -1,14 +1,17 @@
 "use client";
 
 import Input from "@codegouvfr/react-dsfr/Input";
-import { truncFloatToOneDecimal } from "@common/utils/number";
+import { truncFloatToDecimal } from "@common/utils/number";
 import { type SimpleObject } from "@common/utils/types";
 import { useFormContext } from "react-hook-form";
 
-interface PercentagesPairInputsProps<FormType> {
+interface NumbersPairInputsProps<FormType> {
   first: PairInputProps<FormType>;
   options?: {
     disabled?: boolean;
+    max: number;
+    min?: number;
+    step?: number;
   };
   second: PairInputProps<FormType>;
 }
@@ -26,14 +29,18 @@ type FakeKey = keyof FakeFormType;
 type FakeSyncMapper = FakeKey[];
 
 /**
- * Component managed by React Hook Form to handle pair of percentages.
+ * Component managed by React Hook Form to handle pair of numbers.
  * One input triggers the computation of the other value.
  */
-export const PercentagesPairInputs = <FormType extends SimpleObject>({
+export const NumberPairInputs = <FormType extends SimpleObject>({
   first: { formKey: firstFormKey, label: firstLabel },
   second: { formKey: secondFormKey, label: secondLabel },
-  options = {},
-}: PercentagesPairInputsProps<FormType>) => {
+  options = {
+    max: 100,
+  },
+}: NumbersPairInputsProps<FormType>) => {
+  const step = options.step ?? 1;
+
   const {
     setValue,
     getValues,
@@ -41,15 +48,14 @@ export const PercentagesPairInputs = <FormType extends SimpleObject>({
     setFocus,
     formState: { errors },
   } = useFormContext<FakeFormType>();
-  // TODO use rhf controller instead
 
-  const syncPercentages = (firstInput: boolean) => {
+  const syncNumbers = (firstInput: boolean) => {
     const [keyA, keyB] = (firstInput ? [firstFormKey, secondFormKey] : [secondFormKey, firstFormKey]) as FakeSyncMapper;
-    const valueA = truncFloatToOneDecimal(getValues(keyA));
+    const valueA = truncFloatToDecimal(getValues(keyA), step);
 
     if (isNaN(valueA)) return;
 
-    const valueB = truncFloatToOneDecimal(100 - valueA);
+    const valueB = truncFloatToDecimal(options.max - valueA, step);
 
     setValue(keyA, valueA, {
       shouldDirty: true,
@@ -73,15 +79,15 @@ export const PercentagesPairInputs = <FormType extends SimpleObject>({
         nativeInputProps={{
           ...register(firstFormKey as FakeKey, {
             onChange() {
-              syncPercentages(true);
+              syncNumbers(true);
             },
             valueAsNumber: true,
             disabled: options.disabled === true,
           }),
           type: "number",
-          min: 0,
-          max: 100,
-          step: 0.1,
+          min: options.min,
+          max: options.max,
+          step,
         }}
       />
 
@@ -92,15 +98,15 @@ export const PercentagesPairInputs = <FormType extends SimpleObject>({
         nativeInputProps={{
           ...register(secondFormKey as FakeKey, {
             onChange() {
-              syncPercentages(false);
+              syncNumbers(false);
             },
             valueAsNumber: true,
             disabled: options.disabled === true,
           }),
           type: "number",
-          min: 0,
-          max: 100,
-          step: 0.1,
+          min: options.min,
+          max: options.max,
+          step,
         }}
       />
     </>
