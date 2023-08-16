@@ -3,7 +3,6 @@ import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain
 import { type CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { currencyFormat, precisePercentFormat } from "@common/utils/number";
-import { type Any } from "@common/utils/types";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
 import { type AlternativeTableProps } from "@design-system";
 import { type FieldErrors, type UseFormRegister } from "react-hook-form";
@@ -61,7 +60,7 @@ interface CommonBodyColumnsProps {
   categoryId: string;
   categoryIndex: number;
   categoryName: string;
-  computer: IndicateurUnComputer<Any>;
+  computer: IndicateurUnComputer;
   errors: FieldErrors<Indic1FormType>;
   firstCols: AlternativeTableProps.ColType[];
   menCount: number;
@@ -142,7 +141,7 @@ export const getCommonBodyColumns = ({
 };
 
 interface IsEnoughEmployeesProps {
-  computer: IndicateurUnComputer<Any>;
+  computer: IndicateurUnComputer;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
 interface IsEnoughEmployeesReturn {
@@ -175,7 +174,7 @@ export const getIsEnoughEmployees = ({
 };
 
 interface CommonFooterProps {
-  computer: IndicateurUnComputer<Any>;
+  computer: IndicateurUnComputer;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
 const errorColor = "var(--text-default-error)";

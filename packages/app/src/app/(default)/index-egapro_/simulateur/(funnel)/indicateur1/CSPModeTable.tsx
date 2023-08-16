@@ -9,45 +9,24 @@ import {
   flattenRemunerations,
 } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
-import { type CreateSimulationDTO, type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useFormContext } from "react-hook-form";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
+import { getRemuWithCount } from "../utils";
 import { Indicateur1Note } from "./Indicateur1Note";
 import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableUtil";
 
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CSPModeTableProps {
-  computer: IndicateurUnComputer<RemunerationsMode.Enum.CSP>;
+  computer: IndicateurUnComputer;
   staff?: boolean;
 }
-
-const getRemuWithCount = (
-  funnelCsp: CreateSimulationDTO["effectifs"]["csp"],
-  remunerations: ExternalRemunerations | undefined,
-) =>
-  Object.keys(funnelCsp).map<ExternalRemunerations[number]>(categoryName => ({
-    name: categoryName,
-    categoryId: categoryName,
-    category: ageRanges.reduce(
-      (newAgeGroups, ageRange) => ({
-        ...newAgeGroups,
-        [ageRange]: {
-          womenSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.womenSalary || 0,
-          menSalary: remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange]?.menSalary || 0,
-          womenCount: funnelCsp[categoryName].ageRanges[ageRange].women,
-          menCount: funnelCsp[categoryName].ageRanges[ageRange].men,
-        },
-      }),
-      {} as ExternalRemunerations[number]["category"],
-    ),
-  }));
 
 export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
   const funnel = useSimuFunnelStore(state => state.funnel);
@@ -55,7 +34,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
 
   const {
     register,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
     setValue,
     trigger,
@@ -196,7 +175,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       />
 
       <CenteredContainer fluid py="1w">
-        <Indicateur1Note computer={computer} />
+        <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
     </>
   );

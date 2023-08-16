@@ -6,7 +6,6 @@ import {
   type IndicateurUnComputer,
 } from "@common/core-domain/computers/IndicateurUnComputer";
 import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
-import { type RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { type Any } from "@common/utils/types";
@@ -22,7 +21,7 @@ import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableU
 type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface OtherModesTableProps {
-  computer: IndicateurUnComputer<RemunerationsMode.Enum.BRANCH_LEVEL | RemunerationsMode.Enum.OTHER_LEVEL>;
+  computer: IndicateurUnComputer;
   defaultRemunerations?: ExternalRemunerations;
   staff?: boolean;
 }
@@ -33,7 +32,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
 
   const {
     register,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
     control,
   } = useFormContext<Indic1FormType>();
@@ -194,7 +193,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
       </Button>
 
       <CenteredContainer fluid py="1w">
-        <Indicateur1Note computer={computer} />
+        <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
     </>
   );

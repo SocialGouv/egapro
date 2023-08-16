@@ -1,4 +1,5 @@
 import { AbstractComputer, type ComputedResult as BaseComputedResult } from "./AbstractComputer";
+import { type IndicateurUnComputer } from "./IndicateurUnComputer";
 
 interface RaisedCount {
   men: number;
@@ -15,6 +16,7 @@ interface AdditionalOutput {
    */
   ifadvantage: "equality" | "men-men" | "men-women" | "women-men" | "women-women";
   noteEquivalentEmployeeCountGap: number;
+  remunerationsCompensated: boolean;
 }
 
 export namespace IndicateurDeuxTroisComputer {
@@ -23,6 +25,11 @@ export namespace IndicateurDeuxTroisComputer {
 
 export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, AdditionalOutput> {
   public NOTE_TABLE = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0];
+
+  constructor(private indicateurUnComputer: IndicateurUnComputer) {
+    super();
+  }
+
   public compute(): IndicateurDeuxTroisComputer.ComputedResult {
     if (this.computed) {
       return this.computed;
@@ -55,15 +62,22 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
       ifadvantage = "women-women";
     }
 
+    const genderAdvantage = sign === 0 ? "equality" : sign === 1 ? "men" : "women";
+    const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
+    const resultIndicateurUn = this.indicateurUnComputer.compute();
+    const remunerationsCompensated =
+      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.genderAdvantage !== genderAdvantage;
+
     return {
       resultRaw: rawGap,
       result,
       equivalentEmployeeCountGap,
       equivalentEmployeeCountGapRaw,
-      note: this.computeNote(result),
-      genderAdvantage: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
+      note: remunerationsCompensated ? this.getMaxNote() : this.computeNote(result),
+      genderAdvantage,
       noteEquivalentEmployeeCountGap: this.computeNote(equivalentEmployeeCountGap),
       ifadvantage,
+      remunerationsCompensated,
     };
   }
 

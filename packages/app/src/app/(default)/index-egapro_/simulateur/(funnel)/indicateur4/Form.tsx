@@ -7,14 +7,14 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { IndicateurQuatreComputer, type MaternityLeaves } from "@common/core-domain/computers/IndicateurQuatreComputer";
+import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { percentFormat } from "@common/utils/number";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurQuatre } from "@components/aide-simulation/IndicateurQuatre";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, IndicatorNote, Text } from "@design-system";
+import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { last } from "lodash";
@@ -26,6 +26,7 @@ import { type z } from "zod";
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import style from "./Form.module.scss";
+import { Indicateur4Note } from "./Indicateur4Note";
 
 type Indic4FormType = z.infer<typeof createSteps.indicateur4>;
 type Indic4FormTypeWhenCalculable = Extract<Indic4FormType, { calculable: true }>;
@@ -75,7 +76,7 @@ export const Indic4Form = () => {
   const computableCheck = watch("calculable");
   const count = watch("count");
 
-  indicateur4Computer.setInput(count as MaternityLeaves);
+  indicateur4Computer.setInput(count ?? { total: 0, raised: 0 });
 
   const canCompute = indicateur4Computer.canCompute();
   const computed = indicateur4Computer.compute();
@@ -231,26 +232,7 @@ export const Indic4Form = () => {
                     </GridCol>
                   </Grid>
                 </Container>
-                {count?.total === 0 ? (
-                  <IndicatorNote
-                    note="NC"
-                    max={NOTE_MAX}
-                    text="L'indicateur retour de congé maternité est non calculable car il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
-                  />
-                ) : (
-                  <IndicatorNote
-                    note={computed.note ?? "-"}
-                    max={NOTE_MAX}
-                    text="Nombre de point obtenus à l'indicateur retour de congé maternité"
-                    legend={
-                      isValid && canCompute
-                        ? computed.note === NOTE_MAX
-                          ? "La loi sur les augmentations au retour de congé maternité a été appliquée à tous les salariés. Tous les points sont accordés."
-                          : "La loi sur les augmentations au retour de congé maternité n'a pas été appliquée à tous les salariés. Aucun point n'est accordé."
-                        : "Veuillez remplir les champs obligatoires pour obtenir une note."
-                    }
-                  />
-                )}
+                <Indicateur4Note computer={indicateur4Computer} count={count} isValid={isValid} />
               </>
             ) : (
               computableCheck === false && (

@@ -24,16 +24,18 @@ interface AdditionalMetadata {
 
 export type IndicateurUnComputerTotalMetadata = TotalMetadata<string, AdditionalMetadata>;
 
-export class IndicateurUnComputer<TMode extends RemunerationsMode.Enum> extends AbstractGroupComputer<
-  InputRemunerations,
-  AdditionalMetadata
-> {
+export class IndicateurUnComputer extends AbstractGroupComputer<InputRemunerations, AdditionalMetadata> {
   public NOTE_TABLE = [40, 39, 38, 37, 36, 35, 34, 33, 31, 29, 27, 25, 23, 21, 19, 17, 14, 11, 8, 5, 2, 0];
   public VALID_GROUPS_THRESHOLD = 0.4;
   public GROUP_COUNT_THRESHOLD = 3;
+  private mode?: RemunerationsMode.Enum;
 
-  constructor(private readonly mode: TMode) {
+  constructor() {
     super();
+  }
+
+  public setMode(mode: RemunerationsMode.Enum): void {
+    this.mode = mode;
   }
 
   protected addAdditionalMetadata(
@@ -101,6 +103,10 @@ export class IndicateurUnComputer<TMode extends RemunerationsMode.Enum> extends 
 
     if (!this.input) {
       throw new Error("remunerations must be set before calling calculateWeightedGap");
+    }
+
+    if (!this.mode) {
+      throw new Error("mode (csp, or other) must be set before calling calculateWeightedGap");
     }
 
     group = this.input[key] ?? {
