@@ -1,13 +1,14 @@
 import { type Any } from "@common/utils/types";
+import { last } from "lodash";
 
-export type ComputedResult<Additional = object> = Additional & {
+export type ComputedResult<Additional extends object = object> = Additional & {
   genderAdvantage: "equality" | "men" | "women";
   note: number;
   result: number;
   resultRaw: number;
 };
 
-export abstract class AbstractComputer<Input = Any, AdditionalOutput = Any> {
+export abstract class AbstractComputer<Input = Any, AdditionalOutput extends object = object> {
   public abstract NOTE_TABLE: readonly number[];
   protected input?: Input;
   protected computed?: ComputedResult<AdditionalOutput>;
@@ -15,6 +16,10 @@ export abstract class AbstractComputer<Input = Any, AdditionalOutput = Any> {
   public setInput(input: Input) {
     this.input = input;
     delete this.computed;
+  }
+
+  public getMaxNote(): number {
+    return this.NOTE_TABLE[0] === 0 ? last(this.NOTE_TABLE) ?? 0 : this.NOTE_TABLE[0];
   }
 
   public getInput() {

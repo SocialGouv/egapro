@@ -2,20 +2,17 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { percentFormat } from "@common/utils/number";
-import { type Any } from "@common/utils/types";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { useFormContext } from "react-hook-form";
 
 interface Props {
-  computer: IndicateurUnComputer<Any>;
+  computer: IndicateurUnComputer;
+  isValid: boolean;
+  noBorder?: boolean;
+  simple?: boolean;
 }
 
-export const Indicateur1Note = ({ computer }: Props) => {
-  const {
-    formState: { isValid },
-  } = useFormContext();
-
+export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) => {
   let computed: ComputedResult | null = null;
   let isNC = false;
   let advantageText = "";
@@ -39,6 +36,7 @@ export const Indicateur1Note = ({ computer }: Props) => {
     <ClientAnimate>
       {isNC ? (
         <IndicatorNote
+          noBorder={noBorder}
           note="NC"
           size="small"
           text="L'indicateur écart de rémunération est non calculable"
@@ -46,14 +44,18 @@ export const Indicateur1Note = ({ computer }: Props) => {
         />
       ) : (
         <>
+          {!simple && (
+            <IndicatorNote
+              noBorder={noBorder}
+              className={fr.cx("fr-mb-2w")}
+              size="small"
+              note={percentFormat.format((computed?.result ?? 0) / 100)}
+              text="Résultat final de l'indicateur écart de rémunération"
+              legend="Arrondi à la première décimale"
+            />
+          )}
           <IndicatorNote
-            className={fr.cx("fr-mb-2w")}
-            size="small"
-            note={percentFormat.format((computed?.result ?? 0) / 100)}
-            text="Résultat final de l'indicateur écart de rémunération"
-            legend="Arrondi à la première décimale"
-          />
-          <IndicatorNote
+            noBorder={noBorder}
             note={isValid && computed ? computed.note : "-"}
             max={40}
             text="Nombre de points obtenus à l'indicateur écart de rémunération"

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { type TableProps } from "@codegouvfr/react-dsfr/Table";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
@@ -76,12 +77,12 @@ export const AlternativeTableCell = ({
   );
 };
 
-export interface AlternativeTableProps {
+export type AlternativeTableProps = Pick<TableProps, "bordered"> & {
   body: AlternativeTableProps.BodyContent[];
   classeName?: CxArg;
   footer?: AlternativeTableProps.ColumnsFooter[];
   header: AlternativeTableProps.Columns[];
-}
+};
 
 export namespace AlternativeTableProps {
   export interface Columns {
@@ -107,11 +108,16 @@ export namespace AlternativeTableProps {
   }
 
   interface BodyContentWithCols {
+    /**
+     * @default "right"
+     */
+    alignCols?: "center" | "left" | "right";
     cols?: [ColType, ...ColType[]];
     subRows?: never;
   }
 
   interface BodyContentWithSubRows {
+    alignCols?: never;
     cols?: never;
     subRows?: [SubRow, ...SubRow[]];
   }
@@ -131,6 +137,10 @@ export namespace AlternativeTableProps {
     Required<Pick<InputProps, "nativeInputProps">>;
   export type ColType = CellInputProps | number | string;
   export interface SubRow {
+    /**
+     * @default "right"
+     */
+    alignCols?: "center" | "left" | "right";
     cols?: [ColType, ...ColType[]];
     label: ReactNode;
     mergedLabel?: ReactNode;
@@ -175,7 +185,7 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
 }
 
 export const AlternativeTable = (props: AlternativeTableProps) => {
-  const { header, footer, body, classeName } = props;
+  const { header, footer, body, classeName, bordered } = props;
 
   const validated = validateProps(props);
   const maxCols = validated.maxCols;
@@ -185,7 +195,15 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
   }
 
   return (
-    <div className={cx(fr.cx("fr-table"), styles.table, classeName)}>
+    <div
+      className={cx(
+        fr.cx("fr-table", {
+          "fr-table--bordered": bordered,
+        }),
+        styles.table,
+        classeName,
+      )}
+    >
       <table>
         <thead>
           <tr>
@@ -243,7 +261,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       {subItem.label}
                     </AlternativeTableCell>
                     {subItem.cols?.map((col, k) => (
-                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align="right">
+                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
                           <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                         ) : (
@@ -262,7 +280,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                 <tr>
                   <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
                   {row.cols.map((col, k) => (
-                    <AlternativeTableCell key={`${row.key || index}-${k}`} align="right">
+                    <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                       {isDsfrInputProps(col) ? (
                         <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                       ) : (

@@ -22,13 +22,14 @@ type InferGroup<T> = Required<T> extends Record<string, infer G extends DefaultG
 export abstract class AbstractGroupComputer<
   Input extends Partial<Record<string, DefaultGroup>>,
   AdditionalMetadata extends object = object,
+  AdditionalOutput extends object = object,
   Group extends DefaultGroup = InferGroup<Input>,
   GroupKey extends string = InferGroupKey<Input>,
   ExtendedTotalMetadata extends TotalMetadata<GroupKey, AdditionalMetadata> = TotalMetadata<
     GroupKey,
     AdditionalMetadata
   >,
-> extends AbstractComputer<Input> {
+> extends AbstractComputer<Input, AdditionalOutput> {
   protected totalMetadata?: ExtendedTotalMetadata;
   protected groupWeightedGaps: Map<GroupKey, Group> = new Map();
   public abstract GROUP_COUNT_THRESHOLD: number;
@@ -111,7 +112,7 @@ export abstract class AbstractGroupComputer<
    *
    * @returns Le résultat, avec la note et l'avantage de genre.
    */
-  public compute(): ComputedResult {
+  public compute(): ComputedResult<AdditionalOutput> {
     if (this.computed) {
       return this.computed;
     }
@@ -135,7 +136,7 @@ export abstract class AbstractGroupComputer<
 
   protected abstract calculateWeightedGap(key: GroupKey): number;
 
-  protected getResult(weightedGap: number): ComputedResult {
+  protected getResult(weightedGap: number): ComputedResult<AdditionalOutput> {
     const sign = Math.sign(weightedGap);
     const result = Math.round(Math.abs(weightedGap) * 10) / 10;
 
@@ -144,6 +145,6 @@ export abstract class AbstractGroupComputer<
       note: this.computeNote(result),
       result,
       resultRaw: weightedGap,
-    };
+    } as ComputedResult<AdditionalOutput>;
   }
 }

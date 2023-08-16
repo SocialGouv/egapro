@@ -1,18 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
-import { type AbstractGroupComputer } from "@common/core-domain/computers/AbstractGroupComputer";
-import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
+import { type IndicateurDeuxComputer } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { percentFormat } from "@common/utils/number";
-import { type Any } from "@common/utils/types";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { useFormContext } from "react-hook-form";
 
 interface Props {
-  computer: AbstractGroupComputer<Any>;
+  computer: IndicateurDeuxComputer;
   indicateur: 2 | 3;
-  resultIndicateurUn: ComputedResult;
+  isValid: boolean;
+  noBorder?: boolean;
+  simple?: boolean;
 }
 
 const augmentations = {
@@ -33,18 +30,12 @@ const promotions = {
   missingDataLegend: "Veuillez remplir le reste des taux de promotions pour avoir votre note",
 };
 
-const NOTE_MAX_INDICATEUR1 = new IndicateurUnComputer(RemunerationsMode.Enum.CSP).NOTE_TABLE[0];
-
-export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }: Props) => {
-  const {
-    formState: { isValid },
-  } = useFormContext();
-
-  const NOTE_MAX = computer.NOTE_TABLE[0];
+export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBorder }: Props) => {
+  const NOTE_MAX = computer.getMaxNote();
 
   const texts = indicateur === 2 ? augmentations : promotions;
 
-  let computed: ComputedResult | null = null;
+  let computed: IndicateurDeuxComputer.ComputedResult | null = null;
   let isNC = false;
   let advantageText = "";
   try {
@@ -63,16 +54,11 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
     // noop
   }
 
-  const remunerationsCompensated =
-    computed &&
-    resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 &&
-    computed.note < NOTE_MAX &&
-    resultIndicateurUn.genderAdvantage !== computed.genderAdvantage;
-
   return (
     <ClientAnimate>
       {isNC ? (
         <IndicatorNote
+          noBorder={noBorder}
           note="NC"
           size="small"
           text={texts.ncText}
@@ -80,15 +66,19 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
         />
       ) : (
         <>
-          <IndicatorNote
-            className={fr.cx("fr-mb-2w")}
-            size="small"
-            note={percentFormat.format((computed?.result ?? 0) / 100)}
-            text={texts.resultText}
-            legend="Arrondi à la première décimale"
-          />
-          {remunerationsCompensated ? (
+          {!simple && (
             <IndicatorNote
+              noBorder={noBorder}
+              className={fr.cx("fr-mb-2w")}
+              size="small"
+              note={percentFormat.format((computed?.result ?? 0) / 100)}
+              text={texts.resultText}
+              legend="Arrondi à la première décimale"
+            />
+          )}
+          {computed?.remunerationsCompensated ? (
+            <IndicatorNote
+              noBorder={noBorder}
               note={NOTE_MAX}
               max={NOTE_MAX}
               text={texts.balanceText}
@@ -104,6 +94,7 @@ export const Indicateur2ou3Note = ({ computer, resultIndicateurUn, indicateur }:
             />
           ) : (
             <IndicatorNote
+              noBorder={noBorder}
               note={isValid && computed ? computed.note : "-"}
               max={NOTE_MAX}
               text={texts.noteText}
