@@ -8,6 +8,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import {
   type CreateSimulationDTO,
@@ -30,14 +31,15 @@ import { z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
-import { getResultIndicateurUn, getTotalsCsp } from "../utils";
+import { getTotalsCsp, prepareIndicateurUnComputer } from "../utils";
 import style from "./Form.module.scss";
 import { Indicateur2et3Note } from "./Indicateur2et3Note";
 
 type Indic2and3FormType = ClearObject<z.infer<typeof createSteps.indicateur2and3>>;
 type Indic2and3FormWhenCalculated = Extract<Indic2and3FormType, { calculable: true }>;
 
-const indicateur2and3Computer = new IndicateurDeuxTroisComputer();
+const indicateur1Computer = new IndicateurUnComputer();
+const indicateur2and3Computer = new IndicateurDeuxTroisComputer(indicateur1Computer);
 const indicateur2and3Nav = NAVIGATION.indicateur2et3;
 
 const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadvantage"], string> = {
@@ -129,7 +131,7 @@ export const Indic2and3Form = () => {
 
   const computableCheck = watch("calculable");
   const [totalCspWomen, totalCspMen] = getTotalsCsp(funnel as CreateSimulationDTO);
-  const resultIndicateurUn = getResultIndicateurUn(funnel as CreateSimulationDTO);
+  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const raisedCount = watch("raisedCount");
 
@@ -306,7 +308,7 @@ export const Indic2and3Form = () => {
                       </Grid>
                     </Container>
 
-                    <Indicateur2et3Note computer={indicateur2and3Computer} resultIndicateurUn={resultIndicateurUn} />
+                    <Indicateur2et3Note computer={indicateur2and3Computer} isValid={isValid} />
                   </>
                 ) : (
                   computableCheck === false && (
@@ -314,7 +316,7 @@ export const Indic2and3Form = () => {
                       className="fr-mb-3w"
                       severity="info"
                       title="L'indicateur n'est pas calculable"
-                      description={`Il n'y a pas eu d'augmentations durant la période de référence.`}
+                      description="Il n'y a pas eu d'augmentations durant la période de référence."
                     />
                   )
                 )}
