@@ -5,7 +5,8 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
-import { ageRanges, categories } from "@common/core-domain/computers/utils";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import {
@@ -14,7 +15,6 @@ import {
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { precisePercentFormat } from "@common/utils/number";
-import { Object } from "@common/utils/overload";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
@@ -29,41 +29,19 @@ import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
-import { getResultIndicateurUn } from "../utils";
+import { getPourcentagesAugmentationPromotionsWithCount, prepareIndicateurUnComputer } from "../utils";
 import { Indicateur2ou3Note } from "./Indicateur2ou3Note";
 
 type Indic2or3FormType = z.infer<typeof createSteps.indicateur2>;
 type Indic2or3FormTypeWhenCalculable = Extract<Indic2or3FormType, { calculable: true }>;
 
-const indicateur2Computer = new IndicateurDeuxComputer();
-const indicateur3Computer = new IndicateurTroisComputer();
+const indicateur1Computer = new IndicateurUnComputer();
+const indicateur2Computer = new IndicateurDeuxComputer(indicateur1Computer);
+const indicateur3Computer = new IndicateurTroisComputer(indicateur1Computer);
 
 interface Indic2or3FormProps {
   indicateur: 2 | 3;
 }
-
-const getPourcentagesWithCount = (
-  funnelCsp: CreateSimulationDTO["effectifs"]["csp"],
-  pourcentages: Percentages | undefined,
-) =>
-  Object.keys(funnelCsp).reduce(
-    (newPourcentages, category) => ({
-      ...newPourcentages,
-      [category]: {
-        menCount: ageRanges.reduce(
-          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].men ?? 0),
-          0,
-        ),
-        womenCount: ageRanges.reduce(
-          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].women ?? 0),
-          0,
-        ),
-        men: pourcentages?.[category]?.men ?? 0,
-        women: pourcentages?.[category]?.women ?? 0,
-      } as Percentages[CSP.Enum],
-    }),
-    {} as Percentages,
-  );
 
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
@@ -111,13 +89,16 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     redirect(simulateurPath("indicateur2et3"));
   }
 
-  const resultIndicateurUn = getResultIndicateurUn(funnel as CreateSimulationDTO);
+  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const computableCheck = watch("calculable");
   const pourcentages = watch("pourcentages");
 
   // add count from "funnel.effectifs.csp" to pourcentages, to make pourcentagesWithCount
-  const pourcentagesWithCount = getPourcentagesWithCount(funnel.effectifs.csp, pourcentages as Percentages);
+  const pourcentagesWithCount = getPourcentagesAugmentationPromotionsWithCount(
+    funnel.effectifs.csp,
+    pourcentages as Percentages,
+  );
 
   computer.setInput(pourcentagesWithCount);
 
@@ -314,11 +295,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   />
 
                   <Box mb="4w">
-                    <Indicateur2ou3Note
-                      computer={computer}
-                      resultIndicateurUn={resultIndicateurUn}
-                      indicateur={indicateur}
-                    />
+                    <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
                 </>
               ) : (

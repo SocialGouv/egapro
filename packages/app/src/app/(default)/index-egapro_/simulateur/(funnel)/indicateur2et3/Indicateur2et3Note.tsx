@@ -1,26 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { type IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
-import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { useFormContext } from "react-hook-form";
 
 interface Props {
   computer: IndicateurDeuxTroisComputer;
-  resultIndicateurUn: ComputedResult;
+  isValid: boolean;
+  noBorder?: boolean;
+  simple?: boolean;
 }
 
-const NOTE_MAX_INDICATEUR1 = new IndicateurUnComputer(RemunerationsMode.Enum.CSP).NOTE_TABLE[0];
-
-export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
-  const {
-    formState: { isValid },
-  } = useFormContext();
-
-  const NOTE_MAX = computer.NOTE_TABLE[0];
+export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Props) => {
+  const NOTE_MAX = computer.getMaxNote();
 
   let computed: IndicateurDeuxTroisComputer.ComputedResult | null = null;
   let isNC = false;
@@ -41,14 +33,7 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
     // noop
   }
 
-  const remunerationsCompensated =
-    computed &&
-    isValid &&
-    resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 &&
-    resultIndicateurUn.genderAdvantage !== computed.genderAdvantage;
-
   const bestNote = isValid && computed ? Math.max(computed.note, computed.noteEquivalentEmployeeCountGap) : "-";
-
   const raisedCount = computer.getInput();
 
   return (
@@ -63,6 +48,7 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
       )}
       {isNC ? (
         <IndicatorNote
+          noBorder={noBorder}
           note="NC"
           size="small"
           text="L'indicateur écart de taux d'augmentations est non calculable"
@@ -70,26 +56,33 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
         />
       ) : (
         <>
-          <IndicatorNote
-            className={fr.cx("fr-mb-2w")}
-            size="small"
-            classes={{
-              note: fr.cx("fr-ml-n2w"),
-            }}
-            note={isValid ? computed?.note ?? 0 : "-"}
-            text="Nombre de points obtenus sur le résultat en points de pourcentage"
-          />
-          <IndicatorNote
-            className={fr.cx("fr-mb-2w")}
-            size="small"
-            classes={{
-              note: fr.cx("fr-ml-n2w"),
-            }}
-            note={isValid ? computed?.noteEquivalentEmployeeCountGap ?? 0 : "-"}
-            text="Nombre de points obtenus sur le résultat en nombre de salariés"
-          />
-          {remunerationsCompensated ? (
+          {!simple && (
+            <>
+              <IndicatorNote
+                noBorder={noBorder}
+                className={fr.cx("fr-mb-2w")}
+                size="small"
+                classes={{
+                  note: fr.cx("fr-ml-n2w"),
+                }}
+                note={isValid ? computed?.note ?? 0 : "-"}
+                text="Nombre de points obtenus sur le résultat en points de pourcentage"
+              />
+              <IndicatorNote
+                noBorder={noBorder}
+                className={fr.cx("fr-mb-2w")}
+                size="small"
+                classes={{
+                  note: fr.cx("fr-ml-n2w"),
+                }}
+                note={isValid ? computed?.noteEquivalentEmployeeCountGap ?? 0 : "-"}
+                text="Nombre de points obtenus sur le résultat en nombre de salariés"
+              />
+            </>
+          )}
+          {computed?.remunerationsCompensated ? (
             <IndicatorNote
+              noBorder={noBorder}
               note={NOTE_MAX}
               max={NOTE_MAX}
               text="L'écart d'augmentations réduit l'écart de rémunération. Tous les points sont accordés"
@@ -105,13 +98,16 @@ export const Indicateur2et3Note = ({ computer, resultIndicateurUn }: Props) => {
             />
           ) : (
             <>
-              <Alert
-                className={fr.cx("fr-mb-4w", "fr-mt-4w")}
-                small
-                severity="info"
-                description="Le nombre de points retenu pour l'indicateur est le plus élevé."
-              />
+              {!simple && (
+                <Alert
+                  className={fr.cx("fr-mb-4w", "fr-mt-4w")}
+                  small
+                  severity="info"
+                  description="Le nombre de points retenu pour l'indicateur est le plus élevé."
+                />
+              )}
               <IndicatorNote
+                noBorder={noBorder}
                 note={bestNote}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"

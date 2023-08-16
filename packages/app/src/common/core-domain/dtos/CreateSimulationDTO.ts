@@ -217,3 +217,8 @@ export type CreateSimulationWorkforceRangeMoreThan250DTO = ClearObject<
 export type CreateSimulationDTO =
   | CreateSimulationWorkforceRangeLessThan250DTO
   | CreateSimulationWorkforceRangeMoreThan250DTO;
+
+export const isCreateSimulationWorkforceRangeLessThan250DTO = (
+  funnel: CreateSimulationDTO,
+): funnel is CreateSimulationWorkforceRangeLessThan250DTO =>
+  funnel.effectifs.workforceRange === CompanyWorkforceRange.Enum.FROM_50_TO_250 && "indicateur2and3" in funnel;

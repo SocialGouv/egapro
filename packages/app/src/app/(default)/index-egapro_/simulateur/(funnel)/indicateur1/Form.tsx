@@ -24,7 +24,8 @@ import { CSPModeTable } from "./CSPModeTable";
 import { OtherModesTable } from "./OtherModesTable";
 import { getIsEnoughEmployees } from "./tableUtil";
 
-const schemaOtherComputer = new IndicateurUnComputer(RemunerationsMode.Enum.OTHER_LEVEL);
+const schemaOtherComputer = new IndicateurUnComputer();
+schemaOtherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
 const formSchema = createSteps.indicateur1
   .and(createSteps.effectifs)
   .superRefine(({ mode, remunerations, csp }, ctx) => {
@@ -49,8 +50,10 @@ const formSchema = createSteps.indicateur1
 type Indic1FormType = z.infer<typeof formSchema>;
 const indicateur1Navigation = NAVIGATION.indicateur1;
 
-const cspComputer = new IndicateurUnComputer(RemunerationsMode.Enum.CSP);
-const otherComputer = new IndicateurUnComputer(RemunerationsMode.Enum.OTHER_LEVEL);
+const cspComputer = new IndicateurUnComputer();
+cspComputer.setMode(RemunerationsMode.Enum.CSP);
+const otherComputer = new IndicateurUnComputer();
+otherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
 
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic1Form = () => {
