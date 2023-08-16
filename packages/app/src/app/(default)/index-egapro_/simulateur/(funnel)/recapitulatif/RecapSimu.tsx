@@ -42,7 +42,7 @@ import { Indicateur2et3Note } from "../indicateur2et3/Indicateur2et3Note";
 import { Indicateur4Note } from "../indicateur4/Indicateur4Note";
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
-import { getPourcentagesAugmentationPromotionsWithCount, getRemuWithCount, getTotalsCsp } from "../utils";
+import { getCspRemuWithCount, getPourcentagesAugmentationPromotionsWithCount, getTotalsCsp } from "../utils";
 import style from "./Recap.module.scss";
 
 function assertSimu(simulation: Partial<CreateSimulationDTO> | undefined): asserts simulation is CreateSimulationDTO {
@@ -93,10 +93,10 @@ export const RecapSimu = () => {
   // prepare inputs
   const [totalWomen, totalMen] = getTotalsCsp(funnel);
   const isLessThan250 = isCreateSimulationWorkforceRangeLessThan250DTO(funnel);
-  const remuWithCount = getRemuWithCount(
-    funnel.effectifs.csp,
-    funnel.indicateur1.remunerations as ExternalRemunerations,
-  );
+  const remuWithCount =
+    funnel.indicateur1.mode === RemunerationsMode.Enum.CSP
+      ? getCspRemuWithCount(funnel.effectifs.csp, funnel.indicateur1.remunerations as ExternalRemunerations)
+      : (funnel.indicateur1.remunerations as ExternalRemunerations);
 
   // set inputs
   computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
@@ -237,9 +237,7 @@ export const RecapSimu = () => {
                   footer={[
                     {
                       label: (
-                        <strong>
-                          L'écart global est de {precisePercentFormat.format(resultIndicateurUn.resultRaw / 100)}
-                        </strong>
+                        <strong>L'écart global est de {percentFormat.format(resultIndicateurUn.result / 100)}</strong>
                       ),
                       colspan: ageRanges.length + 1,
                     },
@@ -293,7 +291,7 @@ export const RecapSimu = () => {
               <>
                 <p>
                   L'écart en points de pourcentage est de{" "}
-                  <strong>{percentFormat.format(resultIndicateurDeuxTrois.resultRaw)}</strong>
+                  <strong>{percentFormat.format(resultIndicateurDeuxTrois.result / 100)}</strong>
                   <br />
                   L'écart en nombre équivalent de salariés est de{" "}
                   <strong>{resultIndicateurDeuxTrois?.equivalentEmployeeCountGap}</strong>
@@ -390,11 +388,7 @@ export const RecapSimu = () => {
                         }))}
                         footer={[
                           {
-                            label: (
-                              <strong>
-                                L'écart global est de {precisePercentFormat.format(result.resultRaw / 100)}
-                              </strong>
-                            ),
+                            label: <strong>L'écart global est de {percentFormat.format(result.result / 100)}</strong>,
                             colspan: 4,
                           },
                         ]}
@@ -441,7 +435,7 @@ export const RecapSimu = () => {
                   <strong>{count.total}</strong> retours de congé maternité.
                   <br />
                   Le % de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé
-                  maternité est de <strong>{percentFormat.format(resultIndicateurQuatre.resultRaw)}</strong>.
+                  maternité est de <strong>{percentFormat.format(resultIndicateurQuatre.result)}</strong>.
                 </p>
               )}
               <Indicateur4Note noBorder computer={computerIndicateurQuatre} count={count} isValid />
@@ -511,7 +505,7 @@ export const RecapSimu = () => {
                   display={{
                     asTitle: "xs",
                   }}
-                  helpText={`Vos indicateurs calculables représentent moins de 75 points (${resultIndex.note}/100), votre Index ne peut être calculé.`}
+                  helpText={`Nombre de points maximum pouvant être obtenus est inferieur à 75, votre index ne peut être calculé.`}
                   helpTextVariant={["light", "alt"]}
                 />
               )}

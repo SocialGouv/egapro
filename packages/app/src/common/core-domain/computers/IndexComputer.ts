@@ -37,7 +37,6 @@ export class IndexComputer<TWorkforceRange extends CompanyWorkforceRange.Enum> e
 
   public compute(): ComputedResult {
     const totalNote = this.indicateurs.reduce((acc, computer) => {
-      console.log("compute", computer, "canCompute", computer?.canCompute(), computer?.compute().note);
       if (computer?.canCompute()) {
         return acc + computer.compute().note;
       }

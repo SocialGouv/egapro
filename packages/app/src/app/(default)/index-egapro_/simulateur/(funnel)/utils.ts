@@ -7,6 +7,7 @@ import {
   flattenRemunerations,
 } from "@common/core-domain/computers/utils";
 import { type CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CreateSimulationDTO } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 
@@ -14,16 +15,16 @@ export const prepareIndicateurUnComputer = (
   computerIndicateurUn: IndicateurUnComputer,
   funnel: CreateSimulationDTO,
 ) => {
-  const remuWithCount = getRemuWithCount(
-    funnel.effectifs.csp,
-    funnel.indicateur1.remunerations as ExternalRemunerations,
-  );
+  const remuWithCount =
+    funnel.indicateur1.mode === RemunerationsMode.Enum.CSP
+      ? getCspRemuWithCount(funnel.effectifs.csp, funnel.indicateur1.remunerations as ExternalRemunerations)
+      : (funnel.indicateur1.remunerations as ExternalRemunerations);
   computerIndicateurUn.setMode(funnel.indicateur1.mode);
   computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
   computerIndicateurUn.compute();
 };
 
-export const getRemuWithCount = (
+export const getCspRemuWithCount = (
   funnelCsp: CreateSimulationDTO["effectifs"]["csp"],
   remunerations: ExternalRemunerations | undefined,
 ) =>

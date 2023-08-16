@@ -17,7 +17,7 @@ import { useFormContext } from "react-hook-form";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
-import { getRemuWithCount } from "../utils";
+import { getCspRemuWithCount } from "../utils";
 import { Indicateur1Note } from "./Indicateur1Note";
 import { getCommonBodyColumns, getCommonFooter, getCommonHeader } from "./tableUtil";
 
@@ -44,7 +44,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
     return null;
   }
 
-  const countOnly = getRemuWithCount(funnel.effectifs.csp, []);
+  const countOnly = getCspRemuWithCount(funnel.effectifs.csp, []);
   computer.setInput(flattenRemunerations(countOnly));
   const canCompute = computer.canCompute();
   if (!canCompute) {
@@ -61,7 +61,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
   }
 
   const remunerations = watch("remunerations") as ExternalRemunerations;
-  computer.setInput(flattenRemunerations(getRemuWithCount(funnel.effectifs.csp, remunerations)));
+  computer.setInput(flattenRemunerations(getCspRemuWithCount(funnel.effectifs.csp, remunerations)));
 
   computer.compute();
 
