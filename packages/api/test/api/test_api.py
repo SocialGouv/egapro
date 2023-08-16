@@ -24,7 +24,7 @@ async def test_request_token(client, monkeypatch):
         "/token",
         body={
             "email": "foo@bar.org",
-            "target": "simulation",
+            "redirectTo": "/index-egapro/tableauDeBord/me-connecter",
         },
     )
     assert resp.status == 204

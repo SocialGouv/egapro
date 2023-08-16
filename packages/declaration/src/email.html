@@ -23,9 +23,8 @@ title: "Validation de l'email"
     document.getElementById('page-form').addEventListener('submit', async (event) => {
         event.preventDefault()
         const email = event.target.email.value
-        const href = window.location.href
-        const url = href.replace("email.html", "?token=")
-        const response = await request('post', '/token', { email, target: "declaration" })
+        const redirectTo = window.location.pathname.replace("email.html", "")
+        const response = await request('post', '/token', { email, redirectTo })
         if (response.ok) {
             localStorage.egapro_decla_email = email
             redirect('{{ site.baseurl }}/validation-email.html')

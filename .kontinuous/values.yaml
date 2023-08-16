@@ -111,7 +111,7 @@ api:
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
-    EGAPRO_APPLICATION_URL: "https://{{ .Values.global.host }}"
+    EGAPRO_DOMAIN: "https://{{ .Values.global.host }}"
   # addVolumes:
   #   - files
 
