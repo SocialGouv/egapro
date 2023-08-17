@@ -1,3 +1,11 @@
+## [2.91.2](https://github.com/SocialGouv/egapro/compare/v2.91.1...v2.91.2) (2023-08-17)
+
+
+### Bug Fixes
+
+* change nc with 0 when relatable in consultation (Fixes [#1709](https://github.com/SocialGouv/egapro/issues/1709)) ([741140d](https://github.com/SocialGouv/egapro/commit/741140d03add979d529430adc6da44f46221af1c))
+* force url redirection ([#1711](https://github.com/SocialGouv/egapro/issues/1711)) ([92a3df6](https://github.com/SocialGouv/egapro/commit/92a3df6dd074b57737d6b13875e77506948aab9c))
+
 ## [2.91.1](https://github.com/SocialGouv/egapro/compare/v2.91.0...v2.91.1) (2023-08-07)
 
 
