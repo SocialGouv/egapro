@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { type ReactNode } from "react";
 
 import { Box } from "./Box";
 import { type HeadingProps, Text, type TextProps } from "./Typography";
@@ -9,7 +10,7 @@ export interface StatProps {
   helpText?: string;
   helpTextVariant?: TextProps<false>["variant"];
   label?: string;
-  text: string;
+  text: ReactNode;
 }
 
 export const Stat = ({ text, display = { asTitle: "lg" }, helpText, label, align = "center" }: StatProps) => {

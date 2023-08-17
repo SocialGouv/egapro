@@ -6,21 +6,24 @@ import styles from "./IndicatorNote.module.css";
 
 type BaseIndicatorNoteProps = {
   className?: string;
-  classes?: Partial<Record<"description" | "legend" | "max" | "note" | "root" | "text", string>>;
+  classes?: Partial<Record<"content" | "description" | "legend" | "max" | "note" | "root" | "text", string>>;
+  legend?: NonNullable<ReactNode>;
   noBorder?: boolean;
   note: number | string;
+  /**
+   * @default "large"
+   */
+  size?: "large" | "small";
   text: NonNullable<ReactNode>;
 };
 
 type LargeIndicatorNoteProps = BaseIndicatorNoteProps & {
-  legend: NonNullable<ReactNode>;
-  max: number;
+  max?: number;
   size?: "large";
 };
 
 type SmallIndicatorNoteProps = BaseIndicatorNoteProps & {
-  legend?: NonNullable<ReactNode>;
-  max?: number;
+  max?: never;
   size?: "small";
 };
 
@@ -46,9 +49,11 @@ export const IndicatorNote = ({
   >
     <div className={styles["tile-note"]}>
       <span className={cx(size === "small" ? styles["note-small"] : styles["note"], classes.note)}>{note}</span>
-      {size === "large" && <span className={cx(styles.max, classes.max)}>&nbsp;/&nbsp;{max}</span>}
+      {size === "large" && typeof max === "number" && (
+        <span className={cx(styles.max, classes.max)}>&nbsp;/&nbsp;{max}</span>
+      )}
     </div>
-    <div className={styles["tile-content"]}>
+    <div className={cx(styles["tile-content"], classes.content)}>
       <p className={cx(fr.cx("fr-m-0"), styles.text, classes.text)}>{text}</p>
       {legend && (
         <p className={cx(fr.cx("fr-m-0", "fr-text--sm"), classes.legend)}>

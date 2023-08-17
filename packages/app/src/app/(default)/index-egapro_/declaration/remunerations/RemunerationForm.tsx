@@ -23,24 +23,29 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr
-  .object({
-    estCalculable: zodRadioInputSchema,
-    mode: z.string().optional(), // No check is necessary as the value is from select options.
-    cse: zodRadioInputSchema.nullish(),
-    dateConsultationCSE: zodDateSchema.optional(),
-    déclarationCalculCSP: z.boolean().optional(),
-    motifNonCalculabilité: z.string().optional(),
-  })
-  .superRefine(({ cse, estCalculable, déclarationCalculCSP, mode, motifNonCalculabilité }, ctx) => {
-    switch (estCalculable) {
+  .discriminatedUnion("estCalculable", [
+    zodFr.object({
+      estCalculable: z.literal("non"),
+      motifNonCalculabilité: z.string(),
+      déclarationCalculCSP: z.boolean(),
+    }),
+    zodFr.object({
+      estCalculable: z.literal("oui"),
+      mode: z.string(), // No check is necessary as the value is from select options.
+      cse: zodRadioInputSchema.nullish(),
+      dateConsultationCSE: zodDateSchema.optional(),
+    }),
+  ])
+  .superRefine((value, ctx) => {
+    switch (value.estCalculable) {
       case "non": {
-        if (!déclarationCalculCSP) {
+        if (!value.déclarationCalculCSP) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "La confirmation du calcul par CSP est obligatoire",
             path: ["déclarationCalculCSP"],
           });
-        } else if (déclarationCalculCSP === true && !motifNonCalculabilité) {
+        } else if (value.déclarationCalculCSP === true && !value.motifNonCalculabilité) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Le motif de non calculabilité est obligatoire",
@@ -50,17 +55,24 @@ const formSchema = zodFr
         break;
       }
       case "oui": {
-        if (!mode) {
+        if (!value.mode) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Le mode de calcul est obligatoire",
             path: ["mode"],
           });
-        } else if (mode !== "csp" && !cse) {
+        } else if (value.mode !== "csp" && !value.cse) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Obligatoire",
             path: ["cse"],
+          });
+        }
+        if (value.cse === "oui" && !value.dateConsultationCSE) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Obligatoire",
+            path: ["dateConsultationCSE"],
           });
         }
         break;
@@ -106,6 +118,24 @@ export const RemunerationForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
+      // We clean if user has switched between modes.
+      if (data.estCalculable === "oui") {
+        const selectedMode =
+          data.mode === "csp"
+            ? "remunerations-csp"
+            : mode === "niveau_branche"
+            ? "remunerations-coefficient-branche"
+            : "remunerations-coefficient-autre";
+
+        const formStateStepToRemove = (
+          ["remunerations-coefficient-autre", "remunerations-coefficient-branche", "remunerations-csp"] as const
+        ).filter(mode => mode !== selectedMode);
+
+        formStateStepToRemove.forEach(mode => {
+          draft[mode] = undefined;
+        });
+      }
+
       draft[stepName] = data as DeclarationFormState[typeof stepName];
     });
 
@@ -135,7 +165,11 @@ export const RemunerationForm = () => {
                       },
                     },
                   ]}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
                   state={errors.déclarationCalculCSP ? "error" : "default"}
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
                   stateRelatedMessage={errors.déclarationCalculCSP?.message}
                 />
 
@@ -205,7 +239,11 @@ export const RemunerationForm = () => {
                           ...register("dateConsultationCSE"),
                         }}
                         iconId="ri-calendar-line"
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         state={errors.dateConsultationCSE ? "error" : "default"}
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         stateRelatedMessage={errors.dateConsultationCSE?.message}
                       />
                     )}

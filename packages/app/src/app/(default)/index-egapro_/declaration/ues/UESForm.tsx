@@ -7,12 +7,12 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { zodSirenSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { AlertMessage } from "@design-system/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { AlertMessage } from "packages/app/src/design-system/base/client/AlertMessage";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -124,10 +124,10 @@ export const UESForm = () => {
               <tbody>
                 <tr>
                   <td style={{ paddingTop: 30, paddingBottom: 30 }}>
-                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.siren}</span>
+                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.siren}</span>
                   </td>
                   <td>
-                    <span style={{ fontSize: "1rem" }}>{formData.commencer?.entrepriseDéclarante?.raisonSociale}</span>
+                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.raisonSociale}</span>
                   </td>
                   <td>
                     <Badge noIcon severity="info">
@@ -158,7 +158,7 @@ export const UESForm = () => {
                             const allOtherSirens = [
                               ...allSirens.slice(0, index),
                               ...allSirens.slice(index + 1),
-                              formData.commencer?.entrepriseDéclarante?.siren,
+                              formData.commencer?.siren,
                             ];
 
                             if (allOtherSirens.includes(watchedEntreprises[index].siren)) {

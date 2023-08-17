@@ -6,7 +6,7 @@ import {
   computeIndicator2And3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull, zodRadioInputSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -29,23 +29,30 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr
-  .object({
-    estCalculable: zodRadioInputSchema,
-    motifNonCalculabilité: z.string().optional(),
-    populationFavorable: z.string().optional(),
-    résultat: zodNumberOrNaNOrNull.optional(),
-    résultatEquivalentSalarié: zodNumberOrNaNOrNull.optional(),
-    note: z.number().optional(),
-    notePourcentage: z.number().optional(),
-    noteNombreSalaries: z.number().optional(),
-  })
-  .superRefine(({ estCalculable, résultat, résultatEquivalentSalarié, populationFavorable }, ctx) => {
-    if (estCalculable === "oui" && (résultat !== 0 || résultatEquivalentSalarié !== 0) && !populationFavorable) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
-        path: ["populationFavorable"],
-      });
+  .discriminatedUnion("estCalculable", [
+    zodFr.object({
+      estCalculable: z.literal("non"),
+      motifNonCalculabilité: z.string(),
+    }),
+    zodFr.object({
+      estCalculable: z.literal("oui"),
+      populationFavorable: z.string().optional(),
+      résultat: zodNumberOrNaNOrNull.optional(),
+      résultatEquivalentSalarié: zodNumberOrNaNOrNull.optional(),
+      note: z.number().optional(),
+      notePourcentage: z.number().optional(),
+      noteNombreSalaries: z.number().optional(),
+    }),
+  ])
+  .superRefine((value, ctx) => {
+    if (value.estCalculable === "oui") {
+      if ((value.résultat !== 0 || value.résultatEquivalentSalarié !== 0) && !value.populationFavorable) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "La population envers laquelle l'écart est favorable est obligatoire",
+          path: ["populationFavorable"],
+        });
+      }
     }
   });
 
@@ -65,7 +72,7 @@ export const AugmentationEtPromotionsForm = () => {
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
       // console.debug("formData", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
+      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
       return zodResolver(formSchema)(data, context, options);
     },
     mode: "onChange",

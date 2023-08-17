@@ -1,8 +1,8 @@
-import { ageRanges, categories, type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain/computers/utils";
 import { type CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { currencyFormat, precisePercentFormat } from "@common/utils/number";
-import { type Any } from "@common/utils/types";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
 import { type AlternativeTableProps } from "@design-system";
 import { type FieldErrors, type UseFormRegister } from "react-hook-form";
@@ -37,7 +37,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
   },
   {
     label: "Rémunération annuelle brute moyenne en équivalent temps plein",
-    informations: <AideSimulationIndicateurUn.Definition />,
+    informations: <AideSimulationIndicateurUn.Définition />,
     subCols: [
       {
         label: "Femmes",
@@ -60,7 +60,7 @@ interface CommonBodyColumnsProps {
   categoryId: string;
   categoryIndex: number;
   categoryName: string;
-  computer: IndicateurUnComputer<Any, Any>;
+  computer: IndicateurUnComputer;
   errors: FieldErrors<Indic1FormType>;
   firstCols: AlternativeTableProps.ColType[];
   menCount: number;
@@ -131,7 +131,7 @@ export const getCommonBodyColumns = ({
         },
       },
       (() => {
-        const { resultRaw: groupResult } = computer.computeGroup(categoryId, ageRange);
+        const { resultRaw: groupResult } = computer.computeGroup(buildRemunerationKey(categoryId, ageRange));
         return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
           ? precisePercentFormat.format(groupResult / 100)
           : "-";
@@ -141,7 +141,7 @@ export const getCommonBodyColumns = ({
 };
 
 interface IsEnoughEmployeesProps {
-  computer: IndicateurUnComputer<Any, Any>;
+  computer: IndicateurUnComputer;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
 interface IsEnoughEmployeesReturn {
@@ -174,7 +174,7 @@ export const getIsEnoughEmployees = ({
 };
 
 interface CommonFooterProps {
-  computer: IndicateurUnComputer<Any, Any>;
+  computer: IndicateurUnComputer;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
 const errorColor = "var(--text-default-error)";
@@ -233,11 +233,11 @@ export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): 
     },
     {
       label: "Salaire moyen Femmes",
-      data: currencyFormat.format(metadata.averageWomenSalary),
+      data: currencyFormat.format(metadata.additionalMetadata.averageWomenSalary),
     },
     {
       label: "Salaire moyen Hommes",
-      data: currencyFormat.format(metadata.averageMenSalary),
+      data: currencyFormat.format(metadata.additionalMetadata.averageMenSalary),
     },
     {
       label: "Écart total",

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input, { type InputProps } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { type TableProps } from "@codegouvfr/react-dsfr/Table";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
@@ -9,9 +10,10 @@ import { type PropsWithChildren, type ReactNode, useId } from "react";
 import styles from "./AlternativeTable.module.css";
 
 type TableHeaderScope = "col" | "colgroup" | "row" | "rowgroup";
+type TableCellAlign = "center" | "left" | "right";
 
 export type AlternativeTableCellProps = PropsWithChildren & {
-  align?: "center" | "left" | "right";
+  align?: TableCellAlign;
   as?: `t${"d" | "h"}`;
   colSpan?: number;
   informations?: ReactNode;
@@ -75,12 +77,12 @@ export const AlternativeTableCell = ({
   );
 };
 
-export interface AlternativeTableProps {
+export type AlternativeTableProps = Pick<TableProps, "bordered"> & {
   body: AlternativeTableProps.BodyContent[];
   classeName?: CxArg;
   footer?: AlternativeTableProps.ColumnsFooter[];
   header: AlternativeTableProps.Columns[];
-}
+};
 
 export namespace AlternativeTableProps {
   export interface Columns {
@@ -90,17 +92,33 @@ export namespace AlternativeTableProps {
   }
 
   export interface ColumnsFooter {
+    align?: TableCellAlign;
     colspan?: number;
     data?: ReactNode;
     label: ReactNode;
   }
 
-  export interface BodyContent {
+  export type BodyContent = BodyContentBase & (BodyContentWithCols | BodyContentWithSubRows);
+  interface BodyContentBase {
     categoryLabel: ReactNode;
     isDeletable?: boolean;
     key?: string;
     mergedLabel?: ReactNode;
     onClickDelete?: () => void;
+  }
+
+  interface BodyContentWithCols {
+    /**
+     * @default "right"
+     */
+    alignCols?: "center" | "left" | "right";
+    cols?: [ColType, ...ColType[]];
+    subRows?: never;
+  }
+
+  interface BodyContentWithSubRows {
+    alignCols?: never;
+    cols?: never;
     subRows?: [SubRow, ...SubRow[]];
   }
 
@@ -119,6 +137,10 @@ export namespace AlternativeTableProps {
     Required<Pick<InputProps, "nativeInputProps">>;
   export type ColType = CellInputProps | number | string;
   export interface SubRow {
+    /**
+     * @default "right"
+     */
+    alignCols?: "center" | "left" | "right";
     cols?: [ColType, ...ColType[]];
     label: ReactNode;
     mergedLabel?: ReactNode;
@@ -127,12 +149,20 @@ export namespace AlternativeTableProps {
 
 function validateProps(props: AlternativeTableProps) {
   const maxCols = props.header.reduce((prev, curr) => prev + (curr.subCols?.length ?? 1), 0);
-
   // body validation
   for (const row of props.body) {
     if (!row.subRows) {
-      if (!row.mergedLabel)
-        throw new Error(`For row {${row.categoryLabel}}, should either have columns or merged label.`);
+      if (!row.cols) {
+        if (!row.mergedLabel)
+          throw new Error(`For row {${row.categoryLabel}}, should either have columns or merged label.`);
+      } else {
+        // "-1" because we remove the count of categoryLabel
+        if (row.cols.length < maxCols - 1) {
+          throw new Error(
+            `For row {${row.categoryLabel}}, should either have the same amount of columns than header, or at least have merged labels.`,
+          );
+        }
+      }
     } else {
       for (const subRow of row.subRows) {
         // "-2" because we remove the count of categoryLabel and subRow label
@@ -155,7 +185,7 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
 }
 
 export const AlternativeTable = (props: AlternativeTableProps) => {
-  const { header, footer, body, classeName } = props;
+  const { header, footer, body, classeName, bordered } = props;
 
   const validated = validateProps(props);
   const maxCols = validated.maxCols;
@@ -165,7 +195,15 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
   }
 
   return (
-    <div className={cx(fr.cx("fr-table"), styles.table, classeName)}>
+    <div
+      className={cx(
+        fr.cx("fr-table", {
+          "fr-table--bordered": bordered,
+        }),
+        styles.table,
+        classeName,
+      )}
+    >
       <table>
         <thead>
           <tr>
@@ -223,7 +261,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       {subItem.label}
                     </AlternativeTableCell>
                     {subItem.cols?.map((col, k) => (
-                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align="right">
+                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
                           <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                         ) : (
@@ -238,6 +276,24 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                     )}
                   </tr>
                 ))
+              ) : row.cols ? (
+                <tr>
+                  <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
+                  {row.cols.map((col, k) => (
+                    <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
+                      {isDsfrInputProps(col) ? (
+                        <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                      ) : (
+                        col
+                      )}
+                    </AlternativeTableCell>
+                  ))}
+                  {row.mergedLabel && (
+                    <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
+                      <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
+                    </AlternativeTableCell>
+                  )}
+                </tr>
               ) : (
                 <tr>
                   <AlternativeTableCell as="th" scope="rowgroup">
@@ -256,7 +312,11 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
           <tfoot>
             <tr>
               {footer.map((footerCol, index) => (
-                <AlternativeTableCell key={`td-footer-${index}`} colSpan={footerCol.colspan} align="center">
+                <AlternativeTableCell
+                  key={`td-footer-${index}`}
+                  colSpan={footerCol.colspan}
+                  align={footerCol.align ?? "center"}
+                >
                   <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
                     {footerCol.label}
                   </span>
