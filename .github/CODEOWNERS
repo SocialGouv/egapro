@@ -1,0 +1,6 @@
+# Protect workflow files
+.github/workflows/*.yml @socialgouv/sre
+.github/CODEOWNERS @socialgouv/sre
+.kontinuous/ @socialgouv/sre
+
+@pom421 @gary-van-woerkens @lsagetlethias

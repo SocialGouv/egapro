@@ -1,0 +1,13 @@
+charon:
+  ~chart: app
+  ~log: false
+  image: lsagetlethias/charon:main
+  probesPath: /healthz
+  host: "{{ .Values.global.host }}"
+  envFrom:
+    - secretRef:
+        name: "charon"
+  vars:
+    CHARON_PUBLIC_HOST: "https://{{ .Values.global.host }}"
+    DEBUG: "charon:*"
+    CHARON_PORT: "3000"
