@@ -35,8 +35,8 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
       legend={
         isValid && canCompute
           ? computed.note === NOTE_MAX
-            ? "Les salariées ont toutes reçu une augmentation à leur retour. Tous les points sont accordés."
-            : "Les salariées n'ont pas toutes reçu une augmentation à leur retour. Aucun point n'est accordé."
+            ? "Tous les points sont accordés."
+            : "Aucun point n'est accordé."
           : "Veuillez remplir les champs obligatoires pour obtenir une note."
       }
     />

@@ -169,7 +169,6 @@ export const Indic4Form = () => {
                       <Input
                         label="Total des salariées de retour de congé maternité"
                         hintText="Indiquez le nombre total de salariées revenues de congé maternité pendant la période de référence. Doivent être retenues les salariées qui sont revenues de congé maternité pendant la période de référence, si au moins une augmentation salariale a été faite pendant leur congé."
-                        // hintText="Indiquez le nombre total de salariées revenues de congé maternité pendant la période de référence. Ce nombre doit inclure les salariées pour lesquelles des augmentations salariales ont été accordées, soit pendant leur congé maternité, soit à leur retour. Un chiffre de '0' signifie que, malgré des retours de congé maternité, aucune augmentation n'a coïncidé avec ces congés."
                         state={whenCalculableErrors.count?.total && "error"}
                         stateRelatedMessage={whenCalculableErrors.count?.total?.message}
                         nativeInputProps={{
@@ -201,11 +200,6 @@ export const Indic4Form = () => {
                               </>
                             ) : (
                               <>
-                                {/* Parmis les <strong>{count?.total}</strong> salariées revenues de congé maternité,
-                                indiquez le nombre de salariées ayant bénéficié d'une augmentation à leur retour de
-                                congé maternité ou pendant celui-ci, si des augmentations générales ont eu lieu durant
-                                leur absence. Ces augmentations, même accordées pendant le congé, sont prises en compte
-                                pour cet indicateur. */}
                                 Parmi les <strong>{count?.total}</strong> salariées revenues de congé maternité,
                                 indiquez le nombre de salariées ayant bénéficié, à leur retour de congé maternité ou
                                 pendant celui-ci, d'une augmentation correspondant à la majoration de leur rémunération
