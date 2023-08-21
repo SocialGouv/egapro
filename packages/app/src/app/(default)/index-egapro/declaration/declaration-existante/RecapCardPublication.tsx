@@ -1,8 +1,8 @@
 import { type Publication } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
+import { RecapCard } from "@design-system";
 
-import { funnelStaticConfig } from "../../app/(default)/index-egapro_/declaration/declarationFunnelConfiguration";
-import { RecapCard } from "./RecapCard";
+import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 
 type Props = {
   editable?: boolean;

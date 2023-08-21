@@ -24,28 +24,28 @@ export const Navigation = () => {
         },
         {
           text: "Index",
-          isActive: segment === "index-egapro_",
+          isActive: segment === "index-egapro",
           menuLinks: [
             {
               text: "À propos de l'index",
               linkProps: {
-                href: "/index-egapro_",
+                href: "/index-egapro",
               },
-              isActive: segments.includes("index-egapro_") && segments.length === 1,
+              isActive: segments.includes("index-egapro") && segments.length === 1,
             },
             {
               text: "Calculer mon index",
               linkProps: {
-                href: "/index-egapro_/simulateur/commencer",
+                href: "/index-egapro/simulateur/commencer",
               },
-              isActive: segments.includes("simulateur") && segments.includes("index-egapro_"),
+              isActive: segments.includes("simulateur") && segments.includes("index-egapro"),
             },
             {
               text: "Déclarer mon index",
               linkProps: {
-                href: "/index-egapro_/declaration/commencer",
+                href: "/index-egapro/declaration/commencer",
               },
-              isActive: segments.includes("declaration") && segments.includes("index-egapro_"),
+              isActive: segments.includes("declaration") && segments.includes("index-egapro"),
             },
           ],
         },

@@ -128,4 +128,4 @@ export const getFullNavigation = (funnel?: Partial<CreateSimulationDTO>, start =
   return navigation;
 };
 
-export const simulateurPath = (path: Path) => `/index-egapro_/simulateur/${path}`;
+export const simulateurPath = (path: Path) => `/index-egapro/simulateur/${path}`;
