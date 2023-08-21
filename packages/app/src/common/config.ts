@@ -18,7 +18,7 @@ export const config = {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
   },
   get base_declaration_url() {
-    return "/index-egapro_/declaration";
+    return "/index-egapro/declaration";
   },
   matomo: {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
@@ -31,7 +31,6 @@ export const config = {
         enabled: this.env === "dev",
         whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin", "/apiv2/declaration", "/api/auth"],
       },
-      declaV2: this.env === "dev",
     };
   },
   api: {
@@ -65,23 +64,23 @@ export const config = {
       auth: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         privateRoutes: [
-          "/index-egapro_/declaration/augmentations",
-          "/index-egapro_/declaration/augmentations-et-promotions",
-          "/index-egapro_/declaration/commencer",
-          "/index-egapro_/declaration/conges-maternite",
-          "/index-egapro_/declaration/declarant",
-          "/index-egapro_/declaration/declaration-existante",
-          "/index-egapro_/declaration/entreprise",
-          "/index-egapro_/declaration/periode-reference",
-          "/index-egapro_/declaration/publication",
-          "/index-egapro_/declaration/remunerations",
-          "/index-egapro_/declaration/remunerations-coefficient-autre",
-          "/index-egapro_/declaration/remunerations-coefficient-branche",
-          "/index-egapro_/declaration/remunerations-csp",
-          "/index-egapro_/declaration/remunerations-resultat",
-          "/index-egapro_/declaration/resultat-global",
-          "/index-egapro_/declaration/ues",
-          "/index-egapro_/declaration/validation-transmission",
+          "/index-egapro/declaration/augmentations",
+          "/index-egapro/declaration/augmentations-et-promotions",
+          "/index-egapro/declaration/commencer",
+          "/index-egapro/declaration/conges-maternite",
+          "/index-egapro/declaration/declarant",
+          "/index-egapro/declaration/declaration-existante",
+          "/index-egapro/declaration/entreprise",
+          "/index-egapro/declaration/periode-reference",
+          "/index-egapro/declaration/publication",
+          "/index-egapro/declaration/remunerations",
+          "/index-egapro/declaration/remunerations-coefficient-autre",
+          "/index-egapro/declaration/remunerations-coefficient-branche",
+          "/index-egapro/declaration/remunerations-csp",
+          "/index-egapro/declaration/remunerations-resultat",
+          "/index-egapro/declaration/resultat-global",
+          "/index-egapro/declaration/ues",
+          "/index-egapro/declaration/validation-transmission",
           "/representation-equilibree/commencer",
           "/representation-equilibree/declarant",
           "/representation-equilibree/ecarts-",

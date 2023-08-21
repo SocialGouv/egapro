@@ -14,7 +14,7 @@ const SimuFunnelLayout = ({ children }: PropsWithChildren) => {
             {
               label: "Index",
               linkProps: {
-                href: "/index-egapro_",
+                href: "/index-egapro",
               },
             },
           ]}

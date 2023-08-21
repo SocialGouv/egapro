@@ -3,10 +3,11 @@ import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/decla
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
-import { BigNote, RecapCard, RecapCardCompany, RecapCardPublication } from "@design-system";
+import { BigNote, RecapCard, RecapCardCompany } from "@design-system";
 import { type PropsWithChildren } from "react";
 
 import { RecapCardIndicator } from "./RecapCardIndicator";
+import { RecapCardPublication } from "./RecapCardPublication";
 
 type Props = { déclaration: DeclarationDTO };
 

@@ -15,11 +15,6 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
   }
 
-  if (pathname.startsWith("/index-egapro_/") && !_config.ff.declaV2) {
-    console.log("DeclarationV2 disabled, redirecting 404", pathname);
-    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
-  }
-
   // handling authorization by ourselves (and not with authorize callback)
   const { token } = req.nextauth;
   if (!token?.email) {
