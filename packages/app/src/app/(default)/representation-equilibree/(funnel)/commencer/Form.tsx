@@ -13,7 +13,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getRepresentationEquilibree } from "../../actions";
+import { getCompany, getRepresentationEquilibree } from "../../actions";
 import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
 
 type CommencerFormType = z.infer<typeof createSteps.commencer>;
@@ -48,6 +48,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
     setValue,
     reset: resetForm,
     formState: { errors, isValid },
+    setError,
   } = useForm<CommencerFormType>({
     mode: "onChange",
     resolver: zodResolver(schemaWithOwnedSiren),
@@ -61,6 +62,14 @@ export const CommencerForm = ({ session }: { session: Session }) => {
         const exists = await getRepresentationEquilibree(siren, year);
         if (exists) {
           return router.push(`/representation-equilibree/${siren}/${year}`);
+        }
+
+        const company = await getCompany(siren);
+        if (company.dateCessation) {
+          return setError("siren", {
+            type: "manual",
+            message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
+          });
         }
 
         // Otherwise, this is a creation.
@@ -135,7 +144,11 @@ export const CommencerForm = ({ session }: { session: Session }) => {
               label="Siren entreprise (staff)"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
-              nativeInputProps={register("siren")}
+              nativeInputProps={{
+                ...register("siren"),
+                maxLength: 9,
+                minLength: 9,
+              }}
             />
           ) : (
             <Select
