@@ -123,7 +123,7 @@ export const ResultatGlobalForm = () => {
               }
             />
 
-            {index !== undefined && index < 85 && (
+            {index !== undefined && index < 75 && (
               <>
                 <Select
                   label="Mesures de correction prévues à l'article D. 1142-6"
