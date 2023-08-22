@@ -88,7 +88,6 @@ const prepareDataWithExistingDeclaration = async (
 
   // We fetch the latest data for the entreprise to fill the entreprise page.
   const entreprise = await memoizedFetchSiren(siren, year);
-  console.log("entreprise", entreprise);
 
   return {
     ...baseFormData,
@@ -112,7 +111,7 @@ export const CommencerForm = () => {
   const user = session.data?.user;
 
   const methods = useForm<FormType>({
-    mode: "onTouched",
+    mode: "onChange",
     resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
     defaultValues: formData[stepName],
   });

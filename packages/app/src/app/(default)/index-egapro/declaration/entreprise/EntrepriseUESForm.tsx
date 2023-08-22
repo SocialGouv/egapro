@@ -4,6 +4,7 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -63,59 +64,61 @@ export const EntrepriseUESForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <ClientAnimate>
-        <RadioButtons
-          legend="Vous déclarez votre index en tant que"
-          options={[
-            {
-              label: "Entreprise",
-              nativeInputProps: {
-                value: "entreprise",
-                ...register("type"),
-              },
-            },
-            {
-              label: "Unité Économique et Sociale (UES)",
-              nativeInputProps: {
-                value: "ues",
-                ...register("type"),
-              },
-            },
-          ]}
-          orientation="horizontal"
-        />
-
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
+      <FormLayout>
+        <ClientAnimate>
           <RadioButtons
-            legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
+            legend="Vous déclarez votre index en tant que"
             options={[
               {
-                label: "De 50 à 250 inclus",
+                label: "Entreprise",
                 nativeInputProps: {
-                  value: "50:250",
-                  ...register("tranche"),
+                  value: "entreprise",
+                  ...register("type"),
                 },
               },
               {
-                label: "De 251 à 999 inclus",
+                label: "Unité Économique et Sociale (UES)",
                 nativeInputProps: {
-                  value: "251:999",
-                  ...register("tranche"),
-                },
-              },
-              {
-                label: "De 1000 à plus",
-                nativeInputProps: {
-                  value: "1000:",
-                  ...register("tranche"),
+                  value: "ues",
+                  ...register("type"),
                 },
               },
             ]}
+            orientation="horizontal"
           />
-        </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
-      </ClientAnimate>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            <RadioButtons
+              legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
+              options={[
+                {
+                  label: "De 50 à 250 inclus",
+                  nativeInputProps: {
+                    value: "50:250",
+                    ...register("tranche"),
+                  },
+                },
+                {
+                  label: "De 251 à 999 inclus",
+                  nativeInputProps: {
+                    value: "251:999",
+                    ...register("tranche"),
+                  },
+                },
+                {
+                  label: "De 1000 à plus",
+                  nativeInputProps: {
+                    value: "1000:",
+                    ...register("tranche"),
+                  },
+                },
+              ]}
+            />
+          </ClientOnly>
+
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </ClientAnimate>
+      </FormLayout>
     </form>
   );
 };
