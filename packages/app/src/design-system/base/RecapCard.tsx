@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import Button, { type ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type ReactNode } from "react";
 
@@ -7,9 +7,9 @@ import styles from "./RecapCard.module.css";
 import { Text } from "./Typography";
 
 type RecapCardProps = {
-  editLink?: string;
   title: ReactNode;
-} & (RecapCardProps.WithStats | RecapCardProps.WithTextContent);
+} & (RecapCardProps.WithEditLink | RecapCardProps.WithSideButton) &
+  (RecapCardProps.WithStats | RecapCardProps.WithTextContent);
 
 export namespace RecapCardProps {
   export interface WithTextContent {
@@ -21,9 +21,19 @@ export namespace RecapCardProps {
     content?: never;
     stats: Array<{ text: ReactNode; value: ReactNode }>;
   }
+
+  export interface WithEditLink {
+    editLink?: string;
+    sideButtonProps?: never;
+  }
+
+  export interface WithSideButton {
+    editLink?: never;
+    sideButtonProps?: ButtonProps;
+  }
 }
 
-export const RecapCard = ({ content: textContent, title, editLink, stats }: RecapCardProps) => (
+export const RecapCard = ({ content: textContent, title, editLink, sideButtonProps, stats }: RecapCardProps) => (
   <div className={styles["fr-recap-card"]}>
     <div className={styles["fr-recap-card__title"]}>
       <Text text={title} variant={["md", "bold"]} />
@@ -37,6 +47,9 @@ export const RecapCard = ({ content: textContent, title, editLink, stats }: Reca
             href: editLink,
           }}
         />
+      )}
+      {sideButtonProps && (
+        <Button {...sideButtonProps} className={cx(styles["fr-recap-card__edit-link"], sideButtonProps.className)} />
       )}
     </div>
     <hr />

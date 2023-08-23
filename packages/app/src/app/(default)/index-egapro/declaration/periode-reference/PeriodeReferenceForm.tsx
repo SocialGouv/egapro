@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
@@ -16,7 +17,9 @@ import { endOfYear, formatISO, getYear } from "date-fns";
 import { produce } from "immer";
 import { omit } from "lodash";
 import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
+import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
@@ -45,8 +48,8 @@ const formSchema = zodFr
     }),
   );
 
-// Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
+type FormTypeWhenPeriode = Extract<FormType, { périodeSuffisante: "oui" }>;
 
 const stepName: FunnelKey = "periode-reference";
 
@@ -55,6 +58,7 @@ export const PeriodeReferenceForm = () => {
   const router = useRouter();
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true, // Don't store the fields that are not displayed.
     resolver: zodResolver(formSchema),
     defaultValues: { ...formData.commencer, ...formData[stepName] },
@@ -68,7 +72,12 @@ export const PeriodeReferenceForm = () => {
     formState: { errors, isValid },
   } = methods;
 
+  useEffect(() => {
+    register("annéeIndicateurs");
+  }, []);
+
   const périodeSuffisante = watch("périodeSuffisante");
+  const year = watch("annéeIndicateurs");
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -107,21 +116,20 @@ export const PeriodeReferenceForm = () => {
     }
   };
 
+  const errorsWhenPeriode = errors as FieldErrors<FormTypeWhenPeriode>;
+
   return (
     <FormProvider {...methods}>
+      <Highlight className="fr-ml-0" size="lg">
+        <u>
+          <strong>
+            <ClientOnly fallback={<Skeleton inline width="4ch" />}>{year}</ClientOnly>
+          </strong>
+        </u>{" "}
+        est l'année au titre de laquelle les écarts de représentation sont calculés.
+      </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
         <ClientAnimate>
-          <Input
-            label="Année au titre de laquelle les indicateurs sont calculés"
-            nativeInputProps={{
-              title: "Saisissez le nom ou le Siren d'une entreprise",
-              readOnly: true,
-              ...register("annéeIndicateurs", { valueAsNumber: true }),
-            }}
-          />
-
           <RadioOuiNon
             legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ?"
             name="périodeSuffisante"
@@ -136,14 +144,16 @@ export const PeriodeReferenceForm = () => {
                     type: "date",
                     ...register("finPériodeRéférence"),
                   }}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                  state={errors.finPériodeRéférence ? "error" : "default"}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                  stateRelatedMessage={errors.finPériodeRéférence?.message}
+                  state={errorsWhenPeriode.finPériodeRéférence && "error"}
+                  stateRelatedMessage={errorsWhenPeriode.finPériodeRéférence?.message}
                 />
-                <Button type="button" className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
+                <Button
+                  type="button"
+                  size="small"
+                  priority="secondary"
+                  className={fr.cx("fr-mb-4w", "fr-mt-0")}
+                  onClick={selectEndOfYear}
+                >
                   Sélectionner la fin de l'année civile
                 </Button>
                 <Input
@@ -151,14 +161,11 @@ export const PeriodeReferenceForm = () => {
                   nativeInputProps={{
                     type: "number",
                     min: 1,
+                    step: 1,
                     ...register("effectifTotal", { valueAsNumber: true }),
                   }}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                  state={errors.effectifTotal ? "error" : "default"}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                  stateRelatedMessage={errors.effectifTotal?.message}
+                  state={errorsWhenPeriode.effectifTotal && "error"}
+                  stateRelatedMessage={errorsWhenPeriode.effectifTotal?.message}
                 />
               </>
             )}

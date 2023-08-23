@@ -15,7 +15,7 @@ import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -62,20 +62,14 @@ const stepName: FunnelKey = "augmentations-et-promotions";
 
 export const AugmentationEtPromotionsForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate<HTMLDivElement>();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
-    shouldUnregister: true,
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
     mode: "onChange",
+    shouldUnregister: true,
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -161,9 +155,7 @@ export const AugmentationEtPromotionsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
-        <div ref={animationParent}>
+        <ClientAnimate>
           {/* Needs to be outside ClientOnly to not be unregistered by RHF. Be careful! */}
           <RadioOuiNon
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
@@ -171,18 +163,14 @@ export const AugmentationEtPromotionsForm = () => {
           />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            {estCalculable === "non" && (
-              <>
-                <MotifNC stepName={stepName} />
-              </>
-            )}
+            {estCalculable === "non" && <MotifNC stepName={stepName} />}
 
             {estCalculable === "oui" && (
               <>
-                <PercentageInput label="Résultat final en %" name="résultat" min={0} />
+                <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
                 <PercentageInput
-                  label="Résultat final en nombre équivalent de salariés"
+                  label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
                   name="résultatEquivalentSalarié"
                   min={0}
                 />
@@ -219,7 +207,7 @@ export const AugmentationEtPromotionsForm = () => {
                       <Alert
                         severity="info"
                         title=""
-                        description="Le nombre de points obtenus à l'indicateur est maximal car il y a une politique de rattrapage vis à vis de l'indicateur rémunérations."
+                        description="L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."
                         className={fr.cx("fr-mt-2w")}
                       />
                     )}
@@ -230,7 +218,7 @@ export const AugmentationEtPromotionsForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );

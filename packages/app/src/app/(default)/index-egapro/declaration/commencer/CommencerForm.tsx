@@ -1,13 +1,15 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { PUBLIC_YEARS } from "@common/dict";
-import { zodSirenSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
@@ -27,7 +29,7 @@ const stepName: FunnelKey = "commencer";
 
 const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
-  siren: zodSirenSchema,
+  siren: sirenSchema,
 });
 
 type FormType = z.infer<typeof baseSchema>;
@@ -111,7 +113,7 @@ export const CommencerForm = () => {
   const user = session.data?.user;
 
   const methods = useForm<FormType>({
-    mode: "onTouched",
+    mode: "onChange",
     resolver: zodResolver(buildFormSchema(user?.staff === true, user?.companies)),
     defaultValues: formData[stepName],
   });
@@ -120,22 +122,33 @@ export const CommencerForm = () => {
     register,
     handleSubmit,
     setValue,
-    reset: resetForm,
     formState: { errors, isValid },
+    setError,
+    watch,
   } = methods;
 
   if (!user?.companies.length && !user?.staff) return <SkeletonForm fields={2} />;
 
+  const year = watch("annéeIndicateurs");
+
   const companies = user.companies;
 
   const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
-    // Synchronize the data with declaration if any.
-    const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
+    try {
+      // Synchronize the data with declaration if any.
+      const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
 
-    // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
-    saveFormData(newData);
+      // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
+      saveFormData(newData);
 
-    router.push(funnelConfig(newData)[stepName].next().url);
+      router.push(funnelConfig(newData)[stepName].next().url);
+    } catch (error: unknown) {
+      console.error("Unexpected API error", error);
+      setError("siren", {
+        type: "manual",
+        message: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
+      });
+    }
   };
 
   const onSubmit = async ({ siren, annéeIndicateurs }: FormType) => {
@@ -176,8 +189,6 @@ export const CommencerForm = () => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          {/* <ReactHookFormDebug /> */}
-
           <Select
             label="Année au titre de laquelle les indicateurs sont calculés"
             state={errors.annéeIndicateurs && "error"}
@@ -200,19 +211,21 @@ export const CommencerForm = () => {
 
           {user.staff ? (
             <Input
-              label="Siren de l'entreprise"
+              label="Siren entreprise (staff)"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
-              nativeInputProps={register("siren")}
+              nativeInputProps={{
+                ...register("siren"),
+                maxLength: 9,
+                minLength: 9,
+              }}
             />
           ) : (
             <Select
               label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
-              nativeSelectProps={{
-                ...register("siren"),
-              }}
+              nativeSelectProps={register("siren")}
             >
               <option value="" disabled>
                 Sélectionnez une entreprise
@@ -226,8 +239,20 @@ export const CommencerForm = () => {
             </Select>
           )}
 
+          <ClientAnimate>
+            {isValid && (
+              <Alert
+                severity="info"
+                small
+                description={`Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${year} au titre des données de ${
+                  year - 1
+                }.`}
+              />
+            )}
+          </ClientAnimate>
+
           <BackNextButtonsGroup
-            className={fr.cx("fr-my-8w")}
+            className={fr.cx("fr-my-4w")}
             backLabel="Réinitialiser"
             backProps={{
               onClick: confirmReset,

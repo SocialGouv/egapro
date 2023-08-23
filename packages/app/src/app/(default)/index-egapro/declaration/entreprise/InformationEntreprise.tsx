@@ -2,7 +2,7 @@
 
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { ClientOnly } from "@components/utils/ClientOnly";
-import { RecapCardCompany } from "@design-system";
+import { FormLayout, RecapCardCompany } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
 export const InformationEntreprise = () => {
@@ -24,7 +24,9 @@ export const InformationEntreprise = () => {
 
   return (
     <ClientOnly>
-      <RecapCardCompany company={company} />
+      <FormLayout>
+        <RecapCardCompany full company={company} />
+      </FormLayout>
     </ClientOnly>
   );
 };

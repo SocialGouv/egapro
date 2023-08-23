@@ -6,6 +6,7 @@ import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, DownloadCard, Grid, GridCol, ImgJDMA, ImgSuccessLight } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { inRange } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -73,38 +74,83 @@ const ConfirmationPage = () => {
         </GridCol>
       </Grid>
 
-      {index !== undefined && index < 85 && (
-        <Grid align="center" mt="4w">
-          <GridCol md="10">
-            <Card
-              title="Publication et déclaration des objectifs de progression"
-              footer={
-                <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-                  <li>
-                    <Button onClick={() => alert("TODO")}>Déclarer les objectifs de progression</Button>
-                  </li>
-                </ul>
-              }
-              desc={
-                <>
-                  <strong>
-                    Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 85 points
-                    doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs de
-                    progression de chacun des indicateurs.
-                  </strong>
+      {index !== undefined && (
+        <>
+          {inRange(index, 75, 85) ? (
+            <Grid align="center" mt="4w">
+              <GridCol md="10">
+                <Card
+                  title="Publication et déclaration des objectifs de progression"
+                  footer={
+                    <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
+                      <li>
+                        <Button onClick={() => alert("TODO")}>Déclarer les objectifs de progression</Button>
+                      </li>
+                    </ul>
+                  }
+                  desc={
+                    <>
+                      <strong>
+                        Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 85
+                        points doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs
+                        de progression de chacun des indicateurs.
+                      </strong>
 
-                  <br />
-                  <div>
-                    Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de
-                    publication doivent être transmis aux services du ministre chargé du travail et au comité social et
-                    économique.Vous pouvez déclarer les objectifs de progression ultérieurement en vous connectant à
-                    votre espace via le menu "Mes déclarations".
-                  </div>
-                </>
-              }
-            />
-          </GridCol>
-        </Grid>
+                      <br />
+                      <div>
+                        Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités
+                        de publication doivent être transmis aux services du ministre chargé du travail et au comité
+                        social et économique.Vous pouvez déclarer les objectifs de progression ultérieurement en vous
+                        connectant à votre espace via le menu "Mes déclarations".
+                      </div>
+                    </>
+                  }
+                />
+              </GridCol>
+            </Grid>
+          ) : (
+            index < 75 && (
+              <>
+                <Grid align="center" mt="4w">
+                  <GridCol md="10">
+                    <Card
+                      title="Publication et déclaration des objectifs de progression"
+                      footer={
+                        <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
+                          <li>
+                            <Button onClick={() => alert("TODO")}>
+                              Déclarer les mesures de correction et les objectifs de progression
+                            </Button>
+                          </li>
+                        </ul>
+                      }
+                      desc={
+                        <>
+                          <strong>
+                            Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 75
+                            points doivent publier, par une communication externe et au sein de l’entreprise, les
+                            mesures de correction qu’elles ont définies par accord ou, à défaut, par décision
+                            unilatérale.
+                          </strong>
+                          Par ailleurs, elles doivent fixer, également par accord ou, à défaut, par décision
+                          unilatérale, et publier des objectifs de progression de chacun des indicateurs. Une fois
+                          l’accord ou la décision déposé, les informations relatives aux mesures de correction, les
+                          objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux
+                          services du ministre chargé du travail et au comité social et économique.
+                          <br />
+                          <div>
+                            Vous pouvez déclarer les <Link href="TODO">objectifs de progression</Link> ultérieurement en
+                            vous connectant à votre espace via le menu "Mes déclarations".
+                          </div>
+                        </>
+                      }
+                    />
+                  </GridCol>
+                </Grid>
+              </>
+            )
+          )}
+        </>
       )}
 
       <Grid align="center" mt="4w">

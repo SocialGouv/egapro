@@ -44,7 +44,7 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
             }
           },
         }}
-        state={get(errors, name) ? "error" : "default"}
+        state={get(errors, name) && "error"}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         stateRelatedMessage={get(errors, name)?.message || ""}
