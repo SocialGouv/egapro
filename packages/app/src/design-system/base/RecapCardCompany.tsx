@@ -75,7 +75,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
             </>
           ) : (
             <>
-              L'entreprise déclarante : <strong>{name}</strong>
+              Entreprise déclarante : <strong>{name}</strong>
               <br />
               {address}
               {(postalCodeCity || countryLib) && <br />}

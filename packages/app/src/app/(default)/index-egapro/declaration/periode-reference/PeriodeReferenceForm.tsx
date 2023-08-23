@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
@@ -16,7 +17,9 @@ import { endOfYear, formatISO, getYear } from "date-fns";
 import { produce } from "immer";
 import { omit } from "lodash";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
+import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
@@ -69,7 +72,12 @@ export const PeriodeReferenceForm = () => {
     formState: { errors, isValid },
   } = methods;
 
+  useEffect(() => {
+    register("annéeIndicateurs");
+  }, []);
+
   const périodeSuffisante = watch("périodeSuffisante");
+  const year = watch("annéeIndicateurs");
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
@@ -112,17 +120,16 @@ export const PeriodeReferenceForm = () => {
 
   return (
     <FormProvider {...methods}>
+      <Highlight className="fr-ml-0" size="lg">
+        <u>
+          <strong>
+            <ClientOnly fallback={<Skeleton inline width="4ch" />}>{year}</ClientOnly>
+          </strong>
+        </u>{" "}
+        est l'année au titre de laquelle les écarts de représentation sont calculés.
+      </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
-          <Input
-            label="Année au titre de laquelle les indicateurs sont calculés"
-            nativeInputProps={{
-              title: "Saisissez le nom ou le Siren d'une entreprise",
-              readOnly: true,
-              ...register("annéeIndicateurs", { valueAsNumber: true }),
-            }}
-          />
-
           <RadioOuiNon
             legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ?"
             name="périodeSuffisante"

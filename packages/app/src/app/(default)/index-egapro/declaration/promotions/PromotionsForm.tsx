@@ -193,7 +193,7 @@ export const PromotionsForm = () => {
 
                 <br />
 
-                <PercentageInput label="Résultat final en %" name="résultat" min={0} />
+                <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
                 <PopulationFavorable disabled={populationFavorableDisabled} />
 

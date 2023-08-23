@@ -24,7 +24,7 @@ const formSchema = zodFr.object({
   entreprises: z
     .array(
       z.object({
-        raisonSociale: z.string(),
+        raisonSociale: z.string().nonempty("Le nom de l'UES est obligatoire"),
         siren: sirenSchema,
       }),
     )

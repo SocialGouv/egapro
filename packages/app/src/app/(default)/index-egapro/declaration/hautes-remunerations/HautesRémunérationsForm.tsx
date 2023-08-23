@@ -55,12 +55,7 @@ export const HautesRémunérationsForm = () => {
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
+    resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: formData[stepName],
   });
@@ -107,13 +102,11 @@ export const HautesRémunérationsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
         <div ref={animationParent}>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
               <Input
-                label="Résultat en nombre de salariés du sexe sous-représenté"
+                label="Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté"
                 nativeInputProps={{
                   type: "number",
                   min: 0,
