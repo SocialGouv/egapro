@@ -5,14 +5,12 @@ import { RecapCard } from "@design-system";
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 
 type Props = {
-  editable?: boolean;
+  edit?: boolean;
   publication?: Publication;
 };
 
-export const RecapCardPublication = ({ publication, editable }: Props) => {
+export const RecapCardPublication = ({ publication, edit }: Props) => {
   const publicationDate = publication?.date; // Extract variable for TS to understand that publication date is not undefined.
-
-  editable = editable ?? false;
 
   if (!publicationDate) return null;
 
@@ -23,7 +21,7 @@ export const RecapCardPublication = ({ publication, editable }: Props) => {
   return (
     <RecapCard
       title="Publication des résultats obtenus"
-      {...{ editLink: editable ? funnelStaticConfig["publication"].url : undefined }}
+      editLink={(edit || void 0) && funnelStaticConfig["publication"].url}
       content={
         <>
           <p>

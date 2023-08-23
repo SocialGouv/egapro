@@ -4,14 +4,14 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { BigNote, RecapCard, RecapCardCompany } from "@design-system";
-import { type PropsWithChildren } from "react";
 
+import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 import { RecapCardPublication } from "./RecapCardPublication";
 
-type Props = { déclaration: DeclarationDTO };
+type Props = { déclaration: DeclarationDTO; edit?: boolean };
 
-export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => {
+export const RecapDeclaration = ({ déclaration, edit }: Props) => {
   const { déclarant, déclaration: meta, entreprise, indicateurs } = déclaration;
 
   const company: CompanyDTO = {
@@ -36,6 +36,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
 
       <RecapCard
         title="Informations déclarant"
+        editLink={(edit || void 0) && funnelStaticConfig["declarant"].url}
         content={
           <>
             <strong>
@@ -54,6 +55,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
       {entreprise.ues?.nom && (
         <RecapCard
           title="Informations de l'UES"
+          editLink={(edit || void 0) && funnelStaticConfig["ues"].url}
           content={
             <>
               <p>
@@ -67,6 +69,7 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
 
       <RecapCard
         title="Informations calcul et période de référence"
+        editLink={(edit || void 0) && funnelStaticConfig["periode-reference"].url}
         content={
           <>
             <p>
@@ -96,8 +99,9 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
       {meta.période_suffisante !== false && (
         <>
           <RecapCardIndicator
-            nom="rémunérations"
+            name="rémunérations"
             indicateurs={indicateurs}
+            edit={edit}
             customContent={
               <>
                 {indicateurs?.rémunérations?.mode && (
@@ -121,15 +125,15 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
           />
 
           {entreprise.effectif?.tranche === "50:250" ? (
-            <RecapCardIndicator nom="augmentations_et_promotions" indicateurs={indicateurs} />
+            <RecapCardIndicator edit={edit} name="augmentations_et_promotions" indicateurs={indicateurs} />
           ) : (
             <>
-              <RecapCardIndicator nom="augmentations" indicateurs={indicateurs} />
-              <RecapCardIndicator nom="promotions" indicateurs={indicateurs} />
+              <RecapCardIndicator edit={edit} name="augmentations" indicateurs={indicateurs} />
+              <RecapCardIndicator edit={edit} name="promotions" indicateurs={indicateurs} />
             </>
           )}
-          <RecapCardIndicator nom="congés_maternité" indicateurs={indicateurs} />
-          <RecapCardIndicator nom="hautes_rémunérations" indicateurs={indicateurs} />
+          <RecapCardIndicator edit={edit} name="congés_maternité" indicateurs={indicateurs} />
+          <RecapCardIndicator edit={edit} name="hautes_rémunérations" indicateurs={indicateurs} />
         </>
       )}
 
@@ -151,19 +155,17 @@ export const RecapDeclaration = ({ déclaration }: PropsWithChildren<Props>) => 
         }
       />
 
-      <RecapCardPublication publication={meta.publication} />
+      <RecapCardPublication edit={edit} publication={meta.publication} />
 
       {meta.période_suffisante && (
         <RecapCard
           title="Plan de relance"
-          // editLink={funnelStaticConfig["publication"].url}
+          editLink={(edit || void 0) && funnelStaticConfig["publication"].url}
           content={
-            <>
-              <p>
-                Votre entreprise {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue
-                par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance ».
-              </p>
-            </>
+            <p>
+              Votre entreprise {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue par
+              la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance ».
+            </p>
           }
         />
       )}
