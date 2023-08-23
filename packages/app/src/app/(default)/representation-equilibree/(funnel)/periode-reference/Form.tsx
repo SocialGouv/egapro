@@ -1,6 +1,7 @@
 "use client";
 
-import CallOut from "@codegouvfr/react-dsfr/CallOut";
+import Button from "@codegouvfr/react-dsfr/Button";
+import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
@@ -60,21 +61,12 @@ export const PeriodeReferenceForm = () => {
 
   return (
     <>
-      <CallOut
-        title="Année civile"
-        iconId="fr-icon-calendar-line"
-        buttonProps={{
-          priority: "secondary",
-          children: "Sélectionner la fin de l'année civile",
-          size: "small",
-          onClick: selectEndDateOfFunnelYear,
-        }}
-      >
+      <Highlight className="fr-ml-0" size="lg">
         <u>
           <strong>{hydrated ? funnel?.year : <Skeleton inline width="4ch" />}</strong>
         </u>{" "}
         est l'année au titre de laquelle les écarts de représentation sont calculés.
-      </CallOut>
+      </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <Input
@@ -87,6 +79,15 @@ export const PeriodeReferenceForm = () => {
               ...register("endOfPeriod"),
             }}
           />
+          <Button
+            type="button"
+            size="small"
+            onClick={selectEndDateOfFunnelYear}
+            priority="secondary"
+            className="fr-mt-0"
+          >
+            Sélectionner la fin de l'année civile
+          </Button>
           <BackNextButtonsGroup
             backProps={{
               linkProps: {

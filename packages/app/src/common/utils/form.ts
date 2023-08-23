@@ -61,6 +61,19 @@ export const zodNumberOrNaNOrNull = z
 
 export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 
+export const zodPercentOrNaNOrNull = z
+  .null()
+  .or(
+    z
+      .nan()
+      .or(
+        z
+          .number({ invalid_type_error: "La valeur doit être un nombre" })
+          .nonnegative()
+          .max(100, "La valeur ne peut pas être supérieure à 100%"),
+      ),
+  );
+
 /** @deprecated */
 export const zodPercentageAsStringSchema = z
   .string()
@@ -109,6 +122,7 @@ export const zodEmail = z.string().superRefine(zodValueObjectSuperRefine(Email))
 
 export const zodPhone = z
   .string()
+  .nonempty("Le numéro de téléphone est requis")
   .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide"));
 
 export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;

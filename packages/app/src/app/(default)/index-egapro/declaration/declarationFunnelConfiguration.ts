@@ -48,12 +48,12 @@ export const funnelStaticConfig: StaticConfig = {
     "conges-maternite",
     "Pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé maternité",
   ),
-  entreprise: new StaticConfigItem("entreprise", "Informations de l'entreprise / UES"),
+  entreprise: new StaticConfigItem("entreprise", "Informations entreprise / UES"),
   "hautes-remunerations": new StaticConfigItem(
     "hautes-remunerations",
     "Nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations",
   ),
-  "periode-reference": new StaticConfigItem("periode-reference", "Période de référence"),
+  "periode-reference": new StaticConfigItem("periode-reference", "Informations calcul et période de référence"),
   promotions: new StaticConfigItem("promotions", "Écart de taux de promotions entre les femmes et les hommes"),
   publication: new StaticConfigItem("publication", "Publication des résultats obtenus"),
   "remunerations-coefficient-autre": new StaticConfigItem(
@@ -74,7 +74,7 @@ export const funnelStaticConfig: StaticConfig = {
   ),
   remunerations: new StaticConfigItem("remunerations", "Écart de rémunération entre les femmes et les hommes"),
   "resultat-global": new StaticConfigItem("resultat-global", "Niveau de résultat global"),
-  ues: new StaticConfigItem("ues", "Informations de l'UES"),
+  ues: new StaticConfigItem("ues", "Informations UES"),
   "validation-transmission": new StaticConfigItem(
     "validation-transmission",
     "Validation de la transmission des résultats",

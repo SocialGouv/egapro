@@ -1,11 +1,11 @@
 import { Email, Url } from "@common/shared-domain/domain/valueObjects";
+import { zodPhone } from "@common/utils/form";
 import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
 import { z } from "zod";
 
 import { NotComputableReasonExecutiveRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "../domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
-import { FrenchPhoneNumber } from "../domain/valueObjects/FrenchPhoneNumber";
 import { percentageSchema, repeqYearSchema, sirenSchema } from "./helpers/common";
 
 export const createSteps = {
@@ -16,10 +16,7 @@ export const createSteps = {
   declarant: z.object({
     lastname: z.string().nonempty("Le nom est requis"),
     firstname: z.string().nonempty("Le prénom est requis"),
-    phoneNumber: z
-      .string()
-      .nonempty("Le numéro de téléphone est requis")
-      .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide")),
+    phoneNumber: zodPhone,
     gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
     email: z.string().superRefine(zodValueObjectSuperRefine(Email)),
   }),
@@ -59,12 +56,14 @@ export const createSteps = {
         .object({
           publishModalities: z
             .string()
+            .trim()
             .nonempty("La description des modalités de communication des écarts est obligatoire"),
         })
         .or(
           z.object({
             publishUrl: z
               .string()
+              .trim()
               .nonempty("L'adresse exacte de la page internet est obligatoire")
               // can't use built-in zod url() because we can skip "http*://"
               .superRefine(zodValueObjectSuperRefine(Url, "L'adresse de la page internet est invalide")),

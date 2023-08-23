@@ -84,8 +84,8 @@ const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
       .record(
         zodFr.nativeEnum(CSP.Enum),
         zodFr.object({
-          women: zodFr.number().positive().max(100),
-          men: zodFr.number().positive().max(100),
+          women: zodFr.number().positive().lte(100, "La valeur ne peut pas être supérieure à 100%"),
+          men: zodFr.number().positive().lte(100, "La valeur ne peut pas être supérieure à 100%"),
         }),
       )
       .default({}),
