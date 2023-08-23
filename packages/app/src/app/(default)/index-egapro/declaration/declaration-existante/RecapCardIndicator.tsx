@@ -2,6 +2,7 @@ import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declar
 import { type DeclarationDTO } from "@common/models/generated";
 import { IndicatorNote, RecapCard } from "@design-system";
 import { type IndicatorKey } from "@services/form/declaration/DeclarationFormBuilder";
+import { capitalize } from "lodash";
 import { type PropsWithChildren } from "react";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
@@ -10,9 +11,9 @@ type IndicatorKeyFromDTO = Exclude<keyof NonNullable<DeclarationDTO["indicateurs
 
 type Props = {
   customContent?: React.ReactNode;
-  editable?: boolean;
+  edit?: boolean;
   indicateurs: DeclarationDTO["indicateurs"];
-  nom: IndicatorKeyFromDTO;
+  name: IndicatorKeyFromDTO;
 };
 
 const KeyInState: Record<IndicatorKeyFromDTO, IndicatorKey> = {
@@ -24,35 +25,36 @@ const KeyInState: Record<IndicatorKeyFromDTO, IndicatorKey> = {
   hautes_rémunérations: "hautes-remunerations",
 };
 
-export const RecapCardIndicator = ({ nom, indicateurs, customContent, editable }: PropsWithChildren<Props>) => {
-  const note = indicateurs?.[nom]?.note;
-
-  editable = editable ?? false;
+export const RecapCardIndicator = ({ name, indicateurs, customContent, edit }: PropsWithChildren<Props>) => {
+  const note = indicateurs?.[name]?.note;
 
   return (
     <RecapCard
-      title={funnelStaticConfig[KeyInState[nom]].title}
-      // editLink={funnelStaticConfig[matchKey[nom]].url}
-      {...{ editLink: editable ? funnelStaticConfig[KeyInState[nom]].url : undefined }}
+      title={funnelStaticConfig[KeyInState[name]].title}
+      editLink={(edit || void 0) && funnelStaticConfig[KeyInState[name]].url}
       content={
         <>
           {customContent}
 
-          {nom !== "hautes_rémunérations" && indicateurs?.[nom]?.non_calculable && (
-            <p>L'indicateur n'est pas calculable.</p>
+          {name !== "hautes_rémunérations" && indicateurs?.[name]?.non_calculable && (
+            <p>L'indicateur n'est pas calculable</p>
           )}
 
           {note !== undefined && (
             <IndicatorNote
               note={note}
-              max={indicatorNoteMax[KeyInState[nom]]}
+              max={indicatorNoteMax[KeyInState[name]]}
               text="Nombre de points obtenus à l'indicateur"
               legend={
-                nom === "congés_maternité"
+                name === "congés_maternité"
                   ? ""
-                  : indicateurs?.[nom]?.population_favorable === ""
+                  : indicateurs?.[name]?.population_favorable === ""
                   ? "Égalité de l'indicateur"
-                  : `Écart en faveur des ${indicateurs?.[nom]?.population_favorable}`
+                  : name === "hautes_rémunérations"
+                  ? `${capitalize(indicateurs?.[name]?.population_favorable)} sur-représenté${
+                      indicateurs?.[name]?.population_favorable === "femmes" ? "e" : ""
+                    }s`
+                  : `Écart en faveur des ${indicateurs?.[name]?.population_favorable}`
               }
             />
           )}

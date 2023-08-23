@@ -5,7 +5,7 @@ import {
   computeIndicator4Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodPercentOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -13,7 +13,7 @@ import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { IndicatorNote } from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -33,7 +33,7 @@ const formSchema = zodFr.discriminatedUnion("estCalculable", [
   }),
   zodFr.object({
     estCalculable: z.literal("oui"),
-    résultat: zodNumberOrNaNOrNull.optional(),
+    résultat: zodPercentOrNaNOrNull.optional(),
     note: z.number().optional(),
   }),
 ]);
@@ -44,17 +44,11 @@ const stepName: FunnelKey = "conges-maternite";
 
 export const CongesMaterniteForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
     mode: "onChange",
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -95,9 +89,7 @@ export const CongesMaterniteForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
-        <div ref={animationParent}>
+        <ClientAnimate>
           <RadioOuiNon
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
             name="estCalculable"
@@ -112,7 +104,12 @@ export const CongesMaterniteForm = () => {
                   </>
                 ) : (
                   <>
-                    <PercentageInput label="Résultat final en %" name="résultat" min={0} max={100} />
+                    <PercentageInput
+                      label="Résultat final obtenu à l'indicateur en %"
+                      name="résultat"
+                      min={0}
+                      max={100}
+                    />
 
                     {note !== undefined && (
                       <>
@@ -131,7 +128,7 @@ export const CongesMaterniteForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );

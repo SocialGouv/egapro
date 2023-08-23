@@ -3,7 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup } from "@design-system";
+import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { AlertMessage } from "@design-system/client";
 import { submitDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -43,18 +43,20 @@ export const Recap = () => {
     <>
       <AlertMessage title="Erreur" message={error} />
 
-      <RecapDeclaration déclaration={declaration} />
+      <FormLayout>
+        <RecapDeclaration edit déclaration={declaration} />
 
-      <BackNextButtonsGroup
-        className={fr.cx("fr-my-8w")}
-        backProps={{
-          onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
-        }}
-        nextProps={{
-          onClick: onSubmit,
-        }}
-        nextLabel="Valider et transmettre les résultats"
-      />
+        <BackNextButtonsGroup
+          className={fr.cx("fr-my-4w")}
+          backProps={{
+            onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
+          }}
+          nextProps={{
+            onClick: onSubmit,
+          }}
+          nextLabel="Valider et transmettre les résultats"
+        />
+      </FormLayout>
     </>
   );
 };
