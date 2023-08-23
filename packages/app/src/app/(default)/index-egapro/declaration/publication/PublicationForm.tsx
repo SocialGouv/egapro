@@ -92,18 +92,16 @@ export const PublicationForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            <>
-              <Input
-                label="Date de publication des résultats obtenus"
-                nativeInputProps={{
-                  ...register("date"),
-                  type: "date",
-                  min: endOfPeriod,
-                }}
-                state={errors.date && "error"}
-                stateRelatedMessage={errors.date?.message}
-              />
-            </>
+            <Input
+              label="Date de publication des résultats obtenus"
+              nativeInputProps={{
+                ...register("date"),
+                type: "date",
+                min: endOfPeriod,
+              }}
+              state={errors.date && "error"}
+              stateRelatedMessage={errors.date?.message}
+            />
 
             <RadioOuiNon name="choixSiteWeb" legend="Avez-vous un site Internet pour publier les résultats obtenus ?" />
 
@@ -131,8 +129,11 @@ export const PublicationForm = () => {
 
             <RadioOuiNon
               name="planRelance"
-              legend="Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021
-              au titre de la mission « Plan de relance » ?"
+              legend={
+                formData.entreprise?.type === "ues"
+                  ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ?"
+                  : "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ?"
+              }
             />
           </ClientOnly>
 

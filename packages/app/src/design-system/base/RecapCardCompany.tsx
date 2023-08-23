@@ -1,4 +1,5 @@
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
@@ -7,7 +8,7 @@ import { Grid, GridCol } from "./Grid";
 import { RecapCard } from "./RecapCard";
 import { Text } from "./Typography";
 
-type Props = { company: CompanyDTO; full?: boolean };
+type Props = { company: CompanyDTO; full?: boolean; title?: string };
 
 // TODO: replace with tooltip when available in DSFR
 const infoModale = createModal({
@@ -15,28 +16,28 @@ const infoModale = createModal({
   isOpenedByDefault: false,
 });
 
-export const RecapCardCompany = ({ company, full }: Props) => {
-  const { name, address, postalCode, city, countryIsoCode, siren, nafCode } = company;
+export const RecapCardCompany = ({ company, full, title }: Props) => {
+  const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues } = company;
+
+  const titleFull = title ?? "Information de l'entreprise déclarante";
+
+  const postalCodeCity = `${postalCode} ${city}`.trim();
+  const countryLib =
+    countryIsoCode && countryIsoCode !== "FR" && `${postalCodeCity && ", "}${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`;
 
   return (
     <>
       <ClientBodyPortal>
-        <infoModale.Component title="Informations de l'entreprise déclarante">
+        <infoModale.Component title={titleFull}>
           Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
           l'INSEE).
         </infoModale.Component>
       </ClientBodyPortal>
       <RecapCard
-        title={
-          full ? (
-            <Text text="Informations de l'entreprise déclarante" variant={["xl"]} inline />
-          ) : (
-            "Informations entreprise déclarante"
-          )
-        }
+        title={full ? <Text text={titleFull} variant={["xl"]} inline /> : title ?? "Informations entreprise déclarante"}
         sideButtonProps={{
-          iconId: "ri-information-fill",
-          title: "Informations de l'entreprise déclarante",
+          iconId: "fr-icon-information-fill",
+          title: titleFull,
           priority: "tertiary no outline",
           style: { alignSelf: "center" },
           size: "small",
@@ -66,23 +67,31 @@ export const RecapCardCompany = ({ company, full }: Props) => {
                 <GridCol sm={12}>
                   <strong>Adresse</strong>
                   <br />
-                  {address}, {postalCode} {city}
-                  {countryIsoCode && countryIsoCode !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`}
+                  {address}
+                  {postalCodeCity && `, ${postalCodeCity}`}
+                  {countryLib}
                 </GridCol>
               </Grid>
             </>
           ) : (
             <>
-              <strong>{name}</strong>
+              L'entreprise déclarante : <strong>{name}</strong>
               <br />
               {address}
-              <br />
-              {postalCode} {city}
-              {countryIsoCode && countryIsoCode !== "FR" && `, ${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`}
+              {(postalCodeCity || countryLib) && <br />}
+              {postalCodeCity}
+              {countryLib}
               <br />
               Siren : <strong>{siren}</strong>
               <br />
               NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
+              {workforce?.range && (
+                <>
+                  <br />
+                  Tranche d'effectifs assujettis de l'
+                  {ues?.name ? "UES" : "entreprise"} : <strong>{CompanyWorkforceRange.Label[workforce.range]}</strong>
+                </>
+              )}
             </>
           )
         }

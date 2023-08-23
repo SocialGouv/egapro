@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { type CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/models/generated";
@@ -22,6 +23,13 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
     countryIsoCode: entreprise.code_pays,
     siren: entreprise.siren,
     nafCode: entreprise.code_naf,
+    workforce: {
+      range: entreprise.effectif?.tranche as CompanyWorkforceRange.Enum,
+    },
+    ues: {
+      name: entreprise.ues?.nom || "",
+      companies: [],
+    },
   };
 
   return (
@@ -50,18 +58,18 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         }
       />
 
-      <RecapCardCompany company={company} />
+      <RecapCardCompany company={company} title="Informations Entreprise / UES" />
 
       {entreprise.ues?.nom && (
         <RecapCard
-          title="Informations de l'UES"
+          title="Informations UES"
           editLink={(edit || void 0) && funnelStaticConfig["ues"].url}
           content={
             <>
               <p>
                 <strong>{entreprise.ues.nom}</strong>
               </p>
-              <p>{entreprise.ues.entreprises?.length} entreprises composent l'UES</p>
+              <p>{entreprise.ues.entreprises!.length + 1} entreprises composent l'UES</p>
             </>
           }
         />
@@ -73,20 +81,20 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         content={
           <>
             <p>
-              Les indicateurs sont calculés au titre de l’année <strong>{meta.année_indicateurs}</strong>.
+              Les indicateurs sont calculés au titre de l’année <strong>{meta.année_indicateurs}</strong>
             </p>
 
             {meta.période_suffisante && (
               <>
                 <p>
                   La date de fin de la période de référence choisie pour le calcul des indicateurs est le&nbsp;
-                  <strong>{meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}</strong>.
+                  <strong>{meta?.fin_période_référence && formatIsoToFr(meta.fin_période_référence)}</strong>
                 </p>
                 <p>
                   {entreprise.effectif?.total && (
                     <>
                       <strong>{entreprise.effectif?.total}</strong> salariés pris en compte pour le calcul des
-                      indicateurs sur la période de référence (en effectif physique).
+                      indicateurs sur la période de référence (en effectif physique)
                     </>
                   )}
                 </p>
@@ -107,16 +115,16 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                 {indicateurs?.rémunérations?.mode && (
                   <p>
                     La modalité choisie pour le calcul de l'indicateur est{" "}
-                    {new RemunerationsMode(indicateurs?.rémunérations?.mode).getLabel().toLowerCase()}.
+                    {new RemunerationsMode(indicateurs?.rémunérations?.mode).getLabel().toLowerCase()}
                   </p>
                 )}
 
                 {indicateurs?.rémunérations?.mode !== "csp" && (
                   <>
-                    {!entreprise.ues && !indicateurs?.rémunérations?.date_consultation_cse ? (
-                      <p> Aucun CSE n’est mis en place. </p>
+                    {!entreprise.ues || !indicateurs?.rémunérations?.date_consultation_cse ? (
+                      <p> Aucun CSE n’est mis en place </p>
                     ) : (
-                      <p>Le CSE a été consulté le {indicateurs?.rémunérations?.date_consultation_cse}</p>
+                      <p>Le CSE a été consulté le {formatIsoToFr(indicateurs.rémunérations.date_consultation_cse)}</p>
                     )}
                   </>
                 )}
@@ -137,11 +145,13 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         </>
       )}
 
+      <hr />
+
       <BigNote
         className={fr.cx("fr-mb-4w")}
         note={meta.index}
         max={100}
-        legend={meta.index !== undefined ? "Index de" : "Index non calculable"}
+        legend="Niveau de résultat global"
         text={
           <>
             <p>
@@ -163,8 +173,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
           editLink={(edit || void 0) && funnelStaticConfig["publication"].url}
           content={
             <p>
-              Votre entreprise {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue par
-              la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance ».
+              {entreprise.ues?.nom
+                ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES "
+                : "Votre entreprise "}
+              {entreprise.plan_relance ? "a" : "n'a pas"} bénéficié depuis 2021, d'une aide prévue par la loi du 29
+              décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance »
             </p>
           }
         />

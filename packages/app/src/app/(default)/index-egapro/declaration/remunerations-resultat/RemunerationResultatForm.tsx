@@ -20,7 +20,6 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-// Import your language translation files
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -50,13 +49,7 @@ export const RemunerationResultatForm = () => {
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-
-      return zodResolver(formSchema)(data, context, options);
-    },
+    resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: formData[stepName],
   });
@@ -105,13 +98,7 @@ export const RemunerationResultatForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {/* <ReactHookFormDebug /> */}
-
-          <PercentageInput
-            label="Résultat final en % après application du seuil de pertinence à chaque catégorie ou niveau/coefficient"
-            name="résultat"
-            min={0}
-          />
+          <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
           <PopulationFavorable disabled={populationFavorableDisabled} />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
@@ -8,6 +9,7 @@ import { PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { fetchDeclaration } from "@services/apiClient/declaration";
@@ -122,9 +124,12 @@ export const CommencerForm = () => {
     setValue,
     formState: { errors, isValid },
     setError,
+    watch,
   } = methods;
 
   if (!user?.companies.length && !user?.staff) return <SkeletonForm fields={2} />;
+
+  const year = watch("annéeIndicateurs");
 
   const companies = user.companies;
 
@@ -234,8 +239,20 @@ export const CommencerForm = () => {
             </Select>
           )}
 
+          <ClientAnimate>
+            {isValid && (
+              <Alert
+                severity="info"
+                small
+                description={`Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${year} au titre des données de ${
+                  year - 1
+                }.`}
+              />
+            )}
+          </ClientAnimate>
+
           <BackNextButtonsGroup
-            className={fr.cx("fr-my-8w")}
+            className={fr.cx("fr-my-4w")}
             backLabel="Réinitialiser"
             backProps={{
               onClick: confirmReset,

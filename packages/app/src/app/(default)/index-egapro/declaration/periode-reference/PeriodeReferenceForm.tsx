@@ -16,7 +16,7 @@ import { endOfYear, formatISO, getYear } from "date-fns";
 import { produce } from "immer";
 import { omit } from "lodash";
 import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
@@ -45,8 +45,8 @@ const formSchema = zodFr
     }),
   );
 
-// Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
+type FormTypeWhenPeriode = Extract<FormType, { périodeSuffisante: "oui" }>;
 
 const stepName: FunnelKey = "periode-reference";
 
@@ -55,6 +55,7 @@ export const PeriodeReferenceForm = () => {
   const router = useRouter();
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true, // Don't store the fields that are not displayed.
     resolver: zodResolver(formSchema),
     defaultValues: { ...formData.commencer, ...formData[stepName] },
@@ -107,11 +108,11 @@ export const PeriodeReferenceForm = () => {
     }
   };
 
+  const errorsWhenPeriode = errors as FieldErrors<FormTypeWhenPeriode>;
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
         <ClientAnimate>
           <Input
             label="Année au titre de laquelle les indicateurs sont calculés"
@@ -136,14 +137,16 @@ export const PeriodeReferenceForm = () => {
                     type: "date",
                     ...register("finPériodeRéférence"),
                   }}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                  state={errors.finPériodeRéférence && "error"}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                  stateRelatedMessage={errors.finPériodeRéférence?.message}
+                  state={errorsWhenPeriode.finPériodeRéférence && "error"}
+                  stateRelatedMessage={errorsWhenPeriode.finPériodeRéférence?.message}
                 />
-                <Button type="button" className={fr.cx("fr-mb-4w")} onClick={() => selectEndOfYear()}>
+                <Button
+                  type="button"
+                  size="small"
+                  priority="secondary"
+                  className={fr.cx("fr-mb-4w", "fr-mt-0")}
+                  onClick={selectEndOfYear}
+                >
                   Sélectionner la fin de l'année civile
                 </Button>
                 <Input
@@ -151,14 +154,11 @@ export const PeriodeReferenceForm = () => {
                   nativeInputProps={{
                     type: "number",
                     min: 1,
+                    step: 1,
                     ...register("effectifTotal", { valueAsNumber: true }),
                   }}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                  state={errors.effectifTotal && "error"}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                  stateRelatedMessage={errors.effectifTotal?.message}
+                  state={errorsWhenPeriode.effectifTotal && "error"}
+                  stateRelatedMessage={errorsWhenPeriode.effectifTotal?.message}
                 />
               </>
             )}

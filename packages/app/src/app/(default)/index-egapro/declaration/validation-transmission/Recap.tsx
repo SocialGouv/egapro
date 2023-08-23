@@ -47,7 +47,7 @@ export const Recap = () => {
         <RecapDeclaration edit déclaration={declaration} />
 
         <BackNextButtonsGroup
-          className={fr.cx("fr-my-8w")}
+          className={fr.cx("fr-my-4w")}
           backProps={{
             onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
           }}

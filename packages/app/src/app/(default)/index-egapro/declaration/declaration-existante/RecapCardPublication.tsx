@@ -1,6 +1,7 @@
 import { type Publication } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
+import { capitalize } from "lodash";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 
@@ -16,7 +17,7 @@ export const RecapCardPublication = ({ publication, edit }: Props) => {
 
   const messageModalité = publication.url
     ? ` via une publication sur le site ${publication?.url}`
-    : `, avec la modalité suivante: ${publication.modalités}`;
+    : ` avec la modalité suivante : ${capitalize(publication.modalités)}`;
 
   return (
     <RecapCard
@@ -25,7 +26,7 @@ export const RecapCardPublication = ({ publication, edit }: Props) => {
       content={
         <>
           <p>
-            Résultats publiés le <strong>{formatIsoToFr(publicationDate)}</strong> {messageModalité}.
+            Résultats publiés le <strong>{formatIsoToFr(publicationDate)}</strong> {messageModalité}
           </p>
         </>
       }

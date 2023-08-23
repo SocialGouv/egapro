@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { zodSirenSchema } from "@common/utils/form";
+import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { AlertMessage } from "@design-system/client";
@@ -25,7 +25,7 @@ const formSchema = zodFr.object({
     .array(
       z.object({
         raisonSociale: z.string(),
-        siren: zodSirenSchema, // Only for typing, the Siren validation is done for each Siren in the form.
+        siren: sirenSchema,
       }),
     )
     .nonempty({
@@ -49,13 +49,8 @@ export const UESForm = () => {
   });
 
   const methods = useForm<FormType>({
-    mode: "onBlur",
-    resolver: async (data, context, options) => {
-      // console.debug("formDataxxx", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-
-      return zodResolver(formSchema)(data, context, options);
-    },
+    mode: "onChange",
+    resolver: zodResolver(formSchema),
     defaultValues,
   });
 
@@ -71,7 +66,7 @@ export const UESForm = () => {
   } = methods;
 
   const {
-    fields: entreprises,
+    fields: entreprisesFields,
     append,
     remove,
   } = useFieldArray({
@@ -97,8 +92,6 @@ export const UESForm = () => {
           (source : Répertoire Sirene de l'INSEE).
         </p>
 
-        {/* <ReactHookFormDebug /> */}
-
         <ClientOnly>
           <Input
             label="Nom de l'UES"
@@ -111,13 +104,14 @@ export const UESForm = () => {
             stateRelatedMessage={errors.nom?.message}
           />
 
+          <span className={fr.cx("fr-label", "fr-mb-1w")}>Entreprises composant l'UES</span>
           <div className={fr.cx("fr-table", "fr-table--layout-fixed", "fr-table--no-caption")}>
             <table>
               <caption>Liste des entreprises de l'UES</caption>
               <thead>
                 <tr>
-                  <th>Siren</th>
-                  <th>Raison sociale</th>
+                  <th style={{ width: "20%" }}>Siren</th>
+                  <th style={{ width: "50%" }}>Raison sociale</th>
                   <th></th>
                 </tr>
               </thead>
@@ -135,21 +129,25 @@ export const UESForm = () => {
                     </Badge>
                   </td>
                 </tr>
-                {entreprises.map((_entreprise, index) => (
-                  <tr key={index}>
+                {entreprisesFields.map((entrepriseField, index) => (
+                  <tr key={entrepriseField.id}>
                     <td>
                       <Input
-                        label=""
+                        label="Siren entreprise"
+                        hideLabel
+                        classes={{
+                          message: fr.cx("fr-hidden"),
+                        }}
                         nativeInputProps={{
                           ...register(`entreprises.${index}.siren`),
+                          maxLength: 9,
+                          minLength: 9,
+                          // TODO onChange + delay + debounce instead
                           onBlur: async () => {
-                            const result = zodSirenSchema.safeParse(watchedEntreprises[index].siren);
+                            const result = sirenSchema.safeParse(watchedEntreprises[index].siren);
 
                             if (!result.success) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
-                              setError(`entreprises.${index}.siren`, {
-                                message: result.error.issues[0].message,
-                              });
                               return;
                             }
 
@@ -179,39 +177,43 @@ export const UESForm = () => {
                             } catch (error: unknown) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
-                                message: "Le Siren est invalide",
+                                message: error instanceof Error ? error.message : "Le Siren est invalide",
                                 type: "manual",
                               });
                             }
                           },
                         }}
-                        state={errors.entreprises?.[index]?.siren ? "error" : undefined}
-                        stateRelatedMessage={errors.entreprises?.[index]?.siren?.message}
+                        state={errors.entreprises?.[index]?.siren && "error"}
                       />
                     </td>
                     <td>
-                      <Input
-                        label=""
-                        disabled={true}
-                        nativeInputProps={{
-                          ...register(`entreprises.${index}.raisonSociale`),
-
-                          title: watchedEntreprises[index].raisonSociale,
-                        }}
-                        state={errors.entreprises?.[index]?.raisonSociale ? "error" : undefined}
-                        stateRelatedMessage={errors.entreprises?.[index]?.raisonSociale?.message}
-                      />
+                      {errors.entreprises?.[index]?.siren ? (
+                        <span className={fr.cx("fr-error-text", "fr-text--sm")}>
+                          {errors.entreprises?.[index]?.siren?.message}
+                        </span>
+                      ) : (
+                        <Input
+                          label="Raison sociale entreprise"
+                          hideLabel
+                          textArea
+                          disabled
+                          nativeTextAreaProps={{
+                            ...register(`entreprises.${index}.raisonSociale`),
+                            title: watchedEntreprises[index].raisonSociale,
+                          }}
+                          state={errors.entreprises?.[index]?.raisonSociale && "error"}
+                          stateRelatedMessage={errors.entreprises?.[index]?.raisonSociale?.message}
+                        />
+                      )}
                     </td>
                     <td style={{ textAlign: "right" }}>
                       <Button
+                        title="Supprimer l'entreprise"
                         type="button"
                         iconId="fr-icon-delete-bin-line"
                         priority="tertiary no outline"
-                        iconPosition="right"
                         onClick={() => remove(index)}
-                      >
-                        {""}
-                      </Button>
+                      />
                     </td>
                   </tr>
                 ))}
@@ -237,8 +239,8 @@ export const UESForm = () => {
 
           <ClientOnly>
             <span>
-              {`${entreprises.length + 1} entreprise${entreprises.length + 1 >= 2 ? "s" : ""} compose${
-                entreprises.length + 1 >= 2 ? "nt" : ""
+              {`${entreprisesFields.length + 1} entreprise${entreprisesFields.length + 1 >= 2 ? "s" : ""} compose${
+                entreprisesFields.length + 1 >= 2 ? "nt" : ""
               }`}{" "}
               l'UES
             </span>
