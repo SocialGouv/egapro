@@ -13,14 +13,17 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { isBefore, parseISO } from "date-fns";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+
+const MIN_DATE_CSE = "2018-01-01";
 
 const formSchema = zodFr
   .discriminatedUnion("estCalculable", [
@@ -33,7 +36,16 @@ const formSchema = zodFr
       estCalculable: z.literal("oui"),
       mode: z.string(), // No check is necessary as the value is from select options.
       cse: zodRadioInputSchema.nullish(),
-      dateConsultationCSE: zodDateSchema.optional(),
+      dateConsultationCSE: zodDateSchema
+        .superRefine((date, ctx) => {
+          if (isBefore(parseISO(date), parseISO(MIN_DATE_CSE))) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "La date doit être postérieure ou égale à 2018",
+            });
+          }
+        })
+        .optional(),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -82,7 +94,8 @@ const formSchema = zodFr
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
-1;
+type FormTypeWhenCalculable = Extract<FormType, { estCalculable: "oui" }>;
+type FormTypeWhenNonCalculable = Extract<FormType, { estCalculable: "non" }>;
 
 const stepName: FunnelKey = "remunerations";
 
@@ -91,6 +104,7 @@ export const RemunerationForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true, // Don't store the fields that are not displayed.
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
@@ -144,6 +158,9 @@ export const RemunerationForm = () => {
     return router.push(funnelConfig(newFormData)[stepName].next().url);
   };
 
+  const errorsWhenCalculable = errors as FieldErrors<FormTypeWhenCalculable>;
+  const errorsWhenNonCalculable = errors as FieldErrors<FormTypeWhenNonCalculable>;
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -160,17 +177,11 @@ export const RemunerationForm = () => {
                     {
                       label:
                         "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
-                      nativeInputProps: {
-                        ...register("déclarationCalculCSP"),
-                      },
+                      nativeInputProps: register("déclarationCalculCSP"),
                     },
                   ]}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  state={errors.déclarationCalculCSP && "error"}
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  stateRelatedMessage={errors.déclarationCalculCSP?.message}
+                  state={errorsWhenNonCalculable.déclarationCalculCSP && "error"}
+                  stateRelatedMessage={errorsWhenNonCalculable.déclarationCalculCSP?.message}
                 />
 
                 {déclarationCalculCSP && <MotifNC stepName={stepName} />}
@@ -235,16 +246,12 @@ export const RemunerationForm = () => {
                       <Input
                         label="Date de consultation du CSE pour le choix de cette modalité de calcul"
                         nativeInputProps={{
-                          type: "date",
                           ...register("dateConsultationCSE"),
+                          type: "date",
+                          min: MIN_DATE_CSE,
                         }}
-                        iconId="ri-calendar-line"
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        state={errors.dateConsultationCSE && "error"}
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        stateRelatedMessage={errors.dateConsultationCSE?.message}
+                        state={errorsWhenCalculable.dateConsultationCSE && "error"}
+                        stateRelatedMessage={errorsWhenCalculable.dateConsultationCSE?.message}
                       />
                     )}
                   </>
