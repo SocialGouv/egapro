@@ -1,28 +1,40 @@
 "use client";
 
 import Input from "@codegouvfr/react-dsfr/Input";
+import { Url } from "@common/shared-domain/domain/valueObjects";
+import { formatIsoToFr } from "@common/utils/date";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
-import { zodFr } from "@common/utils/zod";
+import { zodFr, zodValueObjectSuperRefine } from "@common/utils/zod";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { isBefore, parseISO } from "date-fns";
 import { produce } from "immer";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey, funnelStaticConfig } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.object({
   choixSiteWeb: zodRadioInputSchema,
   date: zodDateSchema,
-  url: z.string().url().optional(),
-  modalités: z.string().optional(),
+  url: z
+    .string()
+    .trim()
+    .nonempty("L'adresse exacte de la page internet est obligatoire")
+    .superRefine(zodValueObjectSuperRefine(Url, "L'adresse de la page internet est invalide"))
+    .optional(),
+  modalités: z
+    .string()
+    .trim()
+    .nonempty("La description des modalités de communication des écarts est obligatoire")
+    .optional(),
   planRelance: zodRadioInputSchema,
 });
 
@@ -32,17 +44,12 @@ const stepName: FunnelKey = "publication";
 
 export const PublicationForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true,
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -51,12 +58,26 @@ export const PublicationForm = () => {
     handleSubmit,
     trigger,
     watch,
+    setError,
     formState: { isValid, errors },
   } = methods;
 
+  if (!formData["periode-reference"] || formData["periode-reference"]?.périodeSuffisante === "non") {
+    redirect(funnelStaticConfig["periode-reference"].url);
+  }
+  const endOfPeriod = formData["periode-reference"].finPériodeRéférence;
   const choixSiteWeb = watch("choixSiteWeb");
 
   const onSubmit = async (data: FormType) => {
+    if (isBefore(parseISO(data.date), parseISO(endOfPeriod))) {
+      return setError("date", {
+        type: "manual",
+        message: `La date de publication ne peut précéder la date de fin de la période de référence (${formatIsoToFr(
+          endOfPeriod,
+        )})`,
+      });
+    }
+
     const newFormData = produce(formData, draft => {
       draft[stepName] = data as DeclarationFormState[typeof stepName];
     });
@@ -69,22 +90,17 @@ export const PublicationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
-        <div ref={animationParent}>
+        <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
               <Input
                 label="Date de publication des résultats obtenus"
                 nativeInputProps={{
-                  type: "date",
                   ...register("date"),
+                  type: "date",
+                  min: endOfPeriod,
                 }}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                state={errors.date ? "error" : "default"}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
+                state={errors.date && "error"}
                 stateRelatedMessage={errors.date?.message}
               />
             </>
@@ -99,7 +115,7 @@ export const PublicationForm = () => {
                   type: "url",
                   onBlur: () => trigger("url"),
                 }}
-                state={errors.url ? "error" : "default"}
+                state={errors.url && "error"}
                 stateRelatedMessage={errors.url?.message}
               />
             )}
@@ -107,8 +123,9 @@ export const PublicationForm = () => {
               <Input
                 label="Préciser les modalités de communication des résultats obtenus auprès de vos salariés"
                 textArea
+                state={errors.modalités && "error"}
                 stateRelatedMessage={errors.modalités?.message}
-                nativeTextAreaProps={{ ...register("modalités") }}
+                nativeTextAreaProps={register("modalités")}
               />
             )}
 
@@ -120,7 +137,7 @@ export const PublicationForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );
