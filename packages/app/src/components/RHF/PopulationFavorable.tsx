@@ -35,7 +35,7 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
       ]}
       orientation="horizontal"
       // Error in RHF. The error is not detected in onChange validation, because the ref is not found.
-      state={get(errors, "populationFavorable") ? "error" : "default"}
+      state={get(errors, "populationFavorable") && "error"}
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       stateRelatedMessage={get(errors, "populationFavorable")?.message || ""}

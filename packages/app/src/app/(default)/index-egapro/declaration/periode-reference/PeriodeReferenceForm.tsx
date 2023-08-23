@@ -138,7 +138,7 @@ export const PeriodeReferenceForm = () => {
                   }}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
-                  state={errors.finPériodeRéférence ? "error" : "default"}
+                  state={errors.finPériodeRéférence && "error"}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore -- finPériodeRéférence is present if périodeSuffisante is "oui"
                   stateRelatedMessage={errors.finPériodeRéférence?.message}
@@ -155,7 +155,7 @@ export const PeriodeReferenceForm = () => {
                   }}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
-                  state={errors.effectifTotal ? "error" : "default"}
+                  state={errors.effectifTotal && "error"}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore -- effectifTotal is present if périodeSuffisante is "oui"
                   stateRelatedMessage={errors.effectifTotal?.message}

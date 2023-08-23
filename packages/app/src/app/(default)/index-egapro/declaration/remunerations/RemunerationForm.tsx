@@ -167,7 +167,7 @@ export const RemunerationForm = () => {
                   ]}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
-                  state={errors.déclarationCalculCSP ? "error" : "default"}
+                  state={errors.déclarationCalculCSP && "error"}
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
                   stateRelatedMessage={errors.déclarationCalculCSP?.message}
@@ -241,7 +241,7 @@ export const RemunerationForm = () => {
                         iconId="ri-calendar-line"
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
-                        state={errors.dateConsultationCSE ? "error" : "default"}
+                        state={errors.dateConsultationCSE && "error"}
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         stateRelatedMessage={errors.dateConsultationCSE?.message}
