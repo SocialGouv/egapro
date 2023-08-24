@@ -3,7 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import {
-  computeIndicator2Note,
+  computeIndicator3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodNumberOrNaNOrNull, zodPositiveOrZeroNumberSchema } from "@common/utils/form";
@@ -132,7 +132,7 @@ export const PromotionsForm = () => {
   useEffect(() => {
     if (résultat !== undefined) {
       if (résultat !== null) {
-        const note = computeIndicator2Note(résultat);
+        const note = computeIndicator3Note(résultat);
         setValue("note", note);
       }
 
