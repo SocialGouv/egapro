@@ -244,9 +244,9 @@ export const CommencerForm = () => {
               <Alert
                 severity="info"
                 small
-                description={`Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${year} au titre des données de ${
-                  year - 1
-                }.`}
+                description={`Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${
+                  year + 1
+                } au titre des données de ${year}.`}
               />
             )}
           </ClientAnimate>
