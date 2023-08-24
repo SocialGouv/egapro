@@ -126,7 +126,7 @@ export const PeriodeReferenceForm = () => {
             <ClientOnly fallback={<Skeleton inline width="4ch" />}>{year}</ClientOnly>
           </strong>
         </u>{" "}
-        est l'année au titre de laquelle les écarts de représentation sont calculés.
+        est l'année au titre de laquelle les indicateurs sont calculés.
       </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
