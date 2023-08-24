@@ -121,7 +121,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
 
                 {indicateurs?.rémunérations?.mode !== "csp" && (
                   <>
-                    {!entreprise.ues || !indicateurs?.rémunérations?.date_consultation_cse ? (
+                    {!indicateurs?.rémunérations?.date_consultation_cse ? (
                       <p> Aucun CSE n’est mis en place </p>
                     ) : (
                       <p>Le CSE a été consulté le {formatIsoToFr(indicateurs.rémunérations.date_consultation_cse)}</p>

@@ -500,10 +500,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
               : formState.augmentations?.populationFavorable,
           résultat: formState.augmentations?.résultat,
           catégories: [
-            formState.augmentations?.catégories?.[0].écarts || 0,
-            formState.augmentations?.catégories?.[1].écarts || 0,
-            formState.augmentations?.catégories?.[2].écarts || 0,
-            formState.augmentations?.catégories?.[3].écarts || 0,
+            formState.augmentations?.catégories?.[0].écarts || null,
+            formState.augmentations?.catégories?.[1].écarts || null,
+            formState.augmentations?.catégories?.[2].écarts || null,
+            formState.augmentations?.catégories?.[3].écarts || null,
           ],
         };
 
@@ -520,10 +520,10 @@ function buildIndicateurs(formState: DeclarationFormState): DeclarationDTO["indi
           population_favorable:
             formState.promotions?.populationFavorable === "" ? undefined : formState.promotions?.populationFavorable,
           catégories: [
-            formState.promotions?.catégories?.[0].écarts || 0,
-            formState.promotions?.catégories?.[1].écarts || 0,
-            formState.promotions?.catégories?.[2].écarts || 0,
-            formState.promotions?.catégories?.[3].écarts || 0,
+            formState.promotions?.catégories?.[0].écarts || null,
+            formState.promotions?.catégories?.[1].écarts || null,
+            formState.promotions?.catégories?.[2].écarts || null,
+            formState.promotions?.catégories?.[3].écarts || null,
           ],
         };
 
