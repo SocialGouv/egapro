@@ -22,6 +22,7 @@ export const PercentageInput = ({ label, min, max, name, disabled }: PropsWithCh
     <>
       <Input
         label={label}
+        iconId="ri-percent-line"
         nativeInputProps={{
           type: "number",
           min,

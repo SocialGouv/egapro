@@ -124,6 +124,7 @@ export const EcartsMembresForm = () => {
                 max: 100,
                 min: 0,
                 step: 0.1,
+                iconId: "ri-percent-line",
               }}
             />
           </FormProvider>

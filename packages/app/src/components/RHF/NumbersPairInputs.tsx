@@ -1,5 +1,6 @@
 "use client";
 
+import { type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { truncFloatToDecimal } from "@common/utils/number";
 import { type SimpleObject } from "@common/utils/types";
@@ -9,6 +10,7 @@ interface NumbersPairInputsProps<FormType> {
   first: PairInputProps<FormType>;
   options?: {
     disabled?: boolean;
+    iconId?: FrIconClassName | RiIconClassName;
     max: number;
     min?: number;
     step?: number;
@@ -76,6 +78,7 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
         label={firstLabel}
         state={errors[firstFormKey as FakeKey] && "error"}
         stateRelatedMessage={errors[firstFormKey as FakeKey]?.message}
+        iconId={options.iconId}
         nativeInputProps={{
           ...register(firstFormKey as FakeKey, {
             onChange() {
@@ -95,6 +98,7 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
         label={secondLabel}
         state={errors[secondFormKey as FakeKey] && "error"}
         stateRelatedMessage={errors[secondFormKey as FakeKey]?.message}
+        iconId={options.iconId}
         nativeInputProps={{
           ...register(secondFormKey as FakeKey, {
             onChange() {
