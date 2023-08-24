@@ -19,7 +19,7 @@ const infoModale = createModal({
 export const RecapCardCompany = ({ company, full, title }: Props) => {
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues } = company;
 
-  const titleFull = title ?? "Information de l'entreprise déclarante";
+  const titleFull = title ?? "Informations de l'entreprise déclarante";
 
   const postalCodeCity = `${postalCode} ${city}`.trim();
   const countryLib =
@@ -28,7 +28,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
   return (
     <>
       <ClientBodyPortal>
-        <infoModale.Component title={titleFull}>
+        <infoModale.Component title="">
           Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
           l'INSEE).
         </infoModale.Component>
@@ -53,7 +53,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
                   {name}
                 </GridCol>
                 <GridCol sm={3} className="fr-pb-0">
-                  <strong>Numéro de Siren</strong>
+                  <strong>Siren</strong>
                   <br />
                   {siren}
                 </GridCol>
@@ -68,7 +68,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
                   <strong>Adresse</strong>
                   <br />
                   {address}
-                  {postalCodeCity && `, ${postalCodeCity}`}
+                  {postalCodeCity ? `, ${postalCodeCity}` : " "}
                   {countryLib}
                 </GridCol>
               </Grid>
