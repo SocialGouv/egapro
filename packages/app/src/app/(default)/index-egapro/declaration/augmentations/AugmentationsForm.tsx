@@ -6,7 +6,7 @@ import {
   computeIndicator2Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull, zodPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -47,7 +47,7 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: zodPositiveOrZeroNumberSchema,
+      résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
       note: z.number(),
       catégories: zodCategories,
     }),
@@ -183,14 +183,14 @@ export const AugmentationsForm = () => {
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>
 
-                <PercentageInput label="Ouvriers" name="catégories.0.écarts" />
-                <PercentageInput label="Employés" name="catégories.1.écarts" />
-                <PercentageInput label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
-                <PercentageInput label="Ingénieurs et cadres" name="catégories.3.écarts" />
+                <PercentageInput<FormType> label="Ouvriers" name="catégories.0.écarts" />
+                <PercentageInput<FormType> label="Employés" name="catégories.1.écarts" />
+                <PercentageInput<FormType> label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
+                <PercentageInput<FormType> label="Ingénieurs et cadres" name="catégories.3.écarts" />
 
                 <br />
 
-                <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
                 <PopulationFavorable disabled={populationFavorableDisabled} />
 
