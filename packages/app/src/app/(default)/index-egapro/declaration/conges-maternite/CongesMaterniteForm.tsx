@@ -5,7 +5,6 @@ import {
   computeIndicator4Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodPercentOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -33,7 +32,7 @@ const formSchema = zodFr.discriminatedUnion("estCalculable", [
   }),
   zodFr.object({
     estCalculable: z.literal("oui"),
-    résultat: zodPercentOrNaNOrNull.optional(),
+    résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative().lte(100),
     note: z.number().optional(),
   }),
 ]);

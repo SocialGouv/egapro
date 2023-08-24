@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { type Remunerations } from "@common/models/generated";
@@ -64,18 +65,14 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
 
   const methods = useForm<FormType>({
     mode: "onChange",
-    // resolver: zodResolver(formSchema),
-    resolver: async (data, context, options) => {
-      // console.debug("data", data);
-      // console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || buildDefaultCategories(mode),
   });
   const {
     control,
     handleSubmit,
-    formState: { errors: _errors, isValid },
+    formState: { errors, isValid },
+    setError,
   } = methods;
 
   const {
@@ -85,9 +82,29 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "catégories",
+    rules: {
+      minLength: 1,
+    },
   });
 
   const onSubmit = async (data: FormType) => {
+    const notFilled = data.catégories.every(
+      catégorie =>
+        catégorie.tranches[":29"] === null &&
+        catégorie.tranches["30:39"] === null &&
+        catégorie.tranches["40:49"] === null &&
+        catégorie.tranches["50:"] === null,
+    );
+
+    if (notFilled) {
+      return setError("root.catégories", {
+        message:
+          mode === "csp"
+            ? "Vous devez renseigner les écarts de rémunération pour les CSP et tranches d'âge concernés."
+            : "Vous devez renseigner les écarts de rémunération pour les tranches d'âge concernées.",
+      });
+    }
+
     savePageData(stepName, data as DeclarationFormState[typeof stepName]);
 
     router.push(funnelConfig(formData)[stepName].next().url);
@@ -100,8 +117,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          {/* <ReactHookFormDebug /> */}
-
           <div className={fr.cx("fr-mb-8w")}></div>
 
           <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
@@ -176,6 +191,11 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
           )}
         </ClientOnly>
 
+        <ClientAnimate>
+          {errors.root?.catégories && (
+            <Alert severity="error" title="Informations manquantes" description={errors.root.catégories.message} />
+          )}
+        </ClientAnimate>
         <BackNextButtons stepName={stepName} disabled={!isValid} />
       </form>
     </FormProvider>

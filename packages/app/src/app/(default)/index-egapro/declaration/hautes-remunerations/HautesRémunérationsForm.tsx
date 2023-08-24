@@ -27,11 +27,10 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 
 const formSchema = z
   .object({
-    populationFavorable: z.string().optional(),
+    populationFavorable: z.string(),
     résultat: zodPositiveOrZeroIntegerSchema
       .min(0, { message: "La valeur minimale est 0" })
-      .max(5, { message: "La valeur maximale est 5" })
-      .optional(),
+      .max(5, { message: "La valeur maximale est 5" }),
     note: z.number().optional(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {

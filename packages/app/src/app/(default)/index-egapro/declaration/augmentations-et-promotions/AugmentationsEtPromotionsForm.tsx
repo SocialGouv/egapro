@@ -6,7 +6,6 @@ import {
   computeIndicator2And3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -37,8 +36,8 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: zodNumberOrNaNOrNull.optional(),
-      résultatEquivalentSalarié: zodNumberOrNaNOrNull.optional(),
+      résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+      résultatEquivalentSalarié: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
       note: z.number().optional(),
       notePourcentage: z.number().optional(),
       noteNombreSalaries: z.number().optional(),
@@ -76,7 +75,7 @@ export const AugmentationEtPromotionsForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid, errors: _errors },
+    formState: { isValid },
     setValue,
     unregister,
     watch,
