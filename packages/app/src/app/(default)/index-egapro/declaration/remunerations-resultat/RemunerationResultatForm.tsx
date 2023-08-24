@@ -4,7 +4,6 @@ import {
   computeIndicator1Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
@@ -29,7 +28,7 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: zodNumberOrNaNOrNull,
+    résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat !== 0 && !populationFavorable) {
@@ -57,7 +56,7 @@ export const RemunerationResultatForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid, errors: _errors },
+    formState: { isValid },
     setValue,
     watch,
   } = methods;
@@ -98,7 +97,7 @@ export const RemunerationResultatForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+          <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
           <PopulationFavorable disabled={populationFavorableDisabled} />
 

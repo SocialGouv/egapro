@@ -6,7 +6,7 @@ import {
   computeIndicator3Note,
   indicatorNoteMax,
 } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
-import { zodNumberOrNaNOrNull, zodPositiveOrZeroNumberSchema } from "@common/utils/form";
+import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -46,7 +46,7 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: zodPositiveOrZeroNumberSchema,
+      résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
       note: z.number(),
       catégories: zodCategories,
     }),
