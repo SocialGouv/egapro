@@ -76,6 +76,8 @@ export const PeriodeReferenceForm = () => {
             nativeInputProps={{
               type: "date",
               placeholder: "Sélectionner une date",
+              min: `${funnel?.year}-01-01`,
+              max: `${funnel?.year}-12-31`,
               ...register("endOfPeriod"),
             }}
           />
