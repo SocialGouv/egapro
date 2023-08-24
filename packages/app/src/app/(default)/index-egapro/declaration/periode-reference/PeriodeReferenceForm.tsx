@@ -142,6 +142,8 @@ export const PeriodeReferenceForm = () => {
                   label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
                   nativeInputProps={{
                     type: "date",
+                    min: `${year}-01-01`,
+                    max: `${year}-12-31`,
                     ...register("finPériodeRéférence"),
                   }}
                   state={errorsWhenPeriode.finPériodeRéférence && "error"}
