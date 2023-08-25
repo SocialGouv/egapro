@@ -67,8 +67,6 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onsubmit)}>
           <FormLayout>
-            {/* <ReactHookFormDebug /> */}
-
             <ClientOnly fallback={<SkeletonForm fields={3} />}>
               <DeclarantFields<FormType>
                 isStaff={session.user.staff}
