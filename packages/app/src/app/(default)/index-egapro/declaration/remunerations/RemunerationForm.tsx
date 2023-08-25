@@ -164,8 +164,6 @@ export const RemunerationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* <ReactHookFormDebug /> */}
-
         <ClientAnimate>
           <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
 

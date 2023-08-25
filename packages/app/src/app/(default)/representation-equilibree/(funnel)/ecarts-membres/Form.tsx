@@ -140,7 +140,7 @@ export const EcartsMembresForm = () => {
             }),
           }}
         >
-          <option value="" disabled>
+          <option value="" hidden>
             Sélectionnez un motif
           </option>
           {Object.entries(NotComputableReasonMemberRepEq.Label).map(([key, label]) => (

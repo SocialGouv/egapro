@@ -131,7 +131,7 @@ export const EcartsCadresForm = () => {
             }),
           }}
         >
-          <option value="" disabled>
+          <option value="" hidden>
             Sélectionnez un motif
           </option>
           {Object.entries(NotComputableReasonExecutiveRepEq.Label).map(([key, label]) => (
