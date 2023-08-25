@@ -20,11 +20,11 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.object({
-  nom: z.string().min(1, "Le nom de l'UES est obligatoire"),
+  nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
   entreprises: z
     .array(
       z.object({
-        raisonSociale: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
+        raisonSociale: z.string().trim().nonempty(),
         siren: sirenSchema,
       }),
     )
@@ -63,6 +63,7 @@ export const UESForm = () => {
     setError,
     formState: { errors, isValid },
     watch,
+    trigger,
   } = methods;
 
   const {
@@ -174,6 +175,7 @@ export const UESForm = () => {
                               );
                               setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
                               clearErrors(`entreprises.${index}.siren`);
+                              trigger();
                             } catch (error: unknown) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
