@@ -1,23 +1,21 @@
 "use client";
 
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { DeclarantFields } from "@components/RHF/DeclarantFields";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 const formSchema = createSteps.declarant.extend({
-  gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
+  gdpr: z.boolean().refine(gdpr => gdpr, "Vous devez accepter les conditions pour continuer"),
 });
 
 type DeclarantFormType = ClearObject<z.infer<typeof formSchema>>;
@@ -28,11 +26,7 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
   const [funnel, saveFunnel, isEdit] = useStore("funnel", "saveFunnel", "isEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<DeclarantFormType>({
+  const methods = useForm<DeclarantFormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,6 +35,11 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
       ...funnel, // then, if funnel has data, get them
     },
   });
+
+  const {
+    handleSubmit,
+    formState: { isValid },
+  } = methods;
 
   if (!hydrated) {
     return <SkeletonForm fields={5} />;
@@ -51,70 +50,28 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
     router.push("/representation-equilibree/entreprise");
   };
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <FormLayout>
-        <Input
-          label="Nom du déclarant"
-          state={errors.lastname && "error"}
-          stateRelatedMessage={errors.lastname?.message}
-          nativeInputProps={register("lastname")}
-        />
-        <Input
-          label="Prénom du déclarant"
-          state={errors.firstname && "error"}
-          stateRelatedMessage={errors.firstname?.message}
-          nativeInputProps={register("firstname")}
-        />
-        <Input
-          label="Numéro de téléphone"
-          state={errors.phoneNumber && "error"}
-          stateRelatedMessage={errors.phoneNumber?.message}
-          nativeInputProps={{
-            ...register("phoneNumber"),
-            minLength: 10,
-            maxLength: 10,
-          }}
-        />
-        <Input
-          label="Email"
-          hintText={session.user.staff ? "Modifiable en tant que staff" : "Saisi lors de l'authentification"}
-          state={errors.email && "error"}
-          stateRelatedMessage={errors.email?.message}
-          nativeInputProps={{
-            ...register("email"),
-            type: "email",
-            readOnly: !session.user.staff,
-          }}
-        />
-        <Checkbox
-          options={[
-            {
-              label:
-                "J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la validité de ma déclaration.",
-              hintText: (
-                <>
-                  Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos{" "}
-                  <Link href="/cgu" target="_blank">
-                    Conditions Générales d'Utilisation
-                  </Link>
-                  .
-                </>
-              ),
-              nativeInputProps: register("gdpr"),
-            },
-          ]}
-          state={errors.gdpr && "error"}
-          stateRelatedMessage={errors.gdpr?.message}
-        />
-        <BackNextButtonsGroup
-          backProps={{
-            linkProps: {
-              href: "/representation-equilibree/commencer",
-            },
-          }}
-          nextDisabled={!isValid}
-        />
-      </FormLayout>
-    </form>
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <FormLayout>
+          <DeclarantFields<DeclarantFormType>
+            isStaff={session.user.staff}
+            email="email"
+            firstname="firstname"
+            lastname="lastname"
+            phoneNumber="phoneNumber"
+            gdpr="gdpr"
+          />
+
+          <BackNextButtonsGroup
+            backProps={{
+              linkProps: {
+                href: "/representation-equilibree/commencer",
+              },
+            }}
+            nextDisabled={!isValid}
+          />
+        </FormLayout>
+      </form>
+    </FormProvider>
   );
 };

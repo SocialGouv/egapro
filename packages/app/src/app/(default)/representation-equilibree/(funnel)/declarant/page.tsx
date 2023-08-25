@@ -40,10 +40,10 @@ const DeclarantPage = async () => {
         className={fr.cx("fr-mb-4w")}
         description={
           <>
-            Les informations sont préremplies grâce à votre compte MonComptePro mais vous pouvez choisir de modifier les
-            informations déclarant ci-dessous au besoin. En revanche, l'email de référence ne peut être modifiée.
+            Les informations déclarant sont préremplies à partir de votre compte MonComptePro mais vous pouvez les
+            modifier le cas échéant, à l'exception de l'email.
             <br />
-            Vous pouvez modifier les informations par défaut sur{" "}
+            Vous pouvez aussi modifier ces informations directement sur{" "}
             <Link href={`${monCompteProHost}/personal-information`} target="_blank">
               votre profile MonComptePro
             </Link>

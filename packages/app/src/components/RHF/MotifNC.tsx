@@ -16,13 +16,13 @@ export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
   return (
     <>
       <Select
-        label="Précision du motif de non calculabilité de l'indicateur"
+        label="Motif de non calculabilité de l'indicateur"
         nativeSelectProps={{ ...register("motifNonCalculabilité") }}
-        state={errors.motifNonCalculabilité ? "error" : "default"}
+        state={errors.motifNonCalculabilité && "error"}
         stateRelatedMessage={errors.motifNonCalculabilité?.message as string | undefined}
       >
-        <option value="" disabled hidden>
-          Selectionnez une option
+        <option value="" hidden>
+          Selectionnez un motif
         </option>
         {motifsNC[stepName].map(motif => (
           <option key={motif} value={motif}>

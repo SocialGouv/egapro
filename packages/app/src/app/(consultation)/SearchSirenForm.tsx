@@ -69,7 +69,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               ...register("query"),
             }}
             stateRelatedMessage={errors.query?.message}
-            state={errors.query ? "error" : "default"}
+            state={errors.query && "error"}
           />
         </GridCol>
         <GridCol sm={4}>

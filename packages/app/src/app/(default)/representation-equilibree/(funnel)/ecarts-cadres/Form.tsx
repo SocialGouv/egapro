@@ -115,6 +115,7 @@ export const EcartsCadresForm = () => {
                 max: 100,
                 min: 0,
                 step: 0.1,
+                iconId: "ri-percent-line",
               }}
             />
           </FormProvider>
@@ -130,7 +131,7 @@ export const EcartsCadresForm = () => {
             }),
           }}
         >
-          <option value="" disabled>
+          <option value="" hidden>
             Sélectionnez un motif
           </option>
           {Object.entries(NotComputableReasonExecutiveRepEq.Label).map(([key, label]) => (
