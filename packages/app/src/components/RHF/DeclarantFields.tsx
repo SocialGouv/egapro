@@ -1,3 +1,5 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { type SimpleObject } from "@common/utils/types";
@@ -31,6 +33,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
   const {
     register,
     formState: { errors },
+    setValue,
   } = useFormContext<FakeFormType>();
 
   const firstnameKey = firstname as FakeKey;
@@ -61,7 +64,24 @@ export const DeclarantFields = <FormType extends SimpleObject>({
 
         <GridCol sm={12}>
           <Input
-            label="Téléphone du déclarant"
+            label={
+              <>
+                Téléphone du déclarant
+                {isStaff && (
+                  <Button
+                    size="small"
+                    type="button"
+                    priority="tertiary no outline"
+                    iconId="ri-phone-fill"
+                    onClick={() => setValue(phoneNumberKey, "0122334455", { shouldValidate: true })}
+                    className={fr.cx("fr-mb-n1w", "fr-ml-1w")}
+                    style={{ verticalAlign: "sub" }}
+                  >
+                    Staff : Remplir
+                  </Button>
+                )}
+              </>
+            }
             hintText="Format attendu : 0122334455"
             state={errors[phoneNumberKey] && "error"}
             stateRelatedMessage={errors[phoneNumberKey]?.message}
