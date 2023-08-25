@@ -133,7 +133,7 @@ export const ResultatGlobalForm = () => {
                     ...register("mesures"),
                   }}
                 >
-                  <option value="" disabled>
+                  <option value="" hidden>
                     Sélectionnez une mesure
                   </option>
                   {Object.entries(mesuresLabel).map(([key, value]) => (

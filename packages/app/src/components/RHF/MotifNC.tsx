@@ -21,8 +21,8 @@ export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
         state={errors.motifNonCalculabilité && "error"}
         stateRelatedMessage={errors.motifNonCalculabilité?.message as string | undefined}
       >
-        <option value="" disabled hidden>
-          Selectionnez une option
+        <option value="" hidden>
+          Selectionnez un motif
         </option>
         {motifsNC[stepName].map(motif => (
           <option key={motif} value={motif}>
