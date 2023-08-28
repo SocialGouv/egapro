@@ -37,7 +37,7 @@ export const EcartsCadresForm = () => {
     handleSubmit,
     register,
     reset,
-    trigger,
+    setFocus,
   } = methods;
 
   useEffect(() => {
@@ -88,8 +88,7 @@ export const EcartsCadresForm = () => {
                 onChange() {
                   setComputable(true);
                   reset();
-                  trigger("executiveWomenPercent", { shouldFocus: true });
-                  trigger("executiveMenPercent");
+                  setTimeout(() => setFocus("executiveWomenPercent", { shouldSelect: true }), 0);
                 },
               },
             },
