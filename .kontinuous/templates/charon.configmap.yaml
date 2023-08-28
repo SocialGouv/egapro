@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: charon-config
+data:
+  CHARON_CLIENT_0_WILDCARDS: |
+    http://localhost:3000,
+    https://egapro-*.dev.fabrique.social.gouv.fr
+  CHARON_CLIENT_0_PROVIDER: github
+  CHARON_CLIENT_1_WILDCARDS: |
+    http://localhost:3000,
+    https://egapro-*.dev.fabrique.social.gouv.fr
+  CHARON_CLIENT_1_PROVIDER: moncompteprotest
+  CHARON_CLIENT_2_WILDCARDS: |
+    http://localhost:3000,
+    https://egapro-*.dev.fabrique.social.gouv.fr
+  CHARON_CLIENT_2_PROVIDER: moncomptepro
