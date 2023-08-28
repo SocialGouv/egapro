@@ -84,7 +84,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
               <br />
               Siren : <strong>{siren}</strong>
               <br />
-              NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
+              Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
               {workforce?.range && (
                 <>
                   <br />

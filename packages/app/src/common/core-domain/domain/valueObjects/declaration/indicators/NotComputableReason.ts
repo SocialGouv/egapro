@@ -13,7 +13,7 @@ export namespace NotComputableReason {
   export enum Enum {
     /** Absence d'augmentations individuelles */
     ABSAUGI = "absaugi",
-    /** Absence d'augmentations pendant ce congé */
+    /** Absence d'augmentations salariales pendant la durée du ou des congés maternité */
     ABSAUGPDTCM = "absaugpdtcm",
     /** Absence de promotions */
     ABSPROM = "absprom",
@@ -27,7 +27,7 @@ export namespace NotComputableReason {
 
   export const Label = {
     [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
-    [Enum.ABSAUGPDTCM]: "Absence d'augmentations pendant ce congé",
+    [Enum.ABSAUGPDTCM]: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
     [Enum.ABSPROM]: "Absence de promotions",
     [Enum.ABSRCM]: "Absence de retours de congé maternité",
     [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
