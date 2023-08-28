@@ -1,8 +1,8 @@
 import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/models/generated";
 import { IndicatorNote, RecapCard } from "@design-system";
-import { type IndicatorKey } from "@services/form/declaration/DeclarationFormBuilder";
-import { capitalize } from "lodash";
+import { type IndicatorKey, labelsMotifNC } from "@services/form/declaration/DeclarationFormBuilder";
+import { capitalize, lowerFirst } from "lodash";
 import { type PropsWithChildren } from "react";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
@@ -27,6 +27,7 @@ const KeyInState: Record<IndicatorKeyFromDTO, IndicatorKey> = {
 
 export const RecapCardIndicator = ({ name, indicateurs, customContent, edit }: PropsWithChildren<Props>) => {
   const note = indicateurs?.[name]?.note;
+  const motifNc = name !== "hautes_rémunérations" ? indicateurs?.[name]?.non_calculable : undefined;
 
   return (
     <RecapCard
@@ -36,9 +37,7 @@ export const RecapCardIndicator = ({ name, indicateurs, customContent, edit }: P
         <>
           {customContent}
 
-          {name !== "hautes_rémunérations" && indicateurs?.[name]?.non_calculable && (
-            <p>L'indicateur n'est pas calculable</p>
-          )}
+          {motifNc && <p>L'indicateur n'est pas calculable car {lowerFirst(labelsMotifNC[motifNc])}</p>}
 
           {note !== undefined && (
             <IndicatorNote

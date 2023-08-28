@@ -37,7 +37,7 @@ export const labelsMotifNC = {
   absaugi: "Absence d'augmentations individuelles",
   etsno5f5h: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
   absprom: "Absence de promotions",
-  absaugpdtcm: "Absence d'augmentations pendant ce congé",
+  absaugpdtcm: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
   absrcm: "Absence de retours de congé maternité",
 } as const;
 

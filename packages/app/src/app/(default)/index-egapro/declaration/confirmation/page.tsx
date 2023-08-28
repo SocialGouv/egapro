@@ -100,8 +100,10 @@ const ConfirmationPage = () => {
                       <div>
                         Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités
                         de publication doivent être transmis aux services du ministre chargé du travail et au comité
-                        social et économique.Vous pouvez déclarer les objectifs de progression ultérieurement en vous
-                        connectant à votre espace via le menu "Mes déclarations".
+                        social et économique.
+                        <br />
+                        Vous pouvez déclarer les objectifs de progression ultérieurement en vous connectant à votre
+                        espace via le menu "Mes déclarations".
                       </div>
                     </>
                   }
@@ -114,12 +116,12 @@ const ConfirmationPage = () => {
                 <Grid align="center" mt="4w">
                   <GridCol md="10">
                     <Card
-                      title="Publication et déclaration des objectifs de progression"
+                      title="Publication et déclaration des objectifs de progression et mesures de correction"
                       footer={
                         <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                           <li>
                             <Button onClick={() => alert("TODO")}>
-                              Déclarer les mesures de correction et les objectifs de progression
+                              Déclarer les objectifs de progression et mesures de correction
                             </Button>
                           </li>
                         </ul>
@@ -128,18 +130,21 @@ const ConfirmationPage = () => {
                         <>
                           <strong>
                             Les entreprises et unités économiques et sociales (UES) ayant obtenu un index inférieur à 75
-                            points doivent publier, par une communication externe et au sein de l’entreprise, les
-                            mesures de correction qu’elles ont définies par accord ou, à défaut, par décision
-                            unilatérale.
+                            points doivent publier
                           </strong>
-                          Par ailleurs, elles doivent fixer, également par accord ou, à défaut, par décision
-                          unilatérale, et publier des objectifs de progression de chacun des indicateurs. Une fois
-                          l’accord ou la décision déposé, les informations relatives aux mesures de correction, les
-                          objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux
-                          services du ministre chargé du travail et au comité social et économique.
+                          , par une communication externe et au sein de l’entreprise,{" "}
+                          <strong>les mesures de correction</strong> qu’elles ont définies par accord ou, à défaut, par
+                          décision unilatérale.
+                          <br />
+                          <br />
+                          <strong>Par ailleurs, elles doivent fixer</strong>, également par accord ou, à défaut, par
+                          décision unilatérale, <strong>et publier des objectifs de progression</strong> de chacun des
+                          indicateurs. Une fois l’accord ou la décision déposé, les informations relatives aux mesures
+                          de correction, les objectifs de progression ainsi que leurs modalités de publication doivent
+                          être transmis aux services du ministre chargé du travail et au comité social et économique.
                           <br />
                           <div>
-                            Vous pouvez déclarer les <Link href="TODO">objectifs de progression</Link> ultérieurement en
+                            Vous pouvez déclarer les objectifs de progression et mesures de correction ultérieurement en
                             vous connectant à votre espace via le menu "Mes déclarations".
                           </div>
                         </>

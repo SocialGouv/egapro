@@ -84,7 +84,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
               Les indicateurs sont calculés au titre de l’année <strong>{meta.année_indicateurs}</strong>
             </p>
 
-            {meta.période_suffisante && (
+            {meta.période_suffisante ? (
               <>
                 <p>
                   La date de fin de la période de référence choisie pour le calcul des indicateurs est le&nbsp;
@@ -99,6 +99,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                   )}
                 </p>
               </>
+            ) : (
+              <p>
+                Vous ne disposez pas d'une période de référence de 12 mois consécutifs, votre index et vos indicateurs
+                ne sont pas calculables
+              </p>
             )}
           </>
         }
@@ -147,21 +152,26 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
 
       <hr />
 
-      <BigNote
-        className={fr.cx("fr-mb-4w")}
-        note={meta.index}
-        max={100}
-        legend="Niveau de résultat global"
-        text={
-          <>
-            <p>
-              Total des points obtenus aux indicateurs calculables&nbsp;: <strong>{meta.points}</strong>
-            </p>
-            <p>
-              Nombre de points maximum pouvant être obtenus aux indicateurs calculables&nbsp;:{" "}
-              <strong>{meta.points_calculables}</strong>
-            </p>
-          </>
+      <RecapCard
+        title="Niveau de résultat global"
+        content={
+          <BigNote
+            noBorder
+            note={meta.index}
+            max={100}
+            legend={meta.index ? "Index de" : ""}
+            text={
+              <>
+                <p>
+                  Total des points obtenus aux indicateurs calculables&nbsp;: <strong>{meta.points}</strong>
+                </p>
+                <p>
+                  Nombre de points maximum pouvant être obtenus aux indicateurs calculables&nbsp;:{" "}
+                  <strong>{meta.points_calculables}</strong>
+                </p>
+              </>
+            }
+          />
         }
       />
 

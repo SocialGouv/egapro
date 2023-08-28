@@ -65,7 +65,7 @@ const IndexEgapro = () => {
             footer={
               <Button
                 linkProps={{
-                  href: "/index-egapro/simulateur",
+                  href: "/index-egapro/simulateur/commencer",
                 }}
               >
                 Calculer mon index
@@ -82,7 +82,7 @@ const IndexEgapro = () => {
             footer={
               <Button
                 linkProps={{
-                  href: "/index-egapro/declaration",
+                  href: "/index-egapro/declaration/commencer",
                 }}
               >
                 Déclarer mon index

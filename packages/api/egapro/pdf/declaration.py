@@ -15,7 +15,7 @@ class Receipt(PDF):
         "absprom": "Absence de promotions",
         "etsno5f5h": "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
         "absrcm": "Absence de retours de congé maternité",
-        "absaugpdtcm": "Absence d'augmentations pendant ce congé",
+        "absaugpdtcm": "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
         "me": "mesures envisagées",
         "mne": "mesures non envisagées",
         "mmo": "mesures mises en œuvre",
