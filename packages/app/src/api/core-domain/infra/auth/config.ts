@@ -32,7 +32,15 @@ declare module "next-auth/jwt" {
   }
 }
 
-export const monCompteProProvider = MonCompteProProvider(config.api.security.moncomptepro);
+const charonMcp = `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}`;
+export const monCompteProProvider = MonCompteProProvider({
+  ...config.api.security.moncomptepro,
+  ...(config.env !== "prod"
+    ? {
+        wellKnown: `https://egapro-charon.dev.fabrique.social.gouv.fr/${charonMcp}/.well-known/openid-configuration`,
+      }
+    : {}),
+});
 export const authConfig: AuthOptions = {
   secret: config.api.security.auth.secret,
   pages: {
@@ -49,12 +57,20 @@ export const authConfig: AuthOptions = {
   providers: [
     GithubProvider({
       ...config.api.security.github,
-      authorization: {
-        url: "https://github.com/login/oauth/authorize",
-        params: { scope: "user:email read:user read:org" },
-      },
+      ...(config.env !== "prod"
+        ? {
+            authorization: {
+              url: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/authorize",
+              params: { scope: "user:email read:user read:org" },
+            },
+            token: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/access_token",
+          }
+        : {
+            authorization: {
+              params: { scope: "user:email read:user read:org" },
+            },
+          }),
     }),
-    // GithubOAuth2ProxyProvider(config.api.security.github),
     monCompteProProvider,
   ],
   callbacks: {
@@ -128,9 +144,6 @@ export const authConfig: AuthOptions = {
 /**
  * Create a token in API v1 expected format.
  * See packages/api/egapro/tokens.py@create for further details.
- *
- * @param email
- * @returns {string}
  */
 const createTokenApiV1 = (email: string) => {
   return jwt.sign(
