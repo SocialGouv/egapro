@@ -26,8 +26,8 @@ type Props = {
 const formSchema = zodFr.object({
   accordRgpd: z.boolean().refine(val => val, "Vous devez accepter les conditions pour continuer"),
   email: zodEmail,
-  nom: z.string().nonempty("Le nom est obligatoire"),
-  prénom: z.string().nonempty("Le prénom est obligatoire"),
+  nom: z.string().trim().nonempty("Le nom est obligatoire"),
+  prénom: z.string().trim().nonempty("Le prénom est obligatoire"),
   téléphone: zodPhone,
 });
 

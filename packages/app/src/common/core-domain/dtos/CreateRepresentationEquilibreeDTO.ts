@@ -14,8 +14,8 @@ export const createSteps = {
     siren: sirenSchema,
   }),
   declarant: z.object({
-    lastname: z.string().nonempty("Le nom est requis"),
-    firstname: z.string().nonempty("Le prénom est requis"),
+    lastname: z.string().trim().nonempty("Le nom est requis"),
+    firstname: z.string().trim().nonempty("Le prénom est requis"),
     phoneNumber: zodPhone,
     gdpr: z.boolean().refine(gdpr => gdpr, "L'accord est requis"),
     email: z.string().superRefine(zodValueObjectSuperRefine(Email)),
