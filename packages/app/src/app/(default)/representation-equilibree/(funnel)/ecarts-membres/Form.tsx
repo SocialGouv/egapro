@@ -37,7 +37,7 @@ export const EcartsMembresForm = () => {
     handleSubmit,
     register,
     reset,
-    trigger,
+    setFocus,
   } = methods;
 
   useEffect(() => {
@@ -91,8 +91,7 @@ export const EcartsMembresForm = () => {
                 onChange() {
                   setComputable(true);
                   reset();
-                  trigger("memberWomenPercent", { shouldFocus: true });
-                  trigger("memberMenPercent");
+                  setTimeout(() => setFocus("memberWomenPercent", { shouldSelect: true }), 0);
                 },
               },
             },
