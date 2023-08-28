@@ -131,6 +131,6 @@ export const computeIndex = (
   return {
     points,
     pointsCalculables: max,
-    index: max >= 75 ? Math.floor((points / max) * 100) : undefined, // undefined means "Non calculable".
+    index: max >= 75 ? Math.round((points / max) * 100) : undefined, // undefined means "Non calculable".
   };
 };
