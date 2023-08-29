@@ -35,7 +35,7 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       mode: z.string(), // No check is necessary as the value is from select options.
-      cse: zodRadioInputSchema.nullish(),
+      cse: zodRadioInputSchema.nullish(), // May be null if declaration is for UES and for CSP mode.
       dateConsultationCSE: zodDateSchema
         .superRefine((date, ctx) => {
           if (isBefore(parseISO(date), parseISO(MIN_DATE_CSE))) {
@@ -219,27 +219,8 @@ export const RemunerationForm = () => {
 
                 {mode && mode !== "csp" && (
                   <>
-                    <RadioButtons
-                      legend="Un CSE a-t-il été mis en place ?"
-                      disabled={!!formData.ues?.nom}
-                      options={[
-                        {
-                          label: "Oui",
-                          nativeInputProps: {
-                            value: "oui",
-                            ...register("cse"),
-                          },
-                        },
-                        {
-                          label: "Non",
-                          nativeInputProps: {
-                            value: "non",
-                            ...register("cse"),
-                          },
-                        },
-                      ]}
-                      orientation="horizontal"
-                    />
+                    <RadioOuiNon legend="Un CSE a-t-il été mis en place ?" name="cse" disabled={!!formData.ues?.nom} />
+
                     {cse === "oui" && (
                       <Input
                         label="Date de consultation du CSE pour le choix de cette modalité de calcul"
