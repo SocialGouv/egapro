@@ -45,7 +45,7 @@ const DeclarantPage = async () => {
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
             <Link href={`${monCompteProHost}/personal-information`} target="_blank">
-              votre profile MonComptePro
+              votre profil MonComptePro
             </Link>
             .
           </>
