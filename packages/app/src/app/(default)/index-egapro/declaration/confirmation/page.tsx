@@ -134,14 +134,13 @@ const ConfirmationPage = () => {
                           </strong>
                           , par une communication externe et au sein de l’entreprise,{" "}
                           <strong>les mesures de correction</strong> qu’elles ont définies par accord ou, à défaut, par
-                          décision unilatérale.
+                          décision unilatérale. <strong>Par ailleurs, elles doivent fixer</strong>, également par accord
+                          ou, à défaut, par décision unilatérale,{" "}
+                          <strong>et publier des objectifs de progression</strong> de chacun des indicateurs.
                           <br />
-                          <br />
-                          <strong>Par ailleurs, elles doivent fixer</strong>, également par accord ou, à défaut, par
-                          décision unilatérale, <strong>et publier des objectifs de progression</strong> de chacun des
-                          indicateurs. Une fois l’accord ou la décision déposé, les informations relatives aux mesures
-                          de correction, les objectifs de progression ainsi que leurs modalités de publication doivent
-                          être transmis aux services du ministre chargé du travail et au comité social et économique.
+                          Une fois l’accord ou la décision déposé, les informations relatives aux mesures de correction,
+                          les objectifs de progression ainsi que leurs modalités de publication doivent être transmis
+                          aux services du ministre chargé du travail et au comité social et économique.
                           <br />
                           <div>
                             Vous pouvez déclarer les objectifs de progression et mesures de correction ultérieurement en
