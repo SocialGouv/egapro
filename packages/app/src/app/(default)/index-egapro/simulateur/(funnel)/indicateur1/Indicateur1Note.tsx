@@ -39,7 +39,7 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
           noBorder={noBorder}
           note="NC"
           size="small"
-          text="L'indicateur écart de rémunération est non calculable"
+          text="L'indicateur écart de rémunération n'est pas calculable"
           legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs"
         />
       ) : (
@@ -50,7 +50,7 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
               className={fr.cx("fr-mb-2w")}
               size="small"
               note={percentFormat.format((computed?.result ?? 0) / 100)}
-              text="Résultat final de l'indicateur écart de rémunération"
+              text="Écart global de rémunération en valeur absolue"
               legend="Arrondi à la première décimale"
             />
           )}

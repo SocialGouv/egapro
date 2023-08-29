@@ -186,14 +186,14 @@ export const PromotionsForm = () => {
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>
 
-                <PercentageInput label="Ouvriers" name="catégories.0.écarts" />
-                <PercentageInput label="Employés" name="catégories.1.écarts" />
-                <PercentageInput label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
-                <PercentageInput label="Ingénieurs et cadres" name="catégories.3.écarts" />
+                <PercentageInput<FormType> label="Ouvriers" name="catégories.0.écarts" />
+                <PercentageInput<FormType> label="Employés" name="catégories.1.écarts" />
+                <PercentageInput<FormType> label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
+                <PercentageInput<FormType> label="Ingénieurs et cadres" name="catégories.3.écarts" />
 
                 <br />
 
-                <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
                 <PopulationFavorable disabled={populationFavorableDisabled} />
 

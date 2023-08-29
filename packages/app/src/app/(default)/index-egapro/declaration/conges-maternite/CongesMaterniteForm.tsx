@@ -103,7 +103,7 @@ export const CongesMaterniteForm = () => {
                   </>
                 ) : (
                   <>
-                    <PercentageInput
+                    <PercentageInput<FormType>
                       label="Résultat final obtenu à l'indicateur en %"
                       name="résultat"
                       min={0}

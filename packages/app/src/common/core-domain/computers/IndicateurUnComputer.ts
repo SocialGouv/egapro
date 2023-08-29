@@ -69,7 +69,7 @@ export class IndicateurUnComputer extends AbstractGroupComputer<InputRemuneratio
   }
 
   /**
-   * Vériie si l'écart de rémunération peut être calculé pour un groupe spécifique.
+   * Vérifie si l'écart de rémunération peut être calculé pour un groupe spécifique.
    */
   public canComputeGroup(key: string): boolean {
     if (!this.input) {
