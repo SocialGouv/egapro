@@ -82,7 +82,7 @@ const IndexEgapro = () => {
             footer={
               <Button
                 linkProps={{
-                  href: "/index-egapro/declaration/commencer",
+                  href: "/index-egapro/declaration/assujetti",
                 }}
               >
                 Déclarer mon index
