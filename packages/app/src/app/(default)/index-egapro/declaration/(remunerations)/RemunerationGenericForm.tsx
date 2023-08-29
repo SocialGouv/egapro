@@ -154,13 +154,13 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                     <tbody>
                       <tr>
                         <td>
-                          <PercentageInput name={`catégories.${index}.tranches.:29`} />
+                          <PercentageInput<FormType> name={`catégories.${index}.tranches.:29`} />
                         </td>
                         <td>
-                          <PercentageInput name={`catégories.${index}.tranches.30:39`} />
+                          <PercentageInput<FormType> name={`catégories.${index}.tranches.30:39`} />
                         </td>
                         <td>
-                          <PercentageInput name={`catégories.${index}.tranches.40:49`} />
+                          <PercentageInput<FormType> name={`catégories.${index}.tranches.40:49`} />
                         </td>
                         <td>
                           <PercentageInput name={`catégories.${index}.tranches.50:`} />

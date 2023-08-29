@@ -276,8 +276,8 @@ export const Indic2and3Form = () => {
                             mb="1w"
                             text={
                               <>
-                                L'écart en points de pourcentage est de{" "}
-                                <strong>{percentFormat.format(result?.resultRaw ?? 0)}</strong>
+                                Écart absolu en points de pourcentage :{" "}
+                                <strong>{percentFormat.format(result?.result / 100 ?? 0)}</strong>
                               </>
                             }
                           />
@@ -285,11 +285,11 @@ export const Indic2and3Form = () => {
                             mb="1w"
                             text={
                               <>
-                                L'écart en nombre équivalent de salariés
+                                Écart en nombre équivalent de salariés
                                 <strong>
                                   <sup>*</sup>
                                 </strong>{" "}
-                                est de <strong>{result?.equivalentEmployeeCountGap}</strong>
+                                : <strong>{result?.equivalentEmployeeCountGap}</strong>
                               </>
                             }
                           />

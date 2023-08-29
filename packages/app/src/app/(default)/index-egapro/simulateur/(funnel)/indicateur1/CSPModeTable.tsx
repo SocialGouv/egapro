@@ -52,7 +52,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       <CenteredContainer fluid>
         <Alert
           className="fr-mb-3w"
-          severity="warning"
+          severity="info"
           title="L'indicateur n'est pas calculable par CSP"
           description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
         />
