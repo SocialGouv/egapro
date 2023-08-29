@@ -166,9 +166,9 @@ export const AugmentationEtPromotionsForm = () => {
 
             {estCalculable === "oui" && (
               <>
-                <PercentageInput label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-                <PercentageInput
+                <PercentageInput<FormType>
                   label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
                   name="résultatEquivalentSalarié"
                   min={0}

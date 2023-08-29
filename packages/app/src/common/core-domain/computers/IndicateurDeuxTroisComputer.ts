@@ -16,6 +16,7 @@ interface AdditionalOutput {
    */
   ifadvantage: "equality" | "men-men" | "men-women" | "women-men" | "women-women";
   noteEquivalentEmployeeCountGap: number;
+  notePercent: number;
   remunerationsCompensated: boolean;
 }
 
@@ -67,15 +68,19 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
       resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.genderAdvantage !== genderAdvantage;
+    const notePercent = this.computeNote(result);
+    const noteEquivalentEmployeeCountGap = this.computeNote(equivalentEmployeeCountGap);
+    const note = Math.max(notePercent, noteEquivalentEmployeeCountGap);
 
     return {
       resultRaw: rawGap,
       result,
       equivalentEmployeeCountGap,
       equivalentEmployeeCountGapRaw,
-      note: remunerationsCompensated ? this.getMaxNote() : this.computeNote(result),
+      note,
       genderAdvantage,
-      noteEquivalentEmployeeCountGap: this.computeNote(equivalentEmployeeCountGap),
+      noteEquivalentEmployeeCountGap,
+      notePercent,
       ifadvantage,
       remunerationsCompensated,
     };

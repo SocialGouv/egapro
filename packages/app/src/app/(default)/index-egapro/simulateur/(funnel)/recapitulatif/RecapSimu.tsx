@@ -49,6 +49,15 @@ function assertSimu(simulation: Partial<CreateSimulationDTO> | undefined): asser
   createSimulationDTO.parse(simulation);
 }
 
+const IndicatorPercentResult = ({ result }: { result: number }) => (
+  <IndicatorNote
+    noBorder
+    size="small"
+    note={percentFormat.format(result)}
+    text="Résultat final obtenu à l'indicateur en %"
+  />
+);
+
 export const RecapSimu = () => {
   const router = useRouter();
   const funnel = useSimuFunnelStore(store => store.funnel);
@@ -215,6 +224,8 @@ export const RecapSimu = () => {
             {computerIndicateurUn.canCompute() ? (
               <>
                 <AlternativeTable
+                  bordered
+                  classeName="fr-mb-1w"
                   header={[
                     { label: "" },
                     ...ageRanges.map<AlternativeTableProps.Columns>(ageRange => ({
@@ -234,16 +245,9 @@ export const RecapSimu = () => {
                       return canComputeGroup ? precisePercentFormat.format(groupResult.resultRaw / 100) : "NC";
                     }) as [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]],
                   }))}
-                  footer={[
-                    {
-                      label: (
-                        <strong>L'écart global est de {percentFormat.format(resultIndicateurUn.result / 100)}</strong>
-                      ),
-                      colspan: ageRanges.length + 1,
-                    },
-                  ]}
                 />
                 <Indicateur1Note computer={computerIndicateurUn} isValid simple noBorder />
+                <IndicatorPercentResult result={resultIndicateurUn.result / 100} />
               </>
             ) : (
               <IndicatorNote
@@ -289,14 +293,8 @@ export const RecapSimu = () => {
 
             return (
               <>
-                <p>
-                  L'écart en points de pourcentage est de{" "}
-                  <strong>{percentFormat.format(resultIndicateurDeuxTrois.result / 100)}</strong>
-                  <br />
-                  L'écart en nombre équivalent de salariés est de{" "}
-                  <strong>{resultIndicateurDeuxTrois?.equivalentEmployeeCountGap}</strong>
-                </p>
                 <Indicateur2et3Note computer={computerIndicateurDeuxTrois} isValid simple noBorder />
+                <IndicatorPercentResult result={resultIndicateurDeuxTrois.result / 100} />
               </>
             );
           })()}
@@ -351,16 +349,11 @@ export const RecapSimu = () => {
                   return (
                     <>
                       <AlternativeTable
+                        bordered
                         classeName="fr-mb-1w"
                         header={[
                           {
                             label: "",
-                          },
-                          {
-                            label: "Femmes",
-                          },
-                          {
-                            label: "Hommes",
                           },
                           {
                             label: "Écart pondéré",
@@ -373,25 +366,15 @@ export const RecapSimu = () => {
                             const canComputeGroup = computerIndicateurDeuxOuTrois.canComputeGroup(category);
                             if (!canComputeGroup) {
                               return {
-                                mergedLabel: "Non calculable",
+                                mergedLabel: "NC",
                               } satisfies Partial<AlternativeTableProps.BodyContent>;
                             }
                             const groupResult = computerIndicateurDeuxOuTrois.computeGroup(category);
                             return {
-                              cols: [
-                                funnel.indicateur2.pourcentages?.[category]?.women ?? "-",
-                                funnel.indicateur2.pourcentages?.[category]?.men ?? "-",
-                                precisePercentFormat.format(groupResult.resultRaw / 100),
-                              ],
+                              cols: [precisePercentFormat.format(groupResult.resultRaw / 100)],
                             } satisfies Partial<AlternativeTableProps.BodyContent>;
                           })(),
                         }))}
-                        footer={[
-                          {
-                            label: <strong>L'écart global est de {percentFormat.format(result.result / 100)}</strong>,
-                            colspan: 4,
-                          },
-                        ]}
                       />
                       <Indicateur2ou3Note
                         computer={computerIndicateurDeuxOuTrois}
@@ -400,6 +383,7 @@ export const RecapSimu = () => {
                         simple
                         noBorder
                       />
+                      <IndicatorPercentResult result={result.result / 100} />
                     </>
                   );
                 })()}
@@ -430,15 +414,8 @@ export const RecapSimu = () => {
 
           return (
             <>
-              {count.total && (
-                <p className="fr-mb-1w">
-                  <strong>{count.total}</strong> retours de congé maternité.
-                  <br />
-                  Le % de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé
-                  maternité est de <strong>{percentFormat.format(resultIndicateurQuatre.result)}</strong>.
-                </p>
-              )}
               <Indicateur4Note noBorder computer={computerIndicateurQuatre} count={count} isValid />
+              <IndicatorPercentResult result={resultIndicateurQuatre.result} />
             </>
           );
         })()}

@@ -32,13 +32,7 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
       note={computed.note ?? "-"}
       max={NOTE_MAX}
       text="Nombre de point obtenus à l'indicateur retour de congé maternité"
-      legend={
-        isValid && canCompute
-          ? computed.note === NOTE_MAX
-            ? "Tous les points sont accordés."
-            : "Aucun point n'est accordé."
-          : "Veuillez remplir les champs obligatoires pour obtenir une note."
-      }
+      legend={(!isValid || !canCompute) && "Veuillez remplir les champs obligatoires pour obtenir une note."}
     />
   );
 };

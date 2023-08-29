@@ -49,7 +49,7 @@ export const NAVIGATION = {
     },
   },
   indicateur2: {
-    title: "Indicateur écart de taux d’augmentation individuelle (hors promotions)",
+    title: "Indicateur écart de taux d’augmentations individuelles (hors promotions)",
     next() {
       return "indicateur3";
     },
@@ -67,7 +67,7 @@ export const NAVIGATION = {
     },
   },
   indicateur2et3: {
-    title: "Indicateurs écart de taux d’augmentation",
+    title: "Indicateur écart de taux d’augmentations individuelles",
     next() {
       return "indicateur4";
     },
@@ -76,7 +76,8 @@ export const NAVIGATION = {
     },
   },
   indicateur4: {
-    title: "Indicateur retour de congé maternité",
+    title:
+      "Indicateur pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé maternité",
     next() {
       return "indicateur5";
     },
@@ -87,7 +88,8 @@ export const NAVIGATION = {
     },
   },
   indicateur5: {
-    title: "Indicateur hautes rémunérations",
+    title:
+      "Indicateur nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations",
     next() {
       return "recapitulatif";
     },

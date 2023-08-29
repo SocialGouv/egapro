@@ -15,8 +15,8 @@ interface Props {
 const augmentations = {
   advantageTextStart: "Écart de taux d'augmentations individuelles",
   ncText: "L'indicateur écart de taux d'augmentations individuelles est non calculable",
-  balanceText: "L'écart d'augmentations réduit l'écart de rémunération. Tous les points sont accordés",
-  resultText: "Résultat final de l'indicateur écart de taux d'augmentations individuelles",
+  balanceText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
+  resultText: "Écart global de taux d'augmentations en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
   missingDataLegend: "Veuillez remplir le reste des taux d'augmentations individuelles pour avoir votre note",
 };
@@ -24,8 +24,8 @@ const augmentations = {
 const promotions = {
   advantageTextStart: "Écart de taux de promotions",
   ncText: "L'indicateur écart de taux de promotions est non calculable",
-  balanceText: "L'écart de promotions réduit l'écart de rémunération. Tous les points sont accordés",
-  resultText: "Résultat final de l'indicateur écart de taux de promotions",
+  balanceText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
+  resultText: "Écart global de taux de promotions en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
   missingDataLegend: "Veuillez remplir le reste des taux de promotions pour avoir votre note",
 };
@@ -86,9 +86,9 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
                 <>
                   {advantageText}
                   <br />
-                  Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de
-                  rémunération), la note maximale de {NOTE_MAX} points est attribuée à l’entreprise (considérant que
-                  l’employeur a mis en place une politique de rattrapage adaptée).
+                  L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le
+                  nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage
+                  adaptée a été mise en place.
                 </>
               }
             />

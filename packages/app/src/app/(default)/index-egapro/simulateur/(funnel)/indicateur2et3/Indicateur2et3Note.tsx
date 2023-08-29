@@ -33,7 +33,6 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
     // noop
   }
 
-  const bestNote = isValid && computed ? Math.max(computed.note, computed.noteEquivalentEmployeeCountGap) : "-";
   const raisedCount = computer.getInput();
 
   return (
@@ -42,7 +41,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
         <Alert
           className={fr.cx("fr-mb-4w")}
           small
-          severity="warning"
+          severity="info"
           description="Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations."
         />
       )}
@@ -65,7 +64,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
                 classes={{
                   note: fr.cx("fr-ml-n2w"),
                 }}
-                note={isValid ? computed?.note ?? 0 : "-"}
+                note={isValid ? computed?.notePercent ?? 0 : "-"}
                 text="Nombre de points obtenus sur le résultat en points de pourcentage"
               />
               <IndicatorNote
@@ -85,14 +84,14 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
               noBorder={noBorder}
               note={NOTE_MAX}
               max={NOTE_MAX}
-              text="L'écart d'augmentations réduit l'écart de rémunération. Tous les points sont accordés"
+              text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles"
               legend={
                 <>
                   {advantageText}
                   <br />
-                  Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de
-                  rémunération), la note maximale de {NOTE_MAX} points est attribuée à l’entreprise (considérant que
-                  l’employeur a mis en place une politique de rattrapage adaptée).
+                  L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le
+                  nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage
+                  adaptée a été mise en place.
                 </>
               }
             />
@@ -108,7 +107,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
               )}
               <IndicatorNote
                 noBorder={noBorder}
-                note={bestNote}
+                note={computed?.note ?? "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
