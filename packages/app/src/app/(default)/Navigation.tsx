@@ -43,7 +43,7 @@ export const Navigation = () => {
             {
               text: "Déclarer mon index",
               linkProps: {
-                href: "/index-egapro/declaration/commencer",
+                href: "/index-egapro/declaration/assujetti",
               },
               isActive: segments.includes("declaration") && segments.includes("index-egapro"),
             },
