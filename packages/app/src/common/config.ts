@@ -5,7 +5,9 @@ export type FeatureFlag = keyof typeof config.ff;
 
 export const config = {
   /** in seconds */
-  searchRevalidate: 60 * 5,
+  get searchRevalidate() {
+    return this.env === "dev" ? 1 : 60 * 5;
+  },
   get nonce() {
     return this.githubSha;
   },
