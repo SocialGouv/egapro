@@ -7,7 +7,7 @@ import { DeclarantFields } from "@components/RHF/DeclarantFields";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -43,6 +43,10 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
 
   if (!hydrated) {
     return <SkeletonForm fields={5} />;
+  }
+
+  if (!funnel?.year) {
+    redirect("/representation-equilibree/commencer");
   }
 
   const onSubmit = async (form: DeclarantFormType) => {

@@ -68,6 +68,8 @@ export const PublicationForm = () => {
     return <SkeletonForm fields={3} />;
   }
 
+  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
+
   const onSubmit = async (data: PublicationFormType) => {
     if (!funnel) return;
 

@@ -57,7 +57,7 @@ export const PeriodeReferenceForm = () => {
     router.push("/representation-equilibree/ecarts-cadres");
   };
 
-  if (funnel && !funnel?.year) redirect("/representation-equilibree/commencer");
+  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
 
   return (
     <>

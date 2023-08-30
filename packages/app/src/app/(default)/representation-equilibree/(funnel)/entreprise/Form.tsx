@@ -30,7 +30,7 @@ export const EntrepriseForm = () => {
     );
   }
 
-  if (!funnel?.siren) {
+  if (hydrated && !funnel?.siren) {
     return redirect("/representation-equilibree/commencer");
   }
 
