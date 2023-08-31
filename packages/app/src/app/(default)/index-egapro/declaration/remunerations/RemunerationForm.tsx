@@ -120,7 +120,7 @@ export const RemunerationForm = () => {
 
   const estCalculable = watch("estCalculable");
   const mode = watch("mode");
-  const cse = watch("cse");
+  const cse = watch("cse", (formData[stepName]?.estCalculable === "oui" && formData[stepName].cse) || undefined); // Need to add a default value explicitly to fix bug on date not displayed. (bug #1731)
   const déclarationCalculCSP = watch("déclarationCalculCSP");
 
   useEffect(() => {
