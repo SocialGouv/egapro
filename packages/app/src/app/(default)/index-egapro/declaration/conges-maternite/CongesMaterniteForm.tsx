@@ -45,6 +45,8 @@ export const CongesMaterniteForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const methods = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),

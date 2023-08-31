@@ -25,6 +25,8 @@ const Page = () => {
   const router = useRouter();
   const { formData, setStatus } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const siren = formData.commencer?.siren;
   const annéeIndicateurs = formData.commencer?.annéeIndicateurs;
 
