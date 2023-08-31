@@ -23,7 +23,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.discriminatedUnion("estCalculable", [
   zodFr.object({
@@ -45,7 +45,7 @@ export const CongesMaterniteForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
     mode: "onChange",

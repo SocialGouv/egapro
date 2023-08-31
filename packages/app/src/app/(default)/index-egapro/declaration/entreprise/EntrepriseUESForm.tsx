@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.object({
   type: z.string(), // No extra control needed because this is a radio button with options we provide.
@@ -31,7 +31,7 @@ export const EntrepriseUESForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const {
     register,

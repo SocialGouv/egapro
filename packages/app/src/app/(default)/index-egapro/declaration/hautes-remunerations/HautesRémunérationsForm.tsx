@@ -23,7 +23,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = z
   .object({
@@ -52,7 +52,7 @@ export const HautesRémunérationsForm = () => {
   const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 

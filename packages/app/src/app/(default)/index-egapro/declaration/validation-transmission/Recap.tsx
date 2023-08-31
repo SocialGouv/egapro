@@ -12,14 +12,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { RecapDeclaration } from "../declaration-existante/RecapDeclaration";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "validation-transmission";
 
 export const Recap = () => {
   const { formData, setStatus } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const hasMounted = useHasMounted();
   const router = useRouter();

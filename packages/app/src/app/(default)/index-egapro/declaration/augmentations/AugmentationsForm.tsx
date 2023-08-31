@@ -27,7 +27,7 @@ import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 // Import your language translation files
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "augmentations";
 
@@ -78,7 +78,7 @@ export const AugmentationsForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 

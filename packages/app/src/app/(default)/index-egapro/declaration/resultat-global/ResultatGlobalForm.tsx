@@ -20,7 +20,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr
   .object({
@@ -48,7 +48,7 @@ export const ResultatGlobalForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   // We don't compute the index if we only read an existing declaration.
   const defaultValues =
