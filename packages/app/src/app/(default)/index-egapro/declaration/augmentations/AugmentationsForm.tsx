@@ -75,8 +75,11 @@ const formSchema = zodFr
 type FormType = z.infer<typeof formSchema>;
 
 export const AugmentationsForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const { formData, saveFormData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({

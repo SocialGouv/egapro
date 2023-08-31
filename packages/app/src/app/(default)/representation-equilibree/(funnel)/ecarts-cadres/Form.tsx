@@ -54,9 +54,7 @@ export const EcartsCadresForm = () => {
     return <SkeletonForm fields={1} />;
   }
 
-  if (funnel && !funnel.year) {
-    redirect("/representation-equilibree/commencer");
-  }
+  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
 
   const onSubmit = (data: EcartsCadresFormType) => {
     if (!funnel) return;

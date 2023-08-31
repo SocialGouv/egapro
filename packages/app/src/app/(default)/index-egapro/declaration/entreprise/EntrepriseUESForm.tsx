@@ -31,6 +31,8 @@ export const EntrepriseUESForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const {
     register,
     handleSubmit,

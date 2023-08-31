@@ -53,15 +53,17 @@ const buildDefaultCategories = (mode: Remunerations["mode"]) =>
     : { catégories: [] };
 
 export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] }) => {
-  const { formData, savePageData } = useDeclarationFormManager();
-  const router = useRouter();
-
   const stepName: FunnelKey =
     mode === "csp"
       ? "remunerations-csp"
       : mode === "niveau_branche"
       ? "remunerations-coefficient-branche"
       : "remunerations-coefficient-autre";
+
+  const router = useRouter();
+  const { formData, savePageData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
 
   const methods = useForm<FormType>({
     mode: "onChange",

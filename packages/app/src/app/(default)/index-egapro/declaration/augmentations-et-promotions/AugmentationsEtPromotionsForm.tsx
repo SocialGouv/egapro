@@ -63,6 +63,8 @@ export const AugmentationEtPromotionsForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({

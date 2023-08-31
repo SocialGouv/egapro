@@ -17,7 +17,10 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 const stepName: FunnelKey = "validation-transmission";
 
 export const Recap = () => {
-  const { formData } = useDeclarationFormManager();
+  const { formData, setStatus } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const hasMounted = useHasMounted();
   const router = useRouter();
   const [error, setError] = useState("");
@@ -31,6 +34,7 @@ export const Recap = () => {
   const onSubmit = async () => {
     try {
       await submitDeclaration(declaration);
+      setStatus("edition");
       router.push(funnelConfig(formData)[stepName].next().url);
     } catch (error: unknown) {
       console.error("Error in API", error);

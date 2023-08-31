@@ -39,6 +39,8 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
 
   const { formData, savePageData } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const methods = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
