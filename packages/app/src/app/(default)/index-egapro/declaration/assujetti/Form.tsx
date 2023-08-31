@@ -1,5 +1,6 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -18,7 +19,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
   }, [defaultCheckedId]);
 
   return (
-    <>
+    <div className={fr.cx("fr-mb-4w")}>
       <form noValidate>
         <RadioButtons
           legend={title}
@@ -52,7 +53,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
       </form>
       {isAssujetti ? (
         <Button
-          linkProps={{ href: "/representation-equilibree/commencer" }}
+          linkProps={{ href: "/index-egapro/declaration/commencer" }}
           iconId="fr-icon-arrow-right-line"
           iconPosition="right"
         >
@@ -62,15 +63,15 @@ export const AssujettiForm = ({ title }: { title: string }) => {
         <CallOut
           buttonProps={{
             linkProps: {
-              href: "/representation-equilibree",
+              href: "/",
             },
             children: "Retour à la page d'accueil",
           }}
         >
-          Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
+          Vous n'êtes pas assujetti à la publication et à la déclaration de l’index de l'égalité professionnelle entre
           les femmes et les hommes.
         </CallOut>
       )}
-    </>
+    </div>
   );
 };
