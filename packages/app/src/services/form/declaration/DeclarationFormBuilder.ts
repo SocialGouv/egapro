@@ -267,7 +267,11 @@ export const DeclarationFormBuilder = {
       remunerations: {
         estCalculable: declaration.indicateurs?.rémunérations?.non_calculable ? "non" : "oui",
         motifNonCalculabilité: declaration.indicateurs?.rémunérations?.non_calculable,
-        cse: declaration.indicateurs?.rémunérations?.date_consultation_cse ? "oui" : undefined,
+        cse: declaration.indicateurs?.rémunérations?.date_consultation_cse
+          ? "oui"
+          : declaration.indicateurs?.rémunérations?.mode !== "csp"
+          ? "non"
+          : undefined,
         dateConsultationCSE: declaration.indicateurs?.rémunérations?.date_consultation_cse,
         déclarationCalculCSP: true, // Always true for an existing declaration.
         mode: declaration.indicateurs?.rémunérations?.mode, // Always present for an existing declaration.
