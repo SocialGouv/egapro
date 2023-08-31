@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
 
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import { RecapDeclaration } from "./RecapDeclaration";
 
 const stepName: FunnelKey = "declaration-existante";
@@ -25,7 +25,7 @@ const Page = () => {
   const router = useRouter();
   const { formData, setStatus } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const siren = formData.commencer?.siren;
   const annéeIndicateurs = formData.commencer?.annéeIndicateurs;

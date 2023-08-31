@@ -26,7 +26,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "promotions";
 
@@ -77,7 +77,7 @@ export const PromotionsForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  funnelConfig(formData)[stepName].validateStep?.();
+  assertOrRedirectCommencerStep(formData);
 
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
