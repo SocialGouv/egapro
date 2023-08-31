@@ -38,8 +38,10 @@ type FormType = z.infer<typeof formSchema>;
 const stepName: FunnelKey = "ues";
 
 export const UESForm = () => {
-  const { formData, savePageData } = useDeclarationFormManager();
   const router = useRouter();
+  const { formData, savePageData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
 
   // We ensure to have at least one entreprise in the form, in order to force the user to fill the form and the validation to be triggered, even if the user delete the only entreprise in the form.
   const defaultValues = produce(formData[stepName], draft => {

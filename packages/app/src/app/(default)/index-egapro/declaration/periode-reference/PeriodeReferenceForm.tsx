@@ -54,8 +54,10 @@ type FormTypeWhenPeriode = Extract<FormType, { périodeSuffisante: "oui" }>;
 const stepName: FunnelKey = "periode-reference";
 
 export const PeriodeReferenceForm = () => {
-  const { formData, saveFormData } = useDeclarationFormManager();
   const router = useRouter();
+  const { formData, saveFormData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
 
   const methods = useForm<FormType>({
     mode: "onChange",

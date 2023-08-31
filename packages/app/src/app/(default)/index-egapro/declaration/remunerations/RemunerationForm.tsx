@@ -103,6 +103,8 @@ export const RemunerationForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const methods = useForm<FormType>({
     mode: "onChange",
     shouldUnregister: true, // Don't store the fields that are not displayed.

@@ -14,12 +14,12 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { isBefore, parseISO } from "date-fns";
 import { produce } from "immer";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { funnelConfig, type FunnelKey, funnelStaticConfig } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = zodFr.object({
   choixSiteWeb: zodRadioInputSchema,
@@ -46,6 +46,17 @@ export const PublicationForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
+  funnelConfig(formData)[stepName].validateStep?.();
+
+  // asserted by validateStep
+  const referencePeriod = formData["periode-reference"] as Exclude<
+    DeclarationFormState["periode-reference"],
+    | {
+        périodeSuffisante: "non";
+      }
+    | undefined
+  >;
+
   const methods = useForm<FormType>({
     mode: "onChange",
     shouldUnregister: true,
@@ -62,10 +73,7 @@ export const PublicationForm = () => {
     formState: { isValid, errors },
   } = methods;
 
-  if (!formData["periode-reference"] || formData["periode-reference"]?.périodeSuffisante === "non") {
-    redirect(funnelStaticConfig["periode-reference"].url);
-  }
-  const endOfPeriod = formData["periode-reference"].finPériodeRéférence;
+  const endOfPeriod = referencePeriod.finPériodeRéférence;
   const choixSiteWeb = watch("choixSiteWeb");
 
   const onSubmit = async (data: FormType) => {

@@ -1,5 +1,6 @@
 import { config } from "@common/config";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { redirect } from "next/navigation";
 
 export const nbStepsMax = 13;
 
@@ -15,6 +16,10 @@ type FunnelStep = {
   indexStep: () => number;
   next: () => StaticConfig[keyof StaticConfig];
   previous: () => StaticConfig[keyof StaticConfig];
+  /**
+   * Validate if user can be in the current step or be redirected.
+   */
+  validateStep?: () => never | void;
 };
 
 class StaticConfigItem {
@@ -86,17 +91,15 @@ export const funnelStaticConfig: StaticConfig = {
  *
  * @param data formData get by useDeclarationFormManager.
  */
-export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnelKey, FunnelStep> = (
-  data: DeclarationFormState,
-) =>
+export const funnelConfig = (data: DeclarationFormState): Record<ExtendedFunnelKey, FunnelStep> =>
   ({
     commencer: {
       indexStep: () => 1,
       next: () =>
-        data?.["declaration-existante"]?.status !== "creation"
+        data["declaration-existante"]?.status !== "creation"
           ? funnelStaticConfig[`declaration-existante`]
-          : funnelStaticConfig[`declarant`],
-      previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
+          : funnelStaticConfig.declarant,
+      previous: () => funnelStaticConfig.commencer, // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
     confirmation: {
       // confirmation is the last step and should not be considered as a real step.
@@ -112,30 +115,53 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
     },
     "declaration-existante": {
       indexStep: () => 1, // Not applicable. Not a real step.
-      next: () => funnelStaticConfig[`declarant`],
-      previous: () => funnelStaticConfig[`commencer`],
+      next: () => funnelStaticConfig.declarant,
+      previous: () => funnelStaticConfig.commencer,
+      validateStep() {
+        if (!data.commencer?.siren || !data.commencer.annéeIndicateurs) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     declarant: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () => funnelStaticConfig[`entreprise`],
-      previous: () => funnelStaticConfig[`commencer`], // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
+      next: () => funnelStaticConfig.entreprise,
+      previous: () => funnelStaticConfig.commencer, // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     entreprise: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () =>
-        data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`periode-reference`],
-      previous: () => funnelStaticConfig[`declarant`],
+      next: () => (data.entreprise?.type === "ues" ? funnelStaticConfig.ues : funnelStaticConfig[`periode-reference`]),
+      previous: () => funnelStaticConfig.declarant,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     ues: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`periode-reference`],
-      previous: () => funnelStaticConfig[`entreprise`],
+      previous: () => funnelStaticConfig.entreprise,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.entreprise || data.entreprise.type !== "ues") {
+          redirect(funnelStaticConfig.entreprise.url);
+        }
+      },
     },
     "periode-reference": {
       indexStep() {
@@ -144,8 +170,13 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () =>
         data["periode-reference"]?.périodeSuffisante === "non"
           ? funnelStaticConfig[`validation-transmission`]
-          : funnelStaticConfig[`remunerations`],
-      previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig[`ues`] : funnelStaticConfig[`entreprise`]),
+          : funnelStaticConfig.remunerations,
+      previous: () => (data.entreprise?.type === "ues" ? funnelStaticConfig.ues : funnelStaticConfig.entreprise),
+      validateStep() {
+        if (!data.commencer?.annéeIndicateurs) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     remunerations: {
       indexStep: () => {
@@ -155,7 +186,7 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         data.remunerations?.estCalculable === "non"
           ? data.entreprise?.tranche === "50:250"
             ? funnelStaticConfig[`augmentations-et-promotions`]
-            : funnelStaticConfig[`augmentations`]
+            : funnelStaticConfig.augmentations
           : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
           : data.remunerations?.mode === "niveau_branche"
@@ -163,27 +194,85 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
           : funnelStaticConfig[`remunerations-coefficient-autre`],
 
       previous: () => funnelStaticConfig[`periode-reference`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.entreprise) {
+          redirect(funnelStaticConfig.entreprise.url);
+        }
+
+        if (data.entreprise.type === "ues" && !data.ues?.nom) {
+          redirect(funnelStaticConfig.ues.url);
+        }
+      },
     },
     "remunerations-csp": {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`remunerations-resultat`],
-      previous: () => funnelStaticConfig[`remunerations`],
+      previous: () => funnelStaticConfig.remunerations,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.remunerations) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+
+        if (data.remunerations?.estCalculable === "non") {
+          redirect(funnelStaticConfig.remunerations.url);
+        } else if (data.remunerations.mode !== "csp") {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     "remunerations-coefficient-branche": {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`remunerations-resultat`],
-      previous: () => funnelStaticConfig[`remunerations`],
+      previous: () => funnelStaticConfig.remunerations,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.remunerations) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+
+        if (data.remunerations?.estCalculable === "non") {
+          redirect(funnelStaticConfig.remunerations.url);
+        } else if (data.remunerations.mode !== "niveau_branche") {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     "remunerations-coefficient-autre": {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`remunerations-resultat`],
-      previous: () => funnelStaticConfig[`remunerations`],
+      previous: () => funnelStaticConfig.remunerations,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.remunerations) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+
+        if (data.remunerations?.estCalculable === "non") {
+          redirect(funnelStaticConfig.remunerations.url);
+        } else if (data.remunerations.mode !== "niveau_autre") {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     "remunerations-resultat": {
       indexStep() {
@@ -192,15 +281,34 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () =>
         data.entreprise?.tranche === "50:250"
           ? funnelStaticConfig[`augmentations-et-promotions`]
-          : funnelStaticConfig[`augmentations`],
+          : funnelStaticConfig.augmentations,
       previous: () =>
         data.remunerations?.estCalculable === "non"
-          ? funnelStaticConfig[`remunerations`]
+          ? funnelStaticConfig.remunerations
           : data.remunerations?.mode === "csp"
           ? funnelStaticConfig[`remunerations-csp`]
           : data.remunerations?.mode === "niveau_branche"
           ? funnelStaticConfig[`remunerations-coefficient-branche`]
           : funnelStaticConfig[`remunerations-coefficient-autre`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.remunerations) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+
+        if (data.remunerations?.estCalculable === "non") {
+          redirect(funnelStaticConfig.remunerations.url);
+        } else if (data.remunerations.mode === "csp" && !data["remunerations-csp"]) {
+          redirect(funnelStaticConfig["remunerations-csp"].url);
+        } else if (data.remunerations.mode === "niveau_branche" && !data["remunerations-coefficient-branche"]) {
+          redirect(funnelStaticConfig["remunerations-coefficient-branche"].url);
+        } else if (data.remunerations.mode === "niveau_autre" && !data["remunerations-coefficient-autre"]) {
+          redirect(funnelStaticConfig["remunerations-coefficient-autre"].url);
+        }
+      },
     },
     "augmentations-et-promotions": {
       indexStep() {
@@ -209,8 +317,21 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () => funnelStaticConfig[`conges-maternite`],
       previous: () =>
         data.remunerations?.estCalculable === "non"
-          ? funnelStaticConfig[`remunerations`]
+          ? funnelStaticConfig.remunerations
           : funnelStaticConfig[`remunerations-resultat`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.entreprise?.tranche || data.entreprise?.tranche !== "50:250") {
+          redirect(funnelStaticConfig.entreprise.url);
+        }
+
+        if (!data["remunerations-resultat"]?.populationFavorable) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     augmentations: {
       indexStep() {
@@ -219,15 +340,41 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       next: () => funnelStaticConfig[`promotions`],
       previous: () =>
         data.remunerations?.estCalculable === "non"
-          ? funnelStaticConfig[`remunerations`]
+          ? funnelStaticConfig.remunerations
           : funnelStaticConfig[`remunerations-resultat`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.entreprise?.tranche || data.entreprise.tranche === "50:250") {
+          redirect(funnelStaticConfig.entreprise.url);
+        }
+
+        if (!data["remunerations-resultat"]?.populationFavorable) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     promotions: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
       next: () => funnelStaticConfig[`conges-maternite`],
-      previous: () => funnelStaticConfig[`augmentations`],
+      previous: () => funnelStaticConfig.augmentations,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data.entreprise?.tranche || data.entreprise.tranche === "50:250") {
+          redirect(funnelStaticConfig.entreprise.url);
+        }
+
+        if (!data["remunerations-resultat"]?.populationFavorable) {
+          redirect(funnelStaticConfig.remunerations.url);
+        }
+      },
     },
     "conges-maternite": {
       indexStep() {
@@ -238,6 +385,11 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
         data.entreprise?.tranche === "50:250"
           ? funnelStaticConfig[`augmentations-et-promotions`]
           : funnelStaticConfig[`promotions`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     "hautes-remunerations": {
       indexStep() {
@@ -245,13 +397,25 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       },
       next: () => funnelStaticConfig[`resultat-global`],
       previous: () => funnelStaticConfig[`conges-maternite`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+      },
     },
     "resultat-global": {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () => funnelStaticConfig[`publication`],
+      next: () => funnelStaticConfig.publication,
       previous: () => funnelStaticConfig[`hautes-remunerations`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        // TODO add more validation
+      },
     },
     publication: {
       indexStep() {
@@ -259,15 +423,31 @@ export const funnelConfig: (data: DeclarationFormState) => Record<ExtendedFunnel
       },
       next: () => funnelStaticConfig[`validation-transmission`],
       previous: () => funnelStaticConfig[`resultat-global`],
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        if (!data["periode-reference"] || data["periode-reference"].périodeSuffisante === "non") {
+          redirect(funnelStaticConfig["periode-reference"].url);
+        }
+      },
     },
     "validation-transmission": {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;
       },
-      next: () => funnelStaticConfig[`confirmation`],
+      next: () => funnelStaticConfig.confirmation,
       previous: () =>
         data["periode-reference"]?.périodeSuffisante === "non"
           ? funnelStaticConfig[`periode-reference`]
-          : funnelStaticConfig[`publication`],
+          : funnelStaticConfig.publication,
+      validateStep() {
+        if (!data.commencer?.siren) {
+          redirect(funnelStaticConfig.commencer.url);
+        }
+
+        // TODO add more validation
+      },
     },
   }) as const;

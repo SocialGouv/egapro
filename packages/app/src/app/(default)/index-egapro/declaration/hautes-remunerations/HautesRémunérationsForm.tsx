@@ -51,6 +51,9 @@ export const HautesRémunérationsForm = () => {
   const router = useRouter();
   const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
+
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
