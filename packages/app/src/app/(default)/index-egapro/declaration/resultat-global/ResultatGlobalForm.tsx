@@ -3,12 +3,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { computeIndex } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BigNote } from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
@@ -43,16 +44,11 @@ type FormType = z.infer<typeof formSchema>;
 
 const stepName: FunnelKey = "resultat-global";
 
-const mesuresLabel = {
-  mmo: "Mesures mises en oeuvre",
-  me: "Mesures envisagées",
-  mne: "Mesures non envisagées",
-};
-
 export const ResultatGlobalForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
+
+  funnelConfig(formData)[stepName].validateStep?.();
 
   // We don't compute the index if we only read an existing declaration.
   const defaultValues =
@@ -62,12 +58,7 @@ export const ResultatGlobalForm = () => {
 
   const methods = useForm<FormType>({
     shouldUnregister: true,
-    resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      // console.debug("formData", data);
-      console.debug("validation result", await zodResolver(formSchema)(data, context, options));
-      return zodResolver(formSchema)(data, context, options);
-    },
+    resolver: zodResolver(formSchema),
     defaultValues,
   });
 
@@ -101,9 +92,7 @@ export const ResultatGlobalForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* <ReactHookFormDebug /> */}
-
-        <div ref={animationParent}>
+        <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <BigNote
               className={fr.cx("fr-mb-4w")}
@@ -136,7 +125,7 @@ export const ResultatGlobalForm = () => {
                   <option value="" hidden>
                     Sélectionnez une mesure
                   </option>
-                  {Object.entries(mesuresLabel).map(([key, value]) => (
+                  {Object.entries(CorrectiveMeasures.Label).map(([key, value]) => (
                     <option value={key} key={key}>
                       {value}
                     </option>
@@ -153,7 +142,7 @@ export const ResultatGlobalForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );
