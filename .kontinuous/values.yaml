@@ -1,6 +1,5 @@
 charon:
   ~chart: app
-  ~log: false
   image: lsagetlethias/charon:latest
   probesPath: /healthz
   host: "{{ .Values.global.host }}"
