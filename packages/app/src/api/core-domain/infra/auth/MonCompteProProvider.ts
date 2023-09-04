@@ -39,11 +39,9 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
     },
     checks: ["pkce", "state"],
     userinfo: {
-      async request({ tokens: { access_token }, client, provider: { issuer } }) {
-        if (!issuer || !access_token) {
-          throw new Error(
-            `MonCompteProProvider - Userinfo request is missing parameters. (${{ issuer, access_token }})`,
-          );
+      async request({ tokens: { access_token }, client }) {
+        if (!access_token) {
+          throw new Error("MonCompteProProvider - Userinfo request is missing access_token.");
         }
 
         return client.userinfo<MonCompteProProfile>(access_token);

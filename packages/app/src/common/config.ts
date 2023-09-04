@@ -93,6 +93,10 @@ export const config = {
           "/representation-equilibree/validation",
         ],
         staffRoutes: ["/admin/liste-referents"],
+        charonUrl: ensureApiEnvVar(
+          process.env.SECURITY_CHARON_URL,
+          "https://egapro-charon.dev.fabrique.social.gouv.fr",
+        ),
       },
     },
     postgres: {

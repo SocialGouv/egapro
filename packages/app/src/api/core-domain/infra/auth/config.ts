@@ -32,12 +32,16 @@ declare module "next-auth/jwt" {
   }
 }
 
-const charonMcp = `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}`;
+const charonMcpUrl = new URL(
+  `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}/`,
+  config.api.security.auth.charonUrl,
+);
+const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const monCompteProProvider = MonCompteProProvider({
   ...config.api.security.moncomptepro,
   ...(config.env !== "prod"
     ? {
-        wellKnown: `https://egapro-charon.dev.fabrique.social.gouv.fr/${charonMcp}/.well-known/openid-configuration`,
+        wellKnown: new URL(`.well-known/openid-configuration`, charonMcpUrl).toString(),
       }
     : {}),
 });
@@ -60,10 +64,10 @@ export const authConfig: AuthOptions = {
       ...(config.env !== "prod"
         ? {
             authorization: {
-              url: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/authorize",
+              url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
               params: { scope: "user:email read:user read:org" },
             },
-            token: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/access_token",
+            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
           }
         : {
             authorization: {
