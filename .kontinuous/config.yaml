@@ -7,5 +7,6 @@ dependencies:
       contrib:
         patches:
           janitor:
-            permanentDevEnvironmentBranches:
-              - charon
+            options:
+              permanentDevEnvironmentBranches:
+                - charon
