@@ -8,5 +8,4 @@ dependencies:
         patches:
           janitor:
             permanentDevEnvironmentBranches:
-              - master
               - charon
