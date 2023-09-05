@@ -9,7 +9,7 @@ import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 
 interface Input {
   siren: string;
-  year: string;
+  year: number;
 }
 
 export class GetDeclarationBySirenAndYear implements UseCase<Input, DeclarationDTO | null> {
@@ -18,7 +18,7 @@ export class GetDeclarationBySirenAndYear implements UseCase<Input, DeclarationD
   public async execute({ siren, year }: Input): Promise<DeclarationDTO | null> {
     try {
       const validatedSiren = new Siren(siren);
-      const validatedYear = new PositiveNumber(+year);
+      const validatedYear = new PositiveNumber(year);
 
       const declaration = await this.declarationRepo.getOne([validatedSiren, validatedYear]);
 

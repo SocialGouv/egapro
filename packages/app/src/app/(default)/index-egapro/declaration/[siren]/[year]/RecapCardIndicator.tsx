@@ -5,7 +5,7 @@ import { type IndicatorKey, labelsMotifNC } from "@services/form/declaration/Dec
 import { capitalize, lowerFirst } from "lodash";
 import { type PropsWithChildren } from "react";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
+import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 
 type IndicatorKeyFromDTO = Exclude<keyof NonNullable<DeclarationDTO["indicateurs"]>, "représentation_équilibrée">;
 

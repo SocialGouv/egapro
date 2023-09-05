@@ -6,7 +6,7 @@ import { type DeclarationDTO } from "@common/models/generated";
 import { formatIsoToFr } from "@common/utils/date";
 import { BigNote, RecapCard, RecapCardCompany } from "@design-system";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
+import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 import { RecapCardPublication } from "./RecapCardPublication";
 

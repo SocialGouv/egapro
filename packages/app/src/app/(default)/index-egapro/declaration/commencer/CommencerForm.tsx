@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { config } from "@common/config";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
@@ -12,7 +13,6 @@ import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
-import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { buildEntreprise } from "@services/form/declaration/entreprise";
@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
@@ -59,18 +60,13 @@ const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
   formData: DeclarationFormState,
-  tokenApiV1: string,
+  // tokenApiV1: string,
 ): Promise<DeclarationFormState> => {
-  const previousDeclaration = await fetchDeclaration(siren, year, {
-    headers: {
-      "API-KEY": tokenApiV1,
-    },
-    throwErrorOn404: false,
-  });
+  const previousDeclaration = await getDeclaration(siren, year);
 
   // If there is a declaration, we use it as is.
   if (previousDeclaration) {
-    const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
+    const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration);
 
     return {
       ...newFormState,
@@ -136,12 +132,16 @@ export const CommencerForm = () => {
   const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
     try {
       // Synchronize the data with declaration if any.
-      const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
+      const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData);
 
       // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
       saveFormData(newData);
 
-      router.push(funnelConfig(newData)[stepName].next().url);
+      if (newData["declaration-existante"].status !== "creation") {
+        router.push(`${config.base_declaration_url}/${siren}/${year}`);
+      } else {
+        router.push(funnelConfig(newData)[stepName].next().url);
+      }
     } catch (error: unknown) {
       console.error("Unexpected API error", error);
       setError("siren", {

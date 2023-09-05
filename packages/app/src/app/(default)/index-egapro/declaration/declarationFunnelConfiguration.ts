@@ -6,9 +6,9 @@ export const nbStepsMax = 13;
 
 const base = config.base_declaration_url;
 
-export type FunnelKey = keyof DeclarationFormState;
+export type FunnelKey = Exclude<keyof DeclarationFormState, "declaration-existante">;
 
-type ExtendedFunnelKey = FunnelKey | "confirmation" | "declaration-existante";
+type ExtendedFunnelKey = FunnelKey | "confirmation";
 
 type StaticConfig = Record<ExtendedFunnelKey, StaticConfigItem>;
 
@@ -39,7 +39,6 @@ export const funnelStaticConfig: StaticConfig = {
     "Écart de taux d’augmentations individuelles entre les femmes et les hommes",
   ),
   declarant: new StaticConfigItem("declarant", "Informations déclarant"),
-  "declaration-existante": new StaticConfigItem("declaration-existante", "Déclaration existante"),
   augmentations: new StaticConfigItem(
     "augmentations",
     "Écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes",
@@ -100,10 +99,7 @@ export const funnelConfig = (data: DeclarationFormState): Record<ExtendedFunnelK
   ({
     commencer: {
       indexStep: () => 1,
-      next: () =>
-        data["declaration-existante"]?.status !== "creation"
-          ? funnelStaticConfig[`declaration-existante`]
-          : funnelStaticConfig.declarant,
+      next: () => funnelStaticConfig.declarant,
       previous: () => funnelStaticConfig.commencer, // noop for first step. We declared it nevertheless to avoid having to check for its existence in the component.
     },
     confirmation: {
@@ -118,11 +114,7 @@ export const funnelConfig = (data: DeclarationFormState): Record<ExtendedFunnelK
         throw new Error("No previous step for confirmation step");
       },
     },
-    "declaration-existante": {
-      indexStep: () => 1, // Not applicable. Not a real step.
-      next: () => funnelStaticConfig.declarant,
-      previous: () => funnelStaticConfig.commencer,
-    },
+
     declarant: {
       indexStep() {
         return funnelConfig(data)[this.previous().name].indexStep() + 1;

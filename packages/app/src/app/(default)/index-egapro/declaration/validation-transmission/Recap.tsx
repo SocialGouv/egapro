@@ -11,7 +11,7 @@ import { DeclarationFormBuilder } from "@services/form/declaration/DeclarationFo
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { RecapDeclaration } from "../declaration-existante/RecapDeclaration";
+import { RecapDeclaration } from "../[siren]/[year]/RecapDeclaration";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "validation-transmission";
