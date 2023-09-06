@@ -11,7 +11,6 @@ import {
 } from "@api/core-domain/useCases/SendRepresentationEquilibreeReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
-import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { revalidatePath } from "next/cache";
 
@@ -29,10 +28,6 @@ export async function getRepresentationEquilibree(siren: string, year: number) {
   const ret = await useCase.execute({ siren, year });
 
   return ret;
-}
-
-export async function getCompany(siren: string) {
-  return entrepriseService.siren(new Siren(siren));
 }
 
 export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {

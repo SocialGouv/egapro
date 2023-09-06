@@ -5,6 +5,7 @@ import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -13,7 +14,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getCompany, getRepresentationEquilibree } from "../../actions";
+import { getRepresentationEquilibree } from "../../actions";
 import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
 
 type CommencerFormType = z.infer<typeof createSteps.commencer>;
@@ -57,31 +58,30 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   const saveAndGoNext = async (siren: string, year: number) =>
     startTransition(async () => {
-      try {
-        // Synchronise with potential data in DB.
-        const exists = await getRepresentationEquilibree(siren, year);
-        if (exists) {
-          return router.push(`/representation-equilibree/${siren}/${year}`);
-        }
-
-        const company = await getCompany(siren);
-        if (company.dateCessation) {
-          return setError("siren", {
-            type: "manual",
-            message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
-          });
-        }
-
-        // Otherwise, this is a creation.
-        setIsEdit(false);
-        resetFunnel();
-        saveFunnel({ year, siren });
-        router.push("/representation-equilibree/declarant");
-      } catch (error) {
-        // We can't continue in this case, because the backend is not ready.
-        console.error("Unexpected API error", error);
-        resetFunnel();
+      // Synchronise with potential data in DB.
+      const exists = await getRepresentationEquilibree(siren, year);
+      if (exists) {
+        return router.push(`/representation-equilibree/${siren}/${year}`);
       }
+
+      const company = await getCompany(siren);
+      if (!company.ok) {
+        return setError("siren", {
+          type: "manual",
+          message: "Erreur lors de la récupération des données de l'entreprise, veuillez vérifier votre saisie",
+        });
+      } else if (company.data.dateCessation) {
+        return setError("siren", {
+          type: "manual",
+          message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
+        });
+      }
+
+      // Otherwise, this is a creation.
+      setIsEdit(false);
+      resetFunnel();
+      saveFunnel({ year, siren });
+      router.push("/representation-equilibree/declarant");
     });
 
   const onSubmit = async ({ siren, year }: CommencerFormType) => {

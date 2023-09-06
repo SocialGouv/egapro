@@ -34,7 +34,10 @@
       ],
       "@public/*": [
         "packages/app/public/*"
-      ]
+      ],
+      "@globalActions/*": [
+        "packages/app/src/app/_globalActions/*"
+      ],
     }
   },
   "ts-node": {
