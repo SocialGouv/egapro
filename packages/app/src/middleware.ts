@@ -23,7 +23,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     }
   }
 
-  const isStaff = token?.user.staff || token?.staff?.impersonating || false;
+  const isStaff = token?.user.staff || token?.staff.impersonating || false;
   if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
