@@ -14,6 +14,11 @@ export const adminMenuItems = [
     href: "/admin/debug",
     segment: "debug",
   },
+  {
+    text: "Mimoquer un SIREN",
+    href: "/admin/impersonate",
+    segment: "impersonate",
+  },
 ];
 
 export const Navigation = () => {
