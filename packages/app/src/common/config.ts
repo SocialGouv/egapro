@@ -92,7 +92,7 @@ export const config = {
           "/representation-equilibree/transmission",
           "/representation-equilibree/validation",
         ],
-        staffRoutes: ["/admin/liste-referents"],
+        staffRoutes: ["/admin"],
         charonUrl: ensureApiEnvVar(
           process.env.SECURITY_CHARON_URL,
           "https://egapro-charon.dev.fabrique.social.gouv.fr",

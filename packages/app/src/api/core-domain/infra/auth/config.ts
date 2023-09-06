@@ -1,5 +1,6 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
 import { config } from "@common/config";
+import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
 import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
@@ -10,6 +11,9 @@ import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
 declare module "next-auth" {
   interface Session {
+    staff?: {
+      impersonating: boolean;
+    };
     user: {
       companies: Array<{ label: string | null; siren: string }>;
       email: string;
@@ -26,8 +30,7 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-  type UserSession = Session["user"];
-  interface JWT extends DefaultJWT, UserSession {
+  interface JWT extends DefaultJWT, Session {
     email: string;
   }
 }
@@ -106,40 +109,54 @@ export const authConfig: AuthOptions = {
     },
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
-    async jwt({ token, profile, trigger, account }) {
+    async jwt({ token, profile, trigger, account, session }) {
+      if (trigger === "update" && session && token.user.staff) {
+        if (session.staff.impersonating === true) {
+          // staff starts impersonating
+          assertImpersonatedSession(session);
+          token.user.staff = session.user.staff;
+          token.user.companies = session.user.companies;
+          token.staff = { impersonating: true };
+        } else if (session.staff.impersonating === false) {
+          // staff stops impersonating
+          token.user.staff = true;
+          token.user.companies = [];
+          token.staff = { impersonating: false };
+        }
+      }
       if (trigger !== "signUp") return token;
+      token.user = {} as Session["user"];
       if (account?.provider === "github") {
         const githubProfile = profile as unknown as GithubProfile;
-        token.staff = true;
-        token.companies = [];
+        token.user.staff = true;
+        token.user.companies = [];
         const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
-        token.firstname = firstname;
-        token.lastname = lastname;
+        token.user.firstname = firstname;
+        token.user.lastname = lastname;
       } else {
-        token.companies =
+        token.user.companies =
           profile?.organizations.map(orga => ({
             siren: orga.siret.substring(0, 9),
             label: orga.label,
           })) ?? [];
-        token.staff = false;
-        token.firstname = profile?.given_name ?? void 0;
-        token.lastname = profile?.family_name ?? void 0;
-        token.phoneNumber = profile?.phone_number ?? void 0;
+        token.user.staff = false;
+        token.user.firstname = profile?.given_name ?? void 0;
+        token.user.lastname = profile?.family_name ?? void 0;
+        token.user.phoneNumber = profile?.phone_number ?? void 0;
       }
 
       // Token legacy for usage with API v1.
-      token.tokenApiV1 = createTokenApiV1(token.email);
+      token.tokenApiV1 = createTokenApiV1(token.user.email);
 
       return token;
     },
     // expose data from jwt to front
     session({ session, token }) {
-      session.user.staff = token.staff;
-      session.user.companies = token.companies;
-      session.user.firstname = token.firstname;
-      session.user.lastname = token.lastname;
-      session.user.phoneNumber = token.phoneNumber;
-      session.user.tokenApiV1 = token.tokenApiV1;
+      session.user = token.user;
+      session.user.email = token.email;
+      if (token.staff && (token.user.staff || token.staff.impersonating)) {
+        session.staff = token.staff;
+      }
       return session;
     },
   },

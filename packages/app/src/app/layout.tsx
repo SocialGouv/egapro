@@ -9,10 +9,12 @@ import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
 import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
 import { defaultColorScheme } from "./defaultColorScheme";
+import { ImpersonateNotice } from "./ImpersonateNotice";
 import { SessionProvider } from "./SessionProvider";
 import { StartDsfr } from "./StartDsfr";
 
@@ -76,6 +78,9 @@ const RootLayout = ({ children }: PropsWithChildren) => (
               borderRadius="0.25rem"
               duration={2}
             >
+              <ClientAnimate>
+                <ImpersonateNotice />
+              </ClientAnimate>
               <SkipLinks
                 links={[
                   {
