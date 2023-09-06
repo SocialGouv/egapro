@@ -12,7 +12,7 @@ export const Navigation = () => {
 
   const { data: session } = useSession();
 
-  const isStaff = session?.user.staff || session?.staff?.impersonating || false;
+  const isStaff = session?.user.staff || session?.staff.impersonating || false;
 
   return (
     <MainNavigation

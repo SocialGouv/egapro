@@ -10,7 +10,7 @@ export const ImpersonateNotice = () => {
 
   if (session.status !== "authenticated") return null;
 
-  const isImpersonating = session.data.staff?.impersonating || false;
+  const isImpersonating = session.data.staff.impersonating || false;
 
   if (!isImpersonating) return null;
 

@@ -11,8 +11,9 @@ import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
 declare module "next-auth" {
   interface Session {
-    staff?: {
-      impersonating: boolean;
+    staff: {
+      impersonating?: boolean;
+      lastImpersonated?: Array<{ label: string | null; siren: string }>;
     };
     user: {
       companies: Array<{ label: string | null; siren: string }>;
@@ -110,22 +111,30 @@ export const authConfig: AuthOptions = {
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger, account, session }) {
-      if (trigger === "update" && session && token.user.staff) {
+      const isStaff = token.user.staff || token.staff.impersonating || false;
+      if (trigger === "update" && session && isStaff) {
         if (session.staff.impersonating === true) {
           // staff starts impersonating
           assertImpersonatedSession(session);
           token.user.staff = session.user.staff;
           token.user.companies = session.user.companies;
-          token.staff = { impersonating: true };
+          token.staff.impersonating = true;
+          token.staff.lastImpersonated = [
+            // keep only unique companies
+            ...new Map(
+              (token.staff.lastImpersonated ?? []).concat(token.user.companies).map(c => [c.siren, c.label]),
+            ).entries(),
+          ].map(([siren, label]) => ({ siren, label }));
         } else if (session.staff.impersonating === false) {
           // staff stops impersonating
           token.user.staff = true;
           token.user.companies = [];
-          token.staff = { impersonating: false };
+          token.staff.impersonating = false;
         }
       }
       if (trigger !== "signUp") return token;
       token.user = {} as Session["user"];
+      token.staff = {} as Session["staff"];
       if (account?.provider === "github") {
         const githubProfile = profile as unknown as GithubProfile;
         token.user.staff = true;
@@ -154,7 +163,7 @@ export const authConfig: AuthOptions = {
     session({ session, token }) {
       session.user = token.user;
       session.user.email = token.email;
-      if (token.staff && (token.user.staff || token.staff.impersonating)) {
+      if (token.user.staff || token.staff.impersonating) {
         session.staff = token.staff;
       }
       return session;

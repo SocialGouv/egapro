@@ -53,7 +53,7 @@ export const ImpersonateForm = () => {
     };
   }, []);
 
-  if (session.status === "loading") return <SkeletonForm />;
+  if (session.status !== "authenticated") return <SkeletonForm />;
 
   const onSubmit = async () => {
     await session.update({
@@ -81,102 +81,123 @@ export const ImpersonateForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FormLayout>
-        <Input
-          label="Siren"
-          state={errors.siren && "error"}
-          stateRelatedMessage={errors.siren?.message}
-          nativeInputProps={{
-            ...register("siren", {
-              maxLength: 9,
-              minLength: 9,
-              async onChange() {
-                abortController.abort("New request");
-                await trigger("siren");
-                const siren = getValues("siren");
-                const sirenFieldState = getFieldState("siren");
-                setCompany(void 0);
-                if (sirenFieldState.invalid) return;
-                const newAbortController = new AbortController();
-                setAbortController(newAbortController);
-                try {
-                  setPending(true);
-                  const company = await abortablePromise(getCompany(siren), newAbortController.signal);
-                  if (!company.ok) {
-                    console.warn(company.error);
-                    setError("siren", {
-                      message:
-                        company.error === CompanyErrorCodes.NOT_FOUND
-                          ? `Entreprise non trouvée avec le siren "${siren}"`
-                          : "Erreur inconnue lors de la recherche d'entreprise.",
-                      type: "manual",
-                    });
-                  } else {
-                    setCompany(company.data);
+    <>
+      <ClientAnimate>
+        {session.data.staff.impersonating && (
+          <Alert
+            className="fr-mb-2w"
+            title="Vous êtes en train de mimoquer une entreprise"
+            severity="info"
+            description={`Vous êtes actuellement sous l'identité d'une entreprise (${session.data.user.companies[0].siren}). Pour revenir à votre
+          compte staff normal, cliquez sur le bouton "Arrêter de mimoquer.`}
+          />
+        )}
+      </ClientAnimate>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormLayout>
+          <datalist id="siren-list">
+            {session.data.staff.lastImpersonated?.map(company => (
+              <option key={company.siren} value={company.siren}>
+                {company.label}
+              </option>
+            ))}
+          </datalist>
+          <Input
+            label="Siren"
+            state={errors.siren && "error"}
+            stateRelatedMessage={errors.siren?.message}
+            nativeInputProps={{
+              list: "siren-list",
+              ...register("siren", {
+                maxLength: 9,
+                minLength: 9,
+                async onChange() {
+                  abortController.abort("New request");
+                  await trigger("siren");
+                  const siren = getValues("siren");
+                  const sirenFieldState = getFieldState("siren");
+                  setCompany(void 0);
+                  if (sirenFieldState.invalid) return;
+                  const newAbortController = new AbortController();
+                  setAbortController(newAbortController);
+                  try {
+                    setPending(true);
+                    const company = await abortablePromise(getCompany(siren), newAbortController.signal);
+                    if (!company.ok) {
+                      console.warn(company.error);
+                      setError("siren", {
+                        message:
+                          company.error === CompanyErrorCodes.NOT_FOUND
+                            ? `Entreprise non trouvée avec le siren "${siren}"`
+                            : "Erreur inconnue lors de la recherche d'entreprise.",
+                        type: "manual",
+                      });
+                    } else {
+                      setCompany(company.data);
+                    }
+                  } catch (e: unknown) {
+                    if (!(e instanceof AbortedWarning)) {
+                      throw e;
+                    }
                   }
-                } catch (e: unknown) {
-                  if (!(e instanceof AbortedWarning)) {
-                    throw e;
-                  }
-                }
-                setPending(false);
+                  setPending(false);
+                },
+              }),
+            }}
+          />
+          <ButtonsGroup
+            inlineLayoutWhen="sm and up"
+            buttons={[
+              {
+                children: "Valider",
+                disabled: !isValid || pending,
               },
-            }),
-          }}
-        />
-        <ButtonsGroup
-          inlineLayoutWhen="sm and up"
-          buttons={[
-            {
-              children: "Valider",
-              disabled: !isValid || pending,
-            },
-            {
-              children: "Arrêter de mimoquer",
-              disabled: !session.data?.staff?.impersonating,
-              type: "button",
-              priority: "secondary",
-              onClick: onStopImpersonating,
-            },
-          ]}
-        />
-        <ClientAnimate>
-          {company &&
-            (() => {
-              const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
+              {
+                children: "Arrêter de mimoquer",
+                disabled: !session.data?.staff.impersonating,
+                type: "button",
+                priority: "secondary",
+                onClick: onStopImpersonating,
+              },
+            ]}
+          />
+          <ClientAnimate>
+            {company &&
+              (() => {
+                const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
 
-              return (
-                <>
-                  <DebugButton alwaysOn obj={company}>
-                    Debug entreprise
-                  </DebugButton>
-                  {company.dateCessation && (
-                    <Alert
-                      className="fr-mb-2w"
-                      severity="warning"
-                      small
-                      description={`L'entreprise a été fermée le ${formatIsoToFr(company.dateCessation)}`}
+                return (
+                  <>
+                    <DebugButton alwaysOn obj={company}>
+                      Debug entreprise
+                    </DebugButton>
+                    {company.dateCessation && (
+                      <Alert
+                        className="fr-mb-2w"
+                        severity="warning"
+                        small
+                        description={`L'entreprise a été fermée le ${formatIsoToFr(company.dateCessation)}`}
+                      />
+                    )}
+                    <RecapCardCompany
+                      full
+                      title="Informations de l'entreprise à mimoquer"
+                      company={{
+                        address,
+                        city: company.firstMatchingEtablissement.libelleCommuneEtablissement,
+                        countryIsoCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
+                        nafCode: company.activitePrincipaleUniteLegale,
+                        name: company.simpleLabel,
+                        postalCode,
+                        siren: company.siren,
+                      }}
                     />
-                  )}
-                  <RecapCardCompany
-                    full
-                    title="Informations de l'entreprise à mimoquer"
-                    company={{
-                      address,
-                      city: company.firstMatchingEtablissement.libelleCommuneEtablissement,
-                      countryIsoCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
-                      nafCode: company.activitePrincipaleUniteLegale,
-                      name: company.simpleLabel,
-                      postalCode,
-                      siren: company.siren,
-                    }}
-                  />
-                </>
-              );
-            })()}
-        </ClientAnimate>
-      </FormLayout>
-    </form>
+                  </>
+                );
+              })()}
+          </ClientAnimate>
+        </FormLayout>
+      </form>
+    </>
   );
 };
