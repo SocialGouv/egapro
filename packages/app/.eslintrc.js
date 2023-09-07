@@ -97,8 +97,9 @@ const config = {
       files: ["**/*.ts?(x)"],
       extends: [
         "plugin:@typescript-eslint/recommended",
+        // "plugin:@typescript-eslint/stylistic",
         // MORE STRICT
-        // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        // "plugin:@typescript-eslint/recommended-type-checked",
       ],
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
       rules: {
@@ -158,7 +159,7 @@ const config = {
             fixStyle: "inline-type-imports",
           },
         ],
-        "@typescript-eslint/sort-type-union-intersection-members": "warn",
+        "@typescript-eslint/sort-type-constituents": "warn",
         // handled by tsc already (also not working -_-')
         "import/no-unresolved": "off",
       },
