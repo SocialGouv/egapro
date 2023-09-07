@@ -98,7 +98,7 @@ const config = {
       extends: [
         "plugin:@typescript-eslint/recommended",
         // "plugin:@typescript-eslint/stylistic",
-        // MORE STRICT
+        // MORE STRICT, enable when monorepo is down
         // "plugin:@typescript-eslint/recommended-type-checked",
       ],
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
