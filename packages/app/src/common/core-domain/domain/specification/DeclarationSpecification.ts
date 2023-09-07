@@ -6,19 +6,34 @@ const GOOD_INDEX_THRESHOLD = 85;
 const NO_INDEX = -1;
 
 export class DeclarationSpecification extends AbstractSpecification<DeclarationData> {
-  public isSatisfiedBy(data: DeclarationData): boolean {
-    if (data.declaration.draft) {
-      this.assertRequiredFields(data);
-    }
+  private _lastError?: ValidationError;
 
-    if (!data.declaration.sufficientPeriod) {
-      if (data.indicators)
-        throw new DeclarationSpecificationError("La période de référence ne permet pas de définir des indicateurs.");
-    } else {
-      this.assertIndicators(data);
+  public isSatisfiedBy(data: DeclarationData): boolean {
+    try {
+      if (data.declaration.draft) {
+        this.assertRequiredFields(data);
+      }
+
+      if (!data.declaration.sufficientPeriod) {
+        if (data.indicators)
+          throw new DeclarationSpecificationError("La période de référence ne permet pas de définir des indicateurs.");
+      } else {
+        this.assertIndicators(data);
+      }
+    } catch (error: unknown) {
+      if (error instanceof ValidationError) {
+        this._lastError = error;
+        return false;
+      } else {
+        throw error;
+      }
     }
 
     return true;
+  }
+
+  get lastError() {
+    return this._lastError;
   }
 
   private assertRequiredFields(data: DeclarationData): asserts data {

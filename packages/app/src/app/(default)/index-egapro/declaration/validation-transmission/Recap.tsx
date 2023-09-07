@@ -1,17 +1,18 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { AlertMessage } from "@design-system/client";
-import { submitDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { DeclarationFormBuilder } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { RecapDeclaration } from "../[siren]/[year]/RecapDeclaration";
+import { saveDeclaration } from "../actions";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "validation-transmission";
@@ -29,11 +30,11 @@ export const Recap = () => {
     return <SkeletonForm fields={2} />;
   }
 
-  const declaration = DeclarationFormBuilder.toDeclarationDTO(formData);
+  const declaration = DeclarationFormBuilder.toDeclarationDTO(formData) as CreateDeclarationDTO;
 
   const onSubmit = async () => {
     try {
-      await submitDeclaration(declaration);
+      await saveDeclaration(declaration);
       setStatus("edition");
       router.push(funnelConfig(formData)[stepName].next().url);
     } catch (error: unknown) {

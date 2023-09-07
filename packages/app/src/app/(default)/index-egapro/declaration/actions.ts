@@ -1,8 +1,11 @@
 "use server";
 
+import { entrepriseService } from "@api/core-domain/infra/services";
 import { declarationRepo } from "@api/core-domain/repo";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
+import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { assertServerSession } from "@api/utils/auth";
+import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -20,25 +23,25 @@ export async function getDeclaration(siren: string, year: number) {
   return declaration;
 }
 
-// export async function saveDeclaration(declaration: CreateDeclarationDTO) {
-//   const session = await assertServerSession({
-//     owner: {
-//       check: declaration.siren,
-//       message: "Not authorized to save declaration for this siren.",
-//     },
-//     staff: true,
-//   });
+export async function saveDeclaration(déclaration: CreateDeclarationDTO) {
+  await assertServerSession({
+    owner: {
+      check: déclaration.entreprise.siren,
+      message: "Not authorized to save declaration for this siren.",
+    },
+    staff: true,
+  });
 
-//   const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
-//   await useCase.execute({ declaration, override: session.user.staff });
+  const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
+  await useCase.execute({ declaration: déclaration });
 
-//   const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+  // const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
-//   await receiptUseCase.execute(declaration);
+  // await receiptUseCase.execute(declaration);
 
-//   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
-//   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
-// }
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
+}
 
 // export async function sendDeclarationReceipt(siren: string, year: number) {
 //   const session = await assertServerSession({
