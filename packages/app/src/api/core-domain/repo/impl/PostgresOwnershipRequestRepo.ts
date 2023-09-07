@@ -98,8 +98,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async updateWithOwnership(item: OwnershipRequest): Promise<void> {
     await this.sql.begin(async transac => {
       const ownership = new Ownership({
-        email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-        siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+        email: item.email!,
+        siren: item.siren!,
       });
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
@@ -115,8 +115,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
         .map(
           item =>
             new Ownership({
-              email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-              siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+              email: item.email!,
+              siren: item.siren!,
             }),
         );
       const ownershipRepo = new PostgresOwnershipRepo(transac);

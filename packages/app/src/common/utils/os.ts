@@ -31,10 +31,9 @@ const ensureNextEnvVar_: DefaultEnsureNextEnvVar = (envVar, transformerOrDefault
   if (typeof envVar === "undefined" && typeof defaultValue !== "undefined") return defaultValue;
 
   if (typeof transformerOrDefaultValue === "function") {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- not undefined anymore at this point
     return transformerOrDefaultValue(envVar!) ?? envVar ?? defaultValue;
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- always set
+
   return envVar ?? transformerOrDefaultValue!;
 };
 // TODO use "satisfies"

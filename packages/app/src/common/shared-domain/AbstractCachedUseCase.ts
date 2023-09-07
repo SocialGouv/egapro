@@ -43,7 +43,7 @@ export abstract class AbstractCachedUseCase<TRequest extends object, TResponse e
       if (status.has === "stale") {
         this.debug && console.info(`[Cache][${this.cacheMasterKey}] Cache hit but stale`, request);
         pResult.then(result => cache.set(cacheKey, result));
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- cache hit
+
         return cache.get(cacheKey, { allowStale: true })!;
       }
 
@@ -54,7 +54,6 @@ export abstract class AbstractCachedUseCase<TRequest extends object, TResponse e
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- cache hit
     const result = cache.get(cacheKey)!;
     this.debug && console.info(`[Cache][${this.cacheMasterKey}] Cache hit`, { request, result });
     return result;
