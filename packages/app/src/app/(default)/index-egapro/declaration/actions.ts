@@ -23,17 +23,17 @@ export async function getDeclaration(siren: string, year: number) {
   return declaration;
 }
 
-export async function saveDeclaration(déclaration: CreateDeclarationDTO) {
+export async function saveDeclaration(declaration: CreateDeclarationDTO) {
   await assertServerSession({
     owner: {
-      check: déclaration.entreprise.siren,
+      check: declaration.entreprise.siren,
       message: "Not authorized to save declaration for this siren.",
     },
     staff: true,
   });
 
   const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
-  await useCase.execute({ declaration: déclaration });
+  await useCase.execute({ declaration });
 
   // const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
