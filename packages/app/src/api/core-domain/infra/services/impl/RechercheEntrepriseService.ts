@@ -6,11 +6,12 @@ import { stringify } from "querystring";
 
 import {
   type Entreprise,
+  EntrepriseServiceError,
+  EntrepriseServiceNotFoundError,
   type Etablissement,
   type IEntrepriseService,
   type SearchParameters,
 } from "../IEntrepriseService";
-import { EntrepriseServiceError, EntrepriseServiceNotFoundError } from "../IEntrepriseService";
 
 const RECHERCHE_ENTREPRISE_URL = new URL("https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/");
 

@@ -1,7 +1,6 @@
 import { type PropsWithoutChildren } from "@common/utils/types";
 import { clsx } from "clsx";
-import { type PropsWithChildren, type ReactNode } from "react";
-import { useId } from "react";
+import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import { Box } from "./Box";
 

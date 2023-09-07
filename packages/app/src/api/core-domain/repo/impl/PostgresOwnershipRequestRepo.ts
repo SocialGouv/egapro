@@ -5,11 +5,9 @@ import { type OwnershipRequest } from "@common/core-domain/domain/OwnershipReque
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { type GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
-import { type SQLCount } from "@common/shared-domain";
-import { UnexpectedRepositoryError } from "@common/shared-domain";
+import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
-import { type Any } from "@common/utils/types";
-import { ensureRequired } from "@common/utils/types";
+import { type Any, ensureRequired } from "@common/utils/types";
 
 import { type IOwnershipRequestRepo, type OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";

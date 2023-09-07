@@ -3,8 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { type PropsWithChildren } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, type PropsWithChildren, useContext, useEffect, useState } from "react";
 
 const ERROR_COLLAPSE_TIMEOUT = 5000;
 

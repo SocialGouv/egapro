@@ -6,12 +6,10 @@ import {
   type GetOwnershipRequestInputDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { sortBy } from "lodash";
 
-import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
-import { EntrepriseServiceNotFoundError } from "../infra/services/IEntrepriseService";
+import { EntrepriseServiceNotFoundError, type IEntrepriseService } from "../infra/services/IEntrepriseService";
 import { type IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO, GetOwnershipRequestDTO> {

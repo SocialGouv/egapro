@@ -5,8 +5,7 @@ import {
   type OwnershipRequestActionDTO,
 } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 import { type OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import { ensureRequired } from "@common/utils/types";
 import { partition } from "lodash";
