@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { config } from "@common/config";
 import { type SearchConsultationDTO } from "@common/core-domain/dtos/helpers/common";
 import {
@@ -61,12 +61,12 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
             <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
             {isLandingPage ? (
               <SimpleSubmitForm noValidate>
-                <SearchBar
-                  big
+                <Input
                   label="Rechercher"
                   nativeInputProps={{
                     placeholder: "Nom ou numéro de SIREN de l'entreprise",
                     name: "query",
+                    type: "search",
                   }}
                   className={fr.cx("fr-pb-2w")}
                 />
