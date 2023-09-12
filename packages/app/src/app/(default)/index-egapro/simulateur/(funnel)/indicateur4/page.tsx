@@ -28,8 +28,8 @@ const Indicateur4Page = () => {
           <>
             Est prise en compte une salariée qui est <u>revenue</u> de congé maternité (éventuellement prolongé par un
             congé parental) pendant la période de référence si au moins une augmentation a été faite pendant son congé.
-            La prise en compte chaque salariée est donc appréciée individuellement et dépend des éventuelles
-            augmentations ayant eu lieu pendant ses congés.
+            La prise en compte de chaque salariée est donc appréciée individuellement et dépend des éventuelles
+            augmentations ayant eu lieu pendant leur congé maternité.
           </>
         }
       />

@@ -40,8 +40,8 @@ const CommentEstCalculéLIndicateur = () => (
         socio-professionnelle.
       </li>
       <li>
-        L’écart de taux d’augmentations est calculé, en points de pourcentage, pour chacun des groupes, en soustrayant
-        le pourcentage de femmes augmentées à celui des hommes augmentés.
+        L’écart de taux d’augmentations est calculé, en %, pour chacun des groupes, en soustrayant le pourcentage de
+        femmes augmentées à celui des hommes augmentés.
       </li>
       <li>
         Les écarts obtenus sont multipliés par le ratio de l’effectif du groupe à l’effectif total des groupes pris en
