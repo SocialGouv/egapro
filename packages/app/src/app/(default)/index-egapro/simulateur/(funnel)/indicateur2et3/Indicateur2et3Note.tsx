@@ -1,17 +1,27 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
+import { percentFormat } from "@common/utils/number";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
 interface Props {
   computer: IndicateurDeuxTroisComputer;
+  /**
+   * If true, display the note with more details about the result.
+   *
+   * Can only be used if `simple` is false.
+   */
+  detailed?: boolean;
   isValid: boolean;
   noBorder?: boolean;
+  /**
+   * If true, only display the note, without other notes or alerts
+   */
   simple?: boolean;
 }
 
-export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Props) => {
+export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed }: Props) => {
   const NOTE_MAX = computer.getMaxNote();
 
   let computed: IndicateurDeuxTroisComputer.ComputedResult | null = null;
@@ -57,6 +67,30 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
         <>
           {!simple && (
             <>
+              {detailed && (
+                <>
+                  <IndicatorNote
+                    noBorder={noBorder}
+                    className={fr.cx("fr-mb-2w")}
+                    size="small"
+                    classes={{
+                      note: fr.cx("fr-ml-n2w"),
+                    }}
+                    note={isValid ? percentFormat.format((computed?.result ?? 0) / 100) : "-"}
+                    text="Résultat final obtenu à l'indicateur en %"
+                  />
+                  <IndicatorNote
+                    noBorder={noBorder}
+                    className={fr.cx("fr-mb-2w")}
+                    size="small"
+                    classes={{
+                      note: fr.cx("fr-ml-n2w"),
+                    }}
+                    note={isValid ? computed?.equivalentEmployeeCountGap ?? 0 : "-"}
+                    text="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
+                  />
+                </>
+              )}
               <IndicatorNote
                 noBorder={noBorder}
                 className={fr.cx("fr-mb-2w")}
@@ -65,7 +99,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
                   note: fr.cx("fr-ml-n2w"),
                 }}
                 note={isValid ? computed?.notePercent ?? 0 : "-"}
-                text="Nombre de points obtenus sur le résultat en points de pourcentage"
+                text="Nombre de points obtenus sur le résultat en %"
               />
               <IndicatorNote
                 noBorder={noBorder}
@@ -75,7 +109,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder }: Prop
                   note: fr.cx("fr-ml-n2w"),
                 }}
                 note={isValid ? computed?.noteEquivalentEmployeeCountGap ?? 0 : "-"}
-                text="Nombre de points obtenus sur le résultat en nombre de salariés"
+                text="Nombre de points obtenus sur le résultat en nombre de équivalent salariés"
               />
             </>
           )}
