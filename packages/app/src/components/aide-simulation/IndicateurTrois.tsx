@@ -30,8 +30,8 @@ const CommentEstCalculéLIndicateur = () => (
         socio-professionnelle.
       </li>
       <li>
-        L’écart de taux de promotions est calculé, en points de pourcentage, pour chacun des groupes, en soustrayant le
-        pourcentage de femmes promues à celui des hommes promus.
+        L’écart de taux de promotions est calculé, en %, pour chacun des groupes, en soustrayant le pourcentage de
+        femmes promues à celui des hommes promus.
       </li>
       <li>
         Les écarts obtenus sont multipliés par le ratio de l’effectif du groupe à l’effectif total des groupes pris en

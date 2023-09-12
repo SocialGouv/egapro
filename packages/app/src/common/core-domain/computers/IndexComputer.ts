@@ -1,8 +1,8 @@
 import { type CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 import { AbstractComputer, type ComputedResult } from "./AbstractComputer";
 import { type IndicateurCinqComputer } from "./IndicateurCinqComputer";
-import { type IndicateurDeuxComputer } from "./IndicateurDeuxComputer";
-import { type IndicateurDeuxTroisComputer } from "./IndicateurDeuxTroisComputer";
+import { IndicateurDeuxComputer } from "./IndicateurDeuxComputer";
+import { IndicateurDeuxTroisComputer } from "./IndicateurDeuxTroisComputer";
 import { type IndicateurQuatreComputer } from "./IndicateurQuatreComputer";
 import { type IndicateurTroisComputer } from "./IndicateurTroisComputer";
 import { type IndicateurUnComputer } from "./IndicateurUnComputer";
@@ -38,6 +38,13 @@ export class IndexComputer<TWorkforceRange extends CompanyWorkforceRange.Enum> e
   public compute(): ComputedResult {
     const totalNote = this.indicateurs.reduce((acc, computer) => {
       if (computer?.canCompute()) {
+        if (
+          (computer instanceof IndicateurDeuxTroisComputer || computer instanceof IndicateurDeuxComputer) &&
+          computer.compute().remunerationsCompensated
+        ) {
+          return acc + computer.getMaxNote();
+        }
+
         return acc + computer.compute().note;
       }
 
