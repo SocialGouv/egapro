@@ -2,8 +2,7 @@ import { type DeclarationDTO } from "@common/models/generated";
 import { getSession, useSession } from "next-auth/react";
 import useSWR from "swr";
 
-import { type FetcherOptions, type FetcherReturn } from "./fetcher";
-import { fetcher, genericErrorMessage } from "./fetcher";
+import { fetcher, type FetcherOptions, type FetcherReturn, genericErrorMessage } from "./fetcher";
 
 export type DeclarationAPI = {
   data: DeclarationDTO;

@@ -1,6 +1,5 @@
 import "react-loading-skeleton/dist/skeleton.css";
 
-import { ConsentBanner } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
@@ -13,6 +12,7 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
+import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { defaultColorScheme } from "./defaultColorScheme";
 import { ImpersonateNotice } from "./ImpersonateNotice";
 import { SessionProvider } from "./SessionProvider";
@@ -93,25 +93,7 @@ const RootLayout = ({ children }: PropsWithChildren) => (
                   },
                 ]}
               />
-              <ConsentBanner
-                gdprLinkProps={{
-                  href: "/politique-de-confidentialite#cookies",
-                }}
-                siteName="Egapro"
-                services={[
-                  {
-                    name: "egapro",
-                    title: "Egapro",
-                    description: "Cookies obligatoires permettant de sauvegarder l'état d'authentification.",
-                    mandatory: true,
-                  },
-                  {
-                    name: "matomo",
-                    title: "Matomo",
-                    description: "Outil d’analyse comportementale des utilisateurs.",
-                  },
-                ]}
-              />
+              <ConsentBannerAndConsentManagement />
               {children}
             </IsomorphicSkeletonTheme>
           </DsfrProvider>

@@ -1,5 +1,4 @@
-import { type EntityPropsToJson, type UUID } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
+import { type EntityPropsToJson, JsonEntity, type UUID } from "@common/shared-domain";
 
 import { Company } from "./declaration/Company";
 import { Declarant } from "./declaration/Declarant";

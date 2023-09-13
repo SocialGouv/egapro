@@ -1,6 +1,5 @@
 import { config } from "@common/config";
-import { type SendMailOptions } from "nodemailer";
-import { createTransport } from "nodemailer";
+import { createTransport, type SendMailOptions } from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
 import { mailerConfig } from "./config";
