@@ -155,7 +155,7 @@ export const authConfig: AuthOptions = {
       }
 
       // Token legacy for usage with API v1.
-      token.tokenApiV1 = createTokenApiV1(token.user.email);
+      token.user.tokenApiV1 = createTokenApiV1(token.email);
 
       return token;
     },
