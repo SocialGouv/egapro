@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { COUNTIES, NAF, REGIONS, REGIONS_TO_COUNTIES } from "@common/dict";
 import { Object } from "@common/utils/overload";
 import { sample } from "lodash";

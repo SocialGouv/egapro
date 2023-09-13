@@ -21,7 +21,6 @@ export const useUserMocked = ({ redirectTo: _ }: { redirectTo?: string } = {}) =
   return {
     user: { email: "john.maclane@gmail.com" },
     error: "",
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     logout: () => {},
     isAuthenticated: true,
     loading: false,

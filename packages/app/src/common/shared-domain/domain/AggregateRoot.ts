@@ -1,5 +1,4 @@
-import { JsonEntity, type UUID } from "./Entity";
-import { Entity } from "./Entity";
+import { Entity, JsonEntity, type UUID } from "./Entity";
 
 export abstract class AggregateRoot<P, Id = UUID> extends Entity<P, Id> {}
 

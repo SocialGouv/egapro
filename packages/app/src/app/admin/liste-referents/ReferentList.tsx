@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { COUNTIES, REGIONS } from "@common/dict";
 import { storePicker } from "@common/utils/zustand";
@@ -65,11 +65,12 @@ export const ReferentList = ({ referents: data }: ReferentListProps) => {
   return (
     <>
       <form noValidate onSubmit={noop}>
-        <SearchBar
+        <Input
           label="Rechercher un référent"
           nativeInputProps={{
             placeholder: "Rechercher",
             autoComplete: "off",
+            type: "search",
             ...register("query"),
           }}
           className="fr-mb-2w"

@@ -1,7 +1,8 @@
-import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import DsfrFooter, { type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { config } from "@common/config";
+
+import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "./consentManagement";
 
 export interface FooterProps {
   type: "company" | "public";
@@ -55,20 +56,14 @@ export const Footer = ({ type }: FooterProps) => (
         text: "CGU",
         linkProps: { href: "/cgu" },
       },
-      {
-        text: "Politique de confidentialité",
-        linkProps: { href: "/politique-de-confidentialite" },
-      },
+      <FooterPersonalDataPolicyItem key="FooterPersonalDataPolicyItem" />,
       {
         ...headerFooterDisplayItem,
         iconId: "fr-icon-theme-fill",
       },
+      <FooterConsentManagementItem key="FooterConsentManagementItem" />,
     ]}
-    personalDataLinkProps={{ href: "/politique-de-confidentialite" }}
     termsLinkProps={{ href: "/mentions-legales" }}
-    cookiesManagementButtonProps={{
-      nativeButtonProps: consentModalNativeButtonProps,
-    }}
     license={
       <>
         Sauf mention contraire, tous les contenus de ce site sont sous{" "}

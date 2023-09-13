@@ -1,5 +1,4 @@
-import { type EntityPropsToJson } from "@common/shared-domain";
-import { JsonEntity } from "@common/shared-domain";
+import { type EntityPropsToJson, JsonEntity } from "@common/shared-domain";
 
 export interface PublicationProps {
   date: Date;

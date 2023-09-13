@@ -1,6 +1,5 @@
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { type PropsWithChildren } from "react";
-import { forwardRef } from "react";
+import { forwardRef, type PropsWithChildren } from "react";
 
 import style from "./TableAdmin.module.css";
 

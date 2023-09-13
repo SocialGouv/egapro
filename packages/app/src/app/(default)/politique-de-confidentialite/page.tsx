@@ -1,7 +1,7 @@
-import Button from "@codegouvfr/react-dsfr/Button";
-import { consentModalNativeButtonProps } from "@codegouvfr/react-dsfr/ConsentBanner";
 import { Container, Grid, GridCol } from "@design-system";
 import Link from "next/link";
+
+import { FooterConsentManagementItem } from "../../consentManagement";
 
 const title = "Politique de confidentialité";
 
@@ -236,10 +236,7 @@ const PrivacyPolicy = () => {
               </table>
             </div>
             <p>
-              Vous pouvez retirer votre consentement relatif aux cookies :{" "}
-              <Button priority="tertiary no outline" nativeButtonProps={consentModalNativeButtonProps}>
-                ici
-              </Button>
+              Vous pouvez retirer votre consentement relatif aux cookies : <FooterConsentManagementItem />
             </p>
           </GridCol>
         </Grid>

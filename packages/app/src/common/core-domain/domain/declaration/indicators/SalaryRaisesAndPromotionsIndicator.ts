@@ -4,8 +4,7 @@ import { PositiveInteger } from "@common/shared-domain/domain/valueObjects/Posit
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 export interface SalaryRaisesAndPromotionsIndicatorProps extends AbstractIndicatorProps {
   employeesCountResult?: PositiveInteger;

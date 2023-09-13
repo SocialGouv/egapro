@@ -7,8 +7,7 @@ import { RepresentationEquilibreeSpecification } from "@common/core-domain/domai
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
-import { type EntityPropsToJson, type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { add, isAfter } from "date-fns";
 
