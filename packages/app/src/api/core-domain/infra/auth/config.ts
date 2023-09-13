@@ -60,6 +60,7 @@ export const authConfig: AuthOptions = {
   // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     GithubProvider({
@@ -182,7 +183,7 @@ const createTokenApiV1 = (email: string) => {
     config.api.security.jwtv1.secret,
     {
       algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
-      expiresIn: "7d",
+      expiresIn: "24h",
     },
   );
 };
