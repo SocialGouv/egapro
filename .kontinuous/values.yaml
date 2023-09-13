@@ -23,6 +23,21 @@ x-secure-headers: &headers >-
 
   more_set_headers "Referrer-Policy: no-referrer, strict-origin-when-cross-origin";
 
+  more_set_headers
+  "Permissions-Policy:
+  fullscreen=(),
+  display-capture=(),
+  camera=(),
+  microphone=(),
+  web-share=(),
+  geolocation=()"
+
+  more_set_headers "Cross-Origin-Embedder-Policy: require-corp";
+
+  more_set_headers "Cross-Origin-Resource-Policy: same-origin";
+
+  more_set_headers "Cross-Origin-Opener-Policy: same-origin";
+
 app:
   ~chart: app
   ~needs: [build-app]
