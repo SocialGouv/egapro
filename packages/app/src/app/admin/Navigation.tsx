@@ -15,7 +15,7 @@ export const adminMenuItems = [
     segment: "debug",
   },
   {
-    text: "Mimoquer un SIREN",
+    text: "Mimoquer un Siren",
     href: "/admin/impersonate",
     segment: "impersonate",
   },

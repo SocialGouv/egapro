@@ -1,10 +1,11 @@
 "use client";
 
-import { useGdprStore } from "@codegouvfr/react-dsfr/useGdprStore";
 import { config } from "@common/config";
 import { init, push } from "@socialgouv/matomo-next";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { useConsent } from "../../app/consentManagement";
 
 export type MatomoProps = Pick<typeof config, "env">;
 
@@ -16,7 +17,8 @@ export type MatomoProps = Pick<typeof config, "env">;
 export const Matomo = ({ env }: MatomoProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { matomo: matomoConsent } = useGdprStore(state => state.consents);
+  const { finalityConsent } = useConsent();
+  const matomoConsent = finalityConsent?.matomo;
   const [inited, setInited] = useState(false);
   const [previousPath, setPreviousPath] = useState("");
 

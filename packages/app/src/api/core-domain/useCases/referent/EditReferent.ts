@@ -4,8 +4,7 @@ import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/R
 import { Region } from "@common/core-domain/domain/valueObjects/Region";
 import { type EditReferentDTO, type ReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { Email, UniqueID, Url } from "@common/shared-domain/domain/valueObjects";
 
 import { type IReferentRepo } from "../../repo/IReferentRepo";

@@ -1,8 +1,7 @@
 import { type IJsxPdfService } from "@api/shared-domain/infra/pdf/IJsxPdfService";
 import { config } from "@common/config";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { type IGlobalMailerService } from "../infra/mail/IGlobalMailerService";

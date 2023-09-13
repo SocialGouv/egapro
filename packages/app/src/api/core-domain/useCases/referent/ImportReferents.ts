@@ -3,8 +3,7 @@ import { County } from "@common/core-domain/domain/valueObjects/County";
 import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/ReferentType";
 import { Region } from "@common/core-domain/domain/valueObjects/Region";
 import { type CreateReferentDTO } from "@common/core-domain/dtos/ReferentDTO";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { Email, Url } from "@common/shared-domain/domain/valueObjects";
 
 import { type IReferentRepo } from "../../repo/IReferentRepo";

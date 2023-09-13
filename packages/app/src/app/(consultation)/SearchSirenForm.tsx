@@ -66,6 +66,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               id: "query",
               title: "Saisissez le nom ou le Siren d'une entreprise déclarante",
               autoComplete: "off",
+              type: "search",
               ...register("query"),
             }}
             stateRelatedMessage={errors.query?.message}

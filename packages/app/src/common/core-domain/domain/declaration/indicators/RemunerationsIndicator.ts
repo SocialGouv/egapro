@@ -4,8 +4,7 @@ import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 type Categorie = {
   name?: string;
