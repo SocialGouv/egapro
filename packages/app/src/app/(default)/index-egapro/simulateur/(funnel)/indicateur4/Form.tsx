@@ -17,7 +17,6 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { last } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, type FieldErrors, FormProvider, useForm } from "react-hook-form";
@@ -39,7 +38,6 @@ const infoModal = createModal({
   isOpenedByDefault: false,
 });
 
-const NOTE_MAX = last(indicateur4Computer.NOTE_TABLE);
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic4Form = () => {
   const router = useRouter();

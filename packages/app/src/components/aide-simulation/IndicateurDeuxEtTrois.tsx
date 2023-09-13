@@ -44,24 +44,22 @@ const CommentEstCalculéLIndicateur = () => (
         d’hommes augmentées au nombre total d’hommes pris en compte pour le calcul.
       </li>
       <li>
-        Un premier résultat est &quot;l’écart en points de pourcentage&quot; : il s’agit de la valeur absolue de l’écart
-        entre les deux taux calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux
-        d’augmentation des hommes est de 30,00%, l’écart est ainsi de 3,13 points de pourcentage.
+        Un premier résultat est &quot;l’écart en %&quot; : il s’agit de la valeur absolue de l’écart entre les deux taux
+        calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des hommes
+        est de 30,00%, l’écart est ainsi de 3,13%.
       </li>
       <li>
         Un second résultat est &quot;l’écart en nombre équivalent de salariés&quot; : l’écart de taux calculé en 3 est
         appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de salariés
         qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par exemple,
-        l’écart est de 3,13 points de pourcentage dans une entreprise employant 15 femmes et 20 hommes, on applique
-        3,13% aux 15 femmes, le nombre équivalent de salariés est ainsi de 0,4695.
+        l’écart est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le
+        nombre équivalent de salariés est ainsi de 0,4695.
       </li>
+      <li>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale. </li>
       <li>
-        L’écart en points de pourcentage et le nombre équivalent de salariés sont arrondis à la première décimale.{" "}
-      </li>
-      <li>
-        Le barème est appliqué à l’écart en points de pourcentage et à l’écart en nombre équivalent de salariés, et le
-        résultat correspondant au nombre de points le plus élevé est retenu. En reprenant l’exemple en 4, c’est le
-        résultat obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui sera conservée, la note finale obtenu à
+        Le barème est appliqué à l’écart en % et à l’écart en nombre équivalent de salariés, et le résultat
+        correspondant au nombre de points le plus élevé est retenu. En reprenant l’exemple en 4, c’est le résultat
+        obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui sera conservée, la note finale obtenu à
         l’indicateur est ainsi de 35 points.
       </li>
     </ol>

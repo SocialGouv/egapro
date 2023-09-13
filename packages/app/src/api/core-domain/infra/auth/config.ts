@@ -110,7 +110,7 @@ export const authConfig: AuthOptions = {
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger, account, session }) {
-      const isStaff = token.user.staff || token.staff.impersonating || false;
+      const isStaff = token.user?.staff || token.staff?.impersonating || false;
       if (trigger === "update" && session && isStaff) {
         if (session.staff.impersonating === true) {
           // staff starts impersonating

@@ -246,8 +246,7 @@ export const RecapSimu = () => {
                     }) as [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]],
                   }))}
                 />
-                <Indicateur1Note computer={computerIndicateurUn} isValid simple noBorder />
-                <IndicatorPercentResult result={resultIndicateurUn.result / 100} />
+                <Indicateur1Note computer={computerIndicateurUn} isValid noBorder />
               </>
             ) : (
               <IndicatorNote
@@ -293,8 +292,7 @@ export const RecapSimu = () => {
 
             return (
               <>
-                <Indicateur2et3Note computer={computerIndicateurDeuxTrois} isValid simple noBorder />
-                <IndicatorPercentResult result={resultIndicateurDeuxTrois.result / 100} />
+                <Indicateur2et3Note computer={computerIndicateurDeuxTrois} isValid noBorder detailed />
               </>
             );
           })()}
@@ -376,14 +374,19 @@ export const RecapSimu = () => {
                           })(),
                         }))}
                       />
+                      <IndicatorNote
+                        noBorder
+                        size="small"
+                        note={percentFormat.format((result?.result ?? 0) / 100)}
+                        text="Résultat final obtenu à l'indicateur en %"
+                      />
                       <Indicateur2ou3Note
                         computer={computerIndicateurDeuxOuTrois}
                         indicateur={indicateur}
                         isValid
-                        simple
                         noBorder
+                        simple
                       />
-                      <IndicatorPercentResult result={result.result / 100} />
                     </>
                   );
                 })()}
@@ -414,8 +417,8 @@ export const RecapSimu = () => {
 
           return (
             <>
-              <Indicateur4Note noBorder computer={computerIndicateurQuatre} count={count} isValid />
               <IndicatorPercentResult result={resultIndicateurQuatre.result} />
+              <Indicateur4Note noBorder computer={computerIndicateurQuatre} count={count} isValid />
             </>
           );
         })()}
@@ -425,27 +428,11 @@ export const RecapSimu = () => {
         editLink={simulateurPath("indicateur5")}
         content={
           <>
-            <AlternativeTable
-              classeName="fr-mb-1w"
-              bordered
-              header={[
-                {
-                  label: "",
-                },
-                {
-                  label: "Femmes",
-                },
-                {
-                  label: "Hommes",
-                },
-              ]}
-              body={[
-                {
-                  categoryLabel: "Nombre parmi les 10 plus hauts salaires",
-                  alignCols: "center",
-                  cols: [funnel.indicateur5.women, funnel.indicateur5.men],
-                },
-              ]}
+            <IndicatorNote
+              noBorder
+              note={resultIndicateurCinq.result}
+              size="small"
+              text="Résultat final obtenu à l'indicateur en nombre de salariés du sexe sous-représenté"
             />
             <IndicatorNote
               noBorder
