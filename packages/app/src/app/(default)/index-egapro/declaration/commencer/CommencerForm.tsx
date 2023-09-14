@@ -5,6 +5,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
@@ -14,7 +15,7 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { DeclarationFormBuilder } from "@services/form/declaration/DeclarationFormBuilder";
 import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -59,9 +60,9 @@ const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: 
 const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
-  formData: DeclarationFormState,
+  formData: DeclarationDTO,
   // tokenApiV1: string,
-): Promise<DeclarationFormState> => {
+): Promise<DeclarationDTO> => {
   const previousDeclaration = await getDeclaration(siren, year);
 
   // If there is a declaration, we use it as is.
@@ -75,7 +76,7 @@ const prepareDataWithExistingDeclaration = async (
   }
 
   // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
-  const baseFormData: DeclarationFormState =
+  const baseFormData: DeclarationDTO =
     formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
       ? formData
       : {
@@ -83,6 +84,8 @@ const prepareDataWithExistingDeclaration = async (
             status: "creation",
           },
         };
+
+  // TODO: faire un useCase validateSiren qui va appeller l'API et vérifier que la date de cessation est correcte.
 
   // We fetch the latest data for the entreprise to fill the entreprise page.
   const entreprise = await memoizedFetchSiren(siren, year);
@@ -129,7 +132,7 @@ export const CommencerForm = () => {
 
   const companies = user.companies;
 
-  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
+  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationDTO) => {
     try {
       // Synchronize the data with declaration if any.
       const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData);

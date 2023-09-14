@@ -12,6 +12,8 @@ export const formatAdresse = (entreprise: Entreprise | EntrepriseType) => {
   return [entreprise.adresse, entreprise.code_postal, entreprise.commune];
 };
 
+// TODO: faire un useCase validateSiren qui va appeller l'API et vérifier que la date de cessation est correcte.
+
 export const fetchSiren = async (siren: string, year?: number | undefined) => {
   const url = year ? `/validate-siren?siren=${siren}&year=${year}` : `/validate-siren?siren=${siren}`;
 

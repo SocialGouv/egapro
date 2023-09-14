@@ -77,7 +77,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
           throw new SaveDeclarationOverOneYearError("Déclaration is older than one year.");
         }
 
-        declaration = found.fromJson(partialDeclaration);
+        declaration = found.fromJson({ ...partialDeclaration, modifiedAt: now });
       } else {
         declaration = Declaration.fromJson({
           ...partialDeclaration,
@@ -86,14 +86,16 @@ export class SaveDeclaration implements UseCase<Input, void> {
           siren: dto.entreprise.siren,
           year: dto.déclaration.année_indicateurs,
         });
+      }
 
-        const specification = new DeclarationSpecification();
+      // TODO: calculer ou recalculer les points des indicateurs et l'index
 
-        if (declaration.data && specification.isSatisfiedBy(declaration.data)) {
-          await this.declarationRepo.save(declaration);
-        } else {
-          throw specification.lastError;
-        }
+      const specification = new DeclarationSpecification();
+
+      if (declaration.data && specification.isSatisfiedBy(declaration.data)) {
+        await this.declarationRepo.save(declaration);
+      } else {
+        throw specification.lastError;
       }
     } catch (error: unknown) {
       throw new SaveDeclarationError("Cannot save representation equilibree", error as Error);

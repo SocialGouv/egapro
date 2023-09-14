@@ -1,4 +1,4 @@
-import { type DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import { type DeclarationRaw } from "@api/core-domain/infra/db/DeclarationRaw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";

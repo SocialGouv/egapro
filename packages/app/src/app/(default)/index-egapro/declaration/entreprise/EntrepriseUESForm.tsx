@@ -1,6 +1,7 @@
 "use client";
 
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -92,29 +93,13 @@ export const EntrepriseUESForm = () => {
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <RadioButtons
               legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
-              options={[
-                {
-                  label: "De 50 à 250 inclus",
-                  nativeInputProps: {
-                    value: "50:250",
-                    ...register("tranche"),
-                  },
+              options={Object.entries(CompanyWorkforceRange.Label).map(([value, label]) => ({
+                label,
+                nativeInputProps: {
+                  value,
+                  ...register("tranche"),
                 },
-                {
-                  label: "De 251 à 999 inclus",
-                  nativeInputProps: {
-                    value: "251:999",
-                    ...register("tranche"),
-                  },
-                },
-                {
-                  label: "De 1000 à plus",
-                  nativeInputProps: {
-                    value: "1000:",
-                    ...register("tranche"),
-                  },
-                },
-              ]}
+              }))}
             />
           </ClientOnly>
 

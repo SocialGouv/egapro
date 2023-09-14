@@ -1,218 +1,5 @@
-import {
-  type AnneeIndicateur,
-  type Augmentations,
-  type AugmentationsEtPromotions,
-  type CongesMaternite,
-  type DeclarationDTO,
-  type HautesRemunerations,
-  type PopulationFavorable,
-  type Promotions,
-  type Remunerations,
-} from "@common/models/generated";
-import { type EmptyObject } from "@common/utils/types";
-
-import { buildEntreprise, type Entreprise } from "./entreprise";
-
-type OuiNon = "non" | "oui";
-
-export const TrancheOptions = [
-  { label: "De 50 à 250 inclus", value: "50:250" },
-  { label: "De 251 à 999 inclus", value: "251:999" },
-  { label: "De 1000 ou plus", value: "1000:" },
-] as const;
-
-export type TrancheValues = (typeof TrancheOptions)[number]["value"];
-
-type TranchesAge = {
-  "30:39": number | null;
-  "40:49": number | null;
-  "50:": number | null;
-  ":29": number | null;
-};
-
-export type Catégorie = { nom: string; tranches: TranchesAge };
-
-export const labelsMotifNC = {
-  egvi40pcet: "Effectif des groupes valides inférieur à 40% de l'effectif total",
-  absaugi: "Absence d'augmentations individuelles",
-  etsno5f5h: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
-  absprom: "Absence de promotions",
-  absaugpdtcm: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
-  absrcm: "Absence de retours de congé maternité",
-} as const;
-
-export type IndicatorKey = keyof Pick<
-  DeclarationFormState,
-  | "augmentations-et-promotions"
-  | "augmentations"
-  | "conges-maternite"
-  | "hautes-remunerations"
-  | "promotions"
-  | "remunerations"
->;
-
-export type MotifNCKey = Exclude<IndicatorKey, "hautes-remunerations">;
-
-export const motifsNC = {
-  augmentations: ["egvi40pcet", "absaugi"],
-  promotions: ["egvi40pcet", "absprom"],
-  "augmentations-et-promotions": ["absaugi", "etsno5f5h"],
-  remunerations: ["egvi40pcet"],
-  "conges-maternite": ["absrcm", "absaugpdtcm"],
-} as const;
-
-/**
- * The shape of the state for declaration form.
- */
-export type DeclarationFormState = {
-  augmentations?:
-    | {
-        catégories: [
-          { nom: "ouv"; écarts: number | null },
-          { nom: "emp"; écarts: number | null },
-          { nom: "tam"; écarts: number | null },
-          { nom: "ic"; écarts: number | null },
-        ];
-        estCalculable: "oui";
-        note: number;
-        populationFavorable: PopulationFavorable;
-        résultat: number;
-      }
-    | {
-        estCalculable: "non";
-        motifNonCalculabilité: (typeof motifsNC)["augmentations"][number];
-      };
-  "augmentations-et-promotions"?:
-    | {
-        estCalculable: "non";
-        motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
-      }
-    | {
-        estCalculable: "oui";
-        note: number;
-        noteNombreSalaries: number;
-        notePourcentage: number;
-        populationFavorable: PopulationFavorable;
-        résultat: number;
-        résultatEquivalentSalarié: number;
-      };
-  commencer?: {
-    annéeIndicateurs: number;
-    siren: string;
-  };
-  "conges-maternite"?:
-    | {
-        estCalculable: "non";
-        motifNonCalculabilité: (typeof motifsNC)["conges-maternite"][number];
-      }
-    | {
-        estCalculable: "oui";
-        note: number;
-        résultat: number;
-      };
-  declarant?: {
-    accordRgpd: boolean;
-    email: string;
-    nom: string;
-    prénom: string;
-    téléphone: string;
-  };
-  "declaration-existante": {
-    date?: string | undefined;
-    status: "consultation" | "creation" | "edition";
-  };
-  entreprise?: { entrepriseDéclarante: Entreprise; tranche?: TrancheValues; type?: "entreprise" | "ues" };
-  "hautes-remunerations"?: {
-    note: number;
-    populationFavorable: PopulationFavorable;
-    résultat: number;
-  };
-  "periode-reference"?:
-    | {
-        effectifTotal: number;
-        finPériodeRéférence: string;
-        périodeSuffisante: "oui";
-      }
-    | {
-        périodeSuffisante: "non";
-      };
-  promotions?:
-    | {
-        catégories: [
-          { nom: "ouv"; écarts: number | null },
-          { nom: "emp"; écarts: number | null },
-          { nom: "tam"; écarts: number | null },
-          { nom: "ic"; écarts: number | null },
-        ];
-        estCalculable: "oui";
-        note: number;
-        populationFavorable: PopulationFavorable;
-        résultat: number;
-      }
-    | {
-        estCalculable: "non";
-        motifNonCalculabilité: (typeof motifsNC)["promotions"][number];
-      };
-
-  publication?: { date: string; planRelance: OuiNon } & (
-    | {
-        choixSiteWeb: "non";
-        modalités: string;
-      }
-    | {
-        choixSiteWeb: "oui";
-        url: string;
-      }
-  );
-  remunerations?:
-    | {
-        cse?: OuiNon;
-        dateConsultationCSE?: string;
-        estCalculable: "oui";
-        mode: Remunerations["mode"];
-      }
-    | {
-        déclarationCalculCSP: boolean;
-        estCalculable: "non";
-        motifNonCalculabilité?: (typeof motifsNC)["remunerations"][number];
-      };
-  "remunerations-coefficient-autre"?: {
-    catégories: Catégorie[];
-  };
-
-  "remunerations-coefficient-branche"?: {
-    catégories: Catégorie[];
-  };
-  "remunerations-csp"?: {
-    catégories: [
-      { nom: "ouv"; tranches: TranchesAge },
-      { nom: "emp"; tranches: TranchesAge },
-      { nom: "tam"; tranches: TranchesAge },
-      { nom: "ic"; tranches: TranchesAge },
-    ];
-  };
-  "remunerations-resultat"?: {
-    note: number;
-    populationFavorable: PopulationFavorable;
-    résultat: number;
-  };
-  "resultat-global"?: {
-    index?: number;
-    mesures: DeclarationDTO["déclaration"]["mesures_correctives"];
-    points: number;
-    pointsCalculables: number;
-  };
-  ues?: {
-    entreprises: Array<{
-      raisonSociale: string;
-      siren: string;
-    }>;
-    nom: string;
-  };
-  "validation-transmission"?: EmptyObject;
-};
-
 export const DeclarationFormBuilder = {
+  //TODO model => DTO (ex: FormState)
   buildDeclaration: (declaration: DeclarationDTO): DeclarationFormState => {
     return {
       augmentations: declaration.indicateurs?.augmentations?.non_calculable
@@ -367,6 +154,11 @@ export const DeclarationFormBuilder = {
     };
   },
 
+  // TODO: DTO (ex FormState) => model (dans SaveDeclaration)
+  // avant
+  // toDeclarationDTO: (formState: DeclarationFormState): DeclarationDTO => {
+  // après à supprimer
+  //
   toDeclarationDTO: (formState: DeclarationFormState): DeclarationDTO => {
     return {
       source: "formulaire",
@@ -378,6 +170,7 @@ export const DeclarationFormBuilder = {
   },
 };
 
+// TODO : mettre le mapper FormState -> Declaration dans SaveDeclaration
 function buildDeclaration(formState: DeclarationFormState): DeclarationDTO["déclaration"] {
   if (formState.commencer?.annéeIndicateurs === undefined) throw new Error("Missing annéeIndicateurs");
 

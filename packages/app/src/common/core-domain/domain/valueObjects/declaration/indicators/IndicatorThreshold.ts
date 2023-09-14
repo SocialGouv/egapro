@@ -73,6 +73,7 @@ export const computeGenericIndicatorNote = (result: number, thresholds: THRESHOL
   return previous;
 };
 
+// TODO: refactor new IndicateurUnComputer().getMaxNote()
 export const indicatorNoteMax: Record<IndicatorKey, number> = {
   remunerations: max([...REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
   augmentations: max([...AUGMENTATIONS_HP_THRESHOLDS].map(([, note]) => note)) as number,
@@ -82,6 +83,7 @@ export const indicatorNoteMax: Record<IndicatorKey, number> = {
   "hautes-remunerations": max([...HAUTES_REMUNERATIONS_THRESHOLDS].map(([, note]) => note)) as number,
 };
 
+// TODO: refactor en new IndicateurUnComputer().computeNote(result)
 export const computeIndicator1Note = (result: number) => computeGenericIndicatorNote(result, REMUNERATIONS_THRESHOLDS);
 export const computeIndicator2Note = (result: number) =>
   computeGenericIndicatorNote(result, AUGMENTATIONS_HP_THRESHOLDS);
@@ -101,6 +103,89 @@ export const computeIndex = (
 
   if (formState["remunerations"]?.estCalculable === "oui") {
     points += formState["remunerations-resultat"]?.note || 0;
+    max += indicatorNoteMax.remunerations;
+  }
+
+  if (formState.entreprise?.tranche === "50:250") {
+    if (formState["augmentations-et-promotions"]?.estCalculable === "oui") {
+      points += formState["augmentations-et-promotions"].note;
+      max += indicatorNoteMax["augmentations-et-promotions"];
+    }
+  } else {
+    if (formState["augmentations"]?.estCalculable === "oui") {
+      points += formState["augmentations"].note;
+      max += indicatorNoteMax["augmentations"];
+    }
+    if (formState["promotions"]?.estCalculable === "oui") {
+      points += formState["promotions"].note;
+      max += indicatorNoteMax["promotions"];
+    }
+  }
+
+  if (formState["conges-maternite"]?.estCalculable === "oui") {
+    points += formState["conges-maternite"].note;
+    max += indicatorNoteMax["conges-maternite"];
+  }
+
+  points += formState["hautes-remunerations"]?.note || 0;
+  max += indicatorNoteMax["hautes-remunerations"];
+
+  return {
+    points,
+    pointsCalculables: max,
+    index: max >= 75 ? Math.round((points / max) * 100) : undefined, // undefined means "Non calculable".
+  };
+};
+
+type ComputerDeclarationInput = {
+  augmentations: {
+    estCalculable: boolean;
+    note: number;
+  };
+  "augmentations-et-promotions": {
+    estCalculable: boolean;
+    note: number;
+  };
+  "conges-maternite": {
+    estCalculable: boolean;
+    note: number;
+  };
+  "hautes-remunerations": {
+    estCalculable: boolean;
+    note: number;
+  };
+  promotions: {
+    estCalculable: boolean;
+    note: number;
+  };
+  remunerations: {
+    estCalculable: boolean;
+    note: number;
+  };
+};
+
+type ComputerDeclarationOutput = {
+  index?: number;
+  note: {
+    augmentations: number;
+    "augmentations-et-promotions": number;
+    "conges-maternite": number;
+    "hautes-remunerations": number;
+    promotions: number;
+    remunerations: number;
+  };
+  points: number;
+  pointsCalculables: number;
+};
+
+export const computeIndex2 = (
+  input: ComputerDeclarationInput,
+): { index: number | undefined; points: number; pointsCalculables: number } => {
+  let points = 0;
+  let max = 0;
+
+  if (input.remunerations.estCalculable) {
+    points += input.remunerations.note || 0;
     max += indicatorNoteMax.remunerations;
   }
 

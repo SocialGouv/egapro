@@ -13,18 +13,6 @@ import {
 } from "@common/models/generated";
 import { type Enum } from "@common/shared-domain/domain/valueObjects";
 
-export interface DeclarationRaw {
-  data: DeclarationDataRaw | null;
-  declarant: string;
-  declared_at: Date;
-  draft: DeclarationDataRaw | null;
-  ft: string;
-  legacy: DeclarationDataRaw | null;
-  modified_at: Date;
-  siren: string;
-  year: number;
-}
-
 export interface RepresentationEquilibreeDataRaw {
   déclarant: Required<DeclarationDataRaw["déclarant"]>;
   déclaration: {

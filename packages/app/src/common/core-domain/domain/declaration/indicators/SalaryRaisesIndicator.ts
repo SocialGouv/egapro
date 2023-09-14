@@ -2,21 +2,29 @@ import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
-import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
+import { NotComputableReasonSalaryRaises } from "../../valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
 import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
-type Categories = [SimpleNumber | null, SimpleNumber | null, SimpleNumber | null, SimpleNumber | null];
+type Categories = [
+  ouv: SimpleNumber | null,
+  emp: SimpleNumber | null,
+  tam: SimpleNumber | null,
+  ic: SimpleNumber | null,
+];
 
-export interface SalaryRaisesOrPromotionsIndicatorProps extends AbstractIndicatorProps {
+const foo: Categories = [new SimpleNumber(1), new SimpleNumber(1), new SimpleNumber(1)];
+
+// Augmentations
+export interface SalaryRaisesIndicatorProps extends AbstractIndicatorProps {
   categories: Categories;
   favorablePopulation?: FavorablePopulation;
-  notComputableReason?: NotComputableReason;
+  notComputableReason?: NotComputableReasonSalaryRaises;
   result?: Percentage;
   score?: PositiveInteger;
 }
 
-export class SalaryRaisesOrPromotionsIndicator extends AbstractIndicator<SalaryRaisesOrPromotionsIndicatorProps> {
+export class SalaryRaisesIndicator extends AbstractIndicator<SalaryRaisesIndicatorProps> {
   /** `catégories` */
   get categories(): Categories {
     return [...this.props.categories];
@@ -28,7 +36,7 @@ export class SalaryRaisesOrPromotionsIndicator extends AbstractIndicator<SalaryR
   }
 
   /** `non_calculable` */
-  get notComputableReason(): NotComputableReason | undefined {
+  get notComputableReason(): NotComputableReasonSalaryRaises | undefined {
     return this.props.notComputableReason;
   }
 
@@ -42,18 +50,19 @@ export class SalaryRaisesOrPromotionsIndicator extends AbstractIndicator<SalaryR
     return this.props.score;
   }
 
-  public fromJson(json: EntityPropsToJson<SalaryRaisesOrPromotionsIndicatorProps>): this {
+  public fromJson(json: EntityPropsToJson<SalaryRaisesIndicatorProps>): this {
     const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
-    const props: SalaryRaisesOrPromotionsIndicatorProps = {
+    const props: SalaryRaisesIndicatorProps = {
       categories,
       progressObjective: json.progressObjective,
     };
 
-    if (json.notComputableReason) props.notComputableReason = new NotComputableReason(json.notComputableReason);
+    if (json.notComputableReason)
+      props.notComputableReason = new NotComputableReasonSalaryRaises(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
     if (typeof json.result === "number") props.result = new Percentage(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);
 
-    return new SalaryRaisesOrPromotionsIndicator(props) as this;
+    return new SalaryRaisesIndicator(props) as this;
   }
 }

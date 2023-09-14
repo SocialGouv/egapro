@@ -1,12 +1,12 @@
 import { config } from "@common/config";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { redirect } from "next/navigation";
 
 export const nbStepsMax = 13;
 
 const base = config.base_declaration_url;
 
-export type FunnelKey = Exclude<keyof DeclarationFormState, "declaration-existante">;
+export type FunnelKey = Exclude<keyof DeclarationDTO, "declaration-existante">;
 
 type ExtendedFunnelKey = FunnelKey | "confirmation";
 
@@ -84,7 +84,7 @@ export const funnelStaticConfig: StaticConfig = {
 /**
  * Validate if user can be in the current step or be redirected.
  */
-export const assertOrRedirectCommencerStep = (data: DeclarationFormState) => {
+export const assertOrRedirectCommencerStep = (data: DeclarationDTO) => {
   if (!data.commencer?.siren || !data.commencer.annéeIndicateurs) {
     redirect(funnelStaticConfig.commencer.url);
   }
@@ -95,7 +95,7 @@ export const assertOrRedirectCommencerStep = (data: DeclarationFormState) => {
  *
  * @param data formData get by useDeclarationFormManager.
  */
-export const funnelConfig = (data: DeclarationFormState): Record<ExtendedFunnelKey, FunnelStep> =>
+export const funnelConfig = (data: DeclarationDTO): Record<ExtendedFunnelKey, FunnelStep> =>
   ({
     commencer: {
       indexStep: () => 1,

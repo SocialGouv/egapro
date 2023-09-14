@@ -12,7 +12,7 @@ import { Siren } from "../valueObjects/Siren";
 import { UES } from "./company/UES";
 
 type Workforce = {
-  range?: CompanyWorkforceRange;
+  range: CompanyWorkforceRange;
   total?: PositiveNumber;
 };
 export interface CompanyProps {
@@ -27,7 +27,7 @@ export interface CompanyProps {
   region?: Region;
   siren: Siren;
   ues?: UES;
-  workforce?: Workforce;
+  workforce: Workforce;
 }
 
 export class Company extends JsonEntity<CompanyProps, never> {
@@ -96,6 +96,9 @@ export class Company extends JsonEntity<CompanyProps, never> {
       address: json.address,
       city: json.city,
       nafCode: new NafCode(json.nafCode),
+      workforce: {
+        range: new CompanyWorkforceRange(json.workforce.range),
+      },
     };
 
     if (typeof json.hasRecoveryPlan === "boolean") {
@@ -122,11 +125,9 @@ export class Company extends JsonEntity<CompanyProps, never> {
       props.ues = UES.fromJson(json.ues);
     }
 
-    if (json.workforce) {
-      props.workforce = {
-        range: json.workforce.range ? new CompanyWorkforceRange(json.workforce.range) : void 0,
-        total: typeof json.workforce.total === "number" ? new PositiveNumber(json.workforce.total) : void 0,
-      };
+    if (json.workforce.total) {
+      props.workforce.total =
+        typeof json.workforce.total === "number" ? new PositiveNumber(json.workforce.total) : void 0;
     }
 
     return new Company(props) as this;

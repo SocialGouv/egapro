@@ -3,9 +3,9 @@ import { zodFr } from "@common/utils/zod";
 import { type z } from "zod";
 
 import { CSP } from "../domain/valueObjects/CSP";
+import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { CSPAgeRange } from "../domain/valueObjects/declaration/simulation/CSPAgeRange";
 
 const nonnegativeNanSafe = zodFr
   .number()
@@ -18,10 +18,10 @@ const singleAgeRangeSchema = zodFr.object({
   men: nonnegativeNanSafe,
 });
 const ageRangesSchema = zodFr.object({
-  [CSPAgeRange.Enum.LESS_THAN_30]: singleAgeRangeSchema,
-  [CSPAgeRange.Enum.FROM_30_TO_39]: singleAgeRangeSchema,
-  [CSPAgeRange.Enum.FROM_40_TO_49]: singleAgeRangeSchema,
-  [CSPAgeRange.Enum.FROM_50_TO_MORE]: singleAgeRangeSchema,
+  [AgeRange.Enum.LESS_THAN_30]: singleAgeRangeSchema,
+  [AgeRange.Enum.FROM_30_TO_39]: singleAgeRangeSchema,
+  [AgeRange.Enum.FROM_40_TO_49]: singleAgeRangeSchema,
+  [AgeRange.Enum.FROM_50_TO_MORE]: singleAgeRangeSchema,
 });
 
 const cspAgeRangeNumbers = zodFr.object({
@@ -73,7 +73,7 @@ const otherAgeRangeNumbers = zodFr.array(
   zodFr.object({
     name: zodFr.string().nonempty(),
     categoryId: zodFr.string().nonempty(),
-    category: zodFr.record(zodFr.nativeEnum(CSPAgeRange.Enum), otherAgeRangesSchema),
+    category: zodFr.record(zodFr.nativeEnum(AgeRange.Enum), otherAgeRangesSchema),
   }),
 );
 
@@ -114,7 +114,7 @@ export const createSteps = {
             categoryId: zodFr.string().nonempty(),
             category: zodFr
               .record(
-                zodFr.nativeEnum(CSPAgeRange.Enum),
+                zodFr.nativeEnum(AgeRange.Enum),
                 zodFr.object({
                   womenSalary: zodFr.number().positive(),
                   menSalary: zodFr.number().positive(),
