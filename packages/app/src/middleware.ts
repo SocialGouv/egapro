@@ -1,19 +1,44 @@
 import { config as _config } from "@common/config";
 import { StatusCodes } from "http-status-codes";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
+
+const cspMiddleware = (req: NextRequest) => {
+  const nonce = "totototototo";
+  const cspHeader = `
+    default-src 'self' https://*.gouv.fr;
+    connect-src 'self' https://*.gouv.fr;
+    font-src 'self' data: blob:;
+    media-src 'self' https://*.gouv.fr;
+    img-src 'self' data: https://*.gouv.fr;
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval';
+    frame-src 'self' https://*.gouv.fr;
+    style-src 'self' https://*.gouv.fr 'nonce-${nonce}' 'unsafe-inline';
+    frame-ancestors 'self' https://*.gouv.fr;
+    object-src 'none';
+    base-uri 'self' https://*.gouv.fr;
+    form-action 'self' https://*.gouv.fr;
+    block-all-mixed-content;
+    upgrade-insecure-requests;`;
+
+  const requestHeaders = new Headers();
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set(
+    "Content-Security-Policy",
+    // Replace newline characters and spaces
+    cspHeader.replace(/\s{2,}/g, " ").trim(),
+  );
+
+  return NextResponse.next({
+    headers: requestHeaders,
+    request: {
+      headers: requestHeaders,
+    },
+  });
+};
 
 const nextMiddleware: NextMiddlewareWithAuth = async req => {
   const { pathname, href } = req.nextUrl;
-
-  if (
-    (pathname.startsWith("/apiv2/") || pathname.startsWith("/api/")) &&
-    !_config.ff.apiV2.whitelist.some(okPath => pathname.startsWith(okPath)) &&
-    !_config.ff.apiV2.enabled
-  ) {
-    console.log("APIV2 disabled, redirecting 404", pathname);
-    return new NextResponse(null, { status: StatusCodes.NOT_FOUND });
-  }
 
   // handling authorization by ourselves (and not with authorize callback)
   const { token } = req.nextauth;
@@ -28,7 +53,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
-  return NextResponse.next();
+  return cspMiddleware(req);
 };
 
 // export const middleware = nextMiddleware;
