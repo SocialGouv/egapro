@@ -15,7 +15,6 @@ import { type Mapper } from "@common/shared-domain";
 import { dateObjectToDateISOString, dateObjectToDateTimeISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
 import { type Any } from "@common/utils/types";
-import { produce } from "immer";
 import { isUndefined } from "lodash";
 
 import { Declaration } from "../domain/Declaration";
@@ -160,293 +159,271 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
   },
 
   toDTO(obj) {
-    const dto = produce(
-      {
-        commencer: {
-          annéeIndicateurs: obj.year.getValue(),
-          siren: obj.siren.getValue(),
-        },
-        "declaration-existante": {
-          status: "edition",
-          date: dateObjectToDateISOString(obj.declaredAt),
-        },
-      } as DeclarationDTO,
-      draft => {
-        const salaryRaises = obj.salaryRaises;
-
-        if (salaryRaises) {
-          if (salaryRaises.notComputableReason) {
-            draft["augmentations"] = {
-              estCalculable: "non",
-              motifNonCalculabilité: salaryRaises.notComputableReason.getValue(),
-            };
-          } else {
-            draft["augmentations"] = {
-              estCalculable: "oui",
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              note: salaryRaises.score?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              résultat: salaryRaises.result?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              populationFavorable: salaryRaises.favorablePopulation?.getValue()!,
-
-              catégories: [
-                { nom: CSP.Enum.OUVRIERS, écarts: salaryRaises.categories[0]?.getValue() || null },
-                { nom: CSP.Enum.EMPLOYES, écarts: salaryRaises.categories[1]?.getValue() || null },
-                { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: salaryRaises.categories[2]?.getValue() || null },
-                { nom: CSP.Enum.INGENIEURS_CADRES, écarts: salaryRaises.categories[3]?.getValue() || null },
-              ],
-            };
-          }
-        }
-
-        const salaryRaisesAndPromotions = obj.salaryRaisesAndPromotions;
-
-        if (salaryRaisesAndPromotions) {
-          if (salaryRaisesAndPromotions.notComputableReason) {
-            draft["augmentations-et-promotions"] = {
-              estCalculable: "non",
-              motifNonCalculabilité: salaryRaisesAndPromotions.notComputableReason.getValue(),
-            };
-          } else {
-            draft["augmentations-et-promotions"] = {
-              estCalculable: "oui",
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              note: salaryRaisesAndPromotions.score?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              populationFavorable: salaryRaisesAndPromotions.favorablePopulation?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              résultat: salaryRaisesAndPromotions.result?.getValue()!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-              résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue()!,
-            };
-          }
-        }
-
-        const maternityLeaves = obj.maternityLeaves;
-        if (maternityLeaves) {
-          if (maternityLeaves.notComputableReason) {
-            draft["conges-maternite"] = {
-              estCalculable: "non",
-              motifNonCalculabilité: maternityLeaves.notComputableReason.getValue(),
-            };
-          } else {
-            draft["conges-maternite"] = {
-              estCalculable: "oui",
-              // When indicator is calculable, the score is always defined.
-              note: maternityLeaves.score!.getValue(),
-              // When indicator is calculable, the result is always defined.
-              résultat: maternityLeaves.result!.getValue(),
-            };
-          }
-        }
-
-        draft.declarant = {
-          accordRgpd: true,
-          email: obj.declarant.email.getValue(),
-          nom: obj.declarant.lastname || "",
-          prénom: obj.declarant.firstname || "",
-          téléphone: obj.declarant.phone || "",
-        };
-
-        draft["entreprise"] = {
-          tranche: obj.company.workforce?.range.getValue(),
-          type: obj.company.ues ? "ues" : "entreprise",
-          entrepriseDéclarante: {
-            siren: obj.siren.getValue(),
-            adresse: obj.company.address || "",
-            codeNaf: obj.company.nafCode.getValue(),
-            raisonSociale: obj.company.name,
-            codePays: obj.company.countryCode?.getValue(),
-            codePostal: obj.company.postalCode?.getValue(),
-            commune: obj.company.city,
-            département: obj.company.county?.getValue(),
-            région: obj.company.region?.getValue(),
-          },
-        };
-
-        const highRemunerations = obj.highRemunerations;
-        if (highRemunerations) {
-          draft["hautes-remunerations"] = {
-            note: obj.highRemunerations.score.getValue(),
-            populationFavorable: obj.highRemunerations.favorablePopulation.getValue(),
-            résultat: obj.highRemunerations.result.getValue(),
-          };
-        }
-
-        if (!obj.sufficientPeriod) {
-          draft["periode-reference"] = {
-            périodeSuffisante: "non",
-          };
-        } else {
-          draft["periode-reference"] = {
-            périodeSuffisante: "oui",
-            effectifTotal: obj.company.workforce?.total?.getValue() ?? 0,
-            finPériodeRéférence: obj.endReferencePeriod ? dateObjectToDateISOString(obj.endReferencePeriod) : "",
-          };
-        }
-
-        const promotions = obj.promotions;
-
-        if (promotions) {
-          if (promotions.notComputableReason) {
-            draft["promotions"] = {
-              estCalculable: "non",
-              motifNonCalculabilité: promotions.notComputableReason.getValue(),
-            };
-          } else {
-            draft["promotions"] = {
-              estCalculable: "oui",
-              note: promotions.score?.getValue() ?? 0,
-              résultat: promotions.result?.getValue() ?? 0,
-              populationFavorable: promotions.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
-              catégories: [
-                { nom: "ouv", écarts: promotions?.categories?.[0]?.getValue() ?? null },
-                { nom: "emp", écarts: promotions?.categories?.[1]?.getValue() ?? null },
-                { nom: "tam", écarts: promotions?.categories?.[2]?.getValue() ?? null },
-                { nom: "ic", écarts: promotions?.categories?.[3]?.getValue() ?? null },
-              ],
-            };
-          }
-        }
-
-        const publication = obj.publication;
-        if (publication) {
-          draft["publication"] = {
-            date: publication.date ? dateObjectToDateISOString(publication.date) : "",
-            planRelance: obj.company.hasRecoveryPlan ? "oui" : "non",
-            ...(publication.url
-              ? { choixSiteWeb: "oui", url: publication.url }
-              : { choixSiteWeb: "non", modalités: publication.modalities || "" }),
-          };
-        }
-
-        const remunerations = obj.remunerations;
-        if (remunerations) {
-          if (remunerations.notComputableReason) {
-            draft["remunerations"] = {
-              estCalculable: "non",
-              motifNonCalculabilité: remunerations.notComputableReason.getValue(),
-              déclarationCalculCSP: true,
-            };
-          } else {
-            draft["remunerations"] = {
-              estCalculable: "oui",
-              mode: remunerations.mode?.getValue(),
-              cse: remunerations.cseConsultationDate
-                ? "oui"
-                : // If mode !== "csp", cse must be defined. So, there is no cse date, we infer cse === "non".
-                remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
-                ? "non"
-                : undefined,
-              dateConsultationCSE: dateObjectToDateISOString(remunerations.cseConsultationDate!),
-            };
-          }
-        }
-
-        if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.OTHER_LEVEL) {
-          draft["remunerations-coefficient-autre"] = {
-            catégories: remunerations?.categories.map(category => ({
-              nom: category.name || "",
-              tranches: {
-                [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-                [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-                [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-                [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
-              },
-            })),
-          };
-        }
-
-        if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.BRANCH_LEVEL) {
-          draft["remunerations-coefficient-branche"] = {
-            catégories: remunerations?.categories.map(category => ({
-              nom: category.name || "",
-              tranches: {
-                [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-                [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-                [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-                [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
-              },
-            })),
-          };
-        }
-
-        if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.CSP) {
-          draft["remunerations-csp"] = {
-            catégories: [
-              {
-                nom: "ouv",
-                tranches: {
-                  [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || null,
-                },
-              },
-              {
-                nom: "emp",
-                tranches: {
-                  [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || null,
-                },
-              },
-              {
-                nom: "tam",
-                tranches: {
-                  [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || null,
-                },
-              },
-              {
-                nom: "ic",
-                tranches: {
-                  [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || null,
-                  [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || null,
-                },
-              },
-            ],
-          };
-        }
-
-        if (remunerations) {
-          draft["remunerations-resultat"] = {
-            note: remunerations.score?.getValue() ?? 0,
-            populationFavorable: remunerations.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
-            résultat: remunerations.result?.getValue() ?? 0,
-          };
-        }
-
-        draft["resultat-global"] = {
-          index: obj.index?.getValue(),
-          mesures: obj.correctiveMeasures?.getValue() ?? CorrectiveMeasures.Enum.NOT_CONSIDERED,
-          points: obj.points?.getValue() ?? 0,
-          pointsCalculables: obj.computablePoints?.getValue() ?? 0,
-        };
-
-        if (obj.company.ues && obj.company.ues.companies.length > 0) {
-          draft["ues"] = {
-            entreprises: obj.company.ues.companies.map(company => ({
-              raisonSociale: company.name,
-              siren: company.siren.getValue(),
-            })),
-            nom: obj.company.ues?.name || "",
-          };
-        }
-
-        /// FIN
+    const dto = {
+      commencer: {
+        annéeIndicateurs: obj.year.getValue(),
+        siren: obj.siren.getValue(),
       },
-    );
+      "declaration-existante": {
+        status: "edition",
+        date: dateObjectToDateISOString(obj.declaredAt),
+      },
+      declarant: {
+        accordRgpd: true,
+        email: obj.declarant.email.getValue(),
+        nom: obj.declarant.lastname || "",
+        prénom: obj.declarant.firstname || "",
+        téléphone: obj.declarant.phone || "",
+      },
+      entreprise: {
+        tranche: obj.company.workforce?.range.getValue(),
+        type: obj.company.ues ? "ues" : "entreprise",
+        entrepriseDéclarante: {
+          siren: obj.siren.getValue(),
+          adresse: obj.company.address || "",
+          codeNaf: obj.company.nafCode.getValue(),
+          raisonSociale: obj.company.name,
+          codePays: obj.company.countryCode?.getValue(),
+          codePostal: obj.company.postalCode?.getValue(),
+          commune: obj.company.city,
+          département: obj.company.county?.getValue(),
+          région: obj.company.region?.getValue(),
+        },
+      },
+    } as DeclarationDTO;
+
+    if (obj.company.ues && obj.company.ues.companies.length > 0) {
+      dto["ues"] = {
+        entreprises: obj.company.ues.companies.map(company => ({
+          raisonSociale: company.name,
+          siren: company.siren.getValue(),
+        })),
+        nom: obj.company.ues?.name || "",
+      };
+    }
+
+    if (!obj.sufficientPeriod) {
+      dto["periode-reference"] = {
+        périodeSuffisante: "non",
+      };
+    } else {
+      dto["periode-reference"] = {
+        périodeSuffisante: "oui",
+        effectifTotal: obj.company.workforce?.total?.getValue() ?? 0,
+        finPériodeRéférence: obj.endReferencePeriod ? dateObjectToDateISOString(obj.endReferencePeriod) : "",
+      };
+    }
+
+    const publication = obj.publication;
+    if (publication) {
+      dto["publication"] = {
+        date: publication.date ? dateObjectToDateISOString(publication.date) : "",
+        planRelance: obj.company.hasRecoveryPlan ? "oui" : "non",
+        ...(publication.url
+          ? { choixSiteWeb: "oui", url: publication.url }
+          : { choixSiteWeb: "non", modalités: publication.modalities || "" }),
+      };
+    }
+
+    dto["resultat-global"] = {
+      index: obj.index?.getValue(),
+      mesures: obj.correctiveMeasures?.getValue() ?? CorrectiveMeasures.Enum.NOT_CONSIDERED,
+      points: obj.points?.getValue() ?? 0,
+      pointsCalculables: obj.computablePoints?.getValue() ?? 0,
+    };
+
+    // Indicators.
+    const salaryRaises = obj.salaryRaises;
+    if (salaryRaises) {
+      if (salaryRaises.notComputableReason) {
+        dto["augmentations"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: salaryRaises.notComputableReason.getValue(),
+        };
+      } else {
+        dto["augmentations"] = {
+          estCalculable: "oui",
+          note: salaryRaises.score?.getValue() ?? 0,
+          résultat: salaryRaises.result?.getValue() ?? 0,
+          populationFavorable: salaryRaises.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+          catégories: [
+            { nom: CSP.Enum.OUVRIERS, écarts: salaryRaises.categories[0]?.getValue() || null },
+            { nom: CSP.Enum.EMPLOYES, écarts: salaryRaises.categories[1]?.getValue() || null },
+            { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: salaryRaises.categories[2]?.getValue() || null },
+            { nom: CSP.Enum.INGENIEURS_CADRES, écarts: salaryRaises.categories[3]?.getValue() || null },
+          ],
+        };
+      }
+    }
+
+    const promotions = obj.promotions;
+    if (promotions) {
+      if (promotions.notComputableReason) {
+        dto["promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: promotions.notComputableReason.getValue(),
+        };
+      } else {
+        dto["promotions"] = {
+          estCalculable: "oui",
+          note: promotions.score?.getValue() ?? 0,
+          résultat: promotions.result?.getValue() ?? 0,
+          populationFavorable: promotions.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+          catégories: [
+            { nom: "ouv", écarts: promotions?.categories?.[0]?.getValue() ?? null },
+            { nom: "emp", écarts: promotions?.categories?.[1]?.getValue() ?? null },
+            { nom: "tam", écarts: promotions?.categories?.[2]?.getValue() ?? null },
+            { nom: "ic", écarts: promotions?.categories?.[3]?.getValue() ?? null },
+          ],
+        };
+      }
+    }
+
+    const salaryRaisesAndPromotions = obj.salaryRaisesAndPromotions;
+    if (salaryRaisesAndPromotions) {
+      if (salaryRaisesAndPromotions.notComputableReason) {
+        dto["augmentations-et-promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: salaryRaisesAndPromotions.notComputableReason.getValue(),
+        };
+      } else {
+        dto["augmentations-et-promotions"] = {
+          estCalculable: "oui",
+          note: salaryRaisesAndPromotions.score?.getValue() ?? 0,
+          noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue() ?? 0,
+          notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue() ?? 0,
+          populationFavorable:
+            salaryRaisesAndPromotions.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+          résultat: salaryRaisesAndPromotions.result?.getValue() ?? 0,
+          résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue() ?? 0,
+        };
+      }
+    }
+
+    const remunerations = obj.remunerations;
+    if (remunerations) {
+      dto["remunerations-resultat"] = {
+        note: remunerations.score?.getValue() ?? 0,
+        populationFavorable: remunerations.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+        résultat: remunerations.result?.getValue() ?? 0,
+      };
+
+      if (remunerations.notComputableReason) {
+        dto["remunerations"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: remunerations.notComputableReason.getValue(),
+          déclarationCalculCSP: true,
+        };
+      } else {
+        dto["remunerations"] = {
+          estCalculable: "oui",
+          mode: remunerations.mode?.getValue(),
+          cse: remunerations.cseConsultationDate
+            ? "oui"
+            : // If mode !== "csp", cse must be defined. So, there is no cse date, we infer cse === "non".
+            remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
+            ? "non"
+            : undefined,
+          dateConsultationCSE: dateObjectToDateISOString(remunerations.cseConsultationDate!),
+        };
+      }
+    }
+
+    if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.OTHER_LEVEL) {
+      dto["remunerations-coefficient-autre"] = {
+        catégories: remunerations?.categories.map(category => ({
+          nom: category.name || "",
+          tranches: {
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+          },
+        })),
+      };
+    }
+
+    if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.BRANCH_LEVEL) {
+      dto["remunerations-coefficient-branche"] = {
+        catégories: remunerations?.categories.map(category => ({
+          nom: category.name || "",
+          tranches: {
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+          },
+        })),
+      };
+    }
+
+    if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.CSP) {
+      dto["remunerations-csp"] = {
+        catégories: [
+          {
+            nom: "ouv",
+            tranches: {
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || null,
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || null,
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || null,
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || null,
+            },
+          },
+          {
+            nom: "emp",
+            tranches: {
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || null,
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || null,
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || null,
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || null,
+            },
+          },
+          {
+            nom: "tam",
+            tranches: {
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || null,
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || null,
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || null,
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || null,
+            },
+          },
+          {
+            nom: "ic",
+            tranches: {
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || null,
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || null,
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || null,
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || null,
+            },
+          },
+        ],
+      };
+    }
+
+    const maternityLeaves = obj.maternityLeaves;
+    if (maternityLeaves) {
+      if (maternityLeaves.notComputableReason) {
+        dto["conges-maternite"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: maternityLeaves.notComputableReason.getValue(),
+        };
+      } else {
+        dto["conges-maternite"] = {
+          estCalculable: "oui",
+          note: maternityLeaves.score?.getValue() ?? 0,
+          résultat: maternityLeaves.result?.getValue() ?? 0,
+        };
+      }
+    }
+
+    const highRemunerations = obj.highRemunerations;
+    if (highRemunerations) {
+      dto["hautes-remunerations"] = {
+        note: obj.highRemunerations.score.getValue(),
+        populationFavorable: obj.highRemunerations.favorablePopulation.getValue(),
+        résultat: obj.highRemunerations.result.getValue(),
+      };
+    }
 
     return dto;
   },
@@ -573,7 +550,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
     raw.indicateurs.hautes_rémunérations = {
       note: data.highRemunerations.score?.getValue(),
       résultat: data.highRemunerations.result?.getValue(),
-      objectif_de_progression: data.highRemunerations.progressObjective,
+      objectif_de_progression: data.highRemunerations.progressObjective ?? "",
       population_favorable:
         data.highRemunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
           ? ""
