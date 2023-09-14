@@ -1,6 +1,8 @@
 # when next13 supports nonce : script-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
 # style-src 'self' https://*.gouv.fr 'nonce-{{ $.Values.global.shortSha }}';
 x-secure-headers: &headers >-
+  set_secure_random_alphanum $nonce 32;
+
   more_set_headers
   "Content-Security-Policy:
   default-src 'none';
@@ -8,9 +10,9 @@ x-secure-headers: &headers >-
   font-src 'self' data: blob:;
   media-src 'self' https://*.gouv.fr;
   img-src 'self' data: https://*.gouv.fr;
-  script-src 'self' https://*.gouv.fr 'unsafe-inline';
+  script-src 'self' https://*.gouv.fr 'nonce-$nonce' 'strict-dynamic';
   frame-src 'self' https://*.gouv.fr;
-  style-src 'self' https://*.gouv.fr 'unsafe-inline';
+  style-src 'self' https://*.gouv.fr 'nonce-$nonce';
   frame-ancestors 'self' https://*.gouv.fr;
   base-uri 'self' https://*.gouv.fr;
   form-action 'self' https://*.gouv.fr";
