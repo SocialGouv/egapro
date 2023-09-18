@@ -7,7 +7,6 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { AlertMessage } from "@design-system/client";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { DeclarationFormBuilder } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -30,11 +29,9 @@ export const Recap = () => {
     return <SkeletonForm fields={2} />;
   }
 
-  const declaration = DeclarationFormBuilder.toDeclarationDTO(formData) as CreateDeclarationDTO;
-
   const onSubmit = async () => {
     try {
-      await saveDeclaration(declaration);
+      await saveDeclaration(formData as CreateDeclarationDTO);
       setStatus("edition");
       router.push(funnelConfig(formData)[stepName].next().url);
     } catch (error: unknown) {
@@ -49,7 +46,7 @@ export const Recap = () => {
       <AlertMessage title="Erreur" message={error} />
 
       <FormLayout>
-        <RecapDeclaration edit déclaration={declaration} />
+        <RecapDeclaration edit déclaration={formData} />
 
         <BackNextButtonsGroup
           className={fr.cx("fr-my-4w")}

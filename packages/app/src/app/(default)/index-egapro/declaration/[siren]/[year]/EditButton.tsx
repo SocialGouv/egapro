@@ -2,7 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { config } from "@common/config";
-import { type DeclarationDTO } from "@common/models/generated";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { BackNextButtonsGroup } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
@@ -17,7 +17,7 @@ export const EditButton = ({ déclaration }: PropsWithChildren<Props>) => {
   const router = useRouter();
   const { setStatus } = useDeclarationFormManager();
 
-  const date = déclaration.déclaration.date;
+  const date = déclaration["declaration-existante"].date;
 
   const olderThanOneYear = date === undefined || isAfter(new Date(), add(new Date(date), { years: 1 }));
 

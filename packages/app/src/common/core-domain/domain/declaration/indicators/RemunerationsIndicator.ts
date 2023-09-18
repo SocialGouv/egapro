@@ -1,20 +1,16 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
+import { type AgeRange } from "../../valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonRemunerations } from "../../valueObjects/declaration/indicators/NotComputableReasonRemunerations";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
 import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
-type Categorie = {
+export type Categorie = {
   name?: string;
-  ranges?: {
-    "30:39"?: SimpleNumber;
-    "40:49"?: SimpleNumber;
-    "50:"?: SimpleNumber;
-    ":29"?: SimpleNumber;
-  };
+  ranges?: Partial<Record<AgeRange.Enum, SimpleNumber>>;
 };
 
 export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {

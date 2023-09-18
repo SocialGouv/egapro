@@ -51,7 +51,7 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
   const session = await getServerSession(authConfig);
 
-  const declarationDate = déclaration.déclaration.date;
+  const declarationDate = déclaration["declaration-existante"].date;
 
   const canEdit = canEditSiren(session?.user)(siren);
 

@@ -1,14 +1,19 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
 
+/* eslint-disable typescript-sort-keys/interface */
 export interface PublicationProps {
+  /** date, modalities and url are set in regular declaration flow */
   date?: Date;
-  measuresPublishDate?: Date;
   modalities?: string;
+  url?: string;
+
+  /** measuresPublishDate, objectivesMeasuresModalities and objectivesPublishDate are set in OP/MC */
+  measuresPublishDate?: Date;
   objectivesMeasuresModalities?: string;
   objectivesPublishDate?: Date;
-  url?: string;
 }
+/* eslint-enable typescript-sort-keys/interface */
 
 export class Publication extends JsonEntity<PublicationProps, never> {
   /** Date de publication du niveau de résultat de l'entreprise ou de l'UES */

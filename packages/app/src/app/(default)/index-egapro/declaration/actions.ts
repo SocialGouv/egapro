@@ -26,7 +26,7 @@ export async function getDeclaration(siren: string, year: number) {
 export async function saveDeclaration(declaration: CreateDeclarationDTO) {
   await assertServerSession({
     owner: {
-      check: declaration.entreprise.siren,
+      check: declaration.commencer?.siren || "",
       message: "Not authorized to save declaration for this siren.",
     },
     staff: true,

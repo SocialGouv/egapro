@@ -15,8 +15,6 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { DeclarationFormBuilder } from "@services/form/declaration/DeclarationFormBuilder";
-import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
@@ -63,15 +61,13 @@ const prepareDataWithExistingDeclaration = async (
   formData: DeclarationDTO,
   // tokenApiV1: string,
 ): Promise<DeclarationDTO> => {
-  const previousDeclaration = await getDeclaration(siren, year);
+  const previousDeclarationDTO = await getDeclaration(siren, year);
 
   // If there is a declaration, we use it as is.
-  if (previousDeclaration) {
-    const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration);
-
+  if (previousDeclarationDTO) {
     return {
-      ...newFormState,
-      "declaration-existante": { ...newFormState["declaration-existante"], status: "consultation" },
+      ...previousDeclarationDTO,
+      "declaration-existante": { ...previousDeclarationDTO["declaration-existante"], status: "consultation" },
     };
   }
 
@@ -94,7 +90,17 @@ const prepareDataWithExistingDeclaration = async (
     ...baseFormData,
     entreprise: {
       ...baseFormData.entreprise,
-      entrepriseDéclarante: buildEntreprise(entreprise),
+      entrepriseDéclarante: {
+        adresse: entreprise.adresse || "",
+        codeNaf: entreprise.code_naf,
+        codePostal: entreprise.code_postal,
+        codePays: entreprise.code_pays,
+        raisonSociale: entreprise.raison_sociale,
+        siren: entreprise.siren,
+        commune: entreprise.commune,
+        département: entreprise.département,
+        région: entreprise.région,
+      },
     },
     [stepName]: {
       annéeIndicateurs: year,

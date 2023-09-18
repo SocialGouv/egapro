@@ -50,10 +50,8 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         postalCode: raw.data.entreprise.code_postal,
         region: raw.data.entreprise.région,
         hasRecoveryPlan: raw.data.entreprise.plan_relance,
-        workforce: {
-          range: raw.data.entreprise.effectif?.tranche,
-          total: raw.data.entreprise.effectif?.total,
-        },
+        range: raw.data.entreprise.effectif?.tranche,
+        total: raw.data.entreprise.effectif?.total,
         ues: raw.data.entreprise.ues
           ? {
               companies:
@@ -176,7 +174,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         téléphone: obj.declarant.phone || "",
       },
       entreprise: {
-        tranche: obj.company.workforce?.range.getValue(),
+        tranche: obj.company.range?.getValue(),
         type: obj.company.ues ? "ues" : "entreprise",
         entrepriseDéclarante: {
           siren: obj.siren.getValue(),
@@ -209,7 +207,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     } else {
       dto["periode-reference"] = {
         périodeSuffisante: "oui",
-        effectifTotal: obj.company.workforce?.total?.getValue() ?? 0,
+        effectifTotal: obj.company.total?.getValue() ?? 0,
         finPériodeRéférence: obj.endReferencePeriod ? dateObjectToDateISOString(obj.endReferencePeriod) : "",
       };
     }
@@ -429,7 +427,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
   },
 
   toPersistence(obj) {
-    // TODO
     return {
       declarant: obj.declarant.email.getValue(),
       declared_at: obj.declaredAt,
@@ -487,8 +484,8 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
       commune: data.company.city,
       département: data.company.county?.getValue() as CodeDepartement,
       effectif: {
-        total: data.company.workforce?.total?.getValue(),
-        tranche: data.company.workforce?.range?.getValue() as Tranche,
+        total: data.company.total?.getValue(),
+        tranche: data.company.range?.getValue() as Tranche,
       },
       plan_relance: data.company.hasRecoveryPlan,
       raison_sociale: data.company.name,

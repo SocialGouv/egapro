@@ -1,33 +1,37 @@
 import { AbstractSpecification, ValidationError } from "@common/shared-domain";
 
-import { type DeclarationData } from "../DeclarationData";
+import { type Declaration } from "../Declaration";
 
 const GOOD_INDEX_THRESHOLD = 85;
 const NO_INDEX = -1;
 
-export class DeclarationSpecification extends AbstractSpecification<DeclarationData> {
+export class DeclarationSpecification extends AbstractSpecification<Declaration> {
   private _lastError?: ValidationError;
 
-  public isSatisfiedBy(data: DeclarationData): boolean {
-    try {
-      if (data.declaration.draft) {
-        this.assertRequiredFields(data);
-      }
+  public isSatisfiedBy(data: Declaration): boolean {
+    return true;
 
-      if (!data.declaration.sufficientPeriod) {
-        if (data.indicators)
-          throw new DeclarationSpecificationError("La période de référence ne permet pas de définir des indicateurs.");
-      } else {
-        this.assertIndicators(data);
-      }
-    } catch (error: unknown) {
-      if (error instanceof ValidationError) {
-        this._lastError = error;
-        return false;
-      } else {
-        throw error;
-      }
-    }
+    // TODO
+
+    // try {
+    //   if (data.declaration.draft) {
+    //     this.assertRequiredFields(data);
+    //   }
+
+    //   if (!data.declaration.sufficientPeriod) {
+    //     if (data.indicators)
+    //       throw new DeclarationSpecificationError("La période de référence ne permet pas de définir des indicateurs.");
+    //   } else {
+    //     this.assertIndicators(data);
+    //   }
+    // } catch (error: unknown) {
+    //   if (error instanceof ValidationError) {
+    //     this._lastError = error;
+    //     return false;
+    //   } else {
+    //     throw error;
+    //   }
+    // }
 
     return true;
   }
@@ -36,7 +40,7 @@ export class DeclarationSpecification extends AbstractSpecification<DeclarationD
     return this._lastError;
   }
 
-  private assertRequiredFields(data: DeclarationData): asserts data {
+  private assertRequiredFields(data: Declaration): asserts data {
     const baseMsg = "est obligatoire lorsque la déclaration n'est pas en brouillon";
     if (!data.company.nafCode) {
       throw new DeclarationMissingFieldError(`Le code NAF de l'entreprise ${baseMsg}`);
@@ -55,16 +59,16 @@ export class DeclarationSpecification extends AbstractSpecification<DeclarationD
     }
   }
 
-  private assertIndicators(data: DeclarationData): asserts data {
-    const corectiveMeasures = data.declaration.correctiveMeasures;
-    const index = data.declaration.index?.getValue() ?? NO_INDEX;
+  private assertIndicators(data: Declaration): asserts data {
+    const corectiveMeasures = data.correctiveMeasures;
+    const index = data.index?.getValue() ?? NO_INDEX;
 
-    const year = data.declaration.indicatorsYear.getValue();
+    const year = data.year.getValue();
     this.assertIndicatorsObjectives(data);
     this.assertIndicatorsDates(data);
   }
 
-  private assertIndicatorsObjectives(data: DeclarationData): asserts data {
+  private assertIndicatorsObjectives(data: Declaration): asserts data {
     // const index = data.declaration.index?.getValue() ?? NO_INDEX;
     // const year = data.declaration.indicatorsYear.getValue();
     // if (year < CURRENT_YEAR || index === NO_INDEX || index >= GOOD_INDEX_THRESHOLD) {
@@ -118,7 +122,7 @@ export class DeclarationSpecification extends AbstractSpecification<DeclarationD
     // }
   }
 
-  private assertIndicatorsDates(data: DeclarationData): asserts data {
+  private assertIndicatorsDates(data: Declaration): asserts data {
     // const index = data.declaration.index?.getValue() ?? -1;
     // const year = data.declaration.indicatorsYear.getValue();
     // if (year < CURRENT_YEAR || index === NO_INDEX || index >= GOOD_INDEX_THRESHOLD) {

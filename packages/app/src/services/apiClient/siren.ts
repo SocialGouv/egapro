@@ -1,10 +1,30 @@
-import { type DeclarationDTO } from "@common/models/generated";
+import { type CodeDepartement } from "@api/core-domain/infra/db/CodeDepartement";
+import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
+import { type CodePays } from "@api/core-domain/infra/db/CodePays";
+import { type CodeRegion } from "@api/core-domain/infra/db/CodeRegion";
+import { type Effectif, type Ues } from "@api/core-domain/infra/db/DeclarationRaw";
 import { type Any } from "@common/utils/types";
 import moize from "moize";
 
 import { fetcher } from "./fetcher";
 
-export type EntrepriseType = DeclarationDTO["entreprise"];
+export type EntrepriseType = {
+  adresse?: string;
+  code_naf: CodeNaf;
+  code_pays?: CodePays;
+  code_postal?: string;
+  commune?: string;
+  département?: CodeDepartement;
+  effectif?: Effectif;
+  /**
+   * L'entreprise ou une entreprise de l'UES a-t-elle bénéficié d'une aide dans le cadre du plan de relance
+   */
+  plan_relance?: boolean;
+  raison_sociale: string;
+  région?: CodeRegion;
+  siren: string;
+  ues?: Ues;
+};
 
 type Entreprise = Any;
 

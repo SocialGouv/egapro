@@ -11,6 +11,7 @@ export class NotComputableReasonMaternityLeaves extends Enum<typeof NotComputabl
     return NotComputableReasonMaternityLeaves.Label[this.getValue()];
   }
 }
+
 export namespace NotComputableReasonMaternityLeaves {
   export enum Enum {
     /** Absence d'augmentations salariales pendant la durée du ou des congés maternité */

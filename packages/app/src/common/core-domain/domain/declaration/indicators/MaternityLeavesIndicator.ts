@@ -18,12 +18,12 @@ export class MaternityLeavesIndicator extends AbstractIndicator<MaternityLeavesI
 
   /** `résultat` */
   get result(): Percentage | undefined {
-    return this.props["notComputableReason"] ? undefined : this.props.result;
+    if (!this.props.notComputableReason) return this.props.result;
   }
 
   /** `note` */
   get score(): PositiveInteger | undefined {
-    return this.props["notComputableReason"] ? undefined : this.props.score;
+    if (!this.props.notComputableReason) return this.props.score;
   }
 
   public fromJson(json: EntityPropsToJson<MaternityLeavesIndicatorProps>) {

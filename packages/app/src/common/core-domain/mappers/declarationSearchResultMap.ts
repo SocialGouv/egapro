@@ -145,11 +145,11 @@ function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicC
     countryIsoCode: data.company.countryCode?.getValue(),
     nafCode: data.company.nafCode!.getValue(),
     county: data.company.county?.getValue(),
-    ...(data.company.workforce?.total || data.company.workforce?.range
+    ...(data.company.total || data.company.range
       ? {
           workforce: {
-            total: data.company.workforce?.total?.getValue(),
-            range: data.company.workforce?.range?.getValue(),
+            total: data.company.total?.getValue(),
+            range: data.company.range?.getValue(),
           },
         }
       : {}),

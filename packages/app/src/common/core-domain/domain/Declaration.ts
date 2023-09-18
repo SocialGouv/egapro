@@ -33,7 +33,6 @@ export interface DeclarationProps {
   publication?: Publication;
   correctiveMeasures?: CorrectiveMeasures;
 
-  // Indicators.
   // Indicator 1.
   remunerations?: RemunerationsIndicator;
   // Indicator 2.
@@ -47,7 +46,6 @@ export interface DeclarationProps {
   // Indicator 5.
   highRemunerations?: HighRemunerationsIndicator;
 }
-
 /* eslint-enable typescript-sort-keys/interface */
 
 export type DeclarationPK = [Siren, PositiveNumber];

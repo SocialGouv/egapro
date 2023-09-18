@@ -1,3 +1,4 @@
+import { type CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { type DeclarationSource } from "@common/core-domain/domain/valueObjects/declaration/DeclarationSource";
 
 import { type CodeDepartement } from "./CodeDepartement";
@@ -150,10 +151,10 @@ export interface DeclarationRaw {
   data: DeclarationDataRaw;
   declarant: string;
   declared_at: Date;
-  /** deprecated */
+  /** @deprecated */
   draft?: DeclarationDataRaw;
   ft: string;
-  /** deprecated */
+  /** @deprecated */
   legacy?: DeclarationDataRaw;
   modified_at: Date;
   siren: string;
@@ -190,7 +191,7 @@ export interface DeclarationDataRaw {
     /**
      * Mesures de corrections prévues à l'article D. 1142-6 / Trois items : Mesures mises en œuvre (mmo), Mesures envisagées (me), Mesures non envisagées (mne)
      */
-    mesures_correctives?: "me" | "mmo" | "mne";
+    mesures_correctives?: CorrectiveMeasures.Enum;
     /**
      * Nombre total de points obtenus
      */
@@ -216,6 +217,5 @@ export interface DeclarationDataRaw {
     promotions?: Promotions;
     rémunérations?: Remunerations;
   };
-  // source: "api" | "formulaire" | "repeqV2" | "simulateur" | "solen";
   source: DeclarationSource.Enum;
 }

@@ -13,8 +13,6 @@ type Categories = [
   ic: SimpleNumber | null,
 ];
 
-const foo: Categories = [new SimpleNumber(1), new SimpleNumber(1), new SimpleNumber(1)];
-
 // Augmentations
 export interface SalaryRaisesIndicatorProps extends AbstractIndicatorProps {
   categories: Categories;

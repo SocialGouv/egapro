@@ -1,19 +1,15 @@
 import { Enum } from "@common/shared-domain/domain/valueObjects";
 
-export class NotComputableReasonPromotionsIndicator extends Enum<typeof NotComputableReasonPromotionsIndicator.Enum> {
-  constructor(
-    value:
-      | Enum.ToString<typeof NotComputableReasonPromotionsIndicator.Enum>
-      | NotComputableReasonPromotionsIndicator.Enum,
-  ) {
-    super(value, NotComputableReasonPromotionsIndicator.Enum);
+export class NotComputableReasonPromotions extends Enum<typeof NotComputableReasonPromotions.Enum> {
+  constructor(value: Enum.ToString<typeof NotComputableReasonPromotions.Enum> | NotComputableReasonPromotions.Enum) {
+    super(value, NotComputableReasonPromotions.Enum);
   }
 
   public getLabel() {
-    return NotComputableReasonPromotionsIndicator.Label[this.getValue()];
+    return NotComputableReasonPromotions.Label[this.getValue()];
   }
 }
-export namespace NotComputableReasonPromotionsIndicator {
+export namespace NotComputableReasonPromotions {
   export enum Enum {
     /** Absence de promotions */
     ABSPROM = "absprom",

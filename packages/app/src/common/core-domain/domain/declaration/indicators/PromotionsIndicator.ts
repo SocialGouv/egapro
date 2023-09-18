@@ -2,7 +2,7 @@ import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
-import { NotComputableReasonPromotionsIndicator } from "../../valueObjects/declaration/indicators/NotComputableReasonPromotionsIndicator";
+import { NotComputableReasonPromotions } from "../../valueObjects/declaration/indicators/NotComputableReasonPromotions";
 import { type AbstractIndicatorProps } from "./AbstractIndicator";
 import { AbstractIndicator } from "./AbstractIndicator";
 
@@ -16,7 +16,7 @@ type Categories = [
 export interface PromotionsIndicatorProps extends AbstractIndicatorProps {
   categories: Categories;
   favorablePopulation?: FavorablePopulation;
-  notComputableReason?: NotComputableReasonPromotionsIndicator;
+  notComputableReason?: NotComputableReasonPromotions;
   result?: Percentage;
   score?: PositiveInteger;
 }
@@ -33,7 +33,7 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
   }
 
   /** `non_calculable` */
-  get notComputableReason(): NotComputableReasonPromotionsIndicator | undefined {
+  get notComputableReason(): NotComputableReasonPromotions | undefined {
     return this.props.notComputableReason;
   }
 
@@ -55,7 +55,7 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
     };
 
     if (json.notComputableReason)
-      props.notComputableReason = new NotComputableReasonPromotionsIndicator(json.notComputableReason);
+      props.notComputableReason = new NotComputableReasonPromotions(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
     if (typeof json.result === "number") props.result = new Percentage(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);

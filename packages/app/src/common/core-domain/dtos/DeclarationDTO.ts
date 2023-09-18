@@ -16,7 +16,17 @@ type OuiNon = "non" | "oui";
 
 type TranchesAge = Record<AgeRange.Enum, number | null>;
 
-export type Catégorie = { nom: string; tranches: Record<AgeRange.Enum, number | null> };
+export type Catégorie = { nom: string; tranches: TranchesAge };
+
+export type IndicatorKey = keyof Pick<
+  DeclarationDTO,
+  | "augmentations-et-promotions"
+  | "augmentations"
+  | "conges-maternite"
+  | "hautes-remunerations"
+  | "promotions"
+  | "remunerations"
+>;
 
 export type Entreprise = {
   adresse: string;
@@ -30,26 +40,7 @@ export type Entreprise = {
   siren: string;
 };
 
-// export const labelsMotifNC = {
-//   egvi40pcet: "Effectif des groupes valides inférieur à 40% de l'effectif total",
-//   absaugi: "Absence d'augmentations individuelles",
-//   etsno5f5h: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
-//   absprom: "Absence de promotions",
-//   absaugpdtcm: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
-//   absrcm: "Absence de retours de congé maternité",
-// } as const;
-
-export type IndicatorKey = keyof Pick<
-  DeclarationDTO,
-  | "augmentations-et-promotions"
-  | "augmentations"
-  | "conges-maternite"
-  | "hautes-remunerations"
-  | "promotions"
-  | "remunerations"
->;
-
-export type MotifNCKey = Exclude<IndicatorKey, "hautes-remunerations">;
+export type IndicatorKeyWithNC = Exclude<IndicatorKey, "hautes-remunerations">;
 
 export const motifsNC = {
   augmentations: [NotComputableReason.Enum.EGVI40PCET, NotComputableReason.Enum.ABSAUGI],
@@ -58,6 +49,18 @@ export const motifsNC = {
   remunerations: [NotComputableReason.Enum.EGVI40PCET],
   "conges-maternite": [NotComputableReason.Enum.ABSRCM, NotComputableReason.Enum.ABSAUGPDTCM],
 } as const;
+
+type remunerationsRelatedSteps =
+  | "remunerations-coefficient-autre"
+  | "remunerations-coefficient-branche"
+  | "remunerations-csp";
+
+export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remunerationsRelatedSteps =>
+  mode === "csp"
+    ? "remunerations-csp"
+    : mode === "niveau_autre"
+    ? "remunerations-coefficient-autre"
+    : "remunerations-coefficient-branche";
 
 /**
  * The shape of the state for declaration form.
@@ -211,6 +214,5 @@ export type DeclarationDTO = {
   "validation-transmission"?: EmptyObject;
 };
 
-// période_suffisante is always present in new declarations, but not in existing ones.
-export type EditDeclarationDTO = DeclarationDTO & { déclaration: { période_suffisante: boolean } };
+export type EditDeclarationDTO = DeclarationDTO;
 export type CreateDeclarationDTO = Omit<EditDeclarationDTO, "id">;
