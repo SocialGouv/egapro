@@ -10,7 +10,7 @@ from .loggers import logger
 
 def create(email):
     return jwt.encode(
-        {"sub": str(email), "exp": utils.utcnow() + timedelta(weeks=1)},
+        {"sub": str(email), "exp": utils.utcnow() + timedelta(days=1)},
         config.SECRET,
         config.JWT_ALGORITHM,
     )

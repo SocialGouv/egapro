@@ -5,8 +5,7 @@ import {
   type OwnershipRequestActionDTO,
 } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 import { type OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import { ensureRequired } from "@common/utils/types";
 import { partition } from "lodash";
@@ -191,7 +190,6 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
       // 4
       if (errorDetail.errorCode !== "ALREADY_PROCESSED") {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- always found
           const request = ownershipRequests.find(r => r.id?.getValue() === uuid)!;
           request.changeStatus(OwnershipRequestStatus.Enum.ERROR, errorDetail);
           await this.ownershipRequestRepo.update(request);

@@ -12,6 +12,8 @@ export const Navigation = () => {
 
   const { data: session } = useSession();
 
+  const isStaff = session?.user.staff || session?.staff.impersonating || false;
+
   return (
     <MainNavigation
       items={[
@@ -56,7 +58,7 @@ export const Navigation = () => {
           },
           isActive: segment === "representation-equilibree",
         },
-        ...(session?.user.staff
+        ...(isStaff
           ? [
               {
                 text: "Admin",

@@ -22,6 +22,9 @@ const DebugPage = async () => {
       <h3>Activer bouton de debug ?</h3>
       <DebugToggleSwitch />
       <hr />
+      <h3>Session Content</h3>
+      <pre>{JSON.stringify(session, null, 2)}</pre>
+      <hr />
       <h3>Server Side Config</h3>
       <DebugButton alwaysOn obj={clone} infoText="server side config" />
       <pre>{JSON.stringify(clone, null, 2)}</pre>

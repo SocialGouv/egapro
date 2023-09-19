@@ -1,5 +1,6 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
 import { config } from "@common/config";
+import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
 import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
@@ -10,6 +11,10 @@ import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
 declare module "next-auth" {
   interface Session {
+    staff: {
+      impersonating?: boolean;
+      lastImpersonated?: Array<{ label: string | null; siren: string }>;
+    };
     user: {
       companies: Array<{ label: string | null; siren: string }>;
       email: string;
@@ -21,23 +26,25 @@ declare module "next-auth" {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface Profile extends MonCompteProProfile {}
 }
 
 declare module "next-auth/jwt" {
-  type UserSession = Session["user"];
-  interface JWT extends DefaultJWT, UserSession {
+  interface JWT extends DefaultJWT, Session {
     email: string;
   }
 }
 
-const charonMcp = `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}`;
+const charonMcpUrl = new URL(
+  `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}/`,
+  config.api.security.auth.charonUrl,
+);
+const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const monCompteProProvider = MonCompteProProvider({
   ...config.api.security.moncomptepro,
   ...(config.env !== "prod"
     ? {
-        wellKnown: `https://egapro-charon.dev.fabrique.social.gouv.fr/${charonMcp}/.well-known/openid-configuration`,
+        wellKnown: new URL(`.well-known/openid-configuration`, charonMcpUrl).toString(),
       }
     : {}),
 });
@@ -53,6 +60,7 @@ export const authConfig: AuthOptions = {
   // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     GithubProvider({
@@ -60,10 +68,10 @@ export const authConfig: AuthOptions = {
       ...(config.env !== "prod"
         ? {
             authorization: {
-              url: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/authorize",
+              url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
               params: { scope: "user:email read:user read:org" },
             },
-            token: "https://egapro-charon.dev.fabrique.social.gouv.fr/github/login/oauth/access_token",
+            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
           }
         : {
             authorization: {
@@ -102,40 +110,62 @@ export const authConfig: AuthOptions = {
     },
     // prefill JWT encoded data with staff and ownership on signup
     // by design user always "signup" from our pov because we don't save user accounts
-    async jwt({ token, profile, trigger, account }) {
+    async jwt({ token, profile, trigger, account, session }) {
+      const isStaff = token.user?.staff || token.staff?.impersonating || false;
+      if (trigger === "update" && session && isStaff) {
+        if (session.staff.impersonating === true) {
+          // staff starts impersonating
+          assertImpersonatedSession(session);
+          token.user.staff = session.user.staff;
+          token.user.companies = session.user.companies;
+          token.staff.impersonating = true;
+          token.staff.lastImpersonated = [
+            // keep only unique companies
+            ...new Map(
+              (token.staff.lastImpersonated ?? []).concat(token.user.companies).map(c => [c.siren, c.label]),
+            ).entries(),
+          ].map(([siren, label]) => ({ siren, label }));
+        } else if (session.staff.impersonating === false) {
+          // staff stops impersonating
+          token.user.staff = true;
+          token.user.companies = [];
+          token.staff.impersonating = false;
+        }
+      }
       if (trigger !== "signUp") return token;
+      token.user = {} as Session["user"];
+      token.staff = {} as Session["staff"];
       if (account?.provider === "github") {
         const githubProfile = profile as unknown as GithubProfile;
-        token.staff = true;
-        token.companies = [];
+        token.user.staff = true;
+        token.user.companies = [];
         const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
-        token.firstname = firstname;
-        token.lastname = lastname;
+        token.user.firstname = firstname;
+        token.user.lastname = lastname;
       } else {
-        token.companies =
+        token.user.companies =
           profile?.organizations.map(orga => ({
             siren: orga.siret.substring(0, 9),
             label: orga.label,
           })) ?? [];
-        token.staff = false;
-        token.firstname = profile?.given_name ?? void 0;
-        token.lastname = profile?.family_name ?? void 0;
-        token.phoneNumber = profile?.phone_number ?? void 0;
+        token.user.staff = false;
+        token.user.firstname = profile?.given_name ?? void 0;
+        token.user.lastname = profile?.family_name ?? void 0;
+        token.user.phoneNumber = profile?.phone_number ?? void 0;
       }
 
       // Token legacy for usage with API v1.
-      token.tokenApiV1 = createTokenApiV1(token.email);
+      token.user.tokenApiV1 = createTokenApiV1(token.email);
 
       return token;
     },
     // expose data from jwt to front
     session({ session, token }) {
-      session.user.staff = token.staff;
-      session.user.companies = token.companies;
-      session.user.firstname = token.firstname;
-      session.user.lastname = token.lastname;
-      session.user.phoneNumber = token.phoneNumber;
-      session.user.tokenApiV1 = token.tokenApiV1;
+      session.user = token.user;
+      session.user.email = token.email;
+      if (token.user.staff || token.staff.impersonating) {
+        session.staff = token.staff;
+      }
       return session;
     },
   },
@@ -153,7 +183,7 @@ const createTokenApiV1 = (email: string) => {
     config.api.security.jwtv1.secret,
     {
       algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
-      expiresIn: "7d",
+      expiresIn: "24h",
     },
   );
 };

@@ -85,9 +85,9 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
 
   return (
     <modal.Component
-      onClose={cleanForm}
       title={`${mode === "edit" ? "Éditer" : "Créer"} - ${writtenName || "👻"}`}
       iconId="fr-icon-arrow-right-line"
+      concealingBackdrop={false}
       buttons={[
         {
           children: "Sauvegarder",
@@ -95,6 +95,7 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
           doClosesModal: false,
           onClick() {
             doSave();
+            cleanForm();
           },
         },
       ]}

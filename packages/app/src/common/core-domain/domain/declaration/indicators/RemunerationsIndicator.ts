@@ -5,8 +5,7 @@ import { type AgeRange } from "../../valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonRemunerations } from "../../valueObjects/declaration/indicators/NotComputableReasonRemunerations";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 export type Categorie = {
   name?: string;

@@ -8,14 +8,16 @@ import Skeleton from "react-loading-skeleton";
 export const UserHeaderItem = () => {
   const session = useSession();
 
+  let isStaff = false;
   switch (session.status) {
     case "authenticated":
+      isStaff = session.data.user.staff || session.data.staff.impersonating || false;
       return (
         <HeaderQuickAccessItem
           key="hqai-authenticated-user"
           quickAccessItem={{
-            iconId: session.data.user.staff ? "fr-icon-github-line" : "fr-icon-account-fill",
-            text: `${session.data.user.email}${session.data.user.staff ? " (staff)" : ""}`,
+            iconId: isStaff ? "fr-icon-github-line" : "fr-icon-account-fill",
+            text: `${session.data.user.email}${isStaff ? " (staff)" : ""}`,
             linkProps: { href: "/index-egapro/tableauDeBord/mon-profil" },
           }}
         />

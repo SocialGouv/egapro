@@ -67,7 +67,6 @@ export const representationEquilibreeSearchResultMap: Mapper<
 
 function representationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
   return {
-    /* eslint-disable @typescript-eslint/no-non-null-assertion -- we are sure */
     countryIsoCode: company.countryCode?.getValue(),
     nafCode: company.nafCode!.getValue(),
     county: company.county?.getValue(),

@@ -276,7 +276,7 @@ export const Indic2and3Form = () => {
                             mb="1w"
                             text={
                               <>
-                                Écart absolu en points de pourcentage :{" "}
+                                Écart en valeur absolue :{" "}
                                 <strong>{percentFormat.format(result?.result / 100 ?? 0)}</strong>
                               </>
                             }

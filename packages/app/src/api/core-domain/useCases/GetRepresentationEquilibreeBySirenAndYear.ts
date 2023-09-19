@@ -1,8 +1,7 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
-import { type UseCase } from "@common/shared-domain";
-import { AppError } from "@common/shared-domain";
+import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { type IRepresentationEquilibreeRepo } from "../repo/IRepresentationEquilibreeRepo";

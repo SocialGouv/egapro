@@ -5,11 +5,9 @@ import { type OwnershipRequest } from "@common/core-domain/domain/OwnershipReque
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { type GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
-import { type SQLCount } from "@common/shared-domain";
-import { UnexpectedRepositoryError } from "@common/shared-domain";
+import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
-import { type Any } from "@common/utils/types";
-import { ensureRequired } from "@common/utils/types";
+import { type Any, ensureRequired } from "@common/utils/types";
 
 import { type IOwnershipRequestRepo, type OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
@@ -100,8 +98,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async updateWithOwnership(item: OwnershipRequest): Promise<void> {
     await this.sql.begin(async transac => {
       const ownership = new Ownership({
-        email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-        siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+        email: item.email!,
+        siren: item.siren!,
       });
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
@@ -117,8 +115,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
         .map(
           item =>
             new Ownership({
-              email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
-              siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+              email: item.email!,
+              siren: item.siren!,
             }),
         );
       const ownershipRepo = new PostgresOwnershipRepo(transac);

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { type NextRequest, type NextResponse } from "next/server";
 import { type z } from "zod";
 
-import { type Any, type ClearObject, type EmptyObject } from "./types";
+import { type Any, type ClearObject, type EmptyObject, type Nothing } from "./types";
 
 export type NextErrorPageProps = { error: Error; reset: VoidFunction };
 
@@ -72,3 +72,12 @@ export type NextRouteHandler<TParams extends string = string> = (
 export type GenerateStaticParams<TParams extends string = string> = () => Promise<
   Array<{ params: Record<TParams, string> }>
 >;
+
+/**
+ * Wrap Next.js server action response to avoid bubbling up errors
+ */
+export type ServerActionResponse<TData = void, TError = string> =
+  | { error: TError; ok: false }
+  | ((TData extends Nothing ? EmptyObject : { data: TData }) & {
+      ok: true;
+    });

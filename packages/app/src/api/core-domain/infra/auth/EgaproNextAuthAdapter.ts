@@ -12,7 +12,7 @@ const tokenCache = new LRUCache<string, VerificationToken>({
   ttl: 24 * 60 * 60 * 1000,
 });
 
-export const egaproNextAuthAdapter: Adapter<true> = {
+export const egaproNextAuthAdapter: Adapter = {
   async createUser(user) {
     return { id: user.email, ...user };
   },

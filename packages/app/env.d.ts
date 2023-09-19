@@ -3,6 +3,11 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         /**
+         * Dist: `next`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        __NEXT_PRIVATE_PREBUNDLED_REACT?: string;
+        /**
          * Dist: `http://localhost:2626`  
          * {@link [Local Env Dist](.env.development)}
          */
@@ -203,6 +208,11 @@ declare namespace NodeJS {
          */
         SECURITY_GITHUB_CLIENT_SECRET?: string;
         /**
+         * Dist: `https://egapro-charon.dev.fabrique.social.gouv.fr`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        SECURITY_CHARON_URL?: string;
+        /**
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
@@ -215,6 +225,7 @@ declare namespace NodeJS {
     }
 }
 declare type ProcessEnvCustomKeys = 
+    | '__NEXT_PRIVATE_PREBUNDLED_REACT'
     | 'NEXT_PUBLIC_API_URL'
     | 'NEXT_PUBLIC_API_V2_URL'
     | 'NEXT_PUBLIC_MATOMO_URL'
@@ -255,5 +266,6 @@ declare type ProcessEnvCustomKeys =
     | 'SECURITY_MONCOMPTEPRO_TEST'
     | 'SECURITY_GITHUB_CLIENT_ID'
     | 'SECURITY_GITHUB_CLIENT_SECRET'
+    | 'SECURITY_CHARON_URL'
     | 'SENTRY_DSN'
     | 'SENTRY_ENVIRONMENT';
