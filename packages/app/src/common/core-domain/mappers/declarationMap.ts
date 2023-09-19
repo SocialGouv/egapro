@@ -322,7 +322,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
             remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
             ? "non"
             : undefined,
-          dateConsultationCSE: dateObjectToDateISOString(remunerations.cseConsultationDate!),
+          dateConsultationCSE: remunerations.cseConsultationDate
+            ? dateObjectToDateISOString(remunerations.cseConsultationDate)
+            : undefined,
         };
       }
     }

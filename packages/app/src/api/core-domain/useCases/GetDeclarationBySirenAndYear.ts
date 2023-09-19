@@ -23,6 +23,7 @@ export class GetDeclarationBySirenAndYear implements UseCase<Input, DeclarationD
 
       return declaration ? declarationMap.toDTO(declaration) : null;
     } catch (error: unknown) {
+      console.error(error);
       throw new GetDeclarationBySirenAndYearError("Cannot get declaration", error as Error);
     }
   }

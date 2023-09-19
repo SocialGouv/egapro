@@ -13,7 +13,6 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -22,7 +21,7 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getDeclaration } from "../actions";
+import { getCompany, getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
@@ -84,22 +83,22 @@ const prepareDataWithExistingDeclaration = async (
   // TODO: faire un useCase validateSiren qui va appeller l'API et vérifier que la date de cessation est correcte.
 
   // We fetch the latest data for the entreprise to fill the entreprise page.
-  const entreprise = await memoizedFetchSiren(siren, year);
+  const company = await getCompany(siren, year);
 
   return {
     ...baseFormData,
     entreprise: {
       ...baseFormData.entreprise,
       entrepriseDéclarante: {
-        adresse: entreprise.adresse || "",
-        codeNaf: entreprise.code_naf,
-        codePostal: entreprise.code_postal,
-        codePays: entreprise.code_pays,
-        raisonSociale: entreprise.raison_sociale,
-        siren: entreprise.siren,
-        commune: entreprise.commune,
-        département: entreprise.département,
-        région: entreprise.région,
+        adresse: company?.address || "",
+        codeNaf: company?.nafCode || "01.11Z", // Set a default value because this field is required. This should not happen.
+        codePostal: company?.postalCode,
+        codePays: company?.countryIsoCode,
+        raisonSociale: company?.name || "",
+        siren,
+        commune: company?.city,
+        département: company?.countyCode,
+        région: company?.regionCode,
       },
     },
     [stepName]: {

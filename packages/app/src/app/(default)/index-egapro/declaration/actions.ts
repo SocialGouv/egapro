@@ -2,6 +2,7 @@
 
 import { entrepriseService } from "@api/core-domain/infra/services";
 import { declarationRepo } from "@api/core-domain/repo";
+import { GetCompany } from "@api/core-domain/useCases/GetCompany";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { assertServerSession } from "@api/utils/auth";
@@ -23,6 +24,14 @@ export async function getDeclaration(siren: string, year: number) {
   return declaration;
 }
 
+export async function getCompany(siren: string, year: number) {
+  // handle default errors
+  const useCase = new GetCompany(declarationRepo);
+  const company = await useCase.execute({ siren, year });
+
+  return company;
+}
+
 export async function saveDeclaration(declaration: CreateDeclarationDTO) {
   await assertServerSession({
     owner: {
@@ -34,6 +43,8 @@ export async function saveDeclaration(declaration: CreateDeclarationDTO) {
 
   const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
   await useCase.execute({ declaration });
+
+  // TODO: send receipt
 
   // const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
