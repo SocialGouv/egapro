@@ -2,8 +2,7 @@ import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, type PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 
 import { NotComputableReasonMaternityLeaves } from "../../valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 export interface MaternityLeavesIndicatorProps extends AbstractIndicatorProps {
   notComputableReason?: NotComputableReasonMaternityLeaves;

@@ -3,8 +3,7 @@ import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonPromotions } from "../../valueObjects/declaration/indicators/NotComputableReasonPromotions";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 type Categories = [
   ouv: SimpleNumber | null,
