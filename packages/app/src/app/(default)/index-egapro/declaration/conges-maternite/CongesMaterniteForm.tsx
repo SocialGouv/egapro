@@ -1,10 +1,8 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import {
-  computeIndicator4Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -72,7 +70,7 @@ export const CongesMaterniteForm = () => {
 
   useEffect(() => {
     if (résultat !== null && résultat !== undefined) {
-      const note = computeIndicator4Note(résultat);
+      const note = IndicateurQuatreComputer.prototype.computeNote(résultat);
       setValue("note", note);
     }
   }, [résultat, setValue]);

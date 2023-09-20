@@ -2,10 +2,8 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import {
-  computeIndicator5Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
@@ -80,7 +78,7 @@ export const HautesRémunérationsForm = () => {
 
   useEffect(() => {
     if (résultat !== undefined) {
-      const note = computeIndicator5Note(résultat);
+      const note = IndicateurCinqComputer.prototype.computeNote(résultat);
       setValue("note", note);
     }
     if (résultat === 5) {

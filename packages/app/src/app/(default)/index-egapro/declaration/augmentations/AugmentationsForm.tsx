@@ -2,11 +2,9 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { IndicateurDeuxComputer } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import {
-  computeIndicator2Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
@@ -134,7 +132,7 @@ export const AugmentationsForm = () => {
   useEffect(() => {
     if (résultat !== undefined) {
       if (résultat !== null) {
-        const note = computeIndicator2Note(résultat);
+        const note = IndicateurDeuxComputer.prototype.computeNote(résultat);
         setValue("note", note);
       }
 

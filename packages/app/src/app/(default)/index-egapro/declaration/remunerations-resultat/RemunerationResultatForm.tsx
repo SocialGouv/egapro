@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  computeIndicator1Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -74,7 +72,7 @@ export const RemunerationResultatForm = () => {
 
   useEffect(() => {
     if (résultat !== null) {
-      const note = computeIndicator1Note(résultat);
+      const note = IndicateurUnComputer.prototype.computeNote(résultat);
       setValue("note", note);
     }
 
