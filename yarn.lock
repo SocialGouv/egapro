@@ -257,10 +257,10 @@
     call-me-maybe "^1.0.1"
     js-yaml "^4.1.0"
 
-"@codegouvfr/react-dsfr@^0.75.8":
-  version "0.75.8"
-  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.75.8.tgz#b9caa3c47bf278e82379a8f78f89d99759c39f97"
-  integrity sha512-PhAciu4KaNTYjQQgjBE1EZnypqdc+qHurZFMuepC97KeARhxKW3Kl7sQkXDvqr+FKFgXkYn+jkFISwlbSh8kYQ==
+"@codegouvfr/react-dsfr@0.77.0-rc.0":
+  version "0.77.0-rc.0"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.77.0-rc.0.tgz#7a411004bc6b5bf46506aaae71bcc1c804507cd5"
+  integrity sha512-MWArr4LBudpaeW6RzePg4LNQfgIJ18qw7OywHIp+40tLCqSEM8Zglv4N1C0qEyrqM6gBG9Fogw4X0z75YK/BUA==
   dependencies:
     tsafe "^1.6.3"
 

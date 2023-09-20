@@ -6,15 +6,16 @@ import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAtt
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
-import { Matomo } from "@components/utils/Matomo";
 import { IsomorphicSkeletonTheme } from "@components/utils/skeleton/IsomorphicSkeletonTheme";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { type PropsWithChildren, Suspense } from "react";
+import { type PropsWithChildren } from "react";
 
 import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { defaultColorScheme } from "./defaultColorScheme";
 import { ImpersonateNotice } from "./ImpersonateNotice";
+import style from "./root.module.scss";
 import { SessionProvider } from "./SessionProvider";
 import { StartDsfr } from "./StartDsfr";
 
@@ -38,14 +39,7 @@ export const metadata = {
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => (
-  <html
-    lang="fr"
-    {...getHtmlAttributes({ defaultColorScheme })}
-    style={{
-      overflow: "-moz-scrollbars-vertical",
-      overflowY: "scroll",
-    }}
-  >
+  <html lang="fr" {...getHtmlAttributes({ defaultColorScheme })} className={style.app}>
     <head>
       <StartDsfr />
       <DsfrHead
@@ -62,11 +56,12 @@ const RootLayout = ({ children }: PropsWithChildren) => (
           //"Spectral-Regular",
           //"Spectral-ExtraBold"
         ]}
+        nonce={headers().get("x-nonce") ?? void 0}
       />
 
-      <Suspense>
+      {/* <Suspense>
         <Matomo env={config.env} />
-      </Suspense>
+      </Suspense> */}
     </head>
     <body>
       <FeatureStatusProvider>

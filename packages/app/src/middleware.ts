@@ -1,25 +1,29 @@
 import { config as _config } from "@common/config";
 import { StatusCodes } from "http-status-codes";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
-const cspMiddleware = (req: NextRequest) => {
-  const nonce = "totototototo";
+const cspMiddleware = () => {
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${
+      process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
+    };
     frame-src 'self' https://*.gouv.fr;
-    style-src 'self' https://*.gouv.fr 'nonce-${nonce}' 'unsafe-inline';
+    style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
     frame-ancestors 'self' https://*.gouv.fr;
     object-src 'none';
     base-uri 'self' https://*.gouv.fr;
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
-    upgrade-insecure-requests;`;
+    upgrade-insecure-requests;
+    require-trusted-types-for 'script';
+    trusted-types react-dsfr react-dsfr-asap nextjs#bundler;`;
 
   const requestHeaders = new Headers();
   requestHeaders.set("x-nonce", nonce);
@@ -53,7 +57,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
-  return cspMiddleware(req);
+  return cspMiddleware();
 };
 
 // export const middleware = nextMiddleware;

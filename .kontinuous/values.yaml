@@ -1,24 +1,6 @@
 # proxy_set_header adds the header to the request for nextjs to use it
 # require-trusted-types-for 'script'; trusted-types nextjs#bundler nextjs"; => need to be working with react-dsfr
 x-secure-headers: &headers >-
-  set_secure_random_alphanum $nonce 32;
-
-  proxy_set_header Content-Security-Policy "default-src 'self' 'nonce-$nonce';"
-
-  more_set_headers
-  "Content-Security-Policy:
-  default-src 'none';
-  connect-src 'self' https://*.gouv.fr;
-  font-src 'self' data: blob:;
-  media-src 'self' https://*.gouv.fr;
-  img-src 'self' data: https://*.gouv.fr;
-  script-src 'self' 'nonce-$nonce' 'strict-dynamic' 'unsafe-inline';
-  frame-src 'self' https://*.gouv.fr;
-  style-src 'self' https://*.gouv.fr 'nonce-$nonce' 'unsafe-inline';
-  frame-ancestors 'self' https://*.gouv.fr;
-  base-uri 'self' https://*.gouv.fr;
-  form-action 'self' https://*.gouv.fr;
-
   more_set_headers "X-Frame-Options: deny";
 
   more_set_headers "X-XSS-Protection: 1; mode=block";
