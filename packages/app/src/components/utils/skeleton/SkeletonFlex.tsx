@@ -1,5 +1,5 @@
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import Skeleton, { type SkeletonProps } from "react-loading-skeleton";
+import { Skeleton, type SkeletonProps } from "@design-system/utils/client/skeleton";
 
 import styles from "./SkeletonFlex.module.css";
 

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   // TODO optimize deployed output in build mode
   //   output: "standalone",
