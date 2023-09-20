@@ -7,11 +7,12 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
-import { PUBLIC_YEARS } from "@common/dict";
+import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { sortBy } from "lodash";
@@ -21,10 +22,13 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getCompany, getDeclaration } from "../actions";
+import { getDeclaration, getValidCompany } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
+
+const CLOSED_COMPANY_ERROR = "Ce Siren correspond a une entreprise fermée. Veuillez vérifier votre saisie";
+const API_ERROR = "Une erreur serveur est survenue. Veuillez recommencer plus tard";
 
 const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
@@ -80,32 +84,42 @@ const prepareDataWithExistingDeclaration = async (
           },
         };
 
-  // TODO: faire un useCase validateSiren qui va appeller l'API et vérifier que la date de cessation est correcte.
-
   // We fetch the latest data for the entreprise to fill the entreprise page.
-  const company = await getCompany(siren, year);
+  const result = await getValidCompany(siren, year);
 
-  return {
-    ...baseFormData,
-    entreprise: {
-      ...baseFormData.entreprise,
-      entrepriseDéclarante: {
-        adresse: company?.address || "",
-        codeNaf: company?.nafCode || "01.11Z", // Set a default value because this field is required. This should not happen.
-        codePostal: company?.postalCode,
-        codePays: company?.countryIsoCode,
-        raisonSociale: company?.name || "",
-        siren,
-        commune: company?.city,
-        département: company?.countyCode,
-        région: company?.regionCode,
+  if (result.ok) {
+    const company = result.data;
+
+    const countyCode = company.firstMatchingEtablissement?.codeCommuneEtablissement
+      ? (inseeCodeToCounty(company.firstMatchingEtablissement?.codeCommuneEtablissement) as keyof COUNTIES)
+      : undefined;
+
+    return {
+      ...baseFormData,
+      entreprise: {
+        ...baseFormData.entreprise,
+        entrepriseDéclarante: {
+          adresse: company?.firstMatchingEtablissement.address,
+          codeNaf: company.activitePrincipaleUniteLegale,
+          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement,
+          codePays: company.firstMatchingEtablissement?.codePaysEtrangerEtablissement
+            ? COUNTRIES_COG_TO_ISO[company.firstMatchingEtablissement?.codePaysEtrangerEtablissement]
+            : undefined,
+          raisonSociale: company.simpleLabel,
+          siren,
+          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement,
+          département: countyCode,
+          région: countyCode ? COUNTY_TO_REGION[countyCode] : undefined,
+        },
       },
-    },
-    [stepName]: {
-      annéeIndicateurs: year,
-      siren,
-    },
-  };
+      [stepName]: {
+        annéeIndicateurs: year,
+        siren,
+      },
+    };
+  } else {
+    throw new Error(result.error === CompanyErrorCodes.CLOSED ? CLOSED_COMPANY_ERROR : API_ERROR);
+  }
 };
 
 export const CommencerForm = () => {
@@ -152,6 +166,7 @@ export const CommencerForm = () => {
       }
     } catch (error: unknown) {
       console.error("Unexpected API error", error);
+
       setError("siren", {
         type: "manual",
         message: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",

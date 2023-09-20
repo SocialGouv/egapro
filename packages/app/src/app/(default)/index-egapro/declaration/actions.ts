@@ -1,12 +1,19 @@
 "use server";
 
 import { entrepriseService } from "@api/core-domain/infra/services";
+import {
+  type Entreprise,
+  EntrepriseServiceClosedCompanyError,
+  EntrepriseServiceNotFoundError,
+} from "@api/core-domain/infra/services/IEntrepriseService";
 import { declarationRepo } from "@api/core-domain/repo";
-import { GetCompany } from "@api/core-domain/useCases/GetCompany";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { assertServerSession } from "@api/utils/auth";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type ServerActionResponse } from "@common/utils/next";
+import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -24,12 +31,36 @@ export async function getDeclaration(siren: string, year: number) {
   return declaration;
 }
 
-export async function getCompany(siren: string, year: number) {
-  // handle default errors
-  const useCase = new GetCompany(declarationRepo);
-  const company = await useCase.execute({ siren, year });
+export async function getValidCompany(
+  siren: string,
+  year: number,
+): Promise<ServerActionResponse<Entreprise, CompanyErrorCodes>> {
+  try {
+    const company = await entrepriseService.siren(new Siren(siren));
 
-  return company;
+    const limitForClosedCompanies = new Date(year + 1, 2, 1);
+    const closingDate = company.dateCessation;
+
+    // User can't declare if company is closed before 1st of March of the next year.
+    if (closingDate && new Date(closingDate) < limitForClosedCompanies) {
+      throw new EntrepriseServiceClosedCompanyError("The Siren matches a closed company");
+    }
+
+    return {
+      data: company,
+      ok: true,
+    };
+  } catch (error: unknown) {
+    return {
+      ok: false,
+      error:
+        error instanceof EntrepriseServiceNotFoundError
+          ? CompanyErrorCodes.NOT_FOUND
+          : error instanceof EntrepriseServiceClosedCompanyError
+          ? CompanyErrorCodes.CLOSED
+          : CompanyErrorCodes.UNKNOWN,
+    };
+  }
 }
 
 export async function saveDeclaration(declaration: CreateDeclarationDTO) {
