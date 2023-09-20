@@ -7,12 +7,13 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
+import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { sortBy } from "lodash";
@@ -22,7 +23,7 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { getDeclaration, getValidCompany } from "../actions";
+import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
@@ -85,10 +86,14 @@ const prepareDataWithExistingDeclaration = async (
         };
 
   // We fetch the latest data for the entreprise to fill the entreprise page.
-  const result = await getValidCompany(siren, year);
+  const result = await getCompany(siren);
 
   if (result.ok) {
     const company = result.data;
+
+    const isClosed = isCompanyClosed(company, year);
+
+    if (isClosed) throw new Error(CLOSED_COMPANY_ERROR);
 
     const countyCode = company.firstMatchingEtablissement?.codeCommuneEtablissement
       ? (inseeCodeToCounty(company.firstMatchingEtablissement?.codeCommuneEtablissement) as keyof COUNTIES)
@@ -118,7 +123,7 @@ const prepareDataWithExistingDeclaration = async (
       },
     };
   } else {
-    throw new Error(result.error === CompanyErrorCodes.CLOSED ? CLOSED_COMPANY_ERROR : API_ERROR);
+    throw new Error(API_ERROR);
   }
 };
 
