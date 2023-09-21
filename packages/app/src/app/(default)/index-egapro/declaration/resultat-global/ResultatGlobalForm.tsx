@@ -4,7 +4,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
-import { computeIndex } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import {
+  computeDeclarationIndex,
+  DeclarationComputerInputBuilder,
+} from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -54,7 +57,10 @@ export const ResultatGlobalForm = () => {
   const defaultValues =
     formData["declaration-existante"].status === "consultation"
       ? formData[stepName]
-      : { ...formData[stepName], ...computeIndex(formData) };
+      : {
+          ...formData[stepName],
+          ...computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData)),
+        };
 
   const methods = useForm<FormType>({
     shouldUnregister: true,

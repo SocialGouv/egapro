@@ -33,6 +33,7 @@ export interface DeclarationProps {
   publication?: Publication;
   correctiveMeasures?: CorrectiveMeasures;
 
+  // PS: Indicators are undefined when sufficientPeriod is false.
   // Indicator 1.
   remunerations?: RemunerationsIndicator;
   // Indicator 2.

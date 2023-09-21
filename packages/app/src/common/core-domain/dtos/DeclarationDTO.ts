@@ -87,7 +87,7 @@ export type DeclarationDTO = {
   "augmentations-et-promotions"?:
     | {
         estCalculable: "non";
-        motifNonCalculabilité?: (typeof motifsNC)["augmentations-et-promotions"][number];
+        motifNonCalculabilité: (typeof motifsNC)["augmentations-et-promotions"][number];
       }
     | {
         estCalculable: "oui";
@@ -176,7 +176,7 @@ export type DeclarationDTO = {
     | {
         déclarationCalculCSP: boolean;
         estCalculable: "non";
-        motifNonCalculabilité?: (typeof motifsNC)["remunerations"][number];
+        motifNonCalculabilité: (typeof motifsNC)["remunerations"][number];
       };
   "remunerations-coefficient-autre"?: {
     catégories: Catégorie[];

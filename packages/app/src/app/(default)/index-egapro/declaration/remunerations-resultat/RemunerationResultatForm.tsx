@@ -1,7 +1,7 @@
 "use client";
 
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";

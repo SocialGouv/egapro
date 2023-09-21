@@ -1,7 +1,7 @@
 "use client";
 
+import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
-import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
 import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
 import { IndicatorNote, RecapCard } from "@design-system";

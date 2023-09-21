@@ -12,9 +12,11 @@ export type Categorie = {
   ranges?: Partial<Record<AgeRange.Enum, SimpleNumber>>;
 };
 
+// TODO: Enhance type in making an union of 2 objects, with notComputerReason as discriminator.
 export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {
   categories: Categorie[];
   cseConsultationDate?: Date;
+  // favorablePopulation is set to "egalité" by declarationMap when there is no value in DB. TODO: Patch DB to set "egalité" instead of null.
   favorablePopulation?: FavorablePopulation;
   mode?: RemunerationsMode;
   notComputableReason?: NotComputableReasonRemunerations;
