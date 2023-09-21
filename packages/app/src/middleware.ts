@@ -23,7 +23,7 @@ const cspMiddleware = () => {
     block-all-mixed-content;
     upgrade-insecure-requests;
     require-trusted-types-for 'script';
-    trusted-types react-dsfr react-dsfr-asap nextjs#bundler;`;
+    trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`;
 
   const requestHeaders = new Headers();
   requestHeaders.set("x-nonce", nonce);

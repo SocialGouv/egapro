@@ -23,7 +23,7 @@
     "@json2csv/node": "^7.0.1",
     "@octokit/rest": "^20.0.1",
     "@react-pdf/renderer": "^3.1.12",
-    "@socialgouv/matomo-next": "^1.4.0",
+    "@socialgouv/matomo-next": "^1.8.0",
     "chart.js": "^4.3.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "clsx": "^2.0.0",

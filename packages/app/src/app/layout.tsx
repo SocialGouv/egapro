@@ -4,11 +4,12 @@ import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAtt
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
+import { Matomo } from "@components/utils/Matomo";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { SkeletonTheme } from "@design-system/utils/client/skeleton";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 
 import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { defaultColorScheme } from "./defaultColorScheme";
@@ -61,9 +62,9 @@ const RootLayout = ({ children }: PropsWithChildren) => {
         {/* for styled-jsx */}
         <meta property="csp-nonce" content={nonce} />
 
-        {/* <Suspense>
-        <Matomo env={config.env} />
-      </Suspense> */}
+        <Suspense>
+          <Matomo env={config.env} nonce={nonce} />
+        </Suspense>
       </head>
       <body>
         <FeatureStatusProvider>
