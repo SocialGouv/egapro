@@ -1,5 +1,3 @@
-# proxy_set_header adds the header to the request for nextjs to use it
-# require-trusted-types-for 'script'; trusted-types nextjs#bundler nextjs"; => need to be working with react-dsfr
 x-secure-headers: &headers >-
   more_set_headers "X-Frame-Options: deny";
 
