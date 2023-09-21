@@ -1,7 +1,6 @@
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { Fragment, type PropsWithChildren, type ReactElement, useContext } from "react";
 
-import css from "./Skeleton.module.scss";
 import { SkeletonThemeContext } from "./SkeletonThemeContext";
 import { type SkeletonStyleProps } from "./types";
 
@@ -116,7 +115,7 @@ export function Skeleton({
     }
 
     const skeletonSpan = (
-      <span className={cx("react-loading-skeleton", css["react-loading-skeleton"], customClassName)} key={i}>
+      <span className={cx("react-loading-skeleton", customClassName)} key={i}>
         {styleOptionsToStyleJsx({
           ...styleOptions,
           width: currentWidth,

@@ -11,9 +11,7 @@ const cspMiddleware = () => {
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${
-      process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
-    };
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
     frame-ancestors 'self' https://*.gouv.fr;
@@ -57,7 +55,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
-  return cspMiddleware();
+  return process.env.NODE_ENV === "development" ? NextResponse.next() : cspMiddleware();
 };
 
 // export const middleware = nextMiddleware;
