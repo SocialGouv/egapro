@@ -48,9 +48,13 @@ type DeclarationComputerInputFrom250ToInfinity = DeclarationComputerInputBase & 
 type DeclarationComputerInput = DeclarationComputerInputFrom50To250 | DeclarationComputerInputFrom250ToInfinity;
 
 type DeclarationComputerOutput = {
-  [K in keyof DeclarationComputerInput]?: {
-    score: number;
-  };
+  [K in
+    | "highRemunerations"
+    | "maternityLeaves"
+    | "promotions"
+    | "remunerations"
+    | "salaryRaises"
+    | "salaryRaisesAndPromotions" as `${K}Score`]?: number;
 } & {
   computablePoints: number;
   index?: number; // undefined means NC.
@@ -280,38 +284,56 @@ export const DeclarationComputerInputBuilder = {
 
 export const computeDeclarationIndex = (input: DeclarationComputerInput): DeclarationComputerOutput => {
   let points = 0,
-    computablePoints = 0;
+    computablePoints = 0,
+    salaryRaisesAndPromotionsScore,
+    salaryRaisesScore,
+    promotionsScore,
+    maternityLeavesScore,
+    remunerationsScore;
 
   if (input.remunerations.isComputable) {
-    points += IndicateurUnComputer.prototype.computeNote(input.remunerations.result) || 0;
+    remunerationsScore = IndicateurUnComputer.prototype.computeNote(input.remunerations.result) || 0;
+    points += remunerationsScore;
     computablePoints += IndicateurUnComputer.prototype.getMaxNote();
   }
 
   if (input.range === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
     if (input.salaryRaisesAndPromotions.isComputable) {
-      points += IndicateurDeuxTroisComputer.prototype.computeNote(input.salaryRaisesAndPromotions.result) || 0;
+      salaryRaisesAndPromotionsScore =
+        IndicateurDeuxTroisComputer.prototype.computeNote(input.salaryRaisesAndPromotions.result) || 0;
+      points += salaryRaisesAndPromotionsScore;
       computablePoints += IndicateurDeuxTroisComputer.prototype.getMaxNote();
     }
   } else {
     if (input.salaryRaises.isComputable) {
-      points += IndicateurDeuxComputer.prototype.computeNote(input.salaryRaises.result) || 0;
+      salaryRaisesScore = IndicateurDeuxComputer.prototype.computeNote(input.salaryRaises.result) || 0;
+      points += salaryRaisesScore;
       computablePoints += IndicateurDeuxComputer.prototype.getMaxNote();
     }
     if (input.promotions.isComputable) {
-      points += IndicateurTroisComputer.prototype.computeNote(input.promotions.result) || 0;
+      promotionsScore = IndicateurTroisComputer.prototype.computeNote(input.promotions.result) || 0;
+      points += promotionsScore;
       computablePoints += IndicateurTroisComputer.prototype.getMaxNote();
     }
   }
 
   if (input.maternityLeaves.isComputable) {
-    points += IndicateurQuatreComputer.prototype.computeNote(input.maternityLeaves.result) || 0;
+    maternityLeavesScore = IndicateurQuatreComputer.prototype.computeNote(input.maternityLeaves.result) || 0;
+    points += maternityLeavesScore;
     computablePoints += IndicateurQuatreComputer.prototype.getMaxNote();
   }
 
-  points += IndicateurCinqComputer.prototype.computeNote(input.highRemunerations.result) || 0;
+  const highRemunerationsScore = IndicateurCinqComputer.prototype.computeNote(input.highRemunerations.result) || 0;
+  points += highRemunerationsScore;
   computablePoints += IndicateurCinqComputer.prototype.getMaxNote();
 
   return {
+    highRemunerationsScore,
+    maternityLeavesScore,
+    promotionsScore,
+    remunerationsScore,
+    salaryRaisesAndPromotionsScore,
+    salaryRaisesScore,
     points,
     computablePoints,
     index: computablePoints >= 75 ? Math.round((points / computablePoints) * 100) : undefined,
