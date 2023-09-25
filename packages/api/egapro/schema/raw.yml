@@ -68,7 +68,7 @@ indicateurs:
   augmentations:  # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes
     non_calculable: egvi40pcet|absaugi|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
     résultat: "0.0:"
-    population_favorable: femmes|hommes|egalite
+    population_favorable: femmes|hommes|egalite # NB: dans la réalité, on met vide à la place de egalité en db.
     =note: integer
     objectif_de_progression: string
     catégories: [?number, ?number, ?number, ?number]

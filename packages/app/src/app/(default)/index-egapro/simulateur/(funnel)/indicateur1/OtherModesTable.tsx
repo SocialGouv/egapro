@@ -6,7 +6,7 @@ import {
   type IndicateurUnComputer,
 } from "@common/core-domain/computers/IndicateurUnComputer";
 import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
-import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
+import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { type Any } from "@common/utils/types";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
@@ -94,14 +94,11 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                 />
               ),
               ...(() => {
-                const categoryContent = remunerationsField.category as Record<
-                  CSPAgeRange.Enum,
-                  CountAndAverageSalaries
-                >;
+                const categoryContent = remunerationsField.category as Record<AgeRange.Enum, CountAndAverageSalaries>;
 
                 return {
                   subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
-                    label: CSPAgeRange.Label[ageRange],
+                    label: AgeRange.Label[ageRange],
                     ...(() => {
                       const firstCols: [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]] = [
                         {

@@ -1,6 +1,8 @@
 "use client";
 
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -8,7 +10,6 @@ import { FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -47,7 +48,7 @@ export const EntrepriseUESForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
 
       if (data.type === "entreprise") {
         delete draft.ues;
@@ -92,29 +93,13 @@ export const EntrepriseUESForm = () => {
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <RadioButtons
               legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
-              options={[
-                {
-                  label: "De 50 à 250 inclus",
-                  nativeInputProps: {
-                    value: "50:250",
-                    ...register("tranche"),
-                  },
+              options={Object.entries(CompanyWorkforceRange.Label).map(([value, label]) => ({
+                label,
+                nativeInputProps: {
+                  value,
+                  ...register("tranche"),
                 },
-                {
-                  label: "De 251 à 999 inclus",
-                  nativeInputProps: {
-                    value: "251:999",
-                    ...register("tranche"),
-                  },
-                },
-                {
-                  label: "De 1000 à plus",
-                  nativeInputProps: {
-                    value: "1000:",
-                    ...register("tranche"),
-                  },
-                },
-              ]}
+              }))}
             />
           </ClientOnly>
 

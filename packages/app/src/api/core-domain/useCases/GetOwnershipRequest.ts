@@ -71,7 +71,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
                 await this.ownershipRequestRepo.update(domain);
                 return ownershipRequestMap.toDTO(domain);
               } else {
-                console.log(error);
+                console.error(error);
               }
             }
           }

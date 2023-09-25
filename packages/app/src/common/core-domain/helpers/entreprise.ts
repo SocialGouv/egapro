@@ -16,3 +16,17 @@ export const getAdditionalMeta = (company: Entreprise) => {
     countryCodeCOG,
   };
 };
+
+/**
+ * True if company is closed before 1st of March of the next year.
+ *
+ * @param company company
+ * @param year year of indicators
+ */
+export const isCompanyClosed = (company: Entreprise, year: number) => {
+  const limitForClosedCompanies = new Date(year + 1, 2, 1);
+  const closingDate = company.dateCessation;
+
+  // User can't declare if company is closed before 1st of March of the next year.
+  return closingDate && new Date(closingDate) < limitForClosedCompanies;
+};

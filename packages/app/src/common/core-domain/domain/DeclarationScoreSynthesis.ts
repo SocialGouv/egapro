@@ -4,25 +4,30 @@ import { PositiveInteger } from "@common/shared-domain/domain/valueObjects";
 import { type DeclarationInfoProps } from "./declaration/DeclarationInfo";
 import { type HighRemunerationsIndicatorProps } from "./declaration/indicators/HighRemunerationsIndicator";
 import { type MaternityLeavesIndicatorProps } from "./declaration/indicators/MaternityLeavesIndicator";
+import { type PromotionsIndicatorProps } from "./declaration/indicators/PromotionsIndicator";
 import { type RemunerationsIndicatorProps } from "./declaration/indicators/RemunerationsIndicator";
 import { type SalaryRaisesAndPromotionsIndicatorProps } from "./declaration/indicators/SalaryRaisesAndPromotionsIndicator";
-import { type SalaryRaisesOrPromotionsIndicatorProps } from "./declaration/indicators/SalaryRaisesOrPromotionsIndicator";
+import { type SalaryRaisesIndicatorProps } from "./declaration/indicators/SalaryRaisesIndicator";
 import { DeclarationIndex } from "./valueObjects/declaration/declarationInfo/DeclarationIndex";
-import { NotComputableReason } from "./valueObjects/declaration/indicators/NotComputableReason";
+import { NotComputableReasonMaternityLeaves } from "./valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
+import { NotComputableReasonPromotions } from "./valueObjects/declaration/indicators/NotComputableReasonPromotions";
+import { NotComputableReasonRemunerations } from "./valueObjects/declaration/indicators/NotComputableReasonRemunerations";
+import { NotComputableReasonSalaryRaises } from "./valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
+import { NotComputableReasonSalaryRaisesAndPromotions } from "./valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 
 export interface DeclarationScoreSynthesisProps {
   highRemunerationsScore?: HighRemunerationsIndicatorProps["score"];
   index?: DeclarationInfoProps["index"];
   maternityLeavesScore?: MaternityLeavesIndicatorProps["score"];
   notComputableReasonMaternityLeaves?: MaternityLeavesIndicatorProps["notComputableReason"];
-  notComputableReasonPromotions?: SalaryRaisesOrPromotionsIndicatorProps["notComputableReason"];
+  notComputableReasonPromotions?: PromotionsIndicatorProps["notComputableReason"];
   notComputableReasonRemunerations?: RemunerationsIndicatorProps["notComputableReason"];
-  notComputableReasonSalaryRaises?: SalaryRaisesOrPromotionsIndicatorProps["notComputableReason"];
+  notComputableReasonSalaryRaises?: SalaryRaisesIndicatorProps["notComputableReason"];
   notComputableReasonSalaryRaisesAndPromotions?: SalaryRaisesAndPromotionsIndicatorProps["notComputableReason"];
-  promotionsScore?: SalaryRaisesOrPromotionsIndicatorProps["score"];
+  promotionsScore?: PromotionsIndicatorProps["score"];
   remunerationsScore?: RemunerationsIndicatorProps["score"];
   salaryRaisesAndPromotionsScore?: SalaryRaisesAndPromotionsIndicatorProps["score"];
-  salaryRaisesScore?: SalaryRaisesOrPromotionsIndicatorProps["score"];
+  salaryRaisesScore?: SalaryRaisesIndicatorProps["score"];
 }
 
 export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthesisProps> {
@@ -42,7 +47,7 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
     return this.props.notComputableReasonMaternityLeaves;
   }
 
-  get notComputableReasonPromotions(): SalaryRaisesOrPromotionsIndicatorProps["notComputableReason"] {
+  get notComputableReasonPromotions(): PromotionsIndicatorProps["notComputableReason"] {
     return this.props.notComputableReasonPromotions;
   }
 
@@ -50,7 +55,7 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
     return this.props.notComputableReasonRemunerations;
   }
 
-  get notComputableReasonSalaryRaises(): SalaryRaisesOrPromotionsIndicatorProps["notComputableReason"] {
+  get notComputableReasonSalaryRaises(): SalaryRaisesIndicatorProps["notComputableReason"] {
     return this.props.notComputableReasonSalaryRaises;
   }
 
@@ -58,7 +63,7 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
     return this.props.notComputableReasonSalaryRaisesAndPromotions;
   }
 
-  get promotionsScore(): SalaryRaisesOrPromotionsIndicatorProps["score"] | undefined {
+  get promotionsScore(): PromotionsIndicatorProps["score"] | undefined {
     return this.props.promotionsScore;
   }
 
@@ -70,7 +75,7 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
     return this.props.salaryRaisesAndPromotionsScore;
   }
 
-  get salaryRaisesScore(): SalaryRaisesOrPromotionsIndicatorProps["score"] | undefined {
+  get salaryRaisesScore(): SalaryRaisesIndicatorProps["score"] | undefined {
     return this.props.salaryRaisesScore;
   }
 
@@ -83,15 +88,19 @@ export class DeclarationScoreSynthesis extends JsonEntity<DeclarationScoreSynthe
     if (typeof json.maternityLeavesScore === "number")
       props.maternityLeavesScore = new PositiveInteger(json.maternityLeavesScore);
     if (json.notComputableReasonMaternityLeaves)
-      props.notComputableReasonMaternityLeaves = new NotComputableReason(json.notComputableReasonMaternityLeaves);
+      props.notComputableReasonMaternityLeaves = new NotComputableReasonMaternityLeaves(
+        json.notComputableReasonMaternityLeaves,
+      );
     if (json.notComputableReasonPromotions)
-      props.notComputableReasonPromotions = new NotComputableReason(json.notComputableReasonPromotions);
+      props.notComputableReasonPromotions = new NotComputableReasonPromotions(json.notComputableReasonPromotions);
     if (json.notComputableReasonRemunerations)
-      props.notComputableReasonRemunerations = new NotComputableReason(json.notComputableReasonRemunerations);
+      props.notComputableReasonRemunerations = new NotComputableReasonRemunerations(
+        json.notComputableReasonRemunerations,
+      );
     if (json.notComputableReasonSalaryRaises)
-      props.notComputableReasonSalaryRaises = new NotComputableReason(json.notComputableReasonSalaryRaises);
+      props.notComputableReasonSalaryRaises = new NotComputableReasonSalaryRaises(json.notComputableReasonSalaryRaises);
     if (json.notComputableReasonSalaryRaisesAndPromotions)
-      props.notComputableReasonSalaryRaisesAndPromotions = new NotComputableReason(
+      props.notComputableReasonSalaryRaisesAndPromotions = new NotComputableReasonSalaryRaisesAndPromotions(
         json.notComputableReasonSalaryRaisesAndPromotions,
       );
     if (typeof json.promotionsScore === "number") props.promotionsScore = new PositiveInteger(json.promotionsScore);

@@ -2,10 +2,10 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import {
-  computeIndicator3Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
+import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -18,7 +18,6 @@ import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -135,7 +134,7 @@ export const PromotionsForm = () => {
   useEffect(() => {
     if (résultat !== undefined) {
       if (résultat !== null) {
-        const note = computeIndicator3Note(résultat);
+        const note = new IndicateurTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
         setValue("note", note);
       }
 
@@ -153,7 +152,7 @@ export const PromotionsForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);

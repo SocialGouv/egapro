@@ -1,11 +1,24 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { labelsMotifNC, type MotifNCKey, motifsNC } from "@services/form/declaration/DeclarationFormBuilder";
+import { NotComputableReasonMaternityLeaves } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
+import { NotComputableReasonPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonPromotions";
+import { NotComputableReasonRemunerations } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonRemunerations";
+import { NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
+import { NotComputableReasonSalaryRaisesAndPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
+import { type IndicatorKeyWithNC } from "@common/core-domain/dtos/DeclarationDTO";
 import { type PropsWithChildren } from "react";
 import { useFormContext } from "react-hook-form";
 
 type Props = {
-  stepName: MotifNCKey;
+  stepName: IndicatorKeyWithNC;
 };
+
+const mapping: Record<IndicatorKeyWithNC, Record<string, string>> = {
+  augmentations: NotComputableReasonSalaryRaises.Label,
+  remunerations: NotComputableReasonRemunerations.Label,
+  promotions: NotComputableReasonPromotions.Label,
+  "augmentations-et-promotions": NotComputableReasonSalaryRaisesAndPromotions.Label,
+  "conges-maternite": NotComputableReasonMaternityLeaves.Label,
+} as const;
 
 export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
   const {
@@ -24,9 +37,9 @@ export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
         <option value="" hidden>
           Selectionnez un motif
         </option>
-        {motifsNC[stepName].map(motif => (
-          <option key={motif} value={motif}>
-            {labelsMotifNC[motif]}
+        {Object.entries(mapping[stepName]).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
           </option>
         ))}
       </Select>

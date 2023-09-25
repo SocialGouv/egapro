@@ -4,6 +4,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
+import { type Catégorie, type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type Remunerations } from "@common/models/generated";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
@@ -13,7 +15,6 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type Catégorie, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { useRouter } from "next/navigation";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,10 +27,10 @@ const formSchema = zodFr.object({
     z.object({
       nom: z.string(),
       tranches: z.object({
-        ":29": zodNumberOrNaNOrNull,
-        "30:39": zodNumberOrNaNOrNull,
-        "40:49": zodNumberOrNaNOrNull,
-        "50:": zodNumberOrNaNOrNull,
+        [AgeRange.Enum.LESS_THAN_30]: zodNumberOrNaNOrNull,
+        [AgeRange.Enum.FROM_30_TO_39]: zodNumberOrNaNOrNull,
+        [AgeRange.Enum.FROM_40_TO_49]: zodNumberOrNaNOrNull,
+        [AgeRange.Enum.FROM_50_TO_MORE]: zodNumberOrNaNOrNull,
       }),
     }),
   ),
@@ -44,10 +45,10 @@ const buildDefaultCategories = (mode: Remunerations["mode"]) =>
   mode === "csp"
     ? {
         catégories: [
-          { nom: "ouv", tranches: { ...defaultTranch } },
-          { nom: "emp", tranches: { ...defaultTranch } },
-          { nom: "tam", tranches: { ...defaultTranch } },
-          { nom: "ic", tranches: { ...defaultTranch } },
+          { nom: CSP.Enum.OUVRIERS, tranches: { ...defaultTranch } },
+          { nom: CSP.Enum.EMPLOYES, tranches: { ...defaultTranch } },
+          { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, tranches: { ...defaultTranch } },
+          { nom: CSP.Enum.INGENIEURS_CADRES, tranches: { ...defaultTranch } },
         ],
       }
     : { catégories: [] };
@@ -92,10 +93,10 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   const onSubmit = async (data: FormType) => {
     const notFilled = data.catégories.every(
       catégorie =>
-        catégorie.tranches[":29"] === null &&
-        catégorie.tranches["30:39"] === null &&
-        catégorie.tranches["40:49"] === null &&
-        catégorie.tranches["50:"] === null,
+        catégorie.tranches[AgeRange.Enum.LESS_THAN_30] === null &&
+        catégorie.tranches[AgeRange.Enum.FROM_30_TO_39] === null &&
+        catégorie.tranches[AgeRange.Enum.FROM_40_TO_49] === null &&
+        catégorie.tranches[AgeRange.Enum.FROM_50_TO_MORE] === null,
     );
 
     if (notFilled) {
@@ -107,7 +108,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
       });
     }
 
-    savePageData(stepName, data as DeclarationFormState[typeof stepName]);
+    savePageData(stepName, data as DeclarationDTO[typeof stepName]);
 
     router.push(funnelConfig(formData)[stepName].next().url);
   };
@@ -155,18 +156,16 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                     </thead>
                     <tbody>
                       <tr>
-                        <td>
-                          <PercentageInput<FormType> name={`catégories.${index}.tranches.:29`} />
-                        </td>
-                        <td>
-                          <PercentageInput<FormType> name={`catégories.${index}.tranches.30:39`} />
-                        </td>
-                        <td>
-                          <PercentageInput<FormType> name={`catégories.${index}.tranches.40:49`} />
-                        </td>
-                        <td>
-                          <PercentageInput name={`catégories.${index}.tranches.50:`} />
-                        </td>
+                        {[
+                          AgeRange.Enum.LESS_THAN_30,
+                          AgeRange.Enum.FROM_30_TO_39,
+                          AgeRange.Enum.FROM_40_TO_49,
+                          AgeRange.Enum.FROM_50_TO_MORE,
+                        ].map(key => (
+                          <td key={key}>
+                            <PercentageInput<FormType> name={`catégories.${index}.tranches.${key}`} />
+                          </td>
+                        ))}
                       </tr>
                     </tbody>
                   </table>
