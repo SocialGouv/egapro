@@ -1,5 +1,5 @@
 import { type EntityPropsToJson, JsonAggregateRoot } from "@common/shared-domain";
-import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { type PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 
 import { Company } from "./declaration/Company";
 import { Declarant } from "./declaration/Declarant";
@@ -70,6 +70,29 @@ export class Declaration extends JsonAggregateRoot<DeclarationProps, Declaration
 
   public setModifiedAt(modifiedAt: Date) {
     this.props.modifiedAt = new Date(modifiedAt);
+  }
+
+  public setRemunerationsScore(score: PositiveInteger) {
+    this.props.remunerations?.setScore(score);
+  }
+  public setSalaryRaisesScore(score: PositiveInteger) {
+    this.props.salaryRaises?.setScore(score);
+  }
+
+  public setSalaryRaisesAndPromotionsScore(score: PositiveInteger) {
+    this.props.salaryRaisesAndPromotions?.setScore(score);
+  }
+
+  public setPromotionsScore(score: PositiveInteger) {
+    this.props.promotions?.setScore(score);
+  }
+
+  public setMaternityLeavesScore(score: PositiveInteger) {
+    this.props.maternityLeaves?.setScore(score);
+  }
+
+  public setHighRemunerationsScore(score: PositiveInteger) {
+    this.props.highRemunerations?.setScore(score);
   }
 
   get declarant(): Declarant {

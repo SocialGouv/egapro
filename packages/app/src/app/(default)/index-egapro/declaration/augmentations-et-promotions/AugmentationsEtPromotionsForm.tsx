@@ -2,8 +2,9 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
-import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -98,11 +99,13 @@ export const AugmentationEtPromotionsForm = () => {
   useEffect(() => {
     let notePourcentage, noteNombreSalaries;
     if (résultat !== undefined && résultat !== null) {
-      notePourcentage = IndicateurDeuxTroisComputer.prototype.computeNote(résultat);
+      notePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
       setValue("notePourcentage", notePourcentage);
     }
     if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== null) {
-      noteNombreSalaries = IndicateurDeuxTroisComputer.prototype.computeNote(résultatEquivalentSalarié);
+      noteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
+        résultatEquivalentSalarié,
+      );
       setValue("noteNombreSalaries", noteNombreSalaries);
     }
     if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {

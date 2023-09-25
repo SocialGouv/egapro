@@ -1,5 +1,5 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
-import { Percentage, type PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+import { Percentage } from "@common/shared-domain/domain/valueObjects";
 
 import { NotComputableReasonMaternityLeaves } from "../../valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
 import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
@@ -7,7 +7,6 @@ import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndica
 export interface MaternityLeavesIndicatorProps extends AbstractIndicatorProps {
   notComputableReason?: NotComputableReasonMaternityLeaves;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class MaternityLeavesIndicator extends AbstractIndicator<MaternityLeavesIndicatorProps> {
@@ -17,12 +16,7 @@ export class MaternityLeavesIndicator extends AbstractIndicator<MaternityLeavesI
 
   /** `résultat` */
   get result(): Percentage | undefined {
-    if (!this.props.notComputableReason) return this.props.result;
-  }
-
-  /** `note` */
-  get score(): PositiveInteger | undefined {
-    if (!this.props.notComputableReason) return this.props.score;
+    return this.props.result;
   }
 
   public fromJson(json: EntityPropsToJson<MaternityLeavesIndicatorProps>) {

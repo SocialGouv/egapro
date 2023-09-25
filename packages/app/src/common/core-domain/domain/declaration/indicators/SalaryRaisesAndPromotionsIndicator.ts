@@ -14,7 +14,6 @@ export interface SalaryRaisesAndPromotionsIndicatorProps extends AbstractIndicat
   notComputableReason?: NotComputableReasonSalaryRaisesAndPromotions;
   percentScore?: Percentage;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<SalaryRaisesAndPromotionsIndicatorProps> {
@@ -31,11 +30,6 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
   /** `résultat` */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   /** `résultat_nombre_salariés` - Résultat final en nombre équivalent de salariés */

@@ -3,8 +3,7 @@ import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonSalaryRaises } from "../../valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
-import { type AbstractIndicatorProps } from "./AbstractIndicator";
-import { AbstractIndicator } from "./AbstractIndicator";
+import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
 type Categories = [
   ouv: SimpleNumber | null,
@@ -19,7 +18,6 @@ export interface SalaryRaisesIndicatorProps extends AbstractIndicatorProps {
   favorablePopulation?: FavorablePopulation;
   notComputableReason?: NotComputableReasonSalaryRaises;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class SalaryRaisesIndicator extends AbstractIndicator<SalaryRaisesIndicatorProps> {
@@ -41,11 +39,6 @@ export class SalaryRaisesIndicator extends AbstractIndicator<SalaryRaisesIndicat
   /** `résultat` */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   public fromJson(json: EntityPropsToJson<SalaryRaisesIndicatorProps>): this {

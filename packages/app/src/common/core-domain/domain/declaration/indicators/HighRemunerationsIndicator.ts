@@ -5,7 +5,7 @@ import { FavorablePopulation } from "../../valueObjects/declaration/indicators/F
 import { HighRemunerationsResult } from "../../valueObjects/declaration/indicators/HighRemunerationsResult";
 import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
-export interface HighRemunerationsIndicatorProps extends AbstractIndicatorProps {
+export interface HighRemunerationsIndicatorProps extends Exclude<AbstractIndicatorProps, "score"> {
   favorablePopulation: FavorablePopulation;
   result: HighRemunerationsResult;
   score: PositiveInteger;
@@ -22,7 +22,10 @@ export class HighRemunerationsIndicator extends AbstractIndicator<HighRemunerati
     return this.props.result;
   }
 
-  /** `note` */
+  /**
+   * `note`
+   * @override
+   */
   get score(): PositiveInteger {
     return this.props.score;
   }

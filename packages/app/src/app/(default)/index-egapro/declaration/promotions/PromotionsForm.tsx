@@ -2,8 +2,9 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
-import { indicatorNoteMax } from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
@@ -133,7 +134,7 @@ export const PromotionsForm = () => {
   useEffect(() => {
     if (résultat !== undefined) {
       if (résultat !== null) {
-        const note = IndicateurTroisComputer.prototype.computeNote(résultat);
+        const note = new IndicateurTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
         setValue("note", note);
       }
 

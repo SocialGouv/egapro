@@ -8,16 +8,23 @@ import { type Declaration } from "@common/core-domain/domain/Declaration";
 import { type DeclarationDTO, type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
 import assert from "assert";
 
-import { CompanyWorkforceRange } from "../CompanyWorkforceRange";
-import { type FavorablePopulation } from "./FavorablePopulation";
+import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
+import { type FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
+
+const indicateurUn = new IndicateurUnComputer();
+const indicateurDeux = new IndicateurDeuxComputer(indicateurUn);
+const indicateurTrois = new IndicateurTroisComputer(indicateurUn);
+const indicateurDeuxTrois = new IndicateurDeuxTroisComputer(indicateurUn);
+const indicateurQuatre = new IndicateurQuatreComputer();
+const indicateurCinq = new IndicateurCinqComputer();
 
 export const indicatorNoteMax: Record<IndicatorKey, number> = {
-  remunerations: IndicateurUnComputer.prototype.getMaxNote(),
-  augmentations: IndicateurDeuxComputer.prototype.getMaxNote(),
-  promotions: IndicateurTroisComputer.prototype.getMaxNote(),
-  "augmentations-et-promotions": IndicateurDeuxTroisComputer.prototype.getMaxNote(),
-  "conges-maternite": IndicateurQuatreComputer.prototype.getMaxNote(),
-  "hautes-remunerations": IndicateurCinqComputer.prototype.getMaxNote(),
+  remunerations: indicateurUn.getMaxNote(),
+  augmentations: indicateurDeux.getMaxNote(),
+  promotions: indicateurTrois.getMaxNote(),
+  "augmentations-et-promotions": indicateurDeuxTrois.getMaxNote(),
+  "conges-maternite": indicateurQuatre.getMaxNote(),
+  "hautes-remunerations": indicateurCinq.getMaxNote(),
 };
 
 type IndicatorBase =
@@ -36,7 +43,9 @@ type DeclarationComputerInputBase = {
 
 type DeclarationComputerInputFrom50To250 = DeclarationComputerInputBase & {
   range: CompanyWorkforceRange.Enum.FROM_50_TO_250;
-  salaryRaisesAndPromotions: IndicatorBase;
+  salaryRaisesAndPromotions:
+    | Extract<IndicatorBase, { isComputable: false }>
+    | (Extract<IndicatorBase, { isComputable: true }> & { employeesCountResult: number });
 };
 
 type DeclarationComputerInputFrom250ToInfinity = DeclarationComputerInputBase & {
@@ -49,7 +58,6 @@ type DeclarationComputerInput = DeclarationComputerInputFrom50To250 | Declaratio
 
 type DeclarationComputerOutput = {
   [K in
-    | "highRemunerations"
     | "maternityLeaves"
     | "promotions"
     | "remunerations"
@@ -57,6 +65,7 @@ type DeclarationComputerOutput = {
     | "salaryRaisesAndPromotions" as `${K}Score`]?: number;
 } & {
   computablePoints: number;
+  highRemunerationsScore: number;
   index?: number; // undefined means NC.
   points: number;
 };
@@ -79,27 +88,34 @@ export const DeclarationComputerInputBuilder = {
           domain.salaryRaisesAndPromotions.favorablePopulation,
           "salaryRaisesAndPromotions.favorablePopulation must be set when computable",
         );
-        assert(domain.salaryRaisesAndPromotions.result, "salaryRaisesAndPromotions.result must be set when computable");
+        assert(
+          domain.salaryRaisesAndPromotions.result !== undefined,
+          "salaryRaisesAndPromotions.result must be set when computable",
+        );
+        assert(
+          domain.salaryRaisesAndPromotions.employeesCountResult !== undefined,
+          "salaryRaisesAndPromotions.employeesCountResult must be set when computable",
+        );
       }
     } else {
       assert(domain.salaryRaises && domain.promotions, "indicators must be set when sufficientPeriod is true");
       if (domain.salaryRaises?.notComputableReason === undefined) {
         assert(domain.salaryRaises.favorablePopulation, "salaryRaises.favorablePopulation must be set when computable");
-        assert(domain.salaryRaises.result, "salaryRaises.result must be set when computable");
+        assert(domain.salaryRaises.result !== undefined, "salaryRaises.result must be set when computable");
       }
       if (domain.promotions?.notComputableReason === undefined) {
         assert(domain.promotions.favorablePopulation, "promotions.favorablePopulation must be set when computable");
-        assert(domain.promotions.result, "promotions.result must be set when computable");
+        assert(domain.promotions.result !== undefined, "promotions.result must be set when computable");
       }
     }
 
     if (domain.remunerations.notComputableReason === undefined) {
       assert(domain.remunerations.favorablePopulation, "remunerations.favorablePopulation must be set when computable");
-      assert(domain.remunerations.result, "remunerations.result must be set when computable");
+      assert(domain.remunerations.result !== undefined, "remunerations.result must be set when computable");
     }
 
     if (domain.maternityLeaves.notComputableReason === undefined) {
-      assert(domain.maternityLeaves.result, "maternityLeaves.result must be set when computable");
+      assert(domain.maternityLeaves.result !== undefined, "maternityLeaves.result must be set when computable");
     }
 
     const input: DeclarationComputerInput = {
@@ -136,6 +152,7 @@ export const DeclarationComputerInputBuilder = {
                     isComputable: true,
                     favorablePopulation: domain.salaryRaisesAndPromotions!.favorablePopulation!.getValue(),
                     result: domain.salaryRaisesAndPromotions!.result!.getValue(),
+                    employeesCountResult: domain.salaryRaisesAndPromotions!.employeesCountResult!.getValue(),
                   }
                 : {
                     isComputable: false,
@@ -177,16 +194,10 @@ export const DeclarationComputerInputBuilder = {
 
     assert(dto.entreprise?.tranche, "entreprise.tranche must be set");
     assert(dto.remunerations?.estCalculable !== undefined, "remunerations.estCalculable must be set");
-    assert(
-      dto["augmentations-et-promotions"]?.estCalculable !== undefined,
-      "augmentations-et-promotions.estCalculable must be set",
-    );
-    assert(dto.augmentations?.estCalculable !== undefined, "augmentations.estCalculable must be set");
-    assert(dto.promotions?.estCalculable !== undefined, "promotions.estCalculable must be set");
     assert(dto["conges-maternite"]?.estCalculable !== undefined, "conges-maternite.estCalculable must be set");
 
     if (dto.remunerations.estCalculable === "oui") {
-      assert(dto["remunerations-resultat"]?.résultat, "résultat must be set if indicator is computable");
+      assert(dto["remunerations-resultat"]?.résultat !== undefined, "résultat must be set if indicator is computable");
       assert(
         dto["remunerations-resultat"]?.populationFavorable,
         "populationFavorable must be set if indicator is computable]",
@@ -194,23 +205,44 @@ export const DeclarationComputerInputBuilder = {
     }
 
     if (dto.entreprise.tranche === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+      assert(
+        dto["augmentations-et-promotions"]?.estCalculable !== undefined,
+        "augmentations-et-promotions.estCalculable must be set",
+      );
+
       if (dto["augmentations-et-promotions"].estCalculable === "oui") {
-        assert(dto["augmentations-et-promotions"].résultat, "résultat must be set if indicator is computable");
+        assert(
+          dto["augmentations-et-promotions"].résultat !== undefined,
+          "résultat must be set if indicator is computable",
+        );
+        assert(
+          dto["augmentations-et-promotions"].résultatEquivalentSalarié !== undefined,
+          "résultatEquivalentSalarié must be set if indicator is computable",
+        );
+        assert(
+          dto["augmentations-et-promotions"].populationFavorable,
+          "populationFavorable must be set if indicator is computable]",
+        );
       }
     } else {
+      assert(dto.augmentations?.estCalculable !== undefined, "augmentations.estCalculable must be set");
+      assert(dto.promotions?.estCalculable !== undefined, "promotions.estCalculable must be set");
+
       if (dto.augmentations.estCalculable === "oui") {
-        assert(dto.augmentations.résultat, "résultat must be set if indicator is computable");
+        assert(dto.augmentations.résultat !== undefined, "résultat must be set if indicator is computable");
+        assert(dto.augmentations.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
       if (dto.promotions.estCalculable === "oui") {
-        assert(dto.promotions.résultat, "résultat must be set if indicator is computable");
+        assert(dto.promotions.résultat !== undefined, "résultat must be set if indicator is computable");
+        assert(dto.promotions.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
     }
 
     if (dto["conges-maternite"].estCalculable === "oui") {
-      assert(dto["conges-maternite"].résultat, "résultat must be set if indicator is computable");
+      assert(dto["conges-maternite"].résultat !== undefined, "résultat must be set if indicator is computable");
     }
 
-    assert(dto["hautes-remunerations"]?.résultat, "result must be set");
+    assert(dto["hautes-remunerations"]?.résultat !== undefined, "result must be set");
 
     const input: DeclarationComputerInput = {
       remunerations:
@@ -241,11 +273,12 @@ export const DeclarationComputerInputBuilder = {
         ? {
             range: CompanyWorkforceRange.Enum.FROM_50_TO_250,
             salaryRaisesAndPromotions:
-              dto["augmentations-et-promotions"].estCalculable === "oui"
+              dto["augmentations-et-promotions"]!.estCalculable === "oui"
                 ? {
                     isComputable: true,
-                    favorablePopulation: dto["augmentations-et-promotions"].populationFavorable,
-                    result: dto["augmentations-et-promotions"].résultat,
+                    favorablePopulation: dto["augmentations-et-promotions"]!.populationFavorable,
+                    result: dto["augmentations-et-promotions"]!.résultat,
+                    employeesCountResult: dto["augmentations-et-promotions"]!.résultatEquivalentSalarié,
                   }
                 : {
                     isComputable: false,
@@ -256,21 +289,21 @@ export const DeclarationComputerInputBuilder = {
               | CompanyWorkforceRange.Enum.FROM_251_TO_999
               | CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
             salaryRaises:
-              dto.augmentations.estCalculable === "oui"
+              dto.augmentations!.estCalculable === "oui"
                 ? {
                     isComputable: true,
-                    favorablePopulation: dto.augmentations.populationFavorable,
-                    result: dto.augmentations.résultat,
+                    favorablePopulation: dto.augmentations!.populationFavorable,
+                    result: dto.augmentations!.résultat,
                   }
                 : {
                     isComputable: false,
                   },
             promotions:
-              dto.promotions.estCalculable === "oui"
+              dto.promotions!.estCalculable === "oui"
                 ? {
                     isComputable: true,
-                    favorablePopulation: dto.promotions.populationFavorable,
-                    result: dto.promotions.résultat,
+                    favorablePopulation: dto.promotions!.populationFavorable,
+                    result: dto.promotions!.résultat,
                   }
                 : {
                     isComputable: false,
@@ -292,40 +325,64 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
     remunerationsScore;
 
   if (input.remunerations.isComputable) {
-    remunerationsScore = IndicateurUnComputer.prototype.computeNote(input.remunerations.result) || 0;
+    remunerationsScore = indicateurUn.computeNote(input.remunerations.result) || 0;
     points += remunerationsScore;
-    computablePoints += IndicateurUnComputer.prototype.getMaxNote();
+    computablePoints += indicateurUn.getMaxNote();
   }
 
   if (input.range === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
     if (input.salaryRaisesAndPromotions.isComputable) {
-      salaryRaisesAndPromotionsScore =
-        IndicateurDeuxTroisComputer.prototype.computeNote(input.salaryRaisesAndPromotions.result) || 0;
+      if (
+        input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation !== input.salaryRaisesAndPromotions.favorablePopulation
+      ) {
+        salaryRaisesAndPromotionsScore = indicateurDeuxTrois.getMaxNote();
+      } else {
+        const percentScore = indicateurDeuxTrois.computeNote(input.salaryRaisesAndPromotions.result) || 0;
+        const absoluteScore =
+          indicateurDeuxTrois.computeNote(input.salaryRaisesAndPromotions.employeesCountResult) || 0;
+
+        salaryRaisesAndPromotionsScore = Math.max(percentScore, absoluteScore);
+      }
       points += salaryRaisesAndPromotionsScore;
-      computablePoints += IndicateurDeuxTroisComputer.prototype.getMaxNote();
+      computablePoints += indicateurDeuxTrois.getMaxNote();
     }
   } else {
     if (input.salaryRaises.isComputable) {
-      salaryRaisesScore = IndicateurDeuxComputer.prototype.computeNote(input.salaryRaises.result) || 0;
+      if (
+        input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation !== input.salaryRaises.favorablePopulation
+      ) {
+        salaryRaisesScore = indicateurDeux.getMaxNote();
+      } else {
+        salaryRaisesScore = indicateurDeux.computeNote(input.salaryRaises.result) || 0;
+      }
       points += salaryRaisesScore;
-      computablePoints += IndicateurDeuxComputer.prototype.getMaxNote();
+      computablePoints += indicateurDeux.getMaxNote();
     }
     if (input.promotions.isComputable) {
-      promotionsScore = IndicateurTroisComputer.prototype.computeNote(input.promotions.result) || 0;
+      if (
+        input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation !== input.promotions.favorablePopulation
+      ) {
+        promotionsScore = indicateurTrois.getMaxNote();
+      } else {
+        promotionsScore = indicateurTrois.computeNote(input.promotions.result) || 0;
+      }
       points += promotionsScore;
-      computablePoints += IndicateurTroisComputer.prototype.getMaxNote();
+      computablePoints += indicateurTrois.getMaxNote();
     }
   }
 
   if (input.maternityLeaves.isComputable) {
-    maternityLeavesScore = IndicateurQuatreComputer.prototype.computeNote(input.maternityLeaves.result) || 0;
+    maternityLeavesScore = indicateurQuatre.computeNote(input.maternityLeaves.result) || 0;
     points += maternityLeavesScore;
-    computablePoints += IndicateurQuatreComputer.prototype.getMaxNote();
+    computablePoints += indicateurQuatre.getMaxNote();
   }
 
-  const highRemunerationsScore = IndicateurCinqComputer.prototype.computeNote(input.highRemunerations.result) || 0;
+  const highRemunerationsScore = indicateurCinq.computeNote(input.highRemunerations.result) || 0;
   points += highRemunerationsScore;
-  computablePoints += IndicateurCinqComputer.prototype.getMaxNote();
+  computablePoints += indicateurCinq.getMaxNote();
 
   return {
     highRemunerationsScore,

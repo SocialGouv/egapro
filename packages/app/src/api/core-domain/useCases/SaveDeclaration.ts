@@ -1,3 +1,7 @@
+import {
+  computeDeclarationIndex,
+  DeclarationComputerInputBuilder,
+} from "@common/core-domain/computers/DeclarationComputer";
 import { Declaration, type DeclarationPK, type DeclarationProps } from "@common/core-domain/domain/Declaration";
 import { type Categorie } from "@common/core-domain/domain/declaration/indicators/RemunerationsIndicator";
 import { DeclarationSpecification } from "@common/core-domain/domain/specification/DeclarationSpecification";
@@ -6,7 +10,7 @@ import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
 import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
-import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { removeEntryBy } from "@common/utils/object";
 import { add, isAfter } from "date-fns";
 
@@ -206,6 +210,25 @@ export class SaveDeclaration implements UseCase<Input, void> {
       }
 
       // TODO: calculer ou recalculer les points des indicateurs et l'index
+      const {
+        highRemunerationsScore,
+        maternityLeavesScore,
+        promotionsScore,
+        remunerationsScore,
+        salaryRaisesAndPromotionsScore,
+        salaryRaisesScore,
+        points,
+        computablePoints,
+        index,
+      } = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclaration(declaration));
+
+      declaration = declaration.fromJson({
+        index,
+        points,
+        computablePoints,
+      });
+
+      declaration.setHighRemunerationsScore(new PositiveInteger(highRemunerationsScore));
 
       const specification = new DeclarationSpecification();
 
@@ -215,6 +238,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
+      console.error(error);
       throw new SaveDeclarationError("Cannot save representation equilibree", error as Error);
     }
   }

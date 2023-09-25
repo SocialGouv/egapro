@@ -71,6 +71,15 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       sufficientPeriod: raw.data.déclaration.période_suffisante ?? true,
       source: raw.data.source,
 
+      publication: {
+        date: raw.data.déclaration.publication?.date,
+        measuresPublishDate: raw.data.déclaration.publication?.date_publication_mesures,
+        modalities: raw.data.déclaration.publication?.modalités,
+        url: raw.data.déclaration.publication?.url,
+        objectivesMeasuresModalities: raw.data.déclaration.publication?.modalités_objectifs_mesures,
+        objectivesPublishDate: raw.data.déclaration.publication?.date_publication_objectifs,
+      },
+
       highRemunerations: raw.data.indicateurs?.hautes_rémunérations
         ? {
             favorablePopulation:

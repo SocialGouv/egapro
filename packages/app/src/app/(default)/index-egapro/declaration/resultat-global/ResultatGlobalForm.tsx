@@ -3,11 +3,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Select from "@codegouvfr/react-dsfr/Select";
-import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import {
   computeDeclarationIndex,
   DeclarationComputerInputBuilder,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/DeclarationComputer";
+} from "@common/core-domain/computers/DeclarationComputer";
+import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";

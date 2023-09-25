@@ -17,7 +17,6 @@ export interface PromotionsIndicatorProps extends AbstractIndicatorProps {
   favorablePopulation?: FavorablePopulation;
   notComputableReason?: NotComputableReasonPromotions;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorProps> {
@@ -39,11 +38,6 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
   /** `résultat` */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   public fromJson(json: EntityPropsToJson<PromotionsIndicatorProps>): this {

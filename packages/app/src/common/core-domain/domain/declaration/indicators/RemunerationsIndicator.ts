@@ -21,7 +21,6 @@ export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {
   mode?: RemunerationsMode;
   notComputableReason?: NotComputableReasonRemunerations;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndicatorProps> {
@@ -52,11 +51,6 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
   /** `résultat` - Résultat final en % après application du seuil de pertinence à chaque catégorie */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` - Nombre de points obtenus à l'indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   public fromJson(json: EntityPropsToJson<RemunerationsIndicatorProps>) {
