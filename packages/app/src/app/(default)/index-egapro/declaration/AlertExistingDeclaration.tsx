@@ -3,12 +3,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { config } from "@common/config";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
 import { useSelectedLayoutSegment } from "next/navigation";
-
-import { funnelStaticConfig } from "./declarationFunnelConfiguration";
 
 export const AlertExistingDeclaration = () => {
   const { formData } = useDeclarationFormManager();
@@ -45,7 +44,7 @@ export const AlertExistingDeclaration = () => {
                 {
                   title: "Revenir au récapitulatif",
                   children: "Revenir au récapitulatif",
-                  linkProps: { href: funnelStaticConfig["declaration-existante"].url },
+                  linkProps: { href: `${config.base_declaration_url}/declaration-existante` },
                   iconId: "fr-icon-arrow-right-line",
                   iconPosition: "right",
                   className: fr.cx("fr-mt-2w"),

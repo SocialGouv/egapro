@@ -19,9 +19,9 @@ import {
   flattenRemunerations,
 } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import {
   type CreateSimulationDTO,
   createSimulationDTO,
@@ -229,7 +229,7 @@ export const RecapSimu = () => {
                   header={[
                     { label: "" },
                     ...ageRanges.map<AlternativeTableProps.Columns>(ageRange => ({
-                      label: CSPAgeRange.Label[ageRange],
+                      label: AgeRange.Label[ageRange],
                     })),
                   ]}
                   body={remuWithCount.map(category => ({

@@ -1,7 +1,11 @@
 import { type CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
-import { type NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
+import { type NotComputableReasonMaternityLeaves } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
 import { type NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
+import { type NotComputableReasonPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonPromotions";
+import { type NotComputableReasonRemunerations } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonRemunerations";
+import { type NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
+import { type NotComputableReasonSalaryRaisesAndPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import {
   type CodeNaf,
@@ -12,18 +16,6 @@ import {
   type RepresentationEquilibree,
 } from "@common/models/generated";
 import { type Enum } from "@common/shared-domain/domain/valueObjects";
-
-export interface DeclarationRaw {
-  data: DeclarationDataRaw | null;
-  declarant: string;
-  declared_at: Date;
-  draft: DeclarationDataRaw | null;
-  ft: string;
-  legacy: DeclarationDataRaw | null;
-  modified_at: Date;
-  siren: string;
-  year: number;
-}
 
 export interface RepresentationEquilibreeDataRaw {
   déclarant: Required<DeclarationDataRaw["déclarant"]>;
@@ -63,7 +55,6 @@ export interface RepresentationEquilibreeRaw {
   year: number;
 }
 
-type NotComputableReasonString = Enum.ToString<typeof NotComputableReason.Enum>;
 export interface DeclarationSearchResultRaw {
   data: Record<number, DeclarationDataRaw>;
   name: string;
@@ -73,11 +64,11 @@ export interface DeclarationSearchResultRaw {
       highRemunerationsScore: number | null;
       index: number | null;
       maternityLeavesScore: number | null;
-      notComputableReasonMaternityLeaves: NotComputableReasonString | null;
-      notComputableReasonPromotions: NotComputableReasonString | null;
-      notComputableReasonRemunerations: NotComputableReasonString | null;
-      notComputableReasonSalaryRaises: NotComputableReasonString | null;
-      notComputableReasonSalaryRaisesAndPromotions: NotComputableReasonString | null;
+      notComputableReasonMaternityLeaves: NotComputableReasonMaternityLeaves.Enum | null;
+      notComputableReasonPromotions: NotComputableReasonPromotions.Enum | null;
+      notComputableReasonRemunerations: NotComputableReasonRemunerations.Enum | null;
+      notComputableReasonSalaryRaises: NotComputableReasonSalaryRaises.Enum | null;
+      notComputableReasonSalaryRaisesAndPromotions: NotComputableReasonSalaryRaisesAndPromotions.Enum | null;
       promotionsScore: number | null;
       remunerationsScore: number | null;
       salaryRaisesAndPromotionsScore: number | null;

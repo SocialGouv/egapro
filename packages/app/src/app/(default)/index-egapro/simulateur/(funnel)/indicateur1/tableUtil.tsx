@@ -1,6 +1,6 @@
 import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain/computers/utils";
-import { type CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
+import { type AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { currencyFormat, precisePercentFormat } from "@common/utils/number";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
@@ -56,7 +56,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
 export type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CommonBodyColumnsProps {
-  ageRange: CSPAgeRange.Enum;
+  ageRange: AgeRange.Enum;
   categoryId: string;
   categoryIndex: number;
   categoryName: string;

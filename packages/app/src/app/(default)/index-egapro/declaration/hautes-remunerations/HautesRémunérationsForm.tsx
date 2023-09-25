@@ -2,10 +2,9 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import {
-  computeIndicator5Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
+import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -14,7 +13,6 @@ import { IndicatorNote } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { get } from "lodash";
 import { useRouter } from "next/navigation";
@@ -80,7 +78,7 @@ export const HautesRémunérationsForm = () => {
 
   useEffect(() => {
     if (résultat !== undefined) {
-      const note = computeIndicator5Note(résultat);
+      const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note);
     }
     if (résultat === 5) {
@@ -93,7 +91,7 @@ export const HautesRémunérationsForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);

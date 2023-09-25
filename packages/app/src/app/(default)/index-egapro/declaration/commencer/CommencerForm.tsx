@@ -4,18 +4,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { config } from "@common/config";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
-import { PUBLIC_YEARS } from "@common/dict";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
+import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memoizedFetchSiren } from "@services/apiClient";
-import { fetchDeclaration } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { DeclarationFormBuilder, type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
-import { buildEntreprise } from "@services/form/declaration/entreprise";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
@@ -23,9 +23,13 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
+
+const CLOSED_COMPANY_ERROR = "Ce Siren correspond a une entreprise fermée. Veuillez vérifier votre saisie";
+const API_ERROR = "Une erreur serveur est survenue. Veuillez recommencer plus tard";
 
 const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
@@ -58,28 +62,21 @@ const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: 
 const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
-  formData: DeclarationFormState,
-  tokenApiV1: string,
-): Promise<DeclarationFormState> => {
-  const previousDeclaration = await fetchDeclaration(siren, year, {
-    headers: {
-      "API-KEY": tokenApiV1,
-    },
-    throwErrorOn404: false,
-  });
+  formData: DeclarationDTO,
+  // tokenApiV1: string,
+): Promise<DeclarationDTO> => {
+  const previousDeclarationDTO = await getDeclaration(siren, year);
 
   // If there is a declaration, we use it as is.
-  if (previousDeclaration) {
-    const newFormState = DeclarationFormBuilder.buildDeclaration(previousDeclaration.data);
-
+  if (previousDeclarationDTO) {
     return {
-      ...newFormState,
-      "declaration-existante": { ...newFormState["declaration-existante"], status: "consultation" },
+      ...previousDeclarationDTO,
+      "declaration-existante": { ...previousDeclarationDTO["declaration-existante"], status: "consultation" },
     };
   }
 
   // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
-  const baseFormData: DeclarationFormState =
+  const baseFormData: DeclarationDTO =
     formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
       ? formData
       : {
@@ -89,19 +86,45 @@ const prepareDataWithExistingDeclaration = async (
         };
 
   // We fetch the latest data for the entreprise to fill the entreprise page.
-  const entreprise = await memoizedFetchSiren(siren, year);
+  const result = await getCompany(siren);
 
-  return {
-    ...baseFormData,
-    entreprise: {
-      ...baseFormData.entreprise,
-      entrepriseDéclarante: buildEntreprise(entreprise),
-    },
-    [stepName]: {
-      annéeIndicateurs: year,
-      siren,
-    },
-  };
+  if (result.ok) {
+    const company = result.data;
+
+    const isClosed = isCompanyClosed(company, year);
+
+    if (isClosed) throw new Error(CLOSED_COMPANY_ERROR);
+
+    const countyCode = company.firstMatchingEtablissement?.codeCommuneEtablissement
+      ? (inseeCodeToCounty(company.firstMatchingEtablissement?.codeCommuneEtablissement) as keyof COUNTIES)
+      : undefined;
+
+    return {
+      ...baseFormData,
+      entreprise: {
+        ...baseFormData.entreprise,
+        entrepriseDéclarante: {
+          adresse: company?.firstMatchingEtablissement.address,
+          codeNaf: company.activitePrincipaleUniteLegale,
+          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement,
+          codePays: company.firstMatchingEtablissement?.codePaysEtrangerEtablissement
+            ? COUNTRIES_COG_TO_ISO[company.firstMatchingEtablissement?.codePaysEtrangerEtablissement]
+            : undefined,
+          raisonSociale: company.simpleLabel,
+          siren,
+          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement,
+          département: countyCode,
+          région: countyCode ? COUNTY_TO_REGION[countyCode] : undefined,
+        },
+      },
+      [stepName]: {
+        annéeIndicateurs: year,
+        siren,
+      },
+    };
+  } else {
+    throw new Error(API_ERROR);
+  }
 };
 
 export const CommencerForm = () => {
@@ -133,17 +156,22 @@ export const CommencerForm = () => {
 
   const companies = user.companies;
 
-  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationFormState) => {
+  const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationDTO) => {
     try {
       // Synchronize the data with declaration if any.
-      const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData, user.tokenApiV1);
+      const newData = await prepareDataWithExistingDeclaration(siren, annéeIndicateurs, formData);
 
       // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
       saveFormData(newData);
 
-      router.push(funnelConfig(newData)[stepName].next().url);
+      if (newData["declaration-existante"].status !== "creation") {
+        router.push(`${config.base_declaration_url}/${siren}/${year}`);
+      } else {
+        router.push(funnelConfig(newData)[stepName].next().url);
+      }
     } catch (error: unknown) {
       console.error("Unexpected API error", error);
+
       setError("siren", {
         type: "manual",
         message: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",

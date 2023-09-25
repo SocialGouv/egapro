@@ -18,13 +18,13 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   public async execute({ opmc, siren, year }: Input): Promise<void> {
     const declaration = await this.declarationRepo.getOne([new Siren(siren), new PositiveNumber(+year)]);
 
-    if (!declaration?.data) {
+    if (!declaration) {
       throw new UpdateDeclarationWithOpMcDeclarationNotFoundError(
         `Declaration not found with siren=${siren} and year=${year}.`,
       );
     }
 
-    const opMcAlreadySet = !!declaration.data.declaration.publication?.objectivesPublishDate;
+    const opMcAlreadySet = !!declaration.publication?.objectivesPublishDate;
     const now = new Date();
     const opMcStillEditable = isDateBeforeDuration(
       declaration.modifiedAt,
@@ -37,19 +37,17 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
       }
     }
 
-    declaration.data?.indicators?.remunerations?.setProgressObjective(opmc.objectifIndicateurUn);
-    declaration.data?.indicators?.salaryRaises?.setProgressObjective(opmc.objectifIndicateurDeux);
-    declaration.data?.indicators?.promotions?.setProgressObjective(opmc.objectifIndicateurTrois);
-    declaration.data?.indicators?.salaryRaisesAndPromotions?.setProgressObjective(opmc.objectifIndicateurDeuxTrois);
-    declaration.data?.indicators?.maternityLeaves?.setProgressObjective(opmc.objectifIndicateurQuatre);
-    declaration.data?.indicators?.highRemunerations?.setProgressObjective(opmc.objectifIndicateurCinq);
+    declaration.remunerations?.setProgressObjective(opmc.objectifIndicateurUn);
+    declaration.salaryRaises?.setProgressObjective(opmc.objectifIndicateurDeux);
+    declaration.promotions?.setProgressObjective(opmc.objectifIndicateurTrois);
+    declaration.salaryRaisesAndPromotions?.setProgressObjective(opmc.objectifIndicateurDeuxTrois);
+    declaration.maternityLeaves?.setProgressObjective(opmc.objectifIndicateurQuatre);
+    declaration.highRemunerations?.setProgressObjective(opmc.objectifIndicateurCinq);
 
     if (opmc.datePublicationMesures)
-      declaration.data?.declaration.publication?.setMeasuresPublishDate(parseDate(opmc.datePublicationMesures));
-    declaration.data?.declaration.publication?.setObjectivesPublishDate(parseDate(opmc.datePublicationObjectifs));
-    declaration.data?.declaration.publication?.setObjectivesMeasuresModalities(
-      opmc.modalitesPublicationObjectifsMesures,
-    );
+      declaration.publication?.setMeasuresPublishDate(parseDate(opmc.datePublicationMesures));
+    declaration.publication?.setObjectivesPublishDate(parseDate(opmc.datePublicationObjectifs));
+    declaration.publication?.setObjectivesMeasuresModalities(opmc.modalitesPublicationObjectifsMesures);
 
     // TODO on ne change pas la date de modification pour éviter de pour redéclarer les opmc tous les ans avant la date limite
     // il faudrait ajouter un champs "opMcModifiedAt"

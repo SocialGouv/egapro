@@ -2,10 +2,11 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import {
-  computeIndicator2Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
+import { IndicateurDeuxComputer } from "@common/core-domain/computers/IndicateurDeuxComputer";
+import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodNumberOrNaNOrNull } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -18,7 +19,6 @@ import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -32,10 +32,10 @@ import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../
 const stepName: FunnelKey = "augmentations";
 
 const zodCategories = z.tuple([
-  z.object({ nom: z.literal("ouv"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("emp"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("tam"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("ic"), écarts: zodNumberOrNaNOrNull }),
+  z.object({ nom: z.literal(CSP.Enum.OUVRIERS), écarts: zodNumberOrNaNOrNull }),
+  z.object({ nom: z.literal(CSP.Enum.EMPLOYES), écarts: zodNumberOrNaNOrNull }),
+  z.object({ nom: z.literal(CSP.Enum.TECHNICIENS_AGENTS_MAITRISES), écarts: zodNumberOrNaNOrNull }),
+  z.object({ nom: z.literal(CSP.Enum.INGENIEURS_CADRES), écarts: zodNumberOrNaNOrNull }),
 ]);
 
 const formSchema = zodFr
@@ -74,6 +74,13 @@ const formSchema = zodFr
 
 type FormType = z.infer<typeof formSchema>;
 
+const emptyCSPEcarts = [
+  { nom: CSP.Enum.OUVRIERS, écarts: null },
+  { nom: CSP.Enum.EMPLOYES, écarts: null },
+  { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: null },
+  { nom: CSP.Enum.INGENIEURS_CADRES, écarts: null },
+] as const;
+
 export const AugmentationsForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
@@ -87,12 +94,7 @@ export const AugmentationsForm = () => {
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || {
-      catégories: [
-        { nom: "ouv", écarts: null },
-        { nom: "emp", écarts: null },
-        { nom: "tam", écarts: null },
-        { nom: "ic", écarts: null },
-      ],
+      catégories: [...emptyCSPEcarts],
     },
   });
 
@@ -123,12 +125,7 @@ export const AugmentationsForm = () => {
   useEffect(() => {
     if (estCalculable === "oui") {
       if (!catégories?.length) {
-        setValue("catégories", [
-          { nom: "ouv", écarts: null },
-          { nom: "emp", écarts: null },
-          { nom: "tam", écarts: null },
-          { nom: "ic", écarts: null },
-        ]);
+        setValue("catégories", [...emptyCSPEcarts]);
       }
     }
   }, [setValue, catégories, estCalculable]);
@@ -136,7 +133,7 @@ export const AugmentationsForm = () => {
   useEffect(() => {
     if (résultat !== undefined) {
       if (résultat !== null) {
-        const note = computeIndicator2Note(résultat);
+        const note = new IndicateurDeuxComputer(new IndicateurUnComputer()).computeNote(résultat);
         setValue("note", note);
       }
 
@@ -154,7 +151,7 @@ export const AugmentationsForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);

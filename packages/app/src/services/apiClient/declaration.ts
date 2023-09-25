@@ -4,6 +4,8 @@ import useSWR from "swr";
 
 import { fetcher, type FetcherOptions, type FetcherReturn, genericErrorMessage } from "./fetcher";
 
+/** @deprecated */
+
 export type DeclarationAPI = {
   data: DeclarationDTO;
   declared_at: number;
