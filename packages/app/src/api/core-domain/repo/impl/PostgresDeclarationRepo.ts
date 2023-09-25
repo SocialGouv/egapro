@@ -1,4 +1,4 @@
-import { type DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import { type DeclarationRaw } from "@api/core-domain/infra/db/DeclarationRaw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
@@ -61,6 +61,21 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       throw error;
     }
   }
+
+  // TODO faire une fonction qui sauve la décla + index dans la table search.
+
+  public async saveWithIndex(item: Declaration): Promise<void> {
+    throw new Error("Not yet implemented");
+
+    //   await this.sql.begin(async transac => {
+    //     const thisRepo = new PostgresDeclarationRepo(transac);
+    //     const searchRepo = new PostgresDeclarationSearchRepo(transac);
+    //     await thisRepo.save(item);
+    //     await searchRepo.index(item);
+    //   });
+  }
+
+  /** @deprecated - use saveWithIndex */
   public async save(item: Declaration, deleteDraft = false): Promise<DeclarationPK> {
     const raw = declarationMap.toPersistence(item);
     if (deleteDraft) (raw as Any).draft = null;

@@ -1,21 +1,21 @@
 import { Enum } from "@common/shared-domain/domain/valueObjects";
 
-export class CSPAgeRange extends Enum<typeof CSPAgeRange.Enum> {
-  constructor(value: CSPAgeRange.Enum | Enum.ToString<typeof CSPAgeRange.Enum>) {
-    super(value, CSPAgeRange.Enum);
+export class AgeRange extends Enum<typeof AgeRange.Enum> {
+  constructor(value: AgeRange.Enum | Enum.ToString<typeof AgeRange.Enum>) {
+    super(value, AgeRange.Enum);
   }
 
   public getLabel() {
-    return CSPAgeRange.Label[this.getValue()];
+    return AgeRange.Label[this.getValue()];
   }
 }
 
-export namespace CSPAgeRange {
+export namespace AgeRange {
   export enum Enum {
     FROM_30_TO_39 = "30:39",
     FROM_40_TO_49 = "40:49",
     FROM_50_TO_MORE = "50:",
-    LESS_THAN_30 = "0:30",
+    LESS_THAN_30 = ":29",
   }
 
   export const Label = {

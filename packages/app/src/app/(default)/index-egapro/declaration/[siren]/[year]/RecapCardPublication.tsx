@@ -3,7 +3,7 @@ import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard } from "@design-system";
 import { capitalize } from "lodash";
 
-import { funnelStaticConfig } from "../declarationFunnelConfiguration";
+import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 
 type Props = {
   edit?: boolean;

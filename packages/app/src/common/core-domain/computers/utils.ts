@@ -1,5 +1,5 @@
 import { CSP } from "../domain/valueObjects/CSP";
-import { CSPAgeRange } from "../domain/valueObjects/declaration/simulation/CSPAgeRange";
+import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
 import { type CountAndAverageSalaries, type InputRemunerations } from "./IndicateurUnComputer";
 
 // --- Indicateur 1 utils
@@ -10,14 +10,14 @@ export const categories = [
   CSP.Enum.INGENIEURS_CADRES,
 ] as const;
 export const ageRanges = [
-  CSPAgeRange.Enum.LESS_THAN_30,
-  CSPAgeRange.Enum.FROM_30_TO_39,
-  CSPAgeRange.Enum.FROM_40_TO_49,
-  CSPAgeRange.Enum.FROM_50_TO_MORE,
+  AgeRange.Enum.LESS_THAN_30,
+  AgeRange.Enum.FROM_30_TO_39,
+  AgeRange.Enum.FROM_40_TO_49,
+  AgeRange.Enum.FROM_50_TO_MORE,
 ] as const;
 
 export type ExternalRemunerations = Array<{
-  category: Record<CSPAgeRange.Enum, CountAndAverageSalaries>;
+  category: Record<AgeRange.Enum, CountAndAverageSalaries>;
   categoryId: string;
   name: string;
 }>;
@@ -27,13 +27,13 @@ export function flattenRemunerations(remunerations: ExternalRemunerations): Inpu
   for (const { categoryId, category } of remunerations) {
     if (category) {
       for (const [ageRange, ageGroup] of Object.entries(category)) {
-        flattened[buildRemunerationKey(categoryId, ageRange as CSPAgeRange.Enum)] = ageGroup;
+        flattened[buildRemunerationKey(categoryId, ageRange as AgeRange.Enum)] = ageGroup;
       }
     }
   }
   return flattened;
 }
 
-export function buildRemunerationKey(categoryId: string, ageRange: CSPAgeRange.Enum): string {
+export function buildRemunerationKey(categoryId: string, ageRange: AgeRange.Enum): string {
   return `${categoryId}:${ageRange}`;
 }

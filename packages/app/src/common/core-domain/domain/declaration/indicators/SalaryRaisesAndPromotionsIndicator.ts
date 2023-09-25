@@ -3,17 +3,17 @@ import { Percentage, PositiveNumber } from "@common/shared-domain/domain/valueOb
 import { PositiveInteger } from "@common/shared-domain/domain/valueObjects/PositiveInteger";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
-import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
+import { NotComputableReasonSalaryRaisesAndPromotions } from "../../valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
+// AugmentationsEtPromotions
 export interface SalaryRaisesAndPromotionsIndicatorProps extends AbstractIndicatorProps {
   employeesCountResult?: PositiveInteger;
   employeesCountScore?: PositiveInteger;
   favorablePopulation?: FavorablePopulation;
-  notComputableReason?: NotComputableReason;
+  notComputableReason?: NotComputableReasonSalaryRaisesAndPromotions;
   percentScore?: Percentage;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<SalaryRaisesAndPromotionsIndicatorProps> {
@@ -23,18 +23,13 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
   }
 
   /** `non_calculable` */
-  get notComputableReason(): NotComputableReason | undefined {
+  get notComputableReason(): NotComputableReasonSalaryRaisesAndPromotions | undefined {
     return this.props.notComputableReason;
   }
 
   /** `résultat` */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   /** `résultat_nombre_salariés` - Résultat final en nombre équivalent de salariés */
@@ -56,7 +51,8 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
     const props: SalaryRaisesAndPromotionsIndicatorProps = {
       progressObjective: json.progressObjective,
     };
-    if (json.notComputableReason) props.notComputableReason = new NotComputableReason(json.notComputableReason);
+    if (json.notComputableReason)
+      props.notComputableReason = new NotComputableReasonSalaryRaisesAndPromotions(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
     if (typeof json.result === "number") props.result = new Percentage(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);

@@ -6,8 +6,8 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { ageRanges, categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
+import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
-import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
@@ -271,7 +271,7 @@ export const EffectifsForm = () => {
           body={categories.map(category => ({
             categoryLabel: CSP.Label[category],
             subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
-              label: CSPAgeRange.Label[ageRange],
+              label: AgeRange.Label[ageRange],
               cols: [
                 {
                   label: `${category}, ${ageRange}, femmes`,

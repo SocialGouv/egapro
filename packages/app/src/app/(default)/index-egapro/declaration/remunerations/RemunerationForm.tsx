@@ -3,6 +3,7 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -12,7 +13,6 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { isBefore, parseISO } from "date-fns";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
@@ -152,7 +152,7 @@ export const RemunerationForm = () => {
         });
       }
 
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);

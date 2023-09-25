@@ -1,29 +1,26 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
 import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
 
+import { type AgeRange } from "../../valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
-import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
+import { NotComputableReasonRemunerations } from "../../valueObjects/declaration/indicators/NotComputableReasonRemunerations";
 import { RemunerationsMode } from "../../valueObjects/declaration/indicators/RemunerationsMode";
 import { AbstractIndicator, type AbstractIndicatorProps } from "./AbstractIndicator";
 
-type Categorie = {
+export type Categorie = {
   name?: string;
-  ranges?: {
-    "30:39"?: SimpleNumber;
-    "40:49"?: SimpleNumber;
-    "50:"?: SimpleNumber;
-    ":29"?: SimpleNumber;
-  };
+  ranges?: Partial<Record<AgeRange.Enum, SimpleNumber>>;
 };
 
+// TODO: Enhance type in making an union of 2 objects, with notComputerReason as discriminator.
 export interface RemunerationsIndicatorProps extends AbstractIndicatorProps {
   categories: Categorie[];
   cseConsultationDate?: Date;
+  // favorablePopulation is set to "egalité" by declarationMap when there is no value in DB. TODO: Patch DB to set "egalité" instead of null.
   favorablePopulation?: FavorablePopulation;
   mode?: RemunerationsMode;
-  notComputableReason?: NotComputableReason;
+  notComputableReason?: NotComputableReasonRemunerations;
   result?: Percentage;
-  score?: PositiveInteger;
 }
 
 export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndicatorProps> {
@@ -47,18 +44,13 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
   }
 
   /** `non_calculable` - Vide ou egvi40pcet: Effectif des groupes valides inférieur à 40% de l'effectif total */
-  get notComputableReason(): NotComputableReason | undefined {
+  get notComputableReason(): NotComputableReasonRemunerations | undefined {
     return this.props.notComputableReason;
   }
 
   /** `résultat` - Résultat final en % après application du seuil de pertinence à chaque catégorie */
   get result(): Percentage | undefined {
     return this.props.result;
-  }
-
-  /** `note` - Nombre de points obtenus à l'indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes */
-  get score(): PositiveInteger | undefined {
-    return this.props.score;
   }
 
   public fromJson(json: EntityPropsToJson<RemunerationsIndicatorProps>) {
@@ -77,7 +69,8 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
     if (json.mode) props.mode = new RemunerationsMode(json.mode);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
     if (json.cseConsultationDate) props.cseConsultationDate = new Date(json.cseConsultationDate);
-    if (json.notComputableReason) props.notComputableReason = new NotComputableReason(json.notComputableReason);
+    if (json.notComputableReason)
+      props.notComputableReason = new NotComputableReasonRemunerations(json.notComputableReason);
 
     if (typeof json.result === "number") props.result = new Percentage(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);

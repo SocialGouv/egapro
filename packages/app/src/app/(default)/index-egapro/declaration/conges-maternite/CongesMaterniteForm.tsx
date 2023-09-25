@@ -1,10 +1,9 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import {
-  computeIndicator4Note,
-  indicatorNoteMax,
-} from "@common/core-domain/domain/valueObjects/declaration/indicators/IndicatorThreshold";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
+import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
@@ -15,7 +14,6 @@ import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -72,14 +70,14 @@ export const CongesMaterniteForm = () => {
 
   useEffect(() => {
     if (résultat !== null && résultat !== undefined) {
-      const note = computeIndicator4Note(résultat);
+      const note = new IndicateurQuatreComputer().computeNote(résultat);
       setValue("note", note);
     }
   }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationFormState[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);

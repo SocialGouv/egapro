@@ -10,10 +10,6 @@ import { Region } from "../valueObjects/Region";
 import { Siren } from "../valueObjects/Siren";
 import { UES } from "./company/UES";
 
-type Workforce = {
-  range?: CompanyWorkforceRange;
-  total?: PositiveNumber;
-};
 export interface CompanyProps {
   address?: string;
   city?: string;
@@ -23,10 +19,12 @@ export interface CompanyProps {
   nafCode: NafCode;
   name: string;
   postalCode?: FrenchPostalCode;
+  range?: CompanyWorkforceRange;
   region?: Region;
   siren: Siren;
+  /** Total effectif */
+  total?: PositiveNumber;
   ues?: UES;
-  workforce?: Workforce;
 }
 
 export class Company extends JsonEntity<CompanyProps, never> {
@@ -83,9 +81,12 @@ export class Company extends JsonEntity<CompanyProps, never> {
     return this.props.ues;
   }
 
-  /** `effectif` */
-  get workforce(): Workforce | undefined {
-    return this.props.workforce;
+  get total(): PositiveNumber | undefined {
+    return this.props.total;
+  }
+
+  get range(): CompanyWorkforceRange | undefined {
+    return this.props.range;
   }
 
   public fromJson(json: EntityPropsToJson<CompanyProps>) {
@@ -121,11 +122,12 @@ export class Company extends JsonEntity<CompanyProps, never> {
       props.ues = UES.fromJson(json.ues);
     }
 
-    if (json.workforce) {
-      props.workforce = {
-        range: json.workforce.range ? new CompanyWorkforceRange(json.workforce.range) : void 0,
-        total: typeof json.workforce.total === "number" ? new PositiveNumber(json.workforce.total) : void 0,
-      };
+    if (typeof json.total === "number") {
+      props.total = new PositiveNumber(json.total);
+    }
+
+    if (json.range) {
+      props.range = new CompanyWorkforceRange(json.range);
     }
 
     return new Company(props) as this;

@@ -1,16 +1,16 @@
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-type State = { formData: DeclarationFormState };
+type State = { formData: DeclarationDTO };
 
 type Actions = {
   resetFormData: () => void;
-  saveFormData: (data: DeclarationFormState) => void;
-  savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) => void;
-  setStatus: (status: DeclarationFormState["declaration-existante"]["status"]) => void;
+  saveFormData: (data: DeclarationDTO) => void;
+  savePageData: <K extends keyof DeclarationDTO>(page: K, data: DeclarationDTO[K]) => void;
+  setStatus: (status: DeclarationDTO["declaration-existante"]["status"]) => void;
 };
 
 const formDataDefault: State["formData"] = {
@@ -33,8 +33,8 @@ export const useDeclarationFormManager = create<Actions & State>()(
     immer(
       devtools((set, get) => ({
         formData: formDataDefault,
-        saveFormData: (data: DeclarationFormState) => set({ formData: data }),
-        savePageData: <K extends keyof DeclarationFormState>(page: K, data: DeclarationFormState[K]) =>
+        saveFormData: (data: DeclarationDTO) => set({ formData: data }),
+        savePageData: <K extends keyof DeclarationDTO>(page: K, data: DeclarationDTO[K]) =>
           set(state => {
             state.formData[page] = data;
           }),
@@ -42,7 +42,7 @@ export const useDeclarationFormManager = create<Actions & State>()(
           set({
             formData: formDataDefault,
           }),
-        setStatus: (status: DeclarationFormState["declaration-existante"]["status"]) => {
+        setStatus: (status: DeclarationDTO["declaration-existante"]["status"]) => {
           set(state => {
             state.formData["declaration-existante"].status = status;
           });
