@@ -9,7 +9,7 @@ import {
   flattenRemunerations,
 } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import { CSPAgeRange } from "@common/core-domain/domain/valueObjects/declaration/simulation/CSPAgeRange";
+import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
@@ -146,7 +146,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
 
               return {
                 subRows: ageRanges.map<AlternativeTableProps.SubRow>(ageRange => ({
-                  label: CSPAgeRange.Label[ageRange],
+                  label: AgeRange.Label[ageRange],
                   ...(() => {
                     const csp = funnel!.effectifs!.csp[categoryName].ageRanges[ageRange];
 

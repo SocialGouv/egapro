@@ -2,16 +2,17 @@ import { type EntityPropsToJson, JsonEntity } from "@common/shared-domain";
 
 import { HighRemunerationsIndicator } from "./indicators/HighRemunerationsIndicator";
 import { MaternityLeavesIndicator } from "./indicators/MaternityLeavesIndicator";
+import { PromotionsIndicator } from "./indicators/PromotionsIndicator";
 import { RemunerationsIndicator } from "./indicators/RemunerationsIndicator";
 import { SalaryRaisesAndPromotionsIndicator } from "./indicators/SalaryRaisesAndPromotionsIndicator";
-import { SalaryRaisesOrPromotionsIndicator } from "./indicators/SalaryRaisesOrPromotionsIndicator";
+import { SalaryRaisesIndicator } from "./indicators/SalaryRaisesIndicator";
 
 export interface IndicatorsProps {
   highRemunerations?: HighRemunerationsIndicator;
   maternityLeaves?: MaternityLeavesIndicator;
-  promotions?: SalaryRaisesOrPromotionsIndicator;
+  promotions?: PromotionsIndicator;
   remunerations?: RemunerationsIndicator;
-  salaryRaises?: SalaryRaisesOrPromotionsIndicator;
+  salaryRaises?: SalaryRaisesIndicator;
   salaryRaisesAndPromotions?: SalaryRaisesAndPromotionsIndicator;
 }
 
@@ -22,12 +23,12 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
   }
 
   /** `augmentations` - Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes */
-  get salaryRaises(): SalaryRaisesOrPromotionsIndicator | undefined {
+  get salaryRaises(): SalaryRaisesIndicator | undefined {
     return this.props.salaryRaises;
   }
 
   /** Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes */
-  get promotions(): SalaryRaisesOrPromotionsIndicator | undefined {
+  get promotions(): PromotionsIndicator | undefined {
     return this.props.promotions;
   }
 
@@ -61,9 +62,9 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
 
     if (json.remunerations) props.remunerations = RemunerationsIndicator.fromJson(json.remunerations);
 
-    if (json.salaryRaises) props.salaryRaises = SalaryRaisesOrPromotionsIndicator.fromJson(json.salaryRaises);
+    if (json.salaryRaises) props.salaryRaises = SalaryRaisesIndicator.fromJson(json.salaryRaises);
 
-    if (json.promotions) props.promotions = SalaryRaisesOrPromotionsIndicator.fromJson(json.promotions);
+    if (json.promotions) props.promotions = PromotionsIndicator.fromJson(json.promotions);
 
     if (json.salaryRaisesAndPromotions)
       props.salaryRaisesAndPromotions = SalaryRaisesAndPromotionsIndicator.fromJson(json.salaryRaisesAndPromotions);

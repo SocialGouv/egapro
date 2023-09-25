@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
@@ -13,7 +14,6 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { type DeclarationFormState } from "@services/form/declaration/DeclarationFormBuilder";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { produce } from "immer";
 import { omit } from "lodash";
@@ -100,7 +100,7 @@ export const PeriodeReferenceForm = () => {
         draft["publication"] = undefined;
       }
 
-      draft[stepName] = stepData as DeclarationFormState[typeof stepName];
+      draft[stepName] = stepData as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);
