@@ -19,6 +19,13 @@ import { type RepresentationEquilibreeSearchCriteria } from "../IRepresentationE
 export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
   private declaTable = sql("declaration");
   private table = sql("search");
+  private sql = sql;
+
+  constructor(sqlInstance?: typeof sql) {
+    if (sqlInstance) {
+      this.sql = sqlInstance;
+    }
+  }
 
   public index(_item: Declaration): Promise<void> {
     throw new Error("Method not implemented.");

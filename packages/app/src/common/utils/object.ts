@@ -23,7 +23,7 @@ export const isEmpty = (obj: Record<string, unknown>) => {
 /**
  * Remove properties satisfying predicate on values.
  */
-export const removeEntryBy = (obj: Record<string, unknown>, predicate: (val: unknown) => boolean) =>
+export const keepEntryBy = (obj: Record<string, unknown>, predicate: (val: unknown) => boolean) =>
   Object.fromEntries(Object.entries(obj).filter(([_key, value]) => predicate(value)));
 
 export const omitByRecursively = <T extends object>(

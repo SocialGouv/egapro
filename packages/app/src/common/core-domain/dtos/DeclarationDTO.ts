@@ -200,7 +200,7 @@ export type DeclarationDTO = {
   };
   "resultat-global"?: {
     index?: number;
-    mesures: CorrectiveMeasures.Enum;
+    mesures?: CorrectiveMeasures.Enum;
     points: number;
     pointsCalculables: number;
   };

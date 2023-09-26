@@ -11,7 +11,7 @@ import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationD
 import { companyMap } from "@common/core-domain/mappers/companyMap";
 import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
 import { PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
-import { removeEntryBy } from "@common/utils/object";
+import { keepEntryBy } from "@common/utils/object";
 import { add, isAfter } from "date-fns";
 
 import { type IEntrepriseService } from "../infra/services/IEntrepriseService";
@@ -63,12 +63,21 @@ export class SaveDeclaration implements UseCase<Input, void> {
         postalCode: company.postalCode?.getValue(),
         region: company.region?.getValue(),
         siren: company.siren?.getValue(),
+        range: dto.entreprise?.tranche,
+        total:
+          dto["periode-reference"]?.périodeSuffisante === "oui" ? dto["periode-reference"].effectifTotal : undefined,
         hasRecoveryPlan:
           dto["publication"]?.planRelance === "oui"
             ? true
             : dto["publication"]?.planRelance === "non"
             ? false
             : undefined,
+        ...(dto.entreprise?.type === "ues" && {
+          ues: {
+            name: dto.ues!.nom,
+            companies: dto.ues!.entreprises.map(({ siren, raisonSociale }) => ({ siren, name: raisonSociale })),
+          },
+        }),
       },
       index: dto["resultat-global"]?.index,
       points: dto["resultat-global"]?.points,
@@ -100,21 +109,21 @@ export class SaveDeclaration implements UseCase<Input, void> {
             ? dto["remunerations-csp"]?.catégories.length
               ? dto["remunerations-csp"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: removeEntryBy(tranches, val => val === null),
+                  ranges: keepEntryBy(tranches, val => val !== null),
                 }))
               : []
             : remunerationsMode === "niveau_autre"
             ? dto["remunerations-coefficient-autre"]?.catégories.length
               ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: removeEntryBy(tranches, val => val === null),
+                  ranges: keepEntryBy(tranches, val => val !== null),
                 }))
               : []
             : remunerationsMode === "niveau_branche"
             ? dto["remunerations-coefficient-branche"]?.catégories.length
               ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: removeEntryBy(tranches, val => val === null),
+                  ranges: keepEntryBy(tranches, val => val !== null),
                 }))
               : []
             : ([] satisfies Categorie[]),
@@ -209,7 +218,6 @@ export class SaveDeclaration implements UseCase<Input, void> {
         });
       }
 
-      // TODO: calculer ou recalculer les points des indicateurs et l'index
       const {
         highRemunerationsScore,
         maternityLeavesScore,
@@ -228,18 +236,35 @@ export class SaveDeclaration implements UseCase<Input, void> {
         computablePoints,
       });
 
+      // We recompute the score to be sure that it is correct.
+      if (remunerationsScore !== undefined) {
+        declaration.setRemunerationsScore(new PositiveInteger(remunerationsScore));
+      }
+      if (salaryRaisesScore !== undefined) {
+        declaration.setSalaryRaisesScore(new PositiveInteger(salaryRaisesScore));
+      }
+      if (promotionsScore !== undefined) {
+        declaration.setPromotionsScore(new PositiveInteger(promotionsScore));
+      }
+
+      if (salaryRaisesAndPromotionsScore !== undefined) {
+        declaration.setSalaryRaisesAndPromotionsScore(new PositiveInteger(salaryRaisesAndPromotionsScore));
+      }
+      if (maternityLeavesScore !== undefined) {
+        declaration.setMaternityLeavesScore(new PositiveInteger(maternityLeavesScore));
+      }
       declaration.setHighRemunerationsScore(new PositiveInteger(highRemunerationsScore));
 
       const specification = new DeclarationSpecification();
 
       if (specification.isSatisfiedBy(declaration)) {
-        await this.declarationRepo.save(declaration);
+        await this.declarationRepo.saveWithIndex(declaration);
       } else {
         throw specification.lastError;
       }
     } catch (error: unknown) {
       console.error(error);
-      throw new SaveDeclarationError("Cannot save representation equilibree", error as Error);
+      throw new SaveDeclarationError("Cannot save declaration", error as Error);
     }
   }
 }

@@ -184,7 +184,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         }
       />
 
-      <RecapCardPublication edit={edit} publication={déclaration.publication} />
+      <RecapCardPublication
+        edit={edit}
+        publication={déclaration.publication}
+        mesures={déclaration["resultat-global"]?.mesures}
+      />
 
       {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <RecapCard

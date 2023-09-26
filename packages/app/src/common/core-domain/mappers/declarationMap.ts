@@ -20,7 +20,6 @@ import { isUndefined } from "lodash";
 import { Declaration } from "../domain/Declaration";
 import { CSP } from "../domain/valueObjects/CSP";
 import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
-import { CorrectiveMeasures } from "../domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationDTO } from "../dtos/DeclarationDTO";
@@ -70,6 +69,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       endReferencePeriod: raw.data.déclaration.fin_période_référence,
       sufficientPeriod: raw.data.déclaration.période_suffisante ?? true,
       source: raw.data.source,
+      correctiveMeasures: raw.data.déclaration.mesures_correctives,
 
       publication: {
         date: raw.data.déclaration.publication?.date,
@@ -234,7 +234,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
 
     dto["resultat-global"] = {
       index: obj.index?.getValue(),
-      mesures: obj.correctiveMeasures?.getValue() ?? CorrectiveMeasures.Enum.NOT_CONSIDERED,
+      mesures: obj.correctiveMeasures?.getValue(),
       points: obj.points?.getValue() ?? 0,
       pointsCalculables: obj.computablePoints?.getValue() ?? 0,
     };
@@ -428,9 +428,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     const highRemunerations = obj.highRemunerations;
     if (highRemunerations) {
       dto["hautes-remunerations"] = {
-        note: obj.highRemunerations.score.getValue(),
-        populationFavorable: obj.highRemunerations.favorablePopulation.getValue(),
-        résultat: obj.highRemunerations.result.getValue(),
+        note: obj.highRemunerations!.score.getValue(),
+        populationFavorable: obj.highRemunerations!.favorablePopulation.getValue(),
+        résultat: obj.highRemunerations!.result.getValue(),
       };
     }
 
@@ -558,7 +558,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
     raw.indicateurs.hautes_rémunérations = {
       note: data.highRemunerations.score?.getValue(),
       résultat: data.highRemunerations.result?.getValue(),
-      objectif_de_progression: data.highRemunerations.progressObjective ?? "",
+      objectif_de_progression: data.highRemunerations.progressObjective,
       population_favorable:
         data.highRemunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
           ? ""
