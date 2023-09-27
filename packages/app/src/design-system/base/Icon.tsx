@@ -1,8 +1,10 @@
 import { type FrIconClassName } from "@codegouvfr/react-dsfr";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
+import { isBrowser } from "@common/utils/browser";
 
 import { type TextColorStyle } from "../utils/color-styles";
 import style from "./Icon.module.scss";
+import { IconStyleJsx } from "./IconStyleJsx";
 
 export type IconProps = {
   className?: CxArg;
@@ -58,6 +60,18 @@ export const Icon = ({
 }: IconProps) => (
   <span
     {...rest}
+    {...(isBrowser
+      ? {}
+      : {
+          style: {
+            ...(color && {
+              "--icon-color": `var(--${color})`,
+            }),
+            ...(textColor && {
+              color: `var(--${textColor})`,
+            }),
+          } as React.CSSProperties,
+        })}
     onClick={onClick}
     className={cx(
       icon,
@@ -71,14 +85,7 @@ export const Icon = ({
     )}
     aria-hidden={text ? "false" : "true"}
   >
-    <style jsx>
-      {`
-        span {
-          ${color ? `--icon-color: var(--${color});` : ""}
-          ${textColor ? `color: var(--${textColor});` : ""}
-        }
-      `}
-    </style>
+    {isBrowser && <IconStyleJsx color={color} textColor={textColor} />}
     {text && <>{text}</>}
   </span>
 );
