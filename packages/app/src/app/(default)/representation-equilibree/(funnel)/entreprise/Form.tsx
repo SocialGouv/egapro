@@ -6,10 +6,10 @@ import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
 import { COUNTRIES_COG_TO_ISO } from "@common/dict";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { BackNextButtonsGroup, FormLayout, RecapCard, RecapCardCompany } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { getCompany } from "@globalActions/company";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 

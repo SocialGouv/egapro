@@ -3,8 +3,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { type Any } from "@common/utils/types";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { type PropsWithChildren, useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 
 import { ClientOnly } from "../ClientOnly";
 

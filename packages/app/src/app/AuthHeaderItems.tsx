@@ -2,8 +2,8 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { signOut, useSession } from "next-auth/react";
-import Skeleton from "react-loading-skeleton";
 
 export const UserHeaderItem = () => {
   const session = useSession();

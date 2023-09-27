@@ -1,6 +1,6 @@
 import { FormLayout } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { times } from "lodash";
-import Skeleton from "react-loading-skeleton";
 
 export interface SkeletonFormProps {
   /**

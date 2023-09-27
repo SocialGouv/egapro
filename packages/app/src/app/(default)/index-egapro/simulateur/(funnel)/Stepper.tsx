@@ -3,9 +3,9 @@
 import { Stepper as BaseStepper, type StepperProps as BaseStepperProps } from "@codegouvfr/react-dsfr/Stepper";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { last } from "lodash";
 import { useSelectedLayoutSegments } from "next/navigation";
-import Skeleton from "react-loading-skeleton";
 
 import { getFullNavigation, NAVIGATION } from "./navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "./useSimuFunnelStore";
