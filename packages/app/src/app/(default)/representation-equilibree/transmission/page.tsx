@@ -17,7 +17,7 @@ const Transmission = () => {
   return (
     <>
       <CenteredContainer pb="6w">
-        <Box style={{ textAlign: "center" }}>
+        <Box className="text-center">
           <ImgSuccessLight />
           <h1>Votre déclaration a été transmise</h1>
         </Box>
@@ -46,18 +46,18 @@ const Transmission = () => {
         </p>
         <p>Nous vous remercions de votre transmission.</p>
         <SendReceipt />
-        <Box style={{ textAlign: "center" }} mt="6w">
+        <Box className="text-center" mt="6w">
           <Link
             href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
             target="_blank"
             rel="noreferrer"
-            style={{ background: "none" }}
+            className="no-bg"
           >
             <ImgJDMA />
           </Link>
         </Box>
       </CenteredContainer>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} py="4w">
+      <Box className="bg-dsfr-alt-grey" py="4w">
         <Container as="section">
           <Grid align="center" haveGutters>
             <GridCol md={8}>

@@ -1,0 +1,69 @@
+/* === layout === */
+.hidden {
+    display: none;
+}
+
+.block {
+    display: block;
+}
+/* === */
+
+/* === typo === */
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.align-middle {
+    vertical-align: middle;
+}
+
+.align-sub {
+    vertical-align: sub;
+}
+
+.align-bottom {
+    vertical-align: bottom;
+}
+
+.break-words {
+    overflow-wrap: break-word;
+}
+/* === */
+
+/* === flex / grid === */
+.grow {
+    flex-grow: 1;
+}
+/* === */
+
+/* background */
+
+/* -- custom */
+.no-bg {
+    background: none;
+}
+/* === */
+
+/* === based on dsfr === */
+/* typo */
+.text-dsfr-error {
+    color: var(--text-default-error);
+}
+
+.text-dsfr-action-high-blue-france {
+    color: var(--text-action-high-blue-france);
+}
+
+/* background */
+.bg-dsfr-alt-grey {
+    background-color: var(--background-alt-grey);
+}
+/* === */

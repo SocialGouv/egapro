@@ -23,10 +23,8 @@ const RepresentationEquilibree = () => (
       <Grid>
         <GridCol lg={7}>
           <h1>
-            <span className="fr-h3 fr-mb-0" style={{ display: "block" }}>
-              Bienvenue sur
-            </span>{" "}
-            la déclaration des écarts de représentation F/H dans les postes de direction
+            <span className="fr-h3 fr-mb-0 block">Bienvenue sur</span> la déclaration des écarts de représentation F/H
+            dans les postes de direction
           </h1>
           <p>
             <Link

@@ -80,7 +80,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               </>
             }
           />
-          <Box style={{ textAlign: "center" }} mt="2w">
+          <Box className="text-center" mt="2w">
             <MonCompteProLogin callbackUrl={callbackUrl} />
             <GithubLogin callbackUrl={callbackUrl} />
           </Box>

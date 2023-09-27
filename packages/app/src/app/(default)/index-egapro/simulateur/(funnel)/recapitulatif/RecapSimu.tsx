@@ -473,7 +473,7 @@ export const RecapSimu = () => {
                   helpTextVariant={["light", "alt"]}
                 />
               )}
-              <p style={{ textAlign: "center" }} className={fr.cx("fr-mt-2w")}>
+              <p className={cx(fr.cx("fr-mt-2w"), "text-center")}>
                 Total des points obtenus aux indicateurs calculables : <strong>{resultIndex.resultRaw}</strong>
                 <br />
                 Nombre de points maximum pouvant être obtenus aux indicateurs calculables :{" "}
