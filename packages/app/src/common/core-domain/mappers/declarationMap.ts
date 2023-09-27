@@ -20,9 +20,23 @@ import { isUndefined } from "lodash";
 import { Declaration } from "../domain/Declaration";
 import { CSP } from "../domain/valueObjects/CSP";
 import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
+import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 import { FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type DeclarationDTO } from "../dtos/DeclarationDTO";
+
+/**
+ * Index name of company and companies in UES, if any.
+ */
+export const extractFt = (obj: Declaration) => {
+  let ft = obj.company.name;
+
+  if (obj.company.ues) {
+    ft += [obj.company.ues.name, ...obj.company.ues.companies.map(company => company.name)].join(" ");
+  }
+
+  return ft;
+};
 
 export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, DeclarationRaw>> = {
   // TODO convert without validation if perf are not good
@@ -441,7 +455,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     return {
       declarant: obj.declarant.email.getValue(),
       declared_at: obj.declaredAt,
-      ft: "", // TODO
+      ft: extractFt(obj),
       modified_at: obj.modifiedAt,
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
@@ -518,33 +532,48 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
 
   raw.indicateurs = {};
 
-  if (data.salaryRaises)
-    raw.indicateurs.augmentations = {
-      catégories: data.salaryRaises.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
-      non_calculable: data.salaryRaises.notComputableReason?.getValue() as Any,
-      note: data.salaryRaises.score?.getValue(),
-      objectif_de_progression: data.salaryRaises.progressObjective,
-      population_favorable:
-        data.salaryRaises.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
-          ? ""
-          : (data.salaryRaises.favorablePopulation?.getValue() as PopulationFavorable),
-      résultat: data.salaryRaises.result?.getValue(),
-    };
+  if (data.company.range?.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+    if (data.salaryRaisesAndPromotions)
+      raw.indicateurs.augmentations_et_promotions = {
+        note: data.salaryRaisesAndPromotions.score?.getValue(),
+        non_calculable: data.salaryRaisesAndPromotions.notComputableReason?.getValue() as Any,
+        résultat: data.salaryRaisesAndPromotions.result?.getValue(),
+        note_en_pourcentage: data.salaryRaisesAndPromotions.percentScore?.getValue(),
+        note_nombre_salariés: data.salaryRaisesAndPromotions.employeesCountScore?.getValue(),
+        objectif_de_progression: data.salaryRaisesAndPromotions.progressObjective,
+        population_favorable:
+          data.salaryRaisesAndPromotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.salaryRaisesAndPromotions.favorablePopulation?.getValue() as PopulationFavorable),
+        résultat_nombre_salariés: data.salaryRaisesAndPromotions.employeesCountResult?.getValue(),
+      };
+  } else {
+    if (data.salaryRaises)
+      raw.indicateurs.augmentations = {
+        catégories: data.salaryRaises.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
+        non_calculable: data.salaryRaises.notComputableReason?.getValue() as Any,
+        note: data.salaryRaises.score?.getValue(),
+        objectif_de_progression: data.salaryRaises.progressObjective,
+        population_favorable:
+          data.salaryRaises.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.salaryRaises.favorablePopulation?.getValue() as PopulationFavorable),
+        résultat: data.salaryRaises.result?.getValue(),
+      };
 
-  if (data.salaryRaisesAndPromotions)
-    raw.indicateurs.augmentations_et_promotions = {
-      note: data.salaryRaisesAndPromotions.score?.getValue(),
-      non_calculable: data.salaryRaisesAndPromotions.notComputableReason?.getValue() as Any,
-      résultat: data.salaryRaisesAndPromotions.result?.getValue(),
-      note_en_pourcentage: data.salaryRaisesAndPromotions.percentScore?.getValue(),
-      note_nombre_salariés: data.salaryRaisesAndPromotions.employeesCountScore?.getValue(),
-      objectif_de_progression: data.salaryRaisesAndPromotions.progressObjective,
-      population_favorable:
-        data.salaryRaisesAndPromotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
-          ? ""
-          : (data.salaryRaisesAndPromotions.favorablePopulation?.getValue() as PopulationFavorable),
-      résultat_nombre_salariés: data.salaryRaisesAndPromotions.employeesCountResult?.getValue(),
-    };
+    if (data.promotions)
+      raw.indicateurs.promotions = {
+        note: data.promotions.score?.getValue(),
+        non_calculable: data.promotions.notComputableReason?.getValue() as Any,
+        résultat: data.promotions.result?.getValue(),
+        objectif_de_progression: data.promotions.progressObjective,
+        population_favorable:
+          data.promotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
+            ? ""
+            : (data.promotions.favorablePopulation?.getValue() as PopulationFavorable),
+        catégories: data.promotions.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
+      };
+  }
 
   if (data.maternityLeaves)
     raw.indicateurs.congés_maternité = {
@@ -563,19 +592,6 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
         data.highRemunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
           ? ""
           : (data.highRemunerations.favorablePopulation?.getValue() as PopulationFavorable),
-    };
-
-  if (data.promotions)
-    raw.indicateurs.promotions = {
-      note: data.promotions.score?.getValue(),
-      non_calculable: data.promotions.notComputableReason?.getValue() as Any,
-      résultat: data.promotions.result?.getValue(),
-      objectif_de_progression: data.promotions.progressObjective,
-      population_favorable:
-        data.promotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
-          ? ""
-          : (data.promotions.favorablePopulation?.getValue() as PopulationFavorable),
-      catégories: data.promotions.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
     };
 
   if (data.remunerations)

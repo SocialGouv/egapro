@@ -76,28 +76,29 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       const thisRepo = new PostgresDeclarationRepo(transac);
       const searchRepo = new PostgresDeclarationSearchRepo(transac);
       await thisRepo.save(item);
-      // await searchRepo.index(item);
+      await searchRepo.index(item);
     });
   }
 
-  /** @deprecated - use saveWithIndex */
-  public async save(item: Declaration, deleteDraft = false): Promise<DeclarationPK> {
+  /** Prefer use saveWithIndex if you want to synchronize the search */
+  public async save(item: Declaration): Promise<DeclarationPK> {
     const raw = declarationMap.toPersistence(item);
 
-    console.log("raw", JSON.stringify(raw, null, 2));
+    const ftRaw: Any = {
+      ...raw,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
+    };
 
-    throw new Error("Method not implemented.");
+    const insert = sql(ftRaw, "data", "declared_at", "modified_at", "siren", "year", "declarant", "ft");
+    const update = sql(ftRaw, "data", "modified_at", "declarant", "ft");
 
-    if (deleteDraft) (raw as Any).draft = null;
-    const insert = sql(raw, "data", "declared_at", "modified_at", "siren", "year", "declarant", "draft");
-    const update = sql(raw, "data", "modified_at", "declarant", "draft");
     await this.sql`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
 
     return [item.siren, item.year];
   }
 
   public async update(item: Declaration): Promise<void> {
-    await this.save(item, true);
+    await this.save(item);
   }
 
   public async count(): Promise<number> {

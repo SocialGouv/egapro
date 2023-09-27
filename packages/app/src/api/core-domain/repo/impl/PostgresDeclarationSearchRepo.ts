@@ -1,12 +1,15 @@
+import { type DeclarationSearchRaw } from "@api/core-domain/infra/db/DeclarationSearch";
 import { type DeclarationSearchResultRaw, type DeclarationStatsRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Declaration } from "@common/core-domain/domain/Declaration";
 import { type DeclarationSearchResult } from "@common/core-domain/domain/DeclarationSearchResult";
 import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
+import { declarationSearchMap } from "@common/core-domain/mappers/declarationSearchMap";
 import { declarationSearchResultMap } from "@common/core-domain/mappers/declarationSearchResultMap";
 import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
+import { type Any } from "@common/utils/types";
 import { isFinite } from "lodash";
 
 import {
@@ -27,8 +30,19 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     }
   }
 
-  public index(_item: Declaration): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async index(item: Declaration): Promise<void> {
+    const raw = declarationSearchMap.toPersistence(item);
+
+    const ftRaw: Any = {
+      ...raw,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
+    };
+    const insert = sql(ftRaw);
+    const update = sql(ftRaw, "declared_at", "ft", "region", "departement", "section_naf");
+
+    await this.sql<
+      DeclarationSearchRaw[]
+    >`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
   }
 
   public async stats(criteria: DeclarationStatsCriteria): Promise<DeclarationStatsDTO> {
@@ -48,6 +62,7 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
 
   public async search(criteria: DeclarationSearchCriteria): Promise<DeclarationSearchResult[]> {
     const sqlWhereClause = this.buildSearchWhereClause(criteria);
+
     const raws = await sql<DeclarationSearchResultRaw[]>`
         SELECT
             (array_agg(${this.declaTable}.data ORDER BY ${
