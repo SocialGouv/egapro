@@ -14,11 +14,11 @@ import { COUNTRIES_COG_TO_ISO } from "@common/dict";
 import { storePicker } from "@common/utils/zustand";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { RecapCard } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { getCompany } from "@globalActions/company";
 import { times } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 import { type ZodError } from "zod";
 
 import { saveRepresentationEquilibree } from "../../actions";

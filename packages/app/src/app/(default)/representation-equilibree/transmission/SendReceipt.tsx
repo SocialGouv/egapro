@@ -3,9 +3,9 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { storePicker } from "@common/utils/zustand";
 import { Container, DownloadCard, Grid, GridCol } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
-import Skeleton from "react-loading-skeleton";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../(funnel)/useRepeqFunnelStore";
 import { sendRepresentationEquilibreeReceipt } from "../actions";

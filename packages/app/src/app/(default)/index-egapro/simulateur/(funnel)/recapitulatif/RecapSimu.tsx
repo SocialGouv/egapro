@@ -31,9 +31,9 @@ import { percentFormat, precisePercentFormat } from "@common/utils/number";
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { AlternativeTable, type AlternativeTableProps, IndicatorNote, RecapCard, Stat } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { times } from "lodash";
 import { redirect, useRouter } from "next/navigation";
-import Skeleton from "react-loading-skeleton";
 import { type ZodError } from "zod";
 
 import { Indicateur2ou3Note } from "../(indicateurs2ou3)/Indicateur2ou3Note";
