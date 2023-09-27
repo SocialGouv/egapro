@@ -1,5 +1,5 @@
 import { FormLayout } from "@design-system";
-import Skeleton from "react-loading-skeleton";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 
 const FunnelLoading = () => {
   return (

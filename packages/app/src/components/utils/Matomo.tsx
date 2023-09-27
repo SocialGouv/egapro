@@ -7,14 +7,14 @@ import { useEffect, useState } from "react";
 
 import { useConsent } from "../../app/consentManagement";
 
-export type MatomoProps = Pick<typeof config, "env">;
+export type MatomoProps = Pick<typeof config, "env"> & { nonce?: string };
 
 /**
  * Handle Matomo init and consent.
  *
  * Uses `useSearchParams()` internally, must be Suspense-d in server component.
  */
-export const Matomo = ({ env }: MatomoProps) => {
+export const Matomo = ({ env, nonce }: MatomoProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { finalityConsent } = useConsent();
@@ -30,6 +30,7 @@ export const Matomo = ({ env }: MatomoProps) => {
     if (!inited) {
       init({
         ...config.matomo,
+        nonce,
         onInitialization: () => {
           push(["optUserOut"]);
           push(["requireCookieConsent"]);

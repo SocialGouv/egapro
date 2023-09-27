@@ -1,0 +1,19 @@
+.app {
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+}
+
+.error {
+    flex-grow: 1;
+}
+
+.impersonate-notice {
+    position: fixed;
+    z-index: 99999;
+    width: 100%;
+    margin-top: -3.5rem;
+}
+
+.not-found {
+    text-align: center;
+}
