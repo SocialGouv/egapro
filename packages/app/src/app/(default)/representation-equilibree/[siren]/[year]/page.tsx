@@ -106,7 +106,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
       </ClientAnimate>
 
       {isOwner && (
-        <Box style={{ textAlign: "right" }} mb="2v">
+        <Box className="text-right" mb="2v">
           <Badge severity="info" noIcon small>
             Déclarée le {formatIsoToFr(repEq.declaredAt)}
           </Badge>{" "}

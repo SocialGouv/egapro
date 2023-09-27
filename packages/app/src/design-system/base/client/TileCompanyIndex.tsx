@@ -92,8 +92,11 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
         <div className={fr.cx("fr-mt-1v")}>
           <span
             aria-hidden
-            className={fr.cx("fr-icon--sm", uesListOpened ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line")}
-            style={{ color: "var(--text-action-high-blue-france)", verticalAlign: "bottom" }}
+            className={cx(
+              fr.cx("fr-icon--sm", uesListOpened ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"),
+              "align-bottom",
+              "text-dsfr-action-high-blue-france",
+            )}
           ></span>
           <Link
             href="#"

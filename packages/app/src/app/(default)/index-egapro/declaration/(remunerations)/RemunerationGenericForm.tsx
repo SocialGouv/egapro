@@ -3,6 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type Catégorie, type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
@@ -21,6 +22,7 @@ import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import style from "./RemunerationGenericForm.module.scss";
 
 const formSchema = zodFr.object({
   catégories: z.array(
@@ -125,10 +127,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
           <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             {catégories.map((catégorie, index) => (
               <div key={index}>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  className={fr.cx("fr-col")}
-                >
+                <div className={cx(fr.cx("fr-col"), style["category-title"])}>
                   {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
                   <span className={fr.cx("fr-text--bold")}>{getCSPTitle(catégorie) || `Coefficient ${index + 1}`}</span>
                   {mode !== "csp" && (
@@ -175,10 +174,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
           </ClientAnimate>
 
           {mode !== "csp" && (
-            <div
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              className={fr.cx("fr-mb-8w")}
-            >
+            <div className={cx(fr.cx("fr-mb-8w"), style["add-category"])}>
               <Button type="button" onClick={() => append({ nom: "", tranches: defaultTranch })}>
                 Ajouter un coefficient
               </Button>

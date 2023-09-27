@@ -30,10 +30,7 @@ const IndexEgapro = () => {
           <Grid>
             <GridCol lg={7}>
               <h1>
-                <span className="fr-h3 fr-mb-0" style={{ display: "block" }}>
-                  Bienvenue sur
-                </span>{" "}
-                l'index de l'égalité professionnelle
+                <span className="fr-h3 fr-mb-0 block">Bienvenue sur</span> l'index de l'égalité professionnelle
               </h1>
               <Text
                 variant={["lg", "bold"]}

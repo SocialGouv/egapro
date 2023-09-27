@@ -36,7 +36,7 @@ const ConfirmationPage = () => {
 
   return (
     <>
-      <Box style={{ textAlign: "center" }}>
+      <Box className="text-center">
         <ImgSuccessLight />
         <h1>Votre déclaration a été transmise</h1>
       </Box>
@@ -188,12 +188,12 @@ const ConfirmationPage = () => {
         </GridCol>
       </Grid>
 
-      <Box style={{ textAlign: "center" }} my="6w">
+      <Box className="text-center" my="6w">
         <Link
           href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-declaration&key=73366ddb13d498f4c77d01c2983bab48"
           target="_blank"
           rel="noreferrer"
-          style={{ background: "none" }}
+          className="hidden"
         >
           <ImgJDMA />
         </Link>

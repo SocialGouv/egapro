@@ -105,7 +105,7 @@ export const EcartsMembresForm = () => {
             },
           ]}
         />
-        <Box style={{ display: isComputable ? "block" : "none" }}>
+        <Box className={isComputable ? "block" : "hidden"}>
           <FormProvider {...methods}>
             <NumberPairInputs<EcartsMembresFormType>
               first={{
@@ -130,7 +130,7 @@ export const EcartsMembresForm = () => {
           label="Motif de non calculabilité"
           state={errors.notComputableReasonMembers && "error"}
           stateRelatedMessage={errors.notComputableReasonMembers?.message}
-          style={{ display: isComputable === false ? "block" : "none" }}
+          className={isComputable === false ? "block" : "hidden"}
           nativeSelectProps={{
             ...register("notComputableReasonMembers", {
               disabled: isComputable,

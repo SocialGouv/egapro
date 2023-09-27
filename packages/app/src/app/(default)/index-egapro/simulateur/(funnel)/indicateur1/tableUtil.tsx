@@ -177,7 +177,6 @@ interface CommonFooterProps {
   computer: IndicateurUnComputer;
   effectifsCsp: z.infer<typeof createSteps.effectifs>["csp"];
 }
-const errorColor = "var(--text-default-error)";
 export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): AlternativeTableProps["footer"] => {
   const { resultRaw } = computer.compute();
   const metadata = computer.getTotalMetadata();
@@ -197,14 +196,14 @@ export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): 
           `${metadata.totalWomenCount} femmes`
         ) : (
           <>
-            <span style={{ color: errorColor }}>{metadata.totalWomenCount}</span> / {totalCspWomen} femmes
+            <span className="text-dsfr-error">{metadata.totalWomenCount}</span> / {totalCspWomen} femmes
           </>
         );
         const menLabel = enoughMen ? (
           `${metadata.totalMenCount} hommes`
         ) : (
           <>
-            <span style={{ color: errorColor }}>{metadata.totalMenCount}</span> / {totalCspMen} hommes
+            <span className="text-dsfr-error">{metadata.totalMenCount}</span> / {totalCspMen} hommes
           </>
         );
         return (
@@ -220,8 +219,9 @@ export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): 
             `${metadata.totalEmployeeCount} salarié${metadata.totalEmployeeCount > 1 ? "s" : ""}`
           ) : (
             <>
-              <span style={{ color: errorColor }}>{metadata.totalEmployeeCount}</span> / {totalCspWomen + totalCspMen}{" "}
-              salarié{metadata.totalEmployeeCount > 1 ? "s" : ""}
+              <span className="text-dsfr-error">{metadata.totalEmployeeCount}</span> / {totalCspWomen + totalCspMen}{" "}
+              salarié
+              {metadata.totalEmployeeCount > 1 ? "s" : ""}
             </>
           );
         return totalLabel;

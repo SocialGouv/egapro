@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type Any } from "@common/utils/types";
 import { clsx } from "clsx";
 import { type PropsWithChildren } from "react";
@@ -21,13 +22,12 @@ export const TileCompanyTitle = ({ children, ues }: TileCompanyTitleProps) => {
       <Text
         inline
         variant={["xl", "bold"]}
-        className={fr.cx("fr-m-0", "fr-mr-1w")}
-        style={{ wordWrap: "break-word" }}
+        className={cx(fr.cx("fr-m-0", "fr-mr-1w"), "break-words")}
         text={children}
       />
       {ues && (
         <div>
-          <Badge style={{ verticalAlign: "middle" }}>
+          <Badge className="align-middle">
             <span aria-hidden className={fr.cx("fr-icon-building-fill", "fr-icon--sm", "fr-mr-1v")}></span>
             <span>UES</span>
           </Badge>

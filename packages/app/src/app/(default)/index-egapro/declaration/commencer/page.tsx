@@ -58,7 +58,7 @@ const CommencerPage = async () => {
             Si vous déclarez votre index en tant qu'unité économique et sociale (UES), vous devez effectuer une seule
             déclaration et l'entreprise déclarant pour le compte de l'UES doit être celle ayant effectué la déclaration
             les années précédentes.
-            <span style={{ display: "block" }} className="fr-mb-1w" />
+            <span className="fr-mb-1w block" />
             Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
             correspondantes à la déclaration.
           </>

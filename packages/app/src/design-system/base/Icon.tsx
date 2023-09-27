@@ -58,16 +58,6 @@ export const Icon = ({
 }: IconProps) => (
   <span
     {...rest}
-    style={
-      {
-        ...(color && {
-          "--icon-color": `var(--${color})`,
-        }),
-        ...(textColor && {
-          color: `var(--${textColor})`,
-        }),
-      } as React.CSSProperties
-    }
     onClick={onClick}
     className={cx(
       icon,
@@ -80,8 +70,15 @@ export const Icon = ({
       align && style[`fr-icon--align-${align}`],
     )}
     aria-hidden={text ? "false" : "true"}
-    {...(text && {
-      children: text,
-    })}
-  ></span>
+  >
+    <style jsx>
+      {`
+        span {
+          ${color ? `--icon-color: var(--${color});` : ""}
+          ${textColor ? `color: var(--${textColor});` : ""}
+        }
+      `}
+    </style>
+    {text && <>{text}</>}
+  </span>
 );
