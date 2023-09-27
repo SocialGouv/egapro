@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-component-props */
 /* eslint-disable jsx-a11y/alt-text */
 import { formatDateToFr } from "@common/utils/date";
 import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";

@@ -2,6 +2,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { config } from "@common/config";
 import { type SearchConsultationDTO } from "@common/core-domain/dtos/helpers/common";
 import {
@@ -83,7 +84,7 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
           </GridCol>
         </Grid>
       </Container>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
+      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"), "bg-dsfr-alt-grey")}>
         {!searchParamsError && (
           <Suspense>
             {isLandingPage ? (

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type SimpleObject } from "@common/utils/types";
 import Link from "next/link";
 import { useFormContext } from "react-hook-form";
@@ -74,8 +75,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
                     priority="tertiary no outline"
                     iconId="ri-phone-fill"
                     onClick={() => setValue(phoneNumberKey, "0122334455", { shouldValidate: true })}
-                    className={fr.cx("fr-mb-n1w", "fr-ml-1w")}
-                    style={{ verticalAlign: "sub" }}
+                    className={cx(fr.cx("fr-mb-n1w", "fr-ml-1w"), "align-sub")}
                   >
                     Staff : Remplir
                   </Button>

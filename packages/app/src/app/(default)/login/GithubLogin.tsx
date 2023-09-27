@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -33,7 +34,7 @@ export const GithubLogin = ({ callbackUrl }: GithubLoginProps) => {
   }, []);
   return (
     <Button
-      style={{ display: display ? "" : "none" }}
+      className={cx({ hidden: !display })}
       iconId="fr-icon-user-star-fill"
       onClick={e => {
         e.preventDefault();

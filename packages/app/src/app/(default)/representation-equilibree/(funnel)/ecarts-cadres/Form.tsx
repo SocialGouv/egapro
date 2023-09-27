@@ -102,7 +102,7 @@ export const EcartsCadresForm = () => {
             },
           ]}
         />
-        <Box style={{ display: isComputable ? "block" : "none" }}>
+        <Box className={isComputable ? "block" : "hidden"}>
           <FormProvider {...methods}>
             <NumberPairInputs<EcartsCadresFormType>
               first={{ formKey: "executiveWomenPercent", label: "Pourcentage de femmes parmi les cadres dirigeants" }}
@@ -121,7 +121,7 @@ export const EcartsCadresForm = () => {
           label="Motif de non calculabilité"
           state={errors.notComputableReasonExecutives && "error"}
           stateRelatedMessage={errors.notComputableReasonExecutives?.message}
-          style={{ display: isComputable === false ? "block" : "none" }}
+          className={isComputable === false ? "block" : "hidden"}
           nativeSelectProps={{
             ...register("notComputableReasonExecutives", {
               disabled: isComputable,

@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -18,6 +19,7 @@ import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import style from "./UESForm.module.scss";
 
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
@@ -113,18 +115,20 @@ export const UESForm = () => {
               <caption>Liste des entreprises de l'UES</caption>
               <thead>
                 <tr>
-                  <th style={{ width: "20%" }}>Siren</th>
-                  <th style={{ width: "50%" }}>Raison sociale</th>
+                  <th className={style["siren-col"]}>Siren</th>
+                  <th className={style["name-col"]}>Raison sociale</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ paddingTop: 30, paddingBottom: 30 }}>
-                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.siren}</span>
+                  <td className={style["siren-display"]}>
+                    <span className={style["display-text"]}>{formData.entreprise?.entrepriseDéclarante?.siren}</span>
                   </td>
                   <td>
-                    <span style={{ fontSize: "1rem" }}>{formData.entreprise?.entrepriseDéclarante?.raisonSociale}</span>
+                    <span className={style["display-text"]}>
+                      {formData.entreprise?.entrepriseDéclarante?.raisonSociale}
+                    </span>
                   </td>
                   <td>
                     <Badge noIcon severity="info">
@@ -210,7 +214,7 @@ export const UESForm = () => {
                         />
                       )}
                     </td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="text-right">
                       <Button
                         title="Supprimer l'entreprise"
                         type="button"
@@ -226,10 +230,7 @@ export const UESForm = () => {
           </div>
         </ClientOnly>
 
-        <div
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-          className={fr.cx("fr-mb-8w")}
-        >
+        <div className={cx(fr.cx("fr-mb-8w"), style["add-entreprise"])}>
           <Button
             type="button"
             onClick={() => {

@@ -1,3 +1,4 @@
+import "./global.css";
 import "@design-system/utils/client/skeleton/Skeleton.scss";
 
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
