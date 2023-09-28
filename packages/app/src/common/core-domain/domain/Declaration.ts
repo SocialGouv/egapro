@@ -27,7 +27,7 @@ export interface DeclarationProps {
   index?: DeclarationIndex;
   points?: PositiveNumber;
   computablePoints?: PositiveNumber;
-  endReferencePeriod?: Date;
+  endReferencePeriod?: Date; // If sufficientPeriod is false, endReferencePeriod is undefined.
   sufficientPeriod: boolean;
   source: DeclarationSource;
   publication?: Publication;

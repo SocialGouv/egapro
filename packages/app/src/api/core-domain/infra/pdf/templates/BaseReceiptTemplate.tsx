@@ -120,6 +120,7 @@ export namespace BaseReceiptTemplateProps {
 
 const AUTHOR = "Egapro - Ministère du Travail";
 const LANG = "fr";
+
 export const BaseReceiptTemplate = ({
   declaredAt,
   siren,

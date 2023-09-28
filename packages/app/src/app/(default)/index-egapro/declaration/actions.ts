@@ -1,11 +1,15 @@
 "use server";
 
+import { globalMailerService } from "@api/core-domain/infra/mail";
 import { entrepriseService } from "@api/core-domain/infra/services";
 import { declarationRepo } from "@api/core-domain/repo";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
+import { SendDeclarationReceipt } from "@api/core-domain/useCases/SendDeclarationReceipt";
+import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import assert from "assert";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -35,14 +39,26 @@ export async function saveDeclaration(declaration: CreateDeclarationDTO) {
   const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
   await useCase.execute({ declaration });
 
-  // TODO: send receipt
+  const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
-  // const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+  assert(declaration.commencer?.siren, "Siren is required");
+  assert(declaration.commencer?.annéeIndicateurs, "Year is required");
+  assert(declaration.declarant?.email, "Email is required");
 
-  // await receiptUseCase.execute(declaration);
+  // TODO : error handling.
 
-  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
-  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
+  await receiptUseCase.execute({
+    siren: declaration.commencer.siren,
+    year: declaration.commencer.annéeIndicateurs,
+    email: declaration.declarant.email,
+  });
+
+  // revalidatePath(
+  //   `/representation-equilibree/${declaration.commencer?.siren}/${declaration.commencer?.annéeIndicateurs}`,
+  // );
+  // revalidatePath(
+  //   `/representation-equilibree/${declaration.commencer?.siren}/${declaration.commencer?.annéeIndicateurs}/pdf`,
+  // );
 }
 
 // export async function sendDeclarationReceipt(siren: string, year: number) {
