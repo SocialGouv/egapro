@@ -1,10 +1,10 @@
-import { DISPLAY_CURRENT_YEAR, DISPLAY_PUBLIC_YEARS } from "@common/dict";
+import { DISPLAY_CURRENT_YEAR } from "@common/dict";
 import { type ClearObject } from "@common/utils/types";
 import { z } from "zod";
 
 import { type NotComputableReason } from "../domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type PublicCompanyDTO } from "./CompanyDTO";
-import { searchConsultationSchema } from "./helpers/common";
+import { displayPublicYearCoerciveSchema, searchConsultationSchema, searchSchema } from "./helpers/common";
 
 export interface SearchDeclarationResultDTO {
   company: Record<number, PublicCompanyDTO>;
@@ -34,13 +34,7 @@ export type SearchDeclarationDTO = ClearObject<z.infer<typeof searchDeclarationD
 
 export const getDeclarationStatsInputSchema = searchDeclarationDTOSchema.and(
   z.object({
-    year: z.coerce
-      .number()
-      .refine(
-        year => DISPLAY_PUBLIC_YEARS.includes(year),
-        `L'année doit être incluse dans la liste ${DISPLAY_PUBLIC_YEARS.join(", ")}`,
-      )
-      .default(DISPLAY_CURRENT_YEAR),
+    year: displayPublicYearCoerciveSchema.default(DISPLAY_CURRENT_YEAR),
   }),
 );
 export type GetDeclarationStatsInput = ClearObject<z.infer<typeof getDeclarationStatsInputSchema>>;
@@ -51,3 +45,25 @@ export interface DeclarationStatsDTO {
   max: number | null;
   min: number | null;
 }
+
+export const searchAdminDeclarationInput = z.object({
+  ues: z
+    .boolean()
+    .optional()
+    .or(
+      z
+        .string()
+        .transform(val => val === "true")
+        .optional(),
+    ),
+  minDate: z.string().optional(),
+  maxDate: z.string().optional(),
+  index: z.coerce.number().min(0).max(100).optional(),
+  indexComparison: z.enum(["gt", "lt", "eq"]).optional(),
+  query: z.string().optional(),
+  email: z.string().optional(), // can be a partial email
+  year: displayPublicYearCoerciveSchema.optional(),
+});
+export type SearchAdminDeclarationInput = ClearObject<z.infer<typeof searchAdminDeclarationInput>>;
+export const searchAdminDeclarationDTOSchema = searchAdminDeclarationInput.and(searchSchema);
+export type SearchAdminDeclarationDTO = ClearObject<z.infer<typeof searchAdminDeclarationDTOSchema>>;

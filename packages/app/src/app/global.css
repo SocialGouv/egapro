@@ -6,6 +6,10 @@
 .block {
     display: block;
 }
+
+.flex {
+    display: flex;
+}
 /* === */
 
 /* === typo === */
@@ -41,6 +45,9 @@
 /* === flex / grid === */
 .grow {
     flex-grow: 1;
+}
+.self-end {
+    align-self: flex-end;
 }
 /* === */
 
