@@ -53,13 +53,17 @@ export const ResultatGlobalForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
+  const computed = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData));
+
   // We don't compute the index if we only read an existing declaration.
   const defaultValues =
     formData["declaration-existante"].status === "consultation"
       ? formData[stepName]
       : {
           ...formData[stepName],
-          ...computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData)),
+          index: computed.index,
+          points: computed.points,
+          pointsCalculables: computed.computablePoints,
         };
 
   const methods = useForm<FormType>({

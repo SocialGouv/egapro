@@ -1,7 +1,13 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
+import { GetDeclarationBySirenAndYearError } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
+import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { UnexpectedSessionError } from "@common/shared-domain";
 import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { DownloadCard, Grid, GridCol } from "@design-system";
+import { CenteredContainer, DownloadCard, Grid, GridCol } from "@design-system";
 import { notFound } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
@@ -17,33 +23,50 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
 const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
 
-  const déclaration = await getDeclaration(siren, year);
+  let déclaration: DeclarationDTO | null = null;
+  try {
+    déclaration = await getDeclaration(siren, year);
+  } catch (error: unknown) {
+    console.error("Error: ", error);
 
-  // TODO gestion des erreurs de l'action dans un error.tsx ?
+    if (error instanceof UnexpectedSessionError) {
+      return (
+        <Alert
+          severity="error"
+          title="Erreur"
+          description={
+            <>
+              Vous n'êtes pas authentifié. Veuillez vous connecter à nouveau.
+              <br />
+              <Button
+                linkProps={{ href: `/login` }}
+                iconId="fr-icon-arrow-right-line"
+                iconPosition="right"
+                className={fr.cx("fr-mt-2w")}
+                priority="secondary"
+              >
+                Se connecter
+              </Button>
+            </>
+          }
+        />
+      );
+    }
 
-  // const useCase = new GetDeclarationBySirenAndYear(declarationRepo);
+    if (error instanceof GetDeclarationBySirenAndYearError) {
+      return (
+        <CenteredContainer pb="6w">
+          <Alert severity="error" title="Erreur" description={error.message} />
+        </CenteredContainer>
+      );
+    }
 
-  // let déclaration: DeclarationDTO | null = null;
-
-  // try {
-  //   déclaration = await useCase.execute({ siren, year });
-  // } catch (error: unknown) {
-  //   console.error(error);
-
-  //   if (error instanceof GetDeclarationBySirenAndYearError) {
-  //     return (
-  //       <CenteredContainer pb="6w">
-  //         <Alert severity="error" title="Erreur" description={error.message} />
-  //       </CenteredContainer>
-  //     );
-  //   }
-
-  //   return (
-  //     <CenteredContainer pb="6w">
-  //       <Alert severity="error" title="Erreur inattendue" description="Une erreur inattendue est survenue." />
-  //     </CenteredContainer>
-  //   );
-  // }
+    return (
+      <CenteredContainer pb="6w">
+        <Alert severity="error" title="Erreur inattendue" description="Une erreur inattendue est survenue." />
+      </CenteredContainer>
+    );
+  }
 
   if (déclaration === null) {
     notFound();

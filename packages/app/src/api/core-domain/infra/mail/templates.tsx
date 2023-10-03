@@ -151,30 +151,38 @@ Vous venez de procéder à la transmission aux services du ministre chargé du t
   } au titre des données ${déclaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos déclarations.
 
 Vous avez déclaré un index global ${
-    déclaration.index ? `de ${déclaration.index}` : "non calculable"
+    déclaration.index?.getValue() ? `de ${déclaration.index.getValue()}` : "non calculable"
   }, décliné par indicateurs comme suit :
 
-- Indicateur écart de rémunérations : ${
-    déclaration.remunerations?.score === undefined ? "non calculable" : déclaration.remunerations.score
+- indicateur écart de rémunérations : ${
+    déclaration.remunerations?.score?.getValue() === undefined
+      ? "non calculable"
+      : déclaration.remunerations.score.getValue()
   }
 ${
   déclaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250
-    ? `- Indicateur écart de taux d'augmentations individuelles : ${
-        déclaration.salaryRaisesAndPromotions?.score === undefined
+    ? `- indicateur écart de taux d'augmentations individuelles : ${
+        déclaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
           ? "non calculable"
-          : déclaration.salaryRaisesAndPromotions.score
+          : déclaration.salaryRaisesAndPromotions.score.getValue()
       }`
-    : `- Indicateur écart de taux d'augmentation : ${
-        déclaration.salaryRaises?.score === undefined ? "non calculable" : déclaration.salaryRaises.score
+    : `- indicateur écart de taux d'augmentation : ${
+        déclaration.salaryRaises?.score?.getValue() === undefined
+          ? "non calculable"
+          : déclaration.salaryRaises.score.getValue()
       }
-- Indicateur écart de taux de promotion : ${
-        déclaration.promotions?.score === undefined ? "non calculable" : déclaration.promotions.score
+- indicateur écart de taux de promotion : ${
+        déclaration.promotions?.score?.getValue() === undefined
+          ? "non calculable"
+          : déclaration.promotions.score.getValue()
       }`
 }
-- Indicateur retour de congés maternité : ${
-    déclaration.maternityLeaves?.score === undefined ? "non calculable" : déclaration.maternityLeaves.score
+- indicateur retour de congés maternité : ${
+    déclaration.maternityLeaves?.score?.getValue() === undefined
+      ? "non calculable"
+      : déclaration.maternityLeaves.score.getValue()
   }}
-- Indicateur hautes rémunérations: ${déclaration.highRemunerations?.score}}
+- indicateur hautes rémunérations: ${déclaration.highRemunerations?.score.getValue()}}
 
 Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
 
@@ -192,6 +200,74 @@ Les services de l’administration du travail.
       <html>
         <body>
           <p>Madame, Monsieur,</p>
+
+          <p>
+            Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de
+            votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année
+            {déclaration.year.getValue() + 1} au titre des données {déclaration.year.getValue()} conformément aux
+            dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le
+            présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos
+            déclarations.
+          </p>
+
+          <p>
+            Vous avez déclaré un index global {déclaration.index ? `de {déclaration.index}` : "non calculable"}, décliné
+            par indicateurs comme suit :
+          </p>
+
+          <ul>
+            <li>
+              indicateur écart de rémunérations :{" "}
+              {déclaration.remunerations?.score?.getValue() === undefined
+                ? "non calculable"
+                : déclaration.remunerations.score.getValue()}
+            </li>
+
+            {déclaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250 ? (
+              <li>
+                indicateur écart de taux d'augmentations individuelles :{" "}
+                {déclaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
+                  ? "non calculable"
+                  : déclaration.salaryRaisesAndPromotions.score.getValue()}
+              </li>
+            ) : (
+              <>
+                <li>
+                  indicateur écart de taux d'augmentation :{" "}
+                  {déclaration.salaryRaises?.score?.getValue() === undefined
+                    ? "non calculable"
+                    : déclaration.salaryRaises.score.getValue()}
+                </li>
+                <li>
+                  indicateur écart de taux de promotion :{" "}
+                  {déclaration.promotions?.score?.getValue() === undefined
+                    ? "non calculable"
+                    : déclaration.promotions.score.getValue()}
+                </li>
+              </>
+            )}
+            <li>
+              indicateur retour de congés maternité :{" "}
+              {déclaration.maternityLeaves?.score?.getValue() === undefined
+                ? "non calculable"
+                : déclaration.maternityLeaves.score.getValue()}
+            </li>
+            <li>indicateur hautes rémunérations: {déclaration.highRemunerations?.score.getValue()}</li>
+          </ul>
+
+          <p>
+            Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :{" "}
+            <a href={url}>{url}</a>
+          </p>
+
+          <p>
+            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
+            sein de votre DREETS en répondant à ce message.
+          </p>
+
+          <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
+
+          <p>Les services de l’administration du travail.</p>
         </body>
       </html>,
     ),

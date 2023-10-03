@@ -13,17 +13,6 @@ export interface DeclarationReceiptProps {
 export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => {
   const nafCode = declaration.company.nafCode.getValue();
 
-  const uesRows: BaseReceiptTemplateProps.Row[] = [
-    {
-      key: "Nom UES",
-      value: declaration.company.ues?.name,
-    },
-    {
-      key: "Nombre d'entreprises composant l'UES",
-      value: declaration.company.ues?.companies.length,
-    },
-  ];
-
   const table: BaseReceiptTemplateProps["table"] = [
     {
       title: "Informations déclarant",
@@ -67,7 +56,18 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
             declaration.company.city
           }`,
         },
-        ...uesRows,
+        ...(declaration.company.ues?.name === undefined
+          ? []
+          : [
+              {
+                key: "Nom UES",
+                value: declaration.company.ues?.name,
+              },
+              {
+                key: "Nombre d'entreprises composant l'UES",
+                value: declaration.company.ues?.companies.length,
+              },
+            ]),
       ],
     },
     {
@@ -102,14 +102,19 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
         : [
             {
               key: "Modalité de calcul",
-              value: declaration.remunerations.mode?.getValue() || "",
+              value:
+                declaration.remunerations.mode?.getValue() !== undefined
+                  ? declaration.remunerations.mode.getLabel()
+                  : "",
             },
-            {
-              key: "Date de consultation du CSE",
-              value: declaration.remunerations.cseConsultationDate
-                ? formatDateToFr(declaration.remunerations.cseConsultationDate)
-                : "NA",
-            },
+            ...(declaration.remunerations.cseConsultationDate
+              ? [
+                  {
+                    key: "Date de consultation du CSE",
+                    value: formatDateToFr(declaration.remunerations.cseConsultationDate),
+                  },
+                ]
+              : []),
             {
               key: "Résultat final en %",
               value: declaration.remunerations.result?.getValue(),
@@ -250,7 +255,7 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
         },
         {
           key: "Sexe des salariés sur-représentés",
-          value: declaration.highRemunerations.favorablePopulation.getValue(),
+          value: declaration.highRemunerations.favorablePopulation.getLabel(),
         },
         {
           key: "Nombre de points obtenus",
@@ -271,10 +276,14 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
         key: "Résultat final sur 100 points",
         value: declaration.index?.getValue() ?? "Non calculable",
       },
-      {
-        key: "Mesures de corrections prévues",
-        value: declaration.correctiveMeasures?.getValue(),
-      },
+      ...(declaration.correctiveMeasures?.getValue()
+        ? [
+            {
+              key: "Mesures de corrections prévues",
+              value: declaration.correctiveMeasures.getValue(),
+            },
+          ]
+        : []),
     ],
   });
 
@@ -286,15 +295,22 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
           key: "Date de publication",
           value: declaration.publication.date ? formatDateToFr(declaration.publication.date) : "NA",
         },
-        declaration.publication.url
-          ? {
-              key: "Site Internet de publication",
-              value: declaration.publication.url,
-            }
-          : {
-              key: "Modalités de communication auprès des salariés",
-              value: declaration.publication.modalities,
-            },
+        ...(declaration.publication.url
+          ? [
+              {
+                key: "Site Internet de publication",
+                value: declaration.publication.url,
+              },
+            ]
+          : []),
+        ...(declaration.publication.modalities
+          ? [
+              {
+                key: "Modalités de communication auprès des salariés",
+                value: declaration.publication.modalities,
+              },
+            ]
+          : []),
       ],
     });
   }
@@ -318,13 +334,6 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
               value: declaration.promotions?.progressObjective ?? "NA",
             },
           ];
-
-    const measureDate = declaration.publication?.measuresPublishDate
-      ? {
-          key: "Date de publication des mesures de correction",
-          value: formatDateToFr(declaration.publication.measuresPublishDate),
-        }
-      : undefined;
 
     const rows: [BaseReceiptTemplateProps.Row, ...BaseReceiptTemplateProps.Row[]] = [
       {
@@ -350,11 +359,19 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
         key: "Modalités de communication auprès des salariés",
         value: declaration.publication?.objectivesMeasuresModalities,
       },
+      ...(declaration.publication?.measuresPublishDate
+        ? [
+            {
+              key: "Date de publication des mesures de correction",
+              value: formatDateToFr(declaration.publication.measuresPublishDate),
+            },
+          ]
+        : []),
     ];
 
     table.push({
       title: "Objectifs de progression et mesures de correction",
-      rows: measureDate ? [...rows, measureDate] : rows,
+      rows,
     });
   }
 
