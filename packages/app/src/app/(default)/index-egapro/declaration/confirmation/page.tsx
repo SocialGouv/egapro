@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
-import { SendReceiptInitButtons } from "./SendReceipt";
+import { SendReceiptInitButtons } from "./SendReceiptInitButtons";
 
 const ConfirmationPage = () => {
   const { formData } = useDeclarationFormManager();

@@ -143,7 +143,7 @@ ${config.api.mailer.signature}`,
 });
 
 export const declaration_receipt = (url: string, déclaration: Declaration): MailTemplate => ({
-  subject: "Egapro - Déclaration TODO",
+  subject: "Egapro - Déclaration",
   text: `Madame, Monsieur,
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année ${

@@ -21,7 +21,6 @@ interface Input {
   declaration: CreateDeclarationDTO;
 }
 
-// TODO: finir le use case
 export class SaveDeclaration implements UseCase<Input, void> {
   constructor(
     private readonly declarationRepo: IDeclarationRepo,
@@ -94,6 +93,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
         modalities: dto["publication"]?.choixSiteWeb === "non" ? dto["publication"].modalités : undefined,
       },
       correctiveMeasures: dto["resultat-global"]?.mesures,
+
       // Indicators.
       remunerations: {
         cseConsultationDate:

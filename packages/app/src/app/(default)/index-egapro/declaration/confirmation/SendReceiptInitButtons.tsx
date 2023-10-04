@@ -4,10 +4,10 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Container, Grid, GridCol } from "@design-system";
-import { resendReceipt } from "@services/apiClient/declaration";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useState } from "react";
 
+import { sendDeclarationReceipt } from "../actions";
 import style from "./style.module.css";
 
 export const SendReceiptInitButtons = () => {
@@ -34,7 +34,8 @@ export const SendReceiptInitButtons = () => {
     }
 
     setReceiptProcessing(true);
-    resendReceipt(siren, année).finally(() => {
+
+    sendDeclarationReceipt(siren, année).finally(() => {
       setReceiptProcessing(false);
     });
   };
