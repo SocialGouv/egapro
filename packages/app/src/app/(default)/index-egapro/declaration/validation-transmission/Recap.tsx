@@ -35,7 +35,7 @@ export const Recap = () => {
       setStatus("edition");
       router.push(funnelConfig(formData)[stepName].next().url);
     } catch (error: unknown) {
-      console.error("Error in API", error);
+      console.error(error);
 
       setError("Une erreur est survenue, veuillez réessayer.");
     }

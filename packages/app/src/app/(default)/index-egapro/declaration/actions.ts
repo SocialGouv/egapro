@@ -71,10 +71,5 @@ export async function sendDeclarationReceipt(siren: string, year: number) {
 
   const useCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
-  try {
-    await useCase.execute({ siren, year, email: session.user.email });
-  } catch (e: unknown) {
-    console.error(e);
-    throw e;
-  }
+  await useCase.execute({ siren, year, email: session.user.email });
 }

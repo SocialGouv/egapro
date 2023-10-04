@@ -5,19 +5,23 @@ import Card from "@codegouvfr/react-dsfr/Card";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { Box, DownloadCard, Grid, GridCol, ImgJDMA, ImgSuccessLight } from "@design-system";
+import { AlertMessage } from "@design-system/client";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { inRange } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+import { sendDeclarationReceipt } from "../actions";
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
-import { SendReceiptInitButtons } from "./SendReceiptInitButtons";
+import style from "./style.module.css";
 
 const ConfirmationPage = () => {
-  const { formData } = useDeclarationFormManager();
-  const router = useRouter();
+  const { formData, resetFormData } = useDeclarationFormManager();
+  const [receiptProcessing, setReceiptProcessing] = useState(false);
+  const [error, setError] = useState("");
 
+  const router = useRouter();
   const hasMounted = useHasMounted();
 
   useEffect(() => {
@@ -33,6 +37,27 @@ const ConfirmationPage = () => {
   const année = Number(formData.commencer.annéeIndicateurs);
   const siren = formData.commencer.siren;
   const index = formData["resultat-global"]?.index;
+
+  const initNewDeclaration = () => {
+    resetFormData();
+  };
+
+  const sendReceipt = () => {
+    if (!siren || !année) {
+      return;
+    }
+
+    setReceiptProcessing(true);
+
+    sendDeclarationReceipt(siren, année)
+      .catch(error => {
+        console.error(error);
+        setError("Une erreur est survenue, veuillez réessayer ultérieurement.");
+      })
+      .finally(() => {
+        setReceiptProcessing(false);
+      });
+  };
 
   return (
     <>
@@ -58,7 +83,31 @@ const ConfirmationPage = () => {
       <p>Nous vous remercions de votre transmission.</p>
 
       <Box my="8w">
-        <SendReceiptInitButtons />
+        <AlertMessage title="Erreur" message={error} />
+
+        <Grid align="center" haveGutters>
+          <GridCol md={5}>
+            <Button
+              size="medium"
+              className={style["send-receipt-button"]}
+              priority="secondary"
+              onClick={sendReceipt}
+              disabled={receiptProcessing}
+            >
+              {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
+            </Button>
+          </GridCol>
+          <GridCol md={5}>
+            <Button
+              size="medium"
+              priority="secondary"
+              className={style["send-receipt-button"]}
+              onClick={initNewDeclaration}
+            >
+              Effectuer une nouvelle déclaration
+            </Button>
+          </GridCol>
+        </Grid>
       </Box>
 
       <Grid align="center" mt="6w">
