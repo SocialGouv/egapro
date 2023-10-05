@@ -23,6 +23,9 @@ export interface SearchRepo<
   search(criteria: Criteria): Promise<TSearchEntity[]>;
 }
 
+/**
+ * Search without domain validation
+ */
 // TODO: remove this interface when all repos are migrated to SearchDTORepo
 export interface SearchDTORepo<
   Criteria extends SearchDefaultCriteria = SearchDefaultCriteria,

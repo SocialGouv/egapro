@@ -78,6 +78,7 @@ export interface DeclarationSearchResultRaw {
   siren: string;
 }
 
+export { type AdminDeclarationDTO as AdminDeclarationRaw } from "@common/core-domain/dtos/AdminDeclarationDTO";
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {
