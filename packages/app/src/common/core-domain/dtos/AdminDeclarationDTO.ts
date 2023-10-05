@@ -1,3 +1,5 @@
+import { type DeclarationDTO } from "./DeclarationDTO";
+
 export type AdminDeclarationDTO = {
   createdAt: string;
   declarantEmail: string;
@@ -11,12 +13,15 @@ export type AdminDeclarationDTO = {
   | {
       index: number;
       type: "index";
-      ues: Array<{
+      ues: {
+        companies: Array<{
+          name: string;
+          siren: string;
+        }>;
         name: string;
-        siren: string;
-      }>;
+      };
     }
   | {
-      type: "repeq";
+      type: DeclarationDTO["ues"];
     }
 );

@@ -5,12 +5,20 @@ import { type NextServerPageProps, withSearchParamsValidation } from "@common/ut
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { Container, Grid, GridCol, Heading } from "@design-system";
 
+import { getAllAdminDeclarations } from "./actions";
 import { SearchForm } from "./SearchForm";
 
 const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSchema)(async ({
   searchParams,
   searchParamsError,
 }: NextServerPageProps<"", typeof searchAdminDeclarationDTOSchema>) => {
+  const data = await getAllAdminDeclarations({
+    ...searchParams,
+    offset: searchParams.page,
+  });
+
+  console.log("data", data);
+
   return (
     <Container as="section" py="4w">
       <Grid haveGutters align="center">
@@ -29,6 +37,7 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
           )}
           <Heading as="h1" variant="h5" text="Rechercher une déclaration d'index ou de représentation équilibrée" />
           <SearchForm searchParams={searchParams} />
+          <DebugButton obj={data} infoText="data" />
         </GridCol>
       </Grid>
     </Container>

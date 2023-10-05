@@ -1,112 +1,176 @@
 import { type AdminDeclarationRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type AdminDeclarationDTO } from "@common/core-domain/dtos/AdminDeclarationDTO";
-import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
 import { isFinite } from "lodash";
+import { type Helper } from "postgres";
 
 import { type AdminDeclarationSearchCriteria, type IAdminDeclarationRepo } from "../IAdminDeclarationRepo";
-import { type DeclarationStatsCriteria } from "../IDeclarationSearchRepo";
-import { type RepresentationEquilibreeSearchCriteria } from "../IRepresentationEquilibreeSearchRepo";
 
 export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
-  private declaTable = sql("declaration");
+  private declarationTable = sql("declaration");
   private representationEquilibreeTable = sql("representation_equilibree");
   private searchTable = sql("search");
   private searchRepresentationEquilibreeTable = sql("search_representation_equilibree");
 
   public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
-    const sqlWhereClause = this.buildSearchWhereClause(criteria);
+    const cteCombined = sql("cte_combined");
     const raws = await sql<AdminDeclarationRaw[]>`
-        SELECT
-            (array_agg(${this.declaTable}.data ORDER BY ${
-              this.declaTable
-            }.year DESC))[1]->'entreprise'->>'siren' as siren,
-                    (array_agg(${this.declaTable}.data ORDER BY ${
-                      this.declaTable
-                    }.year DESC))[1]->'entreprise'->>'raison_sociale' as name,
-            jsonb_object_agg(${this.declaTable}.year::text, ${this.declaTable}.data) as data,
-            jsonb_object_agg(${this.declaTable}.year::text, json_build_object(
-                'index', (${this.declaTable}.data->'déclaration'->>'index')::int,
-                'remunerationsScore', (${this.declaTable}.data->'indicateurs'->'rémunérations'->>'note')::int,
-                'salaryRaisesScore', (${this.declaTable}.data->'indicateurs'->'augmentations'->>'note')::int,
-                'promotionsScore', (${this.declaTable}.data->'indicateurs'->'promotions'->>'note')::int,
-                'salaryRaisesAndPromotionsScore', (${
-                  this.declaTable
-                }.data->'indicateurs'->'augmentations_et_promotions'->>'note')::int,
-                'maternityLeavesScore', (${this.declaTable}.data->'indicateurs'->'congés_maternité'->>'note')::int,
-                'highRemunerationsScore', (${
-                  this.declaTable
-                }.data->'indicateurs'->'hautes_rémunérations'->>'note')::int,
-                'notComputableReasonRemunerations', (${
-                  this.declaTable
-                }.data->'indicateurs'->'rémunérations'->>'non_calculable')::text,
-                'notComputableReasonSalaryRaises', (${
-                  this.declaTable
-                }.data->'indicateurs'->'augmentations'->>'non_calculable')::text,
-                'notComputableReasonPromotions', (${
-                  this.declaTable
-                }.data->'indicateurs'->'promotions'->>'non_calculable')::text,
-                'notComputableReasonSalaryRaisesAndPromotions', (${
-                  this.declaTable
-                }.data->'indicateurs'->'augmentations_et_promotions'->>'non_calculable')::text,
-                'notComputableReasonMaternityLeaves', (${
-                  this.declaTable
-                }.data->'indicateurs'->'congés_maternité'->>'non_calculable')::text
-            )) as results
-        FROM ${this.declaTable}
-        JOIN ${this.searchTable} ON ${this.declaTable}.siren=${this.searchTable}.siren AND ${this.declaTable}.year=${
-          this.searchTable
-        }.year
-            ${sqlWhereClause}
-        GROUP BY ${this.declaTable}.siren
-        ORDER BY max(${this.declaTable}.year) DESC
-        LIMIT ${criteria.limit ?? 10}
-        OFFSET ${criteria.offset ?? 0}`;
+      WITH ${cteCombined} AS (
+          SELECT ${this.declarationTable}.declared_at AS createdAt,
+              ${this.declarationTable}.data->'déclarant'->>'email' AS declarantEmail,
+              ${this.declarationTable}.data->'déclarant'->>'prénom' AS declarantFirstName,
+              ${this.declarationTable}.data->'déclarant'->>'nom' AS declarantLastName,
+              ${this.declarationTable}.data->'entreprise'->>'raison_sociale' AS name,
+              ${this.declarationTable}.data->'entreprise'->>'siren' AS siren,
+              'index' AS type,
+              ${this.declarationTable}.year,
+              (${this.declarationTable}.data->'déclaration'->>'index')::int AS index,
+              CASE
+                  WHEN ${this.declarationTable}.data->'entreprise'->'ues' IS NOT NULL THEN jsonb_build_object(
+                      'companies',
+                      (
+                          SELECT jsonb_agg(
+                                  jsonb_build_object(
+                                      'name',
+                                      entreprise->>'raison_sociale',
+                                      'siren',
+                                      entreprise->>'siren'
+                                  )
+                              )
+                          FROM jsonb_array_elements(
+                                  ${this.declarationTable}.data->'entreprise'->'ues'->'entreprises'
+                              ) AS entreprise
+                      ),
+                      'name',
+                      ${this.declarationTable}.data->'entreprise'->'ues'->>'nom'
+                  )
+                  ELSE NULL
+              END AS ues
+          FROM ${this.declarationTable}
+              JOIN ${this.searchTable} ON ${this.declarationTable}.siren = ${this.searchTable}.siren
+              AND ${this.searchTable}.year = ${this.declarationTable}.year
+          ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
+          UNION ALL
+          SELECT ${this.representationEquilibreeTable}.declared_at AS createdAt,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'email' AS declarantEmail,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'prénom' AS declarantFirstName,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'nom' AS declarantLastName,
+              ${this.representationEquilibreeTable}.data->'entreprise'->>'raison_sociale' AS name,
+              ${this.representationEquilibreeTable}.data->'entreprise'->>'siren' AS siren,
+              'repeq' AS type,
+              ${this.representationEquilibreeTable}.year,
+              NULL AS index,
+              NULL AS ues
+          FROM ${this.representationEquilibreeTable}
+              JOIN ${this.searchRepresentationEquilibreeTable} ON ${this.representationEquilibreeTable}.siren = ${
+                this.searchRepresentationEquilibreeTable
+              }.siren
+              AND ${this.searchRepresentationEquilibreeTable}.year = ${this.representationEquilibreeTable}.year
+          ${this.buildSearchWhereClause(
+            criteria,
+            this.searchRepresentationEquilibreeTable,
+            this.representationEquilibreeTable,
+          )}
+      )
+      SELECT *
+      FROM ${cteCombined}
+      order by createdAt asc,
+          siren desc
+      LIMIT ${criteria.limit ?? 100}
+      OFFSET ${criteria.offset ?? 0}`;
 
     return raws;
   }
 
-  public async count(criteria: RepresentationEquilibreeSearchCriteria): Promise<number> {
-    const sqlWhereClause = this.buildSearchWhereClause(criteria);
+  public async count(criteria: AdminDeclarationSearchCriteria): Promise<number> {
+    const cteCountDeclaration = sql("cte_count_declaration");
+    const cteCountRepresentationEquilibree = sql("cte_count_representation_equilibree");
 
-    const [{ count }] =
-      await sql<SQLCount>`select count(distinct(siren)) as count from ${this.searchTable} ${sqlWhereClause}`;
+    const [{ count }] = await sql<SQLCount>`
+    WITH 
+        ${cteCountDeclaration} AS (
+            SELECT COUNT(distinct(siren)) AS count1
+            FROM ${this.searchTable}
+            ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
+        ),
+        ${cteCountRepresentationEquilibree} AS (
+            SELECT COUNT(distinct(siren)) AS count2
+            FROM ${this.searchRepresentationEquilibreeTable}
+            ${this.buildSearchWhereClause(
+              criteria,
+              this.searchRepresentationEquilibreeTable,
+              this.representationEquilibreeTable,
+            )}
+        )
+    SELECT 
+        (count1 + count2) AS count
+    FROM 
+        ${cteCountDeclaration}, ${cteCountRepresentationEquilibree};`;
     return +count;
   }
 
-  private buildSearchWhereClause(criteria: RepresentationEquilibreeSearchCriteria) {
+  private buildSearchWhereClause(
+    criteria: AdminDeclarationSearchCriteria,
+    searchTable: Helper<string>,
+    table: Helper<string>,
+  ) {
+    let hasWhere = false;
+
+    let sqlYear = sql``;
+    if (typeof criteria.year === "number") {
+      // no sql`and` here because it's the first condition
+      sqlYear = sql`${searchTable}.year=${criteria.year}`;
+      hasWhere = true;
+    }
+
+    let sqlEmail = sql``;
+    if (criteria.email) {
+      sqlEmail = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'déclarant'->>'email' ${`%${criteria.email}%`}`;
+      hasWhere = true;
+    }
+
+    let sqlIndexComparison = sql``;
+    if (typeof criteria.index === "number" && criteria.indexComparison) {
+      sqlIndexComparison = sql`${hasWhere ? sql`and` : sql``} (${table}.data->'déclaration'->>'index')::int ${
+        criteria.indexComparison === "gt" ? sql`>` : criteria.indexComparison === "lt" ? sql`<` : sql`=`
+      } ${criteria.index}`;
+      hasWhere = true;
+    }
+
+    let sqlMinDate = sql``;
+    if (criteria.minDate) {
+      sqlMinDate = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.declared_at >= ${criteria.minDate}`;
+      hasWhere = true;
+    }
+
+    let sqlMaxDate = sql``;
+    if (criteria.maxDate) {
+      sqlMaxDate = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.declared_at <= ${criteria.maxDate}`;
+      hasWhere = true;
+    }
+
+    let sqlUes = sql``;
+    if (criteria.ues) {
+      sqlUes = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'entreprise'->'ues' IS NOT NULL`;
+      hasWhere = true;
+    }
+
     let sqlQuery = sql``;
     if (criteria.query) {
       if (criteria.query.length === 9 && isFinite(+criteria.query)) {
-        sqlQuery = sql`and ${this.searchTable}.siren=${criteria.query}`;
+        sqlQuery = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.siren=${criteria.query}`;
       } else {
-        sqlQuery = sql`and ${this.searchTable}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
+        sqlQuery = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(
+          criteria.query,
+        )})`;
       }
+      hasWhere = true;
     }
 
-    // no "and" clause because will be first
-    const sqlYear = sql`${this.searchTable}.year in ${sql(PUBLIC_YEARS_REPEQ)}`;
-    const sqlDepartement = criteria.countyCode
-      ? sql`and ${this.searchTable}.departement=${criteria.countyCode}`
+    return hasWhere
+      ? sql`where ${sqlYear} ${sqlEmail} ${sqlIndexComparison} ${sqlMinDate} ${sqlMaxDate} ${sqlUes} ${sqlQuery}`
       : sql``;
-    const sqlSectionNaf = criteria.nafSection ? sql`and ${this.searchTable}.section_naf=${criteria.nafSection}` : sql``;
-    const sqlRegion = criteria.regionCode ? sql`and ${this.searchTable}.region=${criteria.regionCode}` : sql``;
-
-    const where = sql`where ${sqlYear} ${sqlDepartement} ${sqlSectionNaf} ${sqlRegion} ${sqlQuery}`;
-    return where;
-  }
-
-  private buildStatsWhereClause(criteria: DeclarationStatsCriteria) {
-    const sqlYear = sql`${this.searchTable}.year=${Number(criteria.year) || PUBLIC_CURRENT_YEAR}`;
-    const sqlDepartement = criteria.countyCode
-      ? sql`and ${this.searchTable}.departement=${criteria.countyCode}`
-      : sql``;
-    const sqlSectionNaf = criteria.nafSection ? sql`and ${this.searchTable}.section_naf=${criteria.nafSection}` : sql``;
-    const sqlRegion = criteria.regionCode ? sql`and ${this.searchTable}.region=${criteria.regionCode}` : sql``;
-
-    const where = sql`where ${sqlYear} ${sqlDepartement} ${sqlSectionNaf} ${sqlRegion}`;
-    return where;
   }
 }
