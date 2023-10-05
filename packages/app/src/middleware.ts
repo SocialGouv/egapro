@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
-const cspMiddleware = () => {
+const cspMiddleware: NextMiddlewareWithAuth = req => {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self' https://*.gouv.fr;
@@ -23,23 +23,28 @@ const cspMiddleware = () => {
     require-trusted-types-for 'script';
     trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`;
 
-  const requestHeaders = new Headers();
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set(
+  const responseHeaders = new Headers();
+  responseHeaders.set("x-nonce", nonce);
+  responseHeaders.set(
     "Content-Security-Policy",
     // Replace newline characters and spaces
     cspHeader.replace(/\s{2,}/g, " ").trim(),
   );
 
+  const requestHeaders = new Headers(req.headers);
+  responseHeaders.forEach((value, key) => {
+    requestHeaders.set(key, value);
+  });
+
   return NextResponse.next({
-    headers: requestHeaders,
+    headers: responseHeaders,
     request: {
       headers: requestHeaders,
     },
   });
 };
 
-const nextMiddleware: NextMiddlewareWithAuth = async req => {
+const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   const { pathname, href } = req.nextUrl;
 
   // handling authorization by ourselves (and not with authorize callback)
@@ -55,7 +60,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async req => {
     return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
   }
 
-  return process.env.NODE_ENV === "development" ? NextResponse.next() : cspMiddleware();
+  return process.env.NODE_ENV === "development" ? NextResponse.next() : cspMiddleware(req, event);
 };
 
 // export const middleware = nextMiddleware;
