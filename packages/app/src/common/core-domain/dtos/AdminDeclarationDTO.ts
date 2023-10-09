@@ -1,5 +1,3 @@
-import { type DeclarationDTO } from "./DeclarationDTO";
-
 export type AdminDeclarationDTO = {
   createdAt: string;
   declarantEmail: string;
@@ -14,7 +12,7 @@ export type AdminDeclarationDTO = {
       index: number;
       type: "index";
       ues: {
-        companies: Array<{
+        companies?: Array<{
           name: string;
           siren: string;
         }>;
@@ -22,6 +20,19 @@ export type AdminDeclarationDTO = {
       };
     }
   | {
-      type: DeclarationDTO["ues"];
+      type: "repeq";
     }
 );
+
+export const columnMap = {
+  type: "Type de déclaration",
+  siren: "SIREN",
+  year: "Année",
+  name: "Raison sociale",
+  createdAt: "Date de déclaration",
+  declarantEmail: "Email du déclarant",
+  declarantFirstName: "Prénom du déclarant",
+  declarantLastName: "Nom du déclarant",
+  index: "Index",
+  ues: "UES",
+} as const satisfies Record<keyof Exclude<AdminDeclarationDTO, { type: "repeq" }>, string>;

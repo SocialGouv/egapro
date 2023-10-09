@@ -22,6 +22,7 @@ export async function getAllAdminDeclarations(
       ...defaultSearchParams,
       ...searchParams,
     });
+
     return {
       data: declarations,
       ok: true,

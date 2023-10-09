@@ -3,6 +3,7 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type AdminDeclarationDTO } from "@common/core-domain/dtos/AdminDeclarationDTO";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
+import { type Any } from "@common/utils/types";
 import { isFinite } from "lodash";
 import { type Helper } from "postgres";
 
@@ -81,7 +82,21 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
       LIMIT ${criteria.limit ?? 100}
       OFFSET ${criteria.offset ?? 0}`;
 
-    return raws;
+    return raws.map(raw => ({
+      createdAt: raw.createdat,
+      declarantEmail: raw.declarantemail,
+      declarantFirstName: raw.declarantfirstname,
+      declarantLastName: raw.declarantlastname,
+      name: raw.name,
+      siren: raw.siren,
+      type: raw.type,
+      year: raw.year,
+      ...(raw.type === "index" &&
+        ({
+          index: raw.index,
+          ues: raw.ues,
+        } as Any)),
+    }));
   }
 
   public async count(criteria: AdminDeclarationSearchCriteria): Promise<number> {
@@ -91,13 +106,19 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
     const [{ count }] = await sql<SQLCount>`
     WITH 
         ${cteCountDeclaration} AS (
-            SELECT COUNT(distinct(siren)) AS count1
+            SELECT COUNT(distinct(${this.searchTable}.siren)) AS count1
             FROM ${this.searchTable}
+            JOIN ${this.declarationTable} ON ${this.searchTable}.siren = ${this.declarationTable}.siren
+              AND ${this.declarationTable}.year = ${this.searchTable}.year
             ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
         ),
         ${cteCountRepresentationEquilibree} AS (
-            SELECT COUNT(distinct(siren)) AS count2
+            SELECT COUNT(distinct(${this.searchRepresentationEquilibreeTable}.siren)) AS count2
             FROM ${this.searchRepresentationEquilibreeTable}
+            JOIN ${this.representationEquilibreeTable} ON ${this.searchRepresentationEquilibreeTable}.siren = ${
+              this.representationEquilibreeTable
+            }.siren
+              AND ${this.representationEquilibreeTable}.year = ${this.searchRepresentationEquilibreeTable}.year
             ${this.buildSearchWhereClause(
               criteria,
               this.searchRepresentationEquilibreeTable,
@@ -127,7 +148,7 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
 
     let sqlEmail = sql``;
     if (criteria.email) {
-      sqlEmail = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'déclarant'->>'email' ${`%${criteria.email}%`}`;
+      sqlEmail = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'déclarant'->>'email' like ${`%${criteria.email}%`}`;
       hasWhere = true;
     }
 

@@ -40,6 +40,26 @@
 .break-words {
     overflow-wrap: break-word;
 }
+
+.underline {
+    text-decoration: underline;
+}
+/* === */
+
+/* === color === */
+/* -- custom */
+.color-red {
+    color: #b91c1c;
+}
+/* === */
+
+/* === cursor === */
+.cursor-pointer {
+    cursor: pointer;
+}
+.cursor-help {
+    cursor: help;
+}
 /* === */
 
 /* === flex / grid === */
