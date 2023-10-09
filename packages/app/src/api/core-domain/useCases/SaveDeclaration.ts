@@ -218,6 +218,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
         });
       }
 
+      // We recompute the score to be sure of its correctness.
       const {
         highRemunerationsScore,
         maternityLeavesScore,
@@ -236,7 +237,6 @@ export class SaveDeclaration implements UseCase<Input, void> {
         computablePoints,
       });
 
-      // We recompute the score to be sure that it is correct.
       if (remunerationsScore !== undefined) {
         declaration.setRemunerationsScore(new PositiveInteger(remunerationsScore));
       }
