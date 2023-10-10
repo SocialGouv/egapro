@@ -5,14 +5,19 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
+import { AppError } from "@common/shared-domain";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { AlertMessage } from "@design-system/client";
+import { getCompany } from "@globalActions/company";
+import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memoizedFetchSiren } from "@services/apiClient";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import assert from "assert";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
+import { type ChangeEvent } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,7 +30,7 @@ const formSchema = zodFr.object({
     .array(
       z.object({
         raisonSociale: z.string().trim().nonempty(),
-        siren: sirenSchema,
+        siren: z.string(), // Custom validation in the form.
       }),
     )
     .nonempty({
@@ -145,12 +150,16 @@ export const UESForm = () => {
                           ...register(`entreprises.${index}.siren`),
                           maxLength: 9,
                           minLength: 9,
-                          // TODO onChange + delay + debounce instead
-                          onBlur: async () => {
-                            const result = sirenSchema.safeParse(watchedEntreprises[index].siren);
+                          onBlur: async (e: ChangeEvent<HTMLInputElement>) => {
+                            const siren = e.target.value;
 
-                            if (!result.success) {
+                            const parsedSiren = sirenSchema.safeParse(siren);
+
+                            if (!parsedSiren.success) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
+                              setError(`entreprises.${index}.siren`, {
+                                message: parsedSiren.error?.issues?.[0]?.message ?? "Le Siren est invalide",
+                              });
                               return;
                             }
 
@@ -162,7 +171,7 @@ export const UESForm = () => {
                               formData.commencer?.siren,
                             ];
 
-                            if (allOtherSirens.includes(watchedEntreprises[index].siren)) {
+                            if (allOtherSirens.includes(siren)) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
                                 message: "Le Siren est déjà dans l'UES",
@@ -170,18 +179,27 @@ export const UESForm = () => {
                               return;
                             }
 
+                            // We fetch the latest data for the entreprise to fill the entreprise page.
+                            const result = await getCompany(siren);
+
+                            assert(formData.commencer?.annéeIndicateurs, "L'année est obligatoire");
+
                             try {
-                              const firm = await memoizedFetchSiren(
-                                watchedEntreprises[index].siren,
-                                formData.commencer?.annéeIndicateurs,
-                              );
-                              setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
-                              clearErrors(`entreprises.${index}.siren`);
-                              trigger();
+                              if (result.ok) {
+                                const company = result.data;
+
+                                const isClosed = isCompanyClosed(company, formData.commencer.annéeIndicateurs);
+
+                                if (isClosed) throw new AppError(CLOSED_COMPANY_ERROR);
+
+                                setValue(`entreprises.${index}.raisonSociale`, company ? company.simpleLabel : "");
+                                clearErrors(`entreprises.${index}.siren`);
+                                trigger();
+                              }
                             } catch (error: unknown) {
                               setValue(`entreprises.${index}.raisonSociale`, "");
                               setError(`entreprises.${index}.siren`, {
-                                message: error instanceof Error ? error.message : "Le Siren est invalide",
+                                message: error instanceof AppError ? error.message : "Le Siren est invalide",
                                 type: "manual",
                               });
                             }
