@@ -22,74 +22,21 @@ import { z } from "zod";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = (siren: string, year: number) =>
-  zodFr
-    .object({
-      nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
-      entreprises: z
-        .array(
-          z.object({
-            raisonSociale: z.string(),
-            siren: z.string(),
-          }),
-        )
-        .nonempty({
-          message: "Vous devez ajouter au moins une entreprise à l'UES",
-        }),
-    })
-    .superRefine(async (data, ctx) => {
-      console.log("dans superrefine");
-      const allSirens = [siren, ...data.entreprises.map(entreprise => entreprise.siren)];
+const formSchema = zodFr.object({
+  nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
+  entreprises: z
+    .array(
+      z.object({
+        raisonSociale: z.string(),
+        siren: z.string(),
+      }),
+    )
+    .nonempty({
+      message: "Vous devez ajouter au moins une entreprise à l'UES",
+    }),
+});
 
-      for (let index = 0; index < data.entreprises.length; index++) {
-        const company = data.entreprises[index];
-
-        const parsedSiren = sirenSchema.safeParse(company.siren);
-
-        if (!parsedSiren.success) {
-          ctx.addIssue({
-            code: "custom",
-            message: parsedSiren.error?.issues?.[0]?.message ?? "Le Siren est invalide",
-            path: ["entreprises", index, "siren"],
-          });
-        }
-
-        const nbOccurences = allSirens.filter(siren => siren === company.siren).length;
-
-        if (nbOccurences > 1) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Le Siren est déjà dans l'UES",
-            path: ["entreprises", index, "siren"],
-          });
-        }
-
-        // We fetch the latest data for the entreprise to fill the entreprise page.
-        const result = await getCompany(siren);
-
-        if (result.ok) {
-          const company = result.data;
-
-          const isClosed = isCompanyClosed(company, year);
-
-          if (isClosed) {
-            ctx.addIssue({
-              code: "custom",
-              message: CLOSED_COMPANY_ERROR,
-              path: ["entreprises", index, "siren"],
-            });
-          }
-        } else {
-          ctx.addIssue({
-            code: "custom",
-            message: "Impossible de récupérer les informations de l'entreprise",
-            path: ["entreprises", index, "siren"],
-          });
-        }
-      }
-    });
-
-type FormType = z.infer<ReturnType<typeof formSchema>>;
+type FormType = z.infer<typeof formSchema>;
 
 const stepName: FunnelKey = "ues";
 
@@ -109,7 +56,7 @@ export const UESForm = () => {
 
   const methods = useForm<FormType>({
     mode: "onChange",
-
+    // no resolver, because we handle the validation by ourselves.
     defaultValues,
   });
 
@@ -133,10 +80,10 @@ export const UESForm = () => {
     name: "entreprises",
   });
 
-  const watchedEntreprises = watch("entreprises");
-  const [stringifiedCompanies] = useDebounce(JSON.stringify(watchedEntreprises), 500);
+  const watchedCompanies = watch("entreprises");
+  const watchedName = watch("nom");
 
-  console.log("watchedEntreprises", watchedEntreprises?.map(entreprise => entreprise.siren));
+  const [stringifiedCompanies] = useDebounce(JSON.stringify(watchedCompanies), 500);
 
   const onSubmit = async (data: FormType) => {
     savePageData("ues", data);
@@ -147,9 +94,9 @@ export const UESForm = () => {
   // TODO: essayer avec un useEffect
   // - memoize les fetch pour ne pas les refaire à chaque fois
 
+  // Effect to handle validation.
   useEffect(() => {
     async function run() {
-      console.log("dans useEffect");
       clearErrors("entreprises");
 
       let valid = true;
@@ -158,6 +105,11 @@ export const UESForm = () => {
       const year = formData.commencer!.annéeIndicateurs;
 
       const companies = JSON.parse(stringifiedCompanies) as FormType["entreprises"];
+
+      if (!watchedName.trim()) {
+        setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
+        valid = false;
+      }
 
       if (companies.length === 0) {
         setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
@@ -168,10 +120,6 @@ export const UESForm = () => {
 
       for (let index = 0; index < companies.length; index++) {
         const company = companies[index];
-
-        console.log("validate index", index, company.siren);
-        console.log("companies.length", companies.length);
-
         const parsedSiren = sirenSchema.safeParse(company.siren);
 
         if (!parsedSiren.success) {
@@ -215,7 +163,7 @@ export const UESForm = () => {
     }
 
     run();
-  }, [clearErrors, formData.commencer, setError, setValue, stringifiedCompanies]); // We need to stringify the array to trigger the useEffect when the array changes.
+  }, [clearErrors, formData.commencer, setError, setValue, stringifiedCompanies, watchedName]); // We need to stringify the array to trigger the useEffect when the array changes.
 
   return (
     <FormProvider {...methods}>
