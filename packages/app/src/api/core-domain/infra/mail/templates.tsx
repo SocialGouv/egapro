@@ -211,8 +211,9 @@ Les services de l’administration du travail.
           </p>
 
           <p>
-            Vous avez déclaré un index global {déclaration.index ? `de {déclaration.index}` : "non calculable"}, décliné
-            par indicateurs comme suit :
+            Vous avez déclaré un index global{" "}
+            {déclaration.index?.getValue() ? `de ${déclaration.index.getValue()}` : "non calculable"}, décliné par
+            indicateurs comme suit :
           </p>
 
           <ul>
