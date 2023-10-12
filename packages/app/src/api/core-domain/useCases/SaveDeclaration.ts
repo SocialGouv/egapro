@@ -4,7 +4,11 @@ import {
 } from "@common/core-domain/computers/DeclarationComputer";
 import { Declaration, type DeclarationPK, type DeclarationProps } from "@common/core-domain/domain/Declaration";
 import { type Categorie } from "@common/core-domain/domain/declaration/indicators/RemunerationsIndicator";
-import { DeclarationSpecification } from "@common/core-domain/domain/specification/DeclarationSpecification";
+import {
+  DeclarationSpecification,
+  DeclarationSpecificationError,
+} from "@common/core-domain/domain/specification/DeclarationSpecification";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { DeclarationSource } from "@common/core-domain/domain/valueObjects/declaration/DeclarationSource";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
@@ -128,58 +132,63 @@ export class SaveDeclaration implements UseCase<Input, void> {
               : []
             : ([] satisfies Categorie[]),
       },
-      salaryRaises: {
-        categories:
-          dto.augmentations?.estCalculable === "oui"
-            ? dto.augmentations.catégories.map(category => category.écarts)
-            : [null, null, null, null],
-        favorablePopulation:
-          dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable : undefined,
-        notComputableReason:
-          dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
-        result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
-        score: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.note : undefined,
-      },
-      promotions: {
-        notComputableReason: dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
-        favorablePopulation: dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable : undefined,
-        result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
-        score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
-        categories:
-          dto.promotions?.estCalculable === "oui"
-            ? dto.promotions.catégories.map(category => category.écarts)
-            : [null, null, null, null],
-      },
-      salaryRaisesAndPromotions: {
-        notComputableReason:
-          dto["augmentations-et-promotions"]?.estCalculable === "non"
-            ? dto["augmentations-et-promotions"].motifNonCalculabilité
-            : undefined,
-        favorablePopulation:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].populationFavorable
-            : undefined,
-        employeesCountResult:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].résultatEquivalentSalarié
-            : undefined,
-        employeesCountScore:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].noteNombreSalaries
-            : undefined,
-        result:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].résultat
-            : undefined,
-        percentScore:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].notePourcentage
-            : undefined,
-        score:
-          dto["augmentations-et-promotions"]?.estCalculable === "oui"
-            ? dto["augmentations-et-promotions"].note
-            : undefined,
-      },
+      ...(dto.entreprise?.tranche !== CompanyWorkforceRange.Enum.FROM_50_TO_250 && {
+        salaryRaises: {
+          categories:
+            dto.augmentations?.estCalculable === "oui"
+              ? dto.augmentations.catégories.map(category => category.écarts)
+              : [null, null, null, null],
+          favorablePopulation:
+            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable : undefined,
+          notComputableReason:
+            dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
+          result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
+          score: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.note : undefined,
+        },
+        promotions: {
+          notComputableReason:
+            dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
+          favorablePopulation: dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable : undefined,
+          result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
+          score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
+          categories:
+            dto.promotions?.estCalculable === "oui"
+              ? dto.promotions.catégories.map(category => category.écarts)
+              : [null, null, null, null],
+        },
+      }),
+      ...(dto.entreprise?.tranche === CompanyWorkforceRange.Enum.FROM_50_TO_250 && {
+        salaryRaisesAndPromotions: {
+          notComputableReason:
+            dto["augmentations-et-promotions"]?.estCalculable === "non"
+              ? dto["augmentations-et-promotions"].motifNonCalculabilité
+              : undefined,
+          favorablePopulation:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].populationFavorable
+              : undefined,
+          employeesCountResult:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].résultatEquivalentSalarié
+              : undefined,
+          employeesCountScore:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].noteNombreSalaries
+              : undefined,
+          result:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].résultat
+              : undefined,
+          percentScore:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].notePourcentage
+              : undefined,
+          score:
+            dto["augmentations-et-promotions"]?.estCalculable === "oui"
+              ? dto["augmentations-et-promotions"].note
+              : undefined,
+        },
+      }),
       maternityLeaves: {
         notComputableReason:
           dto["conges-maternite"]?.estCalculable === "non" ? dto["conges-maternite"].motifNonCalculabilité : undefined,
@@ -263,7 +272,11 @@ export class SaveDeclaration implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
-      console.error(error);
+      if (error instanceof DeclarationSpecificationError) {
+        console.error(error.message);
+        throw error;
+      }
+
       throw new SaveDeclarationError("Cannot save declaration", error as Error);
     }
   }

@@ -8,7 +8,9 @@ import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { SendDeclarationReceipt } from "@api/core-domain/useCases/SendDeclarationReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
+import { DeclarationSpecificationError } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type ServerActionResponse } from "@common/utils/next";
 import assert from "assert";
 import { revalidatePath } from "next/cache";
 
@@ -28,7 +30,10 @@ export async function getDeclaration(siren: string, year: number) {
   return declaration;
 }
 
-export async function saveDeclaration(declaration: CreateDeclarationDTO) {
+// export async function saveDeclaration(declaration: CreateDeclarationDTO): Promise<UseCaseResult> {
+export async function saveDeclaration(
+  declaration: CreateDeclarationDTO,
+): Promise<ServerActionResponse<undefined, string>> {
   await assertServerSession({
     owner: {
       check: declaration.commencer?.siren || "",
@@ -41,23 +46,42 @@ export async function saveDeclaration(declaration: CreateDeclarationDTO) {
   const year = declaration.commencer?.annéeIndicateurs;
   const email = declaration.declarant?.email;
 
-  const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
-  await useCase.execute({ declaration });
+  try {
+    const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
+    await useCase.execute({ declaration });
 
-  const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+    const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
-  assert(siren, "Siren is required");
-  assert(year, "Year is required");
-  assert(email, "Email is required");
+    assert(siren, "Siren is required");
+    assert(year, "Year is required");
+    assert(email, "Email is required");
 
-  await receiptUseCase.execute({
-    siren,
-    year,
-    email,
-  });
+    await receiptUseCase.execute({
+      siren,
+      year,
+      email,
+    });
 
-  revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
-  revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+    revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
+    revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+
+    return {
+      ok: true,
+    };
+  } catch (error: unknown) {
+    console.error(error);
+
+    if (error instanceof DeclarationSpecificationError) {
+      return {
+        ok: false,
+        error: error.message ?? error.previousError,
+      };
+    }
+    return {
+      ok: false,
+      error: "Une erreur est survenue, veuillez réessayer.",
+    };
+  }
 }
 
 export async function sendDeclarationReceipt(siren: string, year: number) {

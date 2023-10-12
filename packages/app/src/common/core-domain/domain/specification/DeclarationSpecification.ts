@@ -20,6 +20,8 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
   private _lastError?: ValidationError;
 
   public isSatisfiedBy(declaration: Declaration): boolean {
+    // console.log("declaration dans specification:", JSON.stringify(declaration, null, 2));
+
     try {
       // TODO: confirm year with product owner
       assert(
@@ -46,7 +48,7 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
 
       assert(typeof declaration.company.hasRecoveryPlan !== "undefined", "Le champ plan de relance est obligatoire.");
 
-      assert(typeof declaration.sufficientPeriod === "undefined", "Le champ période suffisante est obligatoire.");
+      assert(typeof declaration.sufficientPeriod !== "undefined", "Le champ période suffisante est obligatoire.");
       // Règle 3 & 3 bis - Relation période non suffisante et indicateurs
       if (!declaration.sufficientPeriod) {
         assert(
@@ -125,13 +127,24 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
         }
         type Indicator = { notComputableReason?: NotComputableReason; result?: Percentage } | undefined;
 
-        const indicators = [
-          [declaration.remunerations, "rémunérations"],
-          [declaration.salaryRaises, "augmentations"],
-          [declaration.promotions, "promotions"],
-          [declaration.salaryRaisesAndPromotions, "augmentations et promotions"],
-          [declaration.maternityLeaves, "congés maternité"],
-        ] as Array<[Indicator, string]>;
+        const indicators = (() => {
+          const base = [
+            [declaration.remunerations, "rémunérations"],
+            [declaration.maternityLeaves, "congés maternité"],
+          ];
+
+          if (declaration.company.range.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+            return [...base, [declaration.salaryRaisesAndPromotions, "augmentations et promotions"]] as Array<
+              [Indicator, string]
+            >;
+          } else {
+            return [
+              ...base,
+              [declaration.salaryRaises, "augmentations"],
+              [declaration.promotions, "promotions"],
+            ] as Array<[Indicator, string]>;
+          }
+        })();
 
         // Règle 8 - Si un indicateur est non calculable, aucune autre information n'est présente
         for (const [indicator, name] of indicators) {
