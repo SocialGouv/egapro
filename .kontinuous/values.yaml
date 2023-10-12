@@ -150,13 +150,12 @@ project:
     # DigDash prod 1 and 2
     - "37.187.27.197"
     - "37.187.137.149"
-    # DigDash new (09/10/2023)
-    # dev
-    - "217.182.225.115"
-    # prod
-    - "217.182.225.114"
-    # Invenis prod old and new
+    # DigDash new (12/10/2023)
+    - "217.182.225.112"
+    - "217.182.225.29"
+    # Invenis prod old
     - "217.182.142.112"
+    # Invenis prod new (09/10/2023)
     - "51.38.59.32"
   files:
     public:
