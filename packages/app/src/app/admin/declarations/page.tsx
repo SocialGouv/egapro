@@ -23,6 +23,7 @@ import {
 
 import { getAllAdminDeclarations } from "./actions";
 import { SearchForm } from "./SearchForm";
+import style from "./style.module.scss";
 
 const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSchema)(async ({
   searchParams,
@@ -63,6 +64,7 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
               {Object.entries(columnMap).map(([columnValue, columnLabel]) => (
                 <TableAdminHeadCol
                   key={columnValue}
+                  className={columnValue === "name" && style["table-head-name"]}
                   // orderDirection={orderBy === columnValue && orderDirection}
                   // onClick={() => {
                   //   togglerOrderColumn(columnValue);
@@ -82,7 +84,7 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
                   </TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.siren}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.year}</TableAdminBodyRowCol>
-                  <TableAdminBodyRowCol>{declaration.name}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol className={style["table-column-name"]}>{declaration.name}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{formatDateToFr(new Date(declaration.createdAt))}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantEmail}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantFirstName}</TableAdminBodyRowCol>

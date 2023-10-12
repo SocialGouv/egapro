@@ -1,4 +1,4 @@
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { forwardRef, type PropsWithChildren } from "react";
 
 import style from "./TableAdmin.module.css";
@@ -16,6 +16,7 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
 );
 
 export interface TableAdminHeadColProps {
+  className: CxArg;
   colSpan?: JSX.IntrinsicElements["td"]["colSpan"];
   onClick?: JSX.IntrinsicElements["th"]["onClick"];
   orderDirection?: "asc" | "desc" | false;
@@ -25,9 +26,10 @@ export const TableAdminHeadCol = ({
   colSpan,
   orderDirection,
   onClick,
+  className,
 }: PropsWithChildren<TableAdminHeadColProps>) => (
   <th
-    className={cx(style.tableHeadCol, onClick && style.tableHeadColClickable)}
+    className={cx(style.tableHeadCol, onClick && style.tableHeadColClickable, className)}
     scope="col"
     colSpan={colSpan}
     onClick={onClick}
@@ -46,8 +48,8 @@ export const TableAdminBodyRow = ({ children }: PropsWithChildren) => (
   <tr className={style.tableBodyRow}>{children}</tr>
 );
 
-export const TableAdminBodyRowCol = ({ children, ...rest }: JSX.IntrinsicElements["td"]) => (
-  <td {...rest} className={style.tableBodyRowCol}>
+export const TableAdminBodyRowCol = ({ children, className, ...rest }: JSX.IntrinsicElements["td"]) => (
+  <td {...rest} className={cx(style.tableBodyRowCol, className)}>
     {children}
   </td>
 );

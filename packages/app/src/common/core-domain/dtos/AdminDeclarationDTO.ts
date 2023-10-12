@@ -25,14 +25,14 @@ export type AdminDeclarationDTO = {
 );
 
 export const columnMap = {
-  type: "Type de déclaration",
+  type: "Type",
   siren: "SIREN",
   year: "Année",
   name: "Raison sociale",
-  createdAt: "Date de déclaration",
-  declarantEmail: "Email du déclarant",
-  declarantFirstName: "Prénom du déclarant",
-  declarantLastName: "Nom du déclarant",
+  createdAt: "Date déclaration",
+  declarantEmail: "Email",
+  declarantFirstName: "Prénom",
+  declarantLastName: "Nom",
   index: "Index",
   ues: "UES",
 } as const satisfies Record<keyof Exclude<AdminDeclarationDTO, { type: "repeq" }>, string>;
