@@ -17,7 +17,8 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
 
   public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
     const cteCombined = sql("cte_combined");
-    const raws = await sql<AdminDeclarationRaw[]>`
+    // const raws = await sql<AdminDeclarationRaw[]>`
+    const query = sql<AdminDeclarationRaw[]>`
       WITH ${cteCombined} AS (
           SELECT ${this.declarationTable}.declared_at AS createdAt,
               ${this.declarationTable}.data->'déclarant'->>'email' AS declarantEmail,
@@ -80,8 +81,13 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
       order by createdAt asc,
           siren desc
       LIMIT ${criteria.limit ?? 100}
-      OFFSET ${criteria.offset ?? 0}`;
+      OFFSET ${criteria.offset ?? 0};;`;
 
+    const desc = await query.describe();
+    console.log("=================", desc.);
+    console.log("zaeazleezlakelzakekkekekkekekekekelloeeezaekekekekkekekkekekekkekekekekq");
+
+    const raws = await query;
     return raws.map(raw => ({
       createdAt: raw.createdat,
       declarantEmail: raw.declarantemail,

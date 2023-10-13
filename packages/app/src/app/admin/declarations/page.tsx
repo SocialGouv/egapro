@@ -59,12 +59,16 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
       </Container>
       {data.ok ? (
         <Box className={fr.cx("fr-p-3w")}>
-          <TableAdmin>
+          <TableAdmin
+            compact
+            classes={{
+              table: style.table,
+            }}
+          >
             <TableAdminHead>
               {Object.entries(columnMap).map(([columnValue, columnLabel]) => (
                 <TableAdminHeadCol
                   key={columnValue}
-                  className={columnValue === "name" && style["table-head-name"]}
                   // orderDirection={orderBy === columnValue && orderDirection}
                   // onClick={() => {
                   //   togglerOrderColumn(columnValue);
@@ -84,7 +88,9 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
                   </TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.siren}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.year}</TableAdminBodyRowCol>
-                  <TableAdminBodyRowCol className={style["table-column-name"]}>{declaration.name}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol className={style.tableColumnName} title={declaration.name}>
+                    {declaration.name}
+                  </TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{formatDateToFr(new Date(declaration.createdAt))}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantEmail}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantFirstName}</TableAdminBodyRowCol>

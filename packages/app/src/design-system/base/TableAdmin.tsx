@@ -3,9 +3,16 @@ import { forwardRef, type PropsWithChildren } from "react";
 
 import style from "./TableAdmin.module.css";
 
-export const TableAdmin = ({ children }: PropsWithChildren) => (
-  <div className={style.table}>
-    <table>{children}</table>
+interface TableAdminProps {
+  classes?: {
+    table?: CxArg;
+    wrapper?: CxArg;
+  };
+  compact?: boolean;
+}
+export const TableAdmin = ({ children, classes, compact }: PropsWithChildren<TableAdminProps>) => (
+  <div className={cx(style.table, compact && style.tableCompact, classes?.wrapper)}>
+    <table className={cx(classes?.table)}>{children}</table>
   </div>
 );
 
@@ -16,7 +23,7 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
 );
 
 export interface TableAdminHeadColProps {
-  className: CxArg;
+  className?: CxArg;
   colSpan?: JSX.IntrinsicElements["td"]["colSpan"];
   onClick?: JSX.IntrinsicElements["th"]["onClick"];
   orderDirection?: "asc" | "desc" | false;

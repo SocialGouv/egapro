@@ -1,7 +1,34 @@
-.table-head-name {
-  max-width: fit-content;
+.tableColumnName {
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    width: 75ch;
+    max-width: 0;
 }
 
-.table-column-name {
-    white-space: break-space;
+.table {
+    tbody tr td {
+        &[title] {
+            position: relative;
+        }
+
+        &[title]:hover {
+            overflow-y: visible;
+        }
+
+        &[title]::after {
+            content: attr(title);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: max-content;
+            padding: inherit;
+            opacity: 0;
+            background-color: var(--hover);
+            -webkit-transition: opacity 0.1s ease-in-out;
+        }
+
+        &[title]:hover::after {
+            opacity: 1;
+        }
+    }
 }
