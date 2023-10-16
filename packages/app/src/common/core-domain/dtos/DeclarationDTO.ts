@@ -65,7 +65,6 @@ export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remuner
 /**
  * The shape of the state for declaration form.
  */
-// export type DeclarationFormState = {
 export type DeclarationDTO = {
   augmentations?:
     | {

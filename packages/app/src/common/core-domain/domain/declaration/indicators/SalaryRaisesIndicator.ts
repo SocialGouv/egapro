@@ -45,7 +45,6 @@ export class SalaryRaisesIndicator extends AbstractIndicator<SalaryRaisesIndicat
     const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
     const props: SalaryRaisesIndicatorProps = {
       categories,
-      progressObjective: json.progressObjective,
     };
 
     if (json.notComputableReason)

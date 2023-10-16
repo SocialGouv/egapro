@@ -21,13 +21,13 @@ export class DownloadDeclarationReceipt implements UseCase<Input, Buffer> {
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
-      const declaration = await this.declarationRepo.getOne([validatedSiren, validatedYear]);
+      const declaration = await this.declarationRepo.getOneDeclarationOpmc([validatedSiren, validatedYear]);
 
       if (!declaration) {
         throw new DownloadDeclarationReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
-      return this.jsxPdfService.buffer(DeclarationReceipt({ declaration }));
+      return this.jsxPdfService.buffer(DeclarationReceipt(declaration));
     } catch (error: unknown) {
       throw new DownloadDeclarationReceiptError("Cannot send receipt for desired declaration", error as Error);
     }

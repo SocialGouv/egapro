@@ -25,13 +25,13 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
-      const declaration = await this.declarationRepo.getOne([validatedSiren, validatedYear]);
+      const declaration = await this.declarationRepo.getOneDeclarationOpmc([validatedSiren, validatedYear]);
 
       if (!declaration) {
         throw new SendDeclarationReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
-      const buffer = await this.jsxPdfService.buffer(DeclarationReceipt({ declaration }));
+      const buffer = await this.jsxPdfService.buffer(DeclarationReceipt(declaration));
 
       const url = `${config.host}/index-egapro/declaration/${siren}/${year}`;
       await this.globalMailerService.init();
@@ -55,10 +55,7 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
         throw new SendDeclarationReceiptSendError("Email was rejected");
       }
     } catch (error: unknown) {
-      throw new SendDeclarationReceiptError(
-        "Cannot send receipt for desired representation equilibree",
-        error as Error,
-      );
+      throw new SendDeclarationReceiptError("Cannot send receipt for desired declaration", error as Error);
     }
   }
 }

@@ -1,8 +1,10 @@
 import { type DeclarationRaw } from "@api/core-domain/infra/db/DeclarationRaw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
+import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
+import { declarationOpmcMap } from "@common/core-domain/mappers/declarationOpmcMap";
 import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
 import { type Any } from "@common/utils/types";
 
@@ -17,6 +19,50 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     if (sqlInstance) {
       this.sql = sqlInstance;
     }
+  }
+
+  public async getOneDeclarationOpmc([siren, year]: DeclarationPK): Promise<DeclarationOpmc | null> {
+    try {
+      const [raw] = await this.sql`select * from ${
+        this.table
+      } where siren=${siren.getValue()} and year=${year.getValue()} limit 1`;
+
+      if (!raw) return null;
+      return declarationOpmcMap.toDomain(raw);
+    } catch (error: unknown) {
+      console.error(error);
+      // TODO better error handling
+      if ((error as Any).code === "ECONNREFUSED") {
+        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      }
+      throw error;
+    }
+  }
+
+  public async saveDeclarationOpmcWithIndex(item: DeclarationOpmc): Promise<void> {
+    await this.sql.begin(async transac => {
+      const thisRepo = new PostgresDeclarationRepo(transac);
+      const searchRepo = new PostgresDeclarationSearchRepo(transac);
+      await thisRepo.saveDeclarationOpmc(item);
+      await searchRepo.index(item.declaration);
+    });
+  }
+
+  /** Prefer use saveDeclarationOpmcWithIndex if you want to synchronize the search */
+  private async saveDeclarationOpmc(item: DeclarationOpmc): Promise<DeclarationPK> {
+    const raw = declarationOpmcMap.toPersistence(item);
+
+    const ftRaw: Any = {
+      ...raw,
+      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
+    };
+
+    const insert = sql(ftRaw, "data", "declared_at", "modified_at", "siren", "year", "declarant", "ft");
+    const update = sql(ftRaw, "data", "modified_at", "declarant", "ft");
+
+    await this.sql`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
+
+    return [item.declaration.siren, item.declaration.year];
   }
 
   private nextRequestLimit = 0;
@@ -68,8 +114,6 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
       throw error;
     }
   }
-
-  // TODO faire une fonction qui sauve la décla + index dans la table search.
 
   public async saveWithIndex(item: Declaration): Promise<void> {
     await this.sql.begin(async transac => {

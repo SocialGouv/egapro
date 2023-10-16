@@ -87,11 +87,8 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
 
       publication: {
         date: raw.data.déclaration.publication?.date,
-        measuresPublishDate: raw.data.déclaration.publication?.date_publication_mesures,
         modalities: raw.data.déclaration.publication?.modalités,
         url: raw.data.déclaration.publication?.url,
-        objectivesMeasuresModalities: raw.data.déclaration.publication?.modalités_objectifs_mesures,
-        objectivesPublishDate: raw.data.déclaration.publication?.date_publication_objectifs,
       },
 
       highRemunerations: raw.data.indicateurs?.hautes_rémunérations
@@ -103,14 +100,12 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
                 : raw.data.indicateurs?.hautes_rémunérations.population_favorable,
             result: raw.data.indicateurs?.hautes_rémunérations.résultat,
             score: raw.data.indicateurs?.hautes_rémunérations.note,
-            progressObjective: raw.data.indicateurs?.hautes_rémunérations.objectif_de_progression,
           }
         : void 0,
       maternityLeaves: raw.data.indicateurs?.congés_maternité
         ? {
             result: raw.data.indicateurs?.congés_maternité.résultat,
             score: raw.data.indicateurs?.congés_maternité.note,
-            progressObjective: raw.data.indicateurs?.congés_maternité.objectif_de_progression,
             notComputableReason: raw.data.indicateurs?.congés_maternité.non_calculable
               ? raw.data.indicateurs?.congés_maternité.non_calculable
               : undefined,
@@ -120,7 +115,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         ? {
             result: raw.data.indicateurs?.promotions.résultat,
             score: raw.data.indicateurs?.promotions.note,
-            progressObjective: raw.data.indicateurs?.promotions.objectif_de_progression,
             notComputableReason: raw.data.indicateurs?.promotions.non_calculable,
             categories: raw.data.indicateurs?.promotions.catégories ?? [null, null, null, null],
             favorablePopulation:
@@ -133,7 +127,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         ? {
             result: raw.data.indicateurs?.rémunérations.résultat,
             score: raw.data.indicateurs?.rémunérations.note,
-            progressObjective: raw.data.indicateurs?.rémunérations.objectif_de_progression,
             notComputableReason: raw.data.indicateurs?.rémunérations.non_calculable,
             categories:
               raw.data.indicateurs?.rémunérations.catégories?.map(cat => ({
@@ -152,7 +145,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         ? {
             result: raw.data.indicateurs?.augmentations.résultat,
             score: raw.data.indicateurs?.augmentations.note,
-            progressObjective: raw.data.indicateurs?.augmentations.objectif_de_progression,
             notComputableReason: raw.data.indicateurs?.augmentations.non_calculable,
             categories: raw.data.indicateurs?.augmentations.catégories ?? [null, null, null, null],
             favorablePopulation:
@@ -165,7 +157,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         ? {
             result: raw.data.indicateurs?.augmentations_et_promotions.résultat,
             score: raw.data.indicateurs?.augmentations_et_promotions.note,
-            progressObjective: raw.data.indicateurs?.augmentations_et_promotions.objectif_de_progression,
             notComputableReason: raw.data.indicateurs?.augmentations_et_promotions.non_calculable,
             favorablePopulation:
               raw.data.indicateurs?.augmentations_et_promotions.population_favorable === ""
@@ -488,14 +479,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
       points_calculables: data.computablePoints?.getValue(),
       publication: {
         date: data.publication?.date ? dateObjectToDateISOString(data.publication?.date) : void 0,
-        date_publication_mesures: data.publication?.measuresPublishDate
-          ? dateObjectToDateISOString(data.publication?.measuresPublishDate)
-          : void 0,
-        date_publication_objectifs: data.publication?.objectivesPublishDate
-          ? dateObjectToDateISOString(data.publication?.objectivesPublishDate)
-          : void 0,
         modalités: data.publication?.modalities,
-        modalités_objectifs_mesures: data.publication?.objectivesMeasuresModalities,
         url: data.publication?.url,
       },
       période_suffisante: data.sufficientPeriod,
@@ -540,7 +524,6 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
         résultat: data.salaryRaisesAndPromotions.result?.getValue(),
         note_en_pourcentage: data.salaryRaisesAndPromotions.percentScore?.getValue(),
         note_nombre_salariés: data.salaryRaisesAndPromotions.employeesCountScore?.getValue(),
-        objectif_de_progression: data.salaryRaisesAndPromotions.progressObjective,
         population_favorable:
           data.salaryRaisesAndPromotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
             ? ""
@@ -553,7 +536,6 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
         catégories: data.salaryRaises.categories.map(cat => cat?.getValue() ?? null) ?? defaultCategories,
         non_calculable: data.salaryRaises.notComputableReason?.getValue() as Any,
         note: data.salaryRaises.score?.getValue(),
-        objectif_de_progression: data.salaryRaises.progressObjective,
         population_favorable:
           data.salaryRaises.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
             ? ""
@@ -566,7 +548,6 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
         note: data.promotions.score?.getValue(),
         non_calculable: data.promotions.notComputableReason?.getValue() as Any,
         résultat: data.promotions.result?.getValue(),
-        objectif_de_progression: data.promotions.progressObjective,
         population_favorable:
           data.promotions.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
             ? ""
@@ -580,14 +561,12 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
       note: data.maternityLeaves.score?.getValue(),
       résultat: data.maternityLeaves.result?.getValue(),
       non_calculable: data.maternityLeaves.notComputableReason?.getValue() as Any,
-      objectif_de_progression: data.maternityLeaves.progressObjective,
     };
 
   if (data.highRemunerations)
     raw.indicateurs.hautes_rémunérations = {
       note: data.highRemunerations.score?.getValue(),
       résultat: data.highRemunerations.result?.getValue(),
-      objectif_de_progression: data.highRemunerations.progressObjective,
       population_favorable:
         data.highRemunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
           ? ""
@@ -599,7 +578,6 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
       note: data.remunerations.score?.getValue(),
       non_calculable: data.remunerations.notComputableReason?.getValue() as Any,
       résultat: data.remunerations.result?.getValue(),
-      objectif_de_progression: data.remunerations.progressObjective,
       population_favorable:
         data.remunerations.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY
           ? ""

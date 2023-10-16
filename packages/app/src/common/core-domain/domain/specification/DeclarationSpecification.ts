@@ -144,16 +144,27 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           }
         })();
 
-        // Règle 8 - Si un indicateur est non calculable, aucune autre information n'est présente
+        // Règle 8 - Si un indicateur est non calculable, aucune autre information n'est présente (à minima, aucun résultat ne doit être présent)
         for (const [indicator, name] of indicators) {
           if (indicator?.notComputableReason) {
             if (indicator) {
               assert(
-                Object.keys(indicator).length === 1,
-                `Aucune autre information ne doit exister pour l'indicateur ${name} quand il est non calculable.`,
+                indicator.result === undefined,
+                `Aucune autre information ne doit exister pour l'indicateur ${name} quand il est non calculable. ${JSON.stringify(
+                  indicator,
+                  null,
+                  2,
+                )}`,
               );
             }
           }
+        }
+
+        if (declaration.salaryRaisesAndPromotions?.notComputableReason) {
+          assert(
+            declaration.salaryRaisesAndPromotions.employeesCountResult === undefined,
+            `Aucune autre information ne doit exister pour l'indicateur augmentations et promotions quand il est non calculable.`,
+          );
         }
 
         // Règle 8 bis - Si un indicateur est calculable, le résultat doit être renseigné
@@ -164,6 +175,13 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
               `Le résultat doit être renseigné pour l'indicateur ${name} quand il est calculable.`,
             );
           }
+        }
+
+        if (!declaration.salaryRaisesAndPromotions?.notComputableReason) {
+          assert(
+            declaration.salaryRaisesAndPromotions?.employeesCountResult !== undefined,
+            `Le résulat par employé doit être renseigné pour l'indicateur augmentations et promotions quand il est calculable.`,
+          );
         }
 
         type IndicatorRule9 = { favorablePopulation?: string; result?: Percentage } | undefined;

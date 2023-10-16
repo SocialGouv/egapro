@@ -1,6 +1,6 @@
 import { type MailTemplate } from "@api/shared-domain/infra/mail/type";
 import { config } from "@common/config";
-import { type Declaration } from "@common/core-domain/domain/Declaration";
+import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import path from "path";
 
@@ -142,47 +142,47 @@ ${config.api.mailer.signature}`,
     ),
 });
 
-export const declaration_receipt = (url: string, déclaration: Declaration): MailTemplate => ({
+export const declaration_receipt = (url: string, { declaration }: DeclarationOpmc): MailTemplate => ({
   subject: "Egapro - Déclaration",
   text: `Madame, Monsieur,
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année ${
-    déclaration.year.getValue() + 1
-  } au titre des données ${déclaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos déclarations.
+    declaration.year.getValue() + 1
+  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos déclarations.
 
 Vous avez déclaré un index global ${
-    déclaration.index?.getValue() ? `de ${déclaration.index.getValue()}` : "non calculable"
+    declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"
   }, décliné par indicateurs comme suit :
 
 - indicateur écart de rémunérations : ${
-    déclaration.remunerations?.score?.getValue() === undefined
+    declaration.remunerations?.score?.getValue() === undefined
       ? "non calculable"
-      : déclaration.remunerations.score.getValue()
+      : declaration.remunerations.score.getValue()
   }
 ${
-  déclaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250
+  declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250
     ? `- indicateur écart de taux d'augmentations individuelles : ${
-        déclaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
+        declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
           ? "non calculable"
-          : déclaration.salaryRaisesAndPromotions.score.getValue()
+          : declaration.salaryRaisesAndPromotions.score.getValue()
       }`
     : `- indicateur écart de taux d'augmentation : ${
-        déclaration.salaryRaises?.score?.getValue() === undefined
+        declaration.salaryRaises?.score?.getValue() === undefined
           ? "non calculable"
-          : déclaration.salaryRaises.score.getValue()
+          : declaration.salaryRaises.score.getValue()
       }
 - indicateur écart de taux de promotion : ${
-        déclaration.promotions?.score?.getValue() === undefined
+        declaration.promotions?.score?.getValue() === undefined
           ? "non calculable"
-          : déclaration.promotions.score.getValue()
+          : declaration.promotions.score.getValue()
       }`
 }
 - indicateur retour de congés maternité : ${
-    déclaration.maternityLeaves?.score?.getValue() === undefined
+    declaration.maternityLeaves?.score?.getValue() === undefined
       ? "non calculable"
-      : déclaration.maternityLeaves.score.getValue()
+      : declaration.maternityLeaves.score.getValue()
   }}
-- indicateur hautes rémunérations: ${déclaration.highRemunerations?.score.getValue()}}
+- indicateur hautes rémunérations: ${declaration.highRemunerations?.score.getValue()}}
 
 Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
 
@@ -204,7 +204,7 @@ Les services de l’administration du travail.
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de
             votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année
-            {déclaration.year.getValue() + 1} au titre des données {déclaration.year.getValue()} conformément aux
+            {declaration.year.getValue() + 1} au titre des données {declaration.year.getValue()} conformément aux
             dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le
             présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos
             déclarations.
@@ -212,48 +212,48 @@ Les services de l’administration du travail.
 
           <p>
             Vous avez déclaré un index global{" "}
-            {déclaration.index?.getValue() ? `de ${déclaration.index.getValue()}` : "non calculable"}, décliné par
+            {declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"}, décliné par
             indicateurs comme suit :
           </p>
 
           <ul>
             <li>
               indicateur écart de rémunérations :{" "}
-              {déclaration.remunerations?.score?.getValue() === undefined
+              {declaration.remunerations?.score?.getValue() === undefined
                 ? "non calculable"
-                : déclaration.remunerations.score.getValue()}
+                : declaration.remunerations.score.getValue()}
             </li>
 
-            {déclaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250 ? (
+            {declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250 ? (
               <li>
                 indicateur écart de taux d'augmentations individuelles :{" "}
-                {déclaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
+                {declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
                   ? "non calculable"
-                  : déclaration.salaryRaisesAndPromotions.score.getValue()}
+                  : declaration.salaryRaisesAndPromotions.score.getValue()}
               </li>
             ) : (
               <>
                 <li>
                   indicateur écart de taux d'augmentation :{" "}
-                  {déclaration.salaryRaises?.score?.getValue() === undefined
+                  {declaration.salaryRaises?.score?.getValue() === undefined
                     ? "non calculable"
-                    : déclaration.salaryRaises.score.getValue()}
+                    : declaration.salaryRaises.score.getValue()}
                 </li>
                 <li>
                   indicateur écart de taux de promotion :{" "}
-                  {déclaration.promotions?.score?.getValue() === undefined
+                  {declaration.promotions?.score?.getValue() === undefined
                     ? "non calculable"
-                    : déclaration.promotions.score.getValue()}
+                    : declaration.promotions.score.getValue()}
                 </li>
               </>
             )}
             <li>
               indicateur retour de congés maternité :{" "}
-              {déclaration.maternityLeaves?.score?.getValue() === undefined
+              {declaration.maternityLeaves?.score?.getValue() === undefined
                 ? "non calculable"
-                : déclaration.maternityLeaves.score.getValue()}
+                : declaration.maternityLeaves.score.getValue()}
             </li>
-            <li>indicateur hautes rémunérations: {déclaration.highRemunerations?.score.getValue()}</li>
+            <li>indicateur hautes rémunérations: {declaration.highRemunerations?.score.getValue()}</li>
           </ul>
 
           <p>

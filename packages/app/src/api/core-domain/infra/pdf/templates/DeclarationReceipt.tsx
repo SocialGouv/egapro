@@ -1,4 +1,5 @@
-import { type Declaration } from "@common/core-domain/domain/Declaration";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
+import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { NAF } from "@common/dict";
 import { formatDateToFr } from "@common/utils/date";
@@ -6,11 +7,9 @@ import { isEqual } from "date-fns";
 
 import { BaseReceiptTemplate, type BaseReceiptTemplateProps } from "./BaseReceiptTemplate";
 
-export interface DeclarationReceiptProps {
-  declaration: Declaration;
-}
+export const DeclarationReceipt = (input: DeclarationOpmc) => {
+  const declaration = input.declaration;
 
-export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => {
   const nafCode = declaration.company.nafCode.getValue();
 
   const table: BaseReceiptTemplateProps["table"] = [
@@ -270,6 +269,10 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
     rows: [
       {
         key: "Total de points obtenus",
+        value: declaration.points?.getValue(),
+      },
+      {
+        key: "Points maximum obtenable aux indicateurs calculables",
         value: declaration.computablePoints?.getValue(),
       },
       {
@@ -315,59 +318,79 @@ export const DeclarationReceipt = ({ declaration }: DeclarationReceiptProps) => 
     });
   }
 
-  if (declaration.index && declaration.index.getValue() < 75) {
-    const indicatorsDependingOnRange: BaseReceiptTemplateProps.Row[] =
-      declaration.company.range?.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250
-        ? [
-            {
-              key: "Objectif Indicateur écart de taux d'augmentations individuelles",
-              value: declaration.salaryRaisesAndPromotions?.progressObjective ?? "NA",
-            },
-          ]
-        : [
-            {
-              key: "Objectif Indicateur écart de taux d'augmentations individuelles (hors promotions)",
-              value: declaration.salaryRaises?.progressObjective ?? "NA",
-            },
-            {
-              key: "Objectif Indicateur écart de taux de promotions",
-              value: declaration.promotions?.progressObjective ?? "NA",
-            },
-          ];
-
+  if (declaration.index && declaration.index.getValue() < 85) {
     const rows: [BaseReceiptTemplateProps.Row, ...BaseReceiptTemplateProps.Row[]] = [
       {
-        key: "Objectif Indicateur écart de rémunération",
-        value: declaration.remunerations?.progressObjective ?? "NA",
-      },
-      ...indicatorsDependingOnRange,
-      {
-        key: "Objectif Indicateur retour de congé maternité",
-        value: declaration.maternityLeaves?.progressObjective ?? "NA",
-      },
-      {
-        key: "Objectif Indicateur dix plus hautes rémunérations",
-        value: declaration.highRemunerations?.progressObjective ?? "NA",
-      },
-      {
         key: "Date de publication des objectifs",
-        value: declaration.publication?.objectivesPublishDate
-          ? formatDateToFr(declaration.publication.objectivesPublishDate)
-          : "NA",
+        value: input.objectivesPublishDate ? formatDateToFr(input.objectivesPublishDate) : "À définir",
       },
-      {
-        key: "Modalités de communication auprès des salariés",
-        value: declaration.publication?.objectivesMeasuresModalities,
-      },
-      ...(declaration.publication?.measuresPublishDate
-        ? [
-            {
-              key: "Date de publication des mesures de correction",
-              value: formatDateToFr(declaration.publication.measuresPublishDate),
-            },
-          ]
-        : []),
     ];
+
+    if (declaration.index.getValue() < 75) {
+      rows.push({
+        key: "Date de publication des mesures de correction",
+        value: input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
+      });
+    }
+    if (!declaration.remunerations?.notComputableReason) {
+      if (declaration.remunerations?.score?.getValue() !== indicatorNoteMax["remunerations"])
+        rows.push({
+          key: "Objectif Indicateur écart de rémunération",
+          value: input.objectiveRemunerations?.getValue() ?? "À définir",
+        });
+    }
+
+    if (declaration.company.range?.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+      if (!declaration.salaryRaisesAndPromotions?.notComputableReason) {
+        if (
+          declaration.salaryRaisesAndPromotions?.score?.getValue() !== indicatorNoteMax["augmentations-et-promotions"]
+        ) {
+          rows.push({
+            key: "Objectif Indicateur écart de taux d'augmentations individuelles",
+            value: input.objectiveSalaryRaiseAndPromotions?.getValue() ?? "À définir",
+          });
+        }
+      }
+    } else {
+      if (!declaration.salaryRaises?.notComputableReason) {
+        if (declaration.salaryRaises?.score?.getValue() != indicatorNoteMax["augmentations"]) {
+          rows.push({
+            key: "Objectif Indicateur écart de taux d'augmentations individuelles (hors promotions)",
+            value: input.objectiveSalaryRaise?.getValue() ?? "À définir",
+          });
+        }
+      }
+
+      if (!declaration.promotions?.notComputableReason) {
+        if (declaration.promotions?.score?.getValue() !== indicatorNoteMax["promotions"]) {
+          rows.push({
+            key: "Objectif Indicateur écart de taux de promotions",
+            value: input.objectivePromotions?.getValue() ?? "À définir",
+          });
+        }
+      }
+
+      if (!declaration.maternityLeaves?.notComputableReason) {
+        if (declaration.maternityLeaves?.score?.getValue() !== indicatorNoteMax["conges-maternite"]) {
+          rows.push({
+            key: "Objectif Indicateur retour de congé maternité",
+            value: input.objectiveMaternityLeaves?.getValue() ?? "À définir",
+          });
+        }
+      }
+
+      if (declaration.highRemunerations?.score?.getValue() !== indicatorNoteMax["hautes-remunerations"]) {
+        rows.push({
+          key: "Objectif Indicateur dix plus hautes rémunérations",
+          value: input.objectiveHighRemunerations?.getValue() ?? "À définir",
+        });
+      }
+
+      rows.push({
+        key: "Modalités de communication auprès des salariés",
+        value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
+      });
+    }
 
     table.push({
       title: "Objectifs de progression et mesures de correction",
