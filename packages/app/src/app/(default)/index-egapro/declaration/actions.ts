@@ -4,6 +4,7 @@ import { globalMailerService } from "@api/core-domain/infra/mail";
 import { entrepriseService } from "@api/core-domain/infra/services";
 import { declarationRepo } from "@api/core-domain/repo";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
+import { GetDeclarationOpmcBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationOpmcBySirenAndYear";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { SendDeclarationReceipt } from "@api/core-domain/useCases/SendDeclarationReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
@@ -25,6 +26,22 @@ export async function getDeclaration(siren: string, year: number) {
 
   // handle default errors
   const useCase = new GetDeclarationBySirenAndYear(declarationRepo);
+  const declaration = await useCase.execute({ siren, year });
+
+  return declaration;
+}
+
+export async function getDeclarationOpmc(siren: string, year: number) {
+  await assertServerSession({
+    owner: {
+      check: siren,
+      message: "Not authorized to fetch declaration for this siren.",
+    },
+    staff: true,
+  });
+
+  // handle default errors
+  const useCase = new GetDeclarationOpmcBySirenAndYear(declarationRepo);
   const declaration = await useCase.execute({ siren, year });
 
   return declaration;

@@ -16,6 +16,26 @@ import { sendDeclarationReceipt } from "../actions";
 import { funnelStaticConfig } from "../declarationFunnelConfiguration";
 import style from "./style.module.css";
 
+type Props = {
+  index: number | undefined;
+  siren: string;
+  year: number;
+};
+
+const ButtonOpMc = ({ index, siren, year }: Props) => {
+  const router = useRouter();
+
+  if (index === undefined || index > 85) return null;
+
+  return (
+    <Button onClick={() => router.push(`/index-egapro/objectifs-mesures/${siren}/${year}`)}>
+      {index >= 75
+        ? "Déclarer les objectifs de progression"
+        : "Déclarer les objectifs de progression et mesures de correction"}
+    </Button>
+  );
+};
+
 const ConfirmationPage = () => {
   const { formData, resetFormData } = useDeclarationFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
@@ -133,7 +153,7 @@ const ConfirmationPage = () => {
                   footer={
                     <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                       <li>
-                        <Button onClick={() => alert("TODO")}>Déclarer les objectifs de progression</Button>
+                        <ButtonOpMc index={index} siren={siren} year={année} />
                       </li>
                     </ul>
                   }
@@ -169,9 +189,7 @@ const ConfirmationPage = () => {
                       footer={
                         <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                           <li>
-                            <Button onClick={() => alert("TODO")}>
-                              Déclarer les objectifs de progression et mesures de correction
-                            </Button>
+                            <ButtonOpMc index={index} siren={siren} year={année} />
                           </li>
                         </ul>
                       }
