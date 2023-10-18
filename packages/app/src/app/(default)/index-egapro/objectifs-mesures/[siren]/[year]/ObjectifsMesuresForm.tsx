@@ -108,7 +108,7 @@ const RowProgression = ({
       <Grid>
         <GridCol sm={3}>{children}</GridCol>
         <GridCol sm={1}>
-          <span style={{ textAlign: "center" }}>{valueOrigin}</span>
+          <span className="text-center">{valueOrigin}</span>
         </GridCol>
         <GridCol sm={8}>
           {!isDisabled ? (
@@ -376,7 +376,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
     objectifsMesuresSchema,
   } = buildHelpersObjectifsMesures(declaration);
 
-  const { title, warningText, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
+  const { title, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
     index,
     publicationSurSiteInternet,
   );

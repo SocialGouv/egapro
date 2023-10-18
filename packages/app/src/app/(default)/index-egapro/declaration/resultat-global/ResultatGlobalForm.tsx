@@ -97,6 +97,7 @@ export const ResultatGlobalForm = () => {
     register("index");
     register("points");
     register("pointsCalculables");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

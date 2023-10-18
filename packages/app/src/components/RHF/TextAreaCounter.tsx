@@ -1,4 +1,6 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useFormContext } from "react-hook-form";
 
 export type TextareaCounterProps = {
@@ -33,7 +35,8 @@ export const TextareaCounter = ({
   const value = watch(fieldName);
 
   const remainingCharacters = maxLength ? maxLength - (value?.length ?? 0) : 0;
-  const color = remainingCharacters < 0 ? "red" : remainingCharacters < 20 ? "orange" : "inherit";
+  const color =
+    remainingCharacters < 0 ? "text-dsfr-error" : remainingCharacters < 20 ? "text-dsfr-warning" : "text-dsfr-neutral";
 
   return (
     <>
@@ -54,7 +57,7 @@ export const TextareaCounter = ({
       />
 
       {showRemainingCharacters && maxLength && (
-        <p style={{ color }}>
+        <p className={cx(fr.cx("fr-text--sm", "fr-mt-n3v"), color)}>
           {remainingCharacters} caractère{remainingCharacters > 1 && "s"} restant
           {remainingCharacters > 1 && "s"}
         </p>
