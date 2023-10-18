@@ -5,9 +5,11 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
+import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { formatDateToFr, parseDate } from "@common/utils/date";
 import { TextareaCounter } from "@components/RHF/TextAreaCounter";
 import { BackNextButtonsGroup, Grid, GridCol, Heading, Text } from "@design-system";
+import { AlertMessageWithProvider, useMessageProvider } from "@design-system/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import assert from "assert";
 import { add, isBefore } from "date-fns";
@@ -15,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { type PropsWithChildren } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { updateDeclarationOpmc } from "../../actions";
 
 const required_error = "Ce champ ne peut être vide";
 
@@ -39,40 +43,40 @@ export const objectifValidator = (originValue: number, max: number, calculable =
  * Zod validator in relation to the publication dates and the end of reference period.
  */
 const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date) =>
-  z.string().superRefine((val, ctx) => {
-    if (!finPeriodeReference) return;
+  z
+    .string({ required_error })
+    .min(1, { message: required_error })
+    .superRefine((val, ctx) => {
+      if (!finPeriodeReference) return;
 
-    if (val === "" || val === undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: required_error,
-        path: ctx.path,
-      });
+      if (val === "" || val === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: required_error,
+        });
 
-      return z.NEVER;
-    }
-    let parsedDatePublication;
-    try {
-      parsedDatePublication = parseDate(val);
-    } catch (error: unknown) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La date de publication est invalide",
-        path: ctx.path,
-      });
-      return z.NEVER;
-    }
+        return z.NEVER;
+      }
+      let parsedDatePublication;
+      try {
+        parsedDatePublication = parseDate(val);
+      } catch (error: unknown) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "La date de publication est invalide",
+        });
+        return z.NEVER;
+      }
 
-    if (parsedDatePublication > finPeriodeReference) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${formatDateToFr(
-          finPeriodeReference,
-        )})`,
-        path: ctx.path,
-      });
-    }
-  });
+      if (parsedDatePublication < finPeriodeReference) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${formatDateToFr(
+            finPeriodeReference,
+          )})`,
+        });
+      }
+    });
 
 type RowProgressionProps = {
   children: string;
@@ -107,31 +111,23 @@ const RowProgression = ({
           <span style={{ textAlign: "center" }}>{valueOrigin}</span>
         </GridCol>
         <GridCol sm={8}>
-          <TextareaCounter
-            label=""
-            fieldName={fieldName}
-            readOnly={readOnly}
-            disabled={isDisabled}
-            maxLength={300}
-            showRemainingCharacters
-            placeholder={isDisabled ? "Pas d'objectif à renseigner" : "Votre objectif en 300 caractères maximum"}
-          />
+          {!isDisabled ? (
+            <TextareaCounter
+              label=""
+              fieldName={fieldName}
+              readOnly={readOnly}
+              disabled={isDisabled}
+              maxLength={300}
+              showRemainingCharacters
+              placeholder="Votre objectif en 300 caractères maximum"
+            />
+          ) : (
+            "✅ Pas d'objectif à renseigner."
+          )}
         </GridCol>
       </Grid>
     </>
   );
-};
-
-export type ObjectifsMesuresFormType = {
-  datePublicationMesures?: string;
-  datePublicationObjectifs?: string;
-  modalitesPublicationObjectifsMesures?: string;
-  objectifIndicateurCinq?: string;
-  objectifIndicateurDeux?: string;
-  objectifIndicateurDeuxTrois?: string;
-  objectifIndicateurQuatre?: string;
-  objectifIndicateurTrois?: string;
-  objectifIndicateurUn?: string;
 };
 
 function buildWordings(index: number | undefined, publicationSurSiteInternet: boolean) {
@@ -299,10 +295,6 @@ export function buildHelpersObjectifsMesures(declaration?: DeclarationOpmcDTO) {
           datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
           modalitesPublicationObjectifsMesures: z.string().optional(),
         })
-        // NB : ces règles en zod ne sont pas appelées par React Final Form. Je ne sais pas pourquoi, mais j'imagine que c'est parce que le refine
-        // se situe au niveau racine et pas au niveau d'un des champs. Il faudrait passer en React Hook Form qui supporte zod officiellement.
-        // Côté form, on contourne en se basant sur l'autovalidation des champs date et textarea, qui impose qu'il y ait un contenu si le widget s'affiche.
-        // Côté valiation des données d'un formulaire, c'est appelé correctement.
         .refine(
           val =>
             !index
@@ -362,6 +354,7 @@ type Props = {
 
 export const ObjectifsMesuresForm = ({ declaration }: Props) => {
   const router = useRouter();
+  const { setMessage } = useMessageProvider();
 
   const {
     index,
@@ -388,8 +381,8 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
     publicationSurSiteInternet,
   );
 
-  const methods = useForm<ObjectifsMesuresFormType>({
-    mode: "onSubmit",
+  const methods = useForm<UpdateOpMcDTO>({
+    mode: "onChange",
     resolver: zodResolver(objectifsMesuresSchema),
     defaultValues: {
       datePublicationMesures: declaration.opmc?.datePublicationMesures,
@@ -407,27 +400,24 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
   const {
     register,
     handleSubmit,
-    setValue,
-    formState: { isValid, errors: _errors },
-    watch,
+    formState: { isValid, errors },
   } = methods;
 
   const [siren, year] = [declaration.commencer?.siren, declaration.commencer?.annéeIndicateurs];
 
+  assert(siren, "Le siren est obligatoire");
+  assert(year, "L'année est obligatoire");
+
   const isReadonly = !isEditable(declaration);
 
-  const onSubmit = async (formData: ObjectifsMesuresFormType) => {
-    // try {
-    //   await postOpMc(siren, year, formData);
-    //   await sendReceiptObjectifsMesures(siren, Number(year));
-    //   toastSuccess(finalMessage);
-    // } catch (error) {
-    //   console.error(
-    //     "Erreur lors de la sauvegarde des informations d'objectifs de progression et mesures de correction",
-    //     error,
-    //   );
-    //   toastError("Erreur lors de la sauvegarde des informations");
-    // }
+  const onSubmit = async (formData: UpdateOpMcDTO) => {
+    const result = await updateDeclarationOpmc({ opmc: formData, siren, year });
+
+    if (result.ok) {
+      setMessage({ text: finalMessage, severity: "success" });
+    } else {
+      setMessage({ text: result.error || "Erreur lors de la sauvegarde des informations", severity: "error" });
+    }
   };
 
   return (
@@ -443,14 +433,14 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {(index !== undefined || after2021) && (
           <>
-            <Alert severity="warning" description={warningText} title="" />
+            <AlertMessageWithProvider />
 
-            <p className={fr.cx("fr-mt-4w", "fr-text--sm")}>{legalText}</p>
+            <Heading as="h2" text={title} />
 
-            <Heading as="h2" text="Objectifs de progression" />
+            <p className={fr.cx("fr-mt-4w", "fr-text--xs")}>{legalText}</p>
 
             <>
-              <p className={fr.cx("fr-text--sm")}>
+              <p className={fr.cx("fr-text--xs")}>
                 Conformément à la loi n° 2020-1721 du 29 décembre 2020 de finances pour 2021 et aux articles L. 1142-9-1
                 et D. 1142-6-1 du code du travail, indiquer les objectifs de progression fixés pour chaque indicateur
                 pour lequel la note maximale n'a pas été atteinte.
@@ -564,7 +554,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
               </>
             </>
 
-            <Heading as="h2" text="Publication" />
+            <Heading as="h3" text="Publication" className={fr.cx("fr-mt-6w")} />
 
             <Input
               nativeInputProps={{
@@ -573,6 +563,8 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
                 readOnly: isReadonly ?? false,
               }}
               label="Date de publication des objectifs de progression"
+              state={errors["datePublicationObjectifs"] && "error"}
+              stateRelatedMessage={errors["datePublicationObjectifs"]?.message as string}
             />
 
             {index && index < 75 && (
@@ -584,6 +576,8 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
                     readOnly: isReadonly ?? false,
                   }}
                   label="Date de publication des mesures de correction"
+                  state={errors["datePublicationMesures"] && "error"}
+                  stateRelatedMessage={errors["datePublicationMesures"]?.message as string}
                 />
               </>
             )}
@@ -612,6 +606,8 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
                 }}
                 label={modalite}
                 textArea
+                state={errors["modalitesPublicationObjectifsMesures"] && "error"}
+                stateRelatedMessage={errors["modalitesPublicationObjectifsMesures"]?.message as string}
               />
             )}
           </>

@@ -8,10 +8,11 @@ import { UnexpectedSessionError } from "@common/shared-domain";
 import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { CenteredContainer } from "@design-system";
+import { MessageProvider } from "@design-system/client";
 import { notFound } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
-import { getDeclarationOpmc } from "../../../declaration/actions";
+import { getDeclarationOpmc } from "../../actions";
 import { ObjectifsMesuresForm } from "./ObjectifsMesuresForm";
 
 const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
@@ -22,7 +23,6 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
 const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
 
-  // TODO DeclarationOpmcDTO
   let declaration: DeclarationOpmcDTO | null = null;
   try {
     declaration = await getDeclarationOpmc(siren, year);
@@ -93,9 +93,9 @@ const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextSe
     return <p>Vous n'avez pas à remplir cette page car l'index de cette déclaration est supérieur à 85.</p>;
 
   return (
-    <>
+    <MessageProvider>
       <ObjectifsMesuresForm declaration={declaration} />
-    </>
+    </MessageProvider>
   );
 };
 

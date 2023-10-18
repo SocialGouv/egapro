@@ -11,7 +11,7 @@ import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 type Input = {
   opmc: UpdateOpMcDTO;
   siren: string;
-  year: string;
+  year: number;
 };
 export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   constructor(private readonly declarationRepo: IDeclarationRepo) {}
@@ -19,14 +19,14 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   public async execute({ opmc, siren, year }: Input): Promise<void> {
     const declarationAggregate = await this.declarationRepo.getOneDeclarationOpmc([
       new Siren(siren),
-      new PositiveNumber(+year),
+      new PositiveNumber(year),
     ]);
 
     const declaration = declarationAggregate?.declaration;
 
     if (!declarationAggregate || !declaration) {
       throw new UpdateDeclarationWithOpMcDeclarationNotFoundError(
-        `Declaration not found with siren=${siren} and year=${year}.`,
+        `Aucune déclaration trouvée pour le Siren ${siren} et l'année ${year}.`,
       );
     }
 
@@ -37,9 +37,12 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
       { years: OPMC_OPEN_DURATION_AFTER_EDIT },
       now,
     );
+
     if (opMcAlreadySet) {
       if (!opMcStillEditable) {
-        throw new UpdateDeclarationWithOpMcPastTimeError(`OpMc cannot be set anymore. Time is passed.`);
+        throw new UpdateDeclarationWithOpMcPastTimeError(
+          `Les OPMC ne peuvent plus être modifiés car la durée de 1 an est dépassée.`,
+        );
       }
     }
 
@@ -70,11 +73,7 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
       declarationAggregate.objectivesMeasuresModalities = new NonEmptyString(opmc.modalitesPublicationObjectifsMesures);
     }
 
-    // TODO on ne change pas la date de modification pour éviter de pour redéclarer les opmc tous les ans avant la date limite
-    // il faudrait ajouter un champs "opMcModifiedAt"
-    // declaration.setModifiedAt(now);
-
-    await this.declarationRepo.update(declaration);
+    await this.declarationRepo.saveDeclarationOpmcWithIndex(declarationAggregate);
   }
 }
 
