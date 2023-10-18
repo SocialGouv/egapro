@@ -69,7 +69,7 @@ export const ImportReferentsModal = () => {
       <br />
       <form action={formData => startTransition(() => doImport(formData))}>
         <input disabled={isPending} type="file" accept=".json" name="file" onChange={uploadToClient} />
-        <button ref={submitRef} style={{ display: "none" }} type="submit" />
+        <button ref={submitRef} className="hidden" type="submit" />
       </form>
       {isPending && <Alert className={fr.cx("fr-mt-2w")} small severity="info" description="Uploading..." />}
       {errorMessage && <Alert className={fr.cx("fr-mt-2w")} small severity="error" description={errorMessage} />}

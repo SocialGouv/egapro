@@ -67,12 +67,12 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                 <br />
                 <br />
                 Le compte utilisé doit correspondre à celui de la personne à contacter par les services de l'inspection
-                du travail en case de besoin. L'email associé sera celui sur lequel sera adressé l'accusé de réception
-                en fin de déclaration.
+                du travail en cas de besoin. L'email associé sera celui sur lequel sera adressé l'accusé de réception en
+                fin de déclaration.
                 <br />
                 <br />
-                Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez vous assurez que
-                votre compte est{" "}
+                Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez vous assurer que votre
+                compte est{" "}
                 <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
                   rattaché à votre entreprise
                 </Link>
@@ -80,7 +80,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               </>
             }
           />
-          <Box style={{ textAlign: "center" }} mt="2w">
+          <Box className="text-center" mt="2w">
             <MonCompteProLogin callbackUrl={callbackUrl} />
             <GithubLogin callbackUrl={callbackUrl} />
           </Box>

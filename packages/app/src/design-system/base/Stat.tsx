@@ -15,7 +15,7 @@ export interface StatProps {
 
 export const Stat = ({ text, display = { asTitle: "lg" }, helpText, label, align = "center" }: StatProps) => {
   return (
-    <Box style={{ textAlign: align }}>
+    <Box className={`text-${align}`}>
       {label && <Text text={label} variant="md" className={fr.cx("fr-m-0")} />}
       <Text
         text={text}

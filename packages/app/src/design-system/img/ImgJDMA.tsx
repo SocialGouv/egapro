@@ -1,23 +1,17 @@
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+
+import style from "./ImgJDMA.module.scss";
+
 export const ImgJDMA = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 200 85"
     width="200px"
     height="85px"
-    className="fr-fluid-img"
+    className={cx("fr-fluid-img", style["svg-jdma"])}
     focusable="false"
     aria-hidden="true"
-    id="svg-jdma"
   >
-    <style
-      dangerouslySetInnerHTML={{
-        __html: `
-    #svg-jdma:hover #Rectangle {
-        --hover: var(--background-action-high-blue-france-hover);
-        fill: var(--hover);
-      }`,
-      }}
-    />
     <defs>
       <polygon
         id="path-1"
@@ -27,7 +21,7 @@ export const ImgJDMA = () => (
     <g id="V1a" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="Group">
         <rect
-          id="Rectangle"
+          className={style.Rectangle}
           fill="var(--background-action-high-blue-france)"
           x="0"
           y="0"

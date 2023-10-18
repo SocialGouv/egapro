@@ -134,7 +134,7 @@ export const PublicationForm = () => {
           label="Adresse exacte de la page Internet (URL)"
           state={errors.publishUrl && "error"}
           stateRelatedMessage={errors.publishUrl?.message}
-          style={{ display: hasWebsite ? "block" : "none" }}
+          className={hasWebsite ? "block" : "hidden"}
           nativeInputProps={{
             placeholder: "https://",
             type: "url",
@@ -149,7 +149,7 @@ export const PublicationForm = () => {
           label="Modalités de communication"
           state={errors.publishModalities && "error"}
           stateRelatedMessage={errors.publishModalities?.message}
-          style={{ display: hasWebsite === false ? "block" : "none" }}
+          className={hasWebsite === false ? "block" : "hidden"}
           nativeTextAreaProps={register("publishModalities", { disabled: hasWebsite })}
         />
         <BackNextButtonsGroup

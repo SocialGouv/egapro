@@ -6,11 +6,11 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";

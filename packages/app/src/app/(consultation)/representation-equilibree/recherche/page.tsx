@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { config } from "@common/config";
 import { searchRepresentationEquilibreeDTOSchema } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { withSearchParamsValidation } from "@common/utils/next";
@@ -56,7 +57,7 @@ export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchem
           </GridCol>
         </Grid>
       </Container>
-      <Box style={{ backgroundColor: "var(--background-alt-grey)" }} className={fr.cx("fr-pb-6w", "fr-pt-4w")}>
+      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"), "bg-dsfr-alt-grey")}>
         <Container as="section">
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} xl={8}>

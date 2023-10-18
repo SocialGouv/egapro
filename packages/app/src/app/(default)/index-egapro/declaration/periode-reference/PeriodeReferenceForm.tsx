@@ -11,6 +11,7 @@ import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
+import { Skeleton } from "@design-system/utils/client/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { endOfYear, formatISO, getYear } from "date-fns";
@@ -19,7 +20,6 @@ import { omit } from "lodash";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
-import Skeleton from "react-loading-skeleton";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
