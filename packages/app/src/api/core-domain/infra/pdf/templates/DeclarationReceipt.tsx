@@ -337,6 +337,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         rows.push({
           key: "Objectif Indicateur écart de rémunération",
           value: input.objectiveRemunerations?.getValue() ?? "À définir",
+          showAsBlock: true,
         });
     }
 
@@ -348,6 +349,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           rows.push({
             key: "Objectif Indicateur écart de taux d'augmentations individuelles",
             value: input.objectiveSalaryRaiseAndPromotions?.getValue() ?? "À définir",
+            showAsBlock: true,
           });
         }
       }
@@ -357,6 +359,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           rows.push({
             key: "Objectif Indicateur écart de taux d'augmentations individuelles (hors promotions)",
             value: input.objectiveSalaryRaise?.getValue() ?? "À définir",
+            showAsBlock: true,
           });
         }
       }
@@ -366,6 +369,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           rows.push({
             key: "Objectif Indicateur écart de taux de promotions",
             value: input.objectivePromotions?.getValue() ?? "À définir",
+            showAsBlock: true,
           });
         }
       }
@@ -375,6 +379,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           rows.push({
             key: "Objectif Indicateur retour de congé maternité",
             value: input.objectiveMaternityLeaves?.getValue() ?? "À définir",
+            showAsBlock: true,
           });
         }
       }
@@ -383,13 +388,17 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         rows.push({
           key: "Objectif Indicateur dix plus hautes rémunérations",
           value: input.objectiveHighRemunerations?.getValue() ?? "À définir",
+          showAsBlock: true,
         });
       }
 
-      rows.push({
-        key: "Modalités de communication auprès des salariés",
-        value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
-      });
+      if (!declaration.publication?.url || declaration.index.getValue() < 75) {
+        rows.push({
+          key: "Modalités de communication auprès des salariés",
+          value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
+          showAsBlock: true,
+        });
+      }
     }
 
     table.push({

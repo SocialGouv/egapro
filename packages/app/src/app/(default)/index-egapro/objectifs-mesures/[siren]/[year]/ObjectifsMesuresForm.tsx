@@ -410,8 +410,8 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
 
   const isReadonly = !isEditable(declaration);
 
-  const onSubmit = async (formData: UpdateOpMcDTO) => {
-    const result = await updateDeclarationOpmc({ opmc: formData, siren, year });
+  const onSubmit = async (opmc: UpdateOpMcDTO) => {
+    const result = await updateDeclarationOpmc({ opmc, siren, year });
 
     if (result.ok) {
       setMessage({ text: finalMessage, severity: "success" });

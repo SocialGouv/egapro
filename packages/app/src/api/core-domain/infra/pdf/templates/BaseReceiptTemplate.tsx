@@ -114,6 +114,7 @@ export namespace BaseReceiptTemplateProps {
   }
   export interface Row {
     key: string;
+    showAsBlock?: boolean;
     value?: number | string | null;
   }
 }
@@ -144,12 +145,21 @@ export const BaseReceiptTemplate = ({
           {table.map((section, sectionIdx) => (
             <View key={`section-${sectionIdx}`} style={styles.section} wrap={false}>
               <Text style={styles.sectionTitle}>{section.title}</Text>
-              {section.rows.map((row, rowIdx) => (
-                <View key={`section-${sectionIdx}-row-${rowIdx}`} style={styles.sectionRow}>
-                  <Text style={styles.sectionRowKey}>{row.key}</Text>
-                  <Text style={styles.sectionRowValue}>{row.value ?? "-"}</Text>
-                </View>
-              ))}
+              {section.rows.map((row, rowIdx) =>
+                row.showAsBlock ? (
+                  <View key={`section-${sectionIdx}-row-${rowIdx}`} wrap={true}>
+                    <Text style={styles.sectionRowKey}>{row.key}</Text>
+                    <Text>{row.value ?? "-"}</Text>
+                  </View>
+                ) : (
+                  <>
+                    <View key={`section-${sectionIdx}-row-${rowIdx}`} style={styles.sectionRow}>
+                      <Text style={styles.sectionRowKey}>{row.key}</Text>
+                      <Text style={styles.sectionRowValue}>{row.value ?? "-"}</Text>
+                    </View>
+                  </>
+                ),
+              )}
             </View>
           ))}
         </View>
