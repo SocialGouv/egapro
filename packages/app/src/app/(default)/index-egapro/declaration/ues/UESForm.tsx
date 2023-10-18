@@ -22,6 +22,7 @@ import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import style from "./UESForm.module.scss";
 
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
