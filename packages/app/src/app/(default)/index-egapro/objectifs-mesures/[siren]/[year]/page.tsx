@@ -73,16 +73,14 @@ const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextSe
   }
 
   const index = declaration["resultat-global"]?.index;
-
   const session = await getServerSession(authConfig);
-
   const declarationDate = declaration["declaration-existante"].date;
-
   const canEdit = canEditSiren(session?.user)(siren);
+
+  if (!canEdit) return <p>Vous n'êtes pas autorisés à consulter cette déclaration.</p>;
 
   if (!declarationDate) return <SkeletonForm fields={8} />;
 
-  // This is not supposed to happen due to routing but it is safer to guard against it.
   if (declaration["periode-reference"]?.périodeSuffisante !== "oui")
     return <p>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</p>;
 
