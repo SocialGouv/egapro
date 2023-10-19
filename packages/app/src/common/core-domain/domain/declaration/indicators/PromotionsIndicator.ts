@@ -44,7 +44,6 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
     const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
     const props: PromotionsIndicatorProps = {
       categories,
-      progressObjective: json.progressObjective,
     };
 
     if (json.notComputableReason)

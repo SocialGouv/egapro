@@ -6,6 +6,7 @@ import { type Any } from "@common/utils/types";
 type ButtonType = ButtonsGroupProps["buttons"][number]["type"];
 export type BackNextButtonsGroupProps = {
   backDisabled?: boolean;
+  backIcon?: boolean;
   /**
    * @default "Précédent"
    */
@@ -17,6 +18,7 @@ export type BackNextButtonsGroupProps = {
   backType?: ButtonType;
   className?: CxArg;
   nextDisabled?: boolean;
+  nextIcon?: boolean;
   /**
    * @default "Suivant"
    */
@@ -51,11 +53,13 @@ export const BackNextButtonsGroup = ({
   backLabel = "Précédent",
   backProps,
   backType = "button",
+  backIcon = true,
   className,
   nextDisabled,
   nextLabel = "Suivant",
   nextProps,
   nextType = "submit",
+  nextIcon = true,
   noBack,
   noNext,
 }: BackNextButtonsGroupProps) => {
@@ -75,7 +79,7 @@ export const BackNextButtonsGroup = ({
                   priority: "secondary",
                   type: backType,
                   disabled: backDisabled,
-                  iconId: "fr-icon-arrow-left-line",
+                  iconId: backIcon && "fr-icon-arrow-left-line",
                   iconPosition: "left",
                   ...((backProps ?? {}) as Any),
                 } satisfies ButtonProps,
@@ -87,7 +91,7 @@ export const BackNextButtonsGroup = ({
                   children: nextLabel,
                   type: nextType,
                   disabled: nextDisabled,
-                  iconId: "fr-icon-arrow-right-line",
+                  iconId: nextIcon && "fr-icon-arrow-right-line",
                   iconPosition: "right",
                   ...((nextProps ?? {}) as Any),
                 } satisfies ButtonProps,

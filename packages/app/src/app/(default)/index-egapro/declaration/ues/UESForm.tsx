@@ -6,19 +6,22 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { AlertMessage } from "@design-system/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { memoizedFetchSiren } from "@services/apiClient";
+import { getCompany } from "@globalActions/company";
+import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { useDebounce } from "use-debounce";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
 
 const formSchema = zodFr.object({
@@ -26,8 +29,8 @@ const formSchema = zodFr.object({
   entreprises: z
     .array(
       z.object({
-        raisonSociale: z.string().trim().nonempty(),
-        siren: sirenSchema,
+        raisonSociale: z.string(),
+        siren: z.string(),
       }),
     )
     .nonempty({
@@ -42,8 +45,9 @@ const stepName: FunnelKey = "ues";
 export const UESForm = () => {
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();
+  const [valid, setValid] = useState<false | true | undefined>();
 
-  assertOrRedirectCommencerStep(formData);
+  // assertOrRedirectCommencerStep(formData);
 
   // We ensure to have at least one entreprise in the form, in order to force the user to fill the form and the validation to be triggered, even if the user delete the only entreprise in the form.
   const defaultValues = produce(formData[stepName], draft => {
@@ -54,7 +58,7 @@ export const UESForm = () => {
 
   const methods = useForm<FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema),
+    // no resolver, because we handle the validation by ourselves.
     defaultValues,
   });
 
@@ -65,9 +69,8 @@ export const UESForm = () => {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors, isValid },
+    formState: { errors },
     watch,
-    trigger,
   } = methods;
 
   const {
@@ -79,13 +82,90 @@ export const UESForm = () => {
     name: "entreprises",
   });
 
-  const watchedEntreprises = watch("entreprises");
+  const watchedCompanies = watch("entreprises");
+  const watchedName = watch("nom");
+
+  const [stringifiedCompanies] = useDebounce(JSON.stringify(watchedCompanies), 500);
 
   const onSubmit = async (data: FormType) => {
     savePageData("ues", data);
 
     router.push(funnelConfig(formData)[stepName].next().url);
   };
+
+  // TODO: essayer avec un useEffect
+  // - memoize les fetch pour ne pas les refaire à chaque fois
+
+  // Effect to handle validation.
+  useEffect(() => {
+    async function run() {
+      clearErrors("entreprises");
+
+      let valid = true;
+
+      const siren = formData.commencer!.siren;
+      const year = formData.commencer!.annéeIndicateurs;
+
+      const companies = JSON.parse(stringifiedCompanies) as FormType["entreprises"];
+
+      if (!watchedName.trim()) {
+        setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
+        valid = false;
+      }
+
+      if (companies.length === 0) {
+        setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
+        valid = false;
+      }
+
+      const allSirens = [siren, ...companies.map(entreprise => entreprise.siren)];
+
+      for (let index = 0; index < companies.length; index++) {
+        const company = companies[index];
+        const parsedSiren = sirenSchema.safeParse(company.siren);
+
+        if (!parsedSiren.success) {
+          setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est invalide" });
+          valid = false;
+          continue;
+        }
+
+        const nbOccurences = allSirens.filter(siren => siren === company.siren).length;
+
+        if (nbOccurences > 1) {
+          setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est déjà dans l'UES" });
+          valid = false;
+          continue;
+        }
+
+        // We fetch the latest data for the entreprise to fill the entreprise page.
+        const result = await getCompany(company.siren);
+
+        if (result.ok) {
+          const company = result.data;
+
+          const isClosed = isCompanyClosed(company, year);
+
+          if (isClosed) {
+            setError(`entreprises.${index}.siren`, { type: "custom", message: CLOSED_COMPANY_ERROR });
+            valid = false;
+          } else {
+            setValue(`entreprises.${index}.raisonSociale`, company.simpleLabel);
+          }
+        } else {
+          setError(`entreprises.${index}.siren`, {
+            type: "custom",
+            message: "Impossible de récupérer les informations de l'entreprise",
+          });
+          valid = false;
+        }
+      }
+
+      setValid(valid);
+    }
+
+    run();
+  }, [clearErrors, formData.commencer, setError, setValue, stringifiedCompanies, watchedName]); // We need to stringify the array to trigger the useEffect when the array changes.
 
   return (
     <FormProvider {...methods}>
@@ -149,47 +229,6 @@ export const UESForm = () => {
                           ...register(`entreprises.${index}.siren`),
                           maxLength: 9,
                           minLength: 9,
-                          // TODO onChange + delay + debounce instead
-                          onBlur: async () => {
-                            const result = sirenSchema.safeParse(watchedEntreprises[index].siren);
-
-                            if (!result.success) {
-                              setValue(`entreprises.${index}.raisonSociale`, "");
-                              return;
-                            }
-
-                            const allSirens = watchedEntreprises.map(entreprise => entreprise.siren);
-
-                            const allOtherSirens = [
-                              ...allSirens.slice(0, index),
-                              ...allSirens.slice(index + 1),
-                              formData.commencer?.siren,
-                            ];
-
-                            if (allOtherSirens.includes(watchedEntreprises[index].siren)) {
-                              setValue(`entreprises.${index}.raisonSociale`, "");
-                              setError(`entreprises.${index}.siren`, {
-                                message: "Le Siren est déjà dans l'UES",
-                              });
-                              return;
-                            }
-
-                            try {
-                              const firm = await memoizedFetchSiren(
-                                watchedEntreprises[index].siren,
-                                formData.commencer?.annéeIndicateurs,
-                              );
-                              setValue(`entreprises.${index}.raisonSociale`, firm ? firm.raison_sociale : "");
-                              clearErrors(`entreprises.${index}.siren`);
-                              trigger();
-                            } catch (error: unknown) {
-                              setValue(`entreprises.${index}.raisonSociale`, "");
-                              setError(`entreprises.${index}.siren`, {
-                                message: error instanceof Error ? error.message : "Le Siren est invalide",
-                                type: "manual",
-                              });
-                            }
-                          },
                         }}
                         state={errors.entreprises?.[index]?.siren && "error"}
                       />
@@ -203,11 +242,9 @@ export const UESForm = () => {
                         <Input
                           label="Raison sociale entreprise"
                           hideLabel
-                          textArea
                           disabled
-                          nativeTextAreaProps={{
+                          nativeInputProps={{
                             ...register(`entreprises.${index}.raisonSociale`),
-                            title: watchedEntreprises[index].raisonSociale,
                           }}
                           state={errors.entreprises?.[index]?.raisonSociale && "error"}
                           stateRelatedMessage={errors.entreprises?.[index]?.raisonSociale?.message}
@@ -234,8 +271,8 @@ export const UESForm = () => {
           <Button
             type="button"
             onClick={() => {
-              clearErrors();
               append({ siren: "", raisonSociale: "" });
+              setValid(undefined);
             }}
             iconId="fr-icon-add-line"
           >
@@ -252,7 +289,7 @@ export const UESForm = () => {
           </ClientOnly>
         </div>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+        <BackNextButtons stepName={stepName} disabled={!valid} />
       </form>
     </FormProvider>
   );

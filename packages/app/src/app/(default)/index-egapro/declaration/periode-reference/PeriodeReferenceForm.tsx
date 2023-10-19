@@ -76,6 +76,7 @@ export const PeriodeReferenceForm = () => {
 
   useEffect(() => {
     register("annéeIndicateurs");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const périodeSuffisante = watch("périodeSuffisante");

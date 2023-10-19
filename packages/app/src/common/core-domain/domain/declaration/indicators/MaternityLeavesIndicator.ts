@@ -21,7 +21,6 @@ export class MaternityLeavesIndicator extends AbstractIndicator<MaternityLeavesI
 
   public fromJson(json: EntityPropsToJson<MaternityLeavesIndicatorProps>) {
     const props: MaternityLeavesIndicatorProps = {
-      progressObjective: json.progressObjective,
       notComputableReason: json.notComputableReason
         ? new NotComputableReasonMaternityLeaves(json.notComputableReason)
         : undefined,

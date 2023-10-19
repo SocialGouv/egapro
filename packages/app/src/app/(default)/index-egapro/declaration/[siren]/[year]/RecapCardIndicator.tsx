@@ -30,7 +30,11 @@ export const RecapCardIndicator = ({ name, customContent, edit }: PropsWithChild
 
   const indicateur = formData[name] as unknown as GenericFieldIndicator;
 
-  const note = indicateur?.note;
+  const note = name === "remunerations" ? formData["remunerations-resultat"]?.note : indicateur?.note;
+  const populationFavorable =
+    name === "remunerations"
+      ? formData["remunerations-resultat"]?.populationFavorable
+      : indicateur?.populationFavorable;
   const motifNc = indicateur?.estCalculable === "non" ? indicateur.motifNonCalculabilité : undefined;
 
   return (
@@ -56,13 +60,13 @@ export const RecapCardIndicator = ({ name, customContent, edit }: PropsWithChild
               legend={
                 name === "conges-maternite"
                   ? ""
-                  : indicateur.populationFavorable === FavorablePopulation.Enum.EQUALITY
+                  : populationFavorable === FavorablePopulation.Enum.EQUALITY
                   ? "Égalité de l'indicateur"
                   : name === "hautes-remunerations"
-                  ? `${capitalize(indicateur?.populationFavorable)} sur-représenté${
-                      indicateur.populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
+                  ? `${capitalize(populationFavorable)} sur-représenté${
+                      populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
                     }s`
-                  : `Écart en faveur des ${indicateur?.populationFavorable}`
+                  : `Écart en faveur des ${populationFavorable}`
               }
             />
           )}
