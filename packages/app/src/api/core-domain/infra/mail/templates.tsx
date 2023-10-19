@@ -1,5 +1,7 @@
 import { type MailTemplate } from "@api/shared-domain/infra/mail/type";
 import { config } from "@common/config";
+import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
+import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires -- Nextjs don't like react-dom/server on routes, so we should "hide it" from him by using require instead of import
@@ -135,6 +137,138 @@ ${config.api.mailer.signature}`,
           </p>
           <p>Cordialement,</p>
           <p>{config.api.mailer.signature}</p>
+        </body>
+      </html>,
+    ),
+});
+
+export const declaration_receipt = (url: string, { declaration }: DeclarationOpmc): MailTemplate => ({
+  subject: "Egapro - Déclaration",
+  text: `Madame, Monsieur,
+
+Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année ${
+    declaration.year.getValue() + 1
+  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos déclarations.
+
+Vous avez déclaré un index global ${
+    declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"
+  }, décliné par indicateurs comme suit :
+
+- indicateur écart de rémunérations : ${
+    declaration.remunerations?.score?.getValue() === undefined
+      ? "non calculable"
+      : declaration.remunerations.score.getValue()
+  }
+${
+  declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250
+    ? `- indicateur écart de taux d'augmentations individuelles : ${
+        declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
+          ? "non calculable"
+          : declaration.salaryRaisesAndPromotions.score.getValue()
+      }`
+    : `- indicateur écart de taux d'augmentation : ${
+        declaration.salaryRaises?.score?.getValue() === undefined
+          ? "non calculable"
+          : declaration.salaryRaises.score.getValue()
+      }
+- indicateur écart de taux de promotion : ${
+        declaration.promotions?.score?.getValue() === undefined
+          ? "non calculable"
+          : declaration.promotions.score.getValue()
+      }`
+}
+- indicateur retour de congés maternité : ${
+    declaration.maternityLeaves?.score?.getValue() === undefined
+      ? "non calculable"
+      : declaration.maternityLeaves.score.getValue()
+  }}
+- indicateur hautes rémunérations: ${declaration.highRemunerations?.score.getValue()}}
+
+Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
+
+${url}
+
+Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
+
+Veuillez agréer, Madame, Monsieur, nos salutations distinguées,
+
+Les services de l’administration du travail.
+  `,
+  html:
+    "<!doctype html>" +
+    renderToStaticMarkup(
+      <html>
+        <body>
+          <p>Madame, Monsieur,</p>
+
+          <p>
+            Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de
+            votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année
+            {declaration.year.getValue() + 1} au titre des données {declaration.year.getValue()} conformément aux
+            dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le
+            présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos
+            déclarations.
+          </p>
+
+          <p>
+            Vous avez déclaré un index global{" "}
+            {declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"}, décliné par
+            indicateurs comme suit :
+          </p>
+
+          <ul>
+            <li>
+              indicateur écart de rémunérations :{" "}
+              {declaration.remunerations?.score?.getValue() === undefined
+                ? "non calculable"
+                : declaration.remunerations.score.getValue()}
+            </li>
+
+            {declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250 ? (
+              <li>
+                indicateur écart de taux d'augmentations individuelles :{" "}
+                {declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
+                  ? "non calculable"
+                  : declaration.salaryRaisesAndPromotions.score.getValue()}
+              </li>
+            ) : (
+              <>
+                <li>
+                  indicateur écart de taux d'augmentation :{" "}
+                  {declaration.salaryRaises?.score?.getValue() === undefined
+                    ? "non calculable"
+                    : declaration.salaryRaises.score.getValue()}
+                </li>
+                <li>
+                  indicateur écart de taux de promotion :{" "}
+                  {declaration.promotions?.score?.getValue() === undefined
+                    ? "non calculable"
+                    : declaration.promotions.score.getValue()}
+                </li>
+              </>
+            )}
+            <li>
+              indicateur retour de congés maternité :{" "}
+              {declaration.maternityLeaves?.score?.getValue() === undefined
+                ? "non calculable"
+                : declaration.maternityLeaves.score.getValue()}
+            </li>
+            <li>indicateur hautes rémunérations: {declaration.highRemunerations?.score.getValue()}</li>
+          </ul>
+
+          <p>
+            Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :{" "}
+            <a href={url}>{url}</a>
+          </p>
+
+          <p>
+            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
+            sein de votre DREETS en répondant à ce message.
+          </p>
+
+          <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
+
+          <p>Les services de l’administration du travail.</p>
         </body>
       </html>,
     ),

@@ -14,6 +14,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getCompany } from "@globalActions/company";
+import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { sortBy } from "lodash";
@@ -28,7 +29,6 @@ import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration"
 
 const stepName: FunnelKey = "commencer";
 
-const CLOSED_COMPANY_ERROR = "Ce Siren correspond a une entreprise fermée. Veuillez vérifier votre saisie";
 const API_ERROR = "Une erreur serveur est survenue. Veuillez recommencer plus tard";
 
 const baseSchema = zodFr.object({

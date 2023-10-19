@@ -55,7 +55,6 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
 
   public fromJson(json: EntityPropsToJson<RemunerationsIndicatorProps>) {
     const props: RemunerationsIndicatorProps = {
-      progressObjective: json.progressObjective,
       categories: json.categories.map(({ name, ranges }) => ({
         name,
         ranges: {

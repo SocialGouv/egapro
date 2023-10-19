@@ -87,7 +87,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         content={
           <>
             <p>
-              Les indicateurs sont calculés au titre de l’année <strong>{year}</strong>
+              Les indicateurs sont calculés au titre de l’année <strong>{year}</strong>.
             </p>
 
             {déclaration["periode-reference"]?.périodeSuffisante === "oui" ? (
@@ -98,12 +98,13 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                     {déclaration["periode-reference"].finPériodeRéférence &&
                       formatIsoToFr(déclaration["periode-reference"].finPériodeRéférence)}
                   </strong>
+                  .
                 </p>
                 <p>
                   {déclaration["periode-reference"].effectifTotal && (
                     <>
                       <strong>{déclaration["periode-reference"].effectifTotal}</strong> salariés pris en compte pour le
-                      calcul des indicateurs sur la période de référence (en effectif physique)
+                      calcul des indicateurs sur la période de référence (en effectif physique).
                     </>
                   )}
                 </p>
@@ -111,7 +112,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
             ) : (
               <p>
                 Vous ne disposez pas d'une période de référence de 12 mois consécutifs, votre index et vos indicateurs
-                ne sont pas calculables
+                ne sont pas calculables.
               </p>
             )}
           </>
@@ -128,16 +129,16 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                 {déclaration.remunerations?.estCalculable === "oui" && déclaration.remunerations?.mode && (
                   <p>
                     La modalité choisie pour le calcul de l'indicateur est{" "}
-                    {new RemunerationsMode(déclaration.remunerations?.mode).getLabel().toLowerCase()}
+                    {new RemunerationsMode(déclaration.remunerations?.mode).getLabel().toLowerCase()}.
                   </p>
                 )}
 
                 {déclaration.remunerations?.estCalculable === "oui" && déclaration.remunerations?.mode !== "csp" && (
                   <>
                     {!déclaration.remunerations?.dateConsultationCSE ? (
-                      <p> Aucun CSE n’est mis en place </p>
+                      <p> Aucun CSE n’est mis en place.</p>
                     ) : (
-                      <p>Le CSE a été consulté le {formatIsoToFr(déclaration.remunerations.dateConsultationCSE)}</p>
+                      <p>Le CSE a été consulté le {formatIsoToFr(déclaration.remunerations.dateConsultationCSE)}.</p>
                     )}
                   </>
                 )}
@@ -184,7 +185,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         }
       />
 
-      <RecapCardPublication edit={edit} publication={déclaration.publication} />
+      <RecapCardPublication
+        edit={edit}
+        publication={déclaration.publication}
+        mesures={déclaration["resultat-global"]?.mesures}
+      />
 
       {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <RecapCard

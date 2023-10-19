@@ -48,9 +48,7 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
   }
 
   public fromJson(json: EntityPropsToJson<SalaryRaisesAndPromotionsIndicatorProps>): this {
-    const props: SalaryRaisesAndPromotionsIndicatorProps = {
-      progressObjective: json.progressObjective,
-    };
+    const props: SalaryRaisesAndPromotionsIndicatorProps = {};
     if (json.notComputableReason)
       props.notComputableReason = new NotComputableReasonSalaryRaisesAndPromotions(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);

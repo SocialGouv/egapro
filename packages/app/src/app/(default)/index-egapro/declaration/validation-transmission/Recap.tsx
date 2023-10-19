@@ -30,14 +30,15 @@ export const Recap = () => {
   }
 
   const onSubmit = async () => {
-    try {
-      await saveDeclaration(formData as CreateDeclarationDTO);
+    const result = await saveDeclaration(formData as CreateDeclarationDTO);
+
+    if (result.ok) {
       setStatus("edition");
       router.push(funnelConfig(formData)[stepName].next().url);
-    } catch (error: unknown) {
-      console.error("Error in API", error);
+    } else {
+      console.error(result.error);
 
-      setError("Une erreur est survenue, veuillez réessayer.");
+      setError(result.error);
     }
   };
 

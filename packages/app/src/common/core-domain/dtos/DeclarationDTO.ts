@@ -65,7 +65,6 @@ export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remuner
 /**
  * The shape of the state for declaration form.
  */
-// export type DeclarationFormState = {
 export type DeclarationDTO = {
   augmentations?:
     | {
@@ -200,7 +199,7 @@ export type DeclarationDTO = {
   };
   "resultat-global"?: {
     index?: number;
-    mesures: CorrectiveMeasures.Enum;
+    mesures?: CorrectiveMeasures.Enum;
     points: number;
     pointsCalculables: number;
   };

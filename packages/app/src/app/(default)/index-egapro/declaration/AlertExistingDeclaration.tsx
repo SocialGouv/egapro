@@ -20,7 +20,7 @@ export const AlertExistingDeclaration = () => {
 
   const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
-  if (segment === "commencer") return null;
+  if (segment === "commencer" || segment === "confirmation") return null;
 
   return (
     <Alert
@@ -44,7 +44,9 @@ export const AlertExistingDeclaration = () => {
                 {
                   title: "Revenir au récapitulatif",
                   children: "Revenir au récapitulatif",
-                  linkProps: { href: `${config.base_declaration_url}/declaration-existante` },
+                  linkProps: {
+                    href: `${config.base_declaration_url}/${formData.commencer?.siren}/${formData.commencer?.annéeIndicateurs}`,
+                  },
                   iconId: "fr-icon-arrow-right-line",
                   iconPosition: "right",
                   className: fr.cx("fr-mt-2w"),

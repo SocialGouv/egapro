@@ -142,7 +142,9 @@ export type CongesMaternite = BaseIndicateurNote & {
 /**
  * Indicateur 5 relatif au nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
  */
-export type HautesRemunerations = Required<BaseIndicateurNote> & WithPopulationFavorable;
+export type HautesRemunerations = Pick<BaseIndicateurNote, "objectif_de_progression"> &
+  Required<Pick<BaseIndicateurNote, "note" | "résultat">> &
+  WithPopulationFavorable;
 
 /**
  * Representation of a declaration in db.
