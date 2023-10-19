@@ -67,6 +67,7 @@ export const ResultatGlobalForm = () => {
         };
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues,
