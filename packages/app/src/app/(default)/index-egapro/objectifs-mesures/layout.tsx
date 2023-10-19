@@ -1,36 +1,14 @@
-import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
-import { config } from "@common/config";
-import { CenteredContainer, Container } from "@design-system";
+import { fr } from "@codegouvfr/react-dsfr";
+import { Box, CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
-import { AlertExistingDeclaration } from "../declaration/AlertExistingDeclaration";
-
-const DEFAULT_TITLE = "Déclaration d'index Egapro";
+const DEFAULT_TITLE = "Déclaration des objectifs de progression";
 
 const DeclarationLayout = ({ children }: PropsWithChildren) => {
   return (
-    <>
-      <Container>
-        <Breadcrumb
-          currentPageLabel="Déclaration d'index"
-          homeLinkProps={{
-            href: "/",
-          }}
-          segments={[
-            {
-              linkProps: {
-                href: `${config.base_declaration_url}/commencer`,
-              },
-              label: "Index",
-            },
-          ]}
-        />
-      </Container>
-      <CenteredContainer>
-        <AlertExistingDeclaration />
-        {children}
-      </CenteredContainer>
-    </>
+    <Box className={fr.cx("fr-mt-8w")}>
+      <CenteredContainer>{children}</CenteredContainer>
+    </Box>
   );
 };
 
