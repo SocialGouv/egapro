@@ -1,5 +1,5 @@
 export type AdminDeclarationDTO = {
-  createdAt: string;
+  createdAt: Date;
   declarantEmail: string;
   declarantFirstName: string;
   declarantLastName: string;
@@ -11,7 +11,7 @@ export type AdminDeclarationDTO = {
   | {
       index: number;
       type: "index";
-      ues: {
+      ues?: {
         companies?: Array<{
           name: string;
           siren: string;

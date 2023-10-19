@@ -63,6 +63,7 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
             compact
             classes={{
               table: style.table,
+              wrapper: style.tableWrapper,
             }}
           >
             <TableAdminHead>
@@ -91,22 +92,23 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
                   <TableAdminBodyRowCol className={style.tableColumnName} title={declaration.name}>
                     {declaration.name}
                   </TableAdminBodyRowCol>
-                  <TableAdminBodyRowCol>{formatDateToFr(new Date(declaration.createdAt))}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol>{formatDateToFr(declaration.createdAt)}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantEmail}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantFirstName}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantLastName}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>
                     {declaration.type === "index" ? declaration.index ?? "N.C" : "N/A"}
                   </TableAdminBodyRowCol>
-                  <TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol
+                    title={
+                      declaration.type === "index" && declaration.ues
+                        ? declaration.ues.companies?.map(company => `${company.siren} - ${company.name}`).join("\n")
+                        : void 0
+                    }
+                  >
                     {declaration.type === "index" ? (
                       declaration.ues ? (
-                        <span
-                          className="underline cursor-help"
-                          title={declaration.ues.companies
-                            ?.map(company => `${company.siren} - ${company.name}`)
-                            .join("\n")}
-                        >
+                        <span className="underline cursor-help">
                           {declaration.ues.name} ({declaration.ues.companies?.length ?? 0})
                         </span>
                       ) : (
@@ -133,3 +135,9 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
 });
 
 export default DeclarationPage;
+
+/*
+
+localhost 
+
+ */

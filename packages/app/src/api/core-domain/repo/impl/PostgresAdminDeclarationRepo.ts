@@ -3,7 +3,6 @@ import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type AdminDeclarationDTO } from "@common/core-domain/dtos/AdminDeclarationDTO";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
-import { type Any } from "@common/utils/types";
 import { isFinite } from "lodash";
 import { type Helper } from "postgres";
 
@@ -17,48 +16,27 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
 
   public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
     const cteCombined = sql("cte_combined");
-    // const raws = await sql<AdminDeclarationRaw[]>`
-    const query = sql<AdminDeclarationRaw[]>`
+    const raws = await sql<AdminDeclarationRaw[]>`
       WITH ${cteCombined} AS (
-          SELECT ${this.declarationTable}.declared_at AS createdAt,
-              ${this.declarationTable}.data->'déclarant'->>'email' AS declarantEmail,
-              ${this.declarationTable}.data->'déclarant'->>'prénom' AS declarantFirstName,
-              ${this.declarationTable}.data->'déclarant'->>'nom' AS declarantLastName,
+          SELECT ${this.declarationTable}.declared_at AS created_at,
+              ${this.declarationTable}.data->'déclarant'->>'email' AS declarant_email,
+              ${this.declarationTable}.data->'déclarant'->>'prénom' AS declarant_firstname,
+              ${this.declarationTable}.data->'déclarant'->>'nom' AS declarant_lastname,
               ${this.declarationTable}.data->'entreprise'->>'raison_sociale' AS name,
               ${this.declarationTable}.data->'entreprise'->>'siren' AS siren,
               'index' AS type,
-              ${this.declarationTable}.year,
+              ${this.declarationTable}.year AS year,
               (${this.declarationTable}.data->'déclaration'->>'index')::int AS index,
-              CASE
-                  WHEN ${this.declarationTable}.data->'entreprise'->'ues' IS NOT NULL THEN jsonb_build_object(
-                      'companies',
-                      (
-                          SELECT jsonb_agg(
-                                  jsonb_build_object(
-                                      'name',
-                                      entreprise->>'raison_sociale',
-                                      'siren',
-                                      entreprise->>'siren'
-                                  )
-                              )
-                          FROM jsonb_array_elements(
-                                  ${this.declarationTable}.data->'entreprise'->'ues'->'entreprises'
-                              ) AS entreprise
-                      ),
-                      'name',
-                      ${this.declarationTable}.data->'entreprise'->'ues'->>'nom'
-                  )
-                  ELSE NULL
-              END AS ues
+              ${this.declarationTable}.data->'entreprise'->'ues' AS ues
           FROM ${this.declarationTable}
               JOIN ${this.searchTable} ON ${this.declarationTable}.siren = ${this.searchTable}.siren
               AND ${this.searchTable}.year = ${this.declarationTable}.year
           ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
           UNION ALL
-          SELECT ${this.representationEquilibreeTable}.declared_at AS createdAt,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'email' AS declarantEmail,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'prénom' AS declarantFirstName,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'nom' AS declarantLastName,
+          SELECT ${this.representationEquilibreeTable}.declared_at AS created_at,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'email' AS declarant_email,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'prénom' AS declarant_firstname,
+              ${this.representationEquilibreeTable}.data->'déclarant'->>'nom' AS declarant_lastname,
               ${this.representationEquilibreeTable}.data->'entreprise'->>'raison_sociale' AS name,
               ${this.representationEquilibreeTable}.data->'entreprise'->>'siren' AS siren,
               'repeq' AS type,
@@ -78,31 +56,38 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
       )
       SELECT *
       FROM ${cteCombined}
-      order by createdAt asc,
+      order by created_at asc,
           siren desc
       LIMIT ${criteria.limit ?? 100}
-      OFFSET ${criteria.offset ?? 0};;`;
+      OFFSET ${criteria.offset ?? 0};`;
 
-    const desc = await query.describe();
-    console.log("=================", desc.);
-    console.log("zaeazleezlakelzakekkekekkekekekekelloeeezaekekekekkekekkekekekkekekekekq");
-
-    const raws = await query;
-    return raws.map(raw => ({
-      createdAt: raw.createdat,
-      declarantEmail: raw.declarantemail,
-      declarantFirstName: raw.declarantfirstname,
-      declarantLastName: raw.declarantlastname,
-      name: raw.name,
-      siren: raw.siren,
-      type: raw.type,
-      year: raw.year,
-      ...(raw.type === "index" &&
+    return raws.map(
+      raw =>
         ({
-          index: raw.index,
-          ues: raw.ues,
-        } as Any)),
-    }));
+          createdAt: raw.created_at,
+          declarantEmail: raw.declarant_email,
+          declarantFirstName: raw.declarant_firstname,
+          declarantLastName: raw.declarant_lastname,
+          name: raw.name,
+          siren: raw.siren,
+          type: raw.type,
+          year: raw.year,
+          ...(raw.type === "index"
+            ? {
+                index: raw.index,
+                ues: raw.ues
+                  ? {
+                      name: raw.ues.nom!,
+                      companies: raw.ues.entreprises?.map(entreprise => ({
+                        name: entreprise.raison_sociale,
+                        siren: entreprise.siren,
+                      })),
+                    }
+                  : void 0,
+              }
+            : {}),
+        }) as AdminDeclarationDTO,
+    );
   }
 
   public async count(criteria: AdminDeclarationSearchCriteria): Promise<number> {

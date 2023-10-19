@@ -7,7 +7,6 @@ import { type NotComputableReasonRemunerations } from "@common/core-domain/domai
 import { type NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
 import { type NotComputableReasonSalaryRaisesAndPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 import { type ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
-import { type AdminDeclarationDTO } from "@common/core-domain/dtos/AdminDeclarationDTO";
 import {
   type CodeNaf,
   type CodePays,
@@ -79,15 +78,19 @@ export interface DeclarationSearchResultRaw {
   siren: string;
 }
 
-type AdminDeclarationDTOIndex = Exclude<AdminDeclarationDTO, { type: "repeq" }>;
-type AdminDeclarationDTORepeq = Exclude<AdminDeclarationDTO, { type: "index" }>;
-export type AdminDeclarationRaw =
-  | {
-      [K in keyof AdminDeclarationDTOIndex as Lowercase<K>]: AdminDeclarationDTOIndex[K];
-    }
-  | {
-      [K in keyof AdminDeclarationDTORepeq as Lowercase<K>]: AdminDeclarationDTORepeq[K];
-    };
+export type AdminDeclarationRaw = {
+  created_at: Date;
+  declarant_email: string;
+  declarant_firstname: string;
+  declarant_lastname: string;
+  name: string;
+  siren: string;
+  type: "index" | "repeq";
+  year: number;
+} & (
+  | { index: null; type: "repeq"; ues: null }
+  | { index: number; type: "index"; ues: DeclarationDataRaw["entreprise"]["ues"] }
+);
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {
