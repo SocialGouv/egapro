@@ -32,7 +32,6 @@ export class HighRemunerationsIndicator extends AbstractIndicator<HighRemunerati
 
   public fromJson(json: EntityPropsToJson<HighRemunerationsIndicatorProps>) {
     const props: HighRemunerationsIndicatorProps = {
-      progressObjective: json.progressObjective,
       result: new HighRemunerationsResult(json.result),
       score: new PositiveInteger(json.score),
       favorablePopulation: new FavorablePopulation(json.favorablePopulation),

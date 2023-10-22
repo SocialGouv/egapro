@@ -27,7 +27,7 @@ export interface DeclarationProps {
   index?: DeclarationIndex;
   points?: PositiveNumber;
   computablePoints?: PositiveNumber;
-  endReferencePeriod?: Date;
+  endReferencePeriod?: Date; // If sufficientPeriod is false, endReferencePeriod is undefined.
   sufficientPeriod: boolean;
   source: DeclarationSource;
   publication?: Publication;
@@ -56,19 +56,31 @@ export class Declaration extends JsonAggregateRoot<DeclarationProps, Declaration
     return this.props.siren;
   }
 
+  set siren(siren: Siren) {
+    this.props.siren = siren;
+  }
+
   get year(): DeclarationIndicatorsYear {
     return this.props.year;
+  }
+
+  set year(year: DeclarationIndicatorsYear) {
+    this.props.year = year;
   }
 
   get declaredAt(): Date {
     return this.props.declaredAt;
   }
 
+  set declaredAt(declaredAt: Date) {
+    this.props.declaredAt = new Date(declaredAt);
+  }
+
   get modifiedAt(): Date {
     return this.props.modifiedAt;
   }
 
-  public setModifiedAt(modifiedAt: Date) {
+  set modifiedAt(modifiedAt: Date) {
     this.props.modifiedAt = new Date(modifiedAt);
   }
 
@@ -99,64 +111,128 @@ export class Declaration extends JsonAggregateRoot<DeclarationProps, Declaration
     return this.props.declarant;
   }
 
+  set declarant(declarant: Declarant) {
+    this.props.declarant = declarant;
+  }
+
   get company(): Company {
     return this.props.company;
+  }
+
+  set company(company: Company) {
+    this.props.company = company;
   }
 
   get index(): DeclarationIndex | undefined {
     return this.props.index;
   }
 
+  set index(index: DeclarationIndex) {
+    this.props.index = index;
+  }
+
   get points(): PositiveNumber | undefined {
     return this.props.points;
+  }
+
+  set points(points: PositiveNumber) {
+    this.props.points = points;
   }
 
   get computablePoints(): PositiveNumber | undefined {
     return this.props.computablePoints;
   }
 
+  set computablePoints(computablePoints: PositiveNumber) {
+    this.props.computablePoints = computablePoints;
+  }
+
   get endReferencePeriod(): Date | undefined {
     return this.props.endReferencePeriod;
+  }
+
+  set endReferencePeriod(endReferencePeriod: Date) {
+    this.props.endReferencePeriod = new Date(endReferencePeriod);
   }
 
   get sufficientPeriod(): boolean {
     return this.props.sufficientPeriod;
   }
 
+  set sufficientPeriod(sufficientPeriod: boolean) {
+    this.props.sufficientPeriod = sufficientPeriod;
+  }
+
   get source(): DeclarationSource {
     return this.props.source;
+  }
+
+  set source(source: DeclarationSource) {
+    this.props.source = source;
   }
 
   get publication(): Publication | undefined {
     return this.props.publication;
   }
 
+  set publication(publication: Publication) {
+    this.props.publication = publication;
+  }
+
   get correctiveMeasures(): CorrectiveMeasures | undefined {
     return this.props.correctiveMeasures;
+  }
+
+  set correctiveMeasures(correctiveMeasures: CorrectiveMeasures) {
+    this.props.correctiveMeasures = correctiveMeasures;
   }
 
   get remunerations(): RemunerationsIndicator | undefined {
     return this.props.remunerations;
   }
 
+  set remunerations(remunerations: RemunerationsIndicator) {
+    this.props.remunerations = remunerations;
+  }
+
   get salaryRaises(): SalaryRaisesIndicator | undefined {
     return this.props.salaryRaises;
+  }
+
+  set salaryRaises(salaryRaises: SalaryRaisesIndicator) {
+    this.props.salaryRaises = salaryRaises;
   }
 
   get salaryRaisesAndPromotions(): SalaryRaisesAndPromotionsIndicator | undefined {
     return this.props.salaryRaisesAndPromotions;
   }
 
+  set salaryRaisesAndPromotions(salaryRaisesAndPromotions: SalaryRaisesAndPromotionsIndicator) {
+    this.props.salaryRaisesAndPromotions = salaryRaisesAndPromotions;
+  }
+
   get promotions(): PromotionsIndicator | undefined {
     return this.props.promotions;
+  }
+
+  set promotions(promotions: PromotionsIndicator) {
+    this.props.promotions = promotions;
   }
 
   get maternityLeaves(): MaternityLeavesIndicator | undefined {
     return this.props.maternityLeaves;
   }
 
+  set maternityLeaves(maternityLeaves: MaternityLeavesIndicator) {
+    this.props.maternityLeaves = maternityLeaves;
+  }
+
   get highRemunerations(): HighRemunerationsIndicator | undefined {
     return this.props.highRemunerations;
+  }
+
+  set highRemunerations(highRemunerations: HighRemunerationsIndicator) {
+    this.props.highRemunerations = highRemunerations;
   }
 
   public fromJson(json: Partial<EntityPropsToJson<DeclarationProps>>) {

@@ -53,16 +53,21 @@ export const ResultatGlobalForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
+  const computed = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData));
+
   // We don't compute the index if we only read an existing declaration.
   const defaultValues =
     formData["declaration-existante"].status === "consultation"
       ? formData[stepName]
       : {
           ...formData[stepName],
-          ...computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData)),
+          index: computed.index,
+          points: computed.points,
+          pointsCalculables: computed.computablePoints,
         };
 
   const methods = useForm<FormType>({
+    mode: "onChange",
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -93,6 +98,7 @@ export const ResultatGlobalForm = () => {
     register("index");
     register("points");
     register("pointsCalculables");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

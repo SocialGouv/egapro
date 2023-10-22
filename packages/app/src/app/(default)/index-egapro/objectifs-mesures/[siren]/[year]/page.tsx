@@ -3,29 +3,29 @@ import { GetDeclarationBySirenAndYearError } from "@api/core-domain/useCases/Get
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
 import { UnexpectedSessionError } from "@common/shared-domain";
 import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { CenteredContainer, DownloadCard, Grid, GridCol } from "@design-system";
+import { CenteredContainer } from "@design-system";
+import { MessageProvider } from "@design-system/client";
 import { notFound } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
-import { getDeclaration } from "../../actions";
-import { EditButton } from "./EditButton";
-import { RecapDeclaration } from "./RecapDeclaration";
+import { getDeclarationOpmc } from "../../actions";
+import { ObjectifsMesuresForm } from "./ObjectifsMesuresForm";
 
 const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
   if (!siren || !user) return undefined;
   return user.staff || user.companies.some(company => company.siren === siren);
 };
 
-const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
+const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
 
-  let déclaration: DeclarationDTO | null = null;
+  let declaration: DeclarationOpmcDTO | null = null;
   try {
-    déclaration = await getDeclaration(siren, year);
+    declaration = await getDeclarationOpmc(siren, year);
   } catch (error: unknown) {
     console.error("Error: ", error);
 
@@ -68,42 +68,33 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
     );
   }
 
-  if (déclaration === null) {
+  if (declaration === null) {
     notFound();
   }
 
+  const index = declaration["resultat-global"]?.index;
   const session = await getServerSession(authConfig);
-
-  const declarationDate = déclaration["declaration-existante"].date;
-
+  const declarationDate = declaration["declaration-existante"].date;
   const canEdit = canEditSiren(session?.user)(siren);
+
+  if (!canEdit) return <p>Vous n'êtes pas autorisés à consulter cette déclaration.</p>;
 
   if (!declarationDate) return <SkeletonForm fields={8} />;
 
+  if (declaration["periode-reference"]?.périodeSuffisante !== "oui")
+    return <p>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</p>;
+
+  if (index === undefined)
+    return <p>Vous n'avez pas à remplir cette page car l'index est non calculable pour cette déclaration.</p>;
+
+  if (index > 85)
+    return <p>Vous n'avez pas à remplir cette page car l'index de cette déclaration est supérieur à 85.</p>;
+
   return (
-    <>
-      <RecapDeclaration déclaration={déclaration} />
-
-      {canEdit && year && (
-        <>
-          <EditButton déclaration={déclaration} />
-
-          <Grid align="center" mb="6w">
-            <GridCol md={10} lg={8}>
-              <DownloadCard
-                title="Télécharger le récapitulatif"
-                endDetail="PDF"
-                href={`/api/declaration/${siren}/${year}/pdf`}
-                filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
-                fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des données ${year}`}
-              />
-            </GridCol>
-          </Grid>
-        </>
-      )}
-    </>
+    <MessageProvider>
+      <ObjectifsMesuresForm declaration={declaration} />
+    </MessageProvider>
   );
 };
 
-export default RecapPage;
+export default ObjectifsMesuresPage;

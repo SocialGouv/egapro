@@ -3,6 +3,7 @@ import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { OPMC_OPEN_DURATION_AFTER_EDIT } from "@common/dict";
 import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { NonEmptyString } from "@common/shared-domain/domain/valueObjects/NonEmptyString";
 import { isDateBeforeDuration, parseDate } from "@common/utils/date";
 
 import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
@@ -10,50 +11,69 @@ import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 type Input = {
   opmc: UpdateOpMcDTO;
   siren: string;
-  year: string;
+  year: number;
 };
 export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
   constructor(private readonly declarationRepo: IDeclarationRepo) {}
 
   public async execute({ opmc, siren, year }: Input): Promise<void> {
-    const declaration = await this.declarationRepo.getOne([new Siren(siren), new PositiveNumber(+year)]);
+    const declarationAggregate = await this.declarationRepo.getOneDeclarationOpmc([
+      new Siren(siren),
+      new PositiveNumber(year),
+    ]);
 
-    if (!declaration) {
+    const declaration = declarationAggregate?.declaration;
+
+    if (!declarationAggregate || !declaration) {
       throw new UpdateDeclarationWithOpMcDeclarationNotFoundError(
-        `Declaration not found with siren=${siren} and year=${year}.`,
+        `Aucune déclaration trouvée pour le Siren ${siren} et l'année ${year}.`,
       );
     }
 
-    const opMcAlreadySet = !!declaration.publication?.objectivesPublishDate;
+    const opMcAlreadySet = !!declarationAggregate.objectivesPublishDate;
     const now = new Date();
     const opMcStillEditable = isDateBeforeDuration(
       declaration.modifiedAt,
       { years: OPMC_OPEN_DURATION_AFTER_EDIT },
       now,
     );
+
     if (opMcAlreadySet) {
       if (!opMcStillEditable) {
-        throw new UpdateDeclarationWithOpMcPastTimeError(`OpMc cannot be set anymore. Time is passed.`);
+        throw new UpdateDeclarationWithOpMcPastTimeError(
+          `Les OPMC ne peuvent plus être modifiés car la durée de 1 an est dépassée.`,
+        );
       }
     }
 
-    declaration.remunerations?.setProgressObjective(opmc.objectifIndicateurUn);
-    declaration.salaryRaises?.setProgressObjective(opmc.objectifIndicateurDeux);
-    declaration.promotions?.setProgressObjective(opmc.objectifIndicateurTrois);
-    declaration.salaryRaisesAndPromotions?.setProgressObjective(opmc.objectifIndicateurDeuxTrois);
-    declaration.maternityLeaves?.setProgressObjective(opmc.objectifIndicateurQuatre);
-    declaration.highRemunerations?.setProgressObjective(opmc.objectifIndicateurCinq);
+    if (opmc.objectifIndicateurUn) {
+      declarationAggregate.objectiveRemunerations = new NonEmptyString(opmc.objectifIndicateurUn);
+    }
+    if (opmc.objectifIndicateurDeux) {
+      declarationAggregate.objectiveSalaryRaise = new NonEmptyString(opmc.objectifIndicateurDeux);
+    }
+    if (opmc.objectifIndicateurTrois) {
+      declarationAggregate.objectivePromotions = new NonEmptyString(opmc.objectifIndicateurTrois);
+    }
+    if (opmc.objectifIndicateurDeuxTrois) {
+      declarationAggregate.objectiveSalaryRaiseAndPromotions = new NonEmptyString(opmc.objectifIndicateurDeuxTrois);
+    }
+    if (opmc.objectifIndicateurQuatre) {
+      declarationAggregate.objectiveMaternityLeaves = new NonEmptyString(opmc.objectifIndicateurQuatre);
+    }
+    if (opmc.objectifIndicateurCinq) {
+      declarationAggregate.objectiveHighRemunerations = new NonEmptyString(opmc.objectifIndicateurCinq);
+    }
 
-    if (opmc.datePublicationMesures)
-      declaration.publication?.setMeasuresPublishDate(parseDate(opmc.datePublicationMesures));
-    declaration.publication?.setObjectivesPublishDate(parseDate(opmc.datePublicationObjectifs));
-    declaration.publication?.setObjectivesMeasuresModalities(opmc.modalitesPublicationObjectifsMesures);
+    if (opmc.datePublicationMesures) declarationAggregate.measuresPublishDate = parseDate(opmc.datePublicationMesures);
 
-    // TODO on ne change pas la date de modification pour éviter de pour redéclarer les opmc tous les ans avant la date limite
-    // il faudrait ajouter un champs "opMcModifiedAt"
-    // declaration.setModifiedAt(now);
+    declarationAggregate.objectivesPublishDate = parseDate(opmc.datePublicationObjectifs);
 
-    await this.declarationRepo.update(declaration);
+    if (opmc.modalitesPublicationObjectifsMesures) {
+      declarationAggregate.objectivesMeasuresModalities = new NonEmptyString(opmc.modalitesPublicationObjectifsMesures);
+    }
+
+    await this.declarationRepo.saveDeclarationOpmcWithIndex(declarationAggregate);
   }
 }
 
