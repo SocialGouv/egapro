@@ -18,12 +18,12 @@ import {
   TableAdminBodyRow,
   TableAdminBodyRowCol,
   TableAdminHead,
-  TableAdminHeadCol,
 } from "@design-system";
 
 import { getAllAdminDeclarations } from "./actions";
 import { SearchForm } from "./SearchForm";
 import style from "./style.module.scss";
+import { TableAdminHeadColClient } from "./TableAdminHeadColClient";
 
 const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSchema)(async ({
   searchParams,
@@ -33,6 +33,9 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
     ...searchParams,
     offset: searchParams.page,
   });
+
+  const orderBy = searchParams.orderBy;
+  const orderDirection = searchParams.orderDirection;
 
   return (
     <>
@@ -68,15 +71,12 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
           >
             <TableAdminHead>
               {Object.entries(columnMap).map(([columnValue, columnLabel]) => (
-                <TableAdminHeadCol
+                <TableAdminHeadColClient
                   key={columnValue}
-                  // orderDirection={orderBy === columnValue && orderDirection}
-                  // onClick={() => {
-                  //   togglerOrderColumn(columnValue);
-                  // }}
-                >
-                  {columnLabel}
-                </TableAdminHeadCol>
+                  columnValue={columnValue}
+                  columnLabel={columnLabel}
+                  orderDirection={orderBy === columnValue && orderDirection}
+                />
               ))}
             </TableAdminHead>
             <TableAdminBody>
@@ -135,9 +135,3 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
 });
 
 export default DeclarationPage;
-
-/*
-
-localhost 
-
- */

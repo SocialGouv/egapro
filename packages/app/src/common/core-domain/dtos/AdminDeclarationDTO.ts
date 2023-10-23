@@ -36,3 +36,17 @@ export const columnMap = {
   index: "Index",
   ues: "UES",
 } as const satisfies Record<keyof Exclude<AdminDeclarationDTO, { type: "repeq" }>, string>;
+
+export type OrderableColumn = Exclude<keyof typeof columnMap, "ues">;
+
+export const orderableColumns = [
+  "type",
+  "siren",
+  "year",
+  "name",
+  "createdAt",
+  "declarantEmail",
+  "declarantFirstName",
+  "declarantLastName",
+  "index",
+] as const satisfies readonly OrderableColumn[];

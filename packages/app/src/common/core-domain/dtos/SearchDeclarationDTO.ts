@@ -3,8 +3,14 @@ import { type ClearObject } from "@common/utils/types";
 import { z } from "zod";
 
 import { type NotComputableReason } from "../domain/valueObjects/declaration/indicators/NotComputableReason";
+import { orderableColumns as adminDeclarationOrderableColumns } from "./AdminDeclarationDTO";
 import { type PublicCompanyDTO } from "./CompanyDTO";
-import { displayPublicYearCoerciveSchema, searchConsultationSchema, searchSchema } from "./helpers/common";
+import {
+  displayPublicYearCoerciveSchema,
+  searchConsultationSchema,
+  searchSchema,
+  yearCoerciveSchema,
+} from "./helpers/common";
 
 export interface SearchDeclarationResultDTO {
   company: Record<number, PublicCompanyDTO>;
@@ -62,8 +68,11 @@ export const searchAdminDeclarationInput = z.object({
   indexComparison: z.enum(["gt", "lt", "eq"]).optional(),
   query: z.string().optional(),
   email: z.string().optional(), // can be a partial email
-  year: displayPublicYearCoerciveSchema.optional(),
+  year: yearCoerciveSchema.optional(),
+  orderBy: z.enum(adminDeclarationOrderableColumns).optional().default("createdAt"),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
-export type SearchAdminDeclarationInput = ClearObject<z.infer<typeof searchAdminDeclarationInput>>;
+
+export type SearchAdminDeclarationInput = ClearObject<z.input<typeof searchAdminDeclarationInput>>;
 export const searchAdminDeclarationDTOSchema = searchAdminDeclarationInput.and(searchSchema);
 export type SearchAdminDeclarationDTO = ClearObject<z.infer<typeof searchAdminDeclarationDTOSchema>>;

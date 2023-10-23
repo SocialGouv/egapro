@@ -6,7 +6,7 @@ import { cleanFullTextSearch } from "@common/utils/postgres";
 import { isFinite } from "lodash";
 import { type Helper } from "postgres";
 
-import { type AdminDeclarationSearchCriteria, type IAdminDeclarationRepo } from "../IAdminDeclarationRepo";
+import { type AdminDeclarationSearchCriteria, type IAdminDeclarationRepo, orderByMap } from "../IAdminDeclarationRepo";
 
 export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
   private declarationTable = sql("declaration");
@@ -16,6 +16,9 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
 
   public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
     const cteCombined = sql("cte_combined");
+
+    console.log({ criteria });
+
     const raws = await sql<AdminDeclarationRaw[]>`
       WITH ${cteCombined} AS (
           SELECT ${this.declarationTable}.declared_at AS created_at,
@@ -56,8 +59,9 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
       )
       SELECT *
       FROM ${cteCombined}
-      order by created_at asc,
-          siren desc
+      ORDER BY ${sql(criteria.orderBy ? orderByMap[criteria.orderBy] : sql("created_at"))} ${
+        criteria.orderDirection === "asc" ? sql`asc` : sql`desc`
+      }
       LIMIT ${criteria.limit ?? 100}
       OFFSET ${criteria.offset ?? 0};`;
 
