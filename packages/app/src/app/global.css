@@ -60,6 +60,12 @@
 .cursor-help {
     cursor: help;
 }
+.cursor-default {
+    cursor: default;
+}
+.\!cursor-default {
+    cursor: default !important;
+}
 /* === */
 
 /* === flex / grid === */

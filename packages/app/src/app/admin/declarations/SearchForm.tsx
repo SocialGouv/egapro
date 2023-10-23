@@ -5,6 +5,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import {
+  type SearchAdminDeclarationDTO,
   type SearchAdminDeclarationInput,
   searchAdminDeclarationInput,
 } from "@common/core-domain/dtos/SearchDeclarationDTO";
@@ -51,14 +52,28 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
   }, [resetInputs, searchParams]);
 
   function onSubmit(data: SearchAdminDeclarationInput) {
-    const cleaned = omitByRecursively(data, isUndefined) as Partial<SearchAdminDeclarationInput>;
+    const cleaned = omitByRecursively(data, isUndefined) as unknown as Partial<SearchAdminDeclarationDTO>; // parsed by zod
     if (cleaned.indexComparison && typeof cleaned.index === "undefined") {
       delete cleaned.indexComparison;
     }
     if (!cleaned.ues) {
       delete cleaned.ues;
     }
-    console.log({ cleaned, data });
+
+    const currentUrl = new URL(location.href);
+    const orderBy = currentUrl.searchParams.get("orderBy");
+    const orderDirection = currentUrl.searchParams.get("orderDirection");
+    const limit = currentUrl.searchParams.get("limit");
+    if (orderBy) {
+      cleaned.orderBy = orderBy as typeof cleaned.orderBy;
+    }
+    if (orderDirection) {
+      cleaned.orderDirection = orderDirection as typeof cleaned.orderDirection;
+    }
+    if (limit) {
+      cleaned.limit = parseInt(limit, 10) as typeof cleaned.limit;
+    }
+
     router.replace(`${location.pathname}?${new URLSearchParams(cleaned as URLSearchParams).toString()}`);
   }
 

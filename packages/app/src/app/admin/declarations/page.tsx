@@ -22,6 +22,7 @@ import {
 
 import { getAllAdminDeclarations } from "./actions";
 import { SearchForm } from "./SearchForm";
+import { SelectLimit } from "./SelectLimit";
 import style from "./style.module.scss";
 import { TableAdminHeadColClient } from "./TableAdminHeadColClient";
 
@@ -36,6 +37,7 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
 
   const orderBy = searchParams.orderBy;
   const orderDirection = searchParams.orderDirection;
+  const limit = searchParams.limit;
 
   return (
     <>
@@ -62,6 +64,9 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
       </Container>
       {data.ok ? (
         <Box className={fr.cx("fr-p-3w")}>
+          <Box>
+            <SelectLimit currentLimit={limit} />
+          </Box>
           <TableAdmin
             compact
             classes={{
@@ -75,7 +80,8 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
                   key={columnValue}
                   columnValue={columnValue}
                   columnLabel={columnLabel}
-                  orderDirection={orderBy === columnValue && orderDirection}
+                  currentOrderBy={orderBy}
+                  currentOrderDirection={orderDirection}
                 />
               ))}
             </TableAdminHead>
@@ -93,7 +99,9 @@ const DeclarationPage = withSearchParamsValidation(searchAdminDeclarationDTOSche
                     {declaration.name}
                   </TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{formatDateToFr(declaration.createdAt)}</TableAdminBodyRowCol>
-                  <TableAdminBodyRowCol>{declaration.declarantEmail}</TableAdminBodyRowCol>
+                  <TableAdminBodyRowCol title={declaration.declarantEmail}>
+                    {declaration.declarantEmail}
+                  </TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantFirstName}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>{declaration.declarantLastName}</TableAdminBodyRowCol>
                   <TableAdminBodyRowCol>
