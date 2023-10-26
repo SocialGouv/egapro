@@ -41,8 +41,8 @@ app:
     enabled: true
   resources:
     requests:
-      cpu: 20m
-      memory: 256M
+      cpu: 50m
+      memory: 512M
     limits:
       cpu: 1
       memory: 1G

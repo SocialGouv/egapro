@@ -1,3 +1,67 @@
+## [2.91.5](https://github.com/SocialGouv/egapro/compare/v2.91.4...v2.91.5) (2023-10-13)
+
+
+### Bug Fixes
+
+* change digdash ip again ([565dc85](https://github.com/SocialGouv/egapro/commit/565dc8554c6efe893a2d116c91057c3e3870a8c9))
+
+## [2.91.4](https://github.com/SocialGouv/egapro/compare/v2.91.3...v2.91.4) (2023-10-12)
+
+
+### Bug Fixes
+
+* change digdash ip again ([0fc1f1d](https://github.com/SocialGouv/egapro/commit/0fc1f1d7085142c93f2d1ea1b866726df877f777))
+
+## [2.91.3](https://github.com/SocialGouv/egapro/compare/v2.91.2...v2.91.3) (2023-10-09)
+
+
+### Bug Fixes
+
+* change digdash ip ([6fc6c7d](https://github.com/SocialGouv/egapro/commit/6fc6c7d36f4a0c56fbeee2d303d86caa02fa4786))
+
+## [2.91.2](https://github.com/SocialGouv/egapro/compare/v2.91.1...v2.91.2) (2023-08-17)
+
+
+### Bug Fixes
+
+* change nc with 0 when relatable in consultation (Fixes [#1709](https://github.com/SocialGouv/egapro/issues/1709)) ([741140d](https://github.com/SocialGouv/egapro/commit/741140d03add979d529430adc6da44f46221af1c))
+* force url redirection ([#1711](https://github.com/SocialGouv/egapro/issues/1711)) ([92a3df6](https://github.com/SocialGouv/egapro/commit/92a3df6dd074b57737d6b13875e77506948aab9c))
+
+## [2.91.1](https://github.com/SocialGouv/egapro/compare/v2.91.0...v2.91.1) (2023-08-07)
+
+
+### Bug Fixes
+
+* replace zod email validation with regex ([aa4383e](https://github.com/SocialGouv/egapro/commit/aa4383eb7c63a654b22c4b21efc4b4ab7e5c8938))
+
+# [2.91.0](https://github.com/SocialGouv/egapro/compare/v2.90.0...v2.91.0) (2023-08-04)
+
+
+### Features
+
+* add 'how to' pdf for opmc ([cda1a54](https://github.com/SocialGouv/egapro/commit/cda1a5410734740852d200cdd53b9e1a6424e71e))
+
+# [2.90.0](https://github.com/SocialGouv/egapro/compare/v2.89.5...v2.90.0) (2023-08-01)
+
+
+### Bug Fixes
+
+* better decla map for indic 2/3 after opmc (Closes [#1694](https://github.com/SocialGouv/egapro/issues/1694)) ([1c75675](https://github.com/SocialGouv/egapro/commit/1c75675e0b8e2e3d6ec66e1634abe9ab1784eeb7))
+* up k8s cronjob apiversion ([#1683](https://github.com/SocialGouv/egapro/issues/1683)) ([947971a](https://github.com/SocialGouv/egapro/commit/947971a4d6ca924786318a5aa8989f9d89665e06))
+
+
+### Features
+
+* add precision on search input (Closes [#1664](https://github.com/SocialGouv/egapro/issues/1664)) ([a8ceb9c](https://github.com/SocialGouv/egapro/commit/a8ceb9c185c7506992ff432bfe0a2ffcf158024d))
+* display previous years in search results (Closes [#1700](https://github.com/SocialGouv/egapro/issues/1700)) ([719b4a7](https://github.com/SocialGouv/egapro/commit/719b4a7a6231f6c4d2bae7fbf859ace3f8dd0999))
+
+## [2.89.5](https://github.com/SocialGouv/egapro/compare/v2.89.4...v2.89.5) (2023-07-04)
+
+
+### Bug Fixes
+
+* whiteliste public routes in apiv2 ([9ad7eb8](https://github.com/SocialGouv/egapro/commit/9ad7eb8dfc2f28ecf8113805812378e9b8224ee8))
+
 ## [2.89.4](https://github.com/SocialGouv/egapro/compare/v2.89.3...v2.89.4) (2023-06-28)
 
 

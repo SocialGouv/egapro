@@ -6,7 +6,7 @@ import { type DeclarationSearchResult } from "@common/core-domain/domain/Declara
 import { type DeclarationStatsDTO } from "@common/core-domain/dtos/SearchDeclarationDTO";
 import { declarationSearchMap } from "@common/core-domain/mappers/declarationSearchMap";
 import { declarationSearchResultMap } from "@common/core-domain/mappers/declarationSearchResultMap";
-import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS_REPEQ } from "@common/dict";
+import { PUBLIC_CURRENT_YEAR, PUBLIC_YEARS } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
 import { type Any } from "@common/utils/types";
@@ -132,7 +132,7 @@ export class PostgresDeclarationSearchRepo implements IDeclarationSearchRepo {
     }
 
     // no "and" clause because will be first
-    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS_REPEQ)}`;
+    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS)}`;
     const sqlDepartement = criteria.countyCode ? sql`and ${this.table}.departement=${criteria.countyCode}` : sql``;
     const sqlSectionNaf = criteria.nafSection ? sql`and ${this.table}.section_naf=${criteria.nafSection}` : sql``;
     const sqlRegion = criteria.regionCode ? sql`and ${this.table}.region=${criteria.regionCode}` : sql``;

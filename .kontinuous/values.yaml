@@ -85,6 +85,7 @@ api:
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+    EGAPRO_DOMAIN: "https://{{ .Values.global.host }}"
 
 files:
   ~chart: app
@@ -121,8 +122,14 @@ project:
     # DigDash prod 1 and 2
     - "37.187.27.197"
     - "37.187.137.149"
-    # Invenis prod old and new
+    # DigDash new (12/10/2023)
+    - "217.182.225.112"
+    - "217.182.225.29"
+    - "217.182.225.113"
+    - "217.182.225.117"
+    # Invenis prod old
     - "217.182.142.112"
+    # Invenis prod new (09/10/2023)
     - "51.38.59.32"
   files:
     public:
