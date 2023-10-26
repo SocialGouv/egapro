@@ -12,7 +12,20 @@ interface AdditionalOutput {
   equivalentEmployeeCountGap: number;
   equivalentEmployeeCountGapRaw: number;
   /**
-   * Message accompagnant l'écart en nombre équivalent de salariés
+   * Message accompagnant l'écart en nombre équivalent de salariés.
+   *
+   * Exemples :
+   * ```
+   * "men-men":
+   *   "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "men-women":
+   *   "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "women-men":
+   *   "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "women-women":
+   *   "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * equality: "Les femmes et les hommes sont à égalité"
+   * ```
    */
   ifadvantage: "equality" | "men-men" | "men-women" | "women-men" | "women-women";
   noteEquivalentEmployeeCountGap: number;
