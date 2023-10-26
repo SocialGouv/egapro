@@ -86,8 +86,8 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     }
   }
 
-  public delete(_id: DeclarationPK): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async delete([siren, year]: DeclarationPK): Promise<void> {
+    await this.sql`delete from ${this.table} where siren=${siren.getValue()} and year=${year.getValue()}`;
   }
   public exists(_id: DeclarationPK): Promise<boolean> {
     throw new Error("Method not implemented.");

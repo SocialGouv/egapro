@@ -75,6 +75,21 @@
 .self-end {
     align-self: flex-end;
 }
+.justify-center {
+    justify-content: center;
+}
+.justify-between {
+    justify-content: space-between;
+}
+.content-center {
+    align-content: center;
+}
+.items-end {
+    align-items: flex-end;
+}
+.flex-1 {
+    flex: 1;
+}
 /* === */
 
 /* background */

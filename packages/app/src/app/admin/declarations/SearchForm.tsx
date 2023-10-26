@@ -9,7 +9,7 @@ import {
   type SearchAdminDeclarationInput,
   searchAdminDeclarationInput,
 } from "@common/core-domain/dtos/SearchDeclarationDTO";
-import { DISPLAY_PUBLIC_YEARS } from "@common/dict";
+import { YEARS } from "@common/dict";
 import { dateObjectToDateISOString } from "@common/utils/date";
 import { omitByRecursively } from "@common/utils/object";
 import { Grid, GridCol } from "@design-system";
@@ -80,7 +80,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <Grid haveGutters>
-        <GridCol sm={6}>
+        <GridCol sm={3}>
           <Input
             label="Nom ou Siren de l'entreprise"
             nativeInputProps={{
@@ -96,7 +96,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             stateRelatedMessage={errors.query?.message}
           />
         </GridCol>
-        <GridCol sm={6}>
+        <GridCol sm={3}>
           <Input
             label="Email du déclarant"
             nativeInputProps={{
@@ -112,7 +112,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             stateRelatedMessage={errors.email?.message}
           />
         </GridCol>
-        <GridCol sm={6}>
+        <GridCol sm={3}>
           <Input
             label="Date minimum"
             nativeInputProps={{
@@ -126,7 +126,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             stateRelatedMessage={errors.minDate?.message}
           />
         </GridCol>
-        <GridCol sm={6}>
+        <GridCol sm={3}>
           <Input
             label="Date maximum"
             nativeInputProps={{
@@ -155,7 +155,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             <option value="gt">&gt;</option>
           </Select>
         </GridCol>
-        <GridCol sm={4}>
+        <GridCol sm={2}>
           <Input
             label=" "
             nativeInputProps={{
@@ -171,7 +171,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             stateRelatedMessage={errors.index?.message}
           />
         </GridCol>
-        <GridCol sm={4}>
+        <GridCol sm={3}>
           <Select
             label="Année indicateurs"
             nativeSelectProps={{
@@ -183,19 +183,19 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
             stateRelatedMessage={errors.year?.message}
           >
             <option value="">Sélectionnez une année</option>
-            {DISPLAY_PUBLIC_YEARS.map(year => (
+            {YEARS.map(year => (
               <option key={year} value={year}>
                 {year}
               </option>
             ))}
           </Select>
         </GridCol>
-        <GridCol sm={2} className="flex">
+        <GridCol sm={3} className="flex">
           <Checkbox
             className="fr-mb-0 self-end"
             options={[
               {
-                label: "UES ?",
+                label: "Les UES uniquement ?",
                 nativeInputProps: register("ues", {
                   setValueAs: value => value || void 0,
                 }),

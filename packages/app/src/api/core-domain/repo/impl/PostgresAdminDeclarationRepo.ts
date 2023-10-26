@@ -17,8 +17,6 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
   public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
     const cteCombined = sql("cte_combined");
 
-    console.log({ criteria });
-
     const raws = await sql<AdminDeclarationRaw[]>`
       WITH ${cteCombined} AS (
           SELECT ${this.declarationTable}.declared_at AS created_at,
