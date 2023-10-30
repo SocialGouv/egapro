@@ -1,5 +1,5 @@
 import { ImgRepresentationEquilibree } from "@design-system";
-import { ImageResponse } from "next/server";
+import { ImageResponse } from "next/og";
 
 export const alt = "Représentation Équilibrée Egapro";
 export const size = {

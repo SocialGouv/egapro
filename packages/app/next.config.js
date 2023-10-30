@@ -7,7 +7,6 @@ const nextConfig = {
   //   output: "standalone",
   experimental: {
     // typedRoutes: true, // TODO activate <3
-    serverActions: true,
     // outputFileTracingRoot: path.join(__dirname, "../../"),
     serverComponentsExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node"],
   },
