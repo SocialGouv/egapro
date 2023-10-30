@@ -14,13 +14,13 @@ import { AdminDeclarationErrorCodes } from "./errorCodes";
 export async function getAllAdminDeclarations(
   searchParams: AdminDeclarationSearchCriteria,
 ): Promise<ServerActionResponse<AdminDeclarationDTO[], AdminDeclarationErrorCodes>> {
-  await assertServerSession({ staff: true });
-
   const defaultSearchParams: AdminDeclarationSearchCriteria = {
     limit: 100,
     offset: 0,
   };
   try {
+    await assertServerSession({ staff: true });
+
     const declarations = await adminDeclarationRepo.search({
       ...defaultSearchParams,
       ...searchParams,
@@ -42,9 +42,9 @@ export async function getAllAdminDeclarations(
 export async function deleteAdminDeclarations(
   decla: AdminDeclarationDTO[],
 ): Promise<ServerActionResponse<void, AdminDeclarationErrorCodes>> {
-  await assertServerSession({ staff: true });
-
   try {
+    await assertServerSession({ staff: true });
+
     const [declaIndex, declaRepeq] = partition(decla, d => d.type === "index");
 
     // TODO: use a transaction if needed
