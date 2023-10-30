@@ -5,6 +5,7 @@ import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/value
 import { type SearchRepresentationEquilibreeResultDTO } from "@common/core-domain/dtos/SearchRepresentationEquilibreeDTO";
 import { addressLabel } from "@common/dict";
 import { DebugButton } from "@components/utils/debug/DebugButton";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState } from "react";
 
 import {
@@ -15,7 +16,6 @@ import {
   TileCompanyPercentData,
   TileCompanySiren,
   TileCompanyTable,
-  TileCompanyTableBody,
   TileCompanyTableBodyRow,
   TileCompanyTableBodyRowCol,
   TileCompanyTableHead,
@@ -29,6 +29,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
     company: { county, region, name, siren, countryIsoCode },
     results,
   } = dto;
+  const [animationTBody] = useAutoAnimate();
 
   const rowsDefault = 4;
   const [rowsNumber, setRowsNumber] = useState(rowsDefault);
@@ -57,7 +58,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
           <TileCompanyTableHeadCol size="md">Cadres dirigeants</TileCompanyTableHeadCol>
           <TileCompanyTableHeadCol size="md">Membres instances dirigeantes</TileCompanyTableHeadCol>
         </TileCompanyTableHead>
-        <TileCompanyTableBody>
+        <tbody ref={animationTBody}>
           {years
             .map(year => ({ year, ...results[year] }))
             .slice(0, rowsNumber)
@@ -98,7 +99,7 @@ export const TileCompanyRepeqs = (dto: SearchRepresentationEquilibreeResultDTO) 
                 </TileCompanyTableBodyRowCol>
               </TileCompanyTableBodyRow>
             ))}
-        </TileCompanyTableBody>
+        </tbody>
       </TileCompanyTable>
       {rowsNumber < years?.length && <TileCompanyLoadMore onClick={handleMoreRows} />}
     </TileCompany>
