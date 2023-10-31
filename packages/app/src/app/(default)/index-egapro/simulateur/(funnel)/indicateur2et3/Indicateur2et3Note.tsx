@@ -29,14 +29,14 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
   let advantageText = "";
   try {
     computed = computer.compute();
-    if (computed.genderAdvantage === "equality") {
+    if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à égalité";
     } else {
       advantageText = "Écart d'augmentations ";
       if (computed.note === NOTE_MAX) {
         advantageText += "constaté ";
       }
-      advantageText += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
+      advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
     isNC = !computer.canCompute();
   } catch {

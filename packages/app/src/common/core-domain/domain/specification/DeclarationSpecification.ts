@@ -18,7 +18,7 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
   private _lastError?: ValidationError;
 
   public isSatisfiedBy(declaration: Declaration): boolean {
-    // console.log("declaration dans specification:", JSON.stringify(declaration, null, 2));
+    // console.debug("declaration dans specification:", JSON.stringify(declaration, null, 2));
 
     try {
       // TODO: confirm year with product owner

@@ -76,11 +76,11 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
       ifadvantage = "women-women";
     }
 
-    const genderAdvantage = sign === 0 ? "equality" : sign === 1 ? "men" : "women";
+    const favorablePopulation = sign === 0 ? "equality" : sign === 1 ? "men" : "women";
     const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
-      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.genderAdvantage !== genderAdvantage;
+      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.favorablePopulation !== favorablePopulation;
     const notePercent = this.computeNote(result);
     const noteEquivalentEmployeeCountGap = this.computeNote(equivalentEmployeeCountGap);
     const note = Math.max(notePercent, noteEquivalentEmployeeCountGap);
@@ -91,7 +91,7 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
       equivalentEmployeeCountGap,
       equivalentEmployeeCountGapRaw,
       note,
-      genderAdvantage,
+      favorablePopulation,
       noteEquivalentEmployeeCountGap,
       notePercent,
       ifadvantage,

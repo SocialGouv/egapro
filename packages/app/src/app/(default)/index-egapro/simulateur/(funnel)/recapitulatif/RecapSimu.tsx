@@ -32,6 +32,7 @@ import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import { computerHelper } from "./computerHelper";
 import style from "./Recap.module.scss";
+import { simuFunnelToDeclarationDTO } from "./simuToDecla";
 
 function assertSimu(simulation: Partial<CreateSimulationDTO> | undefined): asserts simulation is CreateSimulationDTO {
   createSimulationDTO.parse(simulation);
@@ -85,11 +86,9 @@ export const RecapSimu = () => {
     computerIndicateurDeux,
     computerIndicateurTrois,
     computerIndicateurQuatre,
-    computerIndicateurCinq,
     totalWomen,
     totalMen,
     remuWithCount,
-    resultIndicateurUn,
     resultIndicateurDeuxTrois,
     resultIndicateurDeux,
     resultIndicateurTrois,
@@ -101,8 +100,8 @@ export const RecapSimu = () => {
 
   // actions
   const sendToDeclaration = () => {
-    console.log("send !", funnel);
-    saveFormData({});
+    saveFormData(simuFunnelToDeclarationDTO(funnel));
+    router.push("/index-egapro/declaration/commencer");
   };
 
   return (
@@ -370,9 +369,9 @@ export const RecapSimu = () => {
               max={10}
               text="Nombre de points obtenus à l'indicateur hautes rémunérations"
               legend={
-                resultIndicateurCinq.genderAdvantage === "equality"
+                resultIndicateurCinq.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
-                  : resultIndicateurCinq.genderAdvantage === "men"
+                  : resultIndicateurCinq.favorablePopulation === "men"
                   ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
                   : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
               }

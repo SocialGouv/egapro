@@ -97,4 +97,3 @@ class IndicateurCinq {
 //   sexeSousRepresente: { ecart, sexe },
 // } = indicateur5
 
-// console.log(note, ecart, sexe)

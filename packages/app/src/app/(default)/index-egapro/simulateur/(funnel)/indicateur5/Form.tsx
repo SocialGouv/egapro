@@ -79,9 +79,9 @@ export const Indic5Form = () => {
             text="Nombre de points obtenus à l'indicateur hautes rémunérations"
             legend={
               isValid
-                ? computed.genderAdvantage === "equality"
+                ? computed.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
-                  : computed.genderAdvantage === "men"
+                  : computed.favorablePopulation === "men"
                   ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
                   : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
                 : "Veuillez remplir le reste des hautes rémunérations pour avoir votre note"

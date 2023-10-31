@@ -34,7 +34,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
   public async execute({ declaration: dto }: Input): Promise<void> {
     const now = new Date();
 
-    const siren = dto.entreprise?.entrepriseDéclarante.siren;
+    const siren = dto.entreprise?.entrepriseDéclarante?.siren;
     const year = dto.commencer?.annéeIndicateurs;
 
     const remunerationsMode = dto.remunerations?.estCalculable === "oui" ? dto.remunerations.mode : undefined;
