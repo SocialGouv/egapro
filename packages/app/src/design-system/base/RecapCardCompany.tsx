@@ -4,11 +4,12 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 
+import { funnelStaticConfig } from "../../app/(default)/index-egapro/declaration/declarationFunnelConfiguration";
 import { Grid, GridCol } from "./Grid";
 import { RecapCard } from "./RecapCard";
 import { Text } from "./Typography";
 
-type Props = { company: CompanyDTO; full?: boolean; title?: string };
+type Props = { company: CompanyDTO; edit?: boolean; full?: boolean; title?: string };
 
 // TODO: replace with tooltip when available in DSFR
 const infoModale = createModal({
@@ -16,7 +17,7 @@ const infoModale = createModal({
   isOpenedByDefault: false,
 });
 
-export const RecapCardCompany = ({ company, full, title }: Props) => {
+export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues } = company;
 
   const titleFull = title ?? "Informations de l'entreprise déclarante";
@@ -35,14 +36,7 @@ export const RecapCardCompany = ({ company, full, title }: Props) => {
       </ClientBodyPortal>
       <RecapCard
         title={full ? <Text text={titleFull} variant={["xl"]} inline /> : title ?? "Informations entreprise déclarante"}
-        sideButtonProps={{
-          iconId: "fr-icon-information-fill",
-          title: titleFull,
-          priority: "tertiary no outline",
-          style: { alignSelf: "center" },
-          size: "small",
-          nativeButtonProps: infoModale.buttonProps,
-        }}
+        editLink={(edit || void 0) && funnelStaticConfig["entreprise"].url}
         content={
           full ? (
             <>
