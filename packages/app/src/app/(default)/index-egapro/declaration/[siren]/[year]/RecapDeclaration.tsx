@@ -64,7 +64,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         }
       />
 
-      <RecapCardCompany company={company} title="Informations Entreprise / UES" />
+      <RecapCardCompany edit={edit} company={company} title="Informations Entreprise / UES" />
 
       {company.ues?.name && (
         <RecapCard
