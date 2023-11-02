@@ -1,4 +1,5 @@
 import { type ComputedResult, resultWithSign } from "@common/core-domain/computers/AbstractComputer";
+import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
@@ -18,6 +19,9 @@ const toFavorablePopulation = (populationFavorable: ComputedResult["favorablePop
     : populationFavorable === "men"
     ? FavorablePopulation.Enum.MEN
     : FavorablePopulation.Enum.WOMEN;
+
+const computeGroupIndicateurUn = (computerIndicateurUn: IndicateurUnComputer) => (key: string) =>
+  !computerIndicateurUn.canComputeGroup(key) ? null : resultWithSign(computerIndicateurUn.computeGroup(key));
 
 export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): DeclarationDTO => {
   const {
@@ -143,13 +147,13 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
         ? "remunerations-coefficient-autre"
         : "remunerations-coefficient-branche"
     ] = {
-      catégories: indicateur1.remunerations.map(({ name: nom }) => ({
+      catégories: indicateur1.remunerations.map(({ name: nom, categoryId }) => ({
         nom,
         tranches: {
-          [AgeRange.Enum.LESS_THAN_30]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}::29`)) || null,
-          [AgeRange.Enum.FROM_30_TO_39]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:30:39`)) || null,
-          [AgeRange.Enum.FROM_40_TO_49]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:40:49`)) || null,
-          [AgeRange.Enum.FROM_50_TO_MORE]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:50:`)) || null,
+          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}::29`),
+          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:30:39`) || null,
+          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:40:49`) || null,
+          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:50:`) || null,
         },
       })),
     };
@@ -160,10 +164,10 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       catégories: ["ouv", "emp", "tam", "ic"].map(nom => ({
         nom,
         tranches: {
-          [AgeRange.Enum.LESS_THAN_30]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}::29`)) || null,
-          [AgeRange.Enum.FROM_30_TO_39]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:30:39`)) || null,
-          [AgeRange.Enum.FROM_40_TO_49]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:40:49`)) || null,
-          [AgeRange.Enum.FROM_50_TO_MORE]: resultWithSign(computerIndicateurUn.computeGroup(`${nom}:50:`)) || null,
+          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`),
+          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`),
+          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`),
+          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`),
         },
       })) as NonNullable<DeclarationDTO["remunerations-csp"]>["catégories"],
     };
