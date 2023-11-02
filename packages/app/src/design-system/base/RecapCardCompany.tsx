@@ -26,6 +26,63 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
   const countryLib =
     countryIsoCode && countryIsoCode !== "FR" && `${postalCodeCity && ", "}${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`;
 
+  const content = full ? (
+    <>
+      <Grid haveGutters>
+        <GridCol sm={12} className="fr-pb-0">
+          <strong>Raison sociale</strong>
+          <br />
+          {name}
+        </GridCol>
+        <GridCol sm={3} className="fr-pb-0">
+          <strong>Siren</strong>
+          <br />
+          {siren}
+        </GridCol>
+        {nafCode && (
+          <GridCol sm={9} className="fr-pb-0">
+            <strong>Code NAF</strong>
+            <br />
+            {nafCode} - {NAF[nafCode].description}
+          </GridCol>
+        )}
+        <GridCol sm={12}>
+          <strong>Adresse</strong>
+          <br />
+          {address}
+          {postalCodeCity ? `, ${postalCodeCity}` : " "}
+          {countryLib}
+        </GridCol>
+      </Grid>
+    </>
+  ) : (
+    <>
+      Entreprise déclarante : <strong>{name}</strong>
+      <br />
+      {address}
+      {(postalCodeCity || countryLib) && <br />}
+      {postalCodeCity}
+      {countryLib}
+      <br />
+      Siren : <strong>{siren}</strong>
+      <br />
+      Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
+      {workforce?.range && (
+        <>
+          <br />
+          Tranche d'effectifs assujettis de l'
+          {ues?.name ? "UES" : "entreprise"} : <strong>{CompanyWorkforceRange.Label[workforce.range]}</strong>
+        </>
+      )}
+    </>
+  );
+
+  const fullTitle = full ? (
+    <Text text={titleFull} variant={["xl"]} inline />
+  ) : (
+    title ?? "Informations entreprise déclarante"
+  );
+
   return (
     <>
       <ClientBodyPortal>
@@ -34,62 +91,22 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
           l'INSEE).
         </infoModale.Component>
       </ClientBodyPortal>
-      <RecapCard
-        title={full ? <Text text={titleFull} variant={["xl"]} inline /> : title ?? "Informations entreprise déclarante"}
-        editLink={(edit || void 0) && funnelStaticConfig["entreprise"].url}
-        content={
-          full ? (
-            <>
-              <Grid haveGutters>
-                <GridCol sm={12} className="fr-pb-0">
-                  <strong>Raison sociale</strong>
-                  <br />
-                  {name}
-                </GridCol>
-                <GridCol sm={3} className="fr-pb-0">
-                  <strong>Siren</strong>
-                  <br />
-                  {siren}
-                </GridCol>
-                {nafCode && (
-                  <GridCol sm={9} className="fr-pb-0">
-                    <strong>Code NAF</strong>
-                    <br />
-                    {nafCode} - {NAF[nafCode].description}
-                  </GridCol>
-                )}
-                <GridCol sm={12}>
-                  <strong>Adresse</strong>
-                  <br />
-                  {address}
-                  {postalCodeCity ? `, ${postalCodeCity}` : " "}
-                  {countryLib}
-                </GridCol>
-              </Grid>
-            </>
-          ) : (
-            <>
-              Entreprise déclarante : <strong>{name}</strong>
-              <br />
-              {address}
-              {(postalCodeCity || countryLib) && <br />}
-              {postalCodeCity}
-              {countryLib}
-              <br />
-              Siren : <strong>{siren}</strong>
-              <br />
-              Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
-              {workforce?.range && (
-                <>
-                  <br />
-                  Tranche d'effectifs assujettis de l'
-                  {ues?.name ? "UES" : "entreprise"} : <strong>{CompanyWorkforceRange.Label[workforce.range]}</strong>
-                </>
-              )}
-            </>
-          )
-        }
-      />
+      {edit ? (
+        <RecapCard title={fullTitle} editLink={funnelStaticConfig["entreprise"].url} content={content} />
+      ) : (
+        <RecapCard
+          title={fullTitle}
+          sideButtonProps={{
+            iconId: "fr-icon-information-fill",
+            title: titleFull,
+            priority: "tertiary no outline",
+            style: { alignSelf: "center" },
+            size: "small",
+            nativeButtonProps: infoModale.buttonProps,
+          }}
+          content={content}
+        />
+      )}
     </>
   );
 };
