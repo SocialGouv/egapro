@@ -4,7 +4,9 @@ import { AbstractComputer, type ComputedResult } from "./AbstractComputer";
 
 export interface TotalMetadata<GroupKey extends string = string, AdditionalMetadata extends object = object> {
   additionalMetadata: AdditionalMetadata;
+  /** Total count of employees  */
   totalEmployeeCount: number;
+  /** Total count of employes for valid groups only */
   totalGroupCount: number;
   totalMenCount: number;
   totalWomenCount: number;
