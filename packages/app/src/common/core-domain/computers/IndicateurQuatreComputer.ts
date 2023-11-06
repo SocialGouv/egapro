@@ -19,7 +19,7 @@ export class IndicateurQuatreComputer extends AbstractComputer<MaternityLeaves> 
     const result = this.input.raised / this.input.total;
 
     return {
-      genderAdvantage: "women",
+      favorablePopulation: "women",
       note: this.computeNote(Math.floor(result)),
       result,
       resultRaw: result,

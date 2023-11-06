@@ -12,7 +12,20 @@ interface AdditionalOutput {
   equivalentEmployeeCountGap: number;
   equivalentEmployeeCountGapRaw: number;
   /**
-   * Message accompagnant l'écart en nombre équivalent de salariés
+   * Message accompagnant l'écart en nombre équivalent de salariés.
+   *
+   * Exemples :
+   * ```
+   * "men-men":
+   *   "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "men-women":
+   *   "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "women-men":
+   *   "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * "women-women":
+   *   "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+   * equality: "Les femmes et les hommes sont à égalité"
+   * ```
    */
   ifadvantage: "equality" | "men-men" | "men-women" | "women-men" | "women-women";
   noteEquivalentEmployeeCountGap: number;
@@ -63,11 +76,11 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
       ifadvantage = "women-women";
     }
 
-    const genderAdvantage = sign === 0 ? "equality" : sign === 1 ? "men" : "women";
+    const favorablePopulation = sign === 0 ? "equality" : sign === 1 ? "men" : "women";
     const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
-      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.genderAdvantage !== genderAdvantage;
+      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.favorablePopulation !== favorablePopulation;
     const notePercent = this.computeNote(result);
     const noteEquivalentEmployeeCountGap = this.computeNote(equivalentEmployeeCountGap);
     const note = Math.max(notePercent, noteEquivalentEmployeeCountGap);
@@ -78,7 +91,7 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
       equivalentEmployeeCountGap,
       equivalentEmployeeCountGapRaw,
       note,
-      genderAdvantage,
+      favorablePopulation,
       noteEquivalentEmployeeCountGap,
       notePercent,
       ifadvantage,

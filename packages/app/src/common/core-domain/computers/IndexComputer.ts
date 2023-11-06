@@ -56,7 +56,7 @@ export class IndexComputer<TWorkforceRange extends CompanyWorkforceRange.Enum> e
     const result = (totalNote * 100) / maxPossibleNote;
 
     return {
-      genderAdvantage: "equality",
+      favorablePopulation: "equality",
       resultRaw: totalNote,
       result,
       note: Math.round(result),

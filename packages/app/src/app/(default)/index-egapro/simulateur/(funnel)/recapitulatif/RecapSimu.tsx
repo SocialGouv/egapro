@@ -4,20 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { IndexComputer } from "@common/core-domain/computers/IndexComputer";
-import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
-import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
-import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
-import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
-import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
-import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import {
-  ageRanges,
-  buildRemunerationKey,
-  categories,
-  type ExternalRemunerations,
-  flattenRemunerations,
-} from "@common/core-domain/computers/utils";
+import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
@@ -32,6 +19,7 @@ import { DebugButton } from "@components/utils/debug/DebugButton";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { AlternativeTable, type AlternativeTableProps, IndicatorNote, RecapCard, Stat } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
+import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { times } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { type ZodError } from "zod";
@@ -42,8 +30,9 @@ import { Indicateur2et3Note } from "../indicateur2et3/Indicateur2et3Note";
 import { Indicateur4Note } from "../indicateur4/Indicateur4Note";
 import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
-import { getCspRemuWithCount, getPourcentagesAugmentationPromotionsWithCount, getTotalsCsp } from "../utils";
+import { computerHelper } from "./computerHelper";
 import style from "./Recap.module.scss";
+import { simuFunnelToDeclarationDTO } from "./simuToDecla";
 
 function assertSimu(simulation: Partial<CreateSimulationDTO> | undefined): asserts simulation is CreateSimulationDTO {
   createSimulationDTO.parse(simulation);
@@ -62,6 +51,7 @@ export const RecapSimu = () => {
   const router = useRouter();
   const funnel = useSimuFunnelStore(store => store.funnel);
   const hydrated = useSimuFunnelStoreHasHydrated();
+  const saveFormData = useDeclarationFormManager(state => state.saveFormData);
 
   if (hydrated && !funnel?.effectifs?.workforceRange) {
     redirect(simulateurPath("effectifs"));
@@ -90,89 +80,28 @@ export const RecapSimu = () => {
     );
   }
 
-  // init computers
-  const computerIndicateurUn = new IndicateurUnComputer();
-  computerIndicateurUn.setMode(funnel.indicateur1.mode);
-  const computerIndicateurDeuxTrois = new IndicateurDeuxTroisComputer(computerIndicateurUn);
-  const computerIndicateurDeux = new IndicateurDeuxComputer(computerIndicateurUn);
-  const computerIndicateurTrois = new IndicateurTroisComputer(computerIndicateurUn);
-  const computerIndicateurQuatre = new IndicateurQuatreComputer();
-  const computerIndicateurCinq = new IndicateurCinqComputer();
-
-  // prepare inputs
-  const [totalWomen, totalMen] = getTotalsCsp(funnel);
-  const isLessThan250 = isCreateSimulationWorkforceRangeLessThan250DTO(funnel);
-  const remuWithCount =
-    funnel.indicateur1.mode === RemunerationsMode.Enum.CSP
-      ? getCspRemuWithCount(funnel.effectifs.csp, funnel.indicateur1.remunerations as ExternalRemunerations)
-      : (funnel.indicateur1.remunerations as ExternalRemunerations);
-
-  // set inputs
-  computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
-  if (isLessThan250) {
-    if (funnel.indicateur2and3.calculable) {
-      computerIndicateurDeuxTrois.setInput({
-        ...funnel.indicateur2and3.raisedCount,
-        menCount: totalMen,
-        womenCount: totalWomen,
-      });
-    }
-  } else {
-    if (funnel.indicateur2.calculable) {
-      computerIndicateurDeux.setInput(
-        getPourcentagesAugmentationPromotionsWithCount(
-          funnel.effectifs.csp,
-          funnel.indicateur2.pourcentages as Percentages,
-        ),
-      );
-    }
-
-    if (funnel.indicateur3.calculable) {
-      computerIndicateurTrois.setInput(
-        getPourcentagesAugmentationPromotionsWithCount(
-          funnel.effectifs.csp,
-          funnel.indicateur3.pourcentages as Percentages,
-        ),
-      );
-    }
-  }
-  if (funnel.indicateur4.calculable) {
-    computerIndicateurQuatre.setInput(funnel.indicateur4.count);
-  }
-  computerIndicateurCinq.setInput(funnel.indicateur5);
-
-  // compute results
-  const resultIndicateurUn = computerIndicateurUn.compute();
-  const resultIndicateurDeuxTrois =
-    isLessThan250 && funnel.indicateur2and3.calculable && computerIndicateurDeuxTrois.compute();
-  const resultIndicateurDeux = !isLessThan250 && funnel.indicateur2.calculable && computerIndicateurDeux.compute();
-  const resultIndicateurTrois = !isLessThan250 && funnel.indicateur3.calculable && computerIndicateurTrois.compute();
-  const resultIndicateurQuatre = funnel.indicateur4.calculable && computerIndicateurQuatre.compute();
-  const resultIndicateurCinq = computerIndicateurCinq.compute();
-
-  // total index
-  const indexComputer = new IndexComputer(
-    funnel.effectifs.workforceRange,
-    isLessThan250
-      ? [
-          computerIndicateurUn,
-          funnel.indicateur2and3.calculable ? computerIndicateurDeuxTrois : null,
-          funnel.indicateur4.calculable ? computerIndicateurQuatre : null,
-          computerIndicateurCinq,
-        ]
-      : [
-          computerIndicateurUn,
-          funnel.indicateur2.calculable ? computerIndicateurDeux : null,
-          funnel.indicateur3.calculable ? computerIndicateurTrois : null,
-          funnel.indicateur4.calculable ? computerIndicateurQuatre : null,
-          computerIndicateurCinq,
-        ],
-  );
-  const resultIndex = indexComputer.compute();
+  const {
+    computerIndicateurUn,
+    computerIndicateurDeuxTrois,
+    computerIndicateurDeux,
+    computerIndicateurTrois,
+    computerIndicateurQuatre,
+    totalWomen,
+    totalMen,
+    remuWithCount,
+    resultIndicateurDeuxTrois,
+    resultIndicateurDeux,
+    resultIndicateurTrois,
+    resultIndicateurQuatre,
+    resultIndicateurCinq,
+    indexComputer,
+    resultIndex,
+  } = computerHelper(funnel);
 
   // actions
   const sendToDeclaration = () => {
-    console.log("send !", funnel);
+    saveFormData(simuFunnelToDeclarationDTO(funnel));
+    router.push("/index-egapro/declaration/commencer");
   };
 
   return (
@@ -440,9 +369,9 @@ export const RecapSimu = () => {
               max={10}
               text="Nombre de points obtenus à l'indicateur hautes rémunérations"
               legend={
-                resultIndicateurCinq.genderAdvantage === "equality"
+                resultIndicateurCinq.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
-                  : resultIndicateurCinq.genderAdvantage === "men"
+                  : resultIndicateurCinq.favorablePopulation === "men"
                   ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
                   : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
               }

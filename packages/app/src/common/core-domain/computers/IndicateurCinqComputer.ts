@@ -19,7 +19,7 @@ export class IndicateurCinqComputer extends AbstractComputer<HighestSalaries> {
     const min = Math.min(this.input.men, this.input.women);
 
     return {
-      genderAdvantage:
+      favorablePopulation:
         this.input.men > this.input.women ? "men" : this.input.women > this.input.men ? "women" : "equality",
       note: this.computeNote(min),
       result: min,
