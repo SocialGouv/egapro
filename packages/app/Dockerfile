@@ -28,6 +28,8 @@ ENV NEXTAUTH_URL $NEXTAUTH_URL
 RUN yarn workspace app build
 RUN yarn workspaces focus app --production
 
+RUN mkdir -p packages/app/node_modules
+
 # Runner
 FROM node:$NODE_VERSION AS runner
 
