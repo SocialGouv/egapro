@@ -75,9 +75,14 @@ const prepareDataWithExistingDeclaration = async (
     };
   }
 
+  // Heuristic to check if the user is back on commencer page but on an declaration at least partially filled.
+  const workingOnSameDeclaration = formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren;
+  // Heuristic to check if the user come from simulator and has saved the data from it.
+  const isDeclarationFromSimulation = !formData.commencer?.siren && formData.entreprise?.tranche;
+
   // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
   const baseFormData: DeclarationDTO =
-    formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
+    workingOnSameDeclaration || isDeclarationFromSimulation
       ? formData
       : {
           "declaration-existante": {

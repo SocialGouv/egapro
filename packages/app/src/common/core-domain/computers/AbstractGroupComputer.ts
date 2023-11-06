@@ -4,7 +4,9 @@ import { AbstractComputer, type ComputedResult } from "./AbstractComputer";
 
 export interface TotalMetadata<GroupKey extends string = string, AdditionalMetadata extends object = object> {
   additionalMetadata: AdditionalMetadata;
+  /** Total count of employees  */
   totalEmployeeCount: number;
+  /** Total count of employes for valid groups only */
   totalGroupCount: number;
   totalMenCount: number;
   totalWomenCount: number;
@@ -124,24 +126,30 @@ export abstract class AbstractGroupComputer<
       totalWeightedGap += weightedGap;
     }
 
-    this.computed = this.getResult(totalWeightedGap);
+    this.computed = this.getNoteAndInfoFromResult(totalWeightedGap);
     return this.computed;
   }
 
   public abstract canComputeGroup(key: GroupKey): boolean;
-  public computeGroup(key: GroupKey): ComputedResult {
-    const weightedGap = this.calculateWeightedGap(key);
-    return this.getResult(weightedGap);
+
+  public computeGroup(groupKey: GroupKey): ComputedResult {
+    const weightedGap = this.calculateWeightedGap(groupKey);
+    return this.getNoteAndInfoFromResult(weightedGap);
   }
 
   protected abstract calculateWeightedGap(key: GroupKey): number;
 
-  protected getResult(weightedGap: number): ComputedResult<AdditionalOutput> {
+  /**
+   * Compute note and retunrs all info from result.
+   *
+   * @param weightedGap indicator's result
+   */
+  protected getNoteAndInfoFromResult(weightedGap: number): ComputedResult<AdditionalOutput> {
     const sign = Math.sign(weightedGap);
     const result = Math.round(Math.abs(weightedGap) * 10) / 10;
 
     return {
-      genderAdvantage: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
+      favorablePopulation: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
       note: this.computeNote(result),
       result,
       resultRaw: weightedGap,

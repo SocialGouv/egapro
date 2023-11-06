@@ -51,7 +51,7 @@ export const useDeclarationFormManager = create<Actions & State>()(
     ),
     {
       name: "ega-declaration-form",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage), // Can't use sessionStorage, to share data from simulator.
     },
   ),
 );
