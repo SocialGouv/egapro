@@ -177,11 +177,14 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           }
         }
 
-        if (!declaration.salaryRaisesAndPromotions?.notComputableReason) {
-          assert(
-            declaration.salaryRaisesAndPromotions?.employeesCountResult !== undefined,
-            `Le résulat par employé doit être renseigné pour l'indicateur augmentations et promotions quand il est calculable.`,
-          );
+        // Règle 8 bis complémentaire, pour l'indicateur augmentations et promotions
+        if (declaration.company.range.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+          if (!declaration.salaryRaisesAndPromotions?.notComputableReason) {
+            assert(
+              declaration.salaryRaisesAndPromotions?.employeesCountResult !== undefined,
+              `Le résultat par employé doit être renseigné pour l'indicateur augmentations et promotions quand il est calculable.`,
+            );
+          }
         }
 
         type IndicatorRule9 = { favorablePopulation?: string; result?: Percentage } | undefined;
