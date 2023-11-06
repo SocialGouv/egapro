@@ -49,6 +49,7 @@ COPY --from=builder /app/packages/app/public ./packages/app/public
 COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 COPY --from=builder --chown=node:node /app/.yarn .yarn
 COPY --from=builder --chown=node:node /app/.yarnrc.yml .
+COPY --from=builder --chown=node:node /app/yarn.lock .
 
 USER 1001
 
