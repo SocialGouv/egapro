@@ -6,7 +6,7 @@
     "predev": "only-include-used-icons",
     "dev": "next dev",
     "prebuild": "only-include-used-icons",
-    "build": "next build",
+    "build": "node --stack-size=2000 ../../node_modules/.bin/next build",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",
