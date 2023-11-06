@@ -46,7 +46,7 @@ COPY --from=builder /app/packages/app/package.json ./packages/app
 COPY --from=builder /app/packages/app/.env.production ./packages/app
 COPY --from=builder /app/packages/app/.env.development ./packages/app
 COPY --from=builder /app/packages/app/public ./packages/app/public
-COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
+COPY --from=builder --chown=node:node /app/packages/app/.next ./packages/app/.next
 COPY --from=builder --chown=node:node /app/.yarn .yarn
 COPY --from=builder --chown=node:node /app/.yarnrc.yml .
 COPY --from=builder --chown=node:node /app/yarn.lock .
