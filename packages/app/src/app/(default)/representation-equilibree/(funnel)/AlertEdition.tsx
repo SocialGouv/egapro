@@ -2,7 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
 import { add, isAfter } from "date-fns";
@@ -28,7 +28,7 @@ export const AlertEdition = () => {
 
   return (
     <Alert
-      severity="warning"
+      severity="info"
       title="Attention"
       className={fr.cx("fr-mb-4w")}
       description={
@@ -37,14 +37,24 @@ export const AlertEdition = () => {
             ? "Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé."
             : "Vous êtes en train de modifier une déclaration validée et transmise. Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
           <br />
-          <Button
-            linkProps={{ href: `/representation-equilibree/${repEq.siren}/${repEq.year}` }}
-            iconId="fr-icon-arrow-right-line"
-            iconPosition="right"
-            className={fr.cx("fr-mt-2w")}
-          >
-            Revenir au récapitulatif
-          </Button>
+
+          <ButtonsGroup
+            inlineLayoutWhen="sm and up"
+            alignment="right"
+            buttons={[
+              {
+                title: "Revenir au récapitulatif",
+                children: "Revenir au récapitulatif",
+                linkProps: {
+                  href: `/representation-equilibree/${repEq.siren}/${repEq.year}`,
+                },
+                iconId: "fr-icon-arrow-right-line",
+                iconPosition: "right",
+                className: fr.cx("fr-mt-2w"),
+                priority: "tertiary",
+              },
+            ]}
+          />
         </>
       }
     />
