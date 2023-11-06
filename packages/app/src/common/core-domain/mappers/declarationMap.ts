@@ -179,6 +179,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       "declaration-existante": {
         status: "edition",
         date: dateObjectToDateISOString(obj.declaredAt),
+        modifiedAt: dateObjectToDateISOString(obj.modifiedAt),
       },
       declarant: {
         accordRgpd: true,

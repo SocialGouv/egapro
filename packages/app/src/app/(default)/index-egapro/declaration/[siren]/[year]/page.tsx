@@ -28,6 +28,7 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   let déclaration: DeclarationDTO | null = null;
   try {
     déclaration = await getDeclaration(siren, year);
+    if (déclaration) déclaration["declaration-existante"].status = "consultation";
   } catch (error: unknown) {
     console.error("Error: ", error);
 
