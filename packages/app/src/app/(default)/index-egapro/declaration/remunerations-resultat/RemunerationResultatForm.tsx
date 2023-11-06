@@ -49,8 +49,8 @@ export const RemunerationResultatForm = () => {
   const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
-    resolver: zodResolver(formSchema),
     mode: "onChange",
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -78,7 +78,7 @@ export const RemunerationResultatForm = () => {
 
     if (résultat === 0 || résultat === null) {
       setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "");
+      setValue("populationFavorable", "", { shouldValidate: true });
     } else {
       setPopulationFavorableDisabled(false);
     }
