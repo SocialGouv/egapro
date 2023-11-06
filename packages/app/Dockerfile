@@ -26,7 +26,7 @@ ENV NEXTAUTH_URL $NEXTAUTH_URL
 
 # RUN yarn workspaces foreach -t run postinstall # if you have postinstall scripts in your package.json file(s)
 RUN yarn workspace app build
-RUN yarn workspace app focus --production
+RUN yarn workspaces focus app --production
 
 # Runner
 FROM node:$NODE_VERSION AS runner
