@@ -40,6 +40,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 COPY --from=builder /app/packages/app/node_modules ./packages/app/node_modules
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 COPY --from=builder /app/packages/app/next.config.js ./packages/app
 COPY --from=builder /app/packages/app/package.json ./packages/app
 COPY --from=builder /app/packages/app/.env.production ./packages/app
