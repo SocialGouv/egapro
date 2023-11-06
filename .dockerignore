@@ -1,7 +1,6 @@
 **/node_modules
 **/.gitignore
 **/Dockerfile
-**/.env.*
 
 .dockerignore
 .git
