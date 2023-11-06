@@ -122,7 +122,7 @@ export type DeclarationDTO = {
     date?: string | undefined;
     status: "consultation" | "creation" | "edition";
   };
-  entreprise?: { entrepriseDéclarante: Entreprise; tranche?: CompanyWorkforceRange.Enum; type?: "entreprise" | "ues" };
+  entreprise?: { entrepriseDéclarante?: Entreprise; tranche?: CompanyWorkforceRange.Enum; type?: "entreprise" | "ues" };
   "hautes-remunerations"?: {
     note: number;
     populationFavorable: FavorablePopulation.Enum;

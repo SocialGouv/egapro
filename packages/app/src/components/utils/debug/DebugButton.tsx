@@ -46,7 +46,7 @@ export const DebugButton = ({ obj, infoText, alwaysOn, children }: PropsWithChil
           size="small"
           iconId="ri-bug-2-line"
           onClick={() => {
-            console.log(`[DEBUG]${infoText ? `[${infoText}]` : ""}`, obj);
+            console.debug(`[DEBUG]${infoText ? `[${infoText}]` : ""}`, obj);
           }}
           priority="tertiary no outline"
           title={`Debug${infoText ? ` ${infoText}` : ""}`}

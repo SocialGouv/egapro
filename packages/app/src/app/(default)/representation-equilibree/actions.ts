@@ -73,7 +73,7 @@ export async function sendRepresentationEquilibreeReceipt(siren: string, year: n
     await useCase.execute({ siren, year, email: session.user.email });
   } catch (e: unknown) {
     if (e instanceof SendRepresentationEquilibreeReceiptError) {
-      console.log(e.appErrorStack());
+      console.error(e.appErrorStack());
       if (e.previousError) throw e.previousError;
     }
     throw e;

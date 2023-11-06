@@ -31,7 +31,7 @@ export const ImportReferentsModal = () => {
       modal.close();
       router.refresh();
     } catch (error: unknown) {
-      console.log(error);
+      console.error(error);
       setErrorMessage((error as Error).message);
     }
   };

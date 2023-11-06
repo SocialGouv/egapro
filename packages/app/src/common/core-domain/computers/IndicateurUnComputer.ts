@@ -96,11 +96,6 @@ export class IndicateurUnComputer extends AbstractGroupComputer<InputRemuneratio
    * Calcule l'écart pondéré pour un groupe donné.
    */
   protected calculateWeightedGap(key: string): number {
-    let group: CountAndAverageSalaries;
-    if (this.groupWeightedGaps.has(key)) {
-      group = this.groupWeightedGaps.get(key)!;
-    }
-
     if (!this.input) {
       throw new Error("remunerations must be set before calling calculateWeightedGap");
     }
@@ -109,7 +104,12 @@ export class IndicateurUnComputer extends AbstractGroupComputer<InputRemuneratio
       throw new Error("mode (csp, or other) must be set before calling calculateWeightedGap");
     }
 
-    group = this.input[key] ?? {
+    // let group: CountAndAverageSalaries;
+    // if (this.groupWeightedGaps.has(key)) {
+    //   group = this.groupWeightedGaps.get(key)!;
+    // }
+
+    const group = this.input[key] ?? {
       menCount: 0,
       menSalary: 0,
       womenCount: 0,
