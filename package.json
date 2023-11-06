@@ -2,11 +2,9 @@
   "name": "~egapro-dev",
   "version": "2.91.5",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/app"
-    ]
-  },
+  "workspaces": [
+    "packages/app"
+  ],
   "engines": {
     "node": "20"
   },
@@ -32,5 +30,6 @@
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
     "semantic-release": "^19"
-  }
+  },
+  "packageManager": "yarn@4.0.1"
 }

@@ -1,0 +1,10 @@
+__pycache__
+*.egg-info
+*.db
+tmp/
+.coverage
+htmlcov/
+site/
+venv/
+.env
+settings.json

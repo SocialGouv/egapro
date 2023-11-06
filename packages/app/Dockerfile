@@ -3,6 +3,16 @@ ARG NODE_VERSION=20-alpine
 # Builder
 FROM node:$NODE_VERSION AS builder
 
+WORKDIR /app
+
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+RUN yarn fetch workspaces focus app
+
+COPY packages/app packages/app
+
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL $NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_API_V2_URL
@@ -14,18 +24,9 @@ ENV EGAPRO_ENV $EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL $NEXTAUTH_URL
 
-WORKDIR /app/packages/app
-
-COPY packages/app/package.json yarn.lock ./
-
-RUN yarn install --frozen-lockfile
-
-COPY packages/app/ ./
-
-ENV NODE_OPTIONS="--max-old-space-size=8192"
-
-RUN yarn build && \
-  yarn install --production
+# RUN yarn workspaces foreach -t run postinstall # if you have postinstall scripts in your package.json file(s)
+RUN yarn workspace app build
+RUN yarn workspace app focus --production
 
 # Runner
 FROM node:$NODE_VERSION AS runner

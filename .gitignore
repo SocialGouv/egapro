@@ -3,8 +3,6 @@
 
 # dependencies
 node_modules
-.pnp
-.pnp.js
 
 # testing
 coverage/
@@ -51,3 +49,12 @@ site/
 venv/
 .env
 /packages/api/settings.json
+
+# Yarn Berry
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
