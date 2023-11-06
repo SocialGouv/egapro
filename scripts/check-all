@@ -2,8 +2,8 @@
 
 set -e
 
-yarn workspaces run lint
-yarn workspaces run build --no-lint
+yarn workspaces foreach -A --exclude '~egapro-dev' run lint
+yarn workspaces foreach -A --exclude '~egapro-dev' run build --no-lint
 
 # Tests API
 yarn test:api

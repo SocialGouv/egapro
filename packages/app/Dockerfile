@@ -24,7 +24,7 @@ ENV EGAPRO_ENV $EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL $NEXTAUTH_URL
 
-# RUN yarn workspaces foreach -t run postinstall # if you have postinstall scripts in your package.json file(s)
+# RUN yarn workspaces foreach -At run postinstall # if you have postinstall scripts in your package.json file(s)
 RUN yarn workspace app build
 RUN yarn workspaces focus app --production
 
