@@ -48,4 +48,4 @@ COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 
 USER 1001
 
-CMD ["node_modules/.bin/next", "start"]
+CMD ["yarn", "workspace", "app", "start"]

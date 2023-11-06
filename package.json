@@ -9,6 +9,7 @@
     "node": "20"
   },
   "scripts": {
+    "start": "next start",
     "dev": "scripts/dev",
     "pgadmin": "docker-compose up --build --force-recreate --remove-orphans pgadmin",
     "dev:app": "yarn workspace app run dev",
