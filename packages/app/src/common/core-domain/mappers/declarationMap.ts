@@ -177,7 +177,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         siren: obj.siren.getValue(),
       },
       "declaration-existante": {
-        status: "edition",
+        status: "consultation",
         date: dateObjectToDateISOString(obj.declaredAt),
         modifiedAt: dateObjectToDateISOString(obj.modifiedAt),
       },

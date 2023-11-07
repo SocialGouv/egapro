@@ -103,7 +103,8 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
       <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
 
       <Highlight>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année <strong>{year + 1}</strong> au titre des
+        données <strong>{year}</strong>.
       </Highlight>
 
       {isOwner && (

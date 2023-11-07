@@ -40,13 +40,12 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
 
   const year = déclaration.commencer?.annéeIndicateurs || 2023;
 
-  console.log(déclaration);
-
   return (
     <>
       <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif de l'Index égalité professionnelle</h1>
       <Highlight>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
+        Déclaration de l'index de l'égalité professionnelle Femmes/Hommes pour l'année <strong>{year + 1}</strong> au
+        titre des données <strong>{year}</strong>.
       </Highlight>
       {/* {meta?.date && <RecapCard title="Date de déclaration" content={meta?.date && formatIsoToFr(meta?.date)} />}  */}
 
