@@ -70,7 +70,8 @@ export const CongesMaterniteForm = () => {
 
   useEffect(() => {
     if (résultat !== null && résultat !== undefined) {
-      const note = new IndicateurQuatreComputer().computeNote(résultat);
+      const percentResult = Math.floor(résultat / 100);
+      const note = new IndicateurQuatreComputer().computeNote(percentResult);
       setValue("note", note);
     }
   }, [résultat, setValue]);
