@@ -20,7 +20,7 @@ export const AlertExistingDeclaration = () => {
 
   const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
-  if (segment === "commencer" || segment === "confirmation") return null;
+  if (segment === "commencer" || segment === "confirmation" || segment === "assujetti") return null;
 
   return (
     <Alert
