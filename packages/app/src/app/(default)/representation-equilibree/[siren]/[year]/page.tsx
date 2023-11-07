@@ -57,11 +57,6 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
   return (
     <CenteredContainer pb="6w">
-      <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
-      <Highlight>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
-      </Highlight>
-
       <ClientAnimate>
         {session && !isOwner && !olderThanOneYear && (
           <Alert
@@ -104,6 +99,12 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
             />
           ))}
       </ClientAnimate>
+
+      <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
+
+      <Highlight>
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
+      </Highlight>
 
       {isOwner && (
         <Box className="text-right" mb="2v">

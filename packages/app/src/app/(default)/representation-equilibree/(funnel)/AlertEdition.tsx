@@ -6,6 +6,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
 import { add, isAfter } from "date-fns";
+import { useSelectedLayoutSegment } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getRepresentationEquilibree } from "../actions";
@@ -16,6 +17,7 @@ export const AlertEdition = () => {
   const [funnel, isEdit] = useStore("funnel", "isEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
   const [repEq, setRepEq] = useState<RepresentationEquilibreeDTO | null>();
+  const segment = useSelectedLayoutSegment();
 
   useEffect(() => {
     funnel?.siren && funnel.year && getRepresentationEquilibree(funnel.siren, funnel.year).then(setRepEq);
@@ -25,7 +27,7 @@ export const AlertEdition = () => {
   if (!hydrated || !isEdit || !repEq) return null;
 
   const olderThanOneYear = isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
-
+  if (segment === "commencer") return null;
   return (
     <Alert
       severity="info"
