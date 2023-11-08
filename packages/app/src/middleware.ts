@@ -6,12 +6,12 @@ import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
-    default-src 'self' https://*.gouv.fr;
+    // default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
+    // script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
     frame-ancestors 'self' https://*.gouv.fr;
@@ -20,8 +20,9 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
     upgrade-insecure-requests;
-    require-trusted-types-for 'script';
-    trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`;
+    // require-trusted-types-for 'script';
+    // trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;
+    `;
 
   const responseHeaders = new Headers();
   responseHeaders.set("x-nonce", nonce);
