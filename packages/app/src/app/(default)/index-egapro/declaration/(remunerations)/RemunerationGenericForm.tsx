@@ -25,21 +25,39 @@ import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../
 import style from "./RemunerationGenericForm.module.scss";
 
 const formSchema = zodFr.object({
-  catégories: z.array(
-    z.object({
-      nom: z.string(),
-      tranches: z.object({
-        [AgeRange.Enum.LESS_THAN_30]: zodNumberOrNaNOrNull,
-        [AgeRange.Enum.FROM_30_TO_39]: zodNumberOrNaNOrNull,
-        [AgeRange.Enum.FROM_40_TO_49]: zodNumberOrNaNOrNull,
-        [AgeRange.Enum.FROM_50_TO_MORE]: zodNumberOrNaNOrNull,
+  catégories: z
+    .array(
+      z.object({
+        nom: z.string(),
+        tranches: z.object({
+          [AgeRange.Enum.LESS_THAN_30]: zodNumberOrNaNOrNull,
+          [AgeRange.Enum.FROM_30_TO_39]: zodNumberOrNaNOrNull,
+          [AgeRange.Enum.FROM_40_TO_49]: zodNumberOrNaNOrNull,
+          [AgeRange.Enum.FROM_50_TO_MORE]: zodNumberOrNaNOrNull,
+        }),
       }),
+    )
+    .superRefine((val, ctx) => {
+      if (notFilled(val)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vous devez renseigner au moins un écart si votre indicateur est calculable",
+        });
+      }
     }),
-  ),
 });
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
+
+const notFilled = (catégories: FormType["catégories"]) =>
+  catégories.every(
+    catégorie =>
+      catégorie.tranches[AgeRange.Enum.LESS_THAN_30] === null &&
+      catégorie.tranches[AgeRange.Enum.FROM_30_TO_39] === null &&
+      catégorie.tranches[AgeRange.Enum.FROM_40_TO_49] === null &&
+      catégorie.tranches[AgeRange.Enum.FROM_50_TO_MORE] === null,
+  );
 
 const defaultTranch = { ":29": null, "30:39": null, "40:49": null, "50:": null };
 
@@ -93,15 +111,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   });
 
   const onSubmit = async (data: FormType) => {
-    const notFilled = data.catégories.every(
-      catégorie =>
-        catégorie.tranches[AgeRange.Enum.LESS_THAN_30] === null &&
-        catégorie.tranches[AgeRange.Enum.FROM_30_TO_39] === null &&
-        catégorie.tranches[AgeRange.Enum.FROM_40_TO_49] === null &&
-        catégorie.tranches[AgeRange.Enum.FROM_50_TO_MORE] === null,
-    );
-
-    if (notFilled) {
+    if (notFilled(data.catégories)) {
       return setError("root.catégories", {
         message:
           mode === "csp"
