@@ -5,6 +5,10 @@ import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+
+  // TODO: les headers commentés évitent le problème no unsafe-eval et trusted types, qui se retrouvent sinon sur la prod.
+  // Voir comment les réactiver.
+
   const cspHeader = `
     // default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;
