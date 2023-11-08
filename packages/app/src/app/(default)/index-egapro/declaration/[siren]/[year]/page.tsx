@@ -20,6 +20,8 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
   return user.staff || user.companies.some(company => company.siren === siren);
 };
 
+export const revalidate = 86_400; // 24h
+
 const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
 
