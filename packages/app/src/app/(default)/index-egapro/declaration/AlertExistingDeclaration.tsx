@@ -6,22 +6,34 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { config } from "@common/config";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { add, isAfter } from "date-fns";
 
 export const AlertExistingDeclaration = () => {
   const { formData } = useDeclarationFormManager();
   const hasMounted = useHasMounted();
 
-  if (!hasMounted) return null;
+  const declarationDate = formData["declaration-existante"].date;
+
+  if (!hasMounted || !declarationDate) return null;
+
+  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   return (
     <Alert
       severity="info"
-      title="Vous êtes en train de modifier une déclaration validée et transmise."
+      title={
+        formData["declaration-existante"].status === "consultation"
+          ? "Cette déclaration a été validée et transmise"
+          : "Vous êtes en train de modifier une déclaration validée et transmise."
+      }
       className={fr.cx("fr-mb-4w")}
       description={
         <>
-          Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière
-          étape.
+          {olderThanOneYear
+            ? "Elle n'est plus modifiable car le délai d'un an est écoulé."
+            : formData["declaration-existante"].status === "consultation"
+            ? "Vous pouvez la modifier en cliquant sur le bouton Modifier."
+            : "Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
           <br />
           <ButtonsGroup
             inlineLayoutWhen="sm and up"
