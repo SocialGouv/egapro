@@ -46,7 +46,7 @@ export const UESForm = () => {
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();
   const [checkDuplicateRequest, setCheckDuplicateRequest] = useState(false);
-  const [valid, setValid] = useState<false | true | undefined>();
+  // const [valid, setValid] = useState<false | true | undefined>();
 
   // assertOrRedirectCommencerStep(formData);
 
@@ -93,6 +93,16 @@ export const UESForm = () => {
       ...watchedCompanies[index],
     };
   });
+
+  const countEmptySiren = controlledCompaniesFields.filter(company => !company.siren).length;
+
+  const countEntreprisesErrors = Object.keys(errors.entreprises ?? {}).length;
+
+  // console.log("#errors entreprises", !errors.entreprises ? 0 : Object.keys(errors.entreprises).length);
+
+  console.log("countEntreprisesErrors:", countEntreprisesErrors);
+
+  console.log("errors:", errors);
 
   useEffect(() => {
     if (checkDuplicateRequest) {
@@ -149,11 +159,6 @@ export const UESForm = () => {
     clearErrors(`entreprises.${index}.siren`);
 
     if (!siren || !year) return;
-
-    if (!childSiren) {
-      setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est requis" });
-      return;
-    }
 
     const parsedSiren = sirenSchema.safeParse(childSiren);
 
@@ -254,6 +259,15 @@ export const UESForm = () => {
                                 registerMethods.onChange(e);
                                 onChangeChildSiren(e.target.value, index);
                               },
+                              onBlur: e => {
+                                registerMethods.onBlur(e);
+                                if (!e.target.value) {
+                                  setError(`entreprises.${index}.siren`, {
+                                    type: "custom",
+                                    message: "Le Siren est requis",
+                                  });
+                                }
+                              },
                             }}
                             state={errors.entreprises?.[index]?.siren && "error"}
                           />
@@ -304,6 +318,7 @@ export const UESForm = () => {
               append({ siren: "", raisonSociale: "" });
               // setValid(undefined);
             }}
+            disabled={countEmptySiren}
             iconId="fr-icon-add-line"
           >
             Ajouter une entreprise
