@@ -329,7 +329,6 @@ export const UESForm = () => {
             type="button"
             onClick={() => {
               append({ siren: "", raisonSociale: "" });
-              // setValid(undefined);
             }}
             disabled={countEmptySiren >= 1}
             iconId="fr-icon-add-line"
