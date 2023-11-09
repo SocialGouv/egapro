@@ -3,7 +3,10 @@ import { times, upperFirst } from "lodash";
 import { NAF, NAF_SECTIONS } from "./utils/naf";
 import { type SimpleObject, type UnknownMapping } from "./utils/types";
 
+// this is first year of egapro existance from where we can search declarations
 export const FIRST_YEAR = 2018 as const;
+
+// this is oldest year of possible index declaration
 export const FIRST_PUBLIC_YEAR = 2021 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
 
