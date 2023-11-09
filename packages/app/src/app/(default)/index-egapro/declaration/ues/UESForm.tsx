@@ -95,18 +95,12 @@ export const UESForm = () => {
   });
 
   const countEmptySiren = controlledCompaniesFields.filter(company => !company.siren).length;
-
   const countEntreprisesErrors = Object.keys(errors.entreprises ?? {}).length;
 
-  console.log("countEntreprisesErrors:", countEntreprisesErrors);
-
-  const checkAllSirens = useCallback((): { duplicatesFound: boolean } => {
+  const checkAllSirens = useCallback(() => {
     clearErrors("entreprises");
 
-    let duplicatesFound = false;
-
     const allSirens = [siren, ...controlledCompaniesFields.map(company => company.siren)];
-
     const countOfSirenOccurences = countBy(allSirens);
 
     controlledCompaniesFields.forEach((entrepriseField, entrepriseFieldIndex) => {
@@ -115,7 +109,6 @@ export const UESForm = () => {
           type: "custom",
           message: "Le Siren est déjà dans l'UES",
         });
-        duplicatesFound = true;
       }
 
       if (!entrepriseField.siren) {
@@ -132,8 +125,6 @@ export const UESForm = () => {
         });
       }
     });
-
-    return { duplicatesFound };
   }, [clearErrors, controlledCompaniesFields, setError, siren]);
 
   useEffect(() => {
@@ -173,7 +164,6 @@ export const UESForm = () => {
   };
 
   const onChangeChildSiren = async (childSiren: string, index: number) => {
-    console.log("avant clearErrors onChangeChildSiren");
     clearErrors(`entreprises.${index}.siren`);
 
     const result = await validateOneSiren(childSiren);
@@ -182,6 +172,7 @@ export const UESForm = () => {
       setError(`entreprises.${index}.siren`, { type: "custom", message: result.error });
     } else {
       setValue(`entreprises.${index}.raisonSociale`, result?.data || "");
+      // Run check duplicate routine in case some sirens are now duplicates.
       setCheckDuplicateRequest(true);
     }
   };
