@@ -4,6 +4,7 @@ import { NAF, NAF_SECTIONS } from "./utils/naf";
 import { type SimpleObject, type UnknownMapping } from "./utils/types";
 
 export const FIRST_YEAR = 2018 as const;
+export const FIRST_PUBLIC_YEAR = 2021 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
 
 // TODO: move to a better place 👼
@@ -14,15 +15,20 @@ export const FIRST_YEAR_REPEQ = 2021 as const;
 export const OPMC_OPEN_DURATION_AFTER_EDIT = 2;
 
 /** Need to be set manually because declaration are not opened on Jan 1rst */
-export const CURRENT_YEAR = 2022 as const;
+export const CURRENT_YEAR = 2023 as const;
 /** Need to be set */
 export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
 // export const PUBLIC_CURRENT_YEAR = 2022 as const;
 
 export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
-export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
+export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_PUBLIC_YEAR + 1)
+  .fill(null)
+  .map((_, idx) => FIRST_PUBLIC_YEAR + idx);
+
+export const SEARCHABLE_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
   .fill(null)
   .map((_, idx) => FIRST_YEAR + idx);
+
 export const PUBLIC_YEARS_DESC = PUBLIC_YEARS.reverse();
 export const YEARS_REPEQ = new Array(CURRENT_YEAR - FIRST_YEAR_REPEQ + 1)
   .fill(null)
