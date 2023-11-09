@@ -82,22 +82,20 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
             className={fr.cx("fr-mb-4w")}
           />
         )}
-        {isOwner &&
-          (olderThanOneYear ? (
-            <p>
-              Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est
-              écoulé.
-            </p>
-          ) : (
-            <Alert
-              severity="info"
-              as="h2"
-              title="Cette déclaration a été validée et transmise."
-              description="Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
-              className={fr.cx("fr-mb-4w")}
-              closable
-            />
-          ))}
+        {isOwner && (
+          <Alert
+            severity="info"
+            as="h2"
+            title="Cette déclaration a été validée et transmise."
+            description={
+              olderThanOneYear
+                ? "Elle n'est plus modifiable car le délai d'un an est écoulé"
+                : "Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
+            }
+            className={fr.cx("fr-mb-4w")}
+            closable
+          />
+        )}
       </ClientAnimate>
 
       <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>

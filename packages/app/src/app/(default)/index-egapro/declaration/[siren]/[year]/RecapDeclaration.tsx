@@ -136,6 +136,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
       {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <>
           <RecapCardIndicator
+            déclaration={déclaration}
             name="remunerations"
             edit={edit}
             customContent={
@@ -161,15 +162,15 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
           />
 
           {déclaration["entreprise"]?.tranche === "50:250" ? (
-            <RecapCardIndicator edit={edit} name="augmentations-et-promotions" />
+            <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations-et-promotions" />
           ) : (
             <>
-              <RecapCardIndicator edit={edit} name="augmentations" />
-              <RecapCardIndicator edit={edit} name="promotions" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="promotions" />
             </>
           )}
-          <RecapCardIndicator edit={edit} name="conges-maternite" />
-          <RecapCardIndicator edit={edit} name="hautes-remunerations" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="conges-maternite" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="hautes-remunerations" />
         </>
       )}
 

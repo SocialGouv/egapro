@@ -2,6 +2,7 @@
 
 import { ClientOnly } from "@components/utils/ClientOnly";
 
+import { AlertExistingDeclaration } from "../AlertExistingDeclaration";
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
 import { PublicationForm } from "./PublicationForm";
@@ -11,6 +12,7 @@ const stepName: FunnelKey = "publication";
 const ResultatGlobalPage = () => {
   return (
     <ClientOnly>
+      <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
       <p>

@@ -8,6 +8,7 @@ import { UnexpectedSessionError } from "@common/shared-domain";
 import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { CenteredContainer, DownloadCard, Grid, GridCol } from "@design-system";
+import { add, isAfter } from "date-fns";
 import { notFound } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
@@ -81,9 +82,22 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const canEdit = canEditSiren(session?.user)(siren);
 
   if (!declarationDate) return <SkeletonForm fields={8} />;
+  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   return (
     <>
+      <Alert
+        severity="info"
+        as="h2"
+        title="Cette déclaration a été validée et transmise."
+        description={
+          olderThanOneYear
+            ? "Elle n'est plus modifiable car le délai d'un an est écoulé"
+            : "Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
+        }
+        className={fr.cx("fr-mb-4w")}
+        closable
+      />
       <RecapDeclaration déclaration={déclaration} />
 
       {canEdit && year && (
