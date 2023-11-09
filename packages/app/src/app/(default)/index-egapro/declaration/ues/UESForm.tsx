@@ -13,10 +13,9 @@ import { AlertMessage } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { isValid } from "date-fns";
 import { countBy } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -68,7 +67,7 @@ export const UESForm = () => {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
   } = methods;
 
@@ -98,73 +97,94 @@ export const UESForm = () => {
 
   const countEntreprisesErrors = Object.keys(errors.entreprises ?? {}).length;
 
-  // console.log("#errors entreprises", !errors.entreprises ? 0 : Object.keys(errors.entreprises).length);
-
   console.log("countEntreprisesErrors:", countEntreprisesErrors);
 
-  console.log("errors:", errors);
+  const checkAllSirens = useCallback((): { duplicatesFound: boolean } => {
+    clearErrors("entreprises");
 
-  useEffect(() => {
-    if (checkDuplicateRequest) {
-      clearErrors("entreprises");
+    let duplicatesFound = false;
 
-      const allSirens = [siren, ...controlledCompaniesFields.map(company => company.siren)];
+    const allSirens = [siren, ...controlledCompaniesFields.map(company => company.siren)];
 
-      const countOfSirenOccurences = countBy(allSirens);
+    const countOfSirenOccurences = countBy(allSirens);
 
-      controlledCompaniesFields.forEach((entrepriseField, entrepriseFieldIndex) => {
-        if (countOfSirenOccurences[entrepriseField.siren] > 1) {
-          setError(`entreprises.${entrepriseFieldIndex}.siren`, {
-            type: "custom",
-            message: "Le Siren est déjà dans l'UES",
-          });
-        }
-      });
+    controlledCompaniesFields.forEach((entrepriseField, entrepriseFieldIndex) => {
+      if (countOfSirenOccurences[entrepriseField.siren] > 1) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: "Le Siren est déjà dans l'UES",
+        });
+        duplicatesFound = true;
+      }
 
-      setCheckDuplicateRequest(false);
-    }
-  }, [controlledCompaniesFields, checkDuplicateRequest, setCheckDuplicateRequest, clearErrors, siren, setError]);
+      if (!entrepriseField.siren) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: "Le Siren est requis",
+        });
+      }
 
-  const onSubmit = async (data: FormType) => {
+      if (!sirenSchema.safeParse(entrepriseField.siren).success) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: "Le Siren est invalide",
+        });
+      }
+    });
+
+    return { duplicatesFound };
+  }, [clearErrors, controlledCompaniesFields, setError, siren]);
+
+  const validate = useCallback(() => {
+    let success = true;
+
     if (!watchedName.trim()) {
       setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
-      return;
+      success = false;
     }
 
     if (watchedCompanies.length === 0) {
       setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
-      return;
+      success = false;
     }
 
     for (let index = 0; index < watchedCompanies.length; index++) {
       if (errors.entreprises?.[index]?.siren) {
         setError("entreprises", { type: "custom", message: "Veuillez corriger les Siren contenus dans l'UES" });
-        return;
+        success = false;
       }
     }
 
-    const duplicatesFound = checkDuplicate();
+    const { duplicatesFound } = checkAllSirens();
 
     if (duplicatesFound) {
       setError("entreprises", { type: "custom", message: "Veuillez corriger les Siren en double" });
-      return;
+      success = false;
     }
 
-    savePageData("ues", data);
+    success = true;
 
-    router.push(funnelConfig(formData)[stepName].next().url);
-  };
+    return { success };
+  }, [checkAllSirens, errors.entreprises, setError, watchedCompanies.length, watchedName]);
 
-  const onChangeChildSiren = async (childSiren: string, index: number) => {
-    clearErrors(`entreprises.${index}.siren`);
+  useEffect(() => {
+    if (checkDuplicateRequest) {
+      checkAllSirens();
+      setCheckDuplicateRequest(false);
+    }
+  }, [checkDuplicateRequest, checkAllSirens, setCheckDuplicateRequest, validate]);
 
-    if (!siren || !year) return;
+  type ValidateResult = { data: string; ok: true } | { error: string; ok: false };
 
+  const validateOneSiren = async (childSiren: string): Promise<ValidateResult> => {
     const parsedSiren = sirenSchema.safeParse(childSiren);
 
+    if (!parsedSiren) {
+      return { ok: false, error: "Le Siren est requis" };
+    }
+
     if (!parsedSiren.success) {
-      setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est invalide" });
-      return;
+      return { ok: false, error: "Le Siren est invalide" };
     }
 
     // We fetch the latest data for the entreprise to fill the entreprise page.
@@ -176,17 +196,33 @@ export const UESForm = () => {
       const isClosed = isCompanyClosed(company, year);
 
       if (isClosed) {
-        setError(`entreprises.${index}.siren`, { type: "custom", message: CLOSED_COMPANY_ERROR });
-        return;
+        return { ok: false, error: CLOSED_COMPANY_ERROR };
       } else {
-        setValue(`entreprises.${index}.raisonSociale`, company.simpleLabel);
-        setCheckDuplicateRequest(true);
+        return { ok: true, data: company.simpleLabel };
       }
     } else {
-      setError(`entreprises.${index}.siren`, {
-        type: "custom",
-        message: "Impossible de récupérer les informations de l'entreprise",
-      });
+      return { ok: false, error: "Impossible de récupérer les informations de l'entreprise" };
+    }
+  };
+
+  const onChangeChildSiren = async (childSiren: string, index: number) => {
+    console.log("avant clearErrors onChangeChildSiren");
+    clearErrors(`entreprises.${index}.siren`);
+
+    const result = await validateOneSiren(childSiren);
+
+    if (!result.ok) {
+      setError(`entreprises.${index}.siren`, { type: "custom", message: result.error });
+    } else {
+      setValue(`entreprises.${index}.raisonSociale`, result.data);
+      setCheckDuplicateRequest(true);
+    }
+  };
+
+  const onSubmit = async (data: FormType) => {
+    if (validate().success) {
+      savePageData("ues", data);
+      router.push(funnelConfig(formData)[stepName].next().url);
     }
   };
 
@@ -318,7 +354,7 @@ export const UESForm = () => {
               append({ siren: "", raisonSociale: "" });
               // setValid(undefined);
             }}
-            disabled={countEmptySiren}
+            disabled={countEmptySiren >= 1}
             iconId="fr-icon-add-line"
           >
             Ajouter une entreprise
@@ -334,7 +370,7 @@ export const UESForm = () => {
           </ClientOnly>
         </div>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+        <BackNextButtons stepName={stepName} disabled={!isDirty || countEntreprisesErrors >= 1} />
       </form>
     </FormProvider>
   );
