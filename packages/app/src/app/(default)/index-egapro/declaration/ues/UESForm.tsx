@@ -23,6 +23,8 @@ import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
 
+type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
+
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
   entreprises: z
@@ -45,11 +47,9 @@ export const UESForm = () => {
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();
   const [checkDuplicateRequest, setCheckDuplicateRequest] = useState(false);
-  // const [valid, setValid] = useState<false | true | undefined>();
 
   // assertOrRedirectCommencerStep(formData);
 
-  // We ensure to have at least one entreprise in the form, in order to force the user to fill the form and the validation to be triggered, even if the user delete the only entreprise in the form.
   const defaultValues = formData[stepName] ?? {
     nom: "",
     entreprises: [],
@@ -67,7 +67,7 @@ export const UESForm = () => {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors, isDirty },
+    formState: { errors },
     watch,
   } = methods;
 
@@ -135,46 +135,12 @@ export const UESForm = () => {
     return { duplicatesFound };
   }, [clearErrors, controlledCompaniesFields, setError, siren]);
 
-  const validate = useCallback(() => {
-    let success = true;
-
-    if (!watchedName.trim()) {
-      setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
-      success = false;
-    }
-
-    if (watchedCompanies.length === 0) {
-      setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
-      success = false;
-    }
-
-    for (let index = 0; index < watchedCompanies.length; index++) {
-      if (errors.entreprises?.[index]?.siren) {
-        setError("entreprises", { type: "custom", message: "Veuillez corriger les Siren contenus dans l'UES" });
-        success = false;
-      }
-    }
-
-    const { duplicatesFound } = checkAllSirens();
-
-    if (duplicatesFound) {
-      setError("entreprises", { type: "custom", message: "Veuillez corriger les Siren en double" });
-      success = false;
-    }
-
-    success = true;
-
-    return { success };
-  }, [checkAllSirens, errors.entreprises, setError, watchedCompanies.length, watchedName]);
-
   useEffect(() => {
     if (checkDuplicateRequest) {
       checkAllSirens();
       setCheckDuplicateRequest(false);
     }
-  }, [checkDuplicateRequest, checkAllSirens, setCheckDuplicateRequest, validate]);
-
-  type ValidateResult = { data: string; ok: true } | { error: string; ok: false };
+  }, [checkDuplicateRequest, checkAllSirens, setCheckDuplicateRequest]);
 
   const validateOneSiren = async (childSiren: string): Promise<ValidateResult> => {
     const parsedSiren = sirenSchema.safeParse(childSiren);
@@ -214,16 +180,27 @@ export const UESForm = () => {
     if (!result.ok) {
       setError(`entreprises.${index}.siren`, { type: "custom", message: result.error });
     } else {
-      setValue(`entreprises.${index}.raisonSociale`, result.data);
+      setValue(`entreprises.${index}.raisonSociale`, result?.data || "");
       setCheckDuplicateRequest(true);
     }
   };
 
   const onSubmit = async (data: FormType) => {
-    if (validate().success) {
-      savePageData("ues", data);
-      router.push(funnelConfig(formData)[stepName].next().url);
+    let ok = true;
+    if (!watchedName.trim()) {
+      setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
+      ok = false;
     }
+
+    if (watchedCompanies.length === 0) {
+      setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
+      ok = false;
+    }
+
+    if (!ok) return;
+
+    savePageData("ues", data);
+    router.push(funnelConfig(formData)[stepName].next().url);
   };
 
   return (
@@ -370,7 +347,7 @@ export const UESForm = () => {
           </ClientOnly>
         </div>
 
-        <BackNextButtons stepName={stepName} disabled={!isDirty || countEntreprisesErrors >= 1} />
+        <BackNextButtons stepName={stepName} disabled={countEntreprisesErrors >= 1} />
       </form>
     </FormProvider>
   );
