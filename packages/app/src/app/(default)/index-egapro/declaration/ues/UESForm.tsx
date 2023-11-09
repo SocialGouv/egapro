@@ -25,8 +25,11 @@ import style from "./UESForm.module.scss";
 
 type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
 
+const MANDATORY_SIREN_ERROR = "Le Siren est requis";
+const INVALID_SIREN_ERROR = "Le Siren est invalide";
+
 const formSchema = zodFr.object({
-  nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
+  nom: z.string().trim().nonempty(),
   entreprises: z
     .array(
       z.object({
@@ -34,9 +37,7 @@ const formSchema = zodFr.object({
         siren: z.string(),
       }),
     )
-    .nonempty({
-      message: "Vous devez ajouter au moins une entreprise à l'UES",
-    }),
+    .nonempty(),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -120,14 +121,14 @@ export const UESForm = () => {
       if (!entrepriseField.siren) {
         setError(`entreprises.${entrepriseFieldIndex}.siren`, {
           type: "custom",
-          message: "Le Siren est requis",
+          message: MANDATORY_SIREN_ERROR,
         });
       }
 
       if (!sirenSchema.safeParse(entrepriseField.siren).success) {
         setError(`entreprises.${entrepriseFieldIndex}.siren`, {
           type: "custom",
-          message: "Le Siren est invalide",
+          message: INVALID_SIREN_ERROR,
         });
       }
     });
@@ -146,11 +147,11 @@ export const UESForm = () => {
     const parsedSiren = sirenSchema.safeParse(childSiren);
 
     if (!parsedSiren) {
-      return { ok: false, error: "Le Siren est requis" };
+      return { ok: false, error: MANDATORY_SIREN_ERROR };
     }
 
     if (!parsedSiren.success) {
-      return { ok: false, error: "Le Siren est invalide" };
+      return { ok: false, error: INVALID_SIREN_ERROR };
     }
 
     // We fetch the latest data for the entreprise to fill the entreprise page.
@@ -277,7 +278,7 @@ export const UESForm = () => {
                                 if (!e.target.value) {
                                   setError(`entreprises.${index}.siren`, {
                                     type: "custom",
-                                    message: "Le Siren est requis",
+                                    message: MANDATORY_SIREN_ERROR,
                                   });
                                 }
                               },
