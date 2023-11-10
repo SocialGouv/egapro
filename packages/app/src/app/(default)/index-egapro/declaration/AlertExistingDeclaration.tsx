@@ -7,12 +7,10 @@ import { config } from "@common/config";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
-import { useSelectedLayoutSegment } from "next/navigation";
 
 export const AlertExistingDeclaration = () => {
   const { formData } = useDeclarationFormManager();
   const hasMounted = useHasMounted();
-  const segment = useSelectedLayoutSegment();
 
   const declarationDate = formData["declaration-existante"].date;
 
@@ -20,41 +18,40 @@ export const AlertExistingDeclaration = () => {
 
   const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
-  if (segment === "commencer" || segment === "confirmation") return null;
-
   return (
     <Alert
       severity="info"
-      title="Attention"
+      title={
+        formData["declaration-existante"].status === "consultation"
+          ? "Cette déclaration a été validée et transmise"
+          : "Vous êtes en train de modifier une déclaration validée et transmise."
+      }
       className={fr.cx("fr-mb-4w")}
       description={
         <>
           {olderThanOneYear
-            ? "Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé."
+            ? "Elle n'est plus modifiable car le délai d'un an est écoulé."
             : formData["declaration-existante"].status === "consultation"
-            ? "Cette déclaration a été validée et transmise. Vous pouvez la modifier en cliquant sur le bouton Modifier."
-            : "Vous êtes en train de modifier une déclaration validée et transmise. Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
+            ? "Vous pouvez la modifier en cliquant sur le bouton Modifier."
+            : "Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
           <br />
-
-          {segment !== "declaration-existante" && (
-            <ButtonsGroup
-              inlineLayoutWhen="sm and up"
-              alignment="right"
-              buttons={[
-                {
-                  title: "Revenir au récapitulatif",
-                  children: "Revenir au récapitulatif",
-                  linkProps: {
-                    href: `${config.base_declaration_url}/${formData.commencer?.siren}/${formData.commencer?.annéeIndicateurs}`,
-                  },
-                  iconId: "fr-icon-arrow-right-line",
-                  iconPosition: "right",
-                  className: fr.cx("fr-mt-2w"),
-                  priority: "tertiary",
+          <ButtonsGroup
+            inlineLayoutWhen="sm and up"
+            alignment="right"
+            buttons={[
+              {
+                title: "Revenir au récapitulatif",
+                children: "Revenir au récapitulatif",
+                linkProps: {
+                  href: `${config.base_declaration_url}/${formData.commencer?.siren}/${formData.commencer?.annéeIndicateurs}`,
                 },
-              ]}
-            />
-          )}
+                iconId: "fr-icon-arrow-right-line",
+                iconPosition: "right",
+                className: fr.cx("fr-mt-2w"),
+                priority: "tertiary",
+              },
+            ]}
+          />
         </>
       }
     />
