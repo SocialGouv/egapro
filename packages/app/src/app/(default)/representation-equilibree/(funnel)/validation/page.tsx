@@ -1,8 +1,6 @@
 import { Heading } from "@design-system";
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import Link from "next/link";
 
-import { AlertEdition } from "../AlertEdition";
 import { TITLES } from "../titles";
 import { ValidationRecapRepEq } from "./RecapRepEq";
 
@@ -18,10 +16,6 @@ export const metadata = {
 const Validation = () => {
   return (
     <>
-      <ClientAnimate>
-        <AlertEdition />
-      </ClientAnimate>
-
       <p>
         Vous êtes sur le point de valider la procédure vous permettant de transmettre aux services du ministre chargé du
         travail vos écarts éventuels de représentation femmes‑hommes conformément aux dispositions de l’

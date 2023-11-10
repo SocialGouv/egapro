@@ -1,10 +1,12 @@
 import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { formatIsoToFr } from "@common/utils/date";
-import { BigNote, RecapCard, RecapCardCompany } from "@design-system";
+import { BigNote, Box, RecapCard, RecapCardCompany } from "@design-system";
 
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
@@ -40,13 +42,25 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
 
   return (
     <>
-      <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif</h1>
-
-      <p>
+      <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif de l'Index égalité professionnelle</h1>
+      <Highlight>
         Déclaration de l'index de l'égalité professionnelle Femmes/Hommes pour l'année <strong>{year + 1}</strong> au
         titre des données <strong>{year}</strong>.
-      </p>
+      </Highlight>
       {/* {meta?.date && <RecapCard title="Date de déclaration" content={meta?.date && formatIsoToFr(meta?.date)} />}  */}
+
+      {déclaration["declaration-existante"].status == "consultation" &&
+        déclaration["declaration-existante"].date &&
+        déclaration["declaration-existante"].modifiedAt && (
+          <Box className="text-right" mb="2v">
+            <Badge severity="info" noIcon small>
+              Déclarée le {formatIsoToFr(déclaration["declaration-existante"].date)}
+            </Badge>{" "}
+            <Badge severity="info" noIcon small>
+              Modifiée le {formatIsoToFr(déclaration["declaration-existante"].modifiedAt)}
+            </Badge>
+          </Box>
+        )}
 
       <RecapCard
         title="Informations déclarant"
@@ -122,6 +136,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
       {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <>
           <RecapCardIndicator
+            déclaration={déclaration}
             name="remunerations"
             edit={edit}
             customContent={
@@ -147,19 +162,17 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
           />
 
           {déclaration["entreprise"]?.tranche === "50:250" ? (
-            <RecapCardIndicator edit={edit} name="augmentations-et-promotions" />
+            <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations-et-promotions" />
           ) : (
             <>
-              <RecapCardIndicator edit={edit} name="augmentations" />
-              <RecapCardIndicator edit={edit} name="promotions" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="promotions" />
             </>
           )}
-          <RecapCardIndicator edit={edit} name="conges-maternite" />
-          <RecapCardIndicator edit={edit} name="hautes-remunerations" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="conges-maternite" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="hautes-remunerations" />
         </>
       )}
-
-      <hr />
 
       <RecapCard
         title="Niveau de résultat global"

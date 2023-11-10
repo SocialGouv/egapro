@@ -1,6 +1,3 @@
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-
-import { AlertEdition } from "../AlertEdition";
 import { TITLES } from "../titles";
 import { EntrepriseForm } from "./Form";
 
@@ -16,10 +13,6 @@ export const metadata = {
 const InformationsEntreprise = () => {
   return (
     <>
-      <ClientAnimate>
-        <AlertEdition />
-      </ClientAnimate>
-
       <EntrepriseForm />
     </>
   );
