@@ -1,3 +1,4 @@
+import { AlertExistingDeclaration } from "../AlertExistingDeclaration";
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
 import { Recap } from "./Recap";
@@ -7,6 +8,7 @@ const stepName: FunnelKey = "validation-transmission";
 const ResultatGlobalPage = () => {
   return (
     <>
+      <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
       <p>

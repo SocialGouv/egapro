@@ -57,11 +57,6 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
   return (
     <CenteredContainer pb="6w">
-      <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
-      <Highlight>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {year + 1} au titre des données {year}.
-      </Highlight>
-
       <ClientAnimate>
         {session && !isOwner && !olderThanOneYear && (
           <Alert
@@ -87,23 +82,28 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
             className={fr.cx("fr-mb-4w")}
           />
         )}
-        {isOwner &&
-          (olderThanOneYear ? (
-            <p>
-              Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est
-              écoulé.
-            </p>
-          ) : (
-            <Alert
-              severity="info"
-              as="h2"
-              title="Cette déclaration a été validée et transmise."
-              description="Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
-              className={fr.cx("fr-mb-4w")}
-              closable
-            />
-          ))}
+        {isOwner && (
+          <Alert
+            severity="info"
+            as="h2"
+            title="Cette déclaration a été validée et transmise."
+            description={
+              olderThanOneYear
+                ? "Elle n'est plus modifiable car le délai d'un an est écoulé"
+                : "Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
+            }
+            className={fr.cx("fr-mb-4w")}
+            closable
+          />
+        )}
       </ClientAnimate>
+
+      <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
+
+      <Highlight>
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année <strong>{year + 1}</strong> au titre des
+        données <strong>{year}</strong>.
+      </Highlight>
 
       {isOwner && (
         <Box className="text-right" mb="2v">

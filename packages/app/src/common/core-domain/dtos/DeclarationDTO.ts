@@ -120,6 +120,7 @@ export type DeclarationDTO = {
   };
   "declaration-existante": {
     date?: string | undefined;
+    modifiedAt?: string | undefined;
     status: "consultation" | "creation" | "edition";
   };
   entreprise?: { entrepriseDéclarante?: Entreprise; tranche?: CompanyWorkforceRange.Enum; type?: "entreprise" | "ues" };

@@ -139,7 +139,9 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
               <div key={index}>
                 <div className={cx(fr.cx("fr-col"), style["category-title"])}>
                   {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
-                  <span className={fr.cx("fr-text--bold")}>{getCSPTitle(catégorie) || `Coefficient ${index + 1}`}</span>
+                  <span className={fr.cx("fr-text--bold")}>
+                    {getCSPTitle(catégorie) || `Niveau ou coefficient ${index + 1}`}
+                  </span>
                   {mode !== "csp" && (
                     <Button
                       type="button"
@@ -157,10 +159,10 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                     <caption>Tableau des rémunérations</caption>
                     <thead>
                       <tr>
-                        <th>% moins de 30 ans</th>
-                        <th>% de 30 à 39 ans</th>
-                        <th>% de 40 à 49 ans</th>
-                        <th>% 50 ans et plus</th>
+                        <th>Moins de 30 ans</th>
+                        <th>De 30 à 39 ans</th>
+                        <th>De 40 à 49 ans</th>
+                        <th>50 ans et plus</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -186,13 +188,13 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
           {mode !== "csp" && (
             <div className={cx(fr.cx("fr-mb-8w"), style["add-category"])}>
               <Button type="button" onClick={() => append({ nom: "", tranches: defaultTranch })}>
-                Ajouter un coefficient
+                Ajouter un niveau ou coefficient
               </Button>
 
               <span>
-                {`${catégories.length} coefficient${catégories.length > 1 ? "s" : ""} défini${
+                {`${catégories.length} niveau${catégories.length > 1 ? "x" : ""} ou coefficient${
                   catégories.length > 1 ? "s" : ""
-                }`}
+                } défini${catégories.length > 1 ? "s" : ""}`}
               </span>
             </div>
           )}

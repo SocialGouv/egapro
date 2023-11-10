@@ -4,6 +4,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
+import { AlertExistingDeclaration } from "../AlertExistingDeclaration";
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
 import { DeclarantForm } from "./DeclarantForm";
@@ -17,6 +18,7 @@ const DeclarantPage = async () => {
 
   return (
     <>
+      <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
       <p>

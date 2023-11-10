@@ -2,9 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { Grid, GridCol } from "@design-system";
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
-import { AlertEdition } from "../AlertEdition";
 import { TITLES } from "../titles";
 import { EcartsMembresForm } from "./Form";
 
@@ -20,10 +18,6 @@ export const metadata = {
 const EcartsMembres = () => {
   return (
     <>
-      <ClientAnimate>
-        <AlertEdition />
-      </ClientAnimate>
-
       <Alert
         severity="info"
         title="Motifs de non calculabilité"
