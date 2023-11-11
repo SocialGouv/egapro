@@ -9,6 +9,7 @@ api:
     EGAPRO_SMTP_SSL: ""
 
 app:
+  ~needs: [build-app, create-db]
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
