@@ -88,7 +88,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
       <ClientBodyPortal>
         <infoModale.Component title="">
           Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
-          l'INSEE).
+          l'INSEE)
         </infoModale.Component>
       </ClientBodyPortal>
       {edit ? (
