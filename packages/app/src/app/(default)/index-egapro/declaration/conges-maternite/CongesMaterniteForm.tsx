@@ -90,10 +90,7 @@ export const CongesMaterniteForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
-          <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
-            name="estCalculable"
-          />
+          <RadioOuiNon legend="L'indicateur est-il calculable ?" name="estCalculable" />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             {estCalculable && (
