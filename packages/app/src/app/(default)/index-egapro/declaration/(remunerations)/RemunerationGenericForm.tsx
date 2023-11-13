@@ -71,7 +71,7 @@ const buildDefaultCategories = (mode: Remunerations["mode"]) =>
           { nom: CSP.Enum.INGENIEURS_CADRES, tranches: { ...defaultTranch } },
         ],
       }
-    : { catégories: [] };
+    : { catégories: [{ nom: "", tranches: { ...defaultTranch } }] };
 
 export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] }) => {
   const stepName: FunnelKey =
@@ -136,7 +136,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
 
           <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             {catégories.map((catégorie, index) => (
-              <div key={index}>
+              <div key={catégorie.id}>
                 <div className={cx(fr.cx("fr-col"), style["category-title"])}>
                   {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
                   <span className={fr.cx("fr-text--bold")}>
@@ -149,6 +149,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                       size="small"
                       iconId="fr-icon-delete-line"
                       onClick={() => remove(index)}
+                      disabled={catégories.length <= 1}
                     >
                       Supprimer
                     </Button>
