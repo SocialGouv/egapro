@@ -158,7 +158,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
                       computer,
                       errors,
                       register,
-                      firstCols: [csp.women || "-", csp.men || "-"],
+                      firstCols: [csp.women || 0, csp.men || "-"],
                       menCount: csp.men,
                       womenCount: csp.women,
                     });
