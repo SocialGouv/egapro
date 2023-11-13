@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -94,13 +95,12 @@ const IndexEgapro = () => {
             title="Déclaration des objectifs de progression et mesures de correction"
             desc="Vous pouvez déclarer vos mesures de correction si votre index est inférieur à 75 points et vos objectifs de progression si votre index est inférieur à 85 points via le formulaire suivant."
             footer={
-              <Button
-                linkProps={{
-                  href: "#",
-                }}
-              >
-                Déclarer
-              </Button>
+              <>
+                <Button disabled={true}>Déclarer</Button>
+                <span className={fr.cx("fr-ml-4v", "fr-text--sm")}>
+                  <i>Cette fonctionnalité sera bientôt disponible.</i>
+                </span>
+              </>
             }
           />
         </CenteredContainer>

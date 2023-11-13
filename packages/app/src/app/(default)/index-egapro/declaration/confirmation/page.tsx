@@ -223,8 +223,8 @@ const ConfirmationPage = () => {
           )}
         </>
       )}
-
-      <Grid align="center" mt="4w">
+      {/* TODO: uncomment when Mon espace is ready  */}
+      {/* <Grid align="center" mt="4w">
         <GridCol md="10">
           <Card
             title="Informations"
@@ -253,7 +253,7 @@ const ConfirmationPage = () => {
             }
           />
         </GridCol>
-      </Grid>
+      </Grid> */}
 
       <Box className="text-center" my="6w">
         <Link
