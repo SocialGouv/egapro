@@ -30,7 +30,7 @@ export const AlertEdition = () => {
   if (segment === "commencer") return null;
   return (
     <Alert
-      severity="info"
+      severity="warning"
       title="Attention"
       className={fr.cx("fr-mb-4w")}
       description={
