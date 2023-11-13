@@ -29,8 +29,6 @@ export const PercentageInput = <FormType extends SimpleObject>({
     formState: { errors },
   } = useFormContext<FakeFormType>();
 
-  console.log(errors);
-
   const name = _name as FakeKey;
 
   return (
