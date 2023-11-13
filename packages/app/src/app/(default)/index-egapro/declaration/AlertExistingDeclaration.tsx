@@ -20,7 +20,7 @@ export const AlertExistingDeclaration = () => {
 
   return (
     <Alert
-      severity="info"
+      severity="warning"
       title={
         formData["declaration-existante"].status === "consultation"
           ? "Cette déclaration a été validée et transmise"
