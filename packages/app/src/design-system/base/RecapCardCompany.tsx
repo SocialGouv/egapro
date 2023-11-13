@@ -22,7 +22,8 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
 
   const titleFull = title ?? "Informations de l'entreprise déclarante";
 
-  const postalCodeCity = `${postalCode} ${city}`.trim();
+  // postalCode and city may be undefined for foreign companies.
+  const postalCodeCity = `${postalCode ?? ""} ${city ?? ""}`.trim();
   const countryLib =
     countryIsoCode && countryIsoCode !== "FR" && `${postalCodeCity && ", "}${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`;
 
