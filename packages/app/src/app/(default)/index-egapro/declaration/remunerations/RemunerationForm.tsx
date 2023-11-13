@@ -1,5 +1,6 @@
 "use client";
 
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -21,7 +22,7 @@ import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const MIN_DATE_CSE = "2018-01-01";
 
@@ -103,7 +104,7 @@ export const RemunerationForm = () => {
   const router = useRouter();
   const { formData, saveFormData } = useDeclarationFormManager();
 
-  assertOrRedirectCommencerStep(formData);
+  // assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
     mode: "onChange",
@@ -195,6 +196,13 @@ export const RemunerationForm = () => {
                   legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
                   options={[
                     {
+                      label: "Par catégorie socio-professionnelle",
+                      nativeInputProps: {
+                        value: "csp",
+                        ...register("mode"),
+                      },
+                    },
+                    {
                       label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
                       nativeInputProps: {
                         value: "niveau_branche",
@@ -209,19 +217,22 @@ export const RemunerationForm = () => {
                         ...register("mode"),
                       },
                     },
-                    {
-                      label: "Par catégorie socio-professionnelle",
-                      nativeInputProps: {
-                        value: "csp",
-                        ...register("mode"),
-                      },
-                    },
                   ]}
                 />
 
                 {mode && mode !== "csp" && (
                   <>
                     <RadioOuiNon legend="Un CSE a-t-il été mis en place ?" name="cse" disabled={!!formData.ues?.nom} />
+
+                    {formData.ues?.nom && (
+                      <Alert
+                        severity="info"
+                        description="La question Un CSE a-t-il été mis en place ? est forcément Oui car vous déclarez pour une UES."
+                        small={true}
+                        title=""
+                        className="fr-mb-4w"
+                      />
+                    )}
 
                     {cse === "oui" && (
                       <Input
