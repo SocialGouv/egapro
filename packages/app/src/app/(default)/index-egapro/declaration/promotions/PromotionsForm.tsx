@@ -179,7 +179,7 @@ export const PromotionsForm = () => {
             {estCalculable === "oui" && (
               <>
                 <p>
-                  <strong>Écarts de taux d’augmentations par CSP en %</strong>
+                  <strong>Écarts de taux de promotions par CSP en %</strong>
                 </p>
 
                 <p>

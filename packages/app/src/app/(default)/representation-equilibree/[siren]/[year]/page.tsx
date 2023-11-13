@@ -93,7 +93,6 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
                 : "Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
             }
             className={fr.cx("fr-mb-4w")}
-            closable
           />
         )}
       </ClientAnimate>
