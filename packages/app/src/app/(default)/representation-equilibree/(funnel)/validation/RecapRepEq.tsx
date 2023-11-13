@@ -97,7 +97,7 @@ export const ValidationRecapRepEq = () => {
       county: countyCode ?? void 0,
       nafCode: company.activitePrincipaleUniteLegale,
       name: company.simpleLabel,
-      postalCode,
+      postalCode: postalCode ?? "",
       region: regionCode ?? void 0,
     },
   };

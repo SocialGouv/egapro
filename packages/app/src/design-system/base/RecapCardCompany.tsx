@@ -52,6 +52,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
           <br />
           {address}
           {postalCodeCity ? `, ${postalCodeCity}` : " "}
+          <br />
           {countryLib}
         </GridCol>
       </Grid>
