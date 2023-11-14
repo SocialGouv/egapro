@@ -30,7 +30,10 @@ const formSchema = zodFr.discriminatedUnion("estCalculable", [
   }),
   zodFr.object({
     estCalculable: z.literal("oui"),
-    résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative().lte(100),
+    résultat: z
+      .number({ invalid_type_error: "Le résultat est obligatoire" })
+      .nonnegative("Le résultat ne peut pas être inférieur à 0")
+      .lte(100, "Le résultat ne peut pas être supérieur à 100%"),
     note: z.number().optional(),
   }),
 ]);
