@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { storePicker } from "@common/utils/zustand";
 import { Container, DownloadCard, Grid, GridCol } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../(funnel)/useRepeqFunnelStore";
@@ -13,7 +13,6 @@ import style from "./style.module.css";
 
 const useStore = storePicker(useRepeqFunnelStore);
 export const SendReceipt = () => {
-  const router = useRouter();
   const [funnel, resetFunnel] = useStore("funnel", "resetFunnel");
   const [receiptProcessing, setReceiptProcessing] = useState(false);
   const hydrated = useRepeqFunnelStoreHasHydrated();
@@ -28,7 +27,6 @@ export const SendReceipt = () => {
 
   const initNewRepresentation = () => {
     resetFunnel();
-    router.push("/representation-equilibree/commencer");
   };
 
   const sendReceipt = () => {
