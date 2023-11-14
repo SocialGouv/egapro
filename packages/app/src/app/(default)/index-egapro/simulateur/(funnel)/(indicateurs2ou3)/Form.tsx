@@ -15,6 +15,7 @@ import {
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { precisePercentFormat } from "@common/utils/number";
+import { zodFr } from "@common/utils/zod";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
@@ -22,6 +23,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isEmpty } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, type FieldErrors, FormProvider, useForm } from "react-hook-form";
@@ -49,6 +51,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const hydrated = useSimuFunnelStoreHasHydrated();
   const [lastPourcentages, setLastPourcentages] = useState<Indic2or3FormTypeWhenCalculable["pourcentages"]>();
+  const [totalPourcentageError, setTotalPourcentageError] = useState<string | undefined>(undefined);
 
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeMoreThan250DTO> | undefined;
   const computer = indicateur === 2 ? indicateur2Computer : indicateur3Computer;
@@ -56,9 +59,26 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const AideSimulationIndicateurDeuxOurTrois =
     indicateur === 2 ? AideSimulationIndicateurDeux : AideSimulationIndicateurTrois;
 
+  const schemaWithGlobalPourcentageVerification = createSteps.indicateur3.superRefine((obj, ctx) => {
+    const calculateTotalPourcentage = (pourcentages: Partial<Record<CSP.Enum, { men: number; women: number }>>) =>
+      Object.values(pourcentages).reduce((prev, current) => current.women + current.men + prev, 0);
+
+    if (obj.calculable && !isEmpty(obj.pourcentages) && calculateTotalPourcentage(obj.pourcentages) === 0) {
+      const errorMessage =
+        "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
+      ctx.addIssue({
+        code: zodFr.ZodIssueCode.custom,
+        message: errorMessage,
+      });
+      setTotalPourcentageError(errorMessage);
+    } else {
+      setTotalPourcentageError(undefined);
+    }
+  });
+
   const methods = useForm<Indic2or3FormType>({
     mode: "onChange",
-    resolver: zodResolver(createSteps.indicateur3),
+    resolver: zodResolver(schemaWithGlobalPourcentageVerification),
     defaultValues: funnel?.[`indicateur${indicateur}`],
   });
 
@@ -293,7 +313,9 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                       },
                     ]}
                   />
-
+                  {totalPourcentageError && (
+                    <Alert className="fr-mb-3w" severity="warning" title={totalPourcentageError} />
+                  )}
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
