@@ -28,7 +28,7 @@ const formSchema = z
     populationFavorable: z.string(),
     résultat: zodPositiveOrZeroIntegerSchema
       .min(0, { message: "La valeur minimale est 0" })
-      .max(5, { message: "La valeur maximale est 5" }),
+      .max(5, { message: "Le résultat ne peut pas être supérieur à 5" }),
     note: z.number().optional(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
