@@ -45,7 +45,9 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+      résultat: z
+        .number({ invalid_type_error: "Le résultat est obligatoire" })
+        .nonnegative("Le résultat ne peut pas être inférieur à 0"),
       note: z.number(),
       catégories: zodCategories,
     }),

@@ -26,7 +26,9 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string(),
-    résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+    résultat: z
+      .number({ invalid_type_error: "Le résultat est obligatoire" })
+      .nonnegative("Le résultat ne peut pas être inférieur à 0"),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat !== 0 && !populationFavorable) {
