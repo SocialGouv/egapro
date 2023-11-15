@@ -26,7 +26,7 @@ import style from "./UESForm.module.scss";
 type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
 
 const MANDATORY_SIREN_ERROR = "Le Siren est requis";
-const INVALID_SIREN_ERROR = "Le Siren est invalide";
+const INVALID_SIREN_ERROR = "Le Siren est composé de 9 chiffres sans espace";
 
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty(),
