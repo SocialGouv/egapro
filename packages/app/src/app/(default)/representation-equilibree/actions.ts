@@ -12,7 +12,6 @@ import {
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { revalidatePath } from "next/cache";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
   await assertServerSession({
@@ -50,8 +49,8 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 
   await receiptUseCase.execute(repEq);
 
-  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
-  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {

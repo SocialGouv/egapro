@@ -11,7 +11,8 @@ import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-export const revalidate = 86400; // 24h
+// export const revalidate = 86400; // 24h
+export const dynamic = "force-dynamic";
 
 export const GET: NextRouteHandler<"siren" | "year"> = async (_, { params: { siren, year } }) => {
   const session = await getServerSession(authConfig);

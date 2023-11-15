@@ -20,7 +20,8 @@ import { getServerSession } from "next-auth";
 import { DetailRepEq } from "../../Recap";
 import { EditButton } from "./EditButton";
 
-export const revalidate = 86400; // 24h
+// export const revalidate = 86400; // 24h
+export const dynamic = "force-dynamic";
 
 const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = +strYear;
