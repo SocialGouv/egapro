@@ -6,9 +6,9 @@ import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
-  // TODO: les headers commentés évitent le problème no unsafe-eval et trusted types, qui se retrouvent sinon sur la prod.
-  // Voir comment les réactiver.
+  // In dev environment, Next injects scripts for HMR, so we need to desactivate script-src.
 
+  // For trusted-types, there is a problem with the [revalidatePath bug](https://github.com/vercel/next.js/issues/49387), so we need to desactivate it in dev environment for the moment. Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
   const cspHeader = `
     default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;

@@ -49,6 +49,7 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 
   await receiptUseCase.execute(repEq);
 
+  // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
 }

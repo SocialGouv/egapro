@@ -20,6 +20,7 @@ import { getServerSession } from "next-auth";
 import { DetailRepEq } from "../../Recap";
 import { EditButton } from "./EditButton";
 
+// Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
 // export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
 
