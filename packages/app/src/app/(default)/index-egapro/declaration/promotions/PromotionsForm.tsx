@@ -82,6 +82,7 @@ export const PromotionsForm = () => {
 
   const methods = useForm<FormType>({
     shouldUnregister: true,
+    shouldUnregister: true,
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || {
@@ -190,6 +191,7 @@ export const PromotionsForm = () => {
 
                 <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
+                {résultat !== 0 && résultat !== null && <PopulationFavorable />}
                 {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
                 {note !== undefined && (
