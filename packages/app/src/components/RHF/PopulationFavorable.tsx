@@ -1,4 +1,5 @@
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { get } from "lodash";
 import { useFormContext } from "react-hook-form";
 
@@ -19,16 +20,16 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
       disabled={disabled}
       options={[
         {
-          label: "Femmes",
+          label: FavorablePopulation.Label[FavorablePopulation.Enum.WOMEN],
           nativeInputProps: {
-            value: "femmes",
+            value: FavorablePopulation.Enum.WOMEN,
             ...register("populationFavorable"),
           },
         },
         {
-          label: "Hommes",
+          label: FavorablePopulation.Label[FavorablePopulation.Enum.MEN],
           nativeInputProps: {
-            value: "hommes",
+            value: FavorablePopulation.Enum.MEN,
             ...register("populationFavorable"),
           },
         },

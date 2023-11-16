@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,7 +25,7 @@ const stepName: FunnelKey = "remunerations-resultat";
 const formSchema = zodFr
   .object({
     note: z.number(),
-    populationFavorable: z.string(),
+    populationFavorable: z.string().optional(),
     résultat: z
       .number({ invalid_type_error: "Le résultat est obligatoire" })
       .nonnegative("Le résultat ne peut pas être inférieur à 0"),
@@ -48,12 +48,11 @@ export const RemunerationResultatForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
+    shouldUnregister: true,
   });
 
   const {
@@ -77,13 +76,6 @@ export const RemunerationResultatForm = () => {
       const note = new IndicateurUnComputer().computeNote(résultat);
       setValue("note", note);
     }
-
-    if (résultat === 0 || résultat === null) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "", { shouldValidate: true });
-    } else {
-      setPopulationFavorableDisabled(false);
-    }
   }, [résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
@@ -102,7 +94,7 @@ export const RemunerationResultatForm = () => {
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-          <PopulationFavorable disabled={populationFavorableDisabled} />
+          {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
           {résultat !== null && (
             <>

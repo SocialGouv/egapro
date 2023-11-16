@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -80,10 +80,8 @@ export const PromotionsForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
-    // shouldUnregister: true,
+    shouldUnregister: true,
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || {
@@ -142,13 +140,6 @@ export const PromotionsForm = () => {
 
       // If it is a compensation, we set the note to the max value.
       if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
-
-      if (résultat === 0 || résultat === null) {
-        setPopulationFavorableDisabled(true);
-        setValue("populationFavorable", "");
-      } else {
-        setPopulationFavorableDisabled(false);
-      }
     }
   }, [estUnRattrapage, résultat, setValue]);
 
@@ -199,7 +190,7 @@ export const PromotionsForm = () => {
 
                 <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-                <PopulationFavorable disabled={populationFavorableDisabled} />
+                {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
                 {note !== undefined && (
                   <>

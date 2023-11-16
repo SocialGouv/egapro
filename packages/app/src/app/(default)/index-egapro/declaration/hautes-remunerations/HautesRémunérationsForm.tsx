@@ -16,7 +16,7 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { produce } from "immer";
 import { get } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,7 +25,7 @@ import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../
 
 const formSchema = z
   .object({
-    populationFavorable: z.string(),
+    populationFavorable: z.string().optional(),
     résultat: zodPositiveOrZeroIntegerSchema
       .min(0, { message: "La valeur minimale est 0" })
       .max(5, { message: "Le résultat ne peut pas être supérieur à 5" }),
@@ -52,12 +52,11 @@ export const HautesRémunérationsForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: formData[stepName],
+    shouldUnregister: true,
   });
 
   const {
@@ -80,12 +79,6 @@ export const HautesRémunérationsForm = () => {
     if (résultat !== undefined) {
       const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note);
-    }
-    if (résultat === 5) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "");
-    } else {
-      setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
 
@@ -114,11 +107,6 @@ export const HautesRémunérationsForm = () => {
                   step: 1,
                   ...register("résultat", {
                     valueAsNumber: true,
-                    // setValueAs: (value: string) => {
-                    //   // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead.
-                    //   const num = Number(value);
-                    //   return isNaN(num) || value === "" ? null : num;
-                    // },
                   }),
                 }}
                 state={get(errors, "résultat") && "error"}
@@ -127,7 +115,7 @@ export const HautesRémunérationsForm = () => {
                 stateRelatedMessage={get(errors, "résultat")?.message || ""}
               />
 
-              <PopulationFavorable legend="Sexe des salariés sur-représentés" disabled={populationFavorableDisabled} />
+              {résultat !== 5 && <PopulationFavorable legend="Sexe des salariés sur-représentés" />}
 
               {note !== undefined && (
                 <>

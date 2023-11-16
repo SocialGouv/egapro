@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -65,8 +65,6 @@ export const AugmentationEtPromotionsForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
-
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
     mode: "onChange",
@@ -116,13 +114,6 @@ export const AugmentationEtPromotionsForm = () => {
 
     // If it is a compensation, we set the note to the max value.
     if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
-
-    if (résultat === 0 && résultatEquivalentSalarié === 0) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "");
-    } else {
-      setPopulationFavorableDisabled(false);
-    }
 
     // RHF recommends to register before using setValue. Seems to work without it though.
     if (estCalculable === "non") {
@@ -178,7 +169,7 @@ export const AugmentationEtPromotionsForm = () => {
                   min={0}
                 />
 
-                <PopulationFavorable disabled={populationFavorableDisabled} />
+                {(résultat !== 0 || résultatEquivalentSalarié !== 0) && <PopulationFavorable />}
 
                 {notePourcentage !== undefined && (
                   <IndicatorNote
