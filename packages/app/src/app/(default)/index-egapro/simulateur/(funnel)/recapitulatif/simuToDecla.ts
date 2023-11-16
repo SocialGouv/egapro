@@ -13,9 +13,10 @@ import { Object } from "@common/utils/overload";
 
 import { computerHelper } from "./computerHelper";
 
+// TODO: use toBinaryFavorablePopulation instead when refactor is made on ComputedResult.favorablePopulation.
 const toFavorablePopulation = (populationFavorable: ComputedResult["favorablePopulation"]) =>
   populationFavorable === "equality"
-    ? FavorablePopulation.Enum.EQUALITY
+    ? undefined
     : populationFavorable === "men"
     ? FavorablePopulation.Enum.MEN
     : FavorablePopulation.Enum.WOMEN;
@@ -94,7 +95,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
           écarts: resultWithSign(computerIndicateurDeux.computeGroup(csp as CSP.Enum)),
         })) as CatégoriesAugmentations,
         note: resultIndicateurDeux.note,
-        populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation),
+        populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation), // TODO: Use the FavorablePopulation.Enum instead.
         résultat: resultIndicateurDeux.result,
       };
     }

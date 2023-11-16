@@ -135,11 +135,11 @@ export const PromotionsForm = () => {
     if (résultat !== undefined) {
       if (résultat !== null) {
         const note = new IndicateurTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-        setValue("note", note);
+        setValue("note", note, { shouldValidate: true });
       }
 
       // If it is a compensation, we set the note to the max value.
-      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
+      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
     }
   }, [estUnRattrapage, résultat, setValue]);
 

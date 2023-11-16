@@ -100,20 +100,20 @@ export const AugmentationEtPromotionsForm = () => {
     let notePourcentage, noteNombreSalaries;
     if (résultat !== undefined && résultat !== null) {
       notePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-      setValue("notePourcentage", notePourcentage);
+      setValue("notePourcentage", notePourcentage, { shouldValidate: true });
     }
     if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== null) {
       noteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
         résultatEquivalentSalarié,
       );
-      setValue("noteNombreSalaries", noteNombreSalaries);
+      setValue("noteNombreSalaries", noteNombreSalaries, { shouldValidate: true });
     }
     if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
-      setValue("note", Math.max(notePourcentage, noteNombreSalaries));
+      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true });
     }
 
     // If it is a compensation, we set the note to the max value.
-    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
+    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
 
     // RHF recommends to register before using setValue. Seems to work without it though.
     if (estCalculable === "non") {

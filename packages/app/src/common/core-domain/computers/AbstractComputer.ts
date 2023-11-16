@@ -2,7 +2,7 @@ import { type Any } from "@common/utils/types";
 import { last } from "lodash";
 
 export type ComputedResult<Additional extends object = object> = Additional & {
-  favorablePopulation: "equality" | "men" | "women";
+  favorablePopulation: "equality" | "men" | "women"; // TODO: use the FavorablePopulation.Enum instead.
   note: number;
   result: number;
   resultRaw: number;
