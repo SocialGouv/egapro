@@ -13,7 +13,6 @@ import {
   type ReferentDTO,
 } from "@common/core-domain/dtos/ReferentDTO";
 import { UnexpectedError } from "@common/shared-domain";
-import { revalidatePath } from "next/cache";
 
 export async function deleteReferent(referent: ReferentDTO) {
   await assertServerSession({ staff: true });
@@ -24,7 +23,7 @@ export async function deleteReferent(referent: ReferentDTO) {
 
   try {
     await useCase.execute(referent.id);
-    revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
+    // revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
   } catch (error: unknown) {
     console.error(error);
     throw new UnexpectedError("Cannot delete referent");
@@ -39,7 +38,7 @@ export async function createReferent(referent: CreateReferentDTO) {
   try {
     const dto = createReferentDTOSchema.parse(referent);
     const id = await useCase.execute(dto);
-    revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
+    // revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
     return id;
   } catch (error: unknown) {
     console.error(error);
@@ -55,7 +54,7 @@ export async function saveReferent(referent: EditReferentDTO) {
   try {
     const dto = editReferentDTOSchema.parse(referent);
     await useCase.execute(dto);
-    revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
+    // revalidatePath("/api/public/referents_egalite_professionnelle/[ext]");
   } catch (error: unknown) {
     console.error(error);
     throw new UnexpectedError("Cannot save referent");
