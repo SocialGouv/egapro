@@ -82,7 +82,6 @@ export const PromotionsForm = () => {
 
   const methods = useForm<FormType>({
     shouldUnregister: true,
-    shouldUnregister: true,
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || {
