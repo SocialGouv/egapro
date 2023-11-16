@@ -13,7 +13,7 @@ import { DeclarationSource } from "@common/core-domain/domain/valueObjects/decla
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
-import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
+import { AppError, type EntityPropsToJson, type UseCase, ValidationError } from "@common/shared-domain";
 import { PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { keepEntryBy } from "@common/utils/object";
 import { add, isAfter } from "date-fns";
@@ -102,7 +102,10 @@ export class SaveDeclaration implements UseCase<Input, void> {
       remunerations: {
         cseConsultationDate:
           dto.remunerations?.estCalculable === "oui" ? dto.remunerations.dateConsultationCSE : undefined,
-        favorablePopulation: dto["remunerations-resultat"]?.populationFavorable,
+        favorablePopulation:
+          dto["remunerations"]?.estCalculable === "oui"
+            ? dto["remunerations-resultat"]?.populationFavorable ?? "egalite"
+            : undefined,
         mode: remunerationsMode,
         notComputableReason:
           dto.remunerations?.estCalculable === "non" ? dto.remunerations.motifNonCalculabilité : undefined,
@@ -139,7 +142,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
               ? dto.augmentations.catégories.map(category => category.écarts)
               : [null, null, null, null],
           favorablePopulation:
-            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable : undefined,
+            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable ?? "egalite" : undefined,
           notComputableReason:
             dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
           result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
@@ -148,7 +151,8 @@ export class SaveDeclaration implements UseCase<Input, void> {
         promotions: {
           notComputableReason:
             dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
-          favorablePopulation: dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable : undefined,
+          favorablePopulation:
+            dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable ?? "egalite" : undefined,
           result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
           score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
           categories:
@@ -165,7 +169,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
               : undefined,
           favorablePopulation:
             dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].populationFavorable
+              ? dto["augmentations-et-promotions"].populationFavorable ?? "egalite"
               : undefined,
           employeesCountResult:
             dto["augmentations-et-promotions"]?.estCalculable === "oui"
@@ -199,7 +203,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
         ? undefined
         : {
             result: dto["hautes-remunerations"].résultat,
-            favorablePopulation: dto["hautes-remunerations"].populationFavorable,
+            favorablePopulation: dto["hautes-remunerations"].populationFavorable ?? "egalite",
             score: dto["hautes-remunerations"].note,
           },
     } satisfies EntityPropsToJson<DeclarationProps>;
@@ -272,8 +276,8 @@ export class SaveDeclaration implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
-      if (error instanceof DeclarationSpecificationError) {
-        console.error(error.message);
+      if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
+        console.error(error);
         throw error;
       }
 

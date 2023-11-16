@@ -42,6 +42,8 @@ export type Entreprise = {
 
 export type IndicatorKeyWithNC = Exclude<IndicatorKey, "hautes-remunerations">;
 
+export type FavorablePopulationEnum = FavorablePopulation.Enum.MEN | FavorablePopulation.Enum.WOMEN;
+
 export const motifsNC = {
   augmentations: [NotComputableReason.Enum.EGVI40PCET, NotComputableReason.Enum.ABSAUGI],
   promotions: [NotComputableReason.Enum.EGVI40PCET, NotComputableReason.Enum.ABSPROM],
@@ -76,7 +78,7 @@ export type DeclarationDTO = {
         ];
         estCalculable: "oui";
         note: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
       }
     | {
@@ -93,7 +95,7 @@ export type DeclarationDTO = {
         note: number;
         noteNombreSalaries: number;
         notePourcentage: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
         résultatEquivalentSalarié: number;
       };
@@ -126,7 +128,7 @@ export type DeclarationDTO = {
   entreprise?: { entrepriseDéclarante?: Entreprise; tranche?: CompanyWorkforceRange.Enum; type?: "entreprise" | "ues" };
   "hautes-remunerations"?: {
     note: number;
-    populationFavorable: FavorablePopulation.Enum;
+    populationFavorable?: FavorablePopulationEnum;
     résultat: number;
   };
   "periode-reference"?:
@@ -148,7 +150,7 @@ export type DeclarationDTO = {
         ];
         estCalculable: "oui";
         note: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
       }
     | {
@@ -195,7 +197,7 @@ export type DeclarationDTO = {
   };
   "remunerations-resultat"?: {
     note: number;
-    populationFavorable: FavorablePopulation.Enum;
+    populationFavorable?: FavorablePopulationEnum;
     résultat: number;
   };
   "resultat-global"?: {
