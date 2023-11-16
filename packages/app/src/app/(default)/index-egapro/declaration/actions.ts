@@ -12,7 +12,6 @@ import { DeclarationSpecificationError } from "@common/core-domain/domain/specif
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type ServerActionResponse } from "@common/utils/next";
 import assert from "assert";
-import { revalidatePath } from "next/cache";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -62,8 +61,9 @@ export async function saveDeclaration(
       email,
     });
 
-    revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
-    revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+    // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
+    // revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
+    // revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
 
     return {
       ok: true,
