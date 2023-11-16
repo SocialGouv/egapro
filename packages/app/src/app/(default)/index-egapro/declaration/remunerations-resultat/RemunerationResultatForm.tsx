@@ -4,11 +4,11 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
@@ -98,11 +98,7 @@ export const RemunerationResultatForm = () => {
 
           {résultat !== null && (
             <>
-              <IndicatorNote
-                note={note}
-                max={indicatorNoteMax.remunerations}
-                text="Nombre de points obtenus à l'indicateur"
-              />
+              <IndicatorNoteInput max={indicatorNoteMax.remunerations} text="Nombre de points obtenus à l'indicateur" />
             </>
           )}
         </ClientOnly>

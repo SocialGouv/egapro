@@ -70,12 +70,12 @@ export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remuner
 export type DeclarationDTO = {
   augmentations?:
     | {
-        catégories: [
-          { nom: CSP.Enum.OUVRIERS; écarts: number | null },
-          { nom: CSP.Enum.EMPLOYES; écarts: number | null },
-          { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES; écarts: number | null },
-          { nom: CSP.Enum.INGENIEURS_CADRES; écarts: number | null },
-        ];
+        catégories: {
+          [CSP.Enum.OUVRIERS]: number | "";
+          [CSP.Enum.EMPLOYES]: number | "";
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: number | "";
+          [CSP.Enum.INGENIEURS_CADRES]: number | "";
+        };
         estCalculable: "oui";
         note: number;
         populationFavorable?: FavorablePopulationEnum;
@@ -142,12 +142,12 @@ export type DeclarationDTO = {
       };
   promotions?:
     | {
-        catégories: [
-          { nom: "ouv"; écarts: number | null },
-          { nom: "emp"; écarts: number | null },
-          { nom: "tam"; écarts: number | null },
-          { nom: "ic"; écarts: number | null },
-        ];
+        catégories: {
+          [CSP.Enum.OUVRIERS]: number | "";
+          [CSP.Enum.EMPLOYES]: number | "";
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: number | "";
+          [CSP.Enum.INGENIEURS_CADRES]: number | "";
+        };
         estCalculable: "oui";
         note: number;
         populationFavorable?: FavorablePopulationEnum;

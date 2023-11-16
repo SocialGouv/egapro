@@ -7,13 +7,13 @@ import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/Indic
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -114,17 +114,6 @@ export const AugmentationEtPromotionsForm = () => {
 
     // If it is a compensation, we set the note to the max value.
     if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
-
-    // RHF recommends to register before using setValue. Seems to work without it though.
-    if (estCalculable === "non") {
-      unregister("notePourcentage");
-      unregister("noteNombreSalaries");
-      unregister("note");
-    } else if (estCalculable === "oui") {
-      register("notePourcentage");
-      register("noteNombreSalaries");
-      register("note");
-    }
   }, [
     estCalculable,
     estUnRattrapage,
@@ -172,16 +161,16 @@ export const AugmentationEtPromotionsForm = () => {
                 {(résultat !== 0 || résultatEquivalentSalarié !== 0) && <PopulationFavorable />}
 
                 {notePourcentage !== undefined && (
-                  <IndicatorNote
-                    note={notePourcentage}
+                  <IndicatorNoteInput
+                    name="notePourcentage"
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus sur le résultat final en %"
                   />
                 )}
 
                 {noteNombreSalaries !== undefined && (
-                  <IndicatorNote
-                    note={noteNombreSalaries}
+                  <IndicatorNoteInput
+                    name="noteNombreSalaries"
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
                     className={fr.cx("fr-mt-2w")}
@@ -190,8 +179,7 @@ export const AugmentationEtPromotionsForm = () => {
 
                 {note !== undefined && (
                   <>
-                    <IndicatorNote
-                      note={note}
+                    <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus à l'indicateur"
                       className={fr.cx("fr-mt-2w")}

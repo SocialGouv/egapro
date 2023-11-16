@@ -5,16 +5,18 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -29,13 +31,6 @@ import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../
 
 const stepName: FunnelKey = "promotions";
 
-const zodCategories = z.tuple([
-  z.object({ nom: z.literal("ouv"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("emp"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("tam"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("ic"), écarts: zodNumberOrNaNOrNull }),
-]);
-
 const formSchema = zodFr
   .discriminatedUnion("estCalculable", [
     zodFr.object({
@@ -49,7 +44,12 @@ const formSchema = zodFr
         .number({ invalid_type_error: "Le résultat est obligatoire" })
         .nonnegative("Le résultat ne peut pas être inférieur à 0"),
       note: z.number(),
-      catégories: zodCategories,
+      catégories: z.object({
+        [CSP.Enum.OUVRIERS]: zodNumberOrEmptyString,
+        [CSP.Enum.EMPLOYES]: zodNumberOrEmptyString,
+        [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: zodNumberOrEmptyString,
+        [CSP.Enum.INGENIEURS_CADRES]: zodNumberOrEmptyString,
+      }),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -62,7 +62,7 @@ const formSchema = zodFr
         });
       }
 
-      if (!value.catégories.some(catégorie => catégorie.écarts !== null)) {
+      if (Object.values(value.catégories).every(val => val === "")) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Au moins une catégorie doit avoir un écart renseigné",
@@ -81,55 +81,28 @@ export const PromotionsForm = () => {
   assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
-    shouldUnregister: true,
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
-    defaultValues: formData[stepName] || {
-      catégories: [
-        { nom: "ouv", écarts: null },
-        { nom: "emp", écarts: null },
-        { nom: "tam", écarts: null },
-        { nom: "ic", écarts: null },
-      ],
-    },
+    defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     formState: { isValid, errors: _errors },
     setValue,
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
-  const catégories = watch("catégories");
   const populationFavorable = watch("populationFavorable");
 
   const estUnRattrapage =
     formData["remunerations-resultat"]?.populationFavorable &&
     populationFavorable &&
     formData["remunerations-resultat"]?.populationFavorable !== populationFavorable;
-
-  useEffect(() => {
-    if (estCalculable === "oui") {
-      if (!catégories?.length) {
-        setValue("catégories", [
-          { nom: "ouv", écarts: null },
-          { nom: "emp", écarts: null },
-          { nom: "tam", écarts: null },
-          { nom: "ic", écarts: null },
-        ]);
-      }
-    }
-  }, [setValue, catégories, estCalculable]);
 
   useEffect(() => {
     if (résultat !== undefined) {
@@ -155,6 +128,7 @@ export const PromotionsForm = () => {
 
   return (
     <FormProvider {...methods}>
+      <ReactHookFormDebug />
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
           <RadioOuiNon
@@ -181,22 +155,26 @@ export const PromotionsForm = () => {
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>
 
-                <PercentageInput<FormType> label="Ouvriers" name="catégories.0.écarts" />
-                <PercentageInput<FormType> label="Employés" name="catégories.1.écarts" />
-                <PercentageInput<FormType> label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
-                <PercentageInput<FormType> label="Ingénieurs et cadres" name="catégories.3.écarts" />
+                <PercentageInput<FormType> label="Ouvriers" name={`catégories.${CSP.Enum.OUVRIERS}`} />
+                <PercentageInput<FormType> label="Employés" name={`catégories.${CSP.Enum.EMPLOYES}`} />
+                <PercentageInput<FormType>
+                  label="Techniciens et agents de maîtrise"
+                  name={`catégories.${CSP.Enum.TECHNICIENS_AGENTS_MAITRISES}`}
+                />
+                <PercentageInput<FormType>
+                  label="Ingénieurs et cadres"
+                  name={`catégories.${CSP.Enum.INGENIEURS_CADRES}`}
+                />
 
                 <br />
 
                 <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
                 {résultat !== 0 && résultat !== null && <PopulationFavorable />}
-                {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
                 {note !== undefined && (
                   <>
-                    <IndicatorNote
-                      note={note}
+                    <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus à l'indicateur"
                     />

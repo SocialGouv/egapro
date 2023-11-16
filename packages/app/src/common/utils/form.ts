@@ -59,6 +59,14 @@ export const zodNumberOrNaNOrNull = z
   .null()
   .or(z.nan().or(z.number({ invalid_type_error: "La valeur doit être un nombre" })));
 
+export const zodNumberOrEmptyString = z
+  .literal("", {
+    errorMap: () => ({
+      message: "La valeur doit être un nombre ",
+    }),
+  })
+  .or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
+
 export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 
 export const zodPercentOrNaNOrNull = z

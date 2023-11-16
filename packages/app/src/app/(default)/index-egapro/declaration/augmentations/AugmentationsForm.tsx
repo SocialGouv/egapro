@@ -6,17 +6,16 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { IndicateurDeuxComputer } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import { type NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
-import { type DeclarationDTO, type FavorablePopulationEnum } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -44,10 +43,12 @@ const formSchema = zodFr
         .number({ invalid_type_error: "Le résultat est obligatoire" })
         .nonnegative("Le résultat ne peut pas être inférieur à 0"),
       note: z.number(),
-      [CSP.Enum.OUVRIERS]: zodNumberOrNaNOrNull,
-      [CSP.Enum.EMPLOYES]: zodNumberOrNaNOrNull,
-      [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: zodNumberOrNaNOrNull,
-      [CSP.Enum.INGENIEURS_CADRES]: zodNumberOrNaNOrNull,
+      catégories: z.object({
+        [CSP.Enum.OUVRIERS]: zodNumberOrEmptyString,
+        [CSP.Enum.EMPLOYES]: zodNumberOrEmptyString,
+        [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: zodNumberOrEmptyString,
+        [CSP.Enum.INGENIEURS_CADRES]: zodNumberOrEmptyString,
+      }),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -60,11 +61,7 @@ const formSchema = zodFr
         });
       }
 
-      if (
-        [CSP.Enum.OUVRIERS, CSP.Enum.EMPLOYES, CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, CSP.Enum.INGENIEURS_CADRES].every(
-          catégorie => value[catégorie] === null,
-        )
-      ) {
+      if (Object.values(value.catégories).every(val => val === "")) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Au moins une catégorie doit avoir un écart renseigné",
@@ -86,40 +83,15 @@ export const AugmentationsForm = () => {
     shouldUnregister: true,
     mode: "onChange",
     resolver: zodResolver(formSchema),
-    defaultValues:
-      formData[stepName] === undefined
-        ? undefined
-        : formData[stepName].estCalculable === "non"
-        ? {
-            estCalculable: "non",
-            motifNonCalculabilité: formData[stepName].motifNonCalculabilité,
-          }
-        : {
-            estCalculable: "oui",
-            populationFavorable: formData[stepName].populationFavorable,
-            résultat: formData[stepName].résultat,
-            note: formData[stepName].note,
-            ouv: formData[stepName].catégories.find(catégorie => catégorie.nom === CSP.Enum.OUVRIERS)?.écarts,
-            emp: formData[stepName].catégories.find(catégorie => catégorie.nom === CSP.Enum.EMPLOYES)?.écarts,
-            ic: formData[stepName].catégories.find(catégorie => catégorie.nom === CSP.Enum.INGENIEURS_CADRES)?.écarts,
-            tam: formData[stepName].catégories.find(
-              catégorie => catégorie.nom === CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-            )?.écarts,
-          },
+    defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     formState: { isValid, errors: _errors },
     setValue,
     watch,
   } = methods;
-
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const résultat = watch("résultat");
   const note = watch("note");
@@ -144,27 +116,8 @@ export const AugmentationsForm = () => {
   }, [estUnRattrapage, résultat, setValue]);
 
   const onSubmit = async (data: FormType) => {
-    const pageData: DeclarationDTO["augmentations"] =
-      data.estCalculable === "non"
-        ? {
-            estCalculable: "non",
-            motifNonCalculabilité: data.motifNonCalculabilité as NotComputableReasonSalaryRaises.Enum,
-          }
-        : {
-            estCalculable: "oui",
-            note: data.note,
-            populationFavorable: (data.populationFavorable as FavorablePopulationEnum) ?? undefined,
-            résultat: data.résultat,
-            catégories: [
-              { nom: CSP.Enum.OUVRIERS, écarts: data[CSP.Enum.OUVRIERS] },
-              { nom: CSP.Enum.EMPLOYES, écarts: data[CSP.Enum.EMPLOYES] },
-              { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: data[CSP.Enum.TECHNICIENS_AGENTS_MAITRISES] },
-              { nom: CSP.Enum.INGENIEURS_CADRES, écarts: data[CSP.Enum.INGENIEURS_CADRES] },
-            ],
-          };
-
     const newFormData = produce(formData, draft => {
-      draft[stepName] = pageData as DeclarationDTO[typeof stepName];
+      draft[stepName] = data as DeclarationDTO[typeof stepName];
     });
 
     saveFormData(newFormData);
@@ -196,13 +149,16 @@ export const AugmentationsForm = () => {
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>
 
-                <PercentageInput<FormType> label="Ouvriers" name={CSP.Enum.OUVRIERS} />
-                <PercentageInput<FormType> label="Employés" name={CSP.Enum.EMPLOYES} />
+                <PercentageInput<FormType> label="Ouvriers" name={`catégories.${CSP.Enum.OUVRIERS}`} />
+                <PercentageInput<FormType> label="Employés" name={`catégories.${CSP.Enum.EMPLOYES}`} />
                 <PercentageInput<FormType>
                   label="Techniciens et agents de maîtrise"
-                  name={CSP.Enum.TECHNICIENS_AGENTS_MAITRISES}
+                  name={`catégories.${CSP.Enum.TECHNICIENS_AGENTS_MAITRISES}`}
                 />
-                <PercentageInput<FormType> label="Ingénieurs et cadres" name={CSP.Enum.INGENIEURS_CADRES} />
+                <PercentageInput<FormType>
+                  label="Ingénieurs et cadres"
+                  name={`catégories.${CSP.Enum.INGENIEURS_CADRES}`}
+                />
 
                 <br />
 
@@ -212,8 +168,7 @@ export const AugmentationsForm = () => {
 
                 {note !== undefined && (
                   <>
-                    <IndicatorNote
-                      note={note}
+                    <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus à l'indicateur"
                     />

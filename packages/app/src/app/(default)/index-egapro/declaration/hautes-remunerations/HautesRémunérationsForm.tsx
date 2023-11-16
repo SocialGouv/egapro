@@ -5,11 +5,11 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
+import { zodNumberOrEmptyString } from "@common/utils/form";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -26,13 +26,30 @@ import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../
 const formSchema = z
   .object({
     populationFavorable: z.string().optional(),
-    résultat: zodPositiveOrZeroIntegerSchema
-      .min(0, { message: "La valeur minimale est 0" })
-      .max(5, { message: "Le résultat ne peut pas être supérieur à 5" }),
+    résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
     note: z.number().optional(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat !== 5 && !populationFavorable) {
+    if (résultat === "") {
+      // But it won't accept an empty string thanks to superRefine rule.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le résultat est obligatoire",
+        path: ["résultat"],
+      });
+    } else if (résultat < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        path: ["résultat"],
+      });
+    } else if (résultat > 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        path: ["résultat"],
+      });
+    } else if (résultat !== 5 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La population envers laquelle l'écart est favorable est obligatoire",
@@ -53,10 +70,10 @@ export const HautesRémunérationsForm = () => {
   assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
-    resolver: zodResolver(formSchema),
     mode: "onChange",
-    defaultValues: formData[stepName],
     shouldUnregister: true,
+    resolver: zodResolver(formSchema),
+    defaultValues: formData[stepName],
   });
 
   const {
@@ -67,16 +84,11 @@ export const HautesRémunérationsForm = () => {
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
   const note = watch("note");
 
   useEffect(() => {
-    if (résultat !== undefined) {
+    if (résultat !== "") {
       const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note);
     }
@@ -106,7 +118,12 @@ export const HautesRémunérationsForm = () => {
                   max: 5,
                   step: 1,
                   ...register("résultat", {
-                    valueAsNumber: true,
+                    setValueAs: (value: string | null) => {
+                      // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead for consistency.
+                      if (value === null) return null;
+                      const num = Number(value);
+                      return isNaN(num) || value === "" ? null : num;
+                    },
                   }),
                 }}
                 state={get(errors, "résultat") && "error"}
@@ -119,8 +136,7 @@ export const HautesRémunérationsForm = () => {
 
               {note !== undefined && (
                 <>
-                  <IndicatorNote
-                    note={note}
+                  <IndicatorNoteInput
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus à l'indicateur"
                     className={fr.cx("fr-mt-2w")}

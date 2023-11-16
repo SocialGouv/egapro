@@ -5,12 +5,12 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -50,12 +50,12 @@ export const CongesMaterniteForm = () => {
 
   const methods = useForm<FormType>({
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     setValue,
     formState: { isValid, errors: _errors },
@@ -65,11 +65,6 @@ export const CongesMaterniteForm = () => {
   const résultat = watch("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
-
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (résultat !== null && résultat !== undefined) {
@@ -113,8 +108,7 @@ export const CongesMaterniteForm = () => {
 
                     {note !== undefined && (
                       <>
-                        <IndicatorNote
-                          note={note}
+                        <IndicatorNoteInput
                           max={indicatorNoteMax[stepName]}
                           text="Nombre de points obtenus à l'indicateur"
                           className={fr.cx("fr-mt-2w")}
