@@ -20,7 +20,12 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0, NOT_HIGHER_THAN_N } from "../../../messages";
+import {
+  MANDATORY_FAVORABLE_POPULATION,
+  MANDATORY_RESULT,
+  NOT_BELOW_0,
+  NOT_HIGHER_THAN_N_RESULT,
+} from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -47,7 +52,7 @@ const formSchema = z
     } else if (résultat > 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: NOT_HIGHER_THAN_N(5),
+        message: NOT_HIGHER_THAN_N_RESULT(5),
         path: ["résultat"],
       });
     } else if (résultat !== 5 && !populationFavorable) {
