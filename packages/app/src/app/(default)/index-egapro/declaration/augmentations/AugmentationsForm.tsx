@@ -45,7 +45,7 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: z.number({ invalid_type_error: MANDATORY_RESULT }).nonnegative(NOT_BELOW_0),
+      résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
       note: z.number(),
       catégories: z.object({
         [CSP.Enum.OUVRIERS]: zodNumberOrEmptyString,
@@ -57,6 +57,20 @@ const formSchema = zodFr
   ])
   .superRefine((value, ctx) => {
     if (value.estCalculable === "oui") {
+      if (value.résultat === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultat"],
+        });
+      } else if (value.résultat < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultat"],
+        });
+      }
       if (value.résultat !== 0 && !value.populationFavorable) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -109,7 +123,7 @@ export const AugmentationsForm = () => {
 
   useEffect(() => {
     if (résultat !== undefined) {
-      if (résultat !== null) {
+      if (résultat !== "") {
         const note = new IndicateurDeuxComputer(new IndicateurUnComputer()).computeNote(résultat);
         setValue("note", note);
       }

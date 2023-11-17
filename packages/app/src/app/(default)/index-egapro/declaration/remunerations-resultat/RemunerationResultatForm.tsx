@@ -8,7 +8,6 @@ import { zodFr } from "@common/utils/zod";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,7 +78,7 @@ export const RemunerationResultatForm = () => {
   const résultat = watch("résultat");
 
   useEffect(() => {
-    if (résultat !== null) {
+    if (résultat !== "") {
       const note = new IndicateurUnComputer().computeNote(résultat);
       setValue("note", note);
     }
@@ -98,7 +97,6 @@ export const RemunerationResultatForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ReactHookFormDebug />
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 

@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -24,20 +25,42 @@ import { MANDATORY_RESULT, NOT_BELOW_0, NOT_HIGHER_THAN_N_RESULT } from "../../.
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = zodFr.discriminatedUnion("estCalculable", [
-  zodFr.object({
-    estCalculable: z.literal("non"),
-    motifNonCalculabilité: z.string(),
-  }),
-  zodFr.object({
-    estCalculable: z.literal("oui"),
-    résultat: z
-      .number({ invalid_type_error: MANDATORY_RESULT })
-      .nonnegative(NOT_BELOW_0)
-      .lte(100, NOT_HIGHER_THAN_N_RESULT(100) + "%"),
-    note: z.number().optional(),
-  }),
-]);
+const formSchema = zodFr
+  .discriminatedUnion("estCalculable", [
+    zodFr.object({
+      estCalculable: z.literal("non"),
+      motifNonCalculabilité: z.string(),
+    }),
+    zodFr.object({
+      estCalculable: z.literal("oui"),
+      résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
+      note: z.number().optional(),
+    }),
+  ])
+  .superRefine((value, ctx) => {
+    if (value.estCalculable === "oui") {
+      if (value.résultat === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultat"],
+        });
+      } else if (value.résultat < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultat"],
+        });
+      } else if (value.résultat > 100) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_HIGHER_THAN_N_RESULT(100) + "%",
+          path: ["résultat"],
+        });
+      }
+    }
+  });
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -68,7 +91,7 @@ export const CongesMaterniteForm = () => {
   const estCalculable = watch("estCalculable");
 
   useEffect(() => {
-    if (résultat !== null && résultat !== undefined) {
+    if (résultat !== "" && résultat !== undefined) {
       const resultAsFloat = Math.floor(résultat / 100);
       const note = new IndicateurQuatreComputer().computeNote(resultAsFloat);
       setValue("note", note);

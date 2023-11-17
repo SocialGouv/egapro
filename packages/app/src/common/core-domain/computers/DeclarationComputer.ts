@@ -218,10 +218,6 @@ export const DeclarationComputerInputBuilder = {
 
     if (dto.remunerations.estCalculable === "oui") {
       assert(dto["remunerations-resultat"]?.résultat !== undefined, "résultat must be set if indicator is computable");
-      assert(
-        dto["remunerations-resultat"]?.populationFavorable,
-        "populationFavorable must be set if indicator is computable]",
-      );
     }
 
     if (dto.entreprise.tranche === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
@@ -239,10 +235,6 @@ export const DeclarationComputerInputBuilder = {
           dto["augmentations-et-promotions"].résultatEquivalentSalarié !== undefined,
           "résultatEquivalentSalarié must be set if indicator is computable",
         );
-        assert(
-          dto["augmentations-et-promotions"].populationFavorable,
-          "populationFavorable must be set if indicator is computable]",
-        );
       }
     } else {
       assert(dto.augmentations?.estCalculable !== undefined, "augmentations.estCalculable must be set");
@@ -250,11 +242,9 @@ export const DeclarationComputerInputBuilder = {
 
       if (dto.augmentations.estCalculable === "oui") {
         assert(dto.augmentations.résultat !== undefined, "résultat must be set if indicator is computable");
-        assert(dto.augmentations.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
       if (dto.promotions.estCalculable === "oui") {
         assert(dto.promotions.résultat !== undefined, "résultat must be set if indicator is computable");
-        assert(dto.promotions.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
     }
 
