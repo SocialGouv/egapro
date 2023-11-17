@@ -260,12 +260,12 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           note: salaryRaises.score?.getValue() ?? 0,
           résultat: salaryRaises.result?.getValue() ?? 0,
           populationFavorable: toBinaryFavorablePopulation(salaryRaises.favorablePopulation!.getValue()),
-          catégories: [
-            { nom: CSP.Enum.OUVRIERS, écarts: salaryRaises.categories[0]?.getValue() || null },
-            { nom: CSP.Enum.EMPLOYES, écarts: salaryRaises.categories[1]?.getValue() || null },
-            { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: salaryRaises.categories[2]?.getValue() || null },
-            { nom: CSP.Enum.INGENIEURS_CADRES, écarts: salaryRaises.categories[3]?.getValue() || null },
-          ],
+          catégories: {
+            [CSP.Enum.OUVRIERS]: salaryRaises.categories[0]?.getValue() || "",
+            [CSP.Enum.EMPLOYES]: salaryRaises.categories[1]?.getValue() || "",
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: salaryRaises.categories[2]?.getValue() || "",
+            [CSP.Enum.INGENIEURS_CADRES]: salaryRaises.categories[3]?.getValue() || "",
+          },
         };
       }
     }
@@ -283,12 +283,12 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           note: promotions.score?.getValue() ?? 0,
           résultat: promotions.result?.getValue() ?? 0,
           populationFavorable: toBinaryFavorablePopulation(promotions.favorablePopulation!.getValue()),
-          catégories: [
-            { nom: "ouv", écarts: promotions?.categories?.[0]?.getValue() ?? null },
-            { nom: "emp", écarts: promotions?.categories?.[1]?.getValue() ?? null },
-            { nom: "tam", écarts: promotions?.categories?.[2]?.getValue() ?? null },
-            { nom: "ic", écarts: promotions?.categories?.[3]?.getValue() ?? null },
-          ],
+          catégories: {
+            [CSP.Enum.OUVRIERS]: promotions.categories[0]?.getValue() || "",
+            [CSP.Enum.EMPLOYES]: promotions.categories[1]?.getValue() || "",
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: promotions.categories[2]?.getValue() || "",
+            [CSP.Enum.INGENIEURS_CADRES]: promotions.categories[3]?.getValue() || "",
+          },
         };
       }
     }
@@ -349,10 +349,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || "",
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || "",
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || "",
           },
         })),
       };
@@ -363,10 +363,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || "",
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || "",
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || "",
           },
         })),
       };
@@ -378,37 +378,37 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           {
             nom: "ouv",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "emp",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "tam",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "ic",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || "",
             },
           },
         ],

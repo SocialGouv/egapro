@@ -116,21 +116,21 @@ export class SaveDeclaration implements UseCase<Input, void> {
             ? dto["remunerations-csp"]?.catégories.length
               ? dto["remunerations-csp"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : remunerationsMode === "niveau_autre"
             ? dto["remunerations-coefficient-autre"]?.catégories.length
               ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : remunerationsMode === "niveau_branche"
             ? dto["remunerations-coefficient-branche"]?.catégories.length
               ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : ([] satisfies Categorie[]),
@@ -139,7 +139,12 @@ export class SaveDeclaration implements UseCase<Input, void> {
         salaryRaises: {
           categories:
             dto.augmentations?.estCalculable === "oui"
-              ? dto.augmentations.catégories.map(category => category.écarts)
+              ? [
+                  dto.augmentations.catégories.ouv === "" ? null : dto.augmentations.catégories.ouv,
+                  dto.augmentations.catégories.emp === "" ? null : dto.augmentations.catégories.emp,
+                  dto.augmentations.catégories.tam === "" ? null : dto.augmentations.catégories.tam,
+                  dto.augmentations.catégories.ic === "" ? null : dto.augmentations.catégories.ic,
+                ]
               : [null, null, null, null],
           favorablePopulation:
             dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable ?? "egalite" : undefined,
@@ -157,7 +162,12 @@ export class SaveDeclaration implements UseCase<Input, void> {
           score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
           categories:
             dto.promotions?.estCalculable === "oui"
-              ? dto.promotions.catégories.map(category => category.écarts)
+              ? [
+                  dto.promotions.catégories.ouv === "" ? null : dto.promotions.catégories.ouv,
+                  dto.promotions.catégories.emp === "" ? null : dto.promotions.catégories.emp,
+                  dto.promotions.catégories.tam === "" ? null : dto.promotions.catégories.tam,
+                  dto.promotions.catégories.ic === "" ? null : dto.promotions.catégories.ic,
+                ]
               : [null, null, null, null],
         },
       }),

@@ -14,7 +14,7 @@ import { NotComputableReason } from "../domain/valueObjects/declaration/indicato
 
 type OuiNon = "non" | "oui";
 
-type TranchesAge = Record<AgeRange.Enum, number | null>;
+type TranchesAge = Record<AgeRange.Enum, number | "">;
 
 export type Catégorie = { nom: string; tranches: TranchesAge };
 

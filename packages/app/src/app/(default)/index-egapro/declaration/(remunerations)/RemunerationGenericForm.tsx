@@ -1,18 +1,18 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
-import { type Catégorie, type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type Remunerations } from "@common/models/generated";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { AlertMessage } from "@design-system/client";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -21,7 +21,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { BackNextButtons } from "../BackNextButtons";
-import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./RemunerationGenericForm.module.scss";
 
 const formSchema = zodFr.object({
@@ -30,15 +30,17 @@ const formSchema = zodFr.object({
       z.object({
         nom: z.string(),
         tranches: z.object({
-          [AgeRange.Enum.LESS_THAN_30]: zodNumberOrNaNOrNull,
-          [AgeRange.Enum.FROM_30_TO_39]: zodNumberOrNaNOrNull,
-          [AgeRange.Enum.FROM_40_TO_49]: zodNumberOrNaNOrNull,
-          [AgeRange.Enum.FROM_50_TO_MORE]: zodNumberOrNaNOrNull,
+          [AgeRange.Enum.LESS_THAN_30]: zodNumberOrEmptyString,
+          [AgeRange.Enum.FROM_30_TO_39]: zodNumberOrEmptyString,
+          [AgeRange.Enum.FROM_40_TO_49]: zodNumberOrEmptyString,
+          [AgeRange.Enum.FROM_50_TO_MORE]: zodNumberOrEmptyString,
         }),
       }),
     )
-    .superRefine((val, ctx) => {
-      if (notFilled(val)) {
+    .superRefine((catégories, ctx) => {
+      console.log("dans superrefine");
+      if (notFilled(catégories)) {
+        console.log("not filled");
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Vous devez renseigner au moins un écart si votre indicateur est calculable",
@@ -47,19 +49,26 @@ const formSchema = zodFr.object({
     }),
 });
 
-// Infer the TS type according to the zod schema.
-type FormType = z.infer<typeof formSchema>;
-
 const notFilled = (catégories: FormType["catégories"]) =>
   catégories.every(
     catégorie =>
-      catégorie.tranches[AgeRange.Enum.LESS_THAN_30] === null &&
-      catégorie.tranches[AgeRange.Enum.FROM_30_TO_39] === null &&
-      catégorie.tranches[AgeRange.Enum.FROM_40_TO_49] === null &&
-      catégorie.tranches[AgeRange.Enum.FROM_50_TO_MORE] === null,
+      catégorie.tranches[AgeRange.Enum.LESS_THAN_30] === "" &&
+      catégorie.tranches[AgeRange.Enum.FROM_30_TO_39] === "" &&
+      catégorie.tranches[AgeRange.Enum.FROM_40_TO_49] === "" &&
+      catégorie.tranches[AgeRange.Enum.FROM_50_TO_MORE] === "",
   );
 
-const defaultTranch = { ":29": null, "30:39": null, "40:49": null, "50:": null };
+// Infer the TS type according to the zod schema.
+type FormType = z.infer<typeof formSchema>;
+
+type NumberOrEmptyString = number | "";
+
+const defaultTranch = {
+  ":29": "" as NumberOrEmptyString,
+  "30:39": "" as NumberOrEmptyString,
+  "40:49": "" as NumberOrEmptyString,
+  "50:": "" as NumberOrEmptyString,
+};
 
 const buildDefaultCategories = (mode: Remunerations["mode"]) =>
   mode === "csp"
@@ -84,16 +93,19 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();
 
-  assertOrRedirectCommencerStep(formData);
+  // assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName] || buildDefaultCategories(mode),
   });
   const {
     control,
+    register,
     handleSubmit,
+    getValues,
     formState: { errors, isValid },
     setError,
   } = methods;
@@ -111,26 +123,18 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   });
 
   const onSubmit = async (data: FormType) => {
-    if (notFilled(data.catégories)) {
-      return setError("root.catégories", {
-        message:
-          mode === "csp"
-            ? "Vous devez renseigner les écarts de rémunération pour les CSP et tranches d'âge concernés."
-            : "Vous devez renseigner les écarts de rémunération pour les tranches d'âge concernées.",
-      });
-    }
-
     savePageData(stepName, data as DeclarationDTO[typeof stepName]);
 
     router.push(funnelConfig(formData)[stepName].next().url);
   };
 
-  const getCSPTitle = (catégorie: Catégorie) =>
-    mode === "csp" ? new CSP(catégorie.nom as CSP.Enum).getLabel() : undefined;
+  console.log("errors", errors);
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <AlertMessage title="Erreur" message={errors.catégories?.root?.message} />
+
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           <div className={fr.cx("fr-mb-8w")}></div>
 
@@ -140,7 +144,9 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                 <div className={cx(fr.cx("fr-col"), style["category-title"])}>
                   {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
                   <span className={fr.cx("fr-text--bold")}>
-                    {getCSPTitle(catégorie) || `Niveau ou coefficient ${index + 1}`}
+                    {mode === "csp"
+                      ? new CSP(catégorie.nom as CSP.Enum).getLabel()
+                      : `Niveau ou coefficient ${index + 1}`}
                   </span>
                   {mode !== "csp" && (
                     <Button
@@ -175,6 +181,10 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
                           AgeRange.Enum.FROM_50_TO_MORE,
                         ].map(key => (
                           <td key={key}>
+                            <input
+                              {...register(`catégories.${index}.nom`, { value: getValues(`catégories.${index}.nom`) })}
+                              type="hidden"
+                            />
                             <PercentageInput<FormType> name={`catégories.${index}.tranches.${key}`} />
                           </td>
                         ))}
@@ -201,11 +211,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
           )}
         </ClientOnly>
 
-        <ClientAnimate>
-          {errors.root?.catégories && (
-            <Alert severity="error" title="Informations manquantes" description={errors.root.catégories.message} />
-          )}
-        </ClientAnimate>
         <BackNextButtons stepName={stepName} disabled={!isValid} />
       </form>
     </FormProvider>
