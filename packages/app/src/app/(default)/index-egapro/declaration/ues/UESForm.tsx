@@ -19,14 +19,12 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { INVALID_SIREN_ERROR, MANDATORY_SIREN_ERROR } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
 
 type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
-
-const MANDATORY_SIREN_ERROR = "Le Siren est requis";
-const INVALID_SIREN_ERROR = "Le Siren est composé de 9 chiffres sans espace";
 
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty(),

@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0 } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -26,15 +27,13 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string().optional(),
-    résultat: z
-      .number({ invalid_type_error: "Le résultat est obligatoire" })
-      .nonnegative("Le résultat ne peut pas être inférieur à 0"),
+    résultat: z.number({ invalid_type_error: MANDATORY_RESULT }).nonnegative(NOT_BELOW_0),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat !== 0 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: MANDATORY_FAVORABLE_POPULATION,
         path: ["populationFavorable"],
       });
     }
@@ -56,20 +55,13 @@ export const RemunerationResultatForm = () => {
   });
 
   const {
-    register,
     handleSubmit,
     formState: { isValid },
     setValue,
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
-  const note = watch("note");
 
   useEffect(() => {
     if (résultat !== null) {
