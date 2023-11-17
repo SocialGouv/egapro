@@ -62,7 +62,7 @@ export const zodNumberOrNaNOrNull = z
 export const zodNumberOrEmptyString = z
   .literal("", {
     errorMap: () => ({
-      message: "La valeur doit être un nombre ",
+      message: "La valeur est obligatoire ",
     }),
   })
   .or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));

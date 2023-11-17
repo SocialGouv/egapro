@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_RESULT, NOT_BELOW_0, NOT_HIGHER_THAN_N } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -31,9 +32,9 @@ const formSchema = zodFr.discriminatedUnion("estCalculable", [
   zodFr.object({
     estCalculable: z.literal("oui"),
     résultat: z
-      .number({ invalid_type_error: "Le résultat est obligatoire" })
-      .nonnegative("Le résultat ne peut pas être inférieur à 0")
-      .lte(100, "Le résultat ne peut pas être supérieur à 100%"),
+      .number({ invalid_type_error: MANDATORY_RESULT })
+      .nonnegative(NOT_BELOW_0)
+      .lte(100, NOT_HIGHER_THAN_N(100) + "%"),
     note: z.number().optional(),
   }),
 ]);

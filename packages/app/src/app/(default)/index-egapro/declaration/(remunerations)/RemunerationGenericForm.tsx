@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { NOT_ALL_EMPTY_CATEGORIES } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./RemunerationGenericForm.module.scss";
@@ -38,12 +39,10 @@ const formSchema = zodFr.object({
       }),
     )
     .superRefine((catégories, ctx) => {
-      console.log("dans superrefine");
       if (notFilled(catégories)) {
-        console.log("not filled");
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Vous devez renseigner au moins un écart si votre indicateur est calculable",
+          message: NOT_ALL_EMPTY_CATEGORIES,
         });
       }
     }),
@@ -107,7 +106,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
     handleSubmit,
     getValues,
     formState: { errors, isValid },
-    setError,
   } = methods;
 
   const {
@@ -127,8 +125,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
 
     router.push(funnelConfig(formData)[stepName].next().url);
   };
-
-  console.log("errors", errors);
 
   return (
     <FormProvider {...methods}>

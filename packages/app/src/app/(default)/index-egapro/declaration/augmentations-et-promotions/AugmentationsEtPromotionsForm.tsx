@@ -23,6 +23,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0 } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -35,10 +36,8 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: z
-        .number({ invalid_type_error: "Le résultat est obligatoire" })
-        .nonnegative("Le résultat ne peut pas être inférieur à 0"),
-      résultatEquivalentSalarié: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+      résultat: z.number({ invalid_type_error: MANDATORY_RESULT }).nonnegative(NOT_BELOW_0),
+      résultatEquivalentSalarié: z.number({ invalid_type_error: MANDATORY_RESULT }).nonnegative(),
       note: z.number().optional(),
       notePourcentage: z.number().optional(),
       noteNombreSalaries: z.number().optional(),
@@ -49,7 +48,7 @@ const formSchema = zodFr
       if ((value.résultat !== 0 || value.résultatEquivalentSalarié !== 0) && !value.populationFavorable) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "La population envers laquelle l'écart est favorable est obligatoire",
+          message: MANDATORY_FAVORABLE_POPULATION,
           path: ["populationFavorable"],
         });
       }

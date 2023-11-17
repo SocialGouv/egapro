@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0, NOT_HIGHER_THAN_N } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -34,25 +35,25 @@ const formSchema = z
       // But it won't accept an empty string thanks to superRefine rule.
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Le résultat est obligatoire",
+        message: MANDATORY_RESULT,
         path: ["résultat"],
       });
     } else if (résultat < 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: NOT_BELOW_0,
         path: ["résultat"],
       });
     } else if (résultat > 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: NOT_HIGHER_THAN_N(5),
         path: ["résultat"],
       });
     } else if (résultat !== 5 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: MANDATORY_FAVORABLE_POPULATION,
         path: ["populationFavorable"],
       });
     }
