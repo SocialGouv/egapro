@@ -18,3 +18,22 @@ jobs:
     name: "🇫🇷 SocialGouv"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto.yaml@v1
     secrets: inherit
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [socialgouv]
+    name: "Test e2e"
+    steps:
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+      - name: Set env
+        run: |
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.dev.fabrique.social.gouv.fr" >> $GITHUB_ENV
+          echo "$SITE_URL"
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          project: ./packages/app
+          component: false
+          config: pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}
+          install-command: yarn --immutable
