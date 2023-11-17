@@ -3,10 +3,12 @@
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,10 +29,23 @@ const formSchema = zodFr
   .object({
     note: z.number(),
     populationFavorable: z.string().optional(),
-    résultat: z.number({ invalid_type_error: MANDATORY_RESULT }).nonnegative(NOT_BELOW_0),
+    résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat !== 0 && !populationFavorable) {
+    if (résultat === "") {
+      // But it won't accept an empty string thanks to superRefine rule.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: MANDATORY_RESULT,
+        path: ["résultat"],
+      });
+    } else if (résultat < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: NOT_BELOW_0,
+        path: ["résultat"],
+      });
+    } else if (résultat !== 0 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: MANDATORY_FAVORABLE_POPULATION,
@@ -49,9 +64,9 @@ export const RemunerationResultatForm = () => {
 
   const methods = useForm<FormType>({
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
-    shouldUnregister: true,
   });
 
   const {
@@ -83,12 +98,13 @@ export const RemunerationResultatForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <ReactHookFormDebug />
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
           {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
-          {résultat !== null && (
+          {résultat !== "" && (
             <>
               <IndicatorNoteInput max={indicatorNoteMax.remunerations} text="Nombre de points obtenus à l'indicateur" />
             </>
