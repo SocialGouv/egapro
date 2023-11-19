@@ -13,7 +13,9 @@ interface Props {
    * Can only be used if `simple` is false.
    */
   detailed?: boolean;
+  isAllValuesZero: boolean;
   isValid: boolean;
+
   noBorder?: boolean;
   /**
    * If true, only display the note, without other notes or alerts
@@ -21,7 +23,7 @@ interface Props {
   simple?: boolean;
 }
 
-export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed }: Props) => {
+export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed, isAllValuesZero }: Props) => {
   const NOTE_MAX = computer.getMaxNote();
 
   let computed: IndicateurDeuxTroisComputer.ComputedResult | null = null;
@@ -43,15 +45,13 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
     // noop
   }
 
-  const raisedCount = computer.getInput();
-
   return (
     <ClientAnimate>
-      {raisedCount?.men === 0 && raisedCount.women === 0 && (
+      {isAllValuesZero && (
         <Alert
           className={fr.cx("fr-mb-4w")}
           small
-          severity="info"
+          severity="warning"
           description="Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations."
         />
       )}
@@ -141,7 +141,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
               )}
               <IndicatorNote
                 noBorder={noBorder}
-                note={computed?.note ?? "-"}
+                note={computed?.note && isValid ? computed.note : "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
