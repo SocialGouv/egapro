@@ -314,7 +314,12 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     ]}
                   />
                   {totalPourcentageError && (
-                    <Alert className="fr-mb-3w" severity="warning" title={totalPourcentageError} />
+                    <Alert
+                      className="fr-mb-3w"
+                      classes={{ title: "fr-text--sm" }}
+                      severity="warning"
+                      title={totalPourcentageError}
+                    />
                   )}
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
