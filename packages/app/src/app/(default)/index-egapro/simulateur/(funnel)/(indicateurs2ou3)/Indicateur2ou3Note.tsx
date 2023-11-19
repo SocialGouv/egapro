@@ -76,7 +76,7 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
               legend="Arrondi à la première décimale"
             />
           )}
-          {computed?.remunerationsCompensated ? (
+          {isValid && computed?.remunerationsCompensated ? (
             <IndicatorNote
               noBorder={noBorder}
               note={NOTE_MAX}
