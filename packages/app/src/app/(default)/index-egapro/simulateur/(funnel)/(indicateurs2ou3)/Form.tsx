@@ -311,7 +311,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   />
                   {errors?.root?.totalPourcentages && (
                     <Alert
-                      className="fr-mb-3w"
+                      className="fr-mb-2w"
                       small
                       severity="warning"
                       description={
