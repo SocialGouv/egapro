@@ -3,12 +3,13 @@ import { Email } from "@common/shared-domain/domain/valueObjects";
 import { isValid, parseISO } from "date-fns";
 import { z } from "zod";
 
+import { INVALID_SIREN, MANDATORY_SIREN } from "../../app/(default)/messages";
 import { zodValueObjectSuperRefine } from "./zod";
 
 export const zodSirenSchema = z
   .string()
-  .min(1, { message: "Le Siren est requis." })
-  .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres.");
+  .min(1, { message: MANDATORY_SIREN })
+  .regex(/^[0-9]{9}$/, INVALID_SIREN);
 
 // TODO: make 2020 a constant or better, fetch the authorized years in /config endpoint (see useConfig).
 export const zodYearSchema = z
@@ -58,6 +59,14 @@ export const zodPercentageSchema = zodPositiveOrZeroNumberSchema.refine(percenta
 export const zodNumberOrNaNOrNull = z
   .null()
   .or(z.nan().or(z.number({ invalid_type_error: "La valeur doit être un nombre" })));
+
+export const zodNumberOrEmptyString = z
+  .literal("", {
+    errorMap: () => ({
+      message: "La valeur est obligatoire ",
+    }),
+  })
+  .or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 
 export const zodNumberOrNull = z.null().or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));
 

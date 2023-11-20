@@ -10,6 +10,7 @@ import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
 import { DeclarationSpecificationError } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { ValidationError } from "@common/shared-domain";
 import { type ServerActionResponse } from "@common/utils/next";
 import assert from "assert";
 
@@ -69,9 +70,7 @@ export async function saveDeclaration(
       ok: true,
     };
   } catch (error: unknown) {
-    console.error(error);
-
-    if (error instanceof DeclarationSpecificationError) {
+    if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
       return {
         ok: false,
         error: error.message ?? error.previousError,

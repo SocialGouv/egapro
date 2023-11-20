@@ -13,7 +13,7 @@ import { DeclarationSource } from "@common/core-domain/domain/valueObjects/decla
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
-import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
+import { AppError, type EntityPropsToJson, type UseCase, ValidationError } from "@common/shared-domain";
 import { PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { keepEntryBy } from "@common/utils/object";
 import { add, isAfter } from "date-fns";
@@ -102,7 +102,10 @@ export class SaveDeclaration implements UseCase<Input, void> {
       remunerations: {
         cseConsultationDate:
           dto.remunerations?.estCalculable === "oui" ? dto.remunerations.dateConsultationCSE : undefined,
-        favorablePopulation: dto["remunerations-resultat"]?.populationFavorable,
+        favorablePopulation:
+          dto["remunerations"]?.estCalculable === "oui"
+            ? dto["remunerations-resultat"]?.populationFavorable ?? "egalite"
+            : undefined,
         mode: remunerationsMode,
         notComputableReason:
           dto.remunerations?.estCalculable === "non" ? dto.remunerations.motifNonCalculabilité : undefined,
@@ -113,21 +116,21 @@ export class SaveDeclaration implements UseCase<Input, void> {
             ? dto["remunerations-csp"]?.catégories.length
               ? dto["remunerations-csp"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : remunerationsMode === "niveau_autre"
             ? dto["remunerations-coefficient-autre"]?.catégories.length
               ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : remunerationsMode === "niveau_branche"
             ? dto["remunerations-coefficient-branche"]?.catégories.length
               ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
                   name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== null),
+                  ranges: keepEntryBy(tranches, val => val !== ""),
                 }))
               : []
             : ([] satisfies Categorie[]),
@@ -136,10 +139,15 @@ export class SaveDeclaration implements UseCase<Input, void> {
         salaryRaises: {
           categories:
             dto.augmentations?.estCalculable === "oui"
-              ? dto.augmentations.catégories.map(category => category.écarts)
+              ? [
+                  dto.augmentations.catégories.ouv === "" ? null : dto.augmentations.catégories.ouv,
+                  dto.augmentations.catégories.emp === "" ? null : dto.augmentations.catégories.emp,
+                  dto.augmentations.catégories.tam === "" ? null : dto.augmentations.catégories.tam,
+                  dto.augmentations.catégories.ic === "" ? null : dto.augmentations.catégories.ic,
+                ]
               : [null, null, null, null],
           favorablePopulation:
-            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable : undefined,
+            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable ?? "egalite" : undefined,
           notComputableReason:
             dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
           result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
@@ -148,12 +156,18 @@ export class SaveDeclaration implements UseCase<Input, void> {
         promotions: {
           notComputableReason:
             dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
-          favorablePopulation: dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable : undefined,
+          favorablePopulation:
+            dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable ?? "egalite" : undefined,
           result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
           score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
           categories:
             dto.promotions?.estCalculable === "oui"
-              ? dto.promotions.catégories.map(category => category.écarts)
+              ? [
+                  dto.promotions.catégories.ouv === "" ? null : dto.promotions.catégories.ouv,
+                  dto.promotions.catégories.emp === "" ? null : dto.promotions.catégories.emp,
+                  dto.promotions.catégories.tam === "" ? null : dto.promotions.catégories.tam,
+                  dto.promotions.catégories.ic === "" ? null : dto.promotions.catégories.ic,
+                ]
               : [null, null, null, null],
         },
       }),
@@ -165,7 +179,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
               : undefined,
           favorablePopulation:
             dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].populationFavorable
+              ? dto["augmentations-et-promotions"].populationFavorable ?? "egalite"
               : undefined,
           employeesCountResult:
             dto["augmentations-et-promotions"]?.estCalculable === "oui"
@@ -199,10 +213,12 @@ export class SaveDeclaration implements UseCase<Input, void> {
         ? undefined
         : {
             result: dto["hautes-remunerations"].résultat,
-            favorablePopulation: dto["hautes-remunerations"].populationFavorable,
+            favorablePopulation: dto["hautes-remunerations"].populationFavorable ?? "egalite",
             score: dto["hautes-remunerations"].note,
           },
     } satisfies EntityPropsToJson<DeclarationProps>;
+
+    console.log("partialDeclaration", JSON.stringify(partialDeclaration, null, 2));
 
     let declaration: Declaration;
 
@@ -272,8 +288,8 @@ export class SaveDeclaration implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
-      if (error instanceof DeclarationSpecificationError) {
-        console.error(error.message);
+      if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
+        console.error(error);
         throw error;
       }
 

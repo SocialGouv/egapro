@@ -5,11 +5,15 @@ import { IndicateurQuatreComputer } from "@common/core-domain/computers/Indicate
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type Declaration } from "@common/core-domain/domain/Declaration";
-import { type DeclarationDTO, type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
+import {
+  type DeclarationDTO,
+  type FavorablePopulationEnum,
+  type IndicatorKey,
+} from "@common/core-domain/dtos/DeclarationDTO";
 import assert from "assert";
 
 import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
-import { type FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
+import { FavorablePopulation } from "../domain/valueObjects/declaration/indicators/FavorablePopulation";
 
 const indicateurUn = new IndicateurUnComputer();
 const indicateurDeux = new IndicateurDeuxComputer(indicateurUn);
@@ -31,7 +35,7 @@ type IndicatorBase =
   | {
       isComputable: false;
     }
-  | { favorablePopulation: FavorablePopulation.Enum; isComputable: true; result: number };
+  | { favorablePopulation?: FavorablePopulationEnum; isComputable: true; result: number };
 
 type DeclarationComputerInputBase = {
   highRemunerations: Omit<Extract<IndicatorBase, { isComputable: true }>, "isComputable">;
@@ -69,6 +73,16 @@ type DeclarationComputerOutput = {
   index?: number; // undefined means NC.
   points: number;
 };
+
+/** Helper to convert a 3 values favorable population in a 2 values with undefined */
+export const toBinaryFavorablePopulation = (populationFavorable: FavorablePopulation.Enum) =>
+  (populationFavorable === FavorablePopulation.Enum.EQUALITY
+    ? undefined
+    : populationFavorable) as FavorablePopulationEnum;
+
+/** Helper to convert a 2 values favorable population with undefined in a 3 values */
+export const toTernaryFavorablePopulation = (populationFavorable?: FavorablePopulationEnum) =>
+  (!populationFavorable ? FavorablePopulation.Enum.EQUALITY : populationFavorable) as FavorablePopulation.Enum;
 
 export const DeclarationComputerInputBuilder = {
   fromDeclaration(domain: Declaration) {
@@ -122,7 +136,7 @@ export const DeclarationComputerInputBuilder = {
       remunerations:
         domain.remunerations.notComputableReason === undefined
           ? {
-              favorablePopulation: domain.remunerations.favorablePopulation!.getValue(),
+              favorablePopulation: toBinaryFavorablePopulation(domain.remunerations.favorablePopulation!.getValue()),
               isComputable: true,
               result: domain.remunerations.result!.getValue() || 0,
             }
@@ -140,17 +154,19 @@ export const DeclarationComputerInputBuilder = {
               isComputable: false,
             },
       highRemunerations: {
-        favorablePopulation: domain.highRemunerations.favorablePopulation.getValue(),
+        favorablePopulation: toBinaryFavorablePopulation(domain.highRemunerations.favorablePopulation.getValue()),
         result: domain.highRemunerations.result.getValue(),
       },
       ...(domain.company.range.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250
         ? {
             range: CompanyWorkforceRange.Enum.FROM_50_TO_250,
             salaryRaisesAndPromotions:
-              domain.salaryRaisesAndPromotions!.notComputableReason === undefined // Unfortunatelay, previous assert is ignored by TS.
+              domain.salaryRaisesAndPromotions!.notComputableReason === undefined // Unfortunately, previous assert is ignored by TS.
                 ? {
                     isComputable: true,
-                    favorablePopulation: domain.salaryRaisesAndPromotions!.favorablePopulation!.getValue(),
+                    favorablePopulation: toBinaryFavorablePopulation(
+                      domain.salaryRaisesAndPromotions!.favorablePopulation!.getValue(),
+                    ),
                     result: domain.salaryRaisesAndPromotions!.result!.getValue(),
                     employeesCountResult: domain.salaryRaisesAndPromotions!.employeesCountResult!.getValue(),
                   }
@@ -166,7 +182,9 @@ export const DeclarationComputerInputBuilder = {
               domain.salaryRaises!.notComputableReason === undefined
                 ? {
                     isComputable: true,
-                    favorablePopulation: domain.salaryRaises!.favorablePopulation!.getValue(),
+                    favorablePopulation: toBinaryFavorablePopulation(
+                      domain.salaryRaises!.favorablePopulation!.getValue(),
+                    ),
                     result: domain.salaryRaises!.result!.getValue(),
                   }
                 : {
@@ -176,7 +194,9 @@ export const DeclarationComputerInputBuilder = {
               domain.promotions!.notComputableReason === undefined
                 ? {
                     isComputable: true,
-                    favorablePopulation: domain.promotions!.favorablePopulation!.getValue(),
+                    favorablePopulation: toBinaryFavorablePopulation(
+                      domain.promotions!.favorablePopulation!.getValue(),
+                    ),
                     result: domain.promotions!.result!.getValue(),
                   }
                 : {
@@ -198,10 +218,6 @@ export const DeclarationComputerInputBuilder = {
 
     if (dto.remunerations.estCalculable === "oui") {
       assert(dto["remunerations-resultat"]?.résultat !== undefined, "résultat must be set if indicator is computable");
-      assert(
-        dto["remunerations-resultat"]?.populationFavorable,
-        "populationFavorable must be set if indicator is computable]",
-      );
     }
 
     if (dto.entreprise.tranche === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
@@ -219,10 +235,6 @@ export const DeclarationComputerInputBuilder = {
           dto["augmentations-et-promotions"].résultatEquivalentSalarié !== undefined,
           "résultatEquivalentSalarié must be set if indicator is computable",
         );
-        assert(
-          dto["augmentations-et-promotions"].populationFavorable,
-          "populationFavorable must be set if indicator is computable]",
-        );
       }
     } else {
       assert(dto.augmentations?.estCalculable !== undefined, "augmentations.estCalculable must be set");
@@ -230,11 +242,9 @@ export const DeclarationComputerInputBuilder = {
 
       if (dto.augmentations.estCalculable === "oui") {
         assert(dto.augmentations.résultat !== undefined, "résultat must be set if indicator is computable");
-        assert(dto.augmentations.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
       if (dto.promotions.estCalculable === "oui") {
         assert(dto.promotions.résultat !== undefined, "résultat must be set if indicator is computable");
-        assert(dto.promotions.populationFavorable, "populationFavorable must be set if indicator is computable");
       }
     }
 
