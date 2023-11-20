@@ -14,7 +14,7 @@ import { NotComputableReason } from "../domain/valueObjects/declaration/indicato
 
 type OuiNon = "non" | "oui";
 
-type TranchesAge = Record<AgeRange.Enum, number | null>;
+type TranchesAge = Record<AgeRange.Enum, number | "">;
 
 export type Catégorie = { nom: string; tranches: TranchesAge };
 
@@ -42,6 +42,8 @@ export type Entreprise = {
 
 export type IndicatorKeyWithNC = Exclude<IndicatorKey, "hautes-remunerations">;
 
+export type FavorablePopulationEnum = FavorablePopulation.Enum.MEN | FavorablePopulation.Enum.WOMEN;
+
 export const motifsNC = {
   augmentations: [NotComputableReason.Enum.EGVI40PCET, NotComputableReason.Enum.ABSAUGI],
   promotions: [NotComputableReason.Enum.EGVI40PCET, NotComputableReason.Enum.ABSPROM],
@@ -68,15 +70,15 @@ export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remuner
 export type DeclarationDTO = {
   augmentations?:
     | {
-        catégories: [
-          { nom: CSP.Enum.OUVRIERS; écarts: number | null },
-          { nom: CSP.Enum.EMPLOYES; écarts: number | null },
-          { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES; écarts: number | null },
-          { nom: CSP.Enum.INGENIEURS_CADRES; écarts: number | null },
-        ];
+        catégories: {
+          [CSP.Enum.OUVRIERS]: number | "";
+          [CSP.Enum.EMPLOYES]: number | "";
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: number | "";
+          [CSP.Enum.INGENIEURS_CADRES]: number | "";
+        };
         estCalculable: "oui";
         note: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
       }
     | {
@@ -93,7 +95,7 @@ export type DeclarationDTO = {
         note: number;
         noteNombreSalaries: number;
         notePourcentage: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
         résultatEquivalentSalarié: number;
       };
@@ -126,7 +128,7 @@ export type DeclarationDTO = {
   entreprise?: { entrepriseDéclarante?: Entreprise; tranche?: CompanyWorkforceRange.Enum; type?: "entreprise" | "ues" };
   "hautes-remunerations"?: {
     note: number;
-    populationFavorable: FavorablePopulation.Enum;
+    populationFavorable?: FavorablePopulationEnum;
     résultat: number;
   };
   "periode-reference"?:
@@ -140,15 +142,15 @@ export type DeclarationDTO = {
       };
   promotions?:
     | {
-        catégories: [
-          { nom: "ouv"; écarts: number | null },
-          { nom: "emp"; écarts: number | null },
-          { nom: "tam"; écarts: number | null },
-          { nom: "ic"; écarts: number | null },
-        ];
+        catégories: {
+          [CSP.Enum.OUVRIERS]: number | "";
+          [CSP.Enum.EMPLOYES]: number | "";
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: number | "";
+          [CSP.Enum.INGENIEURS_CADRES]: number | "";
+        };
         estCalculable: "oui";
         note: number;
-        populationFavorable: FavorablePopulation.Enum;
+        populationFavorable?: FavorablePopulationEnum;
         résultat: number;
       }
     | {
@@ -195,7 +197,7 @@ export type DeclarationDTO = {
   };
   "remunerations-resultat"?: {
     note: number;
-    populationFavorable: FavorablePopulation.Enum;
+    populationFavorable?: FavorablePopulationEnum;
     résultat: number;
   };
   "resultat-global"?: {

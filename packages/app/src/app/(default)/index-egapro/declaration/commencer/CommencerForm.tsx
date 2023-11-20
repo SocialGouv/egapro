@@ -24,12 +24,11 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { API_ERROR, OWNER_ERROR } from "../../../messages";
 import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
-
-const API_ERROR = "Une erreur serveur est survenue. Veuillez recommencer plus tard";
 
 const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
@@ -37,8 +36,6 @@ const baseSchema = zodFr.object({
 });
 
 type FormType = z.infer<typeof baseSchema>;
-
-const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
 
 const buildFormSchema = (isStaffMember: boolean, companies: Session["user"]["companies"] = []) =>
   isStaffMember
@@ -179,7 +176,7 @@ export const CommencerForm = () => {
 
       setError("siren", {
         type: "manual",
-        message: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
+        message: error instanceof Error ? error.message : API_ERROR,
       });
     }
   };

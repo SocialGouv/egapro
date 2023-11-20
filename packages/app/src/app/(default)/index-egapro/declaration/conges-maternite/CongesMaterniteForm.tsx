@@ -4,13 +4,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurQuatreComputer } from "@common/core-domain/computers/IndicateurQuatreComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
@@ -20,23 +21,46 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_RESULT, NOT_BELOW_0, NOT_HIGHER_THAN_N_RESULT } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
-const formSchema = zodFr.discriminatedUnion("estCalculable", [
-  zodFr.object({
-    estCalculable: z.literal("non"),
-    motifNonCalculabilité: z.string(),
-  }),
-  zodFr.object({
-    estCalculable: z.literal("oui"),
-    résultat: z
-      .number({ invalid_type_error: "Le résultat est obligatoire" })
-      .nonnegative("Le résultat ne peut pas être inférieur à 0")
-      .lte(100, "Le résultat ne peut pas être supérieur à 100%"),
-    note: z.number().optional(),
-  }),
-]);
+const formSchema = zodFr
+  .discriminatedUnion("estCalculable", [
+    zodFr.object({
+      estCalculable: z.literal("non"),
+      motifNonCalculabilité: z.string(),
+    }),
+    zodFr.object({
+      estCalculable: z.literal("oui"),
+      résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
+      note: z.number().optional(),
+    }),
+  ])
+  .superRefine((value, ctx) => {
+    if (value.estCalculable === "oui") {
+      if (value.résultat === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultat"],
+        });
+      } else if (value.résultat < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultat"],
+        });
+      } else if (value.résultat > 100) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_HIGHER_THAN_N_RESULT(100) + "%",
+          path: ["résultat"],
+        });
+      }
+    }
+  });
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -50,12 +74,12 @@ export const CongesMaterniteForm = () => {
 
   const methods = useForm<FormType>({
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     setValue,
     formState: { isValid, errors: _errors },
@@ -67,12 +91,7 @@ export const CongesMaterniteForm = () => {
   const estCalculable = watch("estCalculable");
 
   useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (résultat !== null && résultat !== undefined) {
+    if (résultat !== "" && résultat !== undefined) {
       const resultAsFloat = Math.floor(résultat / 100);
       const note = new IndicateurQuatreComputer().computeNote(resultAsFloat);
       setValue("note", note);
@@ -113,8 +132,7 @@ export const CongesMaterniteForm = () => {
 
                     {note !== undefined && (
                       <>
-                        <IndicatorNote
-                          note={note}
+                        <IndicatorNoteInput
                           max={indicatorNoteMax[stepName]}
                           text="Nombre de points obtenus à l'indicateur"
                           className={fr.cx("fr-mt-2w")}

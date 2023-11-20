@@ -6,23 +6,25 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0 } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -35,10 +37,8 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: z
-        .number({ invalid_type_error: "Le résultat est obligatoire" })
-        .nonnegative("Le résultat ne peut pas être inférieur à 0"),
-      résultatEquivalentSalarié: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+      résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
+      résultatEquivalentSalarié: zodNumberOrEmptyString,
       note: z.number().optional(),
       notePourcentage: z.number().optional(),
       noteNombreSalaries: z.number().optional(),
@@ -46,10 +46,40 @@ const formSchema = zodFr
   ])
   .superRefine((value, ctx) => {
     if (value.estCalculable === "oui") {
+      if (value.résultat === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultat"],
+        });
+      } else if (value.résultat < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultat"],
+        });
+      }
+
+      if (value.résultatEquivalentSalarié === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultatEquivalentSalarié"],
+        });
+      } else if (value.résultatEquivalentSalarié < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultatEquivalentSalarié"],
+        });
+      }
+
       if ((value.résultat !== 0 || value.résultatEquivalentSalarié !== 0) && !value.populationFavorable) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "La population envers laquelle l'écart est favorable est obligatoire",
+          message: MANDATORY_FAVORABLE_POPULATION,
           path: ["populationFavorable"],
         });
       }
@@ -65,8 +95,6 @@ export const AugmentationEtPromotionsForm = () => {
   const { formData, saveFormData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
-
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
 
   const methods = useForm<FormType>({
     mode: "onChange",
@@ -100,40 +128,22 @@ export const AugmentationEtPromotionsForm = () => {
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
     let notePourcentage, noteNombreSalaries;
-    if (résultat !== undefined && résultat !== null) {
+    if (résultat !== undefined && résultat !== "") {
       notePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-      setValue("notePourcentage", notePourcentage);
+      setValue("notePourcentage", notePourcentage, { shouldValidate: true });
     }
-    if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== null) {
+    if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== "") {
       noteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
         résultatEquivalentSalarié,
       );
-      setValue("noteNombreSalaries", noteNombreSalaries);
+      setValue("noteNombreSalaries", noteNombreSalaries, { shouldValidate: true });
     }
     if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
-      setValue("note", Math.max(notePourcentage, noteNombreSalaries));
+      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true });
     }
 
     // If it is a compensation, we set the note to the max value.
-    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
-
-    if (résultat === 0 && résultatEquivalentSalarié === 0) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "");
-    } else {
-      setPopulationFavorableDisabled(false);
-    }
-
-    // RHF recommends to register before using setValue. Seems to work without it though.
-    if (estCalculable === "non") {
-      unregister("notePourcentage");
-      unregister("noteNombreSalaries");
-      unregister("note");
-    } else if (estCalculable === "oui") {
-      register("notePourcentage");
-      register("noteNombreSalaries");
-      register("note");
-    }
+    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
   }, [
     estCalculable,
     estUnRattrapage,
@@ -178,19 +188,19 @@ export const AugmentationEtPromotionsForm = () => {
                   min={0}
                 />
 
-                <PopulationFavorable disabled={populationFavorableDisabled} />
+                {(résultat !== 0 || résultatEquivalentSalarié !== 0) && <PopulationFavorable />}
 
                 {notePourcentage !== undefined && (
-                  <IndicatorNote
-                    note={notePourcentage}
+                  <IndicatorNoteInput
+                    name="notePourcentage"
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus sur le résultat final en %"
                   />
                 )}
 
                 {noteNombreSalaries !== undefined && (
-                  <IndicatorNote
-                    note={noteNombreSalaries}
+                  <IndicatorNoteInput
+                    name="noteNombreSalaries"
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus sur le résultat final en nombre équivalent de salariés"
                     className={fr.cx("fr-mt-2w")}
@@ -199,8 +209,7 @@ export const AugmentationEtPromotionsForm = () => {
 
                 {note !== undefined && (
                   <>
-                    <IndicatorNote
-                      note={note}
+                    <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus à l'indicateur"
                       className={fr.cx("fr-mt-2w")}
