@@ -3,20 +3,22 @@
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0 } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -25,16 +27,27 @@ const stepName: FunnelKey = "remunerations-resultat";
 const formSchema = zodFr
   .object({
     note: z.number(),
-    populationFavorable: z.string(),
-    résultat: z
-      .number({ invalid_type_error: "Le résultat est obligatoire" })
-      .nonnegative("Le résultat ne peut pas être inférieur à 0"),
+    populationFavorable: z.string().optional(),
+    résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat !== 0 && !populationFavorable) {
+    if (résultat === "") {
+      // But it won't accept an empty string thanks to superRefine rule.
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: MANDATORY_RESULT,
+        path: ["résultat"],
+      });
+    } else if (résultat < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: NOT_BELOW_0,
+        path: ["résultat"],
+      });
+    } else if (résultat !== 0 && !populationFavorable) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: MANDATORY_FAVORABLE_POPULATION,
         path: ["populationFavorable"],
       });
     }
@@ -48,41 +61,26 @@ export const RemunerationResultatForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     formState: { isValid },
     setValue,
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
-  const note = watch("note");
 
   useEffect(() => {
-    if (résultat !== null) {
+    if (résultat !== "") {
       const note = new IndicateurUnComputer().computeNote(résultat);
       setValue("note", note);
-    }
-
-    if (résultat === 0 || résultat === null) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "", { shouldValidate: true });
-    } else {
-      setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
 
@@ -102,15 +100,11 @@ export const RemunerationResultatForm = () => {
         <ClientOnly fallback={<SkeletonForm fields={2} />}>
           <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-          <PopulationFavorable disabled={populationFavorableDisabled} />
+          {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
-          {résultat !== null && (
+          {résultat !== "" && (
             <>
-              <IndicatorNote
-                note={note}
-                max={indicatorNoteMax.remunerations}
-                text="Nombre de points obtenus à l'indicateur"
-              />
+              <IndicatorNoteInput max={indicatorNoteMax.remunerations} text="Nombre de points obtenus à l'indicateur" />
             </>
           )}
         </ClientOnly>

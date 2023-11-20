@@ -4,6 +4,7 @@ import assert, { AssertionError } from "assert";
 
 import { type Declaration } from "../Declaration";
 import { CompanyWorkforceRange } from "../valueObjects/declaration/CompanyWorkforceRange";
+import { FavorablePopulation } from "../valueObjects/declaration/indicators/FavorablePopulation";
 import { type NotComputableReason } from "../valueObjects/declaration/indicators/NotComputableReason";
 import { RemunerationsMode } from "../valueObjects/declaration/indicators/RemunerationsMode";
 
@@ -187,7 +188,7 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           }
         }
 
-        type IndicatorRule9 = { favorablePopulation?: string; result?: Percentage } | undefined;
+        type IndicatorRule9 = { favorablePopulation?: FavorablePopulation; result?: Percentage } | undefined;
 
         const indicatorsRule9 = [
           [declaration.remunerations, "rémunérations"],
@@ -199,8 +200,8 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
         for (const [indicator, name] of indicatorsRule9) {
           if (indicator?.result?.getValue() === 0) {
             assert(
-              indicator?.favorablePopulation === undefined,
-              `La population favorable doit être absente pour l'indicateur ${name} quand le résultat est 0.`,
+              indicator?.favorablePopulation?.getValue() === FavorablePopulation.Enum.EQUALITY,
+              `La population favorable doit être à égalité pour l'indicateur ${name} quand le résultat est 0.`,
             );
           }
         }
@@ -211,16 +212,17 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           declaration.salaryRaisesAndPromotions?.employeesCountResult?.getValue() === 0
         ) {
           assert(
-            declaration.salaryRaisesAndPromotions?.favorablePopulation === undefined,
-            "La population favorable doit être absente pour l'indicateur augmentations et promotions quand le résultat est 0 et que le résultat en nombre de salariés est aussi 0.",
+            declaration.salaryRaisesAndPromotions?.favorablePopulation?.getValue() ===
+              FavorablePopulation.Enum.EQUALITY,
+            "La population favorable doit être à égalité pour l'indicateur augmentations et promotions quand le résultat est 0 et que le résultat en nombre de salariés est aussi 0.",
           );
         }
 
         // Règle 11 - Population favorable pour l'indicateur hautes rémunérations
         if (declaration.highRemunerations?.result?.getValue() === 5) {
           assert(
-            declaration.highRemunerations?.favorablePopulation === undefined,
-            "La population favorable doit être absente pour l'indicateur hautes rémunérations quand le résultat est 5.",
+            declaration.highRemunerations?.favorablePopulation.getValue() === FavorablePopulation.Enum.EQUALITY,
+            "La population favorable doit être à égalité pour l'indicateur hautes rémunérations quand le résultat est 5.",
           );
         }
 

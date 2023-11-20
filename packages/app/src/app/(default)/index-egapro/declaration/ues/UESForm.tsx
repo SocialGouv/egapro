@@ -19,14 +19,12 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { INVALID_SIREN, MANDATORY_SIREN } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
 
 type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
-
-const MANDATORY_SIREN_ERROR = "Le Siren est requis";
-const INVALID_SIREN_ERROR = "Le Siren est composé de 9 chiffres sans espace";
 
 const formSchema = zodFr.object({
   nom: z.string().trim().nonempty(),
@@ -114,14 +112,14 @@ export const UESForm = () => {
       if (!entrepriseField.siren) {
         setError(`entreprises.${entrepriseFieldIndex}.siren`, {
           type: "custom",
-          message: MANDATORY_SIREN_ERROR,
+          message: MANDATORY_SIREN,
         });
       }
 
       if (!sirenSchema.safeParse(entrepriseField.siren).success) {
         setError(`entreprises.${entrepriseFieldIndex}.siren`, {
           type: "custom",
-          message: INVALID_SIREN_ERROR,
+          message: INVALID_SIREN,
         });
       }
     });
@@ -138,11 +136,11 @@ export const UESForm = () => {
     const parsedSiren = sirenSchema.safeParse(childSiren);
 
     if (!parsedSiren) {
-      return { ok: false, error: MANDATORY_SIREN_ERROR };
+      return { ok: false, error: MANDATORY_SIREN };
     }
 
     if (!parsedSiren.success) {
-      return { ok: false, error: INVALID_SIREN_ERROR };
+      return { ok: false, error: INVALID_SIREN };
     }
 
     // We fetch the latest data for the entreprise to fill the entreprise page.
@@ -269,7 +267,7 @@ export const UESForm = () => {
                                 if (!e.target.value) {
                                   setError(`entreprises.${index}.siren`, {
                                     type: "custom",
-                                    message: MANDATORY_SIREN_ERROR,
+                                    message: MANDATORY_SIREN,
                                   });
                                 }
                               },
