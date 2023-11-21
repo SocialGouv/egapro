@@ -204,7 +204,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         mesures={déclaration["resultat-global"]?.mesures}
       />
 
-      {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
+      {year > 2020 && déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <RecapCard
           title="Plan de relance"
           editLink={(edit || void 0) && funnelStaticConfig["publication"].url}
