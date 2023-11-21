@@ -12,7 +12,10 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
   const {
     register,
     formState: { errors },
+    trigger,
   } = useFormContext();
+
+  const fieldMethods = register("populationFavorable");
 
   return (
     <RadioButtons
@@ -23,14 +26,22 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
           label: FavorablePopulation.Label[FavorablePopulation.Enum.WOMEN],
           nativeInputProps: {
             value: FavorablePopulation.Enum.WOMEN,
-            ...register("populationFavorable"),
+            ...fieldMethods,
+            onChange: e => {
+              trigger(); // Rerun validation to set isValid.
+              fieldMethods.onChange(e); // Inform RHF to update its state.
+            },
           },
         },
         {
           label: FavorablePopulation.Label[FavorablePopulation.Enum.MEN],
           nativeInputProps: {
             value: FavorablePopulation.Enum.MEN,
-            ...register("populationFavorable"),
+            ...fieldMethods,
+            onChange: e => {
+              trigger(); // Rerun validation to set isValid.
+              fieldMethods.onChange(e); // Inform RHF to update its state.
+            },
           },
         },
       ]}
