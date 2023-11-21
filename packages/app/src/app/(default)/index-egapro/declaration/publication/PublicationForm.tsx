@@ -35,11 +35,7 @@ const formSchema = zodFr.object({
     .nonempty("L'adresse exacte de la page internet est obligatoire")
     .superRefine(zodValueObjectSuperRefine(Url, "L'adresse de la page internet est invalide"))
     .optional(),
-  modalités: z
-    .string()
-    .trim()
-    .nonempty("La description des modalités de communication des écarts est obligatoire")
-    .optional(),
+  modalités: z.string().trim().nonempty("La description des modalités de communication est obligatoire").optional(),
   planRelance: zodRadioInputSchema,
 });
 
