@@ -158,8 +158,12 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       count: zodFr
         .object({
-          total: zodFr.number().nonnegative(),
-          raised: zodFr.number().nonnegative().default(0),
+          total: zodFr.number().nonnegative().int({ message: "Le nombre de salariées doit être un nombre entier" }),
+          raised: zodFr
+            .number()
+            .nonnegative()
+            .int({ message: "Le nombre de salariées doit être un nombre entier" })
+            .default(0),
         })
         .refine(({ total, raised }) => raised <= total, {
           message:

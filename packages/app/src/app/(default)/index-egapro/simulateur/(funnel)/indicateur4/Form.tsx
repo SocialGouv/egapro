@@ -12,6 +12,7 @@ import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { percentFormat } from "@common/utils/number";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurQuatre } from "@components/aide-simulation/IndicateurQuatre";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
@@ -90,6 +91,7 @@ export const Indic4Form = () => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <ReactHookFormDebug />
         <FormLayout>
           <ClientBodyPortal>
             <infoModal.Component title="Information indicateur retour de congé maternité">
@@ -173,7 +175,7 @@ export const Indic4Form = () => {
                           ...register("count.total", {
                             setValueAs: value => (value === "" ? void 0 : +value),
                             deps: "count.raised",
-                            onChange: () => {
+                            onChange: e => {
                               if (count?.total === 0) {
                                 setValue("count.raised", 0);
                                 trigger("count.raised");
@@ -183,6 +185,14 @@ export const Indic4Form = () => {
                           type: "number",
                           min: 0,
                           step: 1,
+                          max: count?.total,
+                          onKeyDown: e => {
+                            if (e.key == "," || e.key == ".") e.preventDefault();
+                          },
+                          onPaste: e => {
+                            const paste = e.clipboardData.getData("text");
+                            if (paste.includes(",") || paste.includes(".")) e.preventDefault();
+                          },
                         }}
                       />
                     </GridCol>
