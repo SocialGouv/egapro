@@ -45,7 +45,7 @@ interface Indic2or3FormProps {
   indicateur: 2 | 3;
 }
 
-const schemaWithGlobalPourcentageVerification = (indicateur: number) =>
+const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps["indicateur"]) =>
   createSteps.indicateur3.superRefine((obj, ctx) => {
     const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
       (prev, current) => current.women + current.men + prev,
