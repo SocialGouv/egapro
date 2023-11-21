@@ -9,9 +9,11 @@ type Props = {
 };
 
 export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>) => {
-  const { register } = useFormContext();
+  const { register, trigger } = useFormContext();
 
   disabled = disabled || false;
+
+  const fieldMethods = register(name);
 
   return (
     <RadioButtons
@@ -22,7 +24,11 @@ export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>
           label: "Oui",
           nativeInputProps: {
             value: "oui",
-            ...register(name),
+            ...fieldMethods,
+            onChange: e => {
+              trigger(); // Rerun validation to set isValid.
+              fieldMethods.onChange(e); // Inform RHF to update its state.
+            },
           },
         },
         {
@@ -30,6 +36,10 @@ export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>
           nativeInputProps: {
             value: "non",
             ...register(name),
+            onChange: e => {
+              trigger(); // Rerun validation to set isValid.
+              fieldMethods.onChange(e); // Inform RHF to update its state.
+            },
           },
         },
       ]}
