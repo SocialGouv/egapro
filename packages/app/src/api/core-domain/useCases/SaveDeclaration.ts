@@ -288,8 +288,9 @@ export class SaveDeclaration implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
+      console.error(error);
+
       if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
-        console.error(error);
         throw error;
       }
 
