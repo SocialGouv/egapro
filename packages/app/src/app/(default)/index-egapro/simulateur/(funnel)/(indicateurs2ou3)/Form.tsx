@@ -45,19 +45,23 @@ interface Indic2or3FormProps {
   indicateur: 2 | 3;
 }
 
-const schemaWithGlobalPourcentageVerification = createSteps.indicateur3.superRefine((obj, ctx) => {
-  const calculateTotalPourcentage = (pourcentages: Partial<Record<CSP.Enum, { men: number; women: number }>>) =>
-    Object.values(pourcentages).reduce((prev, current) => current.women + current.men + prev, 0);
+const schemaWithGlobalPourcentageVerification = (indicateur: number) =>
+  createSteps.indicateur3.superRefine((obj, ctx) => {
+    const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
+      (prev, current) => current.women + current.men + prev,
+      0,
+    );
 
-  if (obj.calculable && !isEmpty(obj.pourcentages) && calculateTotalPourcentage(obj.pourcentages) === 0) {
-    const errorMessage = "Tous les champs ne peuvent être à 0 s'il y a eu des ";
-    ctx.addIssue({
-      code: zodFr.ZodIssueCode.custom,
-      message: errorMessage,
-      path: ["root.totalPourcentages"],
-    });
-  }
-});
+    if (obj.calculable && !isEmpty(obj.pourcentages) && totalPourcentages === 0) {
+      const errorMessage =
+        "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
+      ctx.addIssue({
+        code: zodFr.ZodIssueCode.custom,
+        message: errorMessage,
+        path: ["root.totalPourcentages"],
+      });
+    }
+  });
 
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
@@ -74,7 +78,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
 
   const methods = useForm<Indic2or3FormType>({
     mode: "onChange",
-    resolver: zodResolver(schemaWithGlobalPourcentageVerification),
+    resolver: zodResolver(schemaWithGlobalPourcentageVerification(indicateur)),
     defaultValues: funnel?.[`indicateur${indicateur}`],
   });
 
@@ -309,14 +313,12 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                       },
                     ]}
                   />
-                  {errors?.root?.totalPourcentages && (
+                  {errors?.root?.totalPourcentages?.message && (
                     <Alert
-                      className="fr-mb-2w"
+                      className="fr-mb-5w"
                       small
                       severity="warning"
-                      description={
-                        errors.root.totalPourcentages.message + (indicateur === 2 ? "augmentations" : "promotions")
-                      }
+                      description={errors.root.totalPourcentages.message}
                     />
                   )}
                   <Box mb="4w">
