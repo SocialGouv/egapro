@@ -86,9 +86,8 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
                 <>
                   {advantageText}
                   <br />
-                  L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le
-                  nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage
-                  adaptée a été mise en place.
+                  {computed.favorablePopulation !== "equality" &&
+                    "L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."}
                 </>
               }
             />
