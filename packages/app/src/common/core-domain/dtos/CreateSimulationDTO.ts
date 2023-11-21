@@ -9,7 +9,7 @@ import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators
 
 const positiveIntOrEmptyString = zodFr
   .literal("")
-  .or(zodFr.number().int("La valeur doit être un entier").nonnegative());
+  .or(zodFr.number().int("La valeur doit être un entier").nonnegative({ message: "Le nombre ne peut pas être inférieur à 0" }));
 
 const positivePercentageFloatOrEmptyString = zodFr
   .literal("")
