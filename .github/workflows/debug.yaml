@@ -1,0 +1,22 @@
+name: 👀 Debug
+on:
+  push:
+    branches:
+      - "**"
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    name: "Test e2e"
+    steps:
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          install: false
+          working-directory: ./packages/app
+          component: false
+          config: pageLoadTimeout=100000,baseUrl=https://egapro.travail.gouv.fr
