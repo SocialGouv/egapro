@@ -6,9 +6,10 @@ type Props = {
   disabled?: boolean;
   legend: string;
   name: string;
+  triggerValidation?: boolean;
 };
 
-export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>) => {
+export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false }: PropsWithChildren<Props>) => {
   const { register, trigger } = useFormContext();
 
   disabled = disabled || false;
@@ -26,7 +27,9 @@ export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>
             value: "oui",
             ...fieldMethods,
             onChange: e => {
-              trigger(); // Rerun validation to set isValid.
+              if (triggerValidation) {
+                trigger(); // Rerun validation to set isValid.
+              }
               fieldMethods.onChange(e); // Inform RHF to update its state.
             },
           },
@@ -37,7 +40,9 @@ export const RadioOuiNon = ({ legend, name, disabled }: PropsWithChildren<Props>
             value: "non",
             ...register(name),
             onChange: e => {
-              trigger(); // Rerun validation to set isValid.
+              if (triggerValidation) {
+                trigger(); // Rerun validation to set isValid.
+              }
               fieldMethods.onChange(e); // Inform RHF to update its state.
             },
           },
