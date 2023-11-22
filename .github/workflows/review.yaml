@@ -34,6 +34,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
+          install: false
           working-directory: ./packages/app
           component: false
           config: pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}
