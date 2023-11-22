@@ -207,7 +207,7 @@ export const AugmentationEtPromotionsForm = () => {
                   />
                 )}
 
-                {note !== undefined && (
+                {note !== undefined && isValid && (
                   <>
                     <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
