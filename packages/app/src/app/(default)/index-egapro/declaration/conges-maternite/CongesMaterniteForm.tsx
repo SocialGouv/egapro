@@ -130,7 +130,7 @@ export const CongesMaterniteForm = () => {
                       max={100}
                     />
 
-                    {note !== undefined && (
+                    {note !== undefined && isValid && (
                       <>
                         <IndicatorNoteInput
                           max={indicatorNoteMax[stepName]}

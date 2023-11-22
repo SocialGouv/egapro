@@ -10,7 +10,7 @@ import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
@@ -70,7 +70,6 @@ const stepName: FunnelKey = "hautes-remunerations";
 
 export const HautesRémunérationsForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
@@ -113,7 +112,7 @@ export const HautesRémunérationsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div ref={animationParent}>
+        <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
               <Input
@@ -140,7 +139,7 @@ export const HautesRémunérationsForm = () => {
 
               {résultat !== 5 && <PopulationFavorable legend="Sexe des salariés sur-représentés" />}
 
-              {note !== undefined && (
+              {note !== undefined && isValid && (
                 <>
                   <IndicatorNoteInput
                     max={indicatorNoteMax[stepName]}
@@ -153,7 +152,7 @@ export const HautesRémunérationsForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );
