@@ -385,7 +385,7 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
   }
 
   if (input.maternityLeaves.isComputable) {
-    maternityLeavesScore = indicateurQuatre.computeNote(input.maternityLeaves.result) || 0;
+    maternityLeavesScore = indicateurQuatre.computeNote(Math.floor(input.maternityLeaves.result / 100)) || 0;
     points += maternityLeavesScore;
     computablePoints += indicateurQuatre.getMaxNote();
   }
