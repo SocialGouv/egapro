@@ -10,6 +10,7 @@ import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
@@ -76,6 +77,7 @@ export const RemunerationResultatForm = () => {
   } = methods;
 
   const résultat = watch("résultat");
+  const note = watch("note");
 
   useEffect(() => {
     if (résultat !== "") {
@@ -97,19 +99,24 @@ export const RemunerationResultatForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ClientOnly fallback={<SkeletonForm fields={2} />}>
-          <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+        <ClientAnimate>
+          <ClientOnly fallback={<SkeletonForm fields={2} />}>
+            <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-          {résultat !== 0 && résultat !== null && <PopulationFavorable />}
+            {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
-          {résultat !== "" && (
-            <>
-              <IndicatorNoteInput max={indicatorNoteMax.remunerations} text="Nombre de points obtenus à l'indicateur" />
-            </>
-          )}
-        </ClientOnly>
+            {note !== undefined && isValid && (
+              <>
+                <IndicatorNoteInput
+                  max={indicatorNoteMax.remunerations}
+                  text="Nombre de points obtenus à l'indicateur"
+                />
+              </>
+            )}
+          </ClientOnly>
 
-        <BackNextButtons stepName={stepName} disabled={!isValid} />
+          <BackNextButtons stepName={stepName} disabled={!isValid} />
+        </ClientAnimate>
       </form>
     </FormProvider>
   );
