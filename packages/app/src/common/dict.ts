@@ -3,7 +3,11 @@ import { times, upperFirst } from "lodash";
 import { NAF, NAF_SECTIONS } from "./utils/naf";
 import { type SimpleObject, type UnknownMapping } from "./utils/types";
 
+// this is first year of egapro existance from where we can search declarations
 export const FIRST_YEAR = 2018 as const;
+
+// this is oldest year of possible index declaration
+export const FIRST_PUBLIC_YEAR = 2021 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
 
 // TODO: move to a better place 👼
@@ -20,9 +24,14 @@ export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
 // export const PUBLIC_CURRENT_YEAR = 2022 as const;
 
 export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
-export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
+export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_PUBLIC_YEAR + 1)
+  .fill(null)
+  .map((_, idx) => FIRST_PUBLIC_YEAR + idx);
+
+export const SEARCHABLE_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_YEAR + 1)
   .fill(null)
   .map((_, idx) => FIRST_YEAR + idx);
+
 export const PUBLIC_YEARS_DESC = PUBLIC_YEARS.reverse();
 export const YEARS_REPEQ = new Array(CURRENT_YEAR - FIRST_YEAR_REPEQ + 1)
   .fill(null)

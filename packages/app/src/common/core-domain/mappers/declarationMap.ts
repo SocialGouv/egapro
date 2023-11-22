@@ -17,6 +17,7 @@ import { omitByRecursively } from "@common/utils/object";
 import { type Any } from "@common/utils/types";
 import { isUndefined } from "lodash";
 
+import { toBinaryFavorablePopulation } from "../computers/DeclarationComputer";
 import { Declaration } from "../domain/Declaration";
 import { CSP } from "../domain/valueObjects/CSP";
 import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
@@ -177,8 +178,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         siren: obj.siren.getValue(),
       },
       "declaration-existante": {
-        status: "edition",
+        status: "consultation",
         date: dateObjectToDateISOString(obj.declaredAt),
+        modifiedAt: dateObjectToDateISOString(obj.modifiedAt),
       },
       declarant: {
         accordRgpd: true,
@@ -257,13 +259,13 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           estCalculable: "oui",
           note: salaryRaises.score?.getValue() ?? 0,
           résultat: salaryRaises.result?.getValue() ?? 0,
-          populationFavorable: salaryRaises.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
-          catégories: [
-            { nom: CSP.Enum.OUVRIERS, écarts: salaryRaises.categories[0]?.getValue() || null },
-            { nom: CSP.Enum.EMPLOYES, écarts: salaryRaises.categories[1]?.getValue() || null },
-            { nom: CSP.Enum.TECHNICIENS_AGENTS_MAITRISES, écarts: salaryRaises.categories[2]?.getValue() || null },
-            { nom: CSP.Enum.INGENIEURS_CADRES, écarts: salaryRaises.categories[3]?.getValue() || null },
-          ],
+          populationFavorable: toBinaryFavorablePopulation(salaryRaises.favorablePopulation!.getValue()),
+          catégories: {
+            [CSP.Enum.OUVRIERS]: salaryRaises.categories[0]?.getValue() || "",
+            [CSP.Enum.EMPLOYES]: salaryRaises.categories[1]?.getValue() || "",
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: salaryRaises.categories[2]?.getValue() || "",
+            [CSP.Enum.INGENIEURS_CADRES]: salaryRaises.categories[3]?.getValue() || "",
+          },
         };
       }
     }
@@ -280,13 +282,13 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           estCalculable: "oui",
           note: promotions.score?.getValue() ?? 0,
           résultat: promotions.result?.getValue() ?? 0,
-          populationFavorable: promotions.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
-          catégories: [
-            { nom: "ouv", écarts: promotions?.categories?.[0]?.getValue() ?? null },
-            { nom: "emp", écarts: promotions?.categories?.[1]?.getValue() ?? null },
-            { nom: "tam", écarts: promotions?.categories?.[2]?.getValue() ?? null },
-            { nom: "ic", écarts: promotions?.categories?.[3]?.getValue() ?? null },
-          ],
+          populationFavorable: toBinaryFavorablePopulation(promotions.favorablePopulation!.getValue()),
+          catégories: {
+            [CSP.Enum.OUVRIERS]: promotions.categories[0]?.getValue() || "",
+            [CSP.Enum.EMPLOYES]: promotions.categories[1]?.getValue() || "",
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: promotions.categories[2]?.getValue() || "",
+            [CSP.Enum.INGENIEURS_CADRES]: promotions.categories[3]?.getValue() || "",
+          },
         };
       }
     }
@@ -304,8 +306,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           note: salaryRaisesAndPromotions.score?.getValue() ?? 0,
           noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue() ?? 0,
           notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue() ?? 0,
-          populationFavorable:
-            salaryRaisesAndPromotions.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+          populationFavorable: toBinaryFavorablePopulation(salaryRaisesAndPromotions.favorablePopulation!.getValue()),
           résultat: salaryRaisesAndPromotions.result?.getValue() ?? 0,
           résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue() ?? 0,
         };
@@ -316,7 +317,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     if (remunerations) {
       dto["remunerations-resultat"] = {
         note: remunerations.score?.getValue() ?? 0,
-        populationFavorable: remunerations.favorablePopulation?.getValue() ?? FavorablePopulation.Enum.EQUALITY,
+        populationFavorable: toBinaryFavorablePopulation(remunerations.favorablePopulation!.getValue()),
         résultat: remunerations.result?.getValue() ?? 0,
       };
 
@@ -348,10 +349,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || "",
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || "",
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || "",
           },
         })),
       };
@@ -362,10 +363,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || null,
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || null,
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || null,
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || null,
+            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() || "",
+            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() || "",
+            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() || "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() || "",
           },
         })),
       };
@@ -377,37 +378,37 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           {
             nom: "ouv",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "emp",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "tam",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() || "",
             },
           },
           {
             nom: "ic",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || null,
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || null,
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || null,
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || null,
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() || "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() || "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() || "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() || "",
             },
           },
         ],
@@ -434,7 +435,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     if (highRemunerations) {
       dto["hautes-remunerations"] = {
         note: obj.highRemunerations!.score.getValue(),
-        populationFavorable: obj.highRemunerations!.favorablePopulation.getValue(),
+        populationFavorable: toBinaryFavorablePopulation(obj.highRemunerations!.favorablePopulation.getValue()),
         résultat: obj.highRemunerations!.result.getValue(),
       };
     }

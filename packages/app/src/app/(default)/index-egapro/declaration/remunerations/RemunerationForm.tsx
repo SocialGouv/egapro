@@ -195,6 +195,13 @@ export const RemunerationForm = () => {
                   legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
                   options={[
                     {
+                      label: "Par catégorie socio-professionnelle",
+                      nativeInputProps: {
+                        value: "csp",
+                        ...register("mode"),
+                      },
+                    },
+                    {
                       label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
                       nativeInputProps: {
                         value: "niveau_branche",
@@ -209,19 +216,21 @@ export const RemunerationForm = () => {
                         ...register("mode"),
                       },
                     },
-                    {
-                      label: "Par catégorie socio-professionnelle",
-                      nativeInputProps: {
-                        value: "csp",
-                        ...register("mode"),
-                      },
-                    },
                   ]}
                 />
 
                 {mode && mode !== "csp" && (
                   <>
-                    <RadioOuiNon legend="Un CSE a-t-il été mis en place ?" name="cse" disabled={!!formData.ues?.nom} />
+                    {formData.ues?.nom ? (
+                      // The cse field is implicitly yes for UES declaration.
+                      <input {...register(`cse`, { value: "oui" })} type="hidden" />
+                    ) : (
+                      <RadioOuiNon
+                        legend="Un CSE a-t-il été mis en place ?"
+                        name="cse"
+                        disabled={!!formData.ues?.nom}
+                      />
+                    )}
 
                     {cse === "oui" && (
                       <Input

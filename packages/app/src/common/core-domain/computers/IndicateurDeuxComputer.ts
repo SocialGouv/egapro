@@ -40,17 +40,21 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     return true;
   }
 
+  /**
+   * Calculate the weighted gap for a given group ("écart pondéré en pourcent").
+   *
+   */
   protected calculateWeightedGap(id: CSP.Enum): number {
-    let group: CountAndPercentages;
-    if (this.groupWeightedGaps.has(id)) {
-      group = this.groupWeightedGaps.get(id)!;
-    }
-
     if (!this.input) {
       throw new Error("percentages must be set before calling calculateWeightedGap");
     }
 
-    group = this.input[id] ?? {
+    // let group: CountAndPercentages;
+    // if (this.groupWeightedGaps.has(id)) {
+    //   group = this.groupWeightedGaps.get(id)!;
+    // }
+
+    const group = this.input[id] ?? {
       menCount: 0,
       men: 0,
       womenCount: 0,
@@ -64,13 +68,14 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     return (gap * groupCount) / totalGroupCount;
   }
 
-  protected getResult(weightedGap: number): IndicateurDeuxComputer.ComputedResult {
-    const result = super.getResult(weightedGap);
+  protected getNoteAndInfoFromResult(weightedGap: number): IndicateurDeuxComputer.ComputedResult {
+    const result = super.getNoteAndInfoFromResult(weightedGap);
 
     const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
-      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.genderAdvantage !== result.genderAdvantage;
+      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 &&
+      resultIndicateurUn.favorablePopulation !== result.favorablePopulation;
 
     return {
       ...result,

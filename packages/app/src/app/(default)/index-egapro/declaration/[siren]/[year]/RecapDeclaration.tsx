@@ -1,10 +1,12 @@
 import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { formatIsoToFr } from "@common/utils/date";
-import { BigNote, RecapCard, RecapCardCompany } from "@design-system";
+import { BigNote, Box, RecapCard, RecapCardCompany } from "@design-system";
 
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
@@ -40,13 +42,25 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
 
   return (
     <>
-      <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif</h1>
-
-      <p>
+      <h1 className={fr.cx("fr-mt-4w")}>Récapitulatif de l'Index égalité professionnelle</h1>
+      <Highlight>
         Déclaration de l'index de l'égalité professionnelle Femmes/Hommes pour l'année <strong>{year + 1}</strong> au
         titre des données <strong>{year}</strong>.
-      </p>
+      </Highlight>
       {/* {meta?.date && <RecapCard title="Date de déclaration" content={meta?.date && formatIsoToFr(meta?.date)} />}  */}
+
+      {déclaration["declaration-existante"].status == "consultation" &&
+        déclaration["declaration-existante"].date &&
+        déclaration["declaration-existante"].modifiedAt && (
+          <Box className="text-right" mb="2v">
+            <Badge severity="info" noIcon small>
+              Déclarée le {formatIsoToFr(déclaration["declaration-existante"].date)}
+            </Badge>{" "}
+            <Badge severity="info" noIcon small>
+              Modifiée le {formatIsoToFr(déclaration["declaration-existante"].modifiedAt)}
+            </Badge>
+          </Box>
+        )}
 
       <RecapCard
         title="Informations déclarant"
@@ -64,7 +78,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         }
       />
 
-      <RecapCardCompany company={company} title="Informations Entreprise / UES" />
+      <RecapCardCompany edit={edit} company={company} title="Informations Entreprise / UES" />
 
       {company.ues?.name && (
         <RecapCard
@@ -87,7 +101,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         content={
           <>
             <p>
-              Les indicateurs sont calculés au titre de l’année <strong>{year}</strong>.
+              Les indicateurs sont calculés au titre de l’année <strong>{year}</strong>
             </p>
 
             {déclaration["periode-reference"]?.périodeSuffisante === "oui" ? (
@@ -104,7 +118,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                   {déclaration["periode-reference"].effectifTotal && (
                     <>
                       <strong>{déclaration["periode-reference"].effectifTotal}</strong> salariés pris en compte pour le
-                      calcul des indicateurs sur la période de référence (en effectif physique).
+                      calcul des indicateurs sur la période de référence (en effectif physique)
                     </>
                   )}
                 </p>
@@ -112,7 +126,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
             ) : (
               <p>
                 Vous ne disposez pas d'une période de référence de 12 mois consécutifs, votre index et vos indicateurs
-                ne sont pas calculables.
+                ne sont pas calculables
               </p>
             )}
           </>
@@ -122,6 +136,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
       {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <>
           <RecapCardIndicator
+            déclaration={déclaration}
             name="remunerations"
             edit={edit}
             customContent={
@@ -136,9 +151,9 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                 {déclaration.remunerations?.estCalculable === "oui" && déclaration.remunerations?.mode !== "csp" && (
                   <>
                     {!déclaration.remunerations?.dateConsultationCSE ? (
-                      <p> Aucun CSE n’est mis en place.</p>
+                      <p> Aucun CSE n’est mis en place</p>
                     ) : (
-                      <p>Le CSE a été consulté le {formatIsoToFr(déclaration.remunerations.dateConsultationCSE)}.</p>
+                      <p>Le CSE a été consulté le {formatIsoToFr(déclaration.remunerations.dateConsultationCSE)}</p>
                     )}
                   </>
                 )}
@@ -147,19 +162,17 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
           />
 
           {déclaration["entreprise"]?.tranche === "50:250" ? (
-            <RecapCardIndicator edit={edit} name="augmentations-et-promotions" />
+            <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations-et-promotions" />
           ) : (
             <>
-              <RecapCardIndicator edit={edit} name="augmentations" />
-              <RecapCardIndicator edit={edit} name="promotions" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="augmentations" />
+              <RecapCardIndicator déclaration={déclaration} edit={edit} name="promotions" />
             </>
           )}
-          <RecapCardIndicator edit={edit} name="conges-maternite" />
-          <RecapCardIndicator edit={edit} name="hautes-remunerations" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="conges-maternite" />
+          <RecapCardIndicator déclaration={déclaration} edit={edit} name="hautes-remunerations" />
         </>
       )}
-
-      <hr />
 
       <RecapCard
         title="Niveau de résultat global"
@@ -191,7 +204,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
         mesures={déclaration["resultat-global"]?.mesures}
       />
 
-      {déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
+      {year > 2020 && déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <RecapCard
           title="Plan de relance"
           editLink={(edit || void 0) && funnelStaticConfig["publication"].url}

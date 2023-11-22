@@ -1,6 +1,7 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 
+import { AlertExistingDeclaration } from "../AlertExistingDeclaration";
 import { type FunnelKey } from "../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../DeclarationStepper";
 import { EntrepriseUESForm } from "./EntrepriseUESForm";
@@ -11,6 +12,7 @@ const stepName: FunnelKey = "entreprise";
 const InformationsEntreprisePage = () => {
   return (
     <>
+      <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
       <Alert

@@ -12,7 +12,6 @@ import {
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { revalidatePath } from "next/cache";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
   await assertServerSession({
@@ -50,8 +49,9 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 
   await receiptUseCase.execute(repEq);
 
-  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
-  revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
+  // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
+  // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {
@@ -73,7 +73,7 @@ export async function sendRepresentationEquilibreeReceipt(siren: string, year: n
     await useCase.execute({ siren, year, email: session.user.email });
   } catch (e: unknown) {
     if (e instanceof SendRepresentationEquilibreeReceiptError) {
-      console.log(e.appErrorStack());
+      console.error(e.appErrorStack());
       if (e.previousError) throw e.previousError;
     }
     throw e;

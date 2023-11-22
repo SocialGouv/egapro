@@ -15,6 +15,7 @@ import {
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { precisePercentFormat } from "@common/utils/number";
+import { zodFr } from "@common/utils/zod";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
@@ -22,6 +23,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isEmpty } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, type FieldErrors, FormProvider, useForm } from "react-hook-form";
@@ -43,6 +45,24 @@ interface Indic2or3FormProps {
   indicateur: 2 | 3;
 }
 
+const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps["indicateur"]) =>
+  createSteps.indicateur3.superRefine((obj, ctx) => {
+    const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
+      (prev, current) => current.women + current.men + prev,
+      0,
+    );
+
+    if (obj.calculable && !isEmpty(obj.pourcentages) && totalPourcentages === 0) {
+      const errorMessage =
+        "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
+      ctx.addIssue({
+        code: zodFr.ZodIssueCode.custom,
+        message: errorMessage,
+        path: ["root.totalPourcentages"],
+      });
+    }
+  });
+
 const useStore = storePicker(useSimuFunnelStore);
 export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const router = useRouter();
@@ -58,7 +78,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
 
   const methods = useForm<Indic2or3FormType>({
     mode: "onChange",
-    resolver: zodResolver(createSteps.indicateur3),
+    resolver: zodResolver(schemaWithGlobalPourcentageVerification(indicateur)),
     defaultValues: funnel?.[`indicateur${indicateur}`],
   });
 
@@ -242,12 +262,12 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.women?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.women`, {
-                                  setValueAs: value => (value === "" ? void 0 : +value),
-                                  deps: `pourcentages.${category}.men`,
+                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
+                                  deps: [`pourcentages.${category}.men`, "root.totalPourcentages"],
                                 }),
                                 title: categoryError?.women?.message,
                                 type: "number",
-                                min: 1,
+                                min: 0,
                                 max: 100,
                               },
                             },
@@ -257,12 +277,12 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.men?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.men`, {
-                                  setValueAs: value => (value === "" ? void 0 : +value),
-                                  deps: `pourcentages.${category}.women`,
+                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
+                                  deps: [`pourcentages.${category}.women`, "root.totalPourcentages"],
                                 }),
                                 title: categoryError?.men?.message,
                                 type: "number",
-                                min: 1,
+                                min: 0,
                                 max: 100,
                               },
                             },
@@ -293,7 +313,14 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                       },
                     ]}
                   />
-
+                  {errors?.root?.totalPourcentages?.message && (
+                    <Alert
+                      className="fr-mb-5w"
+                      small
+                      severity="warning"
+                      description={errors.root.totalPourcentages.message}
+                    />
+                  )}
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>

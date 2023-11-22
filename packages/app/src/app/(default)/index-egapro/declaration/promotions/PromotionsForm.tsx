@@ -5,36 +5,36 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
+import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodNumberOrNaNOrNull } from "@common/utils/form";
+import { zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import {
+  MANDATORY_FAVORABLE_POPULATION,
+  MANDATORY_RESULT,
+  NOT_ALL_EMPTY_CATEGORIES,
+  NOT_BELOW_0,
+} from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "promotions";
-
-const zodCategories = z.tuple([
-  z.object({ nom: z.literal("ouv"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("emp"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("tam"), écarts: zodNumberOrNaNOrNull }),
-  z.object({ nom: z.literal("ic"), écarts: zodNumberOrNaNOrNull }),
-]);
 
 const formSchema = zodFr
   .discriminatedUnion("estCalculable", [
@@ -45,25 +45,44 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       populationFavorable: z.string().optional(),
-      résultat: z.number({ invalid_type_error: "Le résultat est obligatoire" }).nonnegative(),
+      résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
       note: z.number(),
-      catégories: zodCategories,
+      catégories: z.object({
+        [CSP.Enum.OUVRIERS]: zodNumberOrEmptyString,
+        [CSP.Enum.EMPLOYES]: zodNumberOrEmptyString,
+        [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: zodNumberOrEmptyString,
+        [CSP.Enum.INGENIEURS_CADRES]: zodNumberOrEmptyString,
+      }),
     }),
   ])
   .superRefine((value, ctx) => {
     if (value.estCalculable === "oui") {
+      if (value.résultat === "") {
+        // But it won't accept an empty string thanks to superRefine rule.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: MANDATORY_RESULT,
+          path: ["résultat"],
+        });
+      } else if (value.résultat < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: NOT_BELOW_0,
+          path: ["résultat"],
+        });
+      }
       if (value.résultat !== 0 && !value.populationFavorable) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "La population envers laquelle l'écart est favorable est obligatoire",
+          message: MANDATORY_FAVORABLE_POPULATION,
           path: ["populationFavorable"],
         });
       }
 
-      if (!value.catégories.some(catégorie => catégorie.écarts !== null)) {
+      if (Object.values(value.catégories).every(val => val === "")) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Au moins une catégorie doit avoir un écart renseigné",
+          message: NOT_ALL_EMPTY_CATEGORIES,
           path: ["catégories"],
         });
       }
@@ -78,39 +97,23 @@ export const PromotionsForm = () => {
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
-    // shouldUnregister: true,
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
-    defaultValues: formData[stepName] || {
-      catégories: [
-        { nom: "ouv", écarts: null },
-        { nom: "emp", écarts: null },
-        { nom: "tam", écarts: null },
-        { nom: "ic", écarts: null },
-      ],
-    },
+    defaultValues: formData[stepName],
   });
 
   const {
-    register,
     handleSubmit,
     formState: { isValid, errors: _errors },
     setValue,
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
-  const catégories = watch("catégories");
   const populationFavorable = watch("populationFavorable");
 
   const estUnRattrapage =
@@ -119,34 +122,14 @@ export const PromotionsForm = () => {
     formData["remunerations-resultat"]?.populationFavorable !== populationFavorable;
 
   useEffect(() => {
-    if (estCalculable === "oui") {
-      if (!catégories?.length) {
-        setValue("catégories", [
-          { nom: "ouv", écarts: null },
-          { nom: "emp", écarts: null },
-          { nom: "tam", écarts: null },
-          { nom: "ic", écarts: null },
-        ]);
-      }
-    }
-  }, [setValue, catégories, estCalculable]);
-
-  useEffect(() => {
     if (résultat !== undefined) {
-      if (résultat !== null) {
+      if (résultat !== "") {
         const note = new IndicateurTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-        setValue("note", note);
+        setValue("note", note, { shouldValidate: true });
       }
 
       // If it is a compensation, we set the note to the max value.
-      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
-
-      if (résultat === 0 || résultat === null) {
-        setPopulationFavorableDisabled(true);
-        setValue("populationFavorable", "");
-      } else {
-        setPopulationFavorableDisabled(false);
-      }
+      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
     }
   }, [estUnRattrapage, résultat, setValue]);
 
@@ -179,7 +162,7 @@ export const PromotionsForm = () => {
             {estCalculable === "oui" && (
               <>
                 <p>
-                  <strong>Écarts de taux d’augmentations par CSP en %</strong>
+                  <strong>Écarts de taux de promotions par CSP en %</strong>
                 </p>
 
                 <p>
@@ -188,21 +171,26 @@ export const PromotionsForm = () => {
                   à la faveur des hommes et un écart négatif est à la faveur des femmes.
                 </p>
 
-                <PercentageInput<FormType> label="Ouvriers" name="catégories.0.écarts" />
-                <PercentageInput<FormType> label="Employés" name="catégories.1.écarts" />
-                <PercentageInput<FormType> label="Techniciens et agents de maîtrise" name="catégories.2.écarts" />
-                <PercentageInput<FormType> label="Ingénieurs et cadres" name="catégories.3.écarts" />
+                <PercentageInput<FormType> label="Ouvriers" name={`catégories.${CSP.Enum.OUVRIERS}`} />
+                <PercentageInput<FormType> label="Employés" name={`catégories.${CSP.Enum.EMPLOYES}`} />
+                <PercentageInput<FormType>
+                  label="Techniciens et agents de maîtrise"
+                  name={`catégories.${CSP.Enum.TECHNICIENS_AGENTS_MAITRISES}`}
+                />
+                <PercentageInput<FormType>
+                  label="Ingénieurs et cadres"
+                  name={`catégories.${CSP.Enum.INGENIEURS_CADRES}`}
+                />
 
                 <br />
 
                 <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-                <PopulationFavorable disabled={populationFavorableDisabled} />
+                {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
-                {note !== undefined && (
+                {note !== undefined && isValid && (
                   <>
-                    <IndicatorNote
-                      note={note}
+                    <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
                       text="Nombre de points obtenus à l'indicateur"
                     />

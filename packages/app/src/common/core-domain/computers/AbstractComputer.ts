@@ -2,11 +2,14 @@ import { type Any } from "@common/utils/types";
 import { last } from "lodash";
 
 export type ComputedResult<Additional extends object = object> = Additional & {
-  genderAdvantage: "equality" | "men" | "women";
+  favorablePopulation: "equality" | "men" | "women"; // TODO: use the FavorablePopulation.Enum instead.
   note: number;
   result: number;
   resultRaw: number;
 };
+
+export const resultWithSign = (result: ComputedResult): number =>
+  (result.favorablePopulation === "women" ? -1 : 1) * result.result;
 
 export abstract class AbstractComputer<Input = Any, AdditionalOutput extends object = object> {
   public abstract NOTE_TABLE: readonly number[];

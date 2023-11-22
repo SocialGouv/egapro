@@ -8,6 +8,7 @@ import { UnexpectedSessionError } from "@common/shared-domain";
 import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { CenteredContainer, DownloadCard, Grid, GridCol } from "@design-system";
+import { add, isAfter } from "date-fns";
 import { notFound } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
@@ -19,6 +20,11 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
   if (!siren || !user) return undefined;
   return user.staff || user.companies.some(company => company.siren === siren);
 };
+
+// Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
+// export const revalidate = 86400; // 24h
+export const dynamic = "force-dynamic";
+// export const revalidate = 86_400; // 24h
 
 const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
@@ -79,9 +85,21 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const canEdit = canEditSiren(session?.user)(siren);
 
   if (!declarationDate) return <SkeletonForm fields={8} />;
+  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   return (
     <>
+      <Alert
+        severity="info"
+        as="h2"
+        title="Cette déclaration a été validée et transmise."
+        description={
+          olderThanOneYear
+            ? "Elle n'est plus modifiable car le délai d'un an est écoulé"
+            : "Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle"
+        }
+        className={fr.cx("fr-mb-4w")}
+      />
       <RecapDeclaration déclaration={déclaration} />
 
       {canEdit && year && (

@@ -1,3 +1,4 @@
+import { AlertExistingDeclaration } from "../../AlertExistingDeclaration";
 import { type FunnelKey } from "../../declarationFunnelConfiguration";
 import { DeclarationStepper } from "../../DeclarationStepper";
 import { RemunerationGenericForm } from "../RemunerationGenericForm";
@@ -7,6 +8,7 @@ const stepName: FunnelKey = "remunerations-coefficient-branche";
 const RemunerationCoefficientBranchePage = () => {
   return (
     <>
+      <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
       <p>

@@ -5,37 +5,60 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
+import { zodNumberOrEmptyString } from "@common/utils/form";
+import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { IndicatorNote } from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { produce } from "immer";
 import { get } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import {
+  MANDATORY_FAVORABLE_POPULATION,
+  MANDATORY_RESULT,
+  NOT_BELOW_0,
+  NOT_HIGHER_THAN_N_RESULT,
+} from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = z
   .object({
-    populationFavorable: z.string(),
-    résultat: zodPositiveOrZeroIntegerSchema
-      .min(0, { message: "La valeur minimale est 0" })
-      .max(5, { message: "La valeur maximale est 5" }),
+    populationFavorable: z.string().optional(),
+    résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
     note: z.number().optional(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat !== 5 && !populationFavorable) {
+    if (résultat === "") {
+      // But it won't accept an empty string thanks to superRefine rule.
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La population envers laquelle l'écart est favorable est obligatoire",
+        message: MANDATORY_RESULT,
+        path: ["résultat"],
+      });
+    } else if (résultat < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: NOT_BELOW_0,
+        path: ["résultat"],
+      });
+    } else if (résultat > 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: NOT_HIGHER_THAN_N_RESULT(5),
+        path: ["résultat"],
+      });
+    } else if (résultat !== 5 && !populationFavorable) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: MANDATORY_FAVORABLE_POPULATION,
         path: ["populationFavorable"],
       });
     }
@@ -47,16 +70,14 @@ const stepName: FunnelKey = "hautes-remunerations";
 
 export const HautesRémunérationsForm = () => {
   const router = useRouter();
-  const [animationParent] = useAutoAnimate();
   const { formData, saveFormData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
 
-  const [populationFavorableDisabled, setPopulationFavorableDisabled] = useState<boolean>();
-
   const methods = useForm<FormType>({
-    resolver: zodResolver(formSchema),
     mode: "onChange",
+    shouldUnregister: true,
+    resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
 
@@ -68,24 +89,13 @@ export const HautesRémunérationsForm = () => {
     watch,
   } = methods;
 
-  useEffect(() => {
-    register("note");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const résultat = watch("résultat");
   const note = watch("note");
 
   useEffect(() => {
-    if (résultat !== undefined) {
+    if (résultat !== "") {
       const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note);
-    }
-    if (résultat === 5) {
-      setPopulationFavorableDisabled(true);
-      setValue("populationFavorable", "");
-    } else {
-      setPopulationFavorableDisabled(false);
     }
   }, [résultat, setValue]);
 
@@ -102,7 +112,7 @@ export const HautesRémunérationsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div ref={animationParent}>
+        <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
               <Input
@@ -113,12 +123,12 @@ export const HautesRémunérationsForm = () => {
                   max: 5,
                   step: 1,
                   ...register("résultat", {
-                    valueAsNumber: true,
-                    // setValueAs: (value: string) => {
-                    //   // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead.
-                    //   const num = Number(value);
-                    //   return isNaN(num) || value === "" ? null : num;
-                    // },
+                    setValueAs: (value: string | null) => {
+                      // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead for consistency.
+                      if (value === null) return null;
+                      const num = Number(value);
+                      return isNaN(num) || value === "" ? null : num;
+                    },
                   }),
                 }}
                 state={get(errors, "résultat") && "error"}
@@ -127,12 +137,11 @@ export const HautesRémunérationsForm = () => {
                 stateRelatedMessage={get(errors, "résultat")?.message || ""}
               />
 
-              <PopulationFavorable legend="Sexe des salariés sur-représentés" disabled={populationFavorableDisabled} />
+              {résultat !== 5 && <PopulationFavorable legend="Sexe des salariés sur-représentés" />}
 
-              {note !== undefined && (
+              {note !== undefined && isValid && (
                 <>
-                  <IndicatorNote
-                    note={note}
+                  <IndicatorNoteInput
                     max={indicatorNoteMax[stepName]}
                     text="Nombre de points obtenus à l'indicateur"
                     className={fr.cx("fr-mt-2w")}
@@ -143,7 +152,7 @@ export const HautesRémunérationsForm = () => {
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
-        </div>
+        </ClientAnimate>
       </form>
     </FormProvider>
   );

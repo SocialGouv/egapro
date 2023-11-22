@@ -24,12 +24,11 @@ import { useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { API_ERROR, OWNER_ERROR } from "../../../messages";
 import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "commencer";
-
-const API_ERROR = "Une erreur serveur est survenue. Veuillez recommencer plus tard";
 
 const baseSchema = zodFr.object({
   annéeIndicateurs: z.number(), // No control needed because this is a select with options we provide.
@@ -37,8 +36,6 @@ const baseSchema = zodFr.object({
 });
 
 type FormType = z.infer<typeof baseSchema>;
-
-const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
 
 const buildFormSchema = (isStaffMember: boolean, companies: Session["user"]["companies"] = []) =>
   isStaffMember
@@ -75,9 +72,14 @@ const prepareDataWithExistingDeclaration = async (
     };
   }
 
+  // Heuristic to check if the user is back on commencer page but on an declaration at least partially filled.
+  const workingOnSameDeclaration = formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren;
+  // Heuristic to check if the user come from simulator and has saved the data from it.
+  const isDeclarationFromSimulation = !formData.commencer?.siren && formData.entreprise?.tranche;
+
   // Otherwise, this is a creation, we use the data in session storage if the siren and year have not been changed.
   const baseFormData: DeclarationDTO =
-    formData.commencer?.annéeIndicateurs === year && formData.commencer?.siren === siren
+    workingOnSameDeclaration || isDeclarationFromSimulation
       ? formData
       : {
           "declaration-existante": {
@@ -174,7 +176,7 @@ export const CommencerForm = () => {
 
       setError("siren", {
         type: "manual",
-        message: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
+        message: error instanceof Error ? error.message : API_ERROR,
       });
     }
   };

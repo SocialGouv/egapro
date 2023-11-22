@@ -2,10 +2,17 @@ import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseServ
 import { COUNTY_TO_REGION, DEFAULT_COUNTRY_COG, inseeCodeToCounty } from "@common/dict";
 
 export const getAdditionalMeta = (company: Entreprise) => {
-  const countyCode = inseeCodeToCounty(company.firstMatchingEtablissement.codeCommuneEtablissement);
+  // postalCode and city may be undefined for foreign companies.
+  const countyCode = company.firstMatchingEtablissement.codeCommuneEtablissement
+    ? inseeCodeToCounty(company.firstMatchingEtablissement.codeCommuneEtablissement)
+    : undefined;
   const regionCode = countyCode ? COUNTY_TO_REGION[countyCode] : null;
-  const postalCode = company.firstMatchingEtablissement.codePostalEtablissement;
-  const address = company.firstMatchingEtablissement.address.split(postalCode)[0].trim();
+  const postalCode = company.firstMatchingEtablissement.codePostalEtablissement
+    ? company.firstMatchingEtablissement.codePostalEtablissement
+    : undefined;
+  const address = postalCode
+    ? company.firstMatchingEtablissement.address.split(postalCode)[0].trim()
+    : company.firstMatchingEtablissement.address;
   const countryCodeCOG = company.firstMatchingEtablissement.codePaysEtrangerEtablissement ?? DEFAULT_COUNTRY_COG;
 
   return {

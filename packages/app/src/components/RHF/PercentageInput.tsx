@@ -16,6 +16,15 @@ type FakeFormType = {
 };
 type FakeKey = keyof FakeFormType;
 
+/**
+ * PercentageInput is a wrapper around Input to handle percentage input.
+ *
+ * It stores the data as a number and "" for empty input.
+ * It is so because React doesn't advise to use null or undefined for input value.
+ *
+ * @param param0
+ * @returns
+ */
 export const PercentageInput = <FormType extends SimpleObject>({
   label,
   min,
@@ -40,20 +49,21 @@ export const PercentageInput = <FormType extends SimpleObject>({
           type: "number",
           min,
           max,
+          defaultValue: "",
           step: 0.1,
           ...register(name, {
             setValueAs: (value: string | null) => {
-              // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead for consistency.
-              if (value === null) return null;
-              const num = Number(value);
-              return isNaN(num) || value === "" ? null : num;
+              // We implement our own valueAsNumber because valueAsNumber returns null for empty input and we need "" for React to be safe.
+              if (value === null) return "";
+              const num = Number.parseFloat(value);
+              return isNaN(num) ? "" : num;
             },
             disabled,
           }),
           onBlur: e => {
             // Round number to 1 decimal.
-            const num = Number(e.target.value);
-            if (!isNaN(num) && e.target.value !== "") {
+            const num = Number.parseFloat(e.target.value);
+            if (!isNaN(num)) {
               setValue(name, Math.round(num * 10) / 10);
             }
           },

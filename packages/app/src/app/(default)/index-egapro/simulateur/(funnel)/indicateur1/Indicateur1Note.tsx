@@ -18,14 +18,14 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
   let advantageText = "";
   try {
     computed = computer.compute();
-    if (computed.genderAdvantage === "equality") {
+    if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à égalité";
     } else {
       advantageText = "Écart de rémunération ";
       if (computed.note === 40) {
         advantageText += "constaté ";
       }
-      advantageText += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
+      advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
     isNC = !computer.canCompute();
   } catch {

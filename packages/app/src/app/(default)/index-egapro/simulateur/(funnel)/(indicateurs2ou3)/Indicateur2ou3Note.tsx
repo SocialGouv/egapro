@@ -40,14 +40,14 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
   let advantageText = "";
   try {
     computed = computer.compute();
-    if (computed.genderAdvantage === "equality") {
+    if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à égalité";
     } else {
       advantageText = `${texts.advantageTextStart} `;
       if (computed.note === NOTE_MAX) {
         advantageText += "constaté ";
       }
-      advantageText += `en faveur des ${computed.genderAdvantage === "women" ? "femmes" : "hommes"}`;
+      advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
     isNC = !computer.canCompute();
   } catch {
@@ -76,7 +76,7 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
               legend="Arrondi à la première décimale"
             />
           )}
-          {computed?.remunerationsCompensated ? (
+          {isValid && computed?.remunerationsCompensated ? (
             <IndicatorNote
               noBorder={noBorder}
               note={NOTE_MAX}
@@ -86,9 +86,8 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
                 <>
                   {advantageText}
                   <br />
-                  L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le
-                  nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage
-                  adaptée a été mise en place.
+                  {computed.favorablePopulation !== "equality" &&
+                    "L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."}
                 </>
               }
             />

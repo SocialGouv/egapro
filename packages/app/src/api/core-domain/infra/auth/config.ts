@@ -163,6 +163,7 @@ export const authConfig: AuthOptions = {
     session({ session, token }) {
       session.user = token.user;
       session.user.email = token.email;
+      session.staff = {};
       if (token.user.staff || token.staff.impersonating) {
         session.staff = token.staff;
       }

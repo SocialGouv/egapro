@@ -13,19 +13,21 @@ import { AlertMessage } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { produce } from "immer";
+import { countBy } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useDebounce } from "use-debounce";
 import { z } from "zod";
 
+import { INVALID_SIREN, MANDATORY_SIREN } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
 
+type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
+
 const formSchema = zodFr.object({
-  nom: z.string().trim().nonempty("Le nom de l'UES est obligatoire"),
+  nom: z.string().trim().nonempty(),
   entreprises: z
     .array(
       z.object({
@@ -33,9 +35,7 @@ const formSchema = zodFr.object({
         siren: z.string(),
       }),
     )
-    .nonempty({
-      message: "Vous devez ajouter au moins une entreprise à l'UES",
-    }),
+    .nonempty(),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -45,19 +45,16 @@ const stepName: FunnelKey = "ues";
 export const UESForm = () => {
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();
-  const [valid, setValid] = useState<false | true | undefined>();
+  const [checkDuplicateRequest, setCheckDuplicateRequest] = useState(false);
 
   // assertOrRedirectCommencerStep(formData);
 
-  // We ensure to have at least one entreprise in the form, in order to force the user to fill the form and the validation to be triggered, even if the user delete the only entreprise in the form.
-  const defaultValues = produce(formData[stepName], draft => {
-    if (draft?.entreprises?.length === 0) {
-      draft.entreprises = [{ raisonSociale: "", siren: "" }];
-    }
-  });
+  const defaultValues = formData[stepName] ?? {
+    nom: "",
+    entreprises: [],
+  };
 
   const methods = useForm<FormType>({
-    mode: "onChange",
     // no resolver, because we handle the validation by ourselves.
     defaultValues,
   });
@@ -82,90 +79,119 @@ export const UESForm = () => {
     name: "entreprises",
   });
 
+  const siren = formData.commencer!.siren;
+  const year = formData.commencer!.annéeIndicateurs;
+
   const watchedCompanies = watch("entreprises");
   const watchedName = watch("nom");
 
-  const [stringifiedCompanies] = useDebounce(JSON.stringify(watchedCompanies), 500);
+  const controlledCompaniesFields = entreprisesFields.map((field, index) => {
+    return {
+      ...field,
+      ...watchedCompanies[index],
+    };
+  });
 
-  const onSubmit = async (data: FormType) => {
-    savePageData("ues", data);
+  const countEmptySiren = controlledCompaniesFields.filter(company => !company.siren).length;
+  const countEntreprisesErrors = Object.keys(errors.entreprises ?? {}).length;
 
-    router.push(funnelConfig(formData)[stepName].next().url);
-  };
+  const checkAllSirens = useCallback(() => {
+    clearErrors("entreprises");
 
-  // TODO: essayer avec un useEffect
-  // - memoize les fetch pour ne pas les refaire à chaque fois
+    const allSirens = [siren, ...controlledCompaniesFields.map(company => company.siren)];
+    const countOfSirenOccurences = countBy(allSirens);
 
-  // Effect to handle validation.
+    controlledCompaniesFields.forEach((entrepriseField, entrepriseFieldIndex) => {
+      if (countOfSirenOccurences[entrepriseField.siren] > 1) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: "Le Siren est déjà dans l'UES",
+        });
+      }
+
+      if (!entrepriseField.siren) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: MANDATORY_SIREN,
+        });
+      }
+
+      if (!sirenSchema.safeParse(entrepriseField.siren).success) {
+        setError(`entreprises.${entrepriseFieldIndex}.siren`, {
+          type: "custom",
+          message: INVALID_SIREN,
+        });
+      }
+    });
+  }, [clearErrors, controlledCompaniesFields, setError, siren]);
+
   useEffect(() => {
-    async function run() {
-      clearErrors("entreprises");
+    if (checkDuplicateRequest) {
+      checkAllSirens();
+      setCheckDuplicateRequest(false);
+    }
+  }, [checkDuplicateRequest, checkAllSirens, setCheckDuplicateRequest]);
 
-      let valid = true;
+  const validateOneSiren = async (childSiren: string): Promise<ValidateResult> => {
+    const parsedSiren = sirenSchema.safeParse(childSiren);
 
-      const siren = formData.commencer!.siren;
-      const year = formData.commencer!.annéeIndicateurs;
-
-      const companies = JSON.parse(stringifiedCompanies) as FormType["entreprises"];
-
-      if (!watchedName.trim()) {
-        setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
-        valid = false;
-      }
-
-      if (companies.length === 0) {
-        setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
-        valid = false;
-      }
-
-      const allSirens = [siren, ...companies.map(entreprise => entreprise.siren)];
-
-      for (let index = 0; index < companies.length; index++) {
-        const company = companies[index];
-        const parsedSiren = sirenSchema.safeParse(company.siren);
-
-        if (!parsedSiren.success) {
-          setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est invalide" });
-          valid = false;
-          continue;
-        }
-
-        const nbOccurences = allSirens.filter(siren => siren === company.siren).length;
-
-        if (nbOccurences > 1) {
-          setError(`entreprises.${index}.siren`, { type: "custom", message: "Le Siren est déjà dans l'UES" });
-          valid = false;
-          continue;
-        }
-
-        // We fetch the latest data for the entreprise to fill the entreprise page.
-        const result = await getCompany(company.siren);
-
-        if (result.ok) {
-          const company = result.data;
-
-          const isClosed = isCompanyClosed(company, year);
-
-          if (isClosed) {
-            setError(`entreprises.${index}.siren`, { type: "custom", message: CLOSED_COMPANY_ERROR });
-            valid = false;
-          } else {
-            setValue(`entreprises.${index}.raisonSociale`, company.simpleLabel);
-          }
-        } else {
-          setError(`entreprises.${index}.siren`, {
-            type: "custom",
-            message: "Impossible de récupérer les informations de l'entreprise",
-          });
-          valid = false;
-        }
-      }
-
-      setValid(valid);
+    if (!parsedSiren) {
+      return { ok: false, error: MANDATORY_SIREN };
     }
 
-    run();
-  }, [clearErrors, formData.commencer, setError, setValue, stringifiedCompanies, watchedName]); // We need to stringify the array to trigger the useEffect when the array changes.
+    if (!parsedSiren.success) {
+      return { ok: false, error: INVALID_SIREN };
+    }
+
+    // We fetch the latest data for the entreprise to fill the entreprise page.
+    const result = await getCompany(childSiren);
+
+    if (result.ok) {
+      const company = result.data;
+
+      const isClosed = isCompanyClosed(company, year);
+
+      if (isClosed) {
+        return { ok: false, error: CLOSED_COMPANY_ERROR };
+      } else {
+        return { ok: true, data: company.simpleLabel };
+      }
+    } else {
+      return { ok: false, error: "Impossible de récupérer les informations de l'entreprise" };
+    }
+  };
+
+  const onChangeChildSiren = async (childSiren: string, index: number) => {
+    clearErrors(`entreprises.${index}.siren`);
+
+    const result = await validateOneSiren(childSiren);
+
+    if (!result.ok) {
+      setError(`entreprises.${index}.siren`, { type: "custom", message: result.error });
+    } else {
+      setValue(`entreprises.${index}.raisonSociale`, result?.data || "");
+      // Run check duplicate routine in case some sirens are now duplicates.
+      setCheckDuplicateRequest(true);
+    }
+  };
+
+  const onSubmit = async (data: FormType) => {
+    let ok = true;
+    if (!watchedName.trim()) {
+      setError("nom", { type: "custom", message: "Le nom de l'UES est obligatoire" });
+      ok = false;
+    }
+
+    if (watchedCompanies.length === 0) {
+      setError("entreprises", { type: "custom", message: "Vous devez ajouter au moins une entreprise à l'UES" });
+      ok = false;
+    }
+
+    if (!ok) return;
+
+    savePageData("ues", data);
+    router.push(funnelConfig(formData)[stepName].next().url);
+  };
 
   return (
     <FormProvider {...methods}>
@@ -219,19 +245,37 @@ export const UESForm = () => {
                 {entreprisesFields.map((entrepriseField, index) => (
                   <tr key={entrepriseField.id}>
                     <td>
-                      <Input
-                        label="Siren entreprise"
-                        hideLabel
-                        classes={{
-                          message: fr.cx("fr-hidden"),
-                        }}
-                        nativeInputProps={{
-                          ...register(`entreprises.${index}.siren`),
-                          maxLength: 9,
-                          minLength: 9,
-                        }}
-                        state={errors.entreprises?.[index]?.siren && "error"}
-                      />
+                      {(() => {
+                        const registerMethods = register(`entreprises.${index}.siren`);
+                        return (
+                          <Input
+                            label="Siren entreprise"
+                            hideLabel
+                            classes={{
+                              message: fr.cx("fr-hidden"),
+                            }}
+                            nativeInputProps={{
+                              ...register(`entreprises.${index}.siren`),
+                              maxLength: 9,
+                              minLength: 9,
+                              onChange: e => {
+                                registerMethods.onChange(e);
+                                onChangeChildSiren(e.target.value, index);
+                              },
+                              onBlur: e => {
+                                registerMethods.onBlur(e);
+                                if (!e.target.value) {
+                                  setError(`entreprises.${index}.siren`, {
+                                    type: "custom",
+                                    message: MANDATORY_SIREN,
+                                  });
+                                }
+                              },
+                            }}
+                            state={errors.entreprises?.[index]?.siren && "error"}
+                          />
+                        );
+                      })()}
                     </td>
                     <td>
                       {errors.entreprises?.[index]?.siren ? (
@@ -257,7 +301,10 @@ export const UESForm = () => {
                         type="button"
                         iconId="fr-icon-delete-bin-line"
                         priority="tertiary no outline"
-                        onClick={() => remove(index)}
+                        onClick={() => {
+                          remove(index);
+                          setCheckDuplicateRequest(true);
+                        }}
                       />
                     </td>
                   </tr>
@@ -272,8 +319,8 @@ export const UESForm = () => {
             type="button"
             onClick={() => {
               append({ siren: "", raisonSociale: "" });
-              setValid(undefined);
             }}
+            disabled={countEmptySiren >= 1}
             iconId="fr-icon-add-line"
           >
             Ajouter une entreprise
@@ -289,7 +336,7 @@ export const UESForm = () => {
           </ClientOnly>
         </div>
 
-        <BackNextButtons stepName={stepName} disabled={!valid} />
+        <BackNextButtons stepName={stepName} disabled={countEntreprisesErrors >= 1} />
       </form>
     </FormProvider>
   );

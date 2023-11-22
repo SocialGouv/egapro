@@ -10,9 +10,9 @@ import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
 import { DeclarationSpecificationError } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { ValidationError } from "@common/shared-domain";
 import { type ServerActionResponse } from "@common/utils/next";
 import assert from "assert";
-import { revalidatePath } from "next/cache";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -62,16 +62,15 @@ export async function saveDeclaration(
       email,
     });
 
-    revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
-    revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+    // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
+    // revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
+    // revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
 
     return {
       ok: true,
     };
   } catch (error: unknown) {
-    console.error(error);
-
-    if (error instanceof DeclarationSpecificationError) {
+    if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
       return {
         ok: false,
         error: error.message ?? error.previousError,
