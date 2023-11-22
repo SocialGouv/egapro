@@ -141,18 +141,17 @@ export const DeclarationsList = ({ data, orderBy, orderDirection, limit: current
             },
           ]}
         />
+
         <ButtonsGroup
           inlineLayoutWhen="always"
           buttonsSize="small"
           alignment="right"
           buttons={[
             {
-              children: "Limit",
+              children: "Éléments par page",
               disabled: true,
               priority: "tertiary no outline",
               className: "!cursor-default",
-              iconId: "fr-icon-arrow-right-line",
-              iconPosition: "right",
             },
             ...limits.map<ButtonProps>(limit => ({
               children: limit,

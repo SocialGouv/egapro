@@ -26,7 +26,7 @@ export type AdminDeclarationDTO = {
 
 export const columnMap = {
   type: "Type",
-  siren: "SIREN",
+  siren: "Siren",
   year: "Année",
   name: "Raison sociale",
   createdAt: "Date déclaration",
