@@ -27,4 +27,4 @@ jobs:
         with:
           install: false
           working-directory: ./packages/app
-          config: pageLoadTimeout=100000,baseUrl=https://egapro.travail.gouv.fr
+          config: pageLoadTimeout=100000,baseUrl=https://egapro-persist-migration-fronts-15ita1p5.dev.fabrique.social.gouv.fr
