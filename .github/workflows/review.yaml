@@ -45,4 +45,5 @@ jobs:
         with:
           install: false
           working-directory: ./packages/app
-          config: pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}
+          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          wait-on: "${{ env.SITE_URL }}"
