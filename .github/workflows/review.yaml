@@ -24,6 +24,15 @@ jobs:
     needs: [socialgouv]
     name: "Test e2e"
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        uses: cypress-io/github-action@v5
+        with:
+          # just perform install
+          runTests: false
       - name: Env
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
@@ -36,5 +45,4 @@ jobs:
         with:
           install: false
           working-directory: ./packages/app
-          component: false
           config: pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}
