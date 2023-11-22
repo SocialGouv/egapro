@@ -60,7 +60,7 @@ const notFilled = (catégories: FormType["catégories"]) =>
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-type NumberOrEmptyString = number | "";
+type NumberOrEmptyString = z.infer<typeof zodNumberOrEmptyString>;
 
 const defaultTranch = {
   ":29": "" as NumberOrEmptyString,
@@ -113,7 +113,7 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
     append,
     remove,
   } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
+    control,
     name: "catégories",
     rules: {
       minLength: 1,
@@ -136,63 +136,64 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
             <div className={fr.cx("fr-mb-8w")}></div>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-              {catégories.map((catégorie, index) => (
-                <div key={catégorie.id}>
-                  <div className={cx(fr.cx("fr-col"), style["category-title"])}>
-                    {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
-                    <span className={fr.cx("fr-text--bold")}>
-                      {mode === "csp"
-                        ? new CSP(catégorie.nom as CSP.Enum).getLabel()
-                        : `Niveau ou coefficient ${index + 1}`}
-                    </span>
-                    {mode !== "csp" && (
-                      <Button
-                        type="button"
-                        priority="tertiary no outline"
-                        size="small"
-                        iconId="fr-icon-delete-line"
-                        onClick={() => remove(index)}
-                        disabled={catégories.length <= 1}
-                      >
-                        Supprimer
-                      </Button>
-                    )}
+              <ClientAnimate>
+                {catégories.map((catégorie, index) => (
+                  <div key={catégorie.id}>
+                    <div className={cx(fr.cx("fr-col"), style["category-title"])}>
+                      {/* Name of catégorie doesn't matter when mode is coef, so don't bother with inconsistent name between storage & UI */}
+                      <span className={fr.cx("fr-text--bold")}>
+                        {mode === "csp"
+                          ? new CSP(catégorie.nom as CSP.Enum).getLabel()
+                          : `Niveau ou coefficient ${index + 1}`}
+                      </span>
+                      {mode !== "csp" && (
+                        <Button
+                          type="button"
+                          priority="tertiary no outline"
+                          size="small"
+                          iconId="fr-icon-delete-line"
+                          onClick={() => remove(index)}
+                        >
+                          Supprimer
+                        </Button>
+                      )}
+                    </div>
+                    <div className={fr.cx("fr-table", "fr-table--no-caption")}>
+                      <table>
+                        <caption>Tableau des rémunérations</caption>
+                        <thead>
+                          <tr>
+                            <th>Moins de 30 ans</th>
+                            <th>De 30 à 39 ans</th>
+                            <th>De 40 à 49 ans</th>
+                            <th>50 ans et plus</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            {[
+                              AgeRange.Enum.LESS_THAN_30,
+                              AgeRange.Enum.FROM_30_TO_39,
+                              AgeRange.Enum.FROM_40_TO_49,
+                              AgeRange.Enum.FROM_50_TO_MORE,
+                            ].map(key => (
+                              <td key={key}>
+                                <input
+                                  {...register(`catégories.${index}.nom`, {
+                                    value: getValues(`catégories.${index}.nom`),
+                                  })}
+                                  type="hidden"
+                                />
+                                <PercentageInput<FormType> name={`catégories.${index}.tranches.${key}`} />
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <div className={fr.cx("fr-table", "fr-table--no-caption")}>
-                    <table>
-                      <caption>Tableau des rémunérations</caption>
-                      <thead>
-                        <tr>
-                          <th>Moins de 30 ans</th>
-                          <th>De 30 à 39 ans</th>
-                          <th>De 40 à 49 ans</th>
-                          <th>50 ans et plus</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          {[
-                            AgeRange.Enum.LESS_THAN_30,
-                            AgeRange.Enum.FROM_30_TO_39,
-                            AgeRange.Enum.FROM_40_TO_49,
-                            AgeRange.Enum.FROM_50_TO_MORE,
-                          ].map(key => (
-                            <td key={key}>
-                              <input
-                                {...register(`catégories.${index}.nom`, {
-                                  value: getValues(`catégories.${index}.nom`),
-                                })}
-                                type="hidden"
-                              />
-                              <PercentageInput<FormType> name={`catégories.${index}.tranches.${key}`} />
-                            </td>
-                          ))}
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </ClientAnimate>
             </div>
 
             {mode !== "csp" && (
