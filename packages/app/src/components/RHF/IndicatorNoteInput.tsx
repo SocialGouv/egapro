@@ -26,6 +26,9 @@ type SmallIndicatorNoteProps = BaseIndicatorNoteProps & {
 
 type IndicatorNoteProps = LargeIndicatorNoteProps | SmallIndicatorNoteProps;
 
+/**
+ * Registered component for `note` field.
+ */
 export const IndicatorNoteInput = ({
   name = "note",
   noBorder,

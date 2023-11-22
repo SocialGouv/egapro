@@ -188,7 +188,7 @@ export const PromotionsForm = () => {
 
                 {résultat !== 0 && résultat !== null && <PopulationFavorable />}
 
-                {note !== undefined && (
+                {note !== undefined && isValid && (
                   <>
                     <IndicatorNoteInput
                       max={indicatorNoteMax[stepName]}
