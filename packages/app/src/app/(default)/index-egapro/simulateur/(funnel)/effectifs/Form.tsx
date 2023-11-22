@@ -92,6 +92,8 @@ export const EffectifsForm = () => {
     defaultValues: funnel?.effectifs,
   });
 
+  console.log(errors);
+
   const { total, totalMen, totalWomen } = miniComputer(watch("csp"));
 
   const onSubmit = (form: EffectifsFormType) => {
@@ -277,7 +279,7 @@ export const EffectifsForm = () => {
                   label: `${category}, ${ageRange}, femmes`,
                   nativeInputProps: {
                     ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
-                      setValueAs: (value: string) => parseInt(value, 10) || 0,
+                      setValueAs: value => (value === "" ? void 0 : +value),
                     }),
                     type: "number",
                     min: 0,
@@ -289,7 +291,7 @@ export const EffectifsForm = () => {
                   label: `${category}, ${ageRange}, hommes`,
                   nativeInputProps: {
                     ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
-                      setValueAs: (value: string) => parseInt(value, 10) || 0,
+                      setValueAs: value => (value === "" ? void 0 : +value),
                     }),
                     type: "number",
                     min: 0,

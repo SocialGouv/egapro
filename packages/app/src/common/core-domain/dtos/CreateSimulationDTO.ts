@@ -9,6 +9,7 @@ import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators
 
 const nonnegativeNanSafe = zodFr
   .number()
+  .int("La valeur doit être un entier")
   .nonnegative()
   .default(0)
   .transform(v => (isNaN(v) ? 0 : v));
@@ -141,8 +142,8 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       raisedCount: zodFr
         .object({
-          women: zodFr.number().nonnegative(),
-          men: zodFr.number().nonnegative(),
+          women: zodFr.number().nonnegative().int("La valeur doit être un entier"),
+          men: zodFr.number().nonnegative().int("La valeur doit être un entier"),
         })
         .refine(({ women, men }) => !(!women && !men), {
           message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
@@ -158,12 +159,8 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       count: zodFr
         .object({
-          total: zodFr.number().nonnegative().int({ message: "Le nombre de salariées doit être un nombre entier" }),
-          raised: zodFr
-            .number()
-            .nonnegative()
-            .int({ message: "Le nombre de salariées doit être un nombre entier" })
-            .default(0),
+          total: zodFr.number().nonnegative().int({ message: "La valeur doit être un entier" }),
+          raised: zodFr.number().nonnegative().int({ message: "La valeur doit être un entier" }).default(0),
         })
         .refine(({ total, raised }) => raised <= total, {
           message:
