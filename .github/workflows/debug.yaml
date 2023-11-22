@@ -13,10 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     name: "Test e2e"
     steps:
+      - uses: actions/checkout
+      - name: Install dependencies
+        uses: cypress-io/github-action@v5
+        with:
+          # just perform install
+          runTests: false
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           install: false
           working-directory: ./packages/app
-          component: false
           config: pageLoadTimeout=100000,baseUrl=https://egapro.travail.gouv.fr
