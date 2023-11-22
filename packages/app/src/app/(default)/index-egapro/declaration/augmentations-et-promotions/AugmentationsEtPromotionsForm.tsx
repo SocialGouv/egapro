@@ -207,25 +207,24 @@ export const AugmentationEtPromotionsForm = () => {
                   />
                 )}
 
-                {note !== undefined &&
-                  isValid && (
-                    <>
-                      <IndicatorNoteInput
-                        max={indicatorNoteMax[stepName]}
-                        text="Nombre de points obtenus à l'indicateur"
+                {note !== undefined && isValid && (
+                  <>
+                    <IndicatorNoteInput
+                      max={indicatorNoteMax[stepName]}
+                      text="Nombre de points obtenus à l'indicateur"
+                      className={fr.cx("fr-mt-2w")}
+                    />
+
+                    {estUnRattrapage && (
+                      <Alert
+                        severity="info"
+                        title=""
+                        description="L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."
                         className={fr.cx("fr-mt-2w")}
                       />
-
-                      {estUnRattrapage && (
-                        <Alert
-                          severity="info"
-                          title=""
-                          description="L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."
-                          className={fr.cx("fr-mt-2w")}
-                        />
-                      )}
-                    </>,
-                  )}
+                    )}
+                  </>
+                )}
               </>
             )}
           </ClientOnly>
