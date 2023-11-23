@@ -72,7 +72,7 @@ export const Indic2and3Form = () => {
     if (data.calculable && funnel) {
       const [totalCspWomen, totalCspMen] = getTotalsCsp(funnel as CreateSimulationDTO);
 
-      if (data.raisedCount.women > totalCspWomen) {
+      if (data.raisedCount.women !== "" && data.raisedCount.women > totalCspWomen) {
         ctx.addIssue({
           code: z.ZodIssueCode.too_big,
           inclusive: true,
@@ -83,7 +83,7 @@ export const Indic2and3Form = () => {
         });
       }
 
-      if (data.raisedCount.men > totalCspMen) {
+      if (data.raisedCount.men != "" && data.raisedCount.men > totalCspMen) {
         ctx.addIssue({
           code: z.ZodIssueCode.too_big,
           inclusive: true,
@@ -245,11 +245,11 @@ export const Indic2and3Form = () => {
                             stateRelatedMessage={whenCalculableErrors.raisedCount?.women?.message}
                             nativeInputProps={{
                               ...register("raisedCount.women", {
-                                setValueAs: value => (value === "" ? void 0 : +value),
+                                setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
                                 deps: "raisedCount.men",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.men > 0 ? 0 : 1,
+                              min: raisedCount && raisedCount.men !== "" && raisedCount.men > 0 ? 0 : 1,
                               max: totalCspWomen,
                             }}
                           />
@@ -262,11 +262,11 @@ export const Indic2and3Form = () => {
                             stateRelatedMessage={whenCalculableErrors.raisedCount?.men?.message}
                             nativeInputProps={{
                               ...register("raisedCount.men", {
-                                setValueAs: value => (value === "" ? void 0 : +value),
+                                setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
                                 deps: "raisedCount.women",
                               }),
                               type: "number",
-                              min: raisedCount && raisedCount.women > 0 ? 0 : 1,
+                              min: raisedCount && raisedCount.women !== "" && raisedCount.women > 0 ? 0 : 1,
                               max: totalCspMen,
                             }}
                           />
