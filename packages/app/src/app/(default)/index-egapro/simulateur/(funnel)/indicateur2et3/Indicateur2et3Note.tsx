@@ -43,15 +43,15 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
     // noop
   }
 
-  const raisedCount = computer.getInput();
+  const isAllValuesZero = computer.getInput()?.men === 0 && computer.getInput()?.women === 0;
 
   return (
     <ClientAnimate>
-      {raisedCount?.men === 0 && raisedCount.women === 0 && (
+      {isAllValuesZero && (
         <Alert
           className={fr.cx("fr-mb-4w")}
           small
-          severity="info"
+          severity="warning"
           description="Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations."
         />
       )}
@@ -123,9 +123,8 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
                 <>
                   {advantageText}
                   <br />
-                  L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le
-                  nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage
-                  adaptée a été mise en place.
+                  {computed.favorablePopulation !== "equality" &&
+                    "L’écart constaté étant en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), le nombre de points maximum à l’indicateur est attribué, considérant qu'une politique de rattrapage adaptée a été mise en place."}
                 </>
               }
             />
@@ -141,7 +140,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
               )}
               <IndicatorNote
                 noBorder={noBorder}
-                note={computed?.note ?? "-"}
+                note={computed?.note && isValid ? computed.note : "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
