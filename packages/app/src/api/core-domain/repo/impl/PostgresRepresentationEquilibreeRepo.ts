@@ -43,8 +43,8 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     }
   }
 
-  public delete(_id: RepresentationEquilibreePK): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async delete([siren, year]: RepresentationEquilibreePK): Promise<void> {
+    await this.sql`delete from ${this.table} where siren=${siren.getValue()} and year=${year.getValue()}`;
   }
   public exists(_id: RepresentationEquilibreePK): Promise<boolean> {
     throw new Error("Method not implemented.");

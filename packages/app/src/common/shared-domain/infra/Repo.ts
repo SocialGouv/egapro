@@ -9,6 +9,10 @@ export interface SearchDefaultCriteria {
   limit: number;
   offset: number;
 }
+
+/**
+ * @deprecated use SearchDTORepo instead
+ */
 export interface SearchRepo<
   T extends Entity<Any, Any> = Any,
   TSearchEntity extends Entity<Any, Any> = Any,
@@ -17,6 +21,20 @@ export interface SearchRepo<
   count(criteria: Criteria): Promise<number>;
   index?(item: T): Promise<void>;
   search(criteria: Criteria): Promise<TSearchEntity[]>;
+}
+
+/**
+ * Search without domain validation
+ */
+// TODO: remove this interface when all repos are migrated to SearchDTORepo
+export interface SearchDTORepo<
+  Criteria extends SearchDefaultCriteria = SearchDefaultCriteria,
+  Result = Any,
+  T extends Entity<Any, Any> = Any,
+> {
+  count(criteria: Criteria): Promise<number>;
+  index?(item: T): Promise<void>;
+  search(criteria: Criteria): Promise<Result[]>;
 }
 
 export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo<T> {

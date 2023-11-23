@@ -150,16 +150,16 @@ function representationEquilibreeDataToDTO(data: RepresentationEquilibree): Repr
           notComputableReasonExecutives: data.indicator.notComputableReasonExecutives.getValue(),
         }
       : {
-          executiveMenPercent: data.indicator.executiveMenPercent!.getValue()!,
-          executiveWomenPercent: data.indicator.executiveWomenPercent!.getValue()!,
+          executiveMenPercent: data.indicator.executiveMenPercent?.getValue() ?? 0,
+          executiveWomenPercent: data.indicator.executiveWomenPercent?.getValue() ?? 0,
         }),
     ...(data.indicator.notComputableReasonMembers
       ? {
           notComputableReasonMembers: data.indicator.notComputableReasonMembers.getValue(),
         }
       : {
-          memberMenPercent: data.indicator.memberMenPercent!.getValue()!,
-          memberWomenPercent: data.indicator.memberWomenPercent!.getValue()!,
+          memberMenPercent: data.indicator.memberMenPercent?.getValue() ?? 0,
+          memberWomenPercent: data.indicator.memberWomenPercent?.getValue() ?? 0,
         }),
     ...(data.publication
       ? {

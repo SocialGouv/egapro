@@ -1,9 +1,9 @@
 import { type PropsWithChildren } from "react";
 
+import { Navigation } from "../(default)/Navigation";
 import { Footer } from "../Footer";
 import { Header } from "../Header";
 import styles from "./admin.module.css";
-import { Navigation } from "./Navigation";
 
 const defaultTitle = "Egapro Backoffice";
 const description = "Console d'administration Egapro";
