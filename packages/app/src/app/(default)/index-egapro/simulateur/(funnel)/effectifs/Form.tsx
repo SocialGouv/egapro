@@ -25,8 +25,11 @@ import { NAVIGATION, simulateurPath } from "../navigation";
 import { useSimuFunnelStore } from "../useSimuFunnelStore";
 
 type EffectifsFormType = z.infer<typeof createSteps.effectifs>;
+
 const effectifsNav = NAVIGATION.effectifs;
+
 let miniComputerCache: { total: number; totalMen: number; totalWomen: number };
+
 const lastCspMiniComputer = {} as EffectifsFormType["csp"];
 
 const miniComputer = (csp: EffectifsFormType["csp"]) => {
@@ -281,7 +284,7 @@ export const EffectifsForm = () => {
                     label: `${category}, ${ageRange}, femmes`,
                     nativeInputProps: {
                       ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
-                        setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
+                        setValueAs: value => (value !== "" && !isNaN(value) ? parseFloat(value) : ""),
                       }),
                       type: "number",
                       min: 0,
@@ -293,7 +296,7 @@ export const EffectifsForm = () => {
                     label: `${category}, ${ageRange}, hommes`,
                     nativeInputProps: {
                       ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
-                        setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
+                        setValueAs: value => (value !== "" && !isNaN(value) ? parseFloat(value) : ""),
                       }),
                       type: "number",
                       min: 0,
