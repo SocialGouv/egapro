@@ -28,8 +28,8 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
             value: FavorablePopulation.Enum.WOMEN,
             ...fieldMethods,
             onChange: e => {
-              trigger(); // Rerun validation to set isValid.
               fieldMethods.onChange(e); // Inform RHF to update its state.
+              trigger(); // Rerun validation to set isValid.
             },
           },
         },
@@ -39,8 +39,8 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
             value: FavorablePopulation.Enum.MEN,
             ...fieldMethods,
             onChange: e => {
-              trigger(); // Rerun validation to set isValid.
               fieldMethods.onChange(e); // Inform RHF to update its state.
+              trigger(); // Rerun validation to set isValid.
             },
           },
         },

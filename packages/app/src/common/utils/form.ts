@@ -140,3 +140,10 @@ export const radioStringToBool = (radioInput: RadioInputValueType): boolean => r
 
 export const radioBoolToString = (value: boolean | undefined): RadioInputValueType | "" =>
   value === true ? "oui" : value === false ? "non" : "";
+
+/**
+ * Utility function to convert a string to a float or an empty string if the string is not a number.
+ * The valueAsNumber is dangerous because it returns null when the input is empty.
+ * This is not recommended by React docs to use null or undefined as it will induce it to be an uncontrolled input.
+ */
+export const setValueAsFloatOrEmptyString = (value: string) => (isNaN(parseFloat(value)) ? "" : parseFloat(value));

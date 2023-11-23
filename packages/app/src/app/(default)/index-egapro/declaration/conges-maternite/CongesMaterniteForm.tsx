@@ -34,7 +34,7 @@ const formSchema = zodFr
     zodFr.object({
       estCalculable: z.literal("oui"),
       résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
-      note: z.number().optional(),
+      note: z.number(),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -94,7 +94,7 @@ export const CongesMaterniteForm = () => {
     if (résultat !== "" && résultat !== undefined) {
       const resultAsFloat = Math.floor(résultat / 100);
       const note = new IndicateurQuatreComputer().computeNote(resultAsFloat);
-      setValue("note", note);
+      setValue("note", note, { shouldValidate: true });
     }
   }, [résultat, setValue]);
 
