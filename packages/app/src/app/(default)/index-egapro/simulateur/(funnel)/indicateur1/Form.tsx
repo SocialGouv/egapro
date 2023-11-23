@@ -113,8 +113,8 @@ export const Indic1Form = () => {
       category: ageRanges.reduce(
         (newAgeGroups, ageRange) => ({
           ...newAgeGroups,
-          ...(funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women >= 3 &&
-          funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men >= 3
+          ...((funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women || 0) >= 3 &&
+          (funnel.effectifs!.csp[categoryName].ageRanges[ageRange].men || 0) >= 3
             ? {
                 [ageRange]: {
                   womenCount: funnel.effectifs!.csp[categoryName].ageRanges[ageRange].women,
