@@ -74,7 +74,12 @@ export const Indic4Form = () => {
   const computableCheck = watch("calculable");
   const count = watch("count");
 
-  indicateur4Computer.setInput(count ?? { total: 0, raised: 0 });
+  indicateur4Computer.setInput(
+    {
+      total: count?.total || 0,
+      raised: count?.raised || 0,
+    } ?? { total: 0, raised: 0 },
+  );
 
   const canCompute = indicateur4Computer.canCompute();
   const computed = indicateur4Computer.compute();
@@ -229,7 +234,11 @@ export const Indic4Form = () => {
                     </GridCol>
                   </Grid>
                 </Container>
-                <Indicateur4Note computer={indicateur4Computer} count={count} isValid={isValid} />
+                <Indicateur4Note
+                  computer={indicateur4Computer}
+                  count={{ total: count?.total || 0, raised: count?.raised || 0 }}
+                  isValid={isValid}
+                />
               </>
             ) : (
               computableCheck === false && (

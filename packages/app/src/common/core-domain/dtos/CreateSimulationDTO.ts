@@ -7,15 +7,13 @@ import { AgeRange } from "../domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 
-const nonnegativeNanSafe = zodFr
-  .number()
-  .nonnegative()
-  .default(0)
-  .transform(v => (isNaN(v) ? 0 : v));
+const positiveIntOrEmptyString = zodFr
+  .literal("")
+  .or(zodFr.number().int("La valeur doit être un entier").nonnegative());
 
 const singleAgeRangeSchema = zodFr.object({
-  women: nonnegativeNanSafe,
-  men: nonnegativeNanSafe,
+  women: positiveIntOrEmptyString,
+  men: positiveIntOrEmptyString,
 });
 const ageRangesSchema = zodFr.object({
   [AgeRange.Enum.LESS_THAN_30]: singleAgeRangeSchema,
@@ -41,31 +39,33 @@ const cspAgeRangeNumbers = zodFr.object({
 
 const otherAgeRangesSchema = zodFr
   .object({
-    womenCount: nonnegativeNanSafe,
-    menCount: nonnegativeNanSafe,
-    womenSalary: nonnegativeNanSafe,
-    menSalary: nonnegativeNanSafe,
+    womenCount: positiveIntOrEmptyString,
+    menCount: positiveIntOrEmptyString,
+    womenSalary: positiveIntOrEmptyString,
+    menSalary: positiveIntOrEmptyString,
   })
   .superRefine((obj, ctx) => {
-    if (obj.womenCount >= 3 && obj.menCount >= 3) {
-      if (obj.womenSalary === 0) {
-        ctx.addIssue({
-          path: ["womenSalary"],
-          code: zodFr.ZodIssueCode.too_small,
-          minimum: 0,
-          inclusive: false,
-          type: "number",
-        });
-      }
+    if (obj.womenCount && obj.menCount) {
+      if (obj.womenCount >= 3 && obj.menCount >= 3) {
+        if (obj.womenSalary === 0) {
+          ctx.addIssue({
+            path: ["womenSalary"],
+            code: zodFr.ZodIssueCode.too_small,
+            minimum: 0,
+            inclusive: false,
+            type: "number",
+          });
+        }
 
-      if (obj.menSalary === 0) {
-        ctx.addIssue({
-          path: ["menSalary"],
-          code: zodFr.ZodIssueCode.too_small,
-          minimum: 0,
-          inclusive: false,
-          type: "number",
-        });
+        if (obj.menSalary === 0) {
+          ctx.addIssue({
+            path: ["menSalary"],
+            code: zodFr.ZodIssueCode.too_small,
+            minimum: 0,
+            inclusive: false,
+            type: "number",
+          });
+        }
       }
     }
   });
@@ -141,8 +141,8 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       raisedCount: zodFr
         .object({
-          women: zodFr.number().nonnegative(),
-          men: zodFr.number().nonnegative(),
+          women: positiveIntOrEmptyString,
+          men: positiveIntOrEmptyString,
         })
         .refine(({ women, men }) => !(!women && !men), {
           message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
@@ -158,8 +158,8 @@ export const createSteps = {
       calculable: zodFr.literal(true),
       count: zodFr
         .object({
-          total: zodFr.number().nonnegative(),
-          raised: zodFr.number().nonnegative().default(0),
+          total: positiveIntOrEmptyString,
+          raised: positiveIntOrEmptyString.default(0),
         })
         .refine(({ total, raised }) => raised <= total, {
           message:
