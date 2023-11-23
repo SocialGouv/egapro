@@ -83,8 +83,8 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       const category = categories[categoryIndex];
       for (const ageRange of ageRanges) {
         if (
-          funnel.effectifs.csp[category].ageRanges[ageRange].women < 3 ||
-          funnel.effectifs.csp[category].ageRanges[ageRange].men < 3
+          (funnel.effectifs.csp[category].ageRanges[ageRange].women || 0) < 3 ||
+          (funnel.effectifs.csp[category].ageRanges[ageRange].men || 0) < 3
         ) {
           continue;
         }
@@ -134,7 +134,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
               }
 
               const totalCategory = [...Object.values(effectifsCspCategory.ageRanges)].reduce(
-                (acc, ageRange) => acc + ageRange.women + ageRange.men,
+                (acc, ageRange) => acc + (ageRange.women || 0) + (ageRange.men || 0),
                 0,
               );
 
@@ -159,8 +159,8 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
                       errors,
                       register,
                       firstCols: [csp.women || "-", csp.men || "-"],
-                      menCount: csp.men,
-                      womenCount: csp.women,
+                      menCount: csp.men || 0,
+                      womenCount: csp.women || 0,
                     });
                   })(),
                 })) as [AlternativeTableProps.SubRow, ...AlternativeTableProps.SubRow[]],

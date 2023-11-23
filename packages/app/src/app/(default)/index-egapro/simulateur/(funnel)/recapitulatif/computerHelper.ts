@@ -37,7 +37,8 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
   if (isLessThan250) {
     if (funnel.indicateur2and3.calculable) {
       computerIndicateurDeuxTrois.setInput({
-        ...funnel.indicateur2and3.raisedCount,
+        men: funnel.indicateur2and3.raisedCount.men || 0,
+        women: funnel.indicateur2and3.raisedCount.women || 0,
         menCount: totalMen,
         womenCount: totalWomen,
       });
@@ -62,7 +63,10 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
     }
   }
   if (funnel.indicateur4.calculable) {
-    computerIndicateurQuatre.setInput(funnel.indicateur4.count);
+    computerIndicateurQuatre.setInput({
+      total: funnel.indicateur4.count.total || 0,
+      raised: funnel.indicateur4.count.raised || 0,
+    });
   }
   computerIndicateurCinq.setInput(funnel.indicateur5);
 

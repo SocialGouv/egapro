@@ -57,11 +57,11 @@ export const getPourcentagesAugmentationPromotionsWithCount = (
       ...newPourcentages,
       [category]: {
         menCount: ageRanges.reduce(
-          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].men ?? 0),
+          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].men || 0),
           0,
         ),
         womenCount: ageRanges.reduce(
-          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].women ?? 0),
+          (totalCategoryCount, ageRange) => totalCategoryCount + (funnelCsp[category].ageRanges[ageRange].women || 0),
           0,
         ),
         men: pourcentages?.[category]?.men ?? 0,
