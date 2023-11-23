@@ -5,7 +5,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodNumberOrEmptyString } from "@common/utils/form";
+import { setValueAsFloatOrEmptyString, zodNumberOrEmptyString } from "@common/utils/form";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -123,13 +123,15 @@ export const HautesRémunérationsForm = () => {
                   max: 5,
                   step: 1,
                   ...register("résultat", {
-                    setValueAs: (value: string | null) => {
-                      // We implement our own valueAsNumber because valueAsNumber returns NaN for empty string and we want null instead for consistency.
-                      if (value === null) return null;
-                      const num = Number(value);
-                      return isNaN(num) || value === "" ? null : num;
-                    },
+                    setValueAs: setValueAsFloatOrEmptyString,
                   }),
+                  onBlur: e => {
+                    // Round number to 1 decimal.
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      setValue("résultat", Math.round(value), { shouldValidate: true });
+                    }
+                  },
                 }}
                 state={get(errors, "résultat") && "error"}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

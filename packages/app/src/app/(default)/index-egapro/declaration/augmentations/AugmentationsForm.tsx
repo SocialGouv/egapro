@@ -98,8 +98,8 @@ export const AugmentationsForm = () => {
   assertOrRedirectCommencerStep(formData);
 
   const methods = useForm<FormType>({
-    shouldUnregister: true,
     mode: "onChange",
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: formData[stepName],
   });
@@ -111,6 +111,8 @@ export const AugmentationsForm = () => {
     watch,
   } = methods;
 
+  // For some obscure reasons, résultat can be undefined on some render, before to become eventually "" or a number.
+  // This provokes a bug, because it is responsible to display populationFavorable, which becomes null and makes isValid false...
   const résultat = watch("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
@@ -127,9 +129,8 @@ export const AugmentationsForm = () => {
         const note = new IndicateurDeuxComputer(new IndicateurUnComputer()).computeNote(résultat);
         setValue("note", note, { shouldValidate: true });
       }
-
-      // If it is a compensation, we set the note to the max value.
-      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName]);
+      //If it is a compensation, we set the note to the max value.
+      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
     }
   }, [estUnRattrapage, résultat, setValue]);
 
@@ -151,7 +152,6 @@ export const AugmentationsForm = () => {
             legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ?"
             name="estCalculable"
           />
-
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             {estCalculable === "non" && <MotifNC stepName={stepName} />}
 
@@ -182,7 +182,10 @@ export const AugmentationsForm = () => {
 
                 <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-                {résultat !== 0 && résultat !== null && <PopulationFavorable />}
+                {/* Don't forget that résultat can be undefined, for some reasons. */}
+                {/* We must handle this case, because of shouldUnregister mode. */}
+                {/* Try with a résultat of 0 and go back to this screen. */}
+                {résultat !== 0 && résultat !== "" && résultat !== undefined && <PopulationFavorable />}
 
                 {note !== undefined && isValid && (
                   <>

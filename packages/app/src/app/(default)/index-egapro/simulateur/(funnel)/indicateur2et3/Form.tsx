@@ -15,6 +15,7 @@ import {
   type CreateSimulationWorkforceRangeLessThan250DTO,
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { percentFormat } from "@common/utils/number";
 import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
@@ -245,7 +246,7 @@ export const Indic2and3Form = () => {
                             stateRelatedMessage={whenCalculableErrors.raisedCount?.women?.message}
                             nativeInputProps={{
                               ...register("raisedCount.women", {
-                                setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
+                                setValueAs: setValueAsFloatOrEmptyString,
                                 deps: "raisedCount.men",
                               }),
                               type: "number",
@@ -262,7 +263,7 @@ export const Indic2and3Form = () => {
                             stateRelatedMessage={whenCalculableErrors.raisedCount?.men?.message}
                             nativeInputProps={{
                               ...register("raisedCount.men", {
-                                setValueAs: value => (!isNaN(value) ? parseFloat(value) : ""),
+                                setValueAs: setValueAsFloatOrEmptyString,
                                 deps: "raisedCount.women",
                               }),
                               type: "number",

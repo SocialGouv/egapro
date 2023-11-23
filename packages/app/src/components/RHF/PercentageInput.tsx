@@ -1,4 +1,5 @@
 import Input from "@codegouvfr/react-dsfr/Input";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type SimpleObject } from "@common/utils/types";
 import { type ReactNode } from "react";
 import { type Path, useFormContext } from "react-hook-form";
@@ -52,19 +53,14 @@ export const PercentageInput = <FormType extends SimpleObject>({
           defaultValue: "",
           step: 0.1,
           ...register(name, {
-            setValueAs: (value: string | null) => {
-              // We implement our own valueAsNumber because valueAsNumber returns null for empty input and we need "" for React to be safe.
-              if (value === null) return "";
-              const num = Number.parseFloat(value);
-              return isNaN(num) ? "" : num;
-            },
+            setValueAs: setValueAsFloatOrEmptyString,
             disabled,
           }),
           onBlur: e => {
             // Round number to 1 decimal.
-            const num = Number.parseFloat(e.target.value);
-            if (!isNaN(num)) {
-              setValue(name, Math.round(num * 10) / 10, { shouldValidate: true });
+            const value = parseFloat(e.target.value);
+            if (!isNaN(value)) {
+              setValue(name, Math.round(value * 10) / 10, { shouldValidate: true });
             }
           },
         }}

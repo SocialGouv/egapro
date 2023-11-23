@@ -218,8 +218,6 @@ export class SaveDeclaration implements UseCase<Input, void> {
           },
     } satisfies EntityPropsToJson<DeclarationProps>;
 
-    console.log("partialDeclaration", JSON.stringify(partialDeclaration, null, 2));
-
     let declaration: Declaration;
 
     try {
