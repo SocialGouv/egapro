@@ -2,7 +2,11 @@
     overflow: auto;
 }
 
-.table table{
+.tableCompact tbody tr td {
+    padding: 0.1rem .25rem;
+}
+
+.table table {
     table-layout:fixed;
     min-width: 100%;
     border-collapse: collapse;
@@ -42,3 +46,4 @@
     font-size: 0.875rem;
     white-space: nowrap;
 }
+

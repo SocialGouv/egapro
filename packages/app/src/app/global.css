@@ -6,6 +6,10 @@
 .block {
     display: block;
 }
+
+.flex {
+    display: flex;
+}
 /* === */
 
 /* === typo === */
@@ -36,11 +40,55 @@
 .break-words {
     overflow-wrap: break-word;
 }
+
+.underline {
+    text-decoration: underline;
+}
+/* === */
+
+/* === color === */
+/* -- custom */
+.color-red {
+    color: #b91c1c;
+}
+/* === */
+
+/* === cursor === */
+.cursor-pointer {
+    cursor: pointer;
+}
+.cursor-help {
+    cursor: help;
+}
+.cursor-default {
+    cursor: default;
+}
+.\!cursor-default {
+    cursor: default !important;
+}
 /* === */
 
 /* === flex / grid === */
 .grow {
     flex-grow: 1;
+}
+.self-end {
+    align-self: flex-end;
+}
+.justify-center {
+    justify-content: center;
+}
+.justify-between {
+    justify-content: space-between;
+}
+.content-center {
+    align-content: center;
+}
+.items-end {
+    align-items: flex-end;
+}
+.flex-1 {
+    flex: 1;
 }
 /* === */
 

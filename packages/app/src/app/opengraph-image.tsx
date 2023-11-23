@@ -1,5 +1,5 @@
 import { ImgHome } from "@design-system";
-import { ImageResponse } from "next/server";
+import { ImageResponse } from "next/og";
 
 export const alt = "Egapro";
 export const size = {
