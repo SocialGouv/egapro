@@ -78,6 +78,19 @@ export interface DeclarationSearchResultRaw {
   siren: string;
 }
 
+export type AdminDeclarationRaw = {
+  created_at: Date;
+  declarant_email: string;
+  declarant_firstname: string;
+  declarant_lastname: string;
+  name: string;
+  siren: string;
+  type: "index" | "repeq";
+  year: number;
+} & (
+  | { index: null; type: "repeq"; ues: null }
+  | { index: number; type: "index"; ues: DeclarationDataRaw["entreprise"]["ues"] }
+);
 export { type DeclarationStatsDTO as DeclarationStatsRaw } from "@common/core-domain/dtos/SearchDeclarationDTO";
 
 export interface RepresentationEquilibreeSearchResultRaw {

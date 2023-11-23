@@ -60,7 +60,7 @@ export const authConfig: AuthOptions = {
   // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60, // 24 hours in prod and preprod, 7 days in dev
   },
   providers: [
     GithubProvider({

@@ -17,7 +17,7 @@ import {
 } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { noop, orderBy as _orderBy, truncate } from "lodash";
-import { experimental_useOptimistic as useOptimistic } from "react";
+import { useOptimistic } from "react";
 import { useForm } from "react-hook-form";
 
 import { deleteReferent } from "./actions";
