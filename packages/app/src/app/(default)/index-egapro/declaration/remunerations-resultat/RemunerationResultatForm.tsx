@@ -82,7 +82,7 @@ export const RemunerationResultatForm = () => {
   useEffect(() => {
     if (résultat !== "") {
       const note = new IndicateurUnComputer().computeNote(résultat);
-      setValue("note", note);
+      setValue("note", note, { shouldValidate: true });
     }
   }, [résultat, setValue]);
 
@@ -103,7 +103,7 @@ export const RemunerationResultatForm = () => {
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
 
-            {résultat !== 0 && résultat !== null && <PopulationFavorable />}
+            {résultat !== 0 && résultat !== "" && <PopulationFavorable />}
 
             {note !== undefined && isValid && (
               <>

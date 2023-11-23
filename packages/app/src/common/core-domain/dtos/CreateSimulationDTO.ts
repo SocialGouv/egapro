@@ -80,15 +80,13 @@ const otherAgeRangeNumbers = zodFr.array(
 const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
   zodFr.object({
     calculable: zodFr.literal(true),
-    pourcentages: zodFr
-      .record(
-        zodFr.nativeEnum(CSP.Enum),
-        zodFr.object({
-          women: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
-          men: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
-        }),
-      )
-      .default({}),
+    pourcentages: zodFr.record(
+      zodFr.nativeEnum(CSP.Enum),
+      zodFr.object({
+        women: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
+        men: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
+      }),
+    ),
   }),
   zodFr.object({
     calculable: zodFr.literal(false),
@@ -107,23 +105,21 @@ export const createSteps = {
   indicateur1: zodFr.discriminatedUnion("mode", [
     zodFr.object({
       mode: zodFr.literal(RemunerationsMode.Enum.CSP),
-      remunerations: zodFr
-        .array(
-          zodFr.object({
-            name: zodFr.nativeEnum(CSP.Enum),
-            categoryId: zodFr.string().nonempty(),
-            category: zodFr
-              .record(
-                zodFr.nativeEnum(AgeRange.Enum),
-                zodFr.object({
-                  womenSalary: zodFr.number().positive(),
-                  menSalary: zodFr.number().positive(),
-                }),
-              )
-              .optional(),
-          }),
-        )
-        .default([]),
+      remunerations: zodFr.array(
+        zodFr.object({
+          name: zodFr.nativeEnum(CSP.Enum),
+          categoryId: zodFr.string().nonempty(),
+          category: zodFr
+            .record(
+              zodFr.nativeEnum(AgeRange.Enum),
+              zodFr.object({
+                womenSalary: zodFr.number().positive(),
+                menSalary: zodFr.number().positive(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
     }),
     zodFr.object({
       mode: zodFr.literal(RemunerationsMode.Enum.BRANCH_LEVEL),
@@ -159,7 +155,7 @@ export const createSteps = {
       count: zodFr
         .object({
           total: positiveIntOrEmptyString,
-          raised: positiveIntOrEmptyString.default(0),
+          raised: positiveIntOrEmptyString,
         })
         .refine(({ total, raised }) => raised <= total, {
           message:

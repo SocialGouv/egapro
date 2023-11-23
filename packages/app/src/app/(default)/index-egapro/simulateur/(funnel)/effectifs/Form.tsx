@@ -9,6 +9,7 @@ import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
@@ -284,7 +285,7 @@ export const EffectifsForm = () => {
                     label: `${category}, ${ageRange}, femmes`,
                     nativeInputProps: {
                       ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
-                        setValueAs: value => (value !== "" && !isNaN(value) ? parseFloat(value) : ""),
+                        setValueAs: setValueAsFloatOrEmptyString,
                       }),
                       type: "number",
                       min: 0,
@@ -296,7 +297,7 @@ export const EffectifsForm = () => {
                     label: `${category}, ${ageRange}, hommes`,
                     nativeInputProps: {
                       ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
-                        setValueAs: value => (value !== "" && !isNaN(value) ? parseFloat(value) : ""),
+                        setValueAs: setValueAsFloatOrEmptyString,
                       }),
                       type: "number",
                       min: 0,
