@@ -135,8 +135,6 @@ export const Indic2and3Form = () => {
 
   const raisedCount = watch("raisedCount");
 
-  const isAllValuesZero = raisedCount?.men === 0 && raisedCount?.women === 0;
-
   indicateur2and3Computer.setInput({
     men: raisedCount?.men || 0,
     menCount: totalCspMen,
@@ -310,11 +308,7 @@ export const Indic2and3Form = () => {
                       </Grid>
                     </Container>
 
-                    <Indicateur2et3Note
-                      isAllValuesZero={isAllValuesZero}
-                      computer={indicateur2and3Computer}
-                      isValid={isValid}
-                    />
+                    <Indicateur2et3Note computer={indicateur2and3Computer} isValid={isValid} />
                   </>
                 ) : (
                   computableCheck === false && (

@@ -13,9 +13,7 @@ interface Props {
    * Can only be used if `simple` is false.
    */
   detailed?: boolean;
-  isAllValuesZero: boolean;
   isValid: boolean;
-
   noBorder?: boolean;
   /**
    * If true, only display the note, without other notes or alerts
@@ -23,7 +21,7 @@ interface Props {
   simple?: boolean;
 }
 
-export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed, isAllValuesZero }: Props) => {
+export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed }: Props) => {
   const NOTE_MAX = computer.getMaxNote();
 
   let computed: IndicateurDeuxTroisComputer.ComputedResult | null = null;
@@ -44,6 +42,8 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
   } catch {
     // noop
   }
+
+  const isAllValuesZero = computer.getInput()?.men === 0 && computer.getInput()?.women === 0;
 
   return (
     <ClientAnimate>
