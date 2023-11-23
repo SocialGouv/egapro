@@ -125,7 +125,7 @@ export const AugmentationsForm = () => {
     if (résultat !== undefined) {
       if (résultat !== "") {
         const note = new IndicateurDeuxComputer(new IndicateurUnComputer()).computeNote(résultat);
-        setValue("note", note);
+        setValue("note", note, { shouldValidate: true });
       }
 
       // If it is a compensation, we set the note to the max value.

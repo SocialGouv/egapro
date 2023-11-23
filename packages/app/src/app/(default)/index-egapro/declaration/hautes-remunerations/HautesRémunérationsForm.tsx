@@ -33,7 +33,7 @@ const formSchema = z
   .object({
     populationFavorable: z.string().optional(),
     résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
-    note: z.number().optional(),
+    note: z.number(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
     if (résultat === "") {
@@ -95,7 +95,7 @@ export const HautesRémunérationsForm = () => {
   useEffect(() => {
     if (résultat !== "") {
       const note = new IndicateurCinqComputer().computeNote(résultat);
-      setValue("note", note);
+      setValue("note", note, { shouldValidate: true });
     }
   }, [résultat, setValue]);
 
