@@ -12,7 +12,6 @@ import { DeclarationSpecificationError } from "@common/core-domain/domain/specif
 import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { type ServerActionResponse } from "@common/utils/next";
 import assert from "assert";
-import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 
 export async function getDeclarationOpmc(siren: string, year: number) {
@@ -69,7 +68,8 @@ export async function updateDeclarationOpmc({
       email,
     });
 
-    revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+    // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
+    // revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
 
     return {
       ok: true,
