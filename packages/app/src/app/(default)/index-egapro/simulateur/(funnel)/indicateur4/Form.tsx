@@ -178,7 +178,7 @@ export const Indic4Form = () => {
                           ...register("count.total", {
                             setValueAs: value => (value === "" ? void 0 : +value),
                             deps: "count.raised",
-                            onChange: e => {
+                            onChange: () => {
                               if (count?.total === 0) {
                                 setValue("count.raised", 0);
                                 trigger("count.raised");
