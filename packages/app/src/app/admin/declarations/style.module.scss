@@ -1,0 +1,41 @@
+.tableColumnName {
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    // width: 100%;
+    max-width: 45ch;
+}
+
+.tableWrapper {
+    overflow: visible;
+}
+
+.table {
+    overflow-x: hidden;
+    tbody tr td {
+        &[title] {
+            position: relative;
+        }
+
+        &[title]:hover {
+            overflow-y: visible;
+        }
+
+        &[title]::after {
+            content: attr(title);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: max-content;
+            padding: inherit;
+            opacity: 0;
+            background-color: var(--hover);
+            white-space: preserve;
+            z-index: 1;
+            -webkit-transition: opacity 0.1s ease-in-out;
+        }
+
+        &[title]:hover::after {
+            opacity: 1;
+        }
+    }
+}

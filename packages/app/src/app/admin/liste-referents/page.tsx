@@ -23,7 +23,7 @@ const ReferentListPage = async () => {
   return (
     <>
       <EditReferentModal />
-      <Container as="section" py="3w">
+      <Container as="section" py="4w">
         <h1>Liste des référents Egapro</h1>
         <ActionButtons />
         {referents.length ? (

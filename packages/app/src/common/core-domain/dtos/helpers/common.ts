@@ -1,5 +1,5 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import { COUNTIES_IDS, NAF_SECTIONS, REGIONS_IDS, YEARS_REPEQ } from "@common/dict";
+import { COUNTIES_IDS, DISPLAY_PUBLIC_YEARS, NAF_SECTIONS, REGIONS_IDS, YEARS, YEARS_REPEQ } from "@common/dict";
 import { Percentage } from "@common/shared-domain/domain/valueObjects";
 import { type ClearObject } from "@common/utils/types";
 import { zodValueObjectSuperRefine } from "@common/utils/zod";
@@ -10,6 +10,16 @@ export const countySchema = z.enum(COUNTIES_IDS);
 export const nafSectionSchema = z.enum(
   Object.keys(NAF_SECTIONS) as [keyof typeof NAF_SECTIONS, ...Array<keyof typeof NAF_SECTIONS>],
 );
+export const displayPublicYearCoerciveSchema = z.coerce
+  .number()
+  .refine(
+    year => DISPLAY_PUBLIC_YEARS.includes(year),
+    `L'année doit être incluse dans la liste ${DISPLAY_PUBLIC_YEARS.join(", ")}`,
+  );
+
+export const yearCoerciveSchema = z.coerce
+  .number()
+  .refine(year => YEARS.includes(year), `L'année doit être incluse dans la liste ${YEARS.join(", ")}`);
 
 export const sirenSchema = z.string().superRefine(zodValueObjectSuperRefine(Siren));
 

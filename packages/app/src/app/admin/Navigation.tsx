@@ -19,6 +19,11 @@ export const adminMenuItems = [
     href: "/admin/impersonate",
     segment: "impersonate",
   },
+  {
+    text: "Liste des déclarations d'Index et de Représentation Équilibrée",
+    href: "/admin/declarations",
+    segment: "declarations",
+  },
 ];
 
 export const Navigation = () => {
