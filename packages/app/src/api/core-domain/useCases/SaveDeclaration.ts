@@ -91,124 +91,140 @@ export class SaveDeclaration implements UseCase<Input, void> {
           : undefined,
       sufficientPeriod: dto["periode-reference"]?.périodeSuffisante === "non" ? false : true,
       source: DeclarationSource.Enum.FORMULAIRE,
-      publication: {
-        date: dto["publication"]?.date,
-        url: dto["publication"]?.choixSiteWeb === "oui" ? dto["publication"].url : undefined,
-        modalities: dto["publication"]?.choixSiteWeb === "non" ? dto["publication"].modalités : undefined,
-      },
+      publication: !dto["publication"]
+        ? undefined
+        : {
+            date: dto["publication"]?.date,
+            url: dto["publication"]?.choixSiteWeb === "oui" ? dto["publication"].url : undefined,
+            modalities: dto["publication"]?.choixSiteWeb === "non" ? dto["publication"].modalités : undefined,
+          },
       correctiveMeasures: dto["resultat-global"]?.mesures,
 
       // Indicators.
-      remunerations: {
-        cseConsultationDate:
-          dto.remunerations?.estCalculable === "oui" ? dto.remunerations.dateConsultationCSE : undefined,
-        favorablePopulation:
-          dto["remunerations"]?.estCalculable === "oui"
-            ? dto["remunerations-resultat"]?.populationFavorable ?? "egalite"
-            : undefined,
-        mode: remunerationsMode,
-        notComputableReason:
-          dto.remunerations?.estCalculable === "non" ? dto.remunerations.motifNonCalculabilité : undefined,
-        result: dto["remunerations-resultat"]?.résultat,
-        score: dto["remunerations-resultat"]?.note,
-        categories:
-          remunerationsMode === "csp"
-            ? dto["remunerations-csp"]?.catégories.length
-              ? dto["remunerations-csp"].catégories.map(({ nom, tranches }) => ({
-                  name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== ""),
-                }))
-              : []
-            : remunerationsMode === "niveau_autre"
-            ? dto["remunerations-coefficient-autre"]?.catégories.length
-              ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
-                  name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== ""),
-                }))
-              : []
-            : remunerationsMode === "niveau_branche"
-            ? dto["remunerations-coefficient-branche"]?.catégories.length
-              ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
-                  name: nom,
-                  ranges: keepEntryBy(tranches, val => val !== ""),
-                }))
-              : []
-            : ([] satisfies Categorie[]),
-      },
+      remunerations: !dto["remunerations"]
+        ? undefined
+        : {
+            cseConsultationDate:
+              dto.remunerations?.estCalculable === "oui" ? dto.remunerations.dateConsultationCSE : undefined,
+            favorablePopulation:
+              dto["remunerations"]?.estCalculable === "oui"
+                ? dto["remunerations-resultat"]?.populationFavorable ?? "egalite"
+                : undefined,
+            mode: remunerationsMode,
+            notComputableReason:
+              dto.remunerations?.estCalculable === "non" ? dto.remunerations.motifNonCalculabilité : undefined,
+            result: dto["remunerations-resultat"]?.résultat,
+            score: dto["remunerations-resultat"]?.note,
+            categories:
+              remunerationsMode === "csp"
+                ? dto["remunerations-csp"]?.catégories.length
+                  ? dto["remunerations-csp"].catégories.map(({ nom, tranches }) => ({
+                      name: nom,
+                      ranges: keepEntryBy(tranches, val => val !== ""),
+                    }))
+                  : []
+                : remunerationsMode === "niveau_autre"
+                ? dto["remunerations-coefficient-autre"]?.catégories.length
+                  ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
+                      name: nom,
+                      ranges: keepEntryBy(tranches, val => val !== ""),
+                    }))
+                  : []
+                : remunerationsMode === "niveau_branche"
+                ? dto["remunerations-coefficient-branche"]?.catégories.length
+                  ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
+                      name: nom,
+                      ranges: keepEntryBy(tranches, val => val !== ""),
+                    }))
+                  : []
+                : ([] satisfies Categorie[]),
+          },
       ...(dto.entreprise?.tranche !== CompanyWorkforceRange.Enum.FROM_50_TO_250 && {
-        salaryRaises: {
-          categories:
-            dto.augmentations?.estCalculable === "oui"
-              ? [
-                  dto.augmentations.catégories.ouv === "" ? null : dto.augmentations.catégories.ouv,
-                  dto.augmentations.catégories.emp === "" ? null : dto.augmentations.catégories.emp,
-                  dto.augmentations.catégories.tam === "" ? null : dto.augmentations.catégories.tam,
-                  dto.augmentations.catégories.ic === "" ? null : dto.augmentations.catégories.ic,
-                ]
-              : [null, null, null, null],
-          favorablePopulation:
-            dto.augmentations?.estCalculable === "oui" ? dto.augmentations.populationFavorable ?? "egalite" : undefined,
-          notComputableReason:
-            dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
-          result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
-          score: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.note : undefined,
-        },
-        promotions: {
-          notComputableReason:
-            dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
-          favorablePopulation:
-            dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable ?? "egalite" : undefined,
-          result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
-          score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
-          categories:
-            dto.promotions?.estCalculable === "oui"
-              ? [
-                  dto.promotions.catégories.ouv === "" ? null : dto.promotions.catégories.ouv,
-                  dto.promotions.catégories.emp === "" ? null : dto.promotions.catégories.emp,
-                  dto.promotions.catégories.tam === "" ? null : dto.promotions.catégories.tam,
-                  dto.promotions.catégories.ic === "" ? null : dto.promotions.catégories.ic,
-                ]
-              : [null, null, null, null],
-        },
+        salaryRaises: !dto["augmentations"]
+          ? undefined
+          : {
+              categories:
+                dto.augmentations?.estCalculable === "oui"
+                  ? [
+                      dto.augmentations.catégories.ouv === "" ? null : dto.augmentations.catégories.ouv,
+                      dto.augmentations.catégories.emp === "" ? null : dto.augmentations.catégories.emp,
+                      dto.augmentations.catégories.tam === "" ? null : dto.augmentations.catégories.tam,
+                      dto.augmentations.catégories.ic === "" ? null : dto.augmentations.catégories.ic,
+                    ]
+                  : [null, null, null, null],
+              favorablePopulation:
+                dto.augmentations?.estCalculable === "oui"
+                  ? dto.augmentations.populationFavorable ?? "egalite"
+                  : undefined,
+              notComputableReason:
+                dto.augmentations?.estCalculable == "non" ? dto.augmentations.motifNonCalculabilité : undefined,
+              result: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.résultat : undefined,
+              score: dto.augmentations?.estCalculable === "oui" ? dto.augmentations.note : undefined,
+            },
+        promotions: !dto["promotions"]
+          ? undefined
+          : {
+              notComputableReason:
+                dto.promotions?.estCalculable === "non" ? dto.promotions.motifNonCalculabilité : undefined,
+              favorablePopulation:
+                dto.promotions?.estCalculable === "oui" ? dto.promotions.populationFavorable ?? "egalite" : undefined,
+              result: dto.promotions?.estCalculable === "oui" ? dto.promotions.résultat : undefined,
+              score: dto.promotions?.estCalculable === "oui" ? dto.promotions.note : undefined,
+              categories:
+                dto.promotions?.estCalculable === "oui"
+                  ? [
+                      dto.promotions.catégories.ouv === "" ? null : dto.promotions.catégories.ouv,
+                      dto.promotions.catégories.emp === "" ? null : dto.promotions.catégories.emp,
+                      dto.promotions.catégories.tam === "" ? null : dto.promotions.catégories.tam,
+                      dto.promotions.catégories.ic === "" ? null : dto.promotions.catégories.ic,
+                    ]
+                  : [null, null, null, null],
+            },
       }),
       ...(dto.entreprise?.tranche === CompanyWorkforceRange.Enum.FROM_50_TO_250 && {
-        salaryRaisesAndPromotions: {
-          notComputableReason:
-            dto["augmentations-et-promotions"]?.estCalculable === "non"
-              ? dto["augmentations-et-promotions"].motifNonCalculabilité
-              : undefined,
-          favorablePopulation:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].populationFavorable ?? "egalite"
-              : undefined,
-          employeesCountResult:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].résultatEquivalentSalarié
-              : undefined,
-          employeesCountScore:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].noteNombreSalaries
-              : undefined,
-          result:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].résultat
-              : undefined,
-          percentScore:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].notePourcentage
-              : undefined,
-          score:
-            dto["augmentations-et-promotions"]?.estCalculable === "oui"
-              ? dto["augmentations-et-promotions"].note
-              : undefined,
-        },
+        salaryRaisesAndPromotions: !dto["augmentations-et-promotions"]
+          ? undefined
+          : {
+              notComputableReason:
+                dto["augmentations-et-promotions"]?.estCalculable === "non"
+                  ? dto["augmentations-et-promotions"].motifNonCalculabilité
+                  : undefined,
+              favorablePopulation:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].populationFavorable ?? "egalite"
+                  : undefined,
+              employeesCountResult:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].résultatEquivalentSalarié
+                  : undefined,
+              employeesCountScore:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].noteNombreSalaries
+                  : undefined,
+              result:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].résultat
+                  : undefined,
+              percentScore:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].notePourcentage
+                  : undefined,
+              score:
+                dto["augmentations-et-promotions"]?.estCalculable === "oui"
+                  ? dto["augmentations-et-promotions"].note
+                  : undefined,
+            },
       }),
-      maternityLeaves: {
-        notComputableReason:
-          dto["conges-maternite"]?.estCalculable === "non" ? dto["conges-maternite"].motifNonCalculabilité : undefined,
-        result: dto["conges-maternite"]?.estCalculable === "oui" ? dto["conges-maternite"].résultat : undefined,
-        score: dto["conges-maternite"]?.estCalculable === "oui" ? dto["conges-maternite"].note : undefined,
-      },
+      maternityLeaves: !dto["conges-maternite"]
+        ? undefined
+        : {
+            notComputableReason:
+              dto["conges-maternite"]?.estCalculable === "non"
+                ? dto["conges-maternite"].motifNonCalculabilité
+                : undefined,
+            result: dto["conges-maternite"]?.estCalculable === "oui" ? dto["conges-maternite"].résultat : undefined,
+            score: dto["conges-maternite"]?.estCalculable === "oui" ? dto["conges-maternite"].note : undefined,
+          },
       highRemunerations: !dto["hautes-remunerations"]
         ? undefined
         : {
@@ -241,42 +257,44 @@ export class SaveDeclaration implements UseCase<Input, void> {
         });
       }
 
-      // We recompute the score to be sure of its correctness.
-      const {
-        highRemunerationsScore,
-        maternityLeavesScore,
-        promotionsScore,
-        remunerationsScore,
-        salaryRaisesAndPromotionsScore,
-        salaryRaisesScore,
-        points,
-        computablePoints,
-        index,
-      } = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclaration(declaration));
+      if (declaration.sufficientPeriod) {
+        // We recompute the score to be sure of its correctness.
+        const {
+          highRemunerationsScore,
+          maternityLeavesScore,
+          promotionsScore,
+          remunerationsScore,
+          salaryRaisesAndPromotionsScore,
+          salaryRaisesScore,
+          points,
+          computablePoints,
+          index,
+        } = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclaration(declaration));
 
-      declaration = declaration.fromJson({
-        index,
-        points,
-        computablePoints,
-      });
+        declaration = declaration.fromJson({
+          index,
+          points,
+          computablePoints,
+        });
 
-      if (remunerationsScore !== undefined) {
-        declaration.setRemunerationsScore(new PositiveInteger(remunerationsScore));
-      }
-      if (salaryRaisesScore !== undefined) {
-        declaration.setSalaryRaisesScore(new PositiveInteger(salaryRaisesScore));
-      }
-      if (promotionsScore !== undefined) {
-        declaration.setPromotionsScore(new PositiveInteger(promotionsScore));
-      }
+        if (remunerationsScore !== undefined) {
+          declaration.setRemunerationsScore(new PositiveInteger(remunerationsScore));
+        }
+        if (salaryRaisesScore !== undefined) {
+          declaration.setSalaryRaisesScore(new PositiveInteger(salaryRaisesScore));
+        }
+        if (promotionsScore !== undefined) {
+          declaration.setPromotionsScore(new PositiveInteger(promotionsScore));
+        }
 
-      if (salaryRaisesAndPromotionsScore !== undefined) {
-        declaration.setSalaryRaisesAndPromotionsScore(new PositiveInteger(salaryRaisesAndPromotionsScore));
+        if (salaryRaisesAndPromotionsScore !== undefined) {
+          declaration.setSalaryRaisesAndPromotionsScore(new PositiveInteger(salaryRaisesAndPromotionsScore));
+        }
+        if (maternityLeavesScore !== undefined) {
+          declaration.setMaternityLeavesScore(new PositiveInteger(maternityLeavesScore));
+        }
+        declaration.setHighRemunerationsScore(new PositiveInteger(highRemunerationsScore));
       }
-      if (maternityLeavesScore !== undefined) {
-        declaration.setMaternityLeavesScore(new PositiveInteger(maternityLeavesScore));
-      }
-      declaration.setHighRemunerationsScore(new PositiveInteger(highRemunerationsScore));
 
       const specification = new DeclarationSpecification();
 
