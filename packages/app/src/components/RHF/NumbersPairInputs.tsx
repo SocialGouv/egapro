@@ -2,7 +2,6 @@
 
 import { type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { truncFloatToDecimal } from "@common/utils/number";
 import { type SimpleObject } from "@common/utils/types";
 import { useFormContext } from "react-hook-form";
 
@@ -53,11 +52,11 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
 
   const syncNumbers = (firstInput: boolean) => {
     const [keyA, keyB] = (firstInput ? [firstFormKey, secondFormKey] : [secondFormKey, firstFormKey]) as FakeSyncMapper;
-    const valueA = truncFloatToDecimal(getValues(keyA), step);
+    const valueA = getValues(keyA);
 
     if (isNaN(valueA)) return;
 
-    const valueB = truncFloatToDecimal(options.max - valueA, step);
+    const valueB = options.max - valueA;
 
     setValue(keyA, valueA, {
       shouldDirty: true,
@@ -84,7 +83,6 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
             onChange() {
               syncNumbers(true);
             },
-            valueAsNumber: true,
             disabled: options.disabled === true,
           }),
           type: "number",

@@ -10,7 +10,7 @@ import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators
 const positiveIntOrEmptyString = zodFr
   .literal("", {
     errorMap: () => ({
-      message: "Le champ est requis ",
+      message: "Le champ est requis",
     }),
   })
   .or(
@@ -20,18 +20,27 @@ const positiveIntOrEmptyString = zodFr
       .nonnegative({ message: "Le nombre ne peut pas être inférieur à 0" }),
   );
 
-const positivePercentageFloatOrEmptyString = zodFr
+const remunerationOrEmptyString = zodFr
   .literal("", {
     errorMap: () => ({
-      message: "Le champ est requis ",
+      message: "Le champ est requis",
     }),
   })
   .or(
     zodFr
-      .number()
-      .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
-      .lte(100, "Le pourcentage ne peut pas être supérieur à 100%"),
+      .number({ invalid_type_error: "Le champ est requis" })
+      .positive({ message: "La rémunération ne peut pas être inférieure ou égale à 0" }),
   );
+
+const positiveInt = zodFr
+  .number({ invalid_type_error: "Le champ est requis" })
+  .int("La valeur doit être un entier")
+  .nonnegative({ message: "Le nombre ne peut pas être inférieur à 0" });
+
+const positivePercentageFloat = zodFr
+  .number({ invalid_type_error: "Le champ est requis" })
+  .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
+  .lte(100, "Le pourcentage ne peut pas être supérieur à 100%");
 
 const singleAgeRangeSchema = zodFr.object({
   women: positiveIntOrEmptyString,
@@ -63,29 +72,25 @@ const otherAgeRangesSchema = zodFr
   .object({
     womenCount: positiveIntOrEmptyString,
     menCount: positiveIntOrEmptyString,
-    womenSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
-    menSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
+    womenSalary: remunerationOrEmptyString.or(zodFr.undefined()),
+    menSalary: remunerationOrEmptyString.or(zodFr.undefined()),
   })
   .superRefine((obj, ctx) => {
     if (obj.womenCount && obj.menCount) {
       if (obj.womenCount >= 3 && obj.menCount >= 3) {
-        if (obj.womenSalary === 0 || obj.womenSalary === "" || obj.womenSalary === undefined) {
+        if (obj.womenSalary === "") {
           ctx.addIssue({
             path: ["womenSalary"],
-            code: zodFr.ZodIssueCode.too_small,
-            minimum: 0,
-            inclusive: false,
-            type: "number",
+            code: zodFr.ZodIssueCode.custom,
+            message: "Le champ est requis",
           });
         }
 
-        if (obj.menSalary === 0 || obj.menSalary === "" || obj.menSalary === undefined) {
+        if (obj.menSalary === "") {
           ctx.addIssue({
             path: ["menSalary"],
-            code: zodFr.ZodIssueCode.too_small,
-            minimum: 0,
-            inclusive: false,
-            type: "number",
+            code: zodFr.ZodIssueCode.custom,
+            message: "Le champ est requis",
           });
         }
       }
@@ -104,8 +109,8 @@ const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
     pourcentages: zodFr.record(
       zodFr.nativeEnum(CSP.Enum),
       zodFr.object({
-        women: positivePercentageFloatOrEmptyString,
-        men: positivePercentageFloatOrEmptyString,
+        women: positivePercentageFloat,
+        men: positivePercentageFloat,
       }),
     ),
   }),
@@ -162,16 +167,15 @@ export const createSteps = {
       calculable: zodFr.literal("oui"),
       raisedCount: zodFr
         .object({
-          women: positiveIntOrEmptyString,
-          men: positiveIntOrEmptyString,
+          women: positiveInt,
+          men: positiveInt,
         })
         .superRefine(({ women, men }, ctx) => {
-          if ((women === 0 || women === "") && (men === 0 || men === "")) {
+          if (women === 0 && men === 0)
             ctx.addIssue({
               code: zodFr.ZodIssueCode.custom,
-              message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+              message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations",
             });
-          }
         }),
     }),
     zodFr.object({
@@ -200,13 +204,15 @@ export const createSteps = {
   indicateur5: zodFr
     .object({
       women: zodFr
-        .number()
+        .number({ invalid_type_error: "Le champ est requis" })
         .nonnegative("Le nombre ne peut pas être inférieur à 0")
-        .max(10, "Le nombre ne peut pas être supérieur à 10"),
+        .max(10, "Le nombre ne peut pas être supérieur à 10")
+        .int("La valeur doit être un entier"),
       men: zodFr
-        .number()
+        .number({ invalid_type_error: "Le champ est requis" })
         .nonnegative("Le nombre ne peut pas être inférieur à 0")
-        .max(10, "Le nombre ne peut pas être supérieur à 10"),
+        .max(10, "Le nombre ne peut pas être supérieur à 10")
+        .int("La valeur doit être un entier"),
     })
     .refine(({ women, men }) => women + men <= 10, {
       message:

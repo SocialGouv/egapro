@@ -46,14 +46,14 @@ interface Indic2or3FormProps {
 const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps["indicateur"]) =>
   createSteps.indicateur3.superRefine((obj, ctx) => {
     if (obj.calculable === "oui" && !isEmpty(obj.pourcentages)) {
-      const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
-        (prev, current) => (current.women || 0) + (current.men || 0) + prev,
-        0,
+      const areAllPourcentagesZero = Object.values(obj.pourcentages ?? {}).every(
+        value => value.men === 0 && value.women === 0,
       );
 
-      if (totalPourcentages === 0) {
-        const errorMessage =
-          "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
+      if (areAllPourcentagesZero) {
+        const errorMessage = `Tous les champs ne peuvent être à 0 s'il y a eu des ${
+          indicateur === 2 ? "augmentations" : "promotions"
+        }`;
         ctx.addIssue({
           code: zodFr.ZodIssueCode.custom,
           message: errorMessage,
@@ -131,7 +131,9 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
             <>
               <FormLayout>
                 <RadioOuiNon
-                  legend="Y a-t-il eu des augmentations individuelles durant la période de référence ?"
+                  legend={`Y a-t-il eu des ${
+                    indicateur === 2 ? "augmentations" : "promotions"
+                  } individuelles durant la période de référence ?`}
                   name="calculable"
                   triggerValidation={true}
                 />
@@ -143,6 +145,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     période de référence, doit être renseigné par CSP.
                   </p>
                   <AlternativeTable
+                    withTooltip
                     header={[
                       {
                         label: "Catégories socioprofessionnelles",
