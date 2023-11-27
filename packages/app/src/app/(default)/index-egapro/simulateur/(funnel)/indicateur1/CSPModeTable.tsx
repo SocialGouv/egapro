@@ -179,7 +179,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
 
-      <Tooltip id="error-tooltip" />
+      <Tooltip id="error-tooltip" disableStyleInjection="core" />
     </>
   );
 };

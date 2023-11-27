@@ -258,7 +258,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
-                  <Tooltip id="error-tooltip" />
+                  <Tooltip id="error-tooltip" disableStyleInjection="core" />
                 </>
               ) : (
                 computableCheck === "non" && (

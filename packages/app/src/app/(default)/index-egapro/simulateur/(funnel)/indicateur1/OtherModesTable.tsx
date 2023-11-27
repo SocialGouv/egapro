@@ -199,7 +199,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
 
-      <Tooltip id="error-tooltip" />
+      <Tooltip id="error-tooltip" disableStyleInjection="core" />
     </>
   );
 };

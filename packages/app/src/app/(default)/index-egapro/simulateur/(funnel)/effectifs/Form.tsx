@@ -344,7 +344,7 @@ export const EffectifsForm = () => {
           }}
           nextDisabled={!isValid || !total}
         />
-        <Tooltip id="error-tooltip" />
+        <Tooltip id="error-tooltip" disableStyleInjection="core" />
       </form>
     </FormProvider>
   );
