@@ -52,7 +52,7 @@ const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadva
     "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
   "women-women":
     "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
-  equality: "Les femmes et les hommes sont à égalité",
+  equality: "Les femmes et les hommes sont à parité",
 };
 
 const infoModal = createModal({

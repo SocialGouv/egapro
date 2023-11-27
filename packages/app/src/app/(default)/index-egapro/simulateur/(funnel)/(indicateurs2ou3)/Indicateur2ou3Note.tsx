@@ -13,7 +13,7 @@ interface Props {
 }
 
 const augmentations = {
-  advantageTextStart: "Écart de taux d'augmentations individuelles",
+  advantageTextStart: "Écart d'augmentations",
   ncText: "L'indicateur écart de taux d'augmentations individuelles est non calculable",
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
   resultText: "Écart global de taux d'augmentations en valeur absolue",
@@ -22,7 +22,7 @@ const augmentations = {
 };
 
 const promotions = {
-  advantageTextStart: "Écart de taux de promotions",
+  advantageTextStart: "Écart de promotions",
   ncText: "L'indicateur écart de taux de promotions est non calculable",
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
   resultText: "Écart global de taux de promotions en valeur absolue",
@@ -40,12 +40,12 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
   let advantageText = "";
   try {
     computed = computer.compute();
-    if (computed.favorablePopulation === "equality") {
-      advantageText = "Les femmes et les hommes sont à égalité";
+    if (computed.favorablePopulation === "equality" || computed.result === 0) {
+      advantageText = "Les femmes et les hommes sont à parité";
     } else {
       advantageText = `${texts.advantageTextStart} `;
       if (computed.note === NOTE_MAX) {
-        advantageText += "constaté ";
+        advantageText += "est ";
       }
       advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
