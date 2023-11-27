@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/navigation";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
+import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
@@ -257,6 +258,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
+                  <Tooltip id="error-tooltip" />
                 </>
               ) : (
                 computableCheck === "non" && (

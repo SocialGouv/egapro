@@ -264,7 +264,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
                           <div
-                            data-tooltip-id="my-tooltip"
+                            data-tooltip-id="error-tooltip"
                             data-tooltip-content={col?.stateRelatedMessage?.toString() ?? ""}
                           >
                             <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
@@ -287,7 +287,12 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                   {row.cols.map((col, k) => (
                     <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                       {isDsfrInputProps(col) ? (
-                        <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                        <div
+                          data-tooltip-id="error-tooltip"
+                          data-tooltip-content={col?.stateRelatedMessage?.toString() ?? ""}
+                        >
+                          <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                        </div>
                       ) : (
                         col
                       )}

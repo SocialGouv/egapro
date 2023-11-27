@@ -19,9 +19,8 @@ import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import { FormProvider, useForm } from "react-hook-form";
+import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
@@ -345,6 +344,7 @@ export const EffectifsForm = () => {
           }}
           nextDisabled={!isValid || !total}
         />
+        <Tooltip id="error-tooltip" />
       </form>
     </FormProvider>
   );

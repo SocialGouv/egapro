@@ -14,6 +14,7 @@ import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useFormContext } from "react-hook-form";
+import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
@@ -177,6 +178,8 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       <CenteredContainer fluid py="1w">
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
+
+      <Tooltip id="error-tooltip" />
     </>
   );
 };

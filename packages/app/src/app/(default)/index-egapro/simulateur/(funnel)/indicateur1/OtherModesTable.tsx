@@ -12,6 +12,7 @@ import { type Any } from "@common/utils/types";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
@@ -82,16 +83,21 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                 removeRemunerations(remunerationsFieldIndex);
               },
               categoryLabel: (
-                <Input
-                  label="Niveau ou coefficient hiérarchique"
-                  hideLabel
-                  classes={{ message: "fr-sr-only" }}
-                  state={errors.remunerations?.[remunerationsFieldIndex]?.name && "error"}
-                  stateRelatedMessage={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
-                  nativeInputProps={{
-                    ...register(`remunerations.${remunerationsFieldIndex}.name`),
-                  }}
-                />
+                <div
+                  data-tooltip-id="error-tooltip"
+                  data-tooltip-content={errors.remunerations?.[remunerationsFieldIndex]?.name?.message ?? ""}
+                >
+                  <Input
+                    label="Niveau ou coefficient hiérarchique"
+                    hideLabel
+                    classes={{ message: "fr-sr-only" }}
+                    state={errors.remunerations?.[remunerationsFieldIndex]?.name && "error"}
+                    stateRelatedMessage={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
+                    nativeInputProps={{
+                      ...register(`remunerations.${remunerationsFieldIndex}.name`),
+                    }}
+                  />
+                </div>
               ),
               ...(() => {
                 const categoryContent = remunerationsField.category as Record<AgeRange.Enum, CountAndAverageSalaries>;
@@ -192,6 +198,8 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
       <CenteredContainer fluid py="1w">
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
+
+      <Tooltip id="error-tooltip" />
     </>
   );
 };
