@@ -195,7 +195,7 @@ export const RecapSimu = () => {
           editLink={simulateurPath("indicateur2et3")}
           content={(() => {
             if (!resultIndicateurDeuxTrois) return;
-            if (!funnel.indicateur2and3.calculable) {
+            if (funnel.indicateur2and3.calculable === "non") {
               return (
                 <IndicatorNote
                   noBorder

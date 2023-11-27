@@ -43,18 +43,8 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
     // noop
   }
 
-  const isAllValuesZero = computer.getInput()?.men === 0 && computer.getInput()?.women === 0;
-
   return (
     <ClientAnimate>
-      {isAllValuesZero && (
-        <Alert
-          className={fr.cx("fr-mb-4w")}
-          small
-          severity="warning"
-          description="Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations."
-        />
-      )}
       {isNC ? (
         <IndicatorNote
           noBorder={noBorder}

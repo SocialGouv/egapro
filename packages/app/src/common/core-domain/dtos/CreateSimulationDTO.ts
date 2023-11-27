@@ -134,7 +134,7 @@ export const createSteps = {
   indicateur3: indicateur2or3,
   indicateur2and3: zodFr.discriminatedUnion("calculable", [
     zodFr.object({
-      calculable: zodFr.literal(true),
+      calculable: zodFr.literal("oui"),
       raisedCount: zodFr
         .object({
           women: positiveIntOrEmptyString,
@@ -145,8 +145,7 @@ export const createSteps = {
         }),
     }),
     zodFr.object({
-      calculable: zodFr.literal(false),
-      raisedCount: zodFr.never().optional(),
+      calculable: zodFr.literal("non"),
     }),
   ]),
   indicateur4: zodFr.discriminatedUnion("calculable", [
