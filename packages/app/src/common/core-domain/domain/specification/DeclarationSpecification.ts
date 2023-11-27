@@ -45,9 +45,8 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
         "Le Siren de l'entreprise déclarante et la tranche d'entreprise est obligatoire.",
       );
 
-      assert(typeof declaration.company.hasRecoveryPlan !== "undefined", "Le champ plan de relance est obligatoire.");
-
       assert(typeof declaration.sufficientPeriod !== "undefined", "Le champ période suffisante est obligatoire.");
+
       // Règle 3 & 3 bis - Relation période non suffisante et indicateurs
       if (!declaration.sufficientPeriod) {
         assert(
@@ -58,6 +57,16 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
             !declaration.maternityLeaves &&
             !declaration.highRemunerations,
           "Les indicateurs ne doivent pas être renseignés quand la période n'est pas suffisante.",
+        );
+
+        assert(
+          declaration.endReferencePeriod === undefined,
+          "La fin de période de référence doit être absente quand la période n'est pas suffisante.",
+        );
+
+        assert(
+          !declaration.publication && declaration.company.hasRecoveryPlan === undefined,
+          "La publication et la question du plan de relance ne doivent pas être renseignées quand la période n'est pas suffisante.",
         );
       } else {
         if (declaration.company.range?.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
@@ -83,14 +92,18 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
         assert(declaration.remunerations, "L'indicateur des rémunérations doit être renseigné.");
         assert(declaration.maternityLeaves, "L'indicateur des congés maternité doit être renseigné.");
         assert(declaration.highRemunerations, "L'indicateur des hautes rémunérations doit être renseigné.");
+
+        assert(declaration.endReferencePeriod, "La fin de période de référence doit être renseignée.");
       }
 
       if (declaration.index) {
-        // Règle 4 - Assertion date de publication
+        // Règle 4 - Assertion date de publication et plan de relance
         assert(
           declaration.publication?.date,
           "la date de publication doit être renseignée quand l'index est calculable",
         );
+
+        assert(declaration.company.hasRecoveryPlan !== undefined, "Le champ plan de relance est obligatoire.");
 
         const modalitiesPresence = declaration.publication?.modalities ? 1 : 0;
         const urlPresence = declaration.publication?.url ? 1 : 0;
@@ -291,133 +304,6 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
             "Les mesures correctives doivent être renseignées pour un index < 75.",
           );
         }
-
-        // type IndicatorRule17 = { progressObjective?: string; result?: Percentage } | undefined;
-
-        // const indicators17 = [
-        //   [declaration.remunerations, "rémunérations"],
-        //   [declaration.salaryRaises, "augmentations"],
-        //   [declaration.promotions, "promotions"],
-        //   [declaration.salaryRaisesAndPromotions, "augmentations et promotions"],
-        //   [declaration.maternityLeaves, "congés maternité"],
-        // ] as Array<[IndicatorRule17, string]>;
-
-        // // Règle 17 - Cas d'absences des objectifs de progression
-        // if (
-        //   declaration.year.getValue() < 2021 ||
-        //   !declaration.index ||
-        //   declaration.index.getValue() >= OBJECTIVES_THRESHOLD
-        // ) {
-        //   for (const [indicator, name] of indicators17) {
-        //     assert(
-        //       indicator?.progressObjective === undefined,
-        //       `L'objectif de progression pour l'indicateur ${name} doit être absent.`,
-        //     );
-        //   }
-        //   assert(
-        //     declaration.publication.measuresPublishDate === undefined,
-        //     "La date de publication des mesures doit être absente.",
-        //   );
-        //   assert(
-        //     declaration.publication.objectivesPublishDate === undefined,
-        //     "La date de publication des objectifs doit être absente.",
-        //   );
-        //   assert(
-        //     declaration.publication.modalities === undefined,
-        //     "Les modalités des objectifs mesures doivent être absentes.",
-        //   );
-        // }
-
-        // // Règle 18 - Date de publication des objectifs de progression
-        // if (declaration.year.getValue() >= 2021 && declaration.index && declaration.index.getValue() <= 85) {
-        //   assert(
-        //     declaration.publication.objectivesPublishDate !== undefined,
-        //     "La date de publication des objectifs de progression doit être renseignée.",
-        //   );
-        //   assert(
-        //     isAfter(declaration.publication.objectivesPublishDate, declaration.endReferencePeriod),
-        //     "La date de publication des objectifs de progression doit être postérieure à la fin de période de référence.",
-        //   );
-        // }
-
-        // // Règle 19 - Date de publication des mesures
-        // if (declaration.year.getValue() >= 2021 && declaration.index && declaration.index.getValue() < 75) {
-        //   assert(
-        //     declaration.publication.measuresPublishDate !== undefined,
-        //     "La date de publication des mesures doit être renseignée.",
-        //   );
-        //   assert(
-        //     isAfter(declaration.publication.measuresPublishDate, declaration.endReferencePeriod),
-        //     "La date de publication des mesures doit être postérieure à la fin de période de référence.",
-        //   );
-        // }
-
-        // // Règle 20 - Présence des modalités des objectifs et mesures
-        // if (
-        //   declaration.year.getValue() >= 2021 &&
-        //   declaration.index &&
-        //   declaration.index.getValue() < 75 &&
-        //   !declaration.publication.url
-        // ) {
-        //   assert(
-        //     declaration.publication.modalities !== undefined,
-        //     "Les modalités des objectifs mesures doivent être renseignées.",
-        //   );
-        // }
-
-        // // Règle 20 bis - Absence des modalités des objectifs et mesures pour les entreprises publiant sur internet dont l'année est supérieure ou égal à 2021
-        // if (
-        //   declaration.year.getValue() >= 2021 &&
-        //   declaration.index &&
-        //   declaration.index.getValue() >= 75 &&
-        //   declaration.index.getValue() <= 85 &&
-        //   declaration.publication.url
-        // ) {
-        //   assert(
-        //     declaration.publication.modalities === undefined,
-        //     "Les modalités des objectifs mesures doivent être absentes.",
-        //   );
-        // }
-
-        // type IndicatorRule20 =
-        //   | { notComputableReason?: string; progressObjective?: string; result?: Percentage }
-        //   | undefined;
-
-        // const indicators20 = [
-        //   [declaration.remunerations, "rémunérations", indicatorNoteMax.remunerations],
-        //   [declaration.salaryRaises, "augmentations", indicatorNoteMax.augmentations],
-        //   [declaration.promotions, "promotions", indicatorNoteMax.promotions],
-        //   [declaration.salaryRaisesAndPromotions, indicatorNoteMax["augmentations-et-promotions"]],
-        //   [declaration.maternityLeaves, "congés maternité", indicatorNoteMax["conges-maternite"]],
-        // ] as Array<[IndicatorRule20, string, number]>;
-
-        // // Règle 21 - Absence d'un objectif pour un indicateur
-        // if (declaration.year.getValue() >= 2021) {
-        //   for (const [indicator, name, max] of indicators20) {
-        //     if (indicator?.notComputableReason || indicator?.result?.getValue() === max) {
-        //       assert(
-        //         indicator.progressObjective === undefined,
-        //         `L'objectif de progression pour l'indicateur ${name} doit être absent.`,
-        //       );
-        //     }
-        //   }
-        // }
-
-        // // Règle 21 bis - Présence d'un objectif pour un indicateur
-        // if (declaration.year.getValue() >= 2021) {
-        //   for (const [indicator, name, max] of indicators20) {
-        //     if (
-        //       !indicator?.notComputableReason &&
-        //       indicator?.result?.getValue() &&
-        //       indicator?.result?.getValue() < max
-        //     ) {
-        //       assert(
-        //         indicator.progressObjective !== undefined,
-        //         `L'objectif de progression pour l'indicateur ${name} doit être renseigné.`,
-        //       );
-        //     }
-        //   }
-        // }
       }
     } catch (error: unknown) {
       if (error instanceof AssertionError) {
