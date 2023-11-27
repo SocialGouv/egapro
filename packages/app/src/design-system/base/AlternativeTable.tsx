@@ -5,6 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { type TableProps } from "@codegouvfr/react-dsfr/Table";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
+import { ERROR_TOOLTIP_ID, TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
 
 import styles from "./AlternativeTable.module.css";
@@ -263,12 +264,9 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                     {subItem.cols?.map((col, k) => (
                       <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
-                          <div
-                            data-tooltip-id="error-tooltip"
-                            data-tooltip-content={col?.stateRelatedMessage?.toString() ?? ""}
-                          >
+                          <TooltipWrapper id={ERROR_TOOLTIP_ID} message={col?.stateRelatedMessage?.toString()}>
                             <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                          </div>
+                          </TooltipWrapper>
                         ) : (
                           col
                         )}
@@ -287,12 +285,9 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                   {row.cols.map((col, k) => (
                     <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                       {isDsfrInputProps(col) ? (
-                        <div
-                          data-tooltip-id="error-tooltip"
-                          data-tooltip-content={col?.stateRelatedMessage?.toString() ?? ""}
-                        >
+                        <TooltipWrapper id={ERROR_TOOLTIP_ID} message={col?.stateRelatedMessage?.toString()}>
                           <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                        </div>
+                        </TooltipWrapper>
                       ) : (
                         col
                       )}

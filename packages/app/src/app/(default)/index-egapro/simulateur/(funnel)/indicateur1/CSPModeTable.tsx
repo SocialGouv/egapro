@@ -12,6 +12,7 @@ import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
+import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useFormContext } from "react-hook-form";
 import { Tooltip } from "react-tooltip";
@@ -179,7 +180,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
 
-      <Tooltip id="error-tooltip" disableStyleInjection="core" />
+      <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
     </>
   );
 };

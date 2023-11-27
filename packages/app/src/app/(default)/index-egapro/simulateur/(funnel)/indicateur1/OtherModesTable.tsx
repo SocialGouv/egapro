@@ -9,6 +9,7 @@ import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@co
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { type Any } from "@common/utils/types";
+import { ERROR_TOOLTIP_ID, TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -83,9 +84,9 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                 removeRemunerations(remunerationsFieldIndex);
               },
               categoryLabel: (
-                <div
-                  data-tooltip-id="error-tooltip"
-                  data-tooltip-content={errors.remunerations?.[remunerationsFieldIndex]?.name?.message ?? ""}
+                <TooltipWrapper
+                  id={ERROR_TOOLTIP_ID}
+                  message={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
                 >
                   <Input
                     label="Niveau ou coefficient hiérarchique"
@@ -97,7 +98,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                       ...register(`remunerations.${remunerationsFieldIndex}.name`),
                     }}
                   />
-                </div>
+                </TooltipWrapper>
               ),
               ...(() => {
                 const categoryContent = remunerationsField.category as Record<AgeRange.Enum, CountAndAverageSalaries>;
@@ -199,7 +200,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
 
-      <Tooltip id="error-tooltip" disableStyleInjection="core" />
+      <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
     </>
   );
 };

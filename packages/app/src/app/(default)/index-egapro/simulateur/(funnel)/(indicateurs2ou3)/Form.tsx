@@ -18,6 +18,8 @@ import { zodFr } from "@common/utils/zod";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -258,7 +260,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
-                  <Tooltip id="error-tooltip" disableStyleInjection="core" />
+                  <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
                 </>
               ) : (
                 computableCheck === "non" && (

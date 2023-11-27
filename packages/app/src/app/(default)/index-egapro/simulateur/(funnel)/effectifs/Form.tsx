@@ -12,6 +12,7 @@ import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -344,7 +345,7 @@ export const EffectifsForm = () => {
           }}
           nextDisabled={!isValid || !total}
         />
-        <Tooltip id="error-tooltip" disableStyleInjection="core" />
+        <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
       </form>
     </FormProvider>
   );
