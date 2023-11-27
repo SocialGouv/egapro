@@ -1,3 +1,5 @@
+import { DeclarationOpmcSpecification } from "@common/core-domain/domain/specification/DeclarationOpmcSpecification";
+import { DeclarationSpecification } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { OPMC_OPEN_DURATION_AFTER_EDIT } from "@common/dict";
@@ -73,7 +75,15 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
       declarationAggregate.objectivesMeasuresModalities = new NonEmptyString(opmc.modalitesPublicationObjectifsMesures);
     }
 
-    await this.declarationRepo.saveDeclarationOpmcWithIndex(declarationAggregate);
+    const specification = new DeclarationSpecification();
+    const specificationOpmc = new DeclarationOpmcSpecification();
+
+    // Validation on declaration and declaration with OPMC rules.
+    if (specification.isSatisfiedBy(declaration) && specificationOpmc.isSatisfiedBy(declarationAggregate)) {
+      await this.declarationRepo.saveDeclarationOpmcWithIndex(declarationAggregate);
+    } else {
+      throw specification.lastError;
+    }
   }
 }
 
