@@ -149,7 +149,7 @@ const IndexEgapro = () => {
                     children: "Consulter le site du Ministère du Travail",
                     priority: "secondary",
                     linkProps: {
-                      href: "#",
+                      href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
                     },
                   },
                   {
