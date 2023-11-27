@@ -16,7 +16,7 @@ export class DeclarationOpmcSpecification extends AbstractSpecification<Declarat
   private _lastError?: ValidationError;
 
   public isSatisfiedBy(declarationOpmc: DeclarationOpmc): boolean {
-    console.debug("declaration dans specification:", JSON.stringify(declarationOpmc, null, 2));
+    // console.debug("declaration dans specification:", JSON.stringify(declarationOpmc, null, 2));
 
     try {
       type IndicatorRule17 = { progressObjective?: string; result?: Percentage } | undefined;
