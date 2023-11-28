@@ -221,7 +221,7 @@ export const RecapSimu = () => {
 
             return (
               <>
-                <Indicateur2et3Note computer={computerIndicateurDeuxTrois} isValid noBorder detailed />
+                <Indicateur2et3Note computed={computerIndicateurDeuxTrois.compute()} isValid noBorder detailed />
               </>
             );
           })()}

@@ -120,12 +120,12 @@ export const Indic2and3Form = () => {
     womenCount: totalCspWomen,
   });
 
-  let result = {} as IndicateurDeuxTroisComputer.ComputedResult;
+  let computed = undefined as IndicateurDeuxTroisComputer.ComputedResult | undefined;
 
   const canCompute = indicateur2and3Computer.canCompute();
 
   if (canCompute) {
-    result = indicateur2and3Computer.compute();
+    computed = indicateur2and3Computer.compute();
   }
 
   const onSubmit = async (formData: Indic2and3FormType) => {
@@ -233,7 +233,7 @@ export const Indic2and3Form = () => {
                             text={
                               <>
                                 Écart en valeur absolue :{" "}
-                                <strong>{percentFormat.format(result?.result / 100 ?? 0)}</strong>
+                                <strong>{computed?.result ? percentFormat.format(computed.result / 100) : ""}</strong>
                               </>
                             }
                           />
@@ -245,7 +245,7 @@ export const Indic2and3Form = () => {
                                 <strong>
                                   <sup>*</sup>
                                 </strong>{" "}
-                                : <strong>{result?.equivalentEmployeeCountGap}</strong>
+                                : <strong>{computed?.equivalentEmployeeCountGap}</strong>
                               </>
                             }
                           />
@@ -255,7 +255,8 @@ export const Indic2and3Form = () => {
                               variant={["sm"]}
                               text={
                                 <>
-                                  <strong>*</strong> {ifAdvantageText[result.ifadvantage]}
+                                  <strong>*</strong>
+                                  {computed?.ifadvantage ? ifAdvantageText[computed.ifadvantage] : ""}
                                 </>
                               }
                             />
@@ -273,7 +274,7 @@ export const Indic2and3Form = () => {
                       />
                     )}
 
-                    <Indicateur2et3Note computer={indicateur2and3Computer} isValid={isValid} />
+                    {computed && <Indicateur2et3Note computed={computed} isValid={isValid} />}
                   </>
                 ) : (
                   computableCheck === "non" && (

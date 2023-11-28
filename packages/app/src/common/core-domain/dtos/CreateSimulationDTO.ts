@@ -140,8 +140,13 @@ export const createSteps = {
           women: positiveIntOrEmptyString,
           men: positiveIntOrEmptyString,
         })
-        .refine(({ women, men }) => women !== 0 || men !== 0, {
-          message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+        .superRefine(({ women, men }, ctx) => {
+          if ((women === 0 || women === "") && (men === 0 || men === "")) {
+            ctx.addIssue({
+              code: zodFr.ZodIssueCode.custom,
+              message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+            });
+          }
         }),
     }),
     zodFr.object({
