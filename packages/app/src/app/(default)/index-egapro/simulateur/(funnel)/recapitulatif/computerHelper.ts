@@ -44,7 +44,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
       });
     }
   } else {
-    if (funnel.indicateur2.calculable) {
+    if (funnel.indicateur2.calculable === "oui") {
       computerIndicateurDeux.setInput(
         getPourcentagesAugmentationPromotionsWithCount(
           funnel.effectifs.csp,
@@ -53,7 +53,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
       );
     }
 
-    if (funnel.indicateur3.calculable) {
+    if (funnel.indicateur3.calculable === "oui") {
       computerIndicateurTrois.setInput(
         getPourcentagesAugmentationPromotionsWithCount(
           funnel.effectifs.csp,
@@ -74,8 +74,10 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
   const resultIndicateurUn = computerIndicateurUn.compute();
   const resultIndicateurDeuxTrois =
     isLessThan250 && funnel.indicateur2and3.calculable === "oui" && computerIndicateurDeuxTrois.compute();
-  const resultIndicateurDeux = !isLessThan250 && funnel.indicateur2.calculable && computerIndicateurDeux.compute();
-  const resultIndicateurTrois = !isLessThan250 && funnel.indicateur3.calculable && computerIndicateurTrois.compute();
+  const resultIndicateurDeux =
+    !isLessThan250 && funnel.indicateur2.calculable === "oui" && computerIndicateurDeux.compute();
+  const resultIndicateurTrois =
+    !isLessThan250 && funnel.indicateur3.calculable === "oui" && computerIndicateurTrois.compute();
   const resultIndicateurQuatre = funnel.indicateur4.calculable && computerIndicateurQuatre.compute();
   const resultIndicateurCinq = computerIndicateurCinq.compute();
 
@@ -91,8 +93,8 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
         ]
       : [
           computerIndicateurUn,
-          funnel.indicateur2.calculable ? computerIndicateurDeux : null,
-          funnel.indicateur3.calculable ? computerIndicateurTrois : null,
+          funnel.indicateur2.calculable === "oui" ? computerIndicateurDeux : null,
+          funnel.indicateur3.calculable === "oui" ? computerIndicateurTrois : null,
           funnel.indicateur4.calculable ? computerIndicateurQuatre : null,
           computerIndicateurCinq,
         ],
