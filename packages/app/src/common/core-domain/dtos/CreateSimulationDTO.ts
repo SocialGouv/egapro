@@ -134,19 +134,23 @@ export const createSteps = {
   indicateur3: indicateur2or3,
   indicateur2and3: zodFr.discriminatedUnion("calculable", [
     zodFr.object({
-      calculable: zodFr.literal(true),
+      calculable: zodFr.literal("oui"),
       raisedCount: zodFr
         .object({
           women: positiveIntOrEmptyString,
           men: positiveIntOrEmptyString,
         })
-        .refine(({ women, men }) => !(!women && !men), {
-          message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+        .superRefine(({ women, men }, ctx) => {
+          if ((women === 0 || women === "") && (men === 0 || men === "")) {
+            ctx.addIssue({
+              code: zodFr.ZodIssueCode.custom,
+              message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
+            });
+          }
         }),
     }),
     zodFr.object({
-      calculable: zodFr.literal(false),
-      raisedCount: zodFr.never().optional(),
+      calculable: zodFr.literal("non"),
     }),
   ]),
   indicateur4: zodFr.discriminatedUnion("calculable", [

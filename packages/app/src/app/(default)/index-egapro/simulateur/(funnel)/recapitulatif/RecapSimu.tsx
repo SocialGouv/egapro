@@ -195,7 +195,7 @@ export const RecapSimu = () => {
           editLink={simulateurPath("indicateur2et3")}
           content={(() => {
             if (!resultIndicateurDeuxTrois) return;
-            if (!funnel.indicateur2and3.calculable) {
+            if (funnel.indicateur2and3.calculable === "non") {
               return (
                 <IndicatorNote
                   noBorder
@@ -221,7 +221,7 @@ export const RecapSimu = () => {
 
             return (
               <>
-                <Indicateur2et3Note computer={computerIndicateurDeuxTrois} isValid noBorder detailed />
+                <Indicateur2et3Note computed={computerIndicateurDeuxTrois.compute()} isValid noBorder detailed />
               </>
             );
           })()}
