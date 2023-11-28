@@ -89,7 +89,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
     const indicateur2 = simulation.indicateur2;
 
     // We only care of filling the indicator if it is computable.
-    if (indicateur2.calculable && resultIndicateurDeux) {
+    if (indicateur2.calculable === "oui" && resultIndicateurDeux) {
       dto["augmentations"] = {
         estCalculable: "oui",
         catégories: {
