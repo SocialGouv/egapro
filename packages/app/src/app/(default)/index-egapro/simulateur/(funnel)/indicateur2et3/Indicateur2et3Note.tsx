@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { type IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
 import { percentFormat } from "@common/utils/number";
@@ -113,21 +112,23 @@ export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detail
             />
           ) : (
             <>
-              {!simple && (
-                <Alert
-                  className={fr.cx("fr-mb-4w", "fr-mt-4w")}
-                  small
-                  severity="info"
-                  description="Le nombre de points retenu pour l'indicateur est le plus élevé."
-                />
-              )}
               <IndicatorNote
                 noBorder={noBorder}
                 note={computed?.note !== undefined && isValid ? computed.note : "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
-                  isValid ? advantageText : "Veuillez remplir le reste des taux d'augmentations pour avoir votre note"
+                  isValid ? (
+                    <>
+                      {advantageText}
+                      <br />
+                      {computed?.noteEquivalentEmployeeCountGap === computed?.notePercent && (
+                        <>La nombre de points le plus élevé a été retenu.</>
+                      )}
+                    </>
+                  ) : (
+                    "Veuillez remplir le reste des taux d'augmentations pour avoir votre note"
+                  )
                 }
               />
             </>
