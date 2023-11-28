@@ -122,7 +122,7 @@ export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detail
                     <>
                       {advantageText}
                       <br />
-                      {computed?.noteEquivalentEmployeeCountGap === computed?.notePercent && (
+                      {computed?.noteEquivalentEmployeeCountGap !== computed?.notePercent && (
                         <>La nombre de points le plus élevé a été retenu.</>
                       )}
                     </>
