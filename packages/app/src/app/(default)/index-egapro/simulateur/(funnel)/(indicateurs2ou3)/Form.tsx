@@ -64,6 +64,7 @@ const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps[
   });
 
 const useStore = storePicker(useSimuFunnelStore);
+
 export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const router = useRouter();
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
@@ -123,6 +124,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   computer.setInput(pourcentagesWithCount);
 
   let result = {} as ComputedResult;
+
   const canCompute = computer.canCompute();
   if (canCompute) {
     result = computer.compute();
@@ -262,7 +264,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.women?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.women`, {
-                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
+                                  setValueAs: value => (value === "" ? "" : parseFloat(value)),
                                   deps: [`pourcentages.${category}.men`, "root.totalPourcentages"],
                                 }),
                                 title: categoryError?.women?.message,
@@ -277,7 +279,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.men?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.men`, {
-                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
+                                  setValueAs: value => (value === "" ? "" : parseFloat(value)),
                                   deps: [`pourcentages.${category}.women`, "root.totalPourcentages"],
                                 }),
                                 title: categoryError?.men?.message,
@@ -288,6 +290,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                             },
                             (() => {
                               const { resultRaw: groupResult } = computer.computeGroup(category);
+
                               return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
                                 ? precisePercentFormat.format(groupResult / 100)
                                 : "-";
