@@ -130,7 +130,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
               )}
               <IndicatorNote
                 noBorder={noBorder}
-                note={computed?.note && isValid ? computed.note : "-"}
+                note={computed?.note !== undefined && isValid ? computed.note : "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
