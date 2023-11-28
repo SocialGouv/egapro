@@ -71,7 +71,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
     const indicateur2et3 = simulation.indicateur2and3;
 
     if (indicateur2et3) {
-      if (indicateur2et3.calculable && resultIndicateurDeuxTrois) {
+      if (indicateur2et3.calculable === "oui" && resultIndicateurDeuxTrois) {
         {
           dto["augmentations-et-promotions"] = {
             estCalculable: "oui",

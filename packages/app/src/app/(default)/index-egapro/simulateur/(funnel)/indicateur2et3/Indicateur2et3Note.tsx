@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
+import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { type IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
 import { percentFormat } from "@common/utils/number";
 import { IndicatorNote } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 
 interface Props {
-  computer: IndicateurDeuxTroisComputer;
+  computed: IndicateurDeuxTroisComputer.ComputedResult | undefined;
   /**
    * If true, display the note with more details about the result.
    *
@@ -21,41 +21,23 @@ interface Props {
   simple?: boolean;
 }
 
-export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detailed }: Props) => {
-  const NOTE_MAX = computer.getMaxNote();
+export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detailed }: Props) => {
+  const NOTE_MAX = indicatorNoteMax["augmentations-et-promotions"];
 
-  let computed: IndicateurDeuxTroisComputer.ComputedResult | null = null;
-  let isNC = false;
   let advantageText = "";
-  try {
-    computed = computer.compute();
+
+  if (computed) {
     if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à égalité";
     } else {
       advantageText = "Écart d'augmentations ";
-      if (computed.note === NOTE_MAX) {
-        advantageText += "constaté ";
-      }
       advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
-    isNC = !computer.canCompute();
-  } catch {
-    // noop
   }
-
-  const isAllValuesZero = computer.getInput()?.men === 0 && computer.getInput()?.women === 0;
 
   return (
     <ClientAnimate>
-      {isAllValuesZero && (
-        <Alert
-          className={fr.cx("fr-mb-4w")}
-          small
-          severity="warning"
-          description="Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations."
-        />
-      )}
-      {isNC ? (
+      {!computed ? (
         <IndicatorNote
           noBorder={noBorder}
           note="NC"
@@ -116,7 +98,7 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
           {computed?.remunerationsCompensated ? (
             <IndicatorNote
               noBorder={noBorder}
-              note={NOTE_MAX}
+              note={isValid ? NOTE_MAX : "-"}
               max={NOTE_MAX}
               text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles"
               legend={
@@ -130,21 +112,23 @@ export const Indicateur2et3Note = ({ computer, isValid, simple, noBorder, detail
             />
           ) : (
             <>
-              {!simple && (
-                <Alert
-                  className={fr.cx("fr-mb-4w", "fr-mt-4w")}
-                  small
-                  severity="info"
-                  description="Le nombre de points retenu pour l'indicateur est le plus élevé."
-                />
-              )}
               <IndicatorNote
                 noBorder={noBorder}
-                note={computed?.note && isValid ? computed.note : "-"}
+                note={computed?.note !== undefined && isValid ? computed.note : "-"}
                 max={NOTE_MAX}
                 text="Nombre de points obtenus à l'indicateur écart de taux d'augmentations"
                 legend={
-                  isValid ? advantageText : "Veuillez remplir le reste des taux d'augmentations pour avoir votre note"
+                  isValid ? (
+                    <>
+                      {advantageText}
+                      <br />
+                      {computed?.noteEquivalentEmployeeCountGap !== computed?.notePercent && (
+                        <>La nombre de points le plus élevé a été retenu.</>
+                      )}
+                    </>
+                  ) : (
+                    "Veuillez remplir le reste des taux d'augmentations pour avoir votre note"
+                  )
                 }
               />
             </>
