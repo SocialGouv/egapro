@@ -84,10 +84,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                 removeRemunerations(remunerationsFieldIndex);
               },
               categoryLabel: (
-                <TooltipWrapper
-                  id={ERROR_TOOLTIP_ID}
-                  message={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
-                >
+                <TooltipWrapper message={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}>
                   <Input
                     label="Niveau ou coefficient hiérarchique"
                     hideLabel
