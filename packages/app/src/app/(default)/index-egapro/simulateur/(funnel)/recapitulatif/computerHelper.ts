@@ -35,7 +35,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
   // set inputs
   computerIndicateurUn.setInput(flattenRemunerations(remuWithCount));
   if (isLessThan250) {
-    if (funnel.indicateur2and3.calculable) {
+    if (funnel.indicateur2and3.calculable === "oui") {
       computerIndicateurDeuxTrois.setInput({
         men: funnel.indicateur2and3.raisedCount.men || 0,
         women: funnel.indicateur2and3.raisedCount.women || 0,
@@ -73,7 +73,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
   // compute results
   const resultIndicateurUn = computerIndicateurUn.compute();
   const resultIndicateurDeuxTrois =
-    isLessThan250 && funnel.indicateur2and3.calculable && computerIndicateurDeuxTrois.compute();
+    isLessThan250 && funnel.indicateur2and3.calculable === "oui" && computerIndicateurDeuxTrois.compute();
   const resultIndicateurDeux = !isLessThan250 && funnel.indicateur2.calculable && computerIndicateurDeux.compute();
   const resultIndicateurTrois = !isLessThan250 && funnel.indicateur3.calculable && computerIndicateurTrois.compute();
   const resultIndicateurQuatre = funnel.indicateur4.calculable && computerIndicateurQuatre.compute();
@@ -85,7 +85,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
     isLessThan250
       ? [
           computerIndicateurUn,
-          funnel.indicateur2and3.calculable ? computerIndicateurDeuxTrois : null,
+          funnel.indicateur2and3.calculable === "oui" ? computerIndicateurDeuxTrois : null,
           funnel.indicateur4.calculable ? computerIndicateurQuatre : null,
           computerIndicateurCinq,
         ]

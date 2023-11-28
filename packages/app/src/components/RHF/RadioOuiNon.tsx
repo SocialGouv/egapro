@@ -14,7 +14,7 @@ export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false 
 
   disabled = disabled || false;
 
-  const fieldMethods = register(name);
+  const field = register(name);
 
   return (
     <RadioButtons
@@ -25,12 +25,12 @@ export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false 
           label: "Oui",
           nativeInputProps: {
             value: "oui",
-            ...fieldMethods,
+            ...field,
             onChange: e => {
               if (triggerValidation) {
-                trigger(); // Rerun validation to set isValid.
+                trigger(); // Rerun validation to set isValid and errors.
               }
-              fieldMethods.onChange(e); // Inform RHF to update its state.
+              field.onChange(e); // Inform RHF to update its state.
             },
           },
         },
@@ -38,12 +38,12 @@ export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false 
           label: "Non",
           nativeInputProps: {
             value: "non",
-            ...register(name),
+            ...field,
             onChange: e => {
               if (triggerValidation) {
-                trigger(); // Rerun validation to set isValid.
+                trigger(); // Rerun validation to set isValid and errors.
               }
-              fieldMethods.onChange(e); // Inform RHF to update its state.
+              field.onChange(e); // Inform RHF to update its state.
             },
           },
         },
