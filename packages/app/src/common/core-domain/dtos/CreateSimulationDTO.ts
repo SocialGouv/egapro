@@ -11,6 +11,10 @@ const positiveIntOrEmptyString = zodFr
   .literal("")
   .or(zodFr.number().int("La valeur doit être un entier").nonnegative());
 
+const positivePercentageFloatOrEmptyString = zodFr
+  .literal("")
+  .or(zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"));
+
 const singleAgeRangeSchema = zodFr.object({
   women: positiveIntOrEmptyString,
   men: positiveIntOrEmptyString,
@@ -79,18 +83,17 @@ const otherAgeRangeNumbers = zodFr.array(
 
 const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
   zodFr.object({
-    calculable: zodFr.literal(true),
+    calculable: zodFr.literal("oui"),
     pourcentages: zodFr.record(
       zodFr.nativeEnum(CSP.Enum),
       zodFr.object({
-        women: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
-        men: zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"),
+        women: positivePercentageFloatOrEmptyString,
+        men: positivePercentageFloatOrEmptyString,
       }),
     ),
   }),
   zodFr.object({
-    calculable: zodFr.literal(false),
-    pourcentages: zodFr.never().optional(),
+    calculable: zodFr.literal("non"),
   }),
 ]);
 

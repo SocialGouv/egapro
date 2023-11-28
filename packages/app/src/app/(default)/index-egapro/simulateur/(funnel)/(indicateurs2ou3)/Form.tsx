@@ -1,41 +1,39 @@
 "use client";
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
 import { IndicateurTroisComputer } from "@common/core-domain/computers/IndicateurTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { categories } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
-import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import {
   type CreateSimulationDTO,
   type CreateSimulationWorkforceRangeMoreThan250DTO,
   createSteps,
 } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { precisePercentFormat } from "@common/utils/number";
 import { zodFr } from "@common/utils/zod";
 import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
-import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
-import { redirect, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Controller, type FieldErrors, FormProvider, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
-import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
+import { useSimuFunnelStore } from "../useSimuFunnelStore";
 import { getPourcentagesAugmentationPromotionsWithCount, prepareIndicateurUnComputer } from "../utils";
 import { Indicateur2ou3Note } from "./Indicateur2ou3Note";
 
 type Indic2or3FormType = z.infer<typeof createSteps.indicateur2>;
-type Indic2or3FormTypeWhenCalculable = Extract<Indic2or3FormType, { calculable: true }>;
+type Indic2or3FormTypeWhenCalculable = Extract<Indic2or3FormType, { calculable: "oui" }>;
 
 const indicateur1Computer = new IndicateurUnComputer();
 const indicateur2Computer = new IndicateurDeuxComputer(indicateur1Computer);
@@ -47,30 +45,32 @@ interface Indic2or3FormProps {
 
 const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps["indicateur"]) =>
   createSteps.indicateur3.superRefine((obj, ctx) => {
-    const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
-      (prev, current) => current.women + current.men + prev,
-      0,
-    );
+    if (obj.calculable === "oui" && !isEmpty(obj.pourcentages)) {
+      const totalPourcentages = Object.values(obj.pourcentages ?? {}).reduce(
+        (prev, current) => (current.women || 0) + (current.men || 0) + prev,
+        0,
+      );
 
-    if (obj.calculable && !isEmpty(obj.pourcentages) && totalPourcentages === 0) {
-      const errorMessage =
-        "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
-      ctx.addIssue({
-        code: zodFr.ZodIssueCode.custom,
-        message: errorMessage,
-        path: ["root.totalPourcentages"],
-      });
+      if (totalPourcentages === 0) {
+        const errorMessage =
+          "Tous les champs ne peuvent être à 0 s'il y a eu des " + (indicateur === 2 ? "augmentations" : "promotions");
+        ctx.addIssue({
+          code: zodFr.ZodIssueCode.custom,
+          message: errorMessage,
+          path: ["root.totalPourcentages"],
+        });
+      }
     }
   });
 
 const useStore = storePicker(useSimuFunnelStore);
+
 export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const router = useRouter();
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
-  const hydrated = useSimuFunnelStoreHasHydrated();
-  const [lastPourcentages, setLastPourcentages] = useState<Indic2or3FormTypeWhenCalculable["pourcentages"]>();
-
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeMoreThan250DTO> | undefined;
+  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
+
   const computer = indicateur === 2 ? indicateur2Computer : indicateur3Computer;
   const indicateurNav = indicateur === 2 ? NAVIGATION.indicateur2 : NAVIGATION.indicateur3;
   const AideSimulationIndicateurDeuxOurTrois =
@@ -79,6 +79,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const methods = useForm<Indic2or3FormType>({
     mode: "onChange",
     resolver: zodResolver(schemaWithGlobalPourcentageVerification(indicateur)),
+    shouldUnregister: true,
     defaultValues: funnel?.[`indicateur${indicateur}`],
   });
 
@@ -87,47 +88,27 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     handleSubmit,
     register,
     watch,
-    getValues,
-    reset,
-    trigger,
-    control,
   } = methods;
-
-  if (!hydrated) {
-    return <SkeletonForm fields={2} />;
-  }
-
-  if (!funnel?.effectifs) {
-    redirect(simulateurPath("effectifs"));
-  }
-
-  if (!funnel.indicateur1) {
-    redirect(simulateurPath("indicateur1"));
-  }
-
-  if (_funnel?.effectifs?.workforceRange === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
-    redirect(simulateurPath("indicateur2et3"));
-  }
-
-  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const computableCheck = watch("calculable");
   const pourcentages = watch("pourcentages");
 
+  let pourcentagesWithCount = undefined as Percentages | undefined;
+
   // add count from "funnel.effectifs.csp" to pourcentages, to make pourcentagesWithCount
-  const pourcentagesWithCount = getPourcentagesAugmentationPromotionsWithCount(
-    funnel.effectifs.csp,
-    pourcentages as Percentages,
-  );
+  if (funnel?.effectifs) {
+    pourcentagesWithCount = getPourcentagesAugmentationPromotionsWithCount(
+      funnel.effectifs.csp,
+      pourcentages as Percentages,
+    );
 
-  computer.setInput(pourcentagesWithCount);
+    computer.setInput(pourcentagesWithCount);
+  }
 
-  let result = {} as ComputedResult;
-  const canCompute = computer.canCompute();
-  if (canCompute) {
-    result = computer.compute();
-  } else {
-    register("calculable", { value: false });
+  let computed = {} as ComputedResult;
+
+  if (computer.canCompute()) {
+    computed = computer.compute();
   }
 
   const onSubmit = async (indicateur2or3: Indic2or3FormType) => {
@@ -139,7 +120,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <ClientAnimate>
-          {!canCompute ? (
+          {!computed ? (
             <Alert
               className="fr-mb-3w"
               severity="warning"
@@ -149,62 +130,13 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
           ) : (
             <>
               <FormLayout>
-                <Controller
-                  control={control}
+                <RadioOuiNon
+                  legend="Y a-t-il eu des augmentations individuelles durant la période de référence ?"
                   name="calculable"
-                  render={({ field, fieldState }) => (
-                    <RadioButtons
-                      orientation="horizontal"
-                      legend={
-                        indicateur === 2
-                          ? "Y a-t-il eu des augmentations individuelles (hors promotions) durant la période de référence ?"
-                          : "Y a-t-il eu des promotions durant la période de référence ?"
-                      }
-                      hintText={
-                        indicateur === 2 &&
-                        "Il s'agit des augmentations individuelles du salaire de base, en excluant celles liées à une promotion."
-                      }
-                      state={fieldState.error && "error"}
-                      stateRelatedMessage={fieldState.error?.message}
-                      options={[
-                        {
-                          label: "Oui",
-                          nativeInputProps: {
-                            ...field,
-                            value: 1,
-                            defaultChecked: field.value === true,
-                            onChange() {
-                              reset({
-                                calculable: true,
-                                pourcentages: lastPourcentages,
-                              });
-                              trigger("pourcentages");
-                              setLastPourcentages(void 0);
-                              field.onChange(true);
-                            },
-                          },
-                        },
-                        {
-                          label: "Non",
-                          nativeInputProps: {
-                            ...field,
-                            value: 0,
-                            defaultChecked: field.value === false,
-                            onChange() {
-                              setLastPourcentages(getValues("pourcentages"));
-                              reset({
-                                calculable: false,
-                              });
-                              field.onChange(false);
-                            },
-                          },
-                        },
-                      ]}
-                    />
-                  )}
+                  triggerValidation={true}
                 />
               </FormLayout>
-              {computableCheck ? (
+              {computableCheck === "oui" ? (
                 <>
                   <p>
                     Le pourcentage de femmes et d’hommes ayant été {indicateur === 2 ? "augmentés" : "promus"} durant la
@@ -234,8 +166,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     body={categories.map<AlternativeTableProps.BodyContent>(category => ({
                       categoryLabel: CSP.Label[category],
                       ...(() => {
-                        const womenCount = pourcentagesWithCount[category]?.womenCount ?? 0;
-                        const menCount = pourcentagesWithCount[category]?.menCount ?? 0;
+                        const womenCount = pourcentagesWithCount?.[category]?.womenCount ?? 0;
+                        const menCount = pourcentagesWithCount?.[category]?.menCount ?? 0;
 
                         if (womenCount < 10 && menCount < 10) {
                           return {
@@ -262,8 +194,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.women?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.women`, {
-                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
-                                  deps: [`pourcentages.${category}.men`, "root.totalPourcentages"],
+                                  setValueAs: setValueAsFloatOrEmptyString,
+                                  deps: ["root.totalPourcentages"],
                                 }),
                                 title: categoryError?.women?.message,
                                 type: "number",
@@ -277,8 +209,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                               stateRelatedMessage: categoryError?.men?.message,
                               nativeInputProps: {
                                 ...register(`pourcentages.${category}.men`, {
-                                  setValueAs: value => (value === "" ? "" : parseInt(value, 10)),
-                                  deps: [`pourcentages.${category}.women`, "root.totalPourcentages"],
+                                  setValueAs: setValueAsFloatOrEmptyString,
+                                  deps: ["root.totalPourcentages"],
                                 }),
                                 title: categoryError?.men?.message,
                                 type: "number",
@@ -288,7 +220,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                             },
                             (() => {
                               const { resultRaw: groupResult } = computer.computeGroup(category);
-                              return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
+
+                              return !isNaN(groupResult) && isFinite(groupResult)
                                 ? precisePercentFormat.format(groupResult / 100)
                                 : "-";
                             })(),
@@ -305,8 +238,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                       {
                         label: (
                           <strong>
-                            {!Number.isNaN(result.resultRaw) && Number.isFinite(result.resultRaw)
-                              ? precisePercentFormat.format(result.resultRaw / 100)
+                            {!isNaN(computed.resultRaw) && isFinite(computed.resultRaw)
+                              ? precisePercentFormat.format(computed.resultRaw / 100)
                               : "-"}
                           </strong>
                         ),
@@ -326,7 +259,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   </Box>
                 </>
               ) : (
-                computableCheck === false && (
+                computableCheck === "non" && (
                   <Alert
                     className="fr-mb-3w"
                     severity="info"
