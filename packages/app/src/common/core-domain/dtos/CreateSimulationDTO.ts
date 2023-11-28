@@ -140,7 +140,7 @@ export const createSteps = {
           women: positiveIntOrEmptyString,
           men: positiveIntOrEmptyString,
         })
-        .refine(({ women, men }) => !(!women && !men), {
+        .refine(({ women, men }) => women !== 0 || men !== 0, {
           message: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
         }),
     }),
