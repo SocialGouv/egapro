@@ -233,7 +233,9 @@ export const Indic2and3Form = () => {
                             text={
                               <>
                                 Écart en valeur absolue :{" "}
-                                <strong>{computed?.result ? percentFormat.format(computed.result / 100) : ""}</strong>
+                                <strong>
+                                  {computed?.result !== undefined ? percentFormat.format(computed.result / 100) : ""}
+                                </strong>
                               </>
                             }
                           />
