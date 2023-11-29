@@ -83,6 +83,7 @@ export type AlternativeTableProps = Pick<TableProps, "bordered"> & {
   classeName?: CxArg;
   footer?: AlternativeTableProps.ColumnsFooter[];
   header: AlternativeTableProps.Columns[];
+  withTooltip?: boolean;
 };
 
 export namespace AlternativeTableProps {
@@ -188,6 +189,8 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
 export const AlternativeTable = (props: AlternativeTableProps) => {
   const { header, footer, body, classeName, bordered } = props;
 
+  const withTooltip = props.withTooltip ?? false;
+
   const validated = validateProps(props);
   const maxCols = validated.maxCols;
 
@@ -196,147 +199,157 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
   }
 
   return (
-    <div
-      className={cx(
-        fr.cx("fr-table", {
-          "fr-table--bordered": bordered,
-        }),
-        styles.table,
-        classeName,
-      )}
-    >
-      <table>
-        <thead>
-          <tr>
-            {header.map((headerCol, index) => (
-              <AlternativeTableCell
-                key={`th-top-${index}`}
-                as="th"
-                rowSpan={headerCol.subCols ? void 0 : 2}
-                colSpan={headerCol.subCols?.length ?? void 0}
-                scope={headerCol.subCols ? "colgroup" : "col"}
-                align="center"
-                informations={headerCol.informations}
-              >
-                {headerCol.label}
-              </AlternativeTableCell>
-            ))}
-          </tr>
-          <tr>
-            {header.map(
-              (headerCol, index) =>
-                headerCol.subCols?.map((headerSubCol, subIndex) => (
-                  <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
-                    {headerSubCol.label}
-                  </AlternativeTableCell>
-                )),
-            )}
-          </tr>
-        </thead>
-
-        {body.map((row, index) => {
-          return (
-            <tbody key={row.key || index}>
-              {row.subRows ? (
-                row.subRows.map((subItem, j) => (
-                  <tr key={`${row.key || index}-${j}`}>
-                    {j === 0 && (
-                      <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
-                        <span>{row.categoryLabel}</span>
-                        {row.isDeletable && (
-                          <Button
-                            iconId="fr-icon-delete-fill"
-                            priority="tertiary"
-                            title="Label button"
-                            className={styles["delete-btn"]}
-                            size="small"
-                            type="button"
-                            onClick={row.onClickDelete}
-                          >
-                            Supprimer
-                          </Button>
-                        )}
-                      </AlternativeTableCell>
-                    )}
-                    <AlternativeTableCell as="th" scope="row">
-                      {subItem.label}
+    <>
+      <div
+        className={cx(
+          fr.cx("fr-table", {
+            "fr-table--bordered": bordered,
+          }),
+          styles.table,
+          classeName,
+        )}
+      >
+        <table>
+          <thead>
+            <tr>
+              {header.map((headerCol, index) => (
+                <AlternativeTableCell
+                  key={`th-top-${index}`}
+                  as="th"
+                  rowSpan={headerCol.subCols ? void 0 : 2}
+                  colSpan={headerCol.subCols?.length ?? void 0}
+                  scope={headerCol.subCols ? "colgroup" : "col"}
+                  align="center"
+                  informations={headerCol.informations}
+                >
+                  {headerCol.label}
+                </AlternativeTableCell>
+              ))}
+            </tr>
+            <tr>
+              {header.map(
+                (headerCol, index) =>
+                  headerCol.subCols?.map((headerSubCol, subIndex) => (
+                    <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
+                      {headerSubCol.label}
                     </AlternativeTableCell>
-                    {subItem.cols?.map((col, k) => (
-                      <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
+                  )),
+              )}
+            </tr>
+          </thead>
+
+          {body.map((row, index) => {
+            return (
+              <tbody key={row.key || index}>
+                {row.subRows ? (
+                  row.subRows.map((subItem, j) => (
+                    <tr key={`${row.key || index}-${j}`}>
+                      {j === 0 && (
+                        <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
+                          <span>{row.categoryLabel}</span>
+                          {row.isDeletable && (
+                            <Button
+                              iconId="fr-icon-delete-fill"
+                              priority="tertiary"
+                              title="Label button"
+                              className={styles["delete-btn"]}
+                              size="small"
+                              type="button"
+                              onClick={row.onClickDelete}
+                            >
+                              Supprimer
+                            </Button>
+                          )}
+                        </AlternativeTableCell>
+                      )}
+                      <AlternativeTableCell as="th" scope="row">
+                        {subItem.label}
+                      </AlternativeTableCell>
+                      {subItem.cols?.map((col, k) => (
+                        <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
+                          {isDsfrInputProps(col) ? (
+                            withTooltip ? (
+                              <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
+                                <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                              </TooltipWrapper>
+                            ) : (
+                              <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                            )
+                          ) : (
+                            col
+                          )}
+                        </AlternativeTableCell>
+                      ))}
+                      {subItem.mergedLabel && (
+                        <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)} align="center">
+                          <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
+                        </AlternativeTableCell>
+                      )}
+                    </tr>
+                  ))
+                ) : row.cols ? (
+                  <tr>
+                    <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
+                    {row.cols.map((col, k) => (
+                      <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
-                          <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
+                          withTooltip ? (
+                            <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
+                              <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                            </TooltipWrapper>
+                          ) : (
                             <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                          </TooltipWrapper>
+                          )
                         ) : (
                           col
                         )}
                       </AlternativeTableCell>
                     ))}
-                    {subItem.mergedLabel && (
-                      <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)} align="center">
-                        <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
+                    {row.mergedLabel && (
+                      <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
+                        <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
                       </AlternativeTableCell>
                     )}
                   </tr>
-                ))
-              ) : row.cols ? (
-                <tr>
-                  <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
-                  {row.cols.map((col, k) => (
-                    <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
-                      {isDsfrInputProps(col) ? (
-                        <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                          <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                        </TooltipWrapper>
-                      ) : (
-                        col
-                      )}
+                ) : (
+                  <tr>
+                    <AlternativeTableCell as="th" scope="rowgroup">
+                      {row.categoryLabel}
                     </AlternativeTableCell>
-                  ))}
-                  {row.mergedLabel && (
-                    <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
+                    <AlternativeTableCell colSpan={maxCols - 1} align="center">
                       <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
                     </AlternativeTableCell>
-                  )}
-                </tr>
-              ) : (
-                <tr>
-                  <AlternativeTableCell as="th" scope="rowgroup">
-                    {row.categoryLabel}
-                  </AlternativeTableCell>
-                  <AlternativeTableCell colSpan={maxCols - 1} align="center">
-                    <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
-                  </AlternativeTableCell>
-                </tr>
-              )}
-            </tbody>
-          );
-        })}
+                  </tr>
+                )}
+              </tbody>
+            );
+          })}
 
-        {footer && (
-          <tfoot>
-            <tr>
-              {footer.map((footerCol, index) => (
-                <AlternativeTableCell
-                  key={`td-footer-${index}`}
-                  colSpan={footerCol.colspan}
-                  align={footerCol.align ?? "center"}
-                >
-                  <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
-                    {footerCol.label}
-                  </span>
-                  {typeof footerCol.data !== "undefined" && (
-                    <>
-                      <br />
-                      <strong>{footerCol.data}</strong>
-                    </>
-                  )}
-                </AlternativeTableCell>
-              ))}
-            </tr>
-          </tfoot>
-        )}
-      </table>
-    </div>
+          {footer && (
+            <tfoot>
+              <tr>
+                {footer.map((footerCol, index) => (
+                  <AlternativeTableCell
+                    key={`td-footer-${index}`}
+                    colSpan={footerCol.colspan}
+                    align={footerCol.align ?? "center"}
+                  >
+                    <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
+                      {footerCol.label}
+                    </span>
+                    {typeof footerCol.data !== "undefined" && (
+                      <>
+                        <br />
+                        <strong>{footerCol.data}</strong>
+                      </>
+                    )}
+                  </AlternativeTableCell>
+                ))}
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+    </>
   );
 };

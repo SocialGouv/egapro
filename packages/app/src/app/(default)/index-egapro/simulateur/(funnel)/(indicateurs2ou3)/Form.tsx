@@ -19,14 +19,12 @@ import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
-import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/navigation";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
@@ -259,7 +257,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   <Box mb="4w">
                     <Indicateur2ou3Note computer={computer} indicateur={indicateur} isValid={isValid} />
                   </Box>
-                  <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
                 </>
               ) : (
                 computableCheck === "non" && (

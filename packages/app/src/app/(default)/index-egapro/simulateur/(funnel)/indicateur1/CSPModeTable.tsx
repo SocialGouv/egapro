@@ -12,10 +12,8 @@ import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
-import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useFormContext } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
@@ -119,6 +117,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
         />
       )}
       <AlternativeTable
+        withTooltip
         header={getCommonHeader({ firstColumnLabel: "Catégorie socio-professionnelle" })}
         body={categories.map((categoryName, categoryIndex) => {
           const categoryId = categoryName;
@@ -179,8 +178,6 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       <CenteredContainer fluid py="1w">
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
-
-      <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
     </>
   );
 };

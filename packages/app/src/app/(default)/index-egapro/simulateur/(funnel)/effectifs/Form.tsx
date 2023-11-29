@@ -12,7 +12,6 @@ import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { ERROR_TOOLTIP_ID } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +20,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
@@ -255,6 +253,7 @@ export const EffectifsForm = () => {
             />
           )}
           <AlternativeTable
+            withTooltip
             header={[
               {
                 label: "Catégorie socioprofessionnelle",
@@ -345,7 +344,6 @@ export const EffectifsForm = () => {
           }}
           nextDisabled={!isValid || !total}
         />
-        <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
       </form>
     </FormProvider>
   );

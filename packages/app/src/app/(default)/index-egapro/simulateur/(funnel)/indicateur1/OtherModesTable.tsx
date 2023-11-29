@@ -8,12 +8,12 @@ import {
 import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
-import { ERROR_TOOLTIP_ID, TooltipWrapper } from "@components/utils/TooltipWrapper";
+import { TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import { type z } from "zod";
 
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
@@ -67,6 +67,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
   return (
     <>
       <AlternativeTable
+        withTooltip
         classeName={fr.cx("fr-mb-1w")}
         header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique" })}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
@@ -115,7 +116,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                           )?.womenCount?.message,
                           nativeInputProps: {
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`, {
-                              setValueAs: (value: string) => parseInt(value, 10) || 0,
+                              setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`,
                             }),
                             type: "number",
@@ -132,7 +133,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                           )?.menCount?.message,
                           nativeInputProps: {
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`, {
-                              setValueAs: (value: string) => parseInt(value, 10) || 0,
+                              setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`,
                             }),
                             type: "number",
@@ -196,8 +197,6 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
       <CenteredContainer fluid py="1w">
         <Indicateur1Note computer={computer} isValid={isValid} />
       </CenteredContainer>
-
-      <Tooltip id={ERROR_TOOLTIP_ID} disableStyleInjection="core" />
     </>
   );
 };
