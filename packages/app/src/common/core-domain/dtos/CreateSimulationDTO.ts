@@ -18,7 +18,12 @@ const positiveIntOrEmptyString = zodFr
 
 const positivePercentageFloatOrEmptyString = zodFr
   .literal("")
-  .or(zodFr.number().nonnegative("Le pourcentage ne peut pas être inférieur à 0").lte(100, "Le pourcentage ne peut pas être supérieur à 100%"));
+  .or(
+    zodFr
+      .number()
+      .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
+      .lte(100, "Le pourcentage ne peut pas être supérieur à 100%"),
+  );
 
 const singleAgeRangeSchema = zodFr.object({
   women: positiveIntOrEmptyString,
