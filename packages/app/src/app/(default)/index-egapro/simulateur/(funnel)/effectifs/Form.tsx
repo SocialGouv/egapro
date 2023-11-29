@@ -253,6 +253,7 @@ export const EffectifsForm = () => {
             />
           )}
           <AlternativeTable
+            withTooltip
             header={[
               {
                 label: "Catégorie socioprofessionnelle",
