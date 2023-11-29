@@ -1,5 +1,6 @@
 import "./global.css";
 import "@design-system/utils/client/skeleton/Skeleton.scss";
+import "react-tooltip/dist/react-tooltip.css";
 
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";

@@ -8,7 +8,9 @@ import {
 import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
+import { TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -65,6 +67,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
   return (
     <>
       <AlternativeTable
+        withTooltip
         classeName={fr.cx("fr-mb-1w")}
         header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique" })}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
@@ -82,16 +85,18 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                 removeRemunerations(remunerationsFieldIndex);
               },
               categoryLabel: (
-                <Input
-                  label="Niveau ou coefficient hiérarchique"
-                  hideLabel
-                  classes={{ message: "fr-sr-only" }}
-                  state={errors.remunerations?.[remunerationsFieldIndex]?.name && "error"}
-                  stateRelatedMessage={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
-                  nativeInputProps={{
-                    ...register(`remunerations.${remunerationsFieldIndex}.name`),
-                  }}
-                />
+                <TooltipWrapper message={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}>
+                  <Input
+                    label="Niveau ou coefficient hiérarchique"
+                    hideLabel
+                    classes={{ message: "fr-sr-only" }}
+                    state={errors.remunerations?.[remunerationsFieldIndex]?.name && "error"}
+                    stateRelatedMessage={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
+                    nativeInputProps={{
+                      ...register(`remunerations.${remunerationsFieldIndex}.name`),
+                    }}
+                  />
+                </TooltipWrapper>
               ),
               ...(() => {
                 const categoryContent = remunerationsField.category as Record<AgeRange.Enum, CountAndAverageSalaries>;
@@ -111,7 +116,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                           )?.womenCount?.message,
                           nativeInputProps: {
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`, {
-                              setValueAs: (value: string) => parseInt(value, 10) || 0,
+                              setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`,
                             }),
                             type: "number",
@@ -128,7 +133,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                           )?.menCount?.message,
                           nativeInputProps: {
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`, {
-                              setValueAs: (value: string) => parseInt(value, 10) || 0,
+                              setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`,
                             }),
                             type: "number",
