@@ -117,6 +117,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
         />
       )}
       <AlternativeTable
+        withTooltip
         header={getCommonHeader({ firstColumnLabel: "Catégorie socio-professionnelle" })}
         body={categories.map((categoryName, categoryIndex) => {
           const categoryId = categoryName;

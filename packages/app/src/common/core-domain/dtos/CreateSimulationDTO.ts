@@ -9,11 +9,21 @@ import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators
 
 const positiveIntOrEmptyString = zodFr
   .literal("")
-  .or(zodFr.number().int("La valeur doit être un entier").nonnegative());
+  .or(
+    zodFr
+      .number()
+      .int("La valeur doit être un entier")
+      .nonnegative({ message: "Le nombre ne peut pas être inférieur à 0" }),
+  );
 
 const positivePercentageFloatOrEmptyString = zodFr
   .literal("")
-  .or(zodFr.number().nonnegative().lte(100, "La valeur ne peut pas être supérieure à 100%"));
+  .or(
+    zodFr
+      .number()
+      .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
+      .lte(100, "Le pourcentage ne peut pas être supérieur à 100%"),
+  );
 
 const singleAgeRangeSchema = zodFr.object({
   women: positiveIntOrEmptyString,
@@ -116,8 +126,8 @@ export const createSteps = {
             .record(
               zodFr.nativeEnum(AgeRange.Enum),
               zodFr.object({
-                womenSalary: zodFr.number().positive(),
-                menSalary: zodFr.number().positive(),
+                womenSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                menSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
               }),
             )
             .optional(),
@@ -177,8 +187,14 @@ export const createSteps = {
   ]),
   indicateur5: zodFr
     .object({
-      women: zodFr.number().nonnegative().max(10),
-      men: zodFr.number().nonnegative().max(10),
+      women: zodFr
+        .number()
+        .nonnegative("Le nombre ne peut pas être inférieur à 0")
+        .max(10, "Le nombre ne peut pas être supérieur à 10"),
+      men: zodFr
+        .number()
+        .nonnegative("Le nombre ne peut pas être inférieur à 0")
+        .max(10, "Le nombre ne peut pas être supérieur à 10"),
     })
     .refine(({ women, men }) => women + men <= 10, {
       message:

@@ -49,6 +49,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.46.2",
     "react-json-view": "^1.21.3",
+    "react-tooltip": "^5.24.0",
     "server-only": "^0.0.1",
     "sharp": "^0.32.6",
     "simple-zustand-devtools": "^1.1.0",
