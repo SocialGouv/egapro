@@ -1,3 +1,4 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import { type Any } from "@common/utils/types";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { DebugButton } from "@components/utils/debug/DebugButton";
@@ -35,7 +36,7 @@ const collectErrors = (issues: Any, path: string[] = []): Array<[string, string]
  */
 
 export const ReactHookFormDebug = (props: Props) => {
-  const { watch, formState } = useFormContext();
+  const { watch, formState, trigger } = useFormContext();
 
   // Can't use ...rest because nothing is returned since formState is a Proxy and must be destructured explicitly.
   const { errors, isValid, isDirty } = props.formState || formState;
@@ -54,6 +55,9 @@ export const ReactHookFormDebug = (props: Props) => {
           <legend>
             <DebugButton obj={errors} alwaysOn infoText="Form Errors" /> Form Errors
           </legend>
+          <Button type="button" onClick={() => trigger()}>
+            Manually trigger validation
+          </Button>
           <pre>
             isValid: {JSON.stringify(isValid, null, 2)}
             <br />
