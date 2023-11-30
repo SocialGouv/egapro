@@ -5,6 +5,7 @@ import { DebugButton } from "@components/utils/debug/DebugButton";
 import { type FieldValues, type FormState, useFormContext } from "react-hook-form";
 
 interface Props {
+  collapseData?: boolean;
   formState?: FormState<FieldValues>;
 }
 
@@ -38,6 +39,8 @@ const collectErrors = (issues: Any, path: string[] = []): Array<[string, string]
 export const ReactHookFormDebug = (props: Props) => {
   const { watch, formState, trigger } = useFormContext();
 
+  const { collapseData = true } = props;
+
   // Can't use ...rest because nothing is returned since formState is a Proxy and must be destructured explicitly.
   const { errors, isValid, isDirty } = props.formState || formState;
 
@@ -49,7 +52,12 @@ export const ReactHookFormDebug = (props: Props) => {
         <legend>React Hook Form Debug</legend>
         <fieldset>
           <legend>Form Values</legend>
-          <pre>{JSON.stringify(watch(), null, 2)}</pre>
+
+          <details open={!collapseData}>
+            <summary>Click me to expand form state data</summary>
+
+            <pre>{JSON.stringify(watch(), null, 2)}</pre>
+          </details>
         </fieldset>
         <fieldset>
           <legend>
