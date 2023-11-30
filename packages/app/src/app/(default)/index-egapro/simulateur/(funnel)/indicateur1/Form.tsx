@@ -26,6 +26,7 @@ import { getIsEnoughEmployees } from "./tableUtil";
 
 const schemaOtherComputer = new IndicateurUnComputer();
 schemaOtherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
+
 const formSchema = createSteps.indicateur1
   .and(createSteps.effectifs)
   .superRefine(({ mode, remunerations, csp }, ctx) => {
