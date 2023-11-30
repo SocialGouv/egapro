@@ -55,15 +55,10 @@ export const zodPercentageSchema = zodPositiveOrZeroNumberSchema.refine(percenta
   message: "La valeur maximale est 100",
 });
 
-// Useful for input which could be empty or a number. NaN is of type number but is not serializable, and is replaced by null with JSON.stringify. So we need to allow null.
-export const zodNumberOrNaNOrNull = z
-  .null()
-  .or(z.nan().or(z.number({ invalid_type_error: "La valeur doit être un nombre" })));
-
 export const zodNumberOrEmptyString = z
   .literal("", {
     errorMap: () => ({
-      message: "La valeur est obligatoire ",
+      message: "La valeur est obligatoire",
     }),
   })
   .or(z.number({ invalid_type_error: "La valeur doit être un nombre" }));

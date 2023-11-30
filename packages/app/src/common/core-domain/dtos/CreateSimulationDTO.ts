@@ -10,7 +10,7 @@ import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators
 const positiveIntOrEmptyString = zodFr
   .literal("", {
     errorMap: () => ({
-      message: "La valeur est obligatoire ",
+      message: "Le champ est requis ",
     }),
   })
   .or(
@@ -23,7 +23,7 @@ const positiveIntOrEmptyString = zodFr
 const positivePercentageFloatOrEmptyString = zodFr
   .literal("", {
     errorMap: () => ({
-      message: "La valeur est obligatoire ",
+      message: "Le champ est requis ",
     }),
   })
   .or(
@@ -134,8 +134,12 @@ export const createSteps = {
             .record(
               zodFr.nativeEnum(AgeRange.Enum),
               zodFr.object({
-                womenSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
-                menSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                womenSalary: zodFr
+                  .number({ invalid_type_error: "Le champ est requis" })
+                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                menSalary: zodFr
+                  .number({ invalid_type_error: "Le champ est requis" })
+                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
               }),
             )
             .optional(),
