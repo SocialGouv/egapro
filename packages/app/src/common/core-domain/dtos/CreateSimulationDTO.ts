@@ -8,7 +8,11 @@ import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/Compan
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 
 const positiveIntOrEmptyString = zodFr
-  .literal("")
+  .literal("", {
+    errorMap: () => ({
+      message: "La valeur est obligatoire ",
+    }),
+  })
   .or(
     zodFr
       .number()
@@ -17,7 +21,11 @@ const positiveIntOrEmptyString = zodFr
   );
 
 const positivePercentageFloatOrEmptyString = zodFr
-  .literal("")
+  .literal("", {
+    errorMap: () => ({
+      message: "La valeur est obligatoire ",
+    }),
+  })
   .or(
     zodFr
       .number()
@@ -55,13 +63,13 @@ const otherAgeRangesSchema = zodFr
   .object({
     womenCount: positiveIntOrEmptyString,
     menCount: positiveIntOrEmptyString,
-    womenSalary: positiveIntOrEmptyString,
-    menSalary: positiveIntOrEmptyString,
+    womenSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
+    menSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
   })
   .superRefine((obj, ctx) => {
     if (obj.womenCount && obj.menCount) {
       if (obj.womenCount >= 3 && obj.menCount >= 3) {
-        if (obj.womenSalary === 0) {
+        if (obj.womenSalary === 0 || obj.womenSalary === "" || obj.womenSalary === undefined) {
           ctx.addIssue({
             path: ["womenSalary"],
             code: zodFr.ZodIssueCode.too_small,
@@ -71,7 +79,7 @@ const otherAgeRangesSchema = zodFr
           });
         }
 
-        if (obj.menSalary === 0) {
+        if (obj.menSalary === 0 || obj.menSalary === "" || obj.menSalary === undefined) {
           ctx.addIssue({
             path: ["menSalary"],
             code: zodFr.ZodIssueCode.too_small,
