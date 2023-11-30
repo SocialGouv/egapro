@@ -27,7 +27,7 @@ import style from "./UESForm.module.scss";
 type ValidateResult = { data?: string; ok: true } | { error: string; ok: false };
 
 const formSchema = zodFr.object({
-  nom: z.string().trim().nonempty(),
+  nom: z.string().trim().min(1),
   entreprises: z
     .array(
       z.object({
