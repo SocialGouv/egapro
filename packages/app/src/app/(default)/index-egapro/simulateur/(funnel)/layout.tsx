@@ -1,4 +1,3 @@
-import { ReactTooltip } from "@components/utils/ReactTooltip";
 import { CenteredContainer } from "@design-system";
 import { type PropsWithChildren } from "react";
 
@@ -27,7 +26,6 @@ const SimulateurFunnelLayout = ({ children }: PropsWithChildren) => {
         <Stepper />
       </CenteredContainer>
       {children}
-      <ReactTooltip />
     </>
   );
 };

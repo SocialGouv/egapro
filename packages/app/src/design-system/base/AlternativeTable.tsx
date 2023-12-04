@@ -5,6 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { type TableProps } from "@codegouvfr/react-dsfr/Table";
 import { cx, type CxArg } from "@codegouvfr/react-dsfr/tools/cx";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
+import { ReactTooltip } from "@components/utils/ReactTooltip";
 import { TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { type PropsWithChildren, type ReactNode, useId } from "react";
 
@@ -268,13 +269,9 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       {subItem.cols?.map((col, k) => (
                         <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                           {isDsfrInputProps(col) ? (
-                            withTooltip ? (
-                              <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                                <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                              </TooltipWrapper>
-                            ) : (
+                            <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
                               <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                            )
+                            </TooltipWrapper>
                           ) : (
                             col
                           )}
@@ -293,13 +290,9 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                     {row.cols.map((col, k) => (
                       <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
-                          withTooltip ? (
-                            <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                              <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                            </TooltipWrapper>
-                          ) : (
+                          <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
                             <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
-                          )
+                          </TooltipWrapper>
                         ) : (
                           col
                         )}
@@ -349,6 +342,8 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
             </tfoot>
           )}
         </table>
+
+        {withTooltip && <ReactTooltip />}
       </div>
     </>
   );
