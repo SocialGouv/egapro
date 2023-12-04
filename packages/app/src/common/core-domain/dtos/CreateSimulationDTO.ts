@@ -8,7 +8,11 @@ import { CompanyWorkforceRange } from "../domain/valueObjects/declaration/Compan
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
 
 const positiveIntOrEmptyString = zodFr
-  .literal("")
+  .literal("", {
+    errorMap: () => ({
+      message: "Le champ est requis ",
+    }),
+  })
   .or(
     zodFr
       .number()
@@ -17,7 +21,11 @@ const positiveIntOrEmptyString = zodFr
   );
 
 const positivePercentageFloatOrEmptyString = zodFr
-  .literal("")
+  .literal("", {
+    errorMap: () => ({
+      message: "Le champ est requis ",
+    }),
+  })
   .or(
     zodFr
       .number()
@@ -55,13 +63,13 @@ const otherAgeRangesSchema = zodFr
   .object({
     womenCount: positiveIntOrEmptyString,
     menCount: positiveIntOrEmptyString,
-    womenSalary: positiveIntOrEmptyString,
-    menSalary: positiveIntOrEmptyString,
+    womenSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
+    menSalary: positiveIntOrEmptyString.or(zodFr.undefined()),
   })
   .superRefine((obj, ctx) => {
     if (obj.womenCount && obj.menCount) {
       if (obj.womenCount >= 3 && obj.menCount >= 3) {
-        if (obj.womenSalary === 0) {
+        if (obj.womenSalary === 0 || obj.womenSalary === "" || obj.womenSalary === undefined) {
           ctx.addIssue({
             path: ["womenSalary"],
             code: zodFr.ZodIssueCode.too_small,
@@ -71,7 +79,7 @@ const otherAgeRangesSchema = zodFr
           });
         }
 
-        if (obj.menSalary === 0) {
+        if (obj.menSalary === 0 || obj.menSalary === "" || obj.menSalary === undefined) {
           ctx.addIssue({
             path: ["menSalary"],
             code: zodFr.ZodIssueCode.too_small,
@@ -85,8 +93,8 @@ const otherAgeRangesSchema = zodFr
   });
 const otherAgeRangeNumbers = zodFr.array(
   zodFr.object({
-    name: zodFr.string().nonempty(),
-    categoryId: zodFr.string().nonempty(),
+    name: zodFr.string().min(1, "Le champ est requis"),
+    categoryId: zodFr.string().min(1),
     category: zodFr.record(zodFr.nativeEnum(AgeRange.Enum), otherAgeRangesSchema),
   }),
 );
@@ -121,13 +129,17 @@ export const createSteps = {
       remunerations: zodFr.array(
         zodFr.object({
           name: zodFr.nativeEnum(CSP.Enum),
-          categoryId: zodFr.string().nonempty(),
+          categoryId: zodFr.string().min(1),
           category: zodFr
             .record(
               zodFr.nativeEnum(AgeRange.Enum),
               zodFr.object({
-                womenSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
-                menSalary: zodFr.number().positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                womenSalary: zodFr
+                  .number({ invalid_type_error: "Le champ est requis" })
+                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                menSalary: zodFr
+                  .number({ invalid_type_error: "Le champ est requis" })
+                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
               }),
             )
             .optional(),

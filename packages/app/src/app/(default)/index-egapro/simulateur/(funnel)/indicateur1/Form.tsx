@@ -4,7 +4,7 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { type CreateSimulationDTO, createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
@@ -26,16 +26,26 @@ import { getIsEnoughEmployees } from "./tableUtil";
 
 const schemaOtherComputer = new IndicateurUnComputer();
 schemaOtherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
-const formSchema = createSteps.indicateur1
-  .and(createSteps.effectifs)
-  .superRefine(({ mode, remunerations, csp }, ctx) => {
+
+const formSchema = (funnel: Partial<CreateSimulationDTO> | undefined) =>
+  createSteps.indicateur1.superRefine(({ mode, remunerations }, ctx) => {
+    if (!funnel?.effectifs?.csp) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Les effectifs doivent être renseignés`,
+        path: ["effectifs"],
+      });
+
+      return z.NEVER;
+    }
+
     if (mode !== RemunerationsMode.Enum.CSP) {
       // test if there is the same amount of CSP in effectifs and remunerations
       schemaOtherComputer.setInput(flattenRemunerations(remunerations as ExternalRemunerations));
 
       const { enoughWomen, enoughMen } = getIsEnoughEmployees({
         computer: schemaOtherComputer,
-        effectifsCsp: csp,
+        effectifsCsp: funnel.effectifs.csp,
       });
 
       if (!enoughWomen || !enoughMen) {
@@ -47,7 +57,7 @@ const formSchema = createSteps.indicateur1
       }
     }
   });
-type Indic1FormType = z.infer<typeof formSchema>;
+type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 const indicateur1Navigation = NAVIGATION.indicateur1;
 
 const cspComputer = new IndicateurUnComputer();
@@ -56,6 +66,7 @@ const otherComputer = new IndicateurUnComputer();
 otherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
 
 const useStore = storePicker(useSimuFunnelStore);
+
 export const Indic1Form = () => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -74,10 +85,10 @@ export const Indic1Form = () => {
 
   const methods = useForm<Indic1FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema(funnel)),
     defaultValues: {
       ...funnel?.indicateur1,
-      ...funnel?.effectifs,
+      // ...funnel?.effectifs,
     },
     criteriaMode: "all",
   });
@@ -169,19 +180,23 @@ export const Indic1Form = () => {
                         value: mode,
                         defaultChecked: field.value === mode,
                         onChange() {
+                          field.onChange(mode);
                           if (
                             mode !== RemunerationsMode.Enum.CSP &&
                             lastMode &&
                             lastMode !== RemunerationsMode.Enum.CSP
                           ) {
                             setLastMode(mode);
-                            return field.onChange(mode);
+                            return;
                           }
+
                           const defaultValue =
                             mode === RemunerationsMode.Enum.CSP
                               ? lastCspRemunerations ?? defaultCspModeRemunerations
                               : lastOtherRemunerations ?? defaultOtherModesRemunerations;
+
                           const currentRemunerations = getValues("remunerations");
+
                           if (lastMode && currentRemunerations?.length) {
                             if (lastMode === RemunerationsMode.Enum.CSP) {
                               setLastCspRemunerations(currentRemunerations as ExternalRemunerations);
@@ -189,8 +204,8 @@ export const Indic1Form = () => {
                               setLastOtherRemunerations(currentRemunerations as ExternalRemunerations);
                             }
                           }
+
                           setLastMode(mode);
-                          field.onChange(mode);
                           if (mode === RemunerationsMode.Enum.CSP || currentRemunerations?.length) {
                             resetField("remunerations", { defaultValue });
                           } else {
