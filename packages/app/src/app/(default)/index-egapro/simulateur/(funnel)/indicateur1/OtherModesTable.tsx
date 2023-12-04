@@ -72,12 +72,6 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
         header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique" })}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
           (remunerationsField, remunerationsFieldIndex) => {
-            const categoryId = remunerationsField.categoryId || remunerationsField.id;
-            register(`remunerations.${remunerationsFieldIndex}.categoryId`, {
-              value: categoryId,
-              deps: `remunerations.${remunerationsFieldIndex}.name`,
-            });
-
             return {
               key: remunerationsField.id,
               isDeletable: remunerationsFieldIndex > 0,
@@ -155,7 +149,6 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
 
                       return getCommonBodyColumns({
                         ageRange,
-                        categoryId,
                         categoryIndex: remunerationsFieldIndex,
                         categoryName: remunerationsField.name,
                         computer,

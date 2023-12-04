@@ -120,7 +120,6 @@ export const Indic1Form = () => {
   const defaultCspModeRemunerations = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(
     categoryName => ({
       name: categoryName,
-      categoryId: categoryName,
       category: ageRanges.reduce(
         (newAgeGroups, ageRange) => ({
           ...newAgeGroups,
