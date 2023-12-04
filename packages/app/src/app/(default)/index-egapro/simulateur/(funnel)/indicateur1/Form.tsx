@@ -96,7 +96,6 @@ export const Indic1Form = () => {
   const {
     formState: { isValid },
     handleSubmit,
-    getValues,
     watch,
     resetField,
     control,
@@ -115,6 +114,7 @@ export const Indic1Form = () => {
   }
 
   const currentMode = watch("mode");
+  const currentRemunerations = watch("remunerations");
 
   // default values for CSP mode, set category to empty if no data only if count is >= 3
   const defaultCspModeRemunerations = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(
@@ -193,8 +193,6 @@ export const Indic1Form = () => {
                             mode === RemunerationsMode.Enum.CSP
                               ? lastCspRemunerations ?? defaultCspModeRemunerations
                               : lastOtherRemunerations ?? defaultOtherModesRemunerations;
-
-                          const currentRemunerations = getValues("remunerations");
 
                           if (lastMode && currentRemunerations?.length) {
                             if (lastMode === RemunerationsMode.Enum.CSP) {
