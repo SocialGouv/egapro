@@ -8,7 +8,6 @@ import { type CreateSimulationDTO, createSteps } from "@common/core-domain/dtos/
 import { Object } from "@common/utils/overload";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, CenteredContainer, Container } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -68,11 +67,7 @@ otherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
 
 const useStore = storePicker(useSimuFunnelStore);
 
-let nbRenders = 0;
-
 export const Indic1Form = () => {
-  console.log("nbRenders", ++nbRenders);
-
   const router = useRouter();
   const { data: session } = useSession();
   const [funnel, saveFunnel] = useStore("funnel", "saveFunnel");
@@ -121,11 +116,6 @@ export const Indic1Form = () => {
 
   const currentMode = watch("mode");
 
-  console.log("nbRenders", nbRenders);
-  if (isValid) {
-    console.log("watch", watch());
-  }
-
   // default values for CSP mode, set category to empty if no data only if count is >= 3
   const defaultCspModeRemunerations = Object.keys(funnel.effectifs.csp).map<ExternalRemunerations[number]>(
     categoryName => ({
@@ -171,7 +161,6 @@ export const Indic1Form = () => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <CenteredContainer>
-          <ReactHookFormDebug />
           <Controller
             control={control}
             name="mode"
