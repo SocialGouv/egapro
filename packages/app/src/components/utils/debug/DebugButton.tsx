@@ -43,6 +43,7 @@ export const DebugButton = ({ obj, infoText, alwaysOn, children }: PropsWithChil
     <>
       {isDebugEnabled && (
         <Button
+          type="button"
           size="small"
           iconId="ri-bug-2-line"
           onClick={() => {

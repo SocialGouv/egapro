@@ -2,6 +2,7 @@ import { type IndicateurUnComputer } from "@common/core-domain/computers/Indicat
 import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain/computers/utils";
 import { type AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
+import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { currencyFormat, precisePercentFormat } from "@common/utils/number";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
 import { type AlternativeTableProps } from "@design-system";
@@ -112,7 +113,7 @@ export const getCommonBodyColumns = ({
           type: "number",
           min: 0,
           ...register(`remunerations.${categoryIndex}.category.${ageRange}.womenSalary`, {
-            valueAsNumber: true,
+            setValueAs: setValueAsFloatOrEmptyString,
             deps: `remunerations.${categoryIndex}.category.${ageRange}.menSalary`,
           }),
         },
@@ -125,7 +126,7 @@ export const getCommonBodyColumns = ({
           type: "number",
           min: 0,
           ...register(`remunerations.${categoryIndex}.category.${ageRange}.menSalary`, {
-            valueAsNumber: true,
+            setValueAs: setValueAsFloatOrEmptyString,
             deps: `remunerations.${categoryIndex}.category.${ageRange}.womenSalary`,
           }),
         },
