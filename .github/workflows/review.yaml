@@ -47,6 +47,8 @@ jobs:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }},viewportWidth=1600,viewportHeight=1400"
           wait-on: "${{ env.SITE_URL }}"
+          browser: chrome
+          headed: true
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
