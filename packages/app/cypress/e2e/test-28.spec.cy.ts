@@ -1,7 +1,7 @@
 describe("template spec", () => {
   it("passes", () => {
     cy.visit("/");
-    cy.get("#fr-consent-banner-button-accept-all").click();
+    //cy.get("#fr-consent-banner-button-accept-all").click();
     cy.get("#main-navigation-\\:r4\\:-button-1").click();
     cy.get("#main-navigation-\\:r4\\:-menu-1-link-Calculermonindex-1").click();
     cy.get("#fr-button-\\:S4\\:").click();
@@ -566,5 +566,22 @@ describe("template spec", () => {
     cy.get("#remunerations\\.16\\.category\\.50\\:\\.womenSalary").type("27577");
     cy.get("#remunerations\\.16\\.category\\.50\\:\\.menSalary").clear("27695");
     cy.get("#remunerations\\.16\\.category\\.50\\:\\.menSalary").type("27695");
+    cy.get("#fr-button-\\:r7m\\:").click();
+    cy.get("#fr-fieldset-radio-\\:r61d\\: > .fr-fieldset__content > :nth-child(2) > .fr-label").click();
+    cy.get("#fr-fieldset-radio-\\:r61d\\:-1").check();
+    cy.get("#fr-button-\\:r61h\\:").click();
+    cy.get("#fr-fieldset-radio-\\:r61j\\: > .fr-fieldset__content > :nth-child(2) > .fr-label").click();
+    cy.get("#fr-fieldset-radio-\\:r61j\\:-1").check();
+    cy.get("#fr-button-\\:r61n\\:").click();
+    cy.get("#fr-fieldset-radio-\\:r61q\\: > .fr-fieldset__content > :nth-child(1) > .fr-label").click();
+    cy.get("#fr-fieldset-radio-\\:r61q\\:-0").check();
+    cy.get("#input-\\:r622\\:").clear("31");
+    cy.get("#input-\\:r622\\:").type("31");
+    cy.get("#input-\\:r623\\:").clear("3");
+    cy.get("#input-\\:r623\\:").type("31");
+    cy.get("#fr-button-\\:r61u\\:").click();
+    cy.get("#input-\\:r624\\:").clear("1");
+    cy.get("#input-\\:r624\\:").type("1");
+    cy.get("#fr-button-\\:r628\\:").click();
   });
 });
