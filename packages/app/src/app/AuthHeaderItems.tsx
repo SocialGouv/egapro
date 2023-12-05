@@ -65,7 +65,7 @@ export const LoginLogoutHeaderItem = () => {
         />
       );
 
-    case "unauthenticated":
+    default: // loading
       return (
         <HeaderQuickAccessItem
           key="hqai-unauthenticated-login"
@@ -76,19 +76,6 @@ export const LoginLogoutHeaderItem = () => {
               className: fr.cx("fr-btn--secondary"),
             },
             text: "Se connecter",
-          }}
-        />
-      );
-    default: // loading
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-authloading-fake-button"
-          quickAccessItem={{
-            iconId: "fr-icon-lock-line",
-            text: <Skeleton width={110} />,
-            buttonProps: {
-              className: fr.cx("fr-btn--secondary"),
-            },
           }}
         />
       );
