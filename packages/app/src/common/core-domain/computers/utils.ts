@@ -18,22 +18,21 @@ export const ageRanges = [
 
 export type ExternalRemunerations = Array<{
   category: Record<AgeRange.Enum, CountAndAverageSalaries>;
-  categoryId: string;
   name: string;
 }>;
 
 export function flattenRemunerations(remunerations: ExternalRemunerations): InputRemunerations {
   const flattened: InputRemunerations = {};
-  for (const { categoryId, category } of remunerations) {
+  for (const { name, category } of remunerations) {
     if (category) {
       for (const [ageRange, ageGroup] of Object.entries(category)) {
-        flattened[buildRemunerationKey(categoryId, ageRange as AgeRange.Enum)] = ageGroup;
+        flattened[buildRemunerationKey(name, ageRange as AgeRange.Enum)] = ageGroup;
       }
     }
   }
   return flattened;
 }
 
-export function buildRemunerationKey(categoryId: string, ageRange: AgeRange.Enum): string {
-  return `${categoryId}:${ageRange}`;
+export function buildRemunerationKey(categoryName: string, ageRange: AgeRange.Enum): string {
+  return `${categoryName}:${ageRange}`;
 }

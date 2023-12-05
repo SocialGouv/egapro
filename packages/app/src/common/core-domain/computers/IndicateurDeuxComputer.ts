@@ -27,11 +27,11 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     super();
   }
 
-  public canComputeGroup(categoryId: CSP.Enum): boolean {
+  public canComputeGroup(categoryName: CSP.Enum): boolean {
     if (!this.input) {
       return false;
     }
-    const category = this.input[categoryId];
+    const category = this.input[categoryName];
 
     if (!category || !(category.menCount >= 10 && category.womenCount >= 10 && category.men && category.women)) {
       return false;

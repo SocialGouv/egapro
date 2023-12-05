@@ -30,7 +30,6 @@ export const getCspRemuWithCount = (
 ) =>
   Object.keys(funnelCsp).map<ExternalRemunerations[number]>(categoryName => ({
     name: categoryName,
-    categoryId: categoryName,
     category: ageRanges.reduce(
       (newAgeGroups, ageRange) => {
         const currentAgeRange = remunerations?.find(rem => rem?.name === categoryName)?.category?.[ageRange];
