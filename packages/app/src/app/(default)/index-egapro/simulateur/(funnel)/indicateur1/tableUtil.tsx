@@ -114,6 +114,7 @@ export const getCommonBodyColumns = ({
             setValueAs: setValueAsFloatOrEmptyString,
             deps: `remunerations.${categoryIndex}.category.${ageRange}.menSalary`,
           }),
+          id: `remunerations.${categoryIndex}.category.${ageRange}.womenSalary`,
         },
       },
       {
@@ -127,6 +128,7 @@ export const getCommonBodyColumns = ({
             setValueAs: setValueAsFloatOrEmptyString,
             deps: `remunerations.${categoryIndex}.category.${ageRange}.womenSalary`,
           }),
+          id: `remunerations.${categoryIndex}.category.${ageRange}.menSalary`,
         },
       },
       (() => {
