@@ -1,11 +1,9 @@
 describe("template spec", () => {
   it("passes", () => {
-    cy.visit("/");
+    cy.visit("/index-egapro/simulateur/commencer");
     //cy.get("#fr-consent-banner-button-accept-all").click();
-    cy.get("#main-navigation-index-link").click();
-    cy.get("#main-navigation-calculate-index-link").click();
-    cy.get("#fr-button-\\:S4\\:").click();
-    cy.get("#fr-fieldset-radio-\\:r9\\: > .fr-fieldset__content > :nth-child(3) > .fr-label").click();
+    cy.get("#begin-button").click();
+    cy.get('[data-cy="workforceRange.1000:"]').parents(".fr-radio-group").click();
     cy.get('[data-cy="workforceRange.1000:"]').check();
     cy.get("#csp\\.ouv\\.ageRanges\\.\\:29\\.women").clear("1");
     cy.get("#csp\\.ouv\\.ageRanges\\.\\:29\\.women").type("12");
@@ -72,7 +70,7 @@ describe("template spec", () => {
     cy.get("#csp\\.ic\\.ageRanges\\.50\\:\\.men").clear("130");
     cy.get("#csp\\.ic\\.ageRanges\\.50\\:\\.men").type("130");
     cy.get("#simu-workforce-next").click();
-    cy.get("#fr-fieldset-radio-\\:r7i\\: > .fr-fieldset__content > :nth-child(2) > .fr-label").click();
+    cy.get('[data-cy="mode.niveau_branche"]').parents(".fr-radio-group").click();
     cy.get('[data-cy="mode.niveau_branche"]').check();
     cy.get("#remunerations\\.0\\.name").clear("F");
     cy.get("#remunerations\\.0\\.name").type("F");
@@ -237,7 +235,7 @@ describe("template spec", () => {
     cy.get("#remunerations\\.5\\.category\\.50\\:\\.menCount").clear("2");
     cy.get("#remunerations\\.5\\.category\\.50\\:\\.menCount").type("2");
     cy.get("#add-hierarchical-level").click();
-    /* ==== Generated with Cypress Studio ==== */
+    /!* ==== Generated with Cypress Studio ==== *!/;
     cy.get("#remunerations\\.6\\.name").clear();
     cy.get("#remunerations\\.6\\.name").type("II.7");
     cy.get("#remunerations\\.6\\.category\\.\\:29\\.womenCount").clear("3");
