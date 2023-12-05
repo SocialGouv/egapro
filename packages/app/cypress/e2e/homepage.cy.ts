@@ -1,7 +1,6 @@
 describe("Homepage", () => {
   it("Affiche les informations élémentaires", () => {
     cy.visit("/");
-    cy.wait(2000);
     cy.contains("Bienvenue sur Egapro");
     cy.contains(".fr-btn", "Calculer - Déclarer mon Index");
     cy.contains(".fr-btn", "Consulter l'Index");
