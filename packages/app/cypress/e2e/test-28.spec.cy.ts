@@ -2,8 +2,8 @@ describe("template spec", () => {
   it("passes", () => {
     cy.visit("/");
     //cy.get("#fr-consent-banner-button-accept-all").click();
-    cy.get("#main-navigation-\\:r4\\:-button-1").click();
-    cy.get("#main-navigation-\\:r4\\:-menu-1-link-Calculermonindex-1").click();
+    cy.get("#main-navigation-index-link").click();
+    cy.get("#main-navigation-calculate-index-link").click();
     cy.get("#fr-button-\\:S4\\:").click();
     cy.get("#fr-fieldset-radio-\\:r9\\: > .fr-fieldset__content > :nth-child(3) > .fr-label").click();
     cy.get('[data-cy="workforceRange.1000:"]').check();
