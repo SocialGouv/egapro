@@ -94,7 +94,6 @@ const otherAgeRangesSchema = zodFr
 const otherAgeRangeNumbers = zodFr.array(
   zodFr.object({
     name: zodFr.string().min(1, "Le champ est requis"),
-    categoryId: zodFr.string().min(1),
     category: zodFr.record(zodFr.nativeEnum(AgeRange.Enum), otherAgeRangesSchema),
   }),
 );
@@ -129,7 +128,6 @@ export const createSteps = {
       remunerations: zodFr.array(
         zodFr.object({
           name: zodFr.nativeEnum(CSP.Enum),
-          categoryId: zodFr.string().min(1),
           category: zodFr
             .record(
               zodFr.nativeEnum(AgeRange.Enum),

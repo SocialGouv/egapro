@@ -156,13 +156,13 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
         ? "remunerations-coefficient-autre"
         : "remunerations-coefficient-branche"
     ] = {
-      catégories: indicateur1.remunerations.map(({ name: nom, categoryId }) => ({
+      catégories: indicateur1.remunerations.map(({ name: nom }) => ({
         nom,
         tranches: {
-          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}::29`) || "",
-          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:30:39`) || "",
-          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:40:49`) || "",
-          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${categoryId}:50:`) || "",
+          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`) || "",
+          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`) || "",
+          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`) || "",
+          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`) || "",
         },
       })),
     };

@@ -120,8 +120,6 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
         withTooltip
         header={getCommonHeader({ firstColumnLabel: "Catégorie socio-professionnelle" })}
         body={categories.map((categoryName, categoryIndex) => {
-          const categoryId = categoryName;
-          register(`remunerations.${categoryIndex}.categoryId`, { value: categoryId });
           register(`remunerations.${categoryIndex}.name`, { value: categoryName });
 
           return {
@@ -153,7 +151,6 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
 
                     return getCommonBodyColumns({
                       ageRange,
-                      categoryId,
                       categoryIndex,
                       categoryName,
                       computer,
