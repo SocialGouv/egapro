@@ -164,11 +164,11 @@ export const RecapSimu = () => {
                   body={remuWithCount.map(category => ({
                     categoryLabel:
                       funnel.indicateur1.mode === RemunerationsMode.Enum.CSP
-                        ? CSP.Label[category.categoryId as CSP.Enum]
+                        ? CSP.Label[category.name as CSP.Enum]
                         : category.name,
                     alignCols: "center",
                     cols: ageRanges.map(ageRange => {
-                      const groupKey = buildRemunerationKey(category.categoryId, ageRange);
+                      const groupKey = buildRemunerationKey(category.name, ageRange);
                       const canComputeGroup = computerIndicateurUn.canComputeGroup(groupKey);
                       const groupResult = computerIndicateurUn.computeGroup(groupKey);
                       return canComputeGroup ? precisePercentFormat.format(groupResult.resultRaw / 100) : "NC";

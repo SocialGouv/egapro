@@ -58,7 +58,6 @@ export type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 
 interface CommonBodyColumnsProps {
   ageRange: AgeRange.Enum;
-  categoryId: string;
   categoryIndex: number;
   categoryName: string;
   computer: IndicateurUnComputer;
@@ -77,7 +76,6 @@ export const getCommonBodyColumns = ({
   menCount = 0,
   categoryName,
   categoryIndex,
-  categoryId,
   ageRange,
   errors,
   computer,
@@ -132,7 +130,7 @@ export const getCommonBodyColumns = ({
         },
       },
       (() => {
-        const { resultRaw: groupResult } = computer.computeGroup(buildRemunerationKey(categoryId, ageRange));
+        const { resultRaw: groupResult } = computer.computeGroup(buildRemunerationKey(categoryName, ageRange));
         return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
           ? precisePercentFormat.format(groupResult / 100)
           : "-";

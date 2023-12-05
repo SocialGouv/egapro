@@ -59,7 +59,7 @@ export abstract class AbstractGroupComputer<
     const validGroups: ExtendedTotalMetadata["validGroups"] = [];
     const additionalMetadata = {} as AdditionalMetadata;
 
-    for (const [categoryId, category] of Object.entries(this.input) as Array<[GroupKey, Group]>) {
+    for (const [categoryName, category] of Object.entries(this.input) as Array<[GroupKey, Group]>) {
       const womenCount = category.womenCount || 0;
       const menCount = category.menCount || 0;
       totalEmployeeCount += menCount + womenCount;
@@ -77,7 +77,7 @@ export abstract class AbstractGroupComputer<
 
       // Exclure les groupes qui n'ont pas au moins (this.GROUP_COUNT_THRESHOLD) hommes et (this.GROUP_COUNT_THRESHOLD) femmes. (e.g. 3 pour l'indicateur 1, 10 pour les indicateurs 2 ou 3)
       if (category.menCount >= this.GROUP_COUNT_THRESHOLD && category.womenCount >= this.GROUP_COUNT_THRESHOLD) {
-        validGroups.push(categoryId as GroupKey);
+        validGroups.push(categoryName as GroupKey);
         totalGroupCount += menCount + womenCount;
       }
     }
