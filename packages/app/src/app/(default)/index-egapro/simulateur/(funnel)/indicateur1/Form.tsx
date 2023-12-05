@@ -177,6 +177,7 @@ export const Indic1Form = () => {
                       nativeInputProps: {
                         ...field,
                         value: mode,
+                        "data-cy": `mode.${mode}`,
                         defaultChecked: field.value === mode,
                         onChange() {
                           field.onChange(mode);

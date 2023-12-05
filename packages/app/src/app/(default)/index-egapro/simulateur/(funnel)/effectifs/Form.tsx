@@ -178,6 +178,7 @@ export const EffectifsForm = () => {
                 },
               }),
               value: workforceRange,
+              "data-cy": `workforceRange.${workforceRange}`,
             },
           }))}
         />
@@ -288,6 +289,7 @@ export const EffectifsForm = () => {
                       ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
                         setValueAs: setValueAsFloatOrEmptyString,
                       }),
+                      id: `csp.${category}.ageRanges.${ageRange}.women`,
                       type: "number",
                       min: 0,
                     },
@@ -300,6 +302,7 @@ export const EffectifsForm = () => {
                       ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
                         setValueAs: setValueAsFloatOrEmptyString,
                       }),
+                      id: `csp.${category}.ageRanges.${ageRange}.men`,
                       type: "number",
                       min: 0,
                     },
@@ -341,6 +344,9 @@ export const EffectifsForm = () => {
             linkProps: {
               href: simulateurPath(effectifsNav.prev()),
             },
+          }}
+          nextProps={{
+            id: "simu-workforce-next",
           }}
           nextDisabled={!isValid || !total}
         />
