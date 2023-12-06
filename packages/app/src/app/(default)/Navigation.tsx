@@ -27,6 +27,9 @@ export const Navigation = () => {
         {
           text: "Index",
           isActive: segment === "index-egapro",
+          buttonProps: {
+            id: "main-navigation-index-link",
+          },
           menuLinks: [
             {
               text: "À propos de l'index",
@@ -39,6 +42,7 @@ export const Navigation = () => {
               text: "Calculer mon index",
               linkProps: {
                 href: "/index-egapro/simulateur/commencer",
+                id: "main-navigation-calculate-index-link",
               },
               isActive: segments.includes("simulateur") && segments.includes("index-egapro"),
             },
