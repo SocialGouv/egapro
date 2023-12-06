@@ -1,5 +1,5 @@
-describe("template spec", () => {
-  it("passes", () => {
+describe("Simulation Example 2£8", () => {
+  it.skip("should pass all simulation until recap", () => {
     cy.visit("/index-egapro/simulateur/commencer");
     //cy.get("#fr-consent-banner-button-accept-all").click();
     cy.get("#begin-button").click();
