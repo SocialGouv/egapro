@@ -37,7 +37,7 @@ export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void>
         RepresentationEquilibreeReceipt({ repEq: representationEquilibree }),
       );
 
-      const url = `${config.host}/representation_equilibree/${siren}/${year}`;
+      const url = `${config.host}/representation-equilibree/${siren}/${year}`;
       await this.globalMailerService.init();
       const [, rejected] = await this.globalMailerService.sendMail(
         "balancedRepresentation_receipt",
