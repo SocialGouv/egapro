@@ -143,12 +143,12 @@ ${config.api.mailer.signature}`,
 });
 
 export const declaration_receipt = (url: string, { declaration }: DeclarationOpmc): MailTemplate => ({
-  subject: "Egapro - Déclaration",
+  subject: "Egapro - Déclaration de l’index égalité professionnelle femmes-hommes",
   text: `Madame, Monsieur,
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année ${
     declaration.year.getValue() + 1
-  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos déclarations.
+  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
 
 Vous avez déclaré un index global ${
     declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"
@@ -203,11 +203,11 @@ Les services de l’administration du travail.
 
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de
-            votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année
+            votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année{" "}
             {declaration.year.getValue() + 1} au titre des données {declaration.year.getValue()} conformément aux
             dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le
-            présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de vos
-            déclarations.
+            présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre
+            déclaration.
           </p>
 
           <p>
