@@ -24,6 +24,7 @@ import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFun
 import { CSPModeTable } from "./CSPModeTable";
 import { OtherModesTable } from "./OtherModesTable";
 import { getIsEnoughEmployees } from "./tableUtil";
+import Enum = RemunerationsMode.Enum;
 
 const schemaOtherComputer = new IndicateurUnComputer();
 schemaOtherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
@@ -152,6 +153,8 @@ export const Indic1Form = () => {
     } as ExternalRemunerations[number],
   ];
 
+  const isNonComputableAndCSPMode = !cspComputer.canCompute() && currentMode === RemunerationsMode.Enum.CSP;
+
   const onSubmit = ({ mode, remunerations }: Indic1FormType) => {
     saveFunnel({ indicateur1: { mode, remunerations } as Any });
     router.push(simulateurPath(indicateur1Navigation.next(funnel)));
@@ -245,7 +248,7 @@ export const Indic1Form = () => {
                 href: simulateurPath(indicateur1Navigation.prev()),
               },
             }}
-            nextDisabled={!isValid}
+            nextDisabled={!isValid && !isNonComputableAndCSPMode}
           />
         </CenteredContainer>
       </form>
