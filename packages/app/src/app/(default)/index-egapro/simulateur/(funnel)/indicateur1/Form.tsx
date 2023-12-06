@@ -151,6 +151,8 @@ export const Indic1Form = () => {
     } as ExternalRemunerations[number],
   ];
 
+  const isNonComputableAndCSPMode = !cspComputer.canCompute() && currentMode === RemunerationsMode.Enum.CSP;
+
   const onSubmit = ({ mode, remunerations }: Indic1FormType) => {
     saveFunnel({ indicateur1: { mode, remunerations } as Any });
     router.push(simulateurPath(indicateur1Navigation.next(funnel)));
@@ -243,7 +245,7 @@ export const Indic1Form = () => {
                 href: simulateurPath(indicateur1Navigation.prev()),
               },
             }}
-            nextDisabled={!isValid}
+            nextDisabled={!isValid && !isNonComputableAndCSPMode}
           />
         </CenteredContainer>
       </form>

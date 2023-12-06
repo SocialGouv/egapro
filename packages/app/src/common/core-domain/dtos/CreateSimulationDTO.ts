@@ -125,24 +125,26 @@ export const createSteps = {
   indicateur1: zodFr.discriminatedUnion("mode", [
     zodFr.object({
       mode: zodFr.literal(RemunerationsMode.Enum.CSP),
-      remunerations: zodFr.array(
-        zodFr.object({
-          name: zodFr.nativeEnum(CSP.Enum),
-          category: zodFr
-            .record(
-              zodFr.nativeEnum(AgeRange.Enum),
-              zodFr.object({
-                womenSalary: zodFr
-                  .number({ invalid_type_error: "Le champ est requis" })
-                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
-                menSalary: zodFr
-                  .number({ invalid_type_error: "Le champ est requis" })
-                  .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
-              }),
-            )
-            .optional(),
-        }),
-      ),
+      remunerations: zodFr
+        .array(
+          zodFr.object({
+            name: zodFr.nativeEnum(CSP.Enum),
+            category: zodFr
+              .record(
+                zodFr.nativeEnum(AgeRange.Enum),
+                zodFr.object({
+                  womenSalary: zodFr
+                    .number({ invalid_type_error: "Le champ est requis" })
+                    .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                  menSalary: zodFr
+                    .number({ invalid_type_error: "Le champ est requis" })
+                    .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
+                }),
+              )
+              .optional(),
+          }),
+        )
+        .optional(),
     }),
     zodFr.object({
       mode: zodFr.literal(RemunerationsMode.Enum.BRANCH_LEVEL),
