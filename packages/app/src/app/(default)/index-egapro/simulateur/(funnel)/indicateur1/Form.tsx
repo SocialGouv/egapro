@@ -23,7 +23,6 @@ import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFun
 import { CSPModeTable } from "./CSPModeTable";
 import { OtherModesTable } from "./OtherModesTable";
 import { getIsEnoughEmployees } from "./tableUtil";
-import Enum = RemunerationsMode.Enum;
 
 const schemaOtherComputer = new IndicateurUnComputer();
 schemaOtherComputer.setMode(RemunerationsMode.Enum.OTHER_LEVEL);
