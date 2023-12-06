@@ -19,3 +19,37 @@ jobs:
     name: "🇫🇷 SocialGouv"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review.yaml@v1
     secrets: inherit
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [socialgouv]
+    name: "Test e2e"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        uses: cypress-io/github-action@v5
+        with:
+          # just perform install
+          runTests: false
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+      - name: Set env
+        run: |
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.dev.fabrique.social.gouv.fr" >> $GITHUB_ENV
+          echo "$SITE_URL"
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          install: false
+          working-directory: ./packages/app
+          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }},viewportWidth=1600,viewportHeight=1400"
+          wait-on: "${{ env.SITE_URL }}"
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ./packages/app/cypress/screenshots
+          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`

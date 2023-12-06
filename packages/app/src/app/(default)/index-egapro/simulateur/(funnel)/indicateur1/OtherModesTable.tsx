@@ -88,6 +88,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                     stateRelatedMessage={errors.remunerations?.[remunerationsFieldIndex]?.name?.message}
                     nativeInputProps={{
                       ...register(`remunerations.${remunerationsFieldIndex}.name`),
+                      id: `remunerations.${remunerationsFieldIndex}.name`,
                     }}
                   />
                 </TooltipWrapper>
@@ -113,6 +114,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                               setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`,
                             }),
+                            id: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`,
                             type: "number",
                             min: 0,
                           },
@@ -130,6 +132,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                               setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`,
                             }),
+                            id: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`,
                             type: "number",
                             min: 0,
                           },
@@ -177,6 +180,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
         priority="secondary"
         iconId="fr-icon-add-line"
         className={fr.cx("fr-mb-4w")}
+        id={`add-hierarchical-level`}
         onClick={() => {
           appendRemunerations({ name: "", category: {} } as ExternalRemunerations[number], {
             shouldFocus: true,

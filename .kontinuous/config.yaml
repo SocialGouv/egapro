@@ -1,7 +1,9 @@
 projectName: egapro
 ciNamespace: ci-egapro
-
 repositoryName: egapro
+
 dependencies:
   fabrique:
     import: SocialGouv/kontinuous/plugins/fabrique
+    extends:
+      - name: buildkit-service
