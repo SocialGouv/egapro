@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import {
@@ -64,20 +63,6 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
 
   computer.setInput(flattenRemunerations(remunerations));
   computer.compute();
-
-  const canCompute = computer.canCompute();
-  if (!canCompute) {
-    return (
-      <CenteredContainer fluid>
-        <Alert
-          className="fr-mb-3w"
-          severity="info"
-          title="L'indicateur n'est pas calculable par CSP"
-          description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
-        />
-      </CenteredContainer>
-    );
-  }
 
   return (
     <>
