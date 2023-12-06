@@ -8,6 +8,7 @@ import { type CreateSimulationDTO, createSteps } from "@common/core-domain/dtos/
 import { Object } from "@common/utils/overload";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
+import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, CenteredContainer, Container } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -161,6 +162,7 @@ export const Indic1Form = () => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <ReactHookFormDebug />
         <CenteredContainer>
           <Controller
             control={control}
