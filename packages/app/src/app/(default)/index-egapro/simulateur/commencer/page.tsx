@@ -30,6 +30,7 @@ const CommencerPage = async () => {
         nextProps={{
           linkProps: {
             href: "/index-egapro/simulateur/effectifs",
+            id: "begin-button",
           },
         }}
       />
