@@ -16,6 +16,8 @@ export const metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+
 const ReferentListPage = async () => {
   const useCase = new GetReferents(referentRepo);
   const referents = await useCase.execute();
