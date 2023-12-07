@@ -401,4 +401,4 @@ PAYS = [
 PAYS_COG_TO_ISO = {c["COG"]: c["ISO2"] for c in PAYS}
 PAYS_ISO_TO_LIB = {c["ISO2"]: c["LIB"] for c in PAYS}
 
-ERROR_ENSURE_OWNER = "L'email saisi n'est pas  au Siren de votre entreprise. Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant ici (si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à dgt.ega-pro@travail.gouv.fr)"
+ERROR_ENSURE_OWNER = "L'email saisi n'est pas lié au Siren de votre entreprise. Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant ici (si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à dgt.ega-pro@travail.gouv.fr)"
