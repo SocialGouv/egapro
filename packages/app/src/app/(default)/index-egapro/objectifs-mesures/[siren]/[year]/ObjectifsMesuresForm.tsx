@@ -36,6 +36,7 @@ export const objectifValidator = (originValue: number, max: number, calculable =
         .string({
           required_error,
         })
+        .trim()
         .min(1, { message: required_error })
         .max(300, { message: "L'objectif doit être un texte de 300 caractères max." });
 
