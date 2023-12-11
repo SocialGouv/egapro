@@ -21,7 +21,7 @@ import { AlternativeTable, type AlternativeTableProps, IndicatorNote, RecapCard,
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { times } from "lodash";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { type ZodError } from "zod";
 
 import { Indicateur2ou3Note } from "../(indicateurs2ou3)/Indicateur2ou3Note";
@@ -48,7 +48,6 @@ const IndicatorPercentResult = ({ result }: { result: number }) => (
 );
 
 export const RecapSimu = () => {
-  const router = useRouter();
   const funnel = useSimuFunnelStore(store => store.funnel);
   const hydrated = useSimuFunnelStoreHasHydrated();
   const saveFormData = useDeclarationFormManager(state => state.saveFormData);
@@ -101,7 +100,7 @@ export const RecapSimu = () => {
   // actions
   const sendToDeclaration = () => {
     saveFormData(simuFunnelToDeclarationDTO(funnel));
-    router.push("/index-egapro/declaration/commencer");
+    window.open("/index-egapro/declaration/commencer", "_blank");
   };
 
   return (
