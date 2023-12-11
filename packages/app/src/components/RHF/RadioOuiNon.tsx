@@ -27,10 +27,10 @@ export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false 
             value: "oui",
             ...field,
             onChange: e => {
+              field.onChange(e); // Inform RHF to update its state.
               if (triggerValidation) {
                 trigger(); // Rerun validation to set isValid and errors.
               }
-              field.onChange(e); // Inform RHF to update its state.
             },
           },
         },
@@ -40,10 +40,10 @@ export const RadioOuiNon = ({ legend, name, disabled, triggerValidation = false 
             value: "non",
             ...field,
             onChange: e => {
+              field.onChange(e); // Inform RHF to update its state.
               if (triggerValidation) {
                 trigger(); // Rerun validation to set isValid and errors.
               }
-              field.onChange(e); // Inform RHF to update its state.
             },
           },
         },
