@@ -24,7 +24,7 @@
     "@formkit/auto-animate": "^1.0.0-beta.3",
     "@headlessui/react": "^1.7.3",
     "@hookform/resolvers": "^3.0.0",
-    "@json2csv/node": "^6.1.2",
+    "@json2csv/node": "^7.0.4",
     "@socialgouv/matomo-next": "^1.4.0",
     "clsx": "^1.2.1",
     "cors": "^2.8.5",

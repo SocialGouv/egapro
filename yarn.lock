@@ -2704,26 +2704,25 @@
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
-"@json2csv/formatters@^6.1.3":
-  version "6.1.3"
-  resolved "https://registry.yarnpkg.com/@json2csv/formatters/-/formatters-6.1.3.tgz#a6ef3661f339a0c28f43256abba68faf9e9a60cb"
-  integrity sha512-Yhs6eXTMhSrNFLTuVnhwjgJem2x+z0YZc0YxdCavoDf/tfz6LBVPVVoJPl9tXaCIfPZY9ybRB6sqPQqZTzkNuw==
+"@json2csv/formatters@^7.0.4":
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/@json2csv/formatters/-/formatters-7.0.4.tgz#1ea539d86d895814f334965591f0178db0964230"
+  integrity sha512-qdlLx0Pk/+BQnu6zreLgGrdLyUzLNVdsyCUU/+2aduHg4zemVo/e0iWjPk1sy/QZXXh+1RXBe+IiP9eDyj95qg==
 
-"@json2csv/node@^6.1.2":
-  version "6.1.3"
-  resolved "https://registry.yarnpkg.com/@json2csv/node/-/node-6.1.3.tgz#41afa1bd8072d023ed7d6bda41b8f5ca0732abe3"
-  integrity sha512-AYtaZDhmiMW9uiUDPlbFBWcj5JX485TLT7GBukTQh6509Ha/1GXjLpHUQq594Yn2OQeA4BNZAT70InXDm95soA==
+"@json2csv/node@^7.0.4":
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/@json2csv/node/-/node-7.0.4.tgz#ce5a49dac9670a0396016a36e16198330531cebd"
+  integrity sha512-ZDK56yyn5WFuUNovyjQU14mtSxktL+tV332g3PgqdGcBdIfQhtsGHWugBdD1jmfAHOfacNKkoMZm/JLUOZDJRw==
   dependencies:
-    "@json2csv/plainjs" "^6.1.3"
+    "@json2csv/plainjs" "^7.0.4"
 
-"@json2csv/plainjs@^6.1.3":
-  version "6.1.3"
-  resolved "https://registry.yarnpkg.com/@json2csv/plainjs/-/plainjs-6.1.3.tgz#b990ac54e8a1d2a6cedcfe9ab1e961a1f9013806"
-  integrity sha512-8cH/yVAPt1edDq/2Krr4elS2uJFWAdMQDH+ocuepjyh7lmBHEHv5kU0bqbYpd5ZpKTizshotsKk7KYA3nx4CCw==
+"@json2csv/plainjs@^7.0.4":
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/@json2csv/plainjs/-/plainjs-7.0.4.tgz#d6e952c49f1427fd84a592de00ca13b6458ba561"
+  integrity sha512-IHLyosebSdXMtVKusHHGqvp8mCpEkVk0Qvc0lAGcdAYdvO8lBvry8o665+CX78uPj/QZBhu+s0cOWyxanxlrQw==
   dependencies:
-    "@json2csv/formatters" "^6.1.3"
-    "@streamparser/json" "^0.0.12"
-    lodash.get "^4.4.2"
+    "@json2csv/formatters" "^7.0.4"
+    "@streamparser/json" "^0.0.17"
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -3451,10 +3450,10 @@
   resolved "https://registry.yarnpkg.com/@socialgouv/releaserc/-/releaserc-1.1.1.tgz#642d707b794a1968ba6f0ae4b0afafcbb872c484"
   integrity sha512-a7niKzBEoWXUwddr2Dht/RNwzkx/cDPzWRTx8RWpZu97ldB8MuA6uEiFwPvod9SE2dYa7woQPfcAwzcioUM3tQ==
 
-"@streamparser/json@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@streamparser/json/-/json-0.0.12.tgz#c11ae41e8ec926c0939a8866c2db4a7d64808435"
-  integrity sha512-+kmRpd+EeTFd3qNt1AoKphJqbAN26ZDsbiwqjBFeoAmdCyiUO19xMXPtYi9vovAj9a7OAJnvWtiHkwwjU2Fx4Q==
+"@streamparser/json@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@streamparser/json/-/json-0.0.17.tgz#b68742ebb49eec9c1fcc76cfa730dd74a5131382"
+  integrity sha512-mW54K6CTVJVLwXRB6kSS1xGWPmtTuXAStWnlvtesmcySgtop+eFPWOywBFPpJO4UD173epYsPSP6HSW8kuqN8w==
 
 "@surma/rollup-plugin-off-main-thread@^2.2.3":
   version "2.2.3"
@@ -10986,11 +10985,6 @@ lodash.flow@^3.3.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/lodash.flow/-/lodash.flow-3.5.0.tgz#87bf40292b8cf83e4e8ce1a3ae4209e20071675a"
   integrity sha512-ff3BX/tSioo+XojX4MOsOMhJw0nZoUEF011LX8g8d3gvjVbxd89cCio4BCXronjxcTUIJUoqKEUA+n4CqvvRPw==
-
-lodash.get@^4.4.2:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
-  integrity sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==
 
 lodash.includes@^4.3.0:
   version "4.3.0"
