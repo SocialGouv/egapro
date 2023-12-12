@@ -18,7 +18,7 @@ export const UserHeaderItem = () => {
           quickAccessItem={{
             iconId: isStaff ? "fr-icon-github-line" : "fr-icon-account-fill",
             text: `${session.data.user.email}${isStaff ? " (staff)" : ""}`,
-            linkProps: { href: "/index-egapro/tableauDeBord/mon-profil" },
+            linkProps: { href: "/mon-espace/mon-profil" },
           }}
         />
       );

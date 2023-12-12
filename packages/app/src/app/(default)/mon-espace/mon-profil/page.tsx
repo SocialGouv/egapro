@@ -34,10 +34,10 @@ const MonProfilPage = () => {
           enlargeLink
           horizontal
           imageAlt="texte alternatif de l’image"
-          // imageUrl="https://www.systeme-de-design.gouv.fr/img/placeholder.16x9.png"
-          imageUrl="ri-user-line"
+          imageUrl="https://www.systeme-de-design.gouv.fr/img/placeholder.16x9.png"
+          //imageUrl="ri-user-line"
           linkProps={{
-            href: "#",
+            href: "/mon-espace/mes-declarations",
           }}
           size="medium"
           // start={
@@ -46,7 +46,7 @@ const MonProfilPage = () => {
           //     <p>{user?.email}</p>
           //   </>
           // }
-          title="Compte EgaPro"
+          title="Mes déclarations"
           titleAs="h3"
         />
       </Box>
