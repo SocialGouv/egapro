@@ -92,7 +92,6 @@ export const getCommonBodyColumns = ({
     };
   }
   if (womenCount < 3 && menCount < 3) {
-    console.log("test");
     return {
       cols,
       mergedLabel: "Non pris en compte car moins de 3 femmes / hommes",
