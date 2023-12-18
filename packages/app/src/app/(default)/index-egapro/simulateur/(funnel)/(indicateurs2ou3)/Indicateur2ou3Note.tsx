@@ -18,7 +18,8 @@ const augmentations = {
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
   resultText: "Écart global de taux d'augmentations en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
-  missingDataLegend: "Veuillez remplir le reste des taux d'augmentations individuelles pour avoir votre note",
+  missingDataLegend:
+    "Veuillez renseigner le pourcentage de salariés augmentés pour obtenir le nombre de points à l'indicateur",
 };
 
 const promotions = {
@@ -27,7 +28,8 @@ const promotions = {
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
   resultText: "Écart global de taux de promotions en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
-  missingDataLegend: "Veuillez remplir le reste des taux de promotions pour avoir votre note",
+  missingDataLegend:
+    "Veuillez renseigner le pourcentage de salariés promus pour obtenir le nombre de points à l'indicateur",
 };
 
 export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBorder }: Props) => {
