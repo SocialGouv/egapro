@@ -63,6 +63,7 @@ interface CommonBodyColumnsProps {
   computer: IndicateurUnComputer;
   errors: FieldErrors<Indic1FormType>;
   firstCols: AlternativeTableProps.ColType[];
+  hasCountNotFilled: boolean;
   menCount: number;
   register: UseFormRegister<Indic1FormType>;
   womenCount: number;
@@ -80,9 +81,18 @@ export const getCommonBodyColumns = ({
   errors,
   computer,
   register,
+  hasCountNotFilled,
 }: CommonBodyColumnsProps): CommonBodyColumnsReturn => {
   const cols = firstCols as ColsType;
+
+  if (hasCountNotFilled) {
+    return {
+      cols,
+      mergedLabel: " ",
+    };
+  }
   if (womenCount < 3 && menCount < 3) {
+    console.log("test");
     return {
       cols,
       mergedLabel: "Non pris en compte car moins de 3 femmes / hommes",

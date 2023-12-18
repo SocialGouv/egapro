@@ -42,13 +42,13 @@ const indicateur2and3Nav = NAVIGATION.indicateur2et3;
 
 const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadvantage"], string> = {
   "men-men":
-    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "men-women":
-    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "women-men":
-    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "women-women":
-    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre femmes et hommes.",
   equality: "Les femmes et les hommes sont à égalité",
 };
 
@@ -62,7 +62,7 @@ const schemaWithMax = (totalCsp: [number, number]) =>
     if (data.calculable === "oui") {
       const [totalCspWomen, totalCspMen] = totalCsp;
 
-      if (data.raisedCount.women !== "" && data.raisedCount.women > totalCspWomen) {
+      if (data.raisedCount.women > totalCspWomen) {
         ctx.addIssue({
           code: z.ZodIssueCode.too_big,
           inclusive: true,
@@ -73,7 +73,7 @@ const schemaWithMax = (totalCsp: [number, number]) =>
         });
       }
 
-      if (data.raisedCount.men != "" && data.raisedCount.men > totalCspMen) {
+      if (data.raisedCount.men > totalCspMen) {
         ctx.addIssue({
           code: z.ZodIssueCode.too_big,
           inclusive: true,
@@ -189,7 +189,7 @@ export const Indic2and3Form = () => {
                                 stateRelatedMessage={whenCalculableErrors.raisedCount?.women?.message}
                                 nativeInputProps={{
                                   type: "number",
-                                  min: raisedCount && raisedCount.men !== "" && raisedCount.men > 0 ? 0 : 1,
+                                  min: raisedCount && raisedCount.men > 0 ? 0 : 1,
                                   max: totalCspWomen,
                                   ...field,
                                   onChange: e => {
@@ -215,7 +215,7 @@ export const Indic2and3Form = () => {
                                 stateRelatedMessage={whenCalculableErrors.raisedCount?.men?.message}
                                 nativeInputProps={{
                                   type: "number",
-                                  min: raisedCount && raisedCount.women !== "" && raisedCount.women > 0 ? 0 : 1,
+                                  min: raisedCount && raisedCount.women > 0 ? 0 : 1,
                                   max: totalCspMen,
                                   ...field,
                                   onChange: e => {

@@ -159,6 +159,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
                       firstCols: [csp.women || "0", csp.men || "0"],
                       menCount: csp.men || 0,
                       womenCount: csp.women || 0,
+                      hasCountNotFilled: false,
                     });
                   })(),
                 })) as [AlternativeTableProps.SubRow, ...AlternativeTableProps.SubRow[]],

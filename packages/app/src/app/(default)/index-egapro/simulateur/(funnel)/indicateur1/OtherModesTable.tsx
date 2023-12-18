@@ -12,6 +12,7 @@ import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
+import { isUndefined } from "lodash";
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { type z } from "zod";
@@ -147,6 +148,9 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                         };
                       }
 
+                      const hasCountNotFilled =
+                        ((count.menCount as number | string) == "" && (count.womenCount as number | string) == "") ||
+                        (isUndefined(count.menCount) && isUndefined(count.womenCount));
                       const womenCount = count.womenCount || 0;
                       const menCount = count.menCount || 0;
 
@@ -160,6 +164,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                         menCount,
                         womenCount,
                         register,
+                        hasCountNotFilled,
                       });
                     })(),
                   })) as [AlternativeTableProps.SubRow, ...AlternativeTableProps.SubRow[]],
