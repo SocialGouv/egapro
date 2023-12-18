@@ -42,13 +42,13 @@ const indicateur2and3Nav = NAVIGATION.indicateur2et3;
 
 const ifAdvantageText: Record<IndicateurDeuxTroisComputer.ComputedResult["ifadvantage"], string> = {
   "men-men":
-    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "men-women":
-    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "women-men":
-    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre femmes et hommes.",
   "women-women":
-    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.",
+    "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre femmes et hommes.",
   equality: "Les femmes et les hommes sont à égalité",
 };
 
