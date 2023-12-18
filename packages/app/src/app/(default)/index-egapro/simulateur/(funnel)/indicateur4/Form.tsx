@@ -234,6 +234,14 @@ export const Indic4Form = () => {
                     </GridCol>
                   </Grid>
                 </Container>
+                {count && count.total === 0 && (
+                  <Alert
+                    className="fr-mb-5w"
+                    small
+                    severity="warning"
+                    description="La valeur doit est supérieure à 0 car vous avez répondu qu'il ya avait des salariées augmentées à leur retour de congé maternité"
+                  />
+                )}
                 <Indicateur4Note
                   computer={indicateur4Computer}
                   count={{ total: count?.total || 0, raised: count?.raised || 0 }}

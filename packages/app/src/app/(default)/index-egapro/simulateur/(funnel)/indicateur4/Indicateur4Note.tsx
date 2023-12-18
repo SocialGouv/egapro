@@ -17,7 +17,7 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
   const canCompute = computer.canCompute();
   const computed = computer.compute();
 
-  if (count?.total === 0)
+  if (count?.total === 0 && isValid)
     return (
       <IndicatorNote
         noBorder={noBorder}
