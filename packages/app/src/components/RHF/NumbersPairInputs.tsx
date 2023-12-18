@@ -84,6 +84,7 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
               syncNumbers(true);
             },
             disabled: options.disabled === true,
+            valueAsNumber: true,
           }),
           type: "number",
           min: options.min,
