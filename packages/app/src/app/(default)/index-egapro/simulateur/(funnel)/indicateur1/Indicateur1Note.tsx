@@ -34,7 +34,7 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
 
   return (
     <ClientAnimate>
-      {isNC ? (
+      {isNC && isValid ? (
         <IndicatorNote
           noBorder={noBorder}
           note="NC"
