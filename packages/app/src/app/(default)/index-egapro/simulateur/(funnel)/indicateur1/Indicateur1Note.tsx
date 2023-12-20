@@ -17,7 +17,7 @@ interface Props {
 }
 
 function getNCText(metadata: TotalMetadata) {
-  const validPourcentageRounded = (metadata.totalGroupCount / metadata.totalEmployeeCount) * 100;
+  const validPourcentageRounded = Math.round((metadata.totalGroupCount / metadata.totalEmployeeCount) * 100);
   return (
     <i>
       Il faut avoir plus de 40% des effectifs valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes) pour pouvoir

@@ -98,7 +98,7 @@ const otherAgeRangesSchema = zodFr
   });
 const otherAgeRangeNumbers = zodFr.array(
   zodFr.object({
-    name: zodFr.string().min(1, "Le champ est requis"),
+    name: zodFr.string().trim().min(1, "Le champ est requis"),
     category: zodFr.record(zodFr.nativeEnum(AgeRange.Enum), otherAgeRangesSchema),
   }),
 );
