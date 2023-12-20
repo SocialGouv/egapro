@@ -108,10 +108,11 @@ export const PromotionsForm = () => {
     handleSubmit,
     formState: { isValid, errors: _errors },
     setValue,
+    getValues,
     watch,
   } = methods;
 
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
   const populationFavorable = watch("populationFavorable");

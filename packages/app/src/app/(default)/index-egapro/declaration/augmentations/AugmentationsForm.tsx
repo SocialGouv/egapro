@@ -108,12 +108,13 @@ export const AugmentationsForm = () => {
     handleSubmit,
     formState: { isValid, errors: _errors },
     setValue,
+    getValues,
     watch,
   } = methods;
 
   // For some obscure reasons, résultat can be undefined on some render, before to become eventually "" or a number.
   // This provokes a bug, because it is responsible to display populationFavorable, which becomes null and makes isValid false...
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
   const populationFavorable = watch("populationFavorable");
