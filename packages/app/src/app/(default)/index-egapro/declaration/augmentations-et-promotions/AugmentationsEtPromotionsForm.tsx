@@ -13,7 +13,6 @@ import { MotifNC } from "@components/RHF/MotifNC";
 import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
-import { ReactHookFormDebug } from "@components/RHF/ReactHookFormDebug";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -122,10 +121,6 @@ export const AugmentationEtPromotionsForm = () => {
   const populationFavorable = watch("populationFavorable");
   const noteNombreSalaries = watch("noteNombreSalaries");
 
-  console.log(populationFavorable);
-  console.log(watch());
-  console.log(getValues());
-
   const estUnRattrapage =
     formData["remunerations-resultat"]?.populationFavorable &&
     populationFavorable &&
@@ -174,7 +169,6 @@ export const AugmentationEtPromotionsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <ReactHookFormDebug />
         <ClientAnimate>
           {/* Needs to be outside ClientOnly to not be unregistered by RHF. Be careful! */}
           <RadioOuiNon
