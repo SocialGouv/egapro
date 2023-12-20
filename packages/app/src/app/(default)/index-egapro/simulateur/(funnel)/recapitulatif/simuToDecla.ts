@@ -159,10 +159,10 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       catégories: indicateur1.remunerations.map(({ name: nom }) => ({
         nom,
         tranches: {
-          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`) || "",
-          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`) || "",
-          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`) || "",
-          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`) || "",
+          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`) ?? "",
+          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`) ?? "",
+          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`) ?? "",
+          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`) ?? "",
         },
       })),
     };
@@ -173,10 +173,10 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       catégories: ["ouv", "emp", "tam", "ic"].map(nom => ({
         nom,
         tranches: {
-          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`) || "",
-          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`) || "",
-          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`) || "",
-          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`) || "",
+          [AgeRange.Enum.LESS_THAN_30]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}::29`) ?? "",
+          [AgeRange.Enum.FROM_30_TO_39]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:30:39`) ?? "",
+          [AgeRange.Enum.FROM_40_TO_49]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:40:49`) ?? "",
+          [AgeRange.Enum.FROM_50_TO_MORE]: computeGroupIndicateurUn(computerIndicateurUn)(`${nom}:50:`) ?? "",
         },
       })) as Exclude<DeclarationDTO["remunerations-csp"], undefined>["catégories"],
     };
@@ -189,7 +189,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       dto["conges-maternite"] = {
         estCalculable: "oui",
         note: resultIndicateurQuatre.note,
-        résultat: resultIndicateurQuatre.result,
+        résultat: Math.floor(resultIndicateurQuatre.result * 100),
       };
     }
   }

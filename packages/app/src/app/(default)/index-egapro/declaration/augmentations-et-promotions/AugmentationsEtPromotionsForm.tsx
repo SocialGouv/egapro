@@ -108,6 +108,7 @@ export const AugmentationEtPromotionsForm = () => {
     handleSubmit,
     formState: { isValid },
     setValue,
+    getValues,
     unregister,
     watch,
   } = methods;
