@@ -37,10 +37,18 @@ const positiveInt = zodFr
   .int("La valeur doit être un entier")
   .nonnegative({ message: "Le nombre ne peut pas être inférieur à 0" });
 
-const positivePercentageFloat = zodFr
-  .number({ invalid_type_error: "Le champ est requis" })
-  .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
-  .lte(100, "Le pourcentage ne peut pas être supérieur à 100%");
+const positivePercentageOrEmptyString = zodFr
+  .literal("", {
+    errorMap: () => ({
+      message: "Le champ est requis",
+    }),
+  })
+  .or(
+    zodFr
+      .number({ invalid_type_error: "Le champ est requis" })
+      .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
+      .lte(100, "Le pourcentage ne peut pas être supérieur à 100%"),
+  );
 
 const singleAgeRangeSchema = zodFr.object({
   women: positiveIntOrEmptyString,
@@ -109,8 +117,8 @@ const indicateur2or3 = zodFr.discriminatedUnion("calculable", [
     pourcentages: zodFr.record(
       zodFr.nativeEnum(CSP.Enum),
       zodFr.object({
-        women: positivePercentageFloat,
-        men: positivePercentageFloat,
+        women: positivePercentageOrEmptyString,
+        men: positivePercentageOrEmptyString,
       }),
     ),
   }),

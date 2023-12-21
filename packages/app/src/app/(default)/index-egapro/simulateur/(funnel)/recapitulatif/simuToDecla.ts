@@ -93,12 +93,20 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       dto["augmentations"] = {
         estCalculable: "oui",
         catégories: {
-          [CSP.Enum.OUVRIERS]: resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.OUVRIERS)),
-          [CSP.Enum.EMPLOYES]: resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.EMPLOYES)),
-          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: resultWithSign(
-            computerIndicateurDeux.computeGroup(CSP.Enum.TECHNICIENS_AGENTS_MAITRISES),
-          ),
-          [CSP.Enum.INGENIEURS_CADRES]: resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.INGENIEURS_CADRES)),
+          [CSP.Enum.OUVRIERS]: computerIndicateurDeux.canComputeGroup(CSP.Enum.OUVRIERS)
+            ? resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.OUVRIERS))
+            : "",
+          [CSP.Enum.EMPLOYES]: computerIndicateurDeux.canComputeGroup(CSP.Enum.EMPLOYES)
+            ? resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.EMPLOYES))
+            : "",
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computerIndicateurDeux.canComputeGroup(
+            CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
+          )
+            ? resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.TECHNICIENS_AGENTS_MAITRISES))
+            : "",
+          [CSP.Enum.INGENIEURS_CADRES]: computerIndicateurDeux.canComputeGroup(CSP.Enum.INGENIEURS_CADRES)
+            ? resultWithSign(computerIndicateurDeux.computeGroup(CSP.Enum.INGENIEURS_CADRES))
+            : "",
         },
         note: resultIndicateurDeux.note,
         populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation), // TODO: Use the FavorablePopulation.Enum instead.
@@ -112,14 +120,20 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       dto["promotions"] = {
         estCalculable: "oui",
         catégories: {
-          [CSP.Enum.OUVRIERS]: resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.OUVRIERS)),
-          [CSP.Enum.EMPLOYES]: resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.EMPLOYES)),
-          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: resultWithSign(
-            computerIndicateurTrois.computeGroup(CSP.Enum.TECHNICIENS_AGENTS_MAITRISES),
-          ),
-          [CSP.Enum.INGENIEURS_CADRES]: resultWithSign(
-            computerIndicateurTrois.computeGroup(CSP.Enum.INGENIEURS_CADRES),
-          ),
+          [CSP.Enum.OUVRIERS]: computerIndicateurTrois.canComputeGroup(CSP.Enum.OUVRIERS)
+            ? resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.OUVRIERS))
+            : "",
+          [CSP.Enum.EMPLOYES]: computerIndicateurTrois.canComputeGroup(CSP.Enum.EMPLOYES)
+            ? resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.EMPLOYES))
+            : "",
+          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computerIndicateurTrois.canComputeGroup(
+            CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
+          )
+            ? resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.TECHNICIENS_AGENTS_MAITRISES))
+            : "",
+          [CSP.Enum.INGENIEURS_CADRES]: computerIndicateurTrois.canComputeGroup(CSP.Enum.INGENIEURS_CADRES)
+            ? resultWithSign(computerIndicateurTrois.computeGroup(CSP.Enum.INGENIEURS_CADRES))
+            : "",
         },
         note: resultIndicateurTrois.note,
         populationFavorable: toFavorablePopulation(resultIndicateurTrois.favorablePopulation),

@@ -33,7 +33,15 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     }
     const category = this.input[categoryName];
 
-    if (!category || !(category.menCount >= 10 && category.womenCount >= 10 && category.men && category.women)) {
+    if (
+      !category ||
+      !(
+        category.menCount >= 10 &&
+        category.womenCount >= 10 &&
+        typeof category.men === "number" &&
+        typeof category.women === "number"
+      )
+    ) {
       return false;
     }
 

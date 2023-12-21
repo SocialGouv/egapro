@@ -19,7 +19,15 @@ import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
 import { AideSimulationIndicateurTrois } from "@components/aide-simulation/IndicateurTrois";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
-import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Box, FormLayout } from "@design-system";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import {
+  AlternativeTable,
+  type AlternativeTableProps,
+  BackNextButtonsGroup,
+  Box,
+  CenteredContainer,
+  FormLayout,
+} from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
@@ -28,7 +36,7 @@ import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
-import { useSimuFunnelStore } from "../useSimuFunnelStore";
+import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import { getPourcentagesAugmentationPromotionsWithCount, prepareIndicateurUnComputer } from "../utils";
 import { Indicateur2ou3Note } from "./Indicateur2ou3Note";
 
@@ -60,6 +68,23 @@ const schemaWithGlobalPourcentageVerification = (indicateur: Indic2or3FormProps[
           path: ["root.totalPourcentages"],
         });
       }
+      categories.forEach(category => {
+        const categoryValues = obj.pourcentages[category] ?? null;
+        if (categoryValues) {
+          if (categoryValues.women === "")
+            ctx.addIssue({
+              code: zodFr.ZodIssueCode.custom,
+              message: "Ce champs est requis",
+              path: [`pourcentages.${category}.women`],
+            });
+          if (categoryValues.men === "")
+            ctx.addIssue({
+              code: zodFr.ZodIssueCode.custom,
+              message: "Ce champs est requis",
+              path: [`pourcentages.${category}.men`],
+            });
+        }
+      });
     }
   });
 
@@ -69,7 +94,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const router = useRouter();
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeMoreThan250DTO> | undefined;
-  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
+  const hydrated = useSimuFunnelStoreHasHydrated();
 
   const computer = indicateur === 2 ? indicateur2Computer : indicateur3Computer;
   const indicateurNav = indicateur === 2 ? NAVIGATION.indicateur2 : NAVIGATION.indicateur3;
@@ -88,9 +113,20 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     handleSubmit,
     register,
     watch,
+    getValues,
   } = methods;
 
-  const computableCheck = watch("calculable");
+  if (!hydrated) {
+    return (
+      <CenteredContainer pb="6w">
+        <SkeletonForm fields={1} />
+      </CenteredContainer>
+    );
+  }
+
+  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
+
+  const computableCheck = watch("calculable") || getValues("calculable");
   const pourcentages = watch("pourcentages");
 
   let pourcentagesWithCount = undefined as Percentages | undefined;
