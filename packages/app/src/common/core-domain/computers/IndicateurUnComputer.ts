@@ -1,5 +1,7 @@
+import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
+
 import { RemunerationsMode } from "../domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { AbstractGroupComputer, type TotalMetadata } from "./AbstractGroupComputer";
+import { AbstractGroupComputer, type InferGroupKey, type TotalMetadata } from "./AbstractGroupComputer";
 
 export type CountAndAverageSalaries = {
   menCount: number;
@@ -130,5 +132,31 @@ export class IndicateurUnComputer extends AbstractGroupComputer<InputRemuneratio
     const groupCount = group.menCount + group.womenCount;
     const { totalGroupCount } = this.getTotalMetadata();
     return salaryGap * (groupCount / totalGroupCount);
+  }
+
+  protected calculateGapBeforeThresholdApplication(key: string): number {
+    if (!this.input) {
+      throw new Error("remunerations must be set before calling calculateGapBeforeThresholdApplication");
+    }
+
+    if (!this.mode) {
+      throw new Error("mode (csp, or other) must be set before calling calculateGapBeforeThresholdApplication");
+    }
+
+    const group = this.input[key] ?? {
+      menCount: 0,
+      menSalary: 0,
+      womenCount: 0,
+      womenSalary: 0,
+    };
+
+    let gap = ((group.menSalary - group.womenSalary) / group.menSalary) * 100;
+    gap = isFinite(gap) ? gap : 0;
+    return gap;
+  }
+
+  public computeGroupBeforeThresholdApplication(groupKey: InferGroupKey<InputRemunerations>): ComputedResult {
+    const weightedGap = this.calculateGapBeforeThresholdApplication(groupKey);
+    return this.getNoteAndInfoFromResult(weightedGap);
   }
 }

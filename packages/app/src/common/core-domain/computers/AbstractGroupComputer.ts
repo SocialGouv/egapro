@@ -18,7 +18,7 @@ export interface DefaultGroup {
   womenCount: number;
 }
 
-type InferGroupKey<T> = Required<T> extends Record<infer K extends string, Any> ? K : never;
+export type InferGroupKey<T> = Required<T> extends Record<infer K extends string, Any> ? K : never;
 type InferGroup<T> = Required<T> extends Record<string, infer G extends DefaultGroup> ? G : never;
 
 export abstract class AbstractGroupComputer<

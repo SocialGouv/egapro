@@ -169,7 +169,7 @@ export const RecapSimu = () => {
                     cols: ageRanges.map(ageRange => {
                       const groupKey = buildRemunerationKey(category.name, ageRange);
                       const canComputeGroup = computerIndicateurUn.canComputeGroup(groupKey);
-                      const groupResult = computerIndicateurUn.computeGroup(groupKey);
+                      const groupResult = computerIndicateurUn.computeGroupBeforeThresholdApplication(groupKey);
                       return canComputeGroup ? precisePercentFormat.format(groupResult.resultRaw / 100) : "NC";
                     }) as [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]],
                   }))}
@@ -282,7 +282,7 @@ export const RecapSimu = () => {
                             label: "",
                           },
                           {
-                            label: "Écart pondéré",
+                            label: indicateur === 2 ? "Écarts de taux d'augmentations" : "Écarts de taux de promotions",
                           },
                         ]}
                         body={categories.map(category => ({
@@ -295,7 +295,7 @@ export const RecapSimu = () => {
                                 mergedLabel: "NC",
                               } satisfies Partial<AlternativeTableProps.BodyContent>;
                             }
-                            const groupResult = computerIndicateurDeuxOuTrois.computeGroup(category);
+                            const groupResult = computerIndicateurDeuxOuTrois.computeGroupNonWeightedGap(category);
                             return {
                               cols: [precisePercentFormat.format(groupResult.resultRaw / 100)],
                             } satisfies Partial<AlternativeTableProps.BodyContent>;
