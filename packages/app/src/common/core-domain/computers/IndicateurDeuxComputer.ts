@@ -1,5 +1,5 @@
 import { type CSP } from "../domain/valueObjects/CSP";
-import { type ComputedResult as BaseComputedResult } from "./AbstractComputer";
+import { type ComputedResult as BaseComputedResult, type ComputedResult } from "./AbstractComputer";
 import { AbstractGroupComputer, type DefaultGroup } from "./AbstractGroupComputer";
 import { type IndicateurUnComputer } from "./IndicateurUnComputer";
 
@@ -74,6 +74,27 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     const groupCount = group.menCount + group.womenCount;
     const { totalGroupCount } = this.getTotalMetadata();
     return (gap * groupCount) / totalGroupCount;
+  }
+
+  protected calculateGap(id: CSP.Enum): number {
+    if (!this.input) {
+      throw new Error("percentages must be set before calling calculateGap");
+    }
+
+    const group = this.input[id] ?? {
+      menCount: 0,
+      men: 0,
+      womenCount: 0,
+      women: 0,
+    };
+
+    const gap = group.men - group.women; // in full percentage (e.g. 100%)
+    return gap;
+  }
+
+  public computeGroupNonWeightedGap(groupKey: CSP.Enum): ComputedResult {
+    const weightedGap = this.calculateGap(groupKey);
+    return this.getNoteAndInfoFromResult(weightedGap);
   }
 
   protected getNoteAndInfoFromResult(weightedGap: number): IndicateurDeuxComputer.ComputedResult {
