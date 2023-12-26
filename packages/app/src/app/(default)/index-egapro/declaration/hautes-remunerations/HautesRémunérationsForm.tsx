@@ -85,11 +85,12 @@ export const HautesRémunérationsForm = () => {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors, isValid },
     watch,
   } = methods;
 
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
 
   useEffect(() => {

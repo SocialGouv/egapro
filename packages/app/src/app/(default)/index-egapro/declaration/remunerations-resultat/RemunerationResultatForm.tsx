@@ -73,10 +73,11 @@ export const RemunerationResultatForm = () => {
     handleSubmit,
     formState: { isValid },
     setValue,
+    getValues,
     watch,
   } = methods;
 
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
 
   useEffect(() => {
