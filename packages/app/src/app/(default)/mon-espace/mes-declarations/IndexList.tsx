@@ -123,7 +123,7 @@ export const IndexList = ({
     "TRANCHE D'EFFECTIF",
     "DATE DE DÉCLARATION",
     "INDEX",
-    "OBJECTIF ET MESURES",
+    "OBJECTIFS ET MESURES",
     "RÉCAPITULATIF",
   ];
 
