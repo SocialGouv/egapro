@@ -28,14 +28,14 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
     workforce: {
       range: déclaration.entreprise?.tranche,
     },
-    ...(déclaration.ues?.nom &&
-      déclaration.ues?.entreprises.length && {
-        name: déclaration.ues.nom || "",
-        companies: déclaration.ues.entreprises.map(company => ({
-          name: company.raisonSociale,
-          siren: company.siren,
-        })),
-      }),
+    ues: {
+      name: déclaration.ues?.nom || "",
+      companies:
+        déclaration.ues?.entreprises?.map(company => ({
+          name: company.raisonSociale || "",
+          siren: company.siren || "",
+        })) || [],
+    },
   };
 
   const year = déclaration.commencer?.annéeIndicateurs || 2023;
@@ -87,9 +87,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
           content={
             <>
               <p>
-                <strong>{company.ues?.name}</strong>
+                Nom de l'UES : <strong>{company.ues.name}</strong>
               </p>
-              <p>{company.ues?.companies.length + 1} entreprises composent l'UES</p>
+              <p>
+                Nombre d'entreprises composant l'UES : <strong>{company.ues.companies?.length + 1}</strong>
+              </p>
             </>
           }
         />
