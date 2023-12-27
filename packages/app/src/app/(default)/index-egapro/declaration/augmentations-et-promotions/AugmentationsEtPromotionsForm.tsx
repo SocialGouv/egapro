@@ -114,7 +114,7 @@ export const AugmentationEtPromotionsForm = () => {
   } = methods;
 
   const estCalculable = watch("estCalculable");
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const résultatEquivalentSalarié = watch("résultatEquivalentSalarié");
   const note = watch("note");
   const notePourcentage = watch("notePourcentage");

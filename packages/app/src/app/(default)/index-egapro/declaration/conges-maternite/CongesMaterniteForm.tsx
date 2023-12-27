@@ -82,11 +82,12 @@ export const CongesMaterniteForm = () => {
   const {
     handleSubmit,
     setValue,
+    getValues,
     formState: { isValid, errors: _errors },
     watch,
   } = methods;
 
-  const résultat = watch("résultat");
+  const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
   const estCalculable = watch("estCalculable");
 
