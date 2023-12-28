@@ -16,47 +16,47 @@ const LegalNotice = () => {
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
             <h2>Éditeur de la plateforme</h2>
-            <p>Index Egapro est édité par la Fabrique Numérique des Ministères sociaux.</p>
-            <ul>
-              <li>Adresse&nbsp;: Tour Mirabeau, 39-43 Quai André Citroën 75015 PARIS</li>
-              <li>Tél&nbsp;: 01 40 56 60 00</li>
-            </ul>
-            <h2>Directeur de la publication</h2>
-            <p>Directeur Général du Travail.</p>
-            <h2>Hébergement de la plateforme</h2>
+            <p>Index Egapro est édité par la Fabrique Numérique des Ministères sociaux située&nbsp;:</p>
             <p>
-              Ce site est hébergé au&nbsp;:
-              <br /> Ministère des Affaires sociales et de la Santé
-              <br /> 14 avenue Duquesne 75530 PARIS
+              Tour Mirabeau
+              <br />
+              39-43 Quai André Citroën
+              <br />
+              75015 PARIS
+              <br />
+              01 40 56 60 00
+            </p>
+            <h2>Directeur de la publication</h2>
+            <p>Le directeur de la publication est Monsieur Pierre RAMAIN, directeur général du travail.</p>
+            <h2>Hébergement de la plateforme</h2>
+            <p>La plateforme est hébergée par OVH, situé&nbsp;:</p>
+            <p>
+              2 rue Kellermann
+              <br />
+              59100 Roubaix
+              <br />
+              France
             </p>
             <h2>Accessibilité</h2>
             <p>
-              La conformité aux normes d’accessibilité numérique est un objectif ultérieur mais nous tâchons de rendre
-              ce site accessible à toutes et à tous.
-            </p>
-            <h3 className="fr-text--xl">Signaler un dysfonctionnement</h3>
-            <p>
-              Si vous rencontrez un défaut d’accessibilité vous empêchant d’accéder à un contenu ou une fonctionnalité
-              du site, merci de nous en faire part. Si vous n’obtenez pas de réponse rapide de notre part, vous êtes en
-              droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.
+              La plateforme est partiellement conforme aux normes d’accessibilité numérique, nous tâchons de la rendre
+              accessible à toutes et à tous.
             </p>
             <h3 className="fr-text--xl">En savoir plus</h3>
             <p>
               Pour en savoir plus sur la politique d’accessibilité numérique de l’État&nbsp;:{" "}
-              <Link
-                href="http://references.modernisation.gouv.fr/accessibilite-numerique"
-                target="_blank"
-                rel="noreferrer"
-              >
-                http://references.modernisation.gouv.fr/accessibilite-numerique
+              <Link href="https://accessibilite.numerique.gouv.fr/" target="_blank" rel="noreferrer">
+                https://accessibilite.numerique.gouv.fr/
               </Link>
             </p>
             <h2>Sécurité</h2>
             <p>
-              Le site est protégé par un certificat électronique, matérialisé pour la grande majorité des navigateurs
-              par un cadenas. Cette protection participe à la confidentialité des échanges. En aucun cas les services
-              associés à la plateforme ne seront à l’origine d’envoi d'emails pour demander la saisie d’informations
-              personnelles.
+              La plateforme est protégée par un certificat électronique, matérialisé pour la grande majorité des
+              navigateurs par un cadenas. Cette protection participe à la confidentialité des échanges.
+            </p>
+            <p>
+              En aucun cas, les services associés à la plateforme ne seront à l’origine d’envoi de courriels pour
+              demander la saisie d’informations personnelles.
             </p>
           </GridCol>
         </Grid>
