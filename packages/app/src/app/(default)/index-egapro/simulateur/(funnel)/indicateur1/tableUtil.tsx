@@ -1,6 +1,7 @@
 import { type IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { ageRanges, buildRemunerationKey, categories } from "@common/core-domain/computers/utils";
 import { type AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { currencyFormat, precisePercentFormat } from "@common/utils/number";
@@ -65,6 +66,7 @@ interface CommonBodyColumnsProps {
   firstCols: AlternativeTableProps.ColType[];
   hasCountNotFilled: boolean;
   menCount: number;
+  mode: RemunerationsMode.Enum;
   register: UseFormRegister<Indic1FormType>;
   womenCount: number;
 }
@@ -82,6 +84,7 @@ export const getCommonBodyColumns = ({
   computer,
   register,
   hasCountNotFilled,
+  mode = RemunerationsMode.Enum.CSP,
 }: CommonBodyColumnsProps): CommonBodyColumnsReturn => {
   const cols = firstCols as ColsType;
 
@@ -141,7 +144,9 @@ export const getCommonBodyColumns = ({
         },
       },
       (() => {
-        const { resultRaw: groupResult } = computer.computeGroup(buildRemunerationKey(categoryName, ageRange));
+        const { resultRaw: groupResult } = computer.computeGroup(
+          buildRemunerationKey(mode === RemunerationsMode.Enum.CSP ? categoryName : categoryIndex.toString(), ageRange),
+        );
         return !Number.isNaN(groupResult) && Number.isFinite(groupResult)
           ? precisePercentFormat.format(groupResult / 100)
           : "-";

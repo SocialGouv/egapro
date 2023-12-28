@@ -5,8 +5,13 @@ import {
   type CountAndAverageSalaries,
   type IndicateurUnComputer,
 } from "@common/core-domain/computers/IndicateurUnComputer";
-import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
+import {
+  ageRanges,
+  type ExternalRemunerations,
+  flattenHierarchicalLevelsRemunerations,
+} from "@common/core-domain/computers/utils";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
@@ -26,10 +31,9 @@ type Indic1FormType = z.infer<typeof createSteps.indicateur1>;
 interface OtherModesTableProps {
   computer: IndicateurUnComputer;
   defaultRemunerations?: ExternalRemunerations;
-  staff?: boolean;
 }
 
-export const OtherModesTable = ({ computer, staff, defaultRemunerations }: OtherModesTableProps) => {
+export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTableProps) => {
   const funnel = useSimuFunnelStore(state => state.funnel);
   const hydrated = useSimuFunnelStoreHasHydrated();
 
@@ -62,7 +66,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
 
   const remunerations = watch("remunerations") as ExternalRemunerations;
 
-  computer.setInput(flattenRemunerations(remunerations));
+  computer.setInput(flattenHierarchicalLevelsRemunerations(remunerations));
   computer.compute();
 
   return (
@@ -158,6 +162,7 @@ export const OtherModesTable = ({ computer, staff, defaultRemunerations }: Other
                         ageRange,
                         categoryIndex: remunerationsFieldIndex,
                         categoryName: remunerationsField.name,
+                        mode: RemunerationsMode.Enum.OTHER_LEVEL,
                         computer,
                         errors,
                         firstCols,

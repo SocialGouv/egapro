@@ -33,6 +33,18 @@ export function flattenRemunerations(remunerations: ExternalRemunerations): Inpu
   return flattened;
 }
 
+export function flattenHierarchicalLevelsRemunerations(remunerations: ExternalRemunerations): InputRemunerations {
+  const flattened: InputRemunerations = {};
+  remunerations.forEach(({ category }, index) => {
+    if (category) {
+      for (const [ageRange, ageGroup] of Object.entries(category)) {
+        flattened[buildRemunerationKey(index.toString(), ageRange as AgeRange.Enum)] = ageGroup;
+      }
+    }
+  });
+  return flattened;
+}
+
 export function buildRemunerationKey(categoryName: string, ageRange: AgeRange.Enum): string {
   return `${categoryName}:${ageRange}`;
 }
