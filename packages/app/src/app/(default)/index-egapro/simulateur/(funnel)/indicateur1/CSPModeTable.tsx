@@ -10,6 +10,7 @@ import {
 } from "@common/core-domain/computers/utils";
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
@@ -153,6 +154,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
                       ageRange,
                       categoryIndex,
                       categoryName,
+                      mode: RemunerationsMode.Enum.CSP,
                       computer,
                       errors,
                       register,
