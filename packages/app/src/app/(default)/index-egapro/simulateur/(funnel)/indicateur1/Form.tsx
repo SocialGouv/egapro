@@ -228,11 +228,7 @@ export const Indic1Form = () => {
                 <CSPModeTable computer={cspComputer} staff={session?.user.staff} />
               ) : (
                 <ClientAnimate>
-                  <OtherModesTable
-                    computer={otherComputer}
-                    staff={session?.user.staff}
-                    defaultRemunerations={defaultRemunerationsOtherModes}
-                  />
+                  <OtherModesTable computer={otherComputer} defaultRemunerations={defaultRemunerationsOtherModes} />
                 </ClientAnimate>
               )}
             </ClientAnimate>
