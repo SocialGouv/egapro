@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           # just perform install
           runTests: false
@@ -41,7 +41,7 @@ jobs:
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.dev.fabrique.social.gouv.fr" >> $GITHUB_ENV
           echo "$SITE_URL"
       - name: Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           install: false
           working-directory: ./packages/app
