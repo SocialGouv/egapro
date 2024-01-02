@@ -16,6 +16,7 @@ interface DeclarantFieldsProps<FormType> {
   isStaff?: boolean;
   lastname: keyof FormType;
   phoneNumber: keyof FormType;
+  skipgdpr?: boolean;
 }
 
 type FakeFormType = {
@@ -30,6 +31,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
   email,
   gdpr,
   isStaff = false,
+  skipgdpr = false,
 }: DeclarantFieldsProps<FormType>) => {
   const {
     register,
@@ -107,27 +109,29 @@ export const DeclarantFields = <FormType extends SimpleObject>({
         disabled={!isStaff}
       />
 
-      <Checkbox
-        options={[
-          {
-            label:
-              "J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la validité de ma déclaration.",
+      {!skipgdpr && (
+        <Checkbox
+          options={[
+            {
+              label:
+                "J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la validité de ma déclaration.",
 
-            nativeInputProps: register(gdprKey),
-            hintText: (
-              <>
-                Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos{" "}
-                <Link href="/cgu" target="_blank">
-                  Conditions Générales d'Utilisation
-                </Link>
-                .
-              </>
-            ),
-          },
-        ]}
-        state={errors[gdprKey] && "error"}
-        stateRelatedMessage={errors[gdprKey]?.message}
-      />
+              nativeInputProps: register(gdprKey),
+              hintText: (
+                <>
+                  Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos{" "}
+                  <Link href="/cgu" target="_blank">
+                    Conditions Générales d'Utilisation
+                  </Link>
+                  .
+                </>
+              ),
+            },
+          ]}
+          state={errors[gdprKey] && "error"}
+          stateRelatedMessage={errors[gdprKey]?.message}
+        />
+      )}
     </>
   );
 };

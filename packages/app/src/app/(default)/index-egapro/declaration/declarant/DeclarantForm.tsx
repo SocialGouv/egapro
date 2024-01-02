@@ -49,7 +49,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
       prénom: formData[stepName]?.prénom || user?.firstname,
       email: formData[stepName]?.email || user?.email,
       téléphone: formData[stepName]?.téléphone || "",
-      accordRgpd: formData[stepName]?.accordRgpd || false,
+      accordRgpd: formData[stepName]?.accordRgpd || true,
     },
   });
 
@@ -77,6 +77,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
                 lastname="nom"
                 phoneNumber="téléphone"
                 gdpr="accordRgpd"
+                skipgdpr
               />
             </ClientOnly>
 
