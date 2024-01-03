@@ -61,8 +61,8 @@ export const remunerationsStateFromMode = (mode: Remunerations["mode"]): remuner
   mode === "csp"
     ? "remunerations-csp"
     : mode === "niveau_autre"
-    ? "remunerations-coefficient-autre"
-    : "remunerations-coefficient-branche";
+      ? "remunerations-coefficient-autre"
+      : "remunerations-coefficient-branche";
 
 /**
  * The shape of the state for declaration form.

@@ -32,8 +32,8 @@ export const AlertExistingDeclaration = () => {
           {olderThanOneYear
             ? "Elle n'est plus modifiable car le délai d'un an est écoulé."
             : formData["declaration-existante"].status === "consultation"
-            ? "Vous pouvez la modifier en cliquant sur le bouton Modifier."
-            : "Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
+              ? "Vous pouvez la modifier en cliquant sur le bouton Modifier."
+              : "Vos modifications ne seront enregistrées que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape."}
           <br />
           <ButtonsGroup
             inlineLayoutWhen="sm and up"
