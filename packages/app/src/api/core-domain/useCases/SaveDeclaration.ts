@@ -73,8 +73,8 @@ export class SaveDeclaration implements UseCase<Input, void> {
           dto["publication"]?.planRelance === "oui"
             ? true
             : dto["publication"]?.planRelance === "non"
-              ? false
-              : undefined,
+            ? false
+            : undefined,
         ...(dto.entreprise?.type === "ues" && {
           ues: {
             name: dto.ues!.nom,
@@ -124,20 +124,20 @@ export class SaveDeclaration implements UseCase<Input, void> {
                     }))
                   : []
                 : remunerationsMode === "niveau_autre"
-                  ? dto["remunerations-coefficient-autre"]?.catégories.length
-                    ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
-                        name: nom,
-                        ranges: keepEntryBy(tranches, val => val !== ""),
-                      }))
-                    : []
-                  : remunerationsMode === "niveau_branche"
-                    ? dto["remunerations-coefficient-branche"]?.catégories.length
-                      ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
-                          name: nom,
-                          ranges: keepEntryBy(tranches, val => val !== ""),
-                        }))
-                      : []
-                    : ([] satisfies Categorie[]),
+                ? dto["remunerations-coefficient-autre"]?.catégories.length
+                  ? dto["remunerations-coefficient-autre"].catégories.map(({ nom, tranches }) => ({
+                      name: nom,
+                      ranges: keepEntryBy(tranches, val => val !== ""),
+                    }))
+                  : []
+                : remunerationsMode === "niveau_branche"
+                ? dto["remunerations-coefficient-branche"]?.catégories.length
+                  ? dto["remunerations-coefficient-branche"].catégories.map(({ nom, tranches }) => ({
+                      name: nom,
+                      ranges: keepEntryBy(tranches, val => val !== ""),
+                    }))
+                  : []
+                : ([] satisfies Categorie[]),
           },
       ...(dto.entreprise?.tranche !== CompanyWorkforceRange.Enum.FROM_50_TO_250 && {
         salaryRaises: !dto["augmentations"]

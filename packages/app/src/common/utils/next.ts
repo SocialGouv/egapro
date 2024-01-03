@@ -17,10 +17,10 @@ type SearchParamsString<T> = [T] extends [infer R extends string]
 type SearchParamsObject<T> = T extends z.ZodType
   ? never
   : T extends object
-    ? {
-        searchParams: Partial<T>;
-      }
-    : never;
+  ? {
+      searchParams: Partial<T>;
+    }
+  : never;
 
 type SearchParamsZod<T> = T extends z.ZodType
   ? {

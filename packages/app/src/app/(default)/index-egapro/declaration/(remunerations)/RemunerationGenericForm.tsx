@@ -86,8 +86,8 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
     mode === "csp"
       ? "remunerations-csp"
       : mode === "niveau_branche"
-        ? "remunerations-coefficient-branche"
-        : "remunerations-coefficient-autre";
+      ? "remunerations-coefficient-branche"
+      : "remunerations-coefficient-autre";
 
   const router = useRouter();
   const { formData, savePageData } = useDeclarationFormManager();

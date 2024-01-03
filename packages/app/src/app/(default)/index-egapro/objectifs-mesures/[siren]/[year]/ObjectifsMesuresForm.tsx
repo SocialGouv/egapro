@@ -301,9 +301,9 @@ export function buildHelpersObjectifsMesures(declaration?: DeclarationOpmcDTO) {
             !index
               ? true
               : index < 75 || (index < 85 && publicationSurSiteInternet === false)
-                ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
-                  val.modalitesPublicationObjectifsMesures.trim().length
-                : val.modalitesPublicationObjectifsMesures === undefined,
+              ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
+                val.modalitesPublicationObjectifsMesures.trim().length
+              : val.modalitesPublicationObjectifsMesures === undefined,
           {
             message: required_error,
             path: ["modalitesPublicationObjectifsMesures"],
@@ -314,8 +314,8 @@ export function buildHelpersObjectifsMesures(declaration?: DeclarationOpmcDTO) {
             return !index
               ? true
               : index < 75
-                ? val.datePublicationMesures !== undefined
-                : val.datePublicationMesures === undefined;
+              ? val.datePublicationMesures !== undefined
+              : val.datePublicationMesures === undefined;
           },
           {
             message: required_error,

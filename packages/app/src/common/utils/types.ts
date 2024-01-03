@@ -256,8 +256,8 @@ export type UnionConcat<TUnion extends string, TSep extends string = ","> = PopU
 export type Split<T extends string, TSep extends string = ","> = T extends `${infer Part}${TSep}${infer Rest}`
   ? [Part, ...Split<Rest, TSep>]
   : T extends string
-    ? [T]
-    : never;
+  ? [T]
+  : never;
 
 export type DelegatedGuard<T> = (prop: Any) => prop is T;
 export type DelegatedAsserts = (prop: Any) => asserts prop;

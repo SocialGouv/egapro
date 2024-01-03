@@ -60,12 +60,12 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
                 name === "conges-maternite"
                   ? ""
                   : populationFavorable === FavorablePopulation.Enum.EQUALITY
-                    ? "Égalité de l'indicateur"
-                    : name === "hautes-remunerations"
-                      ? `${capitalize(populationFavorable)} sur-représenté${
-                          populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
-                        }s`
-                      : `Écart en faveur des ${populationFavorable}`
+                  ? "Égalité de l'indicateur"
+                  : name === "hautes-remunerations"
+                  ? `${capitalize(populationFavorable)} sur-représenté${
+                      populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
+                    }s`
+                  : `Écart en faveur des ${populationFavorable}`
               }
             />
           )}

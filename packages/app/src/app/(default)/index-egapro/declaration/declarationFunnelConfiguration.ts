@@ -156,10 +156,10 @@ export const funnelConfig = (data: DeclarationDTO): Record<ExtendedFunnelKey, Fu
             ? funnelStaticConfig[`augmentations-et-promotions`]
             : funnelStaticConfig.augmentations
           : data.remunerations?.mode === "csp"
-            ? funnelStaticConfig[`remunerations-csp`]
-            : data.remunerations?.mode === "niveau_branche"
-              ? funnelStaticConfig[`remunerations-coefficient-branche`]
-              : funnelStaticConfig[`remunerations-coefficient-autre`],
+          ? funnelStaticConfig[`remunerations-csp`]
+          : data.remunerations?.mode === "niveau_branche"
+          ? funnelStaticConfig[`remunerations-coefficient-branche`]
+          : funnelStaticConfig[`remunerations-coefficient-autre`],
 
       previous: () => funnelStaticConfig[`periode-reference`],
     },
@@ -196,10 +196,10 @@ export const funnelConfig = (data: DeclarationDTO): Record<ExtendedFunnelKey, Fu
         data.remunerations?.estCalculable === "non"
           ? funnelStaticConfig.remunerations
           : data.remunerations?.mode === "csp"
-            ? funnelStaticConfig[`remunerations-csp`]
-            : data.remunerations?.mode === "niveau_branche"
-              ? funnelStaticConfig[`remunerations-coefficient-branche`]
-              : funnelStaticConfig[`remunerations-coefficient-autre`],
+          ? funnelStaticConfig[`remunerations-csp`]
+          : data.remunerations?.mode === "niveau_branche"
+          ? funnelStaticConfig[`remunerations-coefficient-branche`]
+          : funnelStaticConfig[`remunerations-coefficient-autre`],
     },
     "augmentations-et-promotions": {
       indexStep() {
