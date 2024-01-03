@@ -3,6 +3,7 @@ import { type IndicateurUnComputer } from "@common/core-domain/computers/Indicat
 import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
+import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import {
   type CreateSimulationDTO,
@@ -17,8 +18,8 @@ const toFavorablePopulation = (populationFavorable: ComputedResult["favorablePop
   populationFavorable === "equality"
     ? undefined
     : populationFavorable === "men"
-    ? FavorablePopulation.Enum.MEN
-    : FavorablePopulation.Enum.WOMEN;
+      ? FavorablePopulation.Enum.MEN
+      : FavorablePopulation.Enum.WOMEN;
 
 const computeGroupIndicateurUn = (computerIndicateurUn: IndicateurUnComputer) => (key: string) =>
   !computerIndicateurUn.canComputeGroup(key) ? null : resultWithSign(computerIndicateurUn.computeGroup(key));
@@ -144,7 +145,6 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
 
   const indicateur1 = simulation.indicateur1;
 
-  // TODO: The simulateur doesn't handle that indicateur1 can not be computable ??
   if (indicateur1.remunerations) {
     // Not mandatory, because the front can recompute this based on value in remunerations form data.
     dto["remunerations-resultat"] = {
@@ -158,6 +158,14 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
       mode: indicateur1.mode,
       cse: undefined,
       dateConsultationCSE: undefined,
+    };
+  }
+
+  if (!computerIndicateurUn.canCompute()) {
+    dto["remunerations"] = {
+      déclarationCalculCSP: false,
+      estCalculable: "non",
+      motifNonCalculabilité: NotComputableReason.Enum.EGVI40PCET,
     };
   }
 

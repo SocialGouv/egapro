@@ -140,8 +140,8 @@ export const RemunerationForm = () => {
           data.mode === "csp"
             ? "remunerations-csp"
             : mode === "niveau_branche"
-            ? "remunerations-coefficient-branche"
-            : "remunerations-coefficient-autre";
+              ? "remunerations-coefficient-branche"
+              : "remunerations-coefficient-autre";
 
         const formStateStepToRemove = (
           ["remunerations-coefficient-autre", "remunerations-coefficient-branche", "remunerations-csp"] as const
