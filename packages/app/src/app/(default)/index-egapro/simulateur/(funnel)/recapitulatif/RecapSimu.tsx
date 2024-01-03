@@ -236,7 +236,7 @@ export const RecapSimu = () => {
                 editLink={simulateurPath(indicateurKey)}
                 content={(() => {
                   const indic = funnel[indicateurKey];
-                  if (!indic.calculable) {
+                  if (indic.calculable === "non") {
                     return (
                       <IndicatorNote
                         noBorder
