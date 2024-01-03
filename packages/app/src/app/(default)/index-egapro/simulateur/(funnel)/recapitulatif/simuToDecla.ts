@@ -18,8 +18,8 @@ const toFavorablePopulation = (populationFavorable: ComputedResult["favorablePop
   populationFavorable === "equality"
     ? undefined
     : populationFavorable === "men"
-    ? FavorablePopulation.Enum.MEN
-    : FavorablePopulation.Enum.WOMEN;
+      ? FavorablePopulation.Enum.MEN
+      : FavorablePopulation.Enum.WOMEN;
 
 const computeGroupIndicateurUn = (computerIndicateurUn: IndicateurUnComputer) => (key: string) =>
   !computerIndicateurUn.canComputeGroup(key) ? null : resultWithSign(computerIndicateurUn.computeGroup(key));

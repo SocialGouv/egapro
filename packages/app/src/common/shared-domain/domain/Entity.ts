@@ -24,16 +24,16 @@ export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {
 type UnboxProp<T> = T extends Any[]
   ? EntityPropsToJson<T>
   : T extends Enum<infer E>
-  ? Enum.ToString<E>
-  : T extends ValueObject<infer V>
-  ? V
-  : T extends Entity<infer TProps, Any>
-  ? EntityPropsToJson<TProps>
-  : T extends Date
-  ? Date | string
-  : T extends SimpleObject
-  ? EntityPropsToJson<T>
-  : T;
+    ? Enum.ToString<E>
+    : T extends ValueObject<infer V>
+      ? V
+      : T extends Entity<infer TProps, Any>
+        ? EntityPropsToJson<TProps>
+        : T extends Date
+          ? Date | string
+          : T extends SimpleObject
+            ? EntityPropsToJson<T>
+            : T;
 
 export type EntityPropsToJson<T> = ClearObject<{
   [P in keyof T]: UnboxProp<T[P]>;

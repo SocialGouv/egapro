@@ -6,7 +6,6 @@ export interface PublicationProps {
   modalities?: string;
   url?: string;
 }
-/* eslint-enable typescript-sort-keys/interface */
 
 export class Publication extends JsonEntity<PublicationProps, never> {
   /** Date de publication du niveau de résultat de l'entreprise ou de l'UES */

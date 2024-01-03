@@ -63,8 +63,8 @@ export const BarChart = ({
               theme === "multicolor"
                 ? data.map((_d, i) => (isDark ? themeDark.backgroundColor[i] : themeLight.backgroundColor[i]))
                 : isDark
-                ? "#8585f6"
-                : "#000091",
+                  ? "#8585f6"
+                  : "#000091",
           },
         ],
       }}

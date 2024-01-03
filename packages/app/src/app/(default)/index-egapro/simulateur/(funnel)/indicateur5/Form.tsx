@@ -82,8 +82,8 @@ export const Indic5Form = () => {
                 ? computed.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
                   : computed.favorablePopulation === "men"
-                  ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
-                  : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
+                    ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
+                    : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
                 : "Veuillez remplir le reste des hautes rémunérations pour avoir votre note"
             }
           />

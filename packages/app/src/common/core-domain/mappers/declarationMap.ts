@@ -334,9 +334,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           cse: remunerations.cseConsultationDate
             ? "oui"
             : // If mode !== "csp", cse must be defined. So, there is no cse date, we infer cse === "non".
-            remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
-            ? "non"
-            : undefined,
+              remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
+              ? "non"
+              : undefined,
           dateConsultationCSE: remunerations.cseConsultationDate
             ? dateObjectToDateISOString(remunerations.cseConsultationDate)
             : undefined,
