@@ -10,6 +10,7 @@
     "export": "next export",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
     "test": "jest --watch",
     "type-check": "tsc",
