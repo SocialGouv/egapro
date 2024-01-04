@@ -2,7 +2,11 @@
 
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
-import { ageRanges, type ExternalRemunerations, flattenRemunerations } from "@common/core-domain/computers/utils";
+import {
+  ageRanges,
+  type ExternalRemunerations,
+  flattenHierarchicalLevelsRemunerations,
+} from "@common/core-domain/computers/utils";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CreateSimulationDTO, createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { Object } from "@common/utils/overload";
@@ -41,7 +45,7 @@ const formSchema = (funnel: Partial<CreateSimulationDTO> | undefined) =>
 
     if (mode !== RemunerationsMode.Enum.CSP) {
       // test if there is the same amount of CSP in effectifs and remunerations
-      schemaOtherComputer.setInput(flattenRemunerations(remunerations as ExternalRemunerations));
+      schemaOtherComputer.setInput(flattenHierarchicalLevelsRemunerations(remunerations as ExternalRemunerations));
 
       const { enoughWomen, enoughMen } = getIsEnoughEmployees({
         computer: schemaOtherComputer,
@@ -52,7 +56,7 @@ const formSchema = (funnel: Partial<CreateSimulationDTO> | undefined) =>
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Le nombre de femmes et d'hommes dans les données saisies ne correspond pas au nombre de femmes et d'hommes dans les données de la page précédente`,
-          path: ["remunerations"],
+          path: ["effectifs"],
         });
       }
     }
