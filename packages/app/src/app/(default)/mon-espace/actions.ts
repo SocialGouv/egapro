@@ -3,6 +3,7 @@ import { GetAllDeclarationsBySiren } from "@api/core-domain/useCases/GetAllDecla
 import { GetDeclarationOpmcBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationOpmcBySirenAndYear";
 import { GetRepresentationEquilibreeBySiren } from "@api/core-domain/useCases/GetRepresentationEquilibreeBySiren";
 import { assertServerSession } from "@api/utils/auth";
+import assert from "assert";
 
 export async function getAllDeclarationsBySiren(siren: string) {
   await assertServerSession({
@@ -12,6 +13,8 @@ export async function getAllDeclarationsBySiren(siren: string) {
     },
     staff: true,
   });
+
+  assert(siren, "Siren is required");
 
   // handle default errors
   const useCase = new GetAllDeclarationsBySiren(declarationRepo);
@@ -27,6 +30,8 @@ export async function getAllRepresentationEquilibreeBySiren(siren: string) {
     staff: true,
   });
 
+  assert(siren, "Siren is required");
+
   // handle default errors
   const useCase = new GetRepresentationEquilibreeBySiren(representationEquilibreeRepo);
   return await useCase.execute({ siren });
@@ -40,6 +45,9 @@ export async function getAllDeclarationOpmcSirenAndYear(siren: string, year: num
     },
     staff: true,
   });
+
+  assert(siren, "Siren is required");
+  assert(year, "Year is required");
 
   // handle default errors
   const useCase = new GetDeclarationOpmcBySirenAndYear(declarationRepo);

@@ -5,6 +5,8 @@ import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { signOut, useSession } from "next-auth/react";
 
+import { HeaderAccountMenu } from "./HeaderAccountMenu";
+
 export const UserHeaderItem = () => {
   const session = useSession();
 
@@ -12,16 +14,7 @@ export const UserHeaderItem = () => {
   switch (session.status) {
     case "authenticated":
       isStaff = session.data.user.staff || session.data.staff.impersonating || false;
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-authenticated-user"
-          quickAccessItem={{
-            iconId: isStaff ? "fr-icon-github-line" : "fr-icon-account-fill",
-            text: `${session.data.user.email}${isStaff ? " (staff)" : ""}`,
-            linkProps: { href: "/mon-espace/mon-profil" },
-          }}
-        />
-      );
+      return <HeaderAccountMenu staff={isStaff} session={session} />;
     case "loading":
       return (
         <HeaderQuickAccessItem

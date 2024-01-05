@@ -14,6 +14,7 @@ import {
 import { IndexList } from "./IndexList";
 import { RepeqList } from "./RepeqList";
 import { SelectSiren } from "./SelectSiren";
+import { SelectSirenStaff } from "./SelectSirenStaff";
 
 const InfoText = () => (
   <>
@@ -35,13 +36,27 @@ const InfoText = () => (
 
 const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
+  const isStaff = session?.user?.staff || session?.staff?.impersonating || false;
+  const isImpersonating = session?.staff?.impersonating || false;
   const sirenList = (session?.user.companies || []).map(company => company.siren);
-  if (!sirenList.length) return null;
-  const selectedSiren = typeof searchParams.siren === "string" ? searchParams.siren : sirenList[0];
+  const selectedSiren = searchParams && typeof searchParams.siren === "string" ? searchParams.siren : "";
+  const titleText = isStaff && !isImpersonating ? "Les déclarations" : "Mes déclarations";
+
+  if (selectedSiren === "" && isStaff && !isImpersonating) {
+    return (
+      <MessageProvider>
+        <Heading as="h1" text={titleText} />
+        <Alert severity="info" small description={<InfoText />} />
+        <Box mt="2w">
+          <SelectSirenStaff currentSiren={selectedSiren} />
+        </Box>
+      </MessageProvider>
+    );
+  }
 
   try {
-    const declarations = await getAllDeclarationsBySiren(selectedSiren);
-    const repEq = await getAllRepresentationEquilibreeBySiren(selectedSiren);
+    const declarations = await getAllDeclarationsBySiren(isImpersonating ? sirenList[0] : selectedSiren);
+    const repEq = await getAllRepresentationEquilibreeBySiren(isImpersonating ? sirenList[0] : selectedSiren);
     const sirenWithCompanyName = sirenList.map(siren => ({
       siren: siren,
       companyName:
@@ -63,10 +78,12 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
 
     return (
       <MessageProvider>
-        <Heading as="h1" text="Mes déclarations" />
+        <Heading as="h1" text={titleText} />
         <Alert severity="info" small description={<InfoText />} />
         <Box mt="2w">
-          <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
+          {(isStaff && !isImpersonating && <SelectSirenStaff currentSiren={selectedSiren} />) || (
+            <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
+          )}
         </Box>
         <Box mt="10w">
           <IndexList declarations={declarations} declarationOpmcList={declarationOpmcList} />
