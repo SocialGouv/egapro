@@ -92,13 +92,14 @@ export const HautesRémunérationsForm = () => {
 
   const résultat = watch("résultat") || getValues("résultat");
   const note = watch("note");
+  const populationFavorable = watch("populationFavorable");
 
   useEffect(() => {
-    if (résultat !== "") {
+    if (résultat !== "" && résultat !== undefined) {
       const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note, { shouldValidate: true });
     }
-  }, [résultat, setValue]);
+  }, [résultat, setValue, populationFavorable]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
