@@ -84,6 +84,11 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
             résultatEquivalentSalarié: resultIndicateurDeuxTrois.equivalentEmployeeCountGap,
           };
         }
+      } else {
+        dto["augmentations-et-promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.ABSAUGI,
+        };
       }
     }
   } else {
@@ -113,6 +118,11 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
         populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation), // TODO: Use the FavorablePopulation.Enum instead.
         résultat: resultIndicateurDeux.result,
       };
+    } else {
+      dto["augmentations"] = {
+        estCalculable: "non",
+        motifNonCalculabilité: NotComputableReason.Enum.ABSAUGI,
+      };
     }
 
     const promotions = simulation.indicateur3;
@@ -139,6 +149,11 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
         note: resultIndicateurTrois.note,
         populationFavorable: toFavorablePopulation(resultIndicateurTrois.favorablePopulation),
         résultat: resultIndicateurTrois.result,
+      };
+    } else {
+      dto["promotions"] = {
+        estCalculable: "non",
+        motifNonCalculabilité: NotComputableReason.Enum.ABSPROM,
       };
     }
   }
@@ -212,6 +227,11 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
         estCalculable: "oui",
         note: resultIndicateurQuatre.note,
         résultat: Math.floor(resultIndicateurQuatre.result * 100),
+      };
+    } else {
+      dto["conges-maternite"] = {
+        estCalculable: "non",
+        motifNonCalculabilité: NotComputableReason.Enum.ABSRCM,
       };
     }
   }
