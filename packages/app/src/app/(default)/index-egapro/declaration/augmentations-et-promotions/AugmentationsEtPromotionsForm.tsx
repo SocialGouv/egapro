@@ -83,6 +83,12 @@ const formSchema = zodFr
           path: ["populationFavorable"],
         });
       }
+    } else if (value.estCalculable === "non" && !value.motifNonCalculabilité) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le motif de non calculabilité est obligatoire",
+        path: ["motifNonCalculabilité"],
+      });
     }
   });
 
