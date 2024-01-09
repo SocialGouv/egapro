@@ -12,7 +12,6 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
   const sirenList = (session?.user.companies || []).map(company => company.siren);
-  console.log(process.env.EGAPRO_ENV);
   if (!sirenList.length)
     return (
       <Box mb="10w">
@@ -20,7 +19,12 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
         <Box mt="4w">
           Vous n'avez pas encore d'entreprises rattachés.
           <br />{" "}
-          <a target="_blank" href="https://app.moncomptepro.beta.gouv.fr/users/start-sign-in">
+          <a
+            target="_blank"
+            href={`https://app${
+              process.env.EGAPRO_ENV === "prod" ? "" : "-test"
+            }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
+          >
             Connectez-vous sur Mon Compte Pro
           </a>{" "}
           et ajoutez votre entreprise.
