@@ -3,6 +3,7 @@ import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import * as process from "process";
 
 import { getAllEmailsBySiren } from "../actions";
 import { SelectSiren } from "./SelectSiren";
@@ -11,6 +12,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
   const sirenList = (session?.user.companies || []).map(company => company.siren);
+  console.log(process.env.EGAPRO_ENV);
   if (!sirenList.length)
     return (
       <Box mb="10w">

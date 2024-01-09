@@ -1,7 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
+import { Select } from "@codegouvfr/react-dsfr/Select";
 import { Grid, GridCol } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { useRouter } from "next/navigation";
@@ -24,15 +24,17 @@ export const SelectSiren = ({ sirenList }: { sirenList: string[] }) => {
   return (
     <Grid>
       <GridCol sm={3}>
-        <SelectNext
+        <Select
           label="SIREN"
-          nativeSelectProps={{ onChange: event => setCurrentSiren(event.target.value) }}
-          options={sirenList.map(value => ({
-            value,
-            label: value,
-            selected: value === currentSiren,
-          }))}
-        />
+          nativeSelectProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
+        >
+          <option value="">Sélectionner un siren</option>
+          {sirenList.map((value, key) => (
+            <option key={`siren-${key}`} value={value}>
+              {value}
+            </option>
+          ))}
+        </Select>
       </GridCol>
       <GridCol sm={9}>
         <div className={fr.cx("fr-pt-10v", "fr-pl-2v")}>
