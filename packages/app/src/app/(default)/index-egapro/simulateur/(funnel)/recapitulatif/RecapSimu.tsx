@@ -193,7 +193,6 @@ export const RecapSimu = () => {
           title={NAVIGATION.indicateur2et3.title}
           editLink={simulateurPath("indicateur2et3")}
           content={(() => {
-            if (!resultIndicateurDeuxTrois) return;
             if (funnel.indicateur2and3.calculable === "non") {
               return (
                 <IndicatorNote
@@ -217,6 +216,8 @@ export const RecapSimu = () => {
                 />
               );
             }
+
+            if (!resultIndicateurDeuxTrois) return;
 
             return (
               <>
