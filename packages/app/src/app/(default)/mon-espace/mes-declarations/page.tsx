@@ -4,6 +4,8 @@ import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpm
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
+import { getCompany } from "@globalActions/company";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import {
@@ -36,6 +38,7 @@ const InfoText = () => (
 
 const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
+  if (!session) redirect("/login");
   const isStaff = session?.user?.staff || session?.staff?.impersonating || false;
   const isImpersonating = session?.staff?.impersonating || false;
   const sirenList = (session?.user.companies || []).map(company => company.siren);
@@ -57,12 +60,14 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
   try {
     const declarations = await getAllDeclarationsBySiren(isImpersonating ? sirenList[0] : selectedSiren);
     const repEq = await getAllRepresentationEquilibreeBySiren(isImpersonating ? sirenList[0] : selectedSiren);
-    const sirenWithCompanyName = sirenList.map(siren => ({
-      siren: siren,
-      companyName:
-        declarations.find(company => company.commencer?.siren === siren)?.entreprise?.entrepriseDéclarante
-          ?.raisonSociale || "",
-    }));
+    const sirenWithCompanyName: Array<{ companyName: string; siren: string }> = [];
+    for (const siren of sirenList) {
+      const result = await getCompany(siren);
+      if (result.ok) {
+        sirenWithCompanyName.push({ siren, companyName: result.data?.simpleLabel || "" });
+      }
+    }
+
     const declarationOpmcList: DeclarationOpmcDTO[] = [];
     for (const declaration of declarations) {
       if (declaration.commencer?.annéeIndicateurs) {
