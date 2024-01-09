@@ -379,8 +379,8 @@ export const RecapSimu = () => {
                 resultIndicateurCinq.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
                   : resultIndicateurCinq.favorablePopulation === "men"
-                    ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
-                    : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
+                    ? "Les hommes sont sur-représentés parmi les salariés les mieux rémunérés."
+                    : "Les femmes sont sur-représentées parmi les salariés les mieux rémunérés."
               }
             />
           </>

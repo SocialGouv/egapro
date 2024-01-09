@@ -84,7 +84,7 @@ export const Indic5Form = () => {
                   : computed.favorablePopulation === "men"
                     ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
                     : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
-                : "Veuillez remplir le reste des hautes rémunérations pour avoir votre note"
+                : "Veuillez renseigner les champs obligatoires pour obtenir le nombre de points à l'indicateur"
             }
           />
           <BackNextButtonsGroup
