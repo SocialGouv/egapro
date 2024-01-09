@@ -1,10 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type SimpleObject } from "@common/utils/types";
-import Link from "next/link";
 import { useFormContext } from "react-hook-form";
 
 import { Grid, GridCol } from "../../design-system/base/Grid";
@@ -12,11 +10,9 @@ import { Grid, GridCol } from "../../design-system/base/Grid";
 interface DeclarantFieldsProps<FormType> {
   email: keyof FormType;
   firstname: keyof FormType;
-  gdpr: keyof FormType;
   isStaff?: boolean;
   lastname: keyof FormType;
   phoneNumber: keyof FormType;
-  skipgdpr?: boolean;
 }
 
 type FakeFormType = {
@@ -29,9 +25,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
   lastname,
   phoneNumber,
   email,
-  gdpr,
   isStaff = false,
-  skipgdpr = false,
 }: DeclarantFieldsProps<FormType>) => {
   const {
     register,
@@ -43,7 +37,6 @@ export const DeclarantFields = <FormType extends SimpleObject>({
   const lastnameKey = lastname as FakeKey;
   const phoneNumberKey = phoneNumber as FakeKey;
   const emailKey = email as FakeKey;
-  const gdprKey = gdpr as FakeKey;
 
   return (
     <>
@@ -108,30 +101,6 @@ export const DeclarantFields = <FormType extends SimpleObject>({
         }}
         disabled={!isStaff}
       />
-
-      {!skipgdpr && (
-        <Checkbox
-          options={[
-            {
-              label:
-                "J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour vérifier la validité de ma déclaration.",
-
-              nativeInputProps: register(gdprKey),
-              hintText: (
-                <>
-                  Pour en savoir plus sur l'usage de ces données, vous pouvez consulter nos{" "}
-                  <Link href="/cgu" target="_blank">
-                    Conditions Générales d'Utilisation
-                  </Link>
-                  .
-                </>
-              ),
-            },
-          ]}
-          state={errors[gdprKey] && "error"}
-          stateRelatedMessage={errors[gdprKey]?.message}
-        />
-      )}
     </>
   );
 };

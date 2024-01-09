@@ -10,27 +10,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
-const formSchema = createSteps.declarant.extend({
-  gdpr: z.boolean().refine(gdpr => gdpr, "Vous devez accepter les conditions pour continuer"),
-});
+const formSchema = createSteps.declarant;
 
 type DeclarantFormType = ClearObject<z.infer<typeof formSchema>>;
 
 const useStore = storePicker(useRepeqFunnelStore);
 export const DeclarantForm = ({ session }: { session: Session }) => {
   const router = useRouter();
-  const [funnel, saveFunnel, isEdit] = useStore("funnel", "saveFunnel", "isEdit");
+  const [funnel, saveFunnel] = useStore("funnel", "saveFunnel", "isEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   const methods = useForm<DeclarantFormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gdpr: isEdit,
+      gdpr: true,
       ...session.user, // first fill with session info (email, username, ...)
       ...funnel, // then, if funnel has data, get them
     },
@@ -63,7 +61,6 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
             firstname="firstname"
             lastname="lastname"
             phoneNumber="phoneNumber"
-            gdpr="gdpr"
           />
 
           <BackNextButtonsGroup
