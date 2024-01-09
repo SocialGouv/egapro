@@ -1,4 +1,6 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
+import { ownershipRepo } from "@api/core-domain/repo";
+import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
@@ -143,6 +145,11 @@ export const authConfig: AuthOptions = {
         token.user.firstname = firstname;
         token.user.lastname = lastname;
       } else {
+        const sirenList = profile?.organizations.map(orga => orga.siret.substring(0, 9));
+        if (profile?.email && sirenList) {
+          const useCase = new SyncOwnership(ownershipRepo);
+          await useCase.execute({ sirens: sirenList, email: profile.email });
+        }
         token.user.companies =
           profile?.organizations.map(orga => ({
             siren: orga.siret.substring(0, 9),

@@ -44,6 +44,25 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
+  public async addSirens(email: Email, sirensToAdd: string[]): Promise<void> {
+    try {
+      const values = sirensToAdd.map(siren => ({ siren, email: email.getValue() }));
+      await this.sql`INSERT INTO ${this.table} ${_sql(values)} ON CONFLICT DO NOTHING`;
+    } catch (error: unknown) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  public async removeSirens(email: Email, sirensToRemove: string[]): Promise<void> {
+    try {
+      await this.sql`DELETE FROM ${this.table} WHERE email = ${email.getValue()} AND siren = ANY(${sirensToRemove})`;
+    } catch (error: unknown) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   public async getAll(): Promise<Ownership[]> {
     try {
       const raws = await this.sql`select * from ${this.table}`;
