@@ -32,6 +32,7 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
@@ -114,7 +115,22 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     register,
     watch,
     getValues,
+    setValue,
   } = methods;
+
+  let computed = {} as ComputedResult;
+
+  const canCompute = computer.canCompute();
+
+  if (canCompute) {
+    computed = computer.compute();
+  }
+
+  useEffect(() => {
+    if (!canCompute) {
+      setValue("calculable", "non", { shouldValidate: true });
+    }
+  }, [canCompute, setValue]);
 
   if (!hydrated) {
     return (
@@ -141,12 +157,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     computer.setInput(pourcentagesWithCount);
   }
 
-  let computed = {} as ComputedResult;
-
-  if (computer.canCompute()) {
-    computed = computer.compute();
-  }
-
   const onSubmit = async (indicateur2or3: Indic2or3FormType) => {
     saveFunnel({ [`indicateur${indicateur}`]: indicateur2or3 });
     router.push(simulateurPath(indicateurNav.next()));
@@ -156,10 +166,10 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <ClientAnimate>
-          {!computed ? (
+          {!canCompute ? (
             <Alert
               className="fr-mb-3w"
-              severity="warning"
+              severity="info"
               title="L'indicateur n'est pas calculable"
               description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
             />
