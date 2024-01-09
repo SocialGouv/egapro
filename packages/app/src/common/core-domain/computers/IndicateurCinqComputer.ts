@@ -32,6 +32,6 @@ export class IndicateurCinqComputer extends AbstractComputer<HighestSalaries> {
       return false;
     }
 
-    return !!this.input.men && !!this.input.women && this.input.men + this.input.women === 10;
+    return this.input.men + this.input.women === 10;
   }
 }
