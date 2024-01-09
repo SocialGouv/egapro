@@ -1,1 +1,4 @@
 .vscode
+
+# Sentry Config File
+.sentryclirc
