@@ -129,7 +129,7 @@ const Recapitulatif: FunctionComponent = () => {
         <Text>
           Le calcul de vos indicateurs et de votre index est terminé. Vous pouvez, si vous le souhaitez, transmettre les
           résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations
-          nécessaires à la déclaration.
+          nécessaires à la déclaration en cliquant sur "Poursuivre vers la déclaration" ci-dessous.
         </Text>
 
         <ActionBar>

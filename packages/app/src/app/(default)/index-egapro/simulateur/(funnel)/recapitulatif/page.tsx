@@ -18,7 +18,7 @@ const Indicateur5Page = () => {
       <p>
         Le calcul de vos indicateurs et de votre index est terminé. Vous pouvez, si vous le souhaitez, transmettre les
         résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations nécessaires
-        à la déclaration.
+        à la déclaration en cliquant sur "Poursuivre vers la déclaration" ci-dessous.
       </p>
       <RecapSimu />
     </CenteredContainer>

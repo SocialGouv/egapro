@@ -147,7 +147,7 @@ export const RecapSimu = () => {
         content={
           <>
             <p className="fr-mb-1w">
-              <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong> (avant seuil de pertinence)
+              <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong>
             </p>
             {computerIndicateurUn.canCompute() ? (
               <>
@@ -422,7 +422,7 @@ export const RecapSimu = () => {
 
       <Alert
         className="fr-mt-4w"
-        severity="info"
+        severity="warning"
         title="Attention, le calcul de vos indicateurs et de votre index n'est pas conservé."
         description="Si vous poursuivez vers la déclaration, seuls les informations de calcul nécessaires à la déclaration seront conservées et préremplies."
       />
