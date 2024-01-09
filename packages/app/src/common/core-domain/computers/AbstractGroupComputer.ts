@@ -147,9 +147,8 @@ export abstract class AbstractGroupComputer<
   protected getNoteAndInfoFromResult(weightedGap: number): ComputedResult<AdditionalOutput> {
     const sign = Math.sign(weightedGap);
     const result = Math.round(Math.abs(weightedGap) * 10) / 10;
-
     return {
-      favorablePopulation: sign === 0 ? "equality" : sign === 1 ? "men" : "women",
+      favorablePopulation: sign === 0 || Math.abs(weightedGap) < 0.05 ? "equality" : sign === 1 ? "men" : "women",
       note: this.computeNote(result),
       result,
       resultRaw: weightedGap,
