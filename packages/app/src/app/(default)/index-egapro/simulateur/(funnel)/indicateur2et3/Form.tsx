@@ -24,6 +24,7 @@ import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -108,6 +109,7 @@ export const Indic2and3Form = () => {
     register,
     watch,
     trigger,
+    setValue,
   } = methods;
 
   const computableCheck = watch("calculable");
@@ -127,6 +129,12 @@ export const Indic2and3Form = () => {
   if (canCompute) {
     computed = indicateur2and3Computer.compute();
   }
+
+  useEffect(() => {
+    if (!canCompute) {
+      setValue("calculable", "non", { shouldValidate: true });
+    }
+  }, [canCompute, setValue]);
 
   const onSubmit = async (formData: Indic2and3FormType) => {
     saveFunnel({ indicateur2and3: formData });
@@ -149,7 +157,7 @@ export const Indic2and3Form = () => {
             {!canCompute ? (
               <Alert
                 className="fr-mb-3w"
-                severity="warning"
+                severity="info"
                 title="L'indicateur n'est pas calculable"
                 description="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
               />
