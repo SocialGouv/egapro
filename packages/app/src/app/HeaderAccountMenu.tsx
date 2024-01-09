@@ -24,8 +24,8 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
           <div className={cx(fr.cx("fr-collapse"), style["account-menu-list"])} id="account-menu-list">
             <ul className="fr-menu__list">
               <li>
-                <a className="fr-nav__link" href="#" target="_self">
-                  {staffLinkText} entreprises
+                <a className="fr-nav__link" href="/mon-espace/mes-entreprises" target="_self">
+                  Mes entreprises
                 </a>
               </li>
               <li>
@@ -33,6 +33,13 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
                   {staffLinkText} déclarations
                 </a>
               </li>
+              {props.staff && (
+                <li>
+                  <a className="fr-nav__link" href="/mon-espace/gerer-utilisateurs" target="_self">
+                    Gérer les utilisateurs
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </li>

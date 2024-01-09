@@ -11,7 +11,20 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
   const sirenList = (session?.user.companies || []).map(company => company.siren);
-  if (!sirenList.length) return null;
+  if (!sirenList.length)
+    return (
+      <Box mb="10w">
+        <Heading as="h1" text="Mes entreprises" />
+        <Box mt="4w">
+          Vous n'avez pas encore d'entreprises rattachés.
+          <br />{" "}
+          <a target="_blank" href="https://app.moncomptepro.beta.gouv.fr/users/start-sign-in">
+            Connectez-vous sur Mon Compte Pro
+          </a>{" "}
+          et ajoutez votre entreprise.
+        </Box>
+      </Box>
+    );
   const selectedSiren = typeof searchParams.siren === "string" ? searchParams.siren : sirenList[0];
 
   try {
