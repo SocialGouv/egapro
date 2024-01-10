@@ -113,6 +113,7 @@ export const Indic2and3Form = () => {
     watch,
     trigger,
     setValue,
+    reset,
   } = methods;
 
   const computableCheck = watch("calculable");
@@ -136,8 +137,8 @@ export const Indic2and3Form = () => {
   useEffect(() => {
     if (!canCompute && hydrated) {
       setValue("calculable", "non", { shouldValidate: true });
-    }
-  }, [canCompute, setValue, hydrated]);
+    } else reset();
+  }, [canCompute, setValue, hydrated, reset]);
 
   if (!hydrated) {
     return (
