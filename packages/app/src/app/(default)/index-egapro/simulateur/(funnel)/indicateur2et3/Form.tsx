@@ -20,7 +20,8 @@ import { storePicker } from "@common/utils/zustand";
 import { AideSimulationIndicateurDeuxEtTrois } from "@components/aide-simulation/IndicateurDeuxEtTrois";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
-import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
+import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
+import { BackNextButtonsGroup, CenteredContainer, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,7 @@ import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { NAVIGATION, simulateurPath } from "../navigation";
-import { useSimuFunnelStore } from "../useSimuFunnelStore";
+import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "../useSimuFunnelStore";
 import { getTotalsCsp, prepareIndicateurUnComputer } from "../utils";
 import style from "./Form.module.scss";
 import { Indicateur2et3Note } from "./Indicateur2et3Note";
@@ -94,6 +95,8 @@ export const Indic2and3Form = () => {
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeLessThan250DTO> | undefined;
   const [totalCspWomen, totalCspMen] = getTotalsCsp(funnel as CreateSimulationDTO);
+  const hydrated = useSimuFunnelStoreHasHydrated();
+
   prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const methods = useForm<Indic2and3FormType>({
@@ -131,10 +134,18 @@ export const Indic2and3Form = () => {
   }
 
   useEffect(() => {
-    if (!canCompute) {
+    if (!canCompute && hydrated) {
       setValue("calculable", "non", { shouldValidate: true });
     }
-  }, [canCompute, setValue]);
+  }, [canCompute, setValue, hydrated]);
+
+  if (!hydrated) {
+    return (
+      <CenteredContainer pb="6w">
+        <SkeletonForm fields={1} />
+      </CenteredContainer>
+    );
+  }
 
   const onSubmit = async (formData: Indic2and3FormType) => {
     saveFunnel({ indicateur2and3: formData });
