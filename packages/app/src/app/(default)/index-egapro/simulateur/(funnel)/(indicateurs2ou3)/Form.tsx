@@ -97,6 +97,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeMoreThan250DTO> | undefined;
   const hydrated = useSimuFunnelStoreHasHydrated();
 
+  if (hydrated) prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
+
   const computer = indicateur === 2 ? indicateur2Computer : indicateur3Computer;
   const indicateurNav = indicateur === 2 ? NAVIGATION.indicateur2 : NAVIGATION.indicateur3;
   const AideSimulationIndicateurDeuxOurTrois =
@@ -139,8 +141,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
       </CenteredContainer>
     );
   }
-
-  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const computableCheck = watch("calculable") || getValues("calculable");
   const pourcentages = watch("pourcentages");
