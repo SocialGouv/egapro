@@ -94,10 +94,10 @@ export const Indic2and3Form = () => {
   const router = useRouter();
   const [_funnel, saveFunnel] = useStore("funnel", "saveFunnel");
   const funnel = _funnel as Partial<CreateSimulationWorkforceRangeLessThan250DTO> | undefined;
-  const [totalCspWomen, totalCspMen] = getTotalsCsp(funnel as CreateSimulationDTO);
   const hydrated = useSimuFunnelStoreHasHydrated();
+  const [totalCspWomen, totalCspMen] = hydrated ? getTotalsCsp(funnel as CreateSimulationDTO) : [0, 0];
 
-  prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
+  if (hydrated) prepareIndicateurUnComputer(indicateur1Computer, funnel as CreateSimulationDTO);
 
   const methods = useForm<Indic2and3FormType>({
     mode: "onChange",
