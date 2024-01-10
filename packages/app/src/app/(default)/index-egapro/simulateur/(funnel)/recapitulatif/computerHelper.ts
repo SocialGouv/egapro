@@ -42,7 +42,13 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
         menCount: totalMen,
         womenCount: totalWomen,
       });
-    }
+    } else
+      computerIndicateurDeuxTrois.setInput({
+        men: 0,
+        women: 0,
+        menCount: totalMen,
+        womenCount: totalWomen,
+      });
   } else {
     if (funnel.indicateur2.calculable === "oui") {
       computerIndicateurDeux.setInput(
@@ -51,7 +57,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
           funnel.indicateur2.pourcentages as Percentages,
         ),
       );
-    }
+    } else computerIndicateurDeux.setInput(getPourcentagesAugmentationPromotionsWithCount(funnel.effectifs.csp, {}));
 
     if (funnel.indicateur3.calculable === "oui") {
       computerIndicateurTrois.setInput(
@@ -60,7 +66,7 @@ export const computerHelper = (funnel: CreateSimulationDTO) => {
           funnel.indicateur3.pourcentages as Percentages,
         ),
       );
-    }
+    } else computerIndicateurTrois.setInput(getPourcentagesAugmentationPromotionsWithCount(funnel.effectifs.csp, {}));
   }
   if (funnel.indicateur4.calculable) {
     computerIndicateurQuatre.setInput({

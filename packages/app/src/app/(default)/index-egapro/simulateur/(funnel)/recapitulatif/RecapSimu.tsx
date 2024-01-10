@@ -193,18 +193,6 @@ export const RecapSimu = () => {
           title={NAVIGATION.indicateur2et3.title}
           editLink={simulateurPath("indicateur2et3")}
           content={(() => {
-            if (funnel.indicateur2and3.calculable === "non") {
-              return (
-                <IndicatorNote
-                  noBorder
-                  note="NC"
-                  size="small"
-                  text="L'indicateur écart de taux d'augmentations est non calculable"
-                  legend="Il n'y a pas eu d'augmentations durant la période de référence"
-                />
-              );
-            }
-
             if (!computerIndicateurDeuxTrois.canCompute()) {
               return (
                 <IndicatorNote
@@ -213,6 +201,18 @@ export const RecapSimu = () => {
                   size="small"
                   text="L'indicateur écart de taux d'augmentations est non calculable"
                   legend="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes"
+                />
+              );
+            }
+
+            if (funnel.indicateur2and3.calculable === "non") {
+              return (
+                <IndicatorNote
+                  noBorder
+                  note="NC"
+                  size="small"
+                  text="L'indicateur écart de taux d'augmentations est non calculable"
+                  legend="Il n'y a pas eu d'augmentations durant la période de référence"
                 />
               );
             }
@@ -236,6 +236,24 @@ export const RecapSimu = () => {
                 title={NAVIGATION[indicateurKey].title}
                 editLink={simulateurPath(indicateurKey)}
                 content={(() => {
+                  const computerIndicateurDeuxOuTrois =
+                    indicateur === 2 ? computerIndicateurDeux : computerIndicateurTrois;
+                  const canCompute = computerIndicateurDeuxOuTrois.canCompute();
+                  const result = indicateur === 2 ? resultIndicateurDeux : resultIndicateurTrois;
+                  if (!canCompute) {
+                    return (
+                      <IndicatorNote
+                        noBorder
+                        note="NC"
+                        size="small"
+                        text={`L'indicateur écart de taux ${
+                          indicateur === 2 ? "d'augmentations" : "de promotions"
+                        } est non calculable`}
+                        legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
+                      />
+                    );
+                  }
+
                   const indic = funnel[indicateurKey];
                   if (indic.calculable === "non") {
                     return (
@@ -252,26 +270,8 @@ export const RecapSimu = () => {
                       />
                     );
                   }
-                  const computerIndicateurDeuxOuTrois =
-                    indicateur === 2 ? computerIndicateurDeux : computerIndicateurTrois;
-                  const canCompute = computerIndicateurDeuxOuTrois.canCompute();
-                  const result = indicateur === 2 ? resultIndicateurDeux : resultIndicateurTrois;
 
                   if (!result) return;
-
-                  if (!canCompute) {
-                    return (
-                      <IndicatorNote
-                        noBorder
-                        note="NC"
-                        size="small"
-                        text={`L'indicateur écart de taux ${
-                          indicateur === 2 ? "d'augmentations" : "de promotions"
-                        } est non calculable`}
-                        legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
-                      />
-                    );
-                  }
 
                   return (
                     <>
