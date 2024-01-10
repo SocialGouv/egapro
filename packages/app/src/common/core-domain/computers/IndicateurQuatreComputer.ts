@@ -31,6 +31,6 @@ export class IndicateurQuatreComputer extends AbstractComputer<MaternityLeaves> 
       return false;
     }
 
-    return typeof this.input.total === "number" && typeof this.input.raised === "number";
+    return typeof this.input.total === "number" && typeof this.input.raised === "number" && this.input.total > 0;
   }
 }

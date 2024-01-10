@@ -346,7 +346,9 @@ export const RecapSimu = () => {
 
           return (
             <>
-              <IndicatorPercentResult result={resultIndicateurQuatre.result} />
+              {count.total !== 0 && count.raised !== 0 && (
+                <IndicatorPercentResult result={resultIndicateurQuatre.result} />
+              )}
               <Indicateur4Note
                 noBorder
                 computer={computerIndicateurQuatre}

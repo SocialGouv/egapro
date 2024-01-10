@@ -132,17 +132,11 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   if (canCompute) {
     computed = computer.compute();
   }
-  console.log("canCompute", canCompute);
-  console.log("hydrated", hydrated);
-  console.log("errors", errors);
-  console.log("isValid", isValid);
 
   useEffect(() => {
     if (!canCompute && hydrated) {
-      console.log("set calculable to non");
       setValue("calculable", "non", { shouldValidate: true });
     } else {
-      console.log("reset()");
       reset();
       trigger();
     }
