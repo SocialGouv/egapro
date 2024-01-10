@@ -54,7 +54,9 @@ export const RepeqList = ({
   return (
     <div>
       <Heading as="h1" variant="h5" text="Liste des déclarations transmises - Représentation Équilibrée" />
-      <Table headers={headers} data={formatTableData(representationEquilibrees)}></Table>
+      {(representationEquilibrees.length > 0 && (
+        <Table headers={headers} data={formatTableData(representationEquilibrees)} />
+      )) || <p>Aucune déclaration transmise.</p>}
     </div>
   );
 };

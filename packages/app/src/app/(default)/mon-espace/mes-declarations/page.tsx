@@ -1,6 +1,8 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
+import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
@@ -36,6 +38,13 @@ const InfoText = () => (
   </>
 );
 
+const sirenToGet = (isImpersonating: boolean, sirenList: string[], selectedSiren: string) => {
+  if (isImpersonating) {
+    return sirenList[0];
+  }
+  return selectedSiren || sirenList[0];
+};
+
 const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
@@ -45,30 +54,32 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
   const selectedSiren = searchParams && typeof searchParams.siren === "string" ? searchParams.siren : "";
   const titleText = isStaff && !isImpersonating ? "Les déclarations" : "Mes déclarations";
 
+  let declarations: DeclarationDTO[] = [];
+  let repEq: RepresentationEquilibreeDTO[] = [];
+  const sirenWithCompanyName: Array<{ companyName: string; siren: string }> = [];
+  const declarationOpmcList: DeclarationOpmcDTO[] = [];
+
   if (selectedSiren === "" && isStaff && !isImpersonating) {
     return (
       <MessageProvider>
         <Heading as="h1" text={titleText} />
         <Alert severity="info" small description={<InfoText />} />
-        <Box mt="2w">
+        <Box mt="2w" mb="8w">
           <SelectSirenStaff currentSiren={selectedSiren} />
         </Box>
       </MessageProvider>
     );
   }
 
-  try {
-    const declarations = await getAllDeclarationsBySiren(isImpersonating ? sirenList[0] : selectedSiren);
-    const repEq = await getAllRepresentationEquilibreeBySiren(isImpersonating ? sirenList[0] : selectedSiren);
-    const sirenWithCompanyName: Array<{ companyName: string; siren: string }> = [];
+  if (selectedSiren || sirenList.length > 0) {
+    declarations = await getAllDeclarationsBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
+    repEq = await getAllRepresentationEquilibreeBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
     for (const siren of sirenList) {
       const result = await getCompany(siren);
       if (result.ok) {
         sirenWithCompanyName.push({ siren, companyName: result.data?.simpleLabel || "" });
       }
     }
-
-    const declarationOpmcList: DeclarationOpmcDTO[] = [];
     for (const declaration of declarations) {
       if (declaration.commencer?.annéeIndicateurs) {
         const result = await getAllDeclarationOpmcSirenAndYear(
@@ -80,27 +91,26 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
         }
       }
     }
-
-    return (
-      <MessageProvider>
-        <Heading as="h1" text={titleText} />
-        <Alert severity="info" small description={<InfoText />} />
-        <Box mt="2w">
-          {(isStaff && !isImpersonating && <SelectSirenStaff currentSiren={selectedSiren} />) || (
-            <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
-          )}
-        </Box>
-        <Box mt="10w">
-          <IndexList declarations={declarations} declarationOpmcList={declarationOpmcList} />
-        </Box>
-        <Box mt="10w">
-          <RepeqList representationEquilibrees={repEq} />
-        </Box>
-      </MessageProvider>
-    );
-  } catch {
-    return null;
   }
+
+  return (
+    <MessageProvider>
+      <Heading as="h1" text={titleText} />
+      <Alert severity="info" small description={<InfoText />} />
+      <Box mt="2w">
+        {(isStaff && !isImpersonating && <SelectSirenStaff currentSiren={selectedSiren} />) ||
+          (sirenWithCompanyName.length > 0 && (
+            <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
+          ))}
+      </Box>
+      <Box mt="10w">
+        <IndexList declarations={declarations} declarationOpmcList={declarationOpmcList} />
+      </Box>
+      <Box mt="10w" mb="8w">
+        <RepeqList representationEquilibrees={repEq} />
+      </Box>
+    </MessageProvider>
+  );
 };
 
 export default MesDeclarationsPage;
