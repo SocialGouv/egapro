@@ -127,10 +127,10 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   }
 
   useEffect(() => {
-    if (!canCompute) {
+    if (!canCompute && hydrated) {
       setValue("calculable", "non", { shouldValidate: true });
     }
-  }, [canCompute, setValue]);
+  }, [canCompute, setValue, hydrated]);
 
   if (!hydrated) {
     return (
