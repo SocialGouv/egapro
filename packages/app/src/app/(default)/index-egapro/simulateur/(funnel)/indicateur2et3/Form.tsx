@@ -25,7 +25,6 @@ import { BackNextButtonsGroup, CenteredContainer, Container, FormLayout, Grid, G
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -112,7 +111,6 @@ export const Indic2and3Form = () => {
     register,
     watch,
     trigger,
-    setValue,
   } = methods;
 
   const computableCheck = watch("calculable");
@@ -132,12 +130,6 @@ export const Indic2and3Form = () => {
   if (canCompute) {
     computed = indicateur2and3Computer.compute();
   }
-
-  useEffect(() => {
-    if (!canCompute && hydrated) {
-      setValue("calculable", "non", { shouldValidate: true });
-    }
-  }, [canCompute, setValue, hydrated]);
 
   if (!hydrated) {
     return (
@@ -318,7 +310,7 @@ export const Indic2and3Form = () => {
                 href: simulateurPath(indicateur2and3Nav.prev()),
               },
             }}
-            nextDisabled={!isValid}
+            nextDisabled={canCompute && !isValid}
           />
         </FormLayout>
       </form>
