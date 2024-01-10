@@ -118,6 +118,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     watch,
     setValue,
     reset,
+    trigger,
   } = methods;
 
   const computableCheck = watch("calculable");
@@ -133,6 +134,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   }
   console.log("canCompute", canCompute);
   console.log("hydrated", hydrated);
+  console.log("errors", errors);
+  console.log("isValid", isValid);
 
   useEffect(() => {
     if (!canCompute && hydrated) {
@@ -141,8 +144,9 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     } else {
       console.log("reset()");
       reset();
+      trigger();
     }
-  }, [canCompute, setValue, hydrated, reset]);
+  }, [canCompute, setValue, hydrated, reset, trigger]);
 
   if (!hydrated) {
     return (
