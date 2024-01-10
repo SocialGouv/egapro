@@ -116,11 +116,14 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     handleSubmit,
     register,
     watch,
-    getValues,
     setValue,
     reset,
   } = methods;
 
+  const computableCheck = watch("calculable");
+  const pourcentages = watch("pourcentages");
+
+  let pourcentagesWithCount = undefined as Percentages | undefined;
   let computed = {} as ComputedResult;
 
   const canCompute = computer.canCompute();
@@ -142,11 +145,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
       </CenteredContainer>
     );
   }
-
-  const computableCheck = watch("calculable") || getValues("calculable");
-  const pourcentages = watch("pourcentages");
-
-  let pourcentagesWithCount = undefined as Percentages | undefined;
 
   // add count from "funnel.effectifs.csp" to pourcentages, to make pourcentagesWithCount
   if (funnel?.effectifs) {
