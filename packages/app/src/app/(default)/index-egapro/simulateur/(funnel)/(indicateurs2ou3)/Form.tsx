@@ -32,7 +32,6 @@ import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
 
@@ -117,7 +116,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     register,
     watch,
     getValues,
-    setValue,
   } = methods;
 
   let computed = {} as ComputedResult;
@@ -127,12 +125,6 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
   if (canCompute) {
     computed = computer.compute();
   }
-
-  useEffect(() => {
-    if (!canCompute && hydrated) {
-      setValue("calculable", "non", { shouldValidate: true });
-    }
-  }, [canCompute, setValue, hydrated]);
 
   if (!hydrated) {
     return (
@@ -330,7 +322,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                 href: simulateurPath(indicateurNav.prev()),
               },
             }}
-            nextDisabled={!isValid}
+            nextDisabled={canCompute && !isValid}
           />
         </FormLayout>
       </form>
