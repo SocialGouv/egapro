@@ -223,18 +223,14 @@ const ConfirmationPage = () => {
           )}
         </>
       )}
-      {/* TODO: uncomment when Mon espace is ready  */}
-      {/* <Grid align="center" mt="4w">
+      <Grid align="center" mt="4w">
         <GridCol md="10">
           <Card
             title="Informations"
             footer={
               <ul className="fr-links-group">
                 <li>
-                  <a
-                    className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
-                    href="https://egapro.travail.gouv.fr/index-egapro/"
-                  >
+                  <a className="fr-link fr-icon-arrow-right-line fr-link--icon-right" href="/index-egapro/">
                     Guide Mon Espace
                   </a>
                 </li>
@@ -253,8 +249,7 @@ const ConfirmationPage = () => {
             }
           />
         </GridCol>
-      </Grid> */}
-
+      </Grid>
       <Box className="text-center" my="6w">
         <Link
           href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-declaration&key=73366ddb13d498f4c77d01c2983bab48"
