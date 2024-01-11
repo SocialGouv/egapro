@@ -1,4 +1,3 @@
-import { DeclarationOpmcSpecification } from "@common/core-domain/domain/specification/DeclarationOpmcSpecification";
 import { DeclarationSpecification } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
@@ -76,10 +75,9 @@ export class UpdateDeclarationWithOpMc implements UseCase<Input, void> {
     }
 
     const specification = new DeclarationSpecification();
-    const specificationOpmc = new DeclarationOpmcSpecification();
-
+    //const specificationOpmc = new DeclarationOpmcSpecification();
     // Validation on declaration and declaration with OPMC rules.
-    if (specification.isSatisfiedBy(declaration) && specificationOpmc.isSatisfiedBy(declarationAggregate)) {
+    if (specification.isSatisfiedBy(declaration) /* && specificationOpmc.isSatisfiedBy(declarationAggregate)*/) {
       await this.declarationRepo.saveDeclarationOpmcWithIndex(declarationAggregate);
     } else {
       throw specification.lastError;

@@ -119,7 +119,11 @@ export class DeclarationOpmcSpecification extends AbstractSpecification<Declarat
         [declarationOpmc.declaration.remunerations, "rémunérations", indicatorNoteMax.remunerations],
         [declarationOpmc.declaration.salaryRaises, "augmentations", indicatorNoteMax.augmentations],
         [declarationOpmc.declaration.promotions, "promotions", indicatorNoteMax.promotions],
-        [declarationOpmc.declaration.salaryRaisesAndPromotions, indicatorNoteMax["augmentations-et-promotions"]],
+        [
+          declarationOpmc.declaration.salaryRaisesAndPromotions,
+          "augmentations-et-promotions",
+          indicatorNoteMax["augmentations-et-promotions"],
+        ],
         [declarationOpmc.declaration.maternityLeaves, "congés maternité", indicatorNoteMax["conges-maternite"]],
       ] as Array<[IndicatorRule20, string, number]>;
       // Règle 21 - Absence d'un objectif pour un indicateur
