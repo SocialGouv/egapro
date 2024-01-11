@@ -126,7 +126,7 @@ export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detail
                       )}
                     </>
                   ) : (
-                    "Veuillez remplir le reste des taux d'augmentations pour avoir votre note"
+                    "Veuillez renseigner le nombre de salariés augmentés pour obtenir le nombre de points à l'indicateur"
                   )
                 }
               />

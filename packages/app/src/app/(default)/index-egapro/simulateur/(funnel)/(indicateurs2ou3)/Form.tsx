@@ -283,7 +283,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     }))}
                     footer={[
                       {
-                        label: "Écart global",
+                        label: "Écart total",
                         colspan: 3,
                         align: "right",
                       },

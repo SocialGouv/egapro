@@ -16,8 +16,7 @@ const Indicateur5Page = () => {
   return (
     <CenteredContainer mb="4w">
       <p>
-        Renseigner le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations durant la période de
-        référence.
+        Renseigner le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations durant la période de référence
       </p>
       <Indic5Form />
     </CenteredContainer>

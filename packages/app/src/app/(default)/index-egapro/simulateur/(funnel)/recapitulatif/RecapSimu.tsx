@@ -147,8 +147,9 @@ export const RecapSimu = () => {
         content={
           <>
             <p className="fr-mb-1w">
-              <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong> (avant seuil de pertinence)
+              <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong>
             </p>
+            <p className="fr-mb-1w">Ecarts de rémunération (avant application du seuil de pertinence)</p>
             {computerIndicateurUn.canCompute() ? (
               <>
                 <AlternativeTable
@@ -379,8 +380,8 @@ export const RecapSimu = () => {
                 resultIndicateurCinq.favorablePopulation === "equality"
                   ? "Les hommes et les femmes sont à parité parmi les salariés les mieux rémunérés."
                   : resultIndicateurCinq.favorablePopulation === "men"
-                    ? "Les femmes sont sous-représentées parmi les salariés les mieux rémunérés."
-                    : "Les hommes sont sous-représentés parmi les salariés les mieux rémunérés."
+                    ? "Les hommes sont sur-représentés parmi les salariés les mieux rémunérés."
+                    : "Les femmes sont sur-représentées parmi les salariés les mieux rémunérés."
               }
             />
           </>
@@ -422,7 +423,7 @@ export const RecapSimu = () => {
 
       <Alert
         className="fr-mt-4w"
-        severity="info"
+        severity="warning"
         title="Attention, le calcul de vos indicateurs et de votre index n'est pas conservé."
         description="Si vous poursuivez vers la déclaration, seuls les informations de calcul nécessaires à la déclaration seront conservées et préremplies."
       />

@@ -252,7 +252,7 @@ export const Indic2and3Form = () => {
                             mb="1w"
                             text={
                               <>
-                                Écart en valeur absolue :{" "}
+                                Écart en valeur absolue, arrondi à la première décimale :{" "}
                                 <strong>
                                   {computed?.result !== undefined ? percentFormat.format(computed.result / 100) : ""}
                                 </strong>
@@ -263,7 +263,7 @@ export const Indic2and3Form = () => {
                             mb="1w"
                             text={
                               <>
-                                Écart en nombre équivalent de salariés
+                                Écart en nombre équivalent de salariés, arrondi à la première décimale
                                 <strong>
                                   <sup>*</sup>
                                 </strong>{" "}

@@ -267,7 +267,7 @@ export const EffectifsForm = () => {
                   "Les caractéristiques individuelles (CSP, âge) sont appréciées au dernier jour de la période de référence ou au dernier jour de présence du salarié dans l’entreprise.",
               },
               {
-                label: "Nombre de salariés",
+                label: "Nombre de salariés (en effectif physique)",
                 subCols: [
                   {
                     label: "Femmes",
@@ -334,7 +334,7 @@ export const EffectifsForm = () => {
           <Alert
             small
             severity="warning"
-            description="Vous devez renseigner au moins un salarié pour pouvoir continuer."
+            description="Vous devez renseigner le nombre de salariés pour pouvoir continuer."
             className={fr.cx("fr-mb-4w")}
           />
         )}

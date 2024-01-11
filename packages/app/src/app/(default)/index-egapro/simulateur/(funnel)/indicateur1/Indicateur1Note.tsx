@@ -39,10 +39,10 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
     if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à parité";
     } else {
-      advantageText = "Un écart de rémunération ";
-      if (computed.note === 40) {
-        advantageText += "est ";
-      }
+      advantageText = "Un écart de rémunération est ";
+      // if (computed.note === 40) {
+      //   advantageText += "est ";
+      // }
       advantageText += `en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
     isNC = !computer.canCompute();
@@ -70,8 +70,7 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
               className={fr.cx("fr-mb-2w")}
               size="small"
               note={percentFormat.format((computed?.result ?? 0) / 100)}
-              text="Écart global de rémunération en valeur absolue"
-              legend="Arrondi à la première décimale"
+              text="Résultat final obtenu à l'indicateur en %"
             />
           )}
           <IndicatorNote
@@ -79,7 +78,11 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
             note={isValid && computed ? computed.note : "-"}
             max={40}
             text="Nombre de points obtenus à l'indicateur écart de rémunération"
-            legend={isValid ? advantageText : "Veuillez remplir le reste des rémunérations pour avoir votre note"}
+            legend={
+              isValid
+                ? advantageText
+                : "Veuillez renseigner les rémunérations annuelles moyennes pour obtenir le nombre de points à l'indicateur"
+            }
           />
         </>
       )}
