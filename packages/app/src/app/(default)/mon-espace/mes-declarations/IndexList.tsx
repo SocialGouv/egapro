@@ -130,7 +130,9 @@ export const IndexList = ({
   return (
     <div>
       <Heading as="h1" variant="h5" text="Liste des déclarations transmises - Index Égalité Professionnelle" />
-      <Table headers={headers} data={formatTableData(declarations, declarationOpmcList)}></Table>
+      {(declarations.length > 0 && (
+        <Table headers={headers} data={formatTableData(declarations, declarationOpmcList)} />
+      )) || <p>Aucune déclaration transmise.</p>}
     </div>
   );
 };

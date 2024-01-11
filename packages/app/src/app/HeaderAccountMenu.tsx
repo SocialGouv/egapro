@@ -25,7 +25,7 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
             <ul className="fr-menu__list">
               <li>
                 <a className="fr-nav__link" href="/mon-espace/mes-entreprises" target="_self">
-                  Mes entreprises
+                  {staffLinkText} entreprises
                 </a>
               </li>
               <li>
