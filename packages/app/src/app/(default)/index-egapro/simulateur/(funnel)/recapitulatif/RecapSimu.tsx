@@ -149,6 +149,7 @@ export const RecapSimu = () => {
             <p className="fr-mb-1w">
               <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong>
             </p>
+            <p className="fr-mb-1w">Ecarts de rémunération (avant application du seuil de pertinence)</p>
             {computerIndicateurUn.canCompute() ? (
               <>
                 <AlternativeTable
