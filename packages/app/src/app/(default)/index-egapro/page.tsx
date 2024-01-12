@@ -10,6 +10,7 @@ import {
   GridCol,
   Icon,
   ImgRepresentationEquilibree,
+  Link,
   Text,
 } from "@design-system";
 
@@ -140,7 +141,31 @@ const IndexEgapro = () => {
           <Card
             horizontal
             title="Besoin d'aide ?"
-            desc="Pour avoir plus d'informations, vous pouvez consulter le site internet du Ministère du Travail ou l'aide pour le calcul de l'index."
+            desc={
+              <>
+                <p>Aide pour l'utilisation du service d'identification MonComptePro :</p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"}>
+                    Comment s'identifier avec MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}>
+                    Comment modifier mes informations personnelles sur MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+                    Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  Pour plus d'informations sur l'index de l'égalité professionnelle, vous pouvez consulter le site
+                  internet du Ministère du Travail, du Plein emploi et de l'Insertion ou l'aide pour le calcul de
+                  l'index.
+                </p>
+              </>
+            }
             footer={
               <ButtonsGroup
                 buttonsEquisized

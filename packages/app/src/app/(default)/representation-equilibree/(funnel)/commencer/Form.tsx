@@ -4,7 +4,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
-import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
@@ -168,6 +168,11 @@ export const CommencerForm = ({ session }: { session: Session }) => {
               ))}
             </Select>
           )}
+          <p>
+            <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+              Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
+            </Link>
+          </p>
           <BackNextButtonsGroup
             backProps={{
               onClick: confirmReset,

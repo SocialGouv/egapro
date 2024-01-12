@@ -2,8 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { ParagrapheList } from "@components/ParagrapheList";
-import { Box, Container, Grid, GridCol, ImgRepresentationEquilibree } from "@design-system";
-import Link from "next/link";
+import { Box, Container, Grid, GridCol, ImgRepresentationEquilibree, Link } from "@design-system";
 
 const title = "Déclaration des écarts de représentation F/H dans les postes de direction";
 const description =
@@ -61,8 +60,30 @@ const RepresentationEquilibree = () => (
         <GridCol lg={6}>
           <Card
             title="Besoin d’aide ?"
-            desc="Pour avoir plus d'informations sur le calcul et la publication de vos écarts éventuels de
-                  représentation femmes‑hommes, vous pouvez consulter le site internet du Ministère du Travail, de l'Emploi et de l'Insertion."
+            desc={
+              <>
+                <p>Aide pour l'utilisation du service d'identification MonComptePro :</p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"}>
+                    Comment s'identifier avec MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}>
+                    Comment modifier mes informations personnelles sur MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+                    Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
+                  </Link>
+                </p>
+                <p>
+                  Pour plus d'informations sur l'obligation de représentation équilibrée, vous pouvez consulter le site
+                  internet du Ministère du Travail, du Plein emploi et de l'Insertion.
+                </p>
+              </>
+            }
             footer={
               <Button
                 linkProps={{
