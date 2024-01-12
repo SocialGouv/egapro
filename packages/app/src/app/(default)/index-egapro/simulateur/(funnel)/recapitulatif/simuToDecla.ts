@@ -46,6 +46,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
   const {
     computerIndicateurUn,
     computerIndicateurDeux,
+    computerIndicateurDeuxTrois,
     computerIndicateurTrois,
     totalWomen,
     totalMen,
@@ -84,83 +85,96 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
   // Indicators.
   if (isCreateSimulationWorkforceRangeLessThan250DTO(simulation)) {
     const indicateur2et3 = simulation.indicateur2and3;
-
     if (indicateur2et3) {
-      if (indicateur2et3.calculable === "oui" && resultIndicateurDeuxTrois) {
-        {
-          dto["augmentations-et-promotions"] = {
-            estCalculable: "oui",
-            note: resultIndicateurDeuxTrois.note,
-            noteNombreSalaries: resultIndicateurDeuxTrois.noteEquivalentEmployeeCountGap,
-            notePourcentage: resultIndicateurDeuxTrois.notePercent,
-            populationFavorable: toFavorablePopulation(resultIndicateurDeuxTrois.favorablePopulation),
-            résultat: resultIndicateurDeuxTrois.result,
-            résultatEquivalentSalarié: resultIndicateurDeuxTrois.equivalentEmployeeCountGap,
-          };
-        }
-      } else {
+      if (!computerIndicateurDeuxTrois.canCompute()) {
+        dto["augmentations-et-promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.ETSNO5F5H,
+        };
+      } else if (indicateur2et3.calculable === "non") {
         dto["augmentations-et-promotions"] = {
           estCalculable: "non",
           motifNonCalculabilité: NotComputableReason.Enum.ABSAUGI,
+        };
+      } else if (indicateur2et3.calculable === "oui" && resultIndicateurDeuxTrois) {
+        dto["augmentations-et-promotions"] = {
+          estCalculable: "oui",
+          note: resultIndicateurDeuxTrois.note,
+          noteNombreSalaries: resultIndicateurDeuxTrois.noteEquivalentEmployeeCountGap,
+          notePourcentage: resultIndicateurDeuxTrois.notePercent,
+          populationFavorable: toFavorablePopulation(resultIndicateurDeuxTrois.favorablePopulation),
+          résultat: resultIndicateurDeuxTrois.result,
+          résultatEquivalentSalarié: resultIndicateurDeuxTrois.equivalentEmployeeCountGap,
         };
       }
     }
   } else {
     const indicateur2 = simulation.indicateur2;
-
-    // We only care of filling the indicator if it is computable.
-    if (indicateur2.calculable === "oui" && resultIndicateurDeux) {
-      dto["augmentations"] = {
-        estCalculable: "oui",
-        catégories: {
-          [CSP.Enum.OUVRIERS]: computeIndicateurDeuxOuTrois(computerIndicateurDeux, CSP.Enum.OUVRIERS),
-          [CSP.Enum.EMPLOYES]: computeIndicateurDeuxOuTrois(computerIndicateurDeux, CSP.Enum.EMPLOYES),
-          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computeIndicateurDeuxOuTrois(
-            computerIndicateurDeux,
-            CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-          ),
-          [CSP.Enum.INGENIEURS_CADRES]: computeIndicateurDeuxOuTrois(
-            computerIndicateurDeux,
-            CSP.Enum.INGENIEURS_CADRES,
-          ),
-        },
-        note: resultIndicateurDeux.note,
-        populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation), // TODO: Use the FavorablePopulation.Enum instead.
-        résultat: resultIndicateurDeux.result,
-      };
-    } else {
-      dto["augmentations"] = {
-        estCalculable: "non",
-        motifNonCalculabilité: NotComputableReason.Enum.ABSAUGI,
-      };
+    if (indicateur2) {
+      if (!computerIndicateurDeux.canCompute()) {
+        dto["augmentations"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.EGVI40PCET,
+        };
+      } else if (indicateur2.calculable === "non") {
+        dto["augmentations"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.ABSAUGI,
+        };
+      } else if (indicateur2.calculable === "oui" && resultIndicateurDeux) {
+        dto["augmentations"] = {
+          estCalculable: "oui",
+          catégories: {
+            [CSP.Enum.OUVRIERS]: computeIndicateurDeuxOuTrois(computerIndicateurDeux, CSP.Enum.OUVRIERS),
+            [CSP.Enum.EMPLOYES]: computeIndicateurDeuxOuTrois(computerIndicateurDeux, CSP.Enum.EMPLOYES),
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computeIndicateurDeuxOuTrois(
+              computerIndicateurDeux,
+              CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
+            ),
+            [CSP.Enum.INGENIEURS_CADRES]: computeIndicateurDeuxOuTrois(
+              computerIndicateurDeux,
+              CSP.Enum.INGENIEURS_CADRES,
+            ),
+          },
+          note: resultIndicateurDeux.note,
+          populationFavorable: toFavorablePopulation(resultIndicateurDeux.favorablePopulation), // TODO: Use the FavorablePopulation.Enum instead.
+          résultat: resultIndicateurDeux.result,
+        };
+      }
     }
 
-    const promotions = simulation.indicateur3;
-
-    if (promotions.calculable && resultIndicateurTrois) {
-      dto["promotions"] = {
-        estCalculable: "oui",
-        catégories: {
-          [CSP.Enum.OUVRIERS]: computeIndicateurDeuxOuTrois(computerIndicateurTrois, CSP.Enum.OUVRIERS),
-          [CSP.Enum.EMPLOYES]: computeIndicateurDeuxOuTrois(computerIndicateurTrois, CSP.Enum.EMPLOYES),
-          [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computeIndicateurDeuxOuTrois(
-            computerIndicateurTrois,
-            CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
-          ),
-          [CSP.Enum.INGENIEURS_CADRES]: computeIndicateurDeuxOuTrois(
-            computerIndicateurTrois,
-            CSP.Enum.INGENIEURS_CADRES,
-          ),
-        },
-        note: resultIndicateurTrois.note,
-        populationFavorable: toFavorablePopulation(resultIndicateurTrois.favorablePopulation),
-        résultat: resultIndicateurTrois.result,
-      };
-    } else {
-      dto["promotions"] = {
-        estCalculable: "non",
-        motifNonCalculabilité: NotComputableReason.Enum.ABSPROM,
-      };
+    const indicateur3 = simulation.indicateur3;
+    if (indicateur3) {
+      if (!computerIndicateurTrois.canCompute()) {
+        dto["promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.EGVI40PCET,
+        };
+      } else if (indicateur3.calculable === "non") {
+        dto["promotions"] = {
+          estCalculable: "non",
+          motifNonCalculabilité: NotComputableReason.Enum.ABSPROM,
+        };
+      } else if (indicateur3.calculable === "oui" && resultIndicateurTrois) {
+        dto["promotions"] = {
+          estCalculable: "oui",
+          catégories: {
+            [CSP.Enum.OUVRIERS]: computeIndicateurDeuxOuTrois(computerIndicateurTrois, CSP.Enum.OUVRIERS),
+            [CSP.Enum.EMPLOYES]: computeIndicateurDeuxOuTrois(computerIndicateurTrois, CSP.Enum.EMPLOYES),
+            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: computeIndicateurDeuxOuTrois(
+              computerIndicateurTrois,
+              CSP.Enum.TECHNICIENS_AGENTS_MAITRISES,
+            ),
+            [CSP.Enum.INGENIEURS_CADRES]: computeIndicateurDeuxOuTrois(
+              computerIndicateurTrois,
+              CSP.Enum.INGENIEURS_CADRES,
+            ),
+          },
+          note: resultIndicateurTrois.note,
+          populationFavorable: toFavorablePopulation(resultIndicateurTrois.favorablePopulation),
+          résultat: resultIndicateurTrois.result,
+        };
+      }
     }
   }
 
@@ -228,16 +242,16 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
   const indicateur4 = simulation.indicateur4;
 
   if (indicateur4) {
-    if (indicateur4.calculable && resultIndicateurQuatre) {
+    if (!indicateur4.calculable) {
+      dto["conges-maternite"] = {
+        estCalculable: "non",
+        motifNonCalculabilité: NotComputableReason.Enum.ABSRCM,
+      };
+    } else if (indicateur4.calculable && resultIndicateurQuatre) {
       dto["conges-maternite"] = {
         estCalculable: "oui",
         note: resultIndicateurQuatre.note,
         résultat: Math.floor(resultIndicateurQuatre.result * 100),
-      };
-    } else {
-      dto["conges-maternite"] = {
-        estCalculable: "non",
-        motifNonCalculabilité: NotComputableReason.Enum.ABSRCM,
       };
     }
   }
