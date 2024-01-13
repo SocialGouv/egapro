@@ -11,7 +11,7 @@ import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup } from "@design-system";
+import { BackNextButtonsGroup, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
@@ -268,6 +268,12 @@ export const CommencerForm = () => {
               ))}
             </Select>
           )}
+
+          <p>
+            <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+              Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
+            </Link>
+          </p>
 
           <ClientAnimate>
             {isValid && (
