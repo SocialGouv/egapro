@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: "https://28b6186c058a49fc94ee665667e44612@sentry.fabrique.social.gouv.fr/99",
-
+  environment: process.env.SENTRY_ENVIRONMENT,
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1,
 
@@ -21,6 +21,7 @@ Sentry.init({
 
   // You can remove this option if you're not planning to use the Sentry Session Replay feature:
   integrations: [
+    // eslint-disable-next-line import/namespace
     new Sentry.Replay({
       // Additional Replay configuration goes in here, for example:
       maskAllText: true,
