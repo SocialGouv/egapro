@@ -31,7 +31,7 @@ export namespace NotComputableReason {
     [Enum.ABSPROM]: "Absence de promotions",
     [Enum.ABSRCM]: "Absence de retours de congé maternité",
     [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
-    [Enum.ETSNO5F5H]: "L'entreprise ne comporte pas au moins 5 femmes et 5 hommes",
+    [Enum.ETSNO5F5H]: "Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes",
   } as const;
 
   export type Label = typeof Label;
