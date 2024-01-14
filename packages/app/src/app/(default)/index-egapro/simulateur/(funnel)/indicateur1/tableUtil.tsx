@@ -22,7 +22,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
     label: "Tranche d’âge",
   },
   {
-    label: "Nombre de salariés",
+    label: "Nombre de salariés (en effectif physique)",
     subCols: [
       {
         label: "Femmes",
