@@ -70,7 +70,8 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
               className={fr.cx("fr-mb-2w")}
               size="small"
               note={percentFormat.format((computed?.result ?? 0) / 100)}
-              text="Résultat final obtenu à l'indicateur en %"
+              text="Ecart global de rémunération en valeur absolue"
+              legend="Arrondi à la première décimale"
             />
           )}
           <IndicatorNote
