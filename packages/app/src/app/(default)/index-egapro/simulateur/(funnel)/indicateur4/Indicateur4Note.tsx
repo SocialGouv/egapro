@@ -22,8 +22,8 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
       <IndicatorNote
         noBorder={noBorder}
         note="NC"
-        max={NOTE_MAX}
-        text="L'indicateur retour de congé maternité est non calculable car il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
+        legend="Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
+        text="L'indicateur n'est pas calculable"
       />
     );
   return (
