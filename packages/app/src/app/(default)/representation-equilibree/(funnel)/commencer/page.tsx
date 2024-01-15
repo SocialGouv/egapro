@@ -44,12 +44,13 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <p>
-        <b>
-          Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
-          correspondantes à la déclaration.
-        </b>
-      </p>
+      <Alert
+        severity="info"
+        small
+        className={fr.cx("fr-mb-3w")}
+        description="Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
+          correspondantes à la déclaration."
+      />
       <CommencerForm session={session} />
     </>
   );

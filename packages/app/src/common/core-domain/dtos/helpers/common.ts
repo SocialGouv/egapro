@@ -25,8 +25,8 @@ export const sirenSchema = z.string().superRefine(zodValueObjectSuperRefine(Sire
 
 export const percentageSchema = z
   .number({ invalid_type_error: "Le pourcentage est requis et doit être valide" })
-  .nonnegative("La valeur doit être positive")
-  .lte(100, "La valeur ne peut pas être supérieure à 100%")
+  .nonnegative("Le pourcentage ne peut pas être inférieur à 0")
+  .lte(100, "Le pourcentage ne peut pas être supérieur à 100%")
   .superRefine(zodValueObjectSuperRefine(Percentage));
 
 export const repeqYearSchema = z

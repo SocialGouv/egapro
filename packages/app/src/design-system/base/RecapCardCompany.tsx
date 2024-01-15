@@ -80,11 +80,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
     </>
   );
 
-  const fullTitle = full ? (
-    <Text text={titleFull} variant={["xl"]} inline />
-  ) : (
-    title ?? "Informations entreprise déclarante"
-  );
+  const fullTitle = full ? <Text text={titleFull} variant={["xl"]} inline /> : title ?? "Informations entreprise";
 
   return (
     <>

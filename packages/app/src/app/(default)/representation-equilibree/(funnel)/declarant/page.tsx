@@ -24,10 +24,8 @@ const DeclarantPage = async () => {
   return (
     <>
       <p>
-        <b>
-          Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les
-          services de l’inspection du travail.
-        </b>
+        Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services
+        de l’inspection du travail.
       </p>
       <Alert
         small

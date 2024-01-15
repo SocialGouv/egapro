@@ -65,7 +65,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         />
       )}
       <RecapCard
-        title="Écart de représentation parmi les cadres dirigeants"
+        title="Écarts de représentation parmi les cadres dirigeants"
         editLink={(edit || void 0) && "/representation-equilibree/ecarts-cadres"}
         stats={
           "notComputableReasonExecutives" in repEq
@@ -93,7 +93,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         }
       />
       <RecapCard
-        title="Écart de représentation parmi les membres des instances dirigeantes"
+        title="Écarts de représentation parmi les membres des instances dirigeantes"
         editLink={(edit || void 0) && "/representation-equilibree/ecarts-membres"}
         stats={
           "notComputableReasonMembers" in repEq
@@ -122,7 +122,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
       />
       {!publicMode && repEq.publishDate && (
         <RecapCard
-          title="Publication de vos écarts"
+          title="Publication des écarts de représentation"
           editLink={(edit || void 0) && "/representation-equilibree/publication"}
           content={
             <>
