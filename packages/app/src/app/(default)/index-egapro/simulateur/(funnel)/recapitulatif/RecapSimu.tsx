@@ -175,7 +175,7 @@ export const RecapSimu = () => {
                     }) as [AlternativeTableProps.ColType, ...AlternativeTableProps.ColType[]],
                   }))}
                 />
-                <Indicateur1Note computer={computerIndicateurUn} isValid noBorder />
+                <Indicateur1Note computer={computerIndicateurUn} isValid noBorder isRecap />
               </>
             ) : (
               <IndicatorNote
