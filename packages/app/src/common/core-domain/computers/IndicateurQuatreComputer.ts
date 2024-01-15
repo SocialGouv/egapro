@@ -16,7 +16,10 @@ export class IndicateurQuatreComputer extends AbstractComputer<MaternityLeaves> 
       throw new Error("maternity leaves must be set before calling calculateWeightedGap");
     }
 
-    const result = this.input.raised / this.input.total;
+    let result = 0;
+    if (this.input.total !== 0) {
+      result = this.input.raised / this.input.total;
+    }
 
     return {
       favorablePopulation: "women",

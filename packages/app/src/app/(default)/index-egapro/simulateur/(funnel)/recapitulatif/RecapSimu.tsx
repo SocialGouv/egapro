@@ -329,6 +329,22 @@ export const RecapSimu = () => {
         title={NAVIGATION.indicateur4.title}
         editLink={simulateurPath("indicateur4")}
         content={(() => {
+          if (
+            funnel.indicateur4.calculable &&
+            funnel.indicateur4.count.total === 0 &&
+            funnel.indicateur4.count.raised === 0
+          ) {
+            return (
+              <IndicatorNote
+                noBorder
+                note="NC"
+                size="small"
+                text="L'indicateur retour de congé maternité est non calculable"
+                legend="Absence d'augmentations salariales pendant la durée du ou des congés maternité"
+              />
+            );
+          }
+
           if (!funnel.indicateur4.calculable) {
             return (
               <IndicatorNote
