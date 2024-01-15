@@ -40,9 +40,9 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       <Box mb="10w">
         <Heading as="h1" text="Mes entreprises" />
         <Box mt="2w">
-          <SelectSiren sirenList={sirenList} />
+          <SelectSiren sirenList={sirenList} loadedSiren={selectedSiren} />
         </Box>
-        {typeof searchParams.siren === "string" && (
+        {typeof selectedSiren === "string" && (
           <Box mt="4w">
             <Heading as="h1" variant="h6" text="Responsables" />
             <ul>

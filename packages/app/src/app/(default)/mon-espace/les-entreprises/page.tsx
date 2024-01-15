@@ -15,7 +15,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
   if (typeof searchParams.siren !== "string")
     return (
       <Box mb="10w">
-        <Heading as="h1" text="Gérer les utilisateurs" />
+        <Heading as="h1" text="Les entreprises" />
         <Box mt="2w">
           <SirenInput />
         </Box>
@@ -29,9 +29,9 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
 
     return (
       <Box mb="10w">
-        <Heading as="h1" text="Gérer les utilisateurs" />
+        <Heading as="h1" text="Les entreprises" />
         <Box mt="2w">
-          <SirenInput />
+          <SirenInput loadedSiren={selectedSiren} />
         </Box>
         <Box mt="4w">
           <Heading as="h1" variant="h6" text="Responsables" />
@@ -47,7 +47,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
     if (error && error.constructor.name === "UnexpectedSessionError")
       return (
         <Box mb="10w">
-          <Heading as="h1" text="Mes entreprises" />
+          <Heading as="h1" text="Les entreprises" />
           <Box mt="2w">
             <SirenInput />
           </Box>
