@@ -1,6 +1,7 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
+import { MessageProvider } from "@design-system/client";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
@@ -14,12 +15,14 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
 
   if (typeof searchParams.siren !== "string")
     return (
-      <Box mb="10w">
-        <Heading as="h1" text="Gérer les utilisateurs" />
-        <Box mt="2w">
-          <SirenInput />
+      <MessageProvider>
+        <Box mb="10w">
+          <Heading as="h1" text="Les entreprises" />
+          <Box mt="2w">
+            <SirenInput />
+          </Box>
         </Box>
-      </Box>
+      </MessageProvider>
     );
 
   const selectedSiren = searchParams.siren;
@@ -28,31 +31,35 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
     const emails = await getAllEmailsBySiren(selectedSiren);
 
     return (
-      <Box mb="10w">
-        <Heading as="h1" text="Gérer les utilisateurs" />
-        <Box mt="2w">
-          <SirenInput />
+      <MessageProvider>
+        <Box mb="10w">
+          <Heading as="h1" text="Les entreprises" />
+          <Box mt="2w">
+            <SirenInput loadedSiren={selectedSiren} />
+          </Box>
+          <Box mt="4w">
+            <Heading as="h1" variant="h6" text="Responsables" />
+            <ul>
+              {emails.map((email, index) => (
+                <li key={`owner-${index}`}>{email}</li>
+              ))}
+            </ul>
+          </Box>
         </Box>
-        <Box mt="4w">
-          <Heading as="h1" variant="h6" text="Responsables" />
-          <ul>
-            {emails.map((email, index) => (
-              <li key={`owner-${index}`}>{email}</li>
-            ))}
-          </ul>
-        </Box>
-      </Box>
+      </MessageProvider>
     );
   } catch (error: unknown) {
     if (error && error.constructor.name === "UnexpectedSessionError")
       return (
-        <Box mb="10w">
-          <Heading as="h1" text="Mes entreprises" />
-          <Box mt="2w">
-            <SirenInput />
+        <MessageProvider>
+          <Box mb="10w">
+            <Heading as="h1" text="Les entreprises" />
+            <Box mt="2w">
+              <SirenInput />
+            </Box>
+            <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
           </Box>
-          <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
-        </Box>
+        </MessageProvider>
       );
     return null;
   }

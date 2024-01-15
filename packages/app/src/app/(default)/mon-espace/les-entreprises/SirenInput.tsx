@@ -8,9 +8,9 @@ import { getCompany } from "@globalActions/company";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const SirenInput = () => {
+export const SirenInput = ({ loadedSiren }: { loadedSiren?: string }) => {
   const router = useRouter();
-  const [currentSiren, setCurrentSiren] = useState<string>("");
+  const [currentSiren, setCurrentSiren] = useState<string>(loadedSiren ? loadedSiren : "");
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(false);
 
@@ -22,11 +22,14 @@ export const SirenInput = () => {
         setDisabled(false);
         if (company.ok) setSelectedCompanyName(company?.data?.simpleLabel ?? "");
       });
-      router.push(`/mon-espace/gerer-utilisateurs?siren=${currentSiren}`);
+
+      if (loadedSiren != currentSiren) {
+        router.push(`/mon-espace/les-entreprises?siren=${currentSiren}`);
+      }
     } catch (e) {
       return;
     }
-  }, [currentSiren, router]);
+  }, [currentSiren, router, loadedSiren]);
 
   return (
     <Grid>
@@ -34,7 +37,7 @@ export const SirenInput = () => {
         <Input
           label="SIREN"
           disabled={disabled}
-          nativeInputProps={{ onChange: event => setCurrentSiren(event.target.value) }}
+          nativeInputProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
         />
       </GridCol>
       <GridCol sm={9}>

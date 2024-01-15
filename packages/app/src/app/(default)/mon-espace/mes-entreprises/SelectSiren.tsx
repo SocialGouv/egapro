@@ -7,9 +7,9 @@ import { getCompany } from "@globalActions/company";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const SelectSiren = ({ sirenList }: { sirenList: string[] }) => {
+export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; sirenList: string[] }) => {
   const router = useRouter();
-  const [currentSiren, setCurrentSiren] = useState<string>("");
+  const [currentSiren, setCurrentSiren] = useState<string>(loadedSiren ? loadedSiren : "");
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
 
   useEffect(() => {
@@ -17,9 +17,9 @@ export const SelectSiren = ({ sirenList }: { sirenList: string[] }) => {
       getCompany(currentSiren).then(company => {
         if (company.ok) setSelectedCompanyName(company?.data?.simpleLabel ?? "");
       });
-      router.push(`/mon-espace/mes-entreprises?siren=${currentSiren}`);
+      if (loadedSiren != currentSiren) router.push(`/mon-espace/mes-entreprises?siren=${currentSiren}`);
     }
-  }, [currentSiren, router]);
+  }, [currentSiren, router, loadedSiren]);
 
   return (
     <Grid>
