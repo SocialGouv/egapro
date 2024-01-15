@@ -59,7 +59,7 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
     };
 
     const rawGap = raiseRate.men - raiseRate.women;
-    const equivalentEmployeeCountGapRaw = Math.abs(rawGap) * Math.min(this.input.womenCount, this.input.menCount);
+    const equivalentEmployeeCountGapRaw = rawGap * Math.min(this.input.womenCount, this.input.menCount);
     const equivalentEmployeeCountGap = Math.round(Math.abs(equivalentEmployeeCountGapRaw) * 10) / 10;
 
     const sign = Math.sign(rawGap);
