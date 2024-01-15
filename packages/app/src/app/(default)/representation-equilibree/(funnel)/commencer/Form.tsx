@@ -169,7 +169,10 @@ export const CommencerForm = ({ session }: { session: Session }) => {
             </Select>
           )}
           <p>
-            <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+            <Link
+              href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
+              target="_blank"
+            >
               Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
             </Link>
           </p>

@@ -15,6 +15,8 @@ export const MonCompteProLogin = ({ callbackUrl }: MonCompteProLoginProps) => (
         signIn("moncomptepro", { callbackUrl });
       }}
     />
-    <Link href="/aide-moncomptepro">Consulter l'aide MonComptePro</Link>
+    <Link href="/aide-moncomptepro" target="_blank">
+      Consulter l'aide MonComptePro
+    </Link>
   </>
 );

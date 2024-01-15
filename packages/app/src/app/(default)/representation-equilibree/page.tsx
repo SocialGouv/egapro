@@ -64,17 +64,23 @@ const RepresentationEquilibree = () => (
               <>
                 <p>Aide pour l'utilisation du service d'identification MonComptePro :</p>
                 <p>
-                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"}>
+                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"} target="_blank">
                     Comment s'identifier avec MonComptePro ?
                   </Link>
                 </p>
                 <p>
-                  <Link href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}>
+                  <Link
+                    href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}
+                    target="_blank"
+                  >
                     Comment modifier mes informations personnelles sur MonComptePro ?
                   </Link>
                 </p>
                 <p>
-                  <Link href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}>
+                  <Link
+                    href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
+                    target="_blank"
+                  >
                     Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
                   </Link>
                 </p>
