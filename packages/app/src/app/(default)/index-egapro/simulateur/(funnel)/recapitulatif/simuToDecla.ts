@@ -48,6 +48,7 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
     computerIndicateurDeux,
     computerIndicateurDeuxTrois,
     computerIndicateurTrois,
+    computerIndicateurQuatre,
     totalWomen,
     totalMen,
     resultIndicateurUn,
@@ -242,7 +243,12 @@ export const simuFunnelToDeclarationDTO = (simulation: CreateSimulationDTO): Dec
   const indicateur4 = simulation.indicateur4;
 
   if (indicateur4) {
-    if (!indicateur4.calculable) {
+    if (!computerIndicateurQuatre.canCompute() && resultIndicateurQuatre) {
+      dto["conges-maternite"] = {
+        estCalculable: "non",
+        motifNonCalculabilité: NotComputableReason.Enum.ABSAUGPDTCM,
+      };
+    } else if (!indicateur4.calculable) {
       dto["conges-maternite"] = {
         estCalculable: "non",
         motifNonCalculabilité: NotComputableReason.Enum.ABSRCM,
