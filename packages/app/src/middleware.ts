@@ -27,7 +27,7 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     block-all-mixed-content;
     upgrade-insecure-requests;
     ${
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? ""
         : `require-trusted-types-for 'script';
            trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`
