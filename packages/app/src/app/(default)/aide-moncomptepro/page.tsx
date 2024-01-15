@@ -80,15 +80,6 @@ const AideMonCompteProPage = () => {
               Vous êtes redirigé sur le site MonComptePro, à la page "S'inscrire ou se connecter". Vous saisissez votre
               email.
             </p>
-            <p>
-              Les indicateurs sont calculés à partir des données de la période de référence annuelle choisie par
-              l’entreprise ou l’unité économique et sociale (UES). Cette période doit être de 12 mois consécutifs et
-              précéder l’année de publication. Par exemple, elle doit donc nécessairement s’achever au plus tard le 31
-              décembre 2021 pour un Index publié en 2022. Uniquement pour l’indicateur « écart de taux d’augmentation »,
-              et uniquement pour une entreprise ou une unité économique et sociale (UES) de 50 à 250 salariés,
-              l’employeur peut choisir une période de référence de 3 ans maximum. Ce caractère pluriannuel peut être
-              révisé tous les 3 ans.
-            </p>
             <AnchorLink as="h3" anchor="Vous-avez-un-compte-MonComptePro">
               Vous avez un compte MonComptePro
             </AnchorLink>
