@@ -344,6 +344,8 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
     if (input.salaryRaisesAndPromotions.isComputable) {
       if (
         input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation &&
+        input.salaryRaisesAndPromotions.favorablePopulation &&
         input.remunerations.favorablePopulation !== input.salaryRaisesAndPromotions.favorablePopulation
       ) {
         salaryRaisesAndPromotionsScore = indicateurDeuxTrois.getMaxNote();
@@ -361,6 +363,8 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
     if (input.salaryRaises.isComputable) {
       if (
         input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation &&
+        input.salaryRaises.favorablePopulation &&
         input.remunerations.favorablePopulation !== input.salaryRaises.favorablePopulation
       ) {
         salaryRaisesScore = indicateurDeux.getMaxNote();
@@ -373,6 +377,8 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
     if (input.promotions.isComputable) {
       if (
         input.remunerations.isComputable &&
+        input.remunerations.favorablePopulation &&
+        input.promotions.favorablePopulation &&
         input.remunerations.favorablePopulation !== input.promotions.favorablePopulation
       ) {
         promotionsScore = indicateurTrois.getMaxNote();
@@ -393,7 +399,6 @@ export const computeDeclarationIndex = (input: DeclarationComputerInput): Declar
   const highRemunerationsScore = indicateurCinq.computeNote(input.highRemunerations.result) || 0;
   points += highRemunerationsScore;
   computablePoints += indicateurCinq.getMaxNote();
-
   return {
     highRemunerationsScore,
     maternityLeavesScore,
