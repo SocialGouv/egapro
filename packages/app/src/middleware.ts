@@ -25,14 +25,13 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     base-uri 'self' https://*.gouv.fr;
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
-    upgrade-insecure-requests;
-    ${
-      process.env.NODE_ENV === "development"
-        ? ""
-        : `require-trusted-types-for 'script';
-           trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`
-    }
-    `;
+    upgrade-insecure-requests; `;
+  // ${
+  //   process.env.NODE_ENV === "development"
+  //     ? ""
+  //     : `require-trusted-types-for 'script';
+  //        trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`
+  // }
 
   const responseHeaders = new Headers();
   responseHeaders.set("x-nonce", nonce);
