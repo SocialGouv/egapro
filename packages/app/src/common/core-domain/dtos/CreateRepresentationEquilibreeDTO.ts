@@ -57,7 +57,7 @@ export const createSteps = {
           publishModalities: z
             .string()
             .trim()
-            .nonempty("La description des modalités de communication des écarts est obligatoire"),
+            .nonempty("La description des modalités de communication est obligatoire"),
         })
         .or(
           z.object({

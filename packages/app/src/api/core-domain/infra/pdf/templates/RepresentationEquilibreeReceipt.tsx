@@ -62,7 +62,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
       ],
     },
     {
-      title: "Écart de représentation parmi les cadres dirigeants",
+      title: "Écarts de représentation parmi les cadres dirigeants",
       rows: repEq.indicator.notComputableReasonExecutives
         ? [
             {
@@ -82,7 +82,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
           ],
     },
     {
-      title: "Écart de représentation parmi les membres des instances dirigeantes",
+      title: "Écarts de représentation parmi les membres des instances dirigeantes",
       rows: repEq.indicator.notComputableReasonMembers
         ? [
             {

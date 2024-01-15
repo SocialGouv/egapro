@@ -30,7 +30,7 @@ const Validation = () => {
       </p>
       <p>
         Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous recevrez un
-        accusé de réception par email.
+        accusé de réception.
       </p>
       <Heading as="h2" mt="6w" text="Récapitulatif" />
 
