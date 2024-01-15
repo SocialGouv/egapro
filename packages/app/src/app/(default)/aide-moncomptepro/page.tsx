@@ -169,6 +169,17 @@ const AideMonCompteProPage = () => {
               siège social et sur le site Egapro c'est le numéro Siren de l'entreprise qui sera disponible pour
               effectuer votre déclaration.
             </p>
+            <p>
+              L'équipe MonComptePro devra vérifier votre rattachement avant de le valider, vous recevrez un mail dès que
+              celui-ci sera effectif (un délai de un jour et à prévoir).
+            </p>
+            <p>
+              <b>
+                Si le rattachement a été validé par l'équipe MonComptePro et que sur le site Egapro vous n'avez pas le
+                numéro Siren de l'entreprise dans la liste déroulante de la page "Commencer" de la déclaration, il
+                convient de vous déconnecter du site Egapro en haut à droite de la page et de vous reconnecter.
+              </b>
+            </p>
           </ContentWithChapter>
         </GridCol>
       </Grid>
