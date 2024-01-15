@@ -11,6 +11,7 @@ import styles from "./IndicatorNote1.module.css";
 
 interface Props {
   computer: IndicateurUnComputer;
+  isRecap?: boolean;
   isValid: boolean;
   noBorder?: boolean;
   simple?: boolean;
@@ -30,7 +31,7 @@ function getNCText(metadata: TotalMetadata) {
   );
 }
 
-export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) => {
+export const Indicateur1Note = ({ computer, isValid, simple, noBorder, isRecap = false }: Props) => {
   let computed: ComputedResult | null = null;
   let isNC = false;
   let advantageText = "";
@@ -70,8 +71,10 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder }: Props) 
               className={fr.cx("fr-mb-2w")}
               size="small"
               note={percentFormat.format((computed?.result ?? 0) / 100)}
-              text="Ecart global de rémunération en valeur absolue"
-              legend="Arrondi à la première décimale"
+              text={
+                isRecap ? "Résultat final obtenu à l'indicateur en %" : "Ecart global de rémunération en valeur absolue"
+              }
+              legend={isRecap ? "" : "Arrondi à la première décimale"}
             />
           )}
           <IndicatorNote
