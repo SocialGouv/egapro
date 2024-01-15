@@ -230,8 +230,11 @@ const ConfirmationPage = () => {
             footer={
               <ul className="fr-links-group">
                 <li>
-                  <a className="fr-link fr-icon-arrow-right-line fr-link--icon-right" href="/index-egapro/">
-                    Guide Mon Espace
+                  <a
+                    className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
+                    href="/mon-espace/mes-declarations"
+                  >
+                    Accéder à mon espace
                   </a>
                 </li>
               </ul>
