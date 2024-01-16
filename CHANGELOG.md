@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/SocialGouv/egapro/compare/v3.0.0...v3.0.1) (2024-01-16)
+
+
+### Bug Fixes
+
+* increase ressources ([0fa8a5f](https://github.com/SocialGouv/egapro/commit/0fa8a5fc09d06917ecf778292b7e992535de8f45))
+
 # [3.0.0](https://github.com/SocialGouv/egapro/compare/v2.92.0...v3.0.0) (2024-01-16)
 
 
