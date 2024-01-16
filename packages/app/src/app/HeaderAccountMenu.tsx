@@ -42,6 +42,16 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
                   {staffLinkText} déclarations
                 </a>
               </li>
+              <li>
+                <a
+                  className="fr-nav__link"
+                  href={`https://app${process.env.EGAPRO_ENV === "prod" ? "" : "-test"}.moncomptepro.beta.gouv.fr`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Accès à mon compte MonComptePro
+                </a>
+              </li>
             </ul>
           </div>
         </li>
