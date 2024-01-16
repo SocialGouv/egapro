@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/SocialGouv/egapro/compare/v2.92.0...v3.0.0) (2024-01-16)
+
+
+### chore
+
+* nextjs migration ([f649f05](https://github.com/SocialGouv/egapro/commit/f649f05c0f54789aa729c72cd740b3b5cc01b350))
+
+
+### BREAKING CHANGES
+
+* migration
+
 # [2.92.0](https://github.com/SocialGouv/egapro/compare/v2.91.5...v2.92.0) (2024-01-16)
 
 
