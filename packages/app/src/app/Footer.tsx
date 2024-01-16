@@ -2,11 +2,7 @@ import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import DsfrFooter, { type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { config } from "@common/config";
 
-import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "./consentManagement";
-
-export interface FooterProps {
-  type: "company" | "public";
-}
+import { FooterPersonalDataPolicyItem } from "./consentManagement";
 
 const githubLink = {
   text: "Contribuer sur Github",
@@ -18,14 +14,23 @@ const githubLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const helpLink = {
-  text: "Consulter l'aide",
+  text: "Consulter l'aide pour le calcul de l'index",
   linkProps: {
     href: "/aide-simulation",
+    target: "_blank",
+  },
+} satisfies DsfrFooterProps.LinkList.Link;
+
+const helpMCP = {
+  text: "Consulter l'aide MonComptePro",
+  linkProps: {
+    href: "/aide-moncomptepro",
+    target: "_blank",
   },
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const contactLink = {
-  text: "index@travail.gouv.fr",
+  text: "Contact support technique : index@travail.gouv.fr",
   linkProps: {
     href: "mailto:index@travail.gouv.fr",
     target: "_blank",
@@ -34,7 +39,7 @@ const contactLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const referenteDownloadLink = {
-  text: "Télécharger la liste des référents",
+  text: "Télécharger la liste des référents Egapro - Dreets",
   linkProps: {
     title: "Télécharger la liste des référents au format xlsx",
     href: "https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx",
@@ -43,7 +48,25 @@ const referenteDownloadLink = {
   },
 } satisfies DsfrFooterProps.LinkList.Link;
 
-export const Footer = ({ type }: FooterProps) => (
+const labourMinistryIndex = {
+  text: "Consulter le site du Ministère du Travail - Index",
+  linkProps: {
+    href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
+    target: "_blank",
+    rel: "noreferrer",
+  },
+} satisfies DsfrFooterProps.LinkList.Link;
+
+const labourMinistryRepeq = {
+  text: "Consulter le site du Ministère du Travail - Représentation équilibrée",
+  linkProps: {
+    href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/",
+    target: "_blank",
+    rel: "noreferrer",
+  },
+} satisfies DsfrFooterProps.LinkList.Link;
+
+export const Footer = () => (
   <DsfrFooter
     accessibility="partially compliant"
     accessibilityLinkProps={{
@@ -61,7 +84,6 @@ export const Footer = ({ type }: FooterProps) => (
         ...headerFooterDisplayItem,
         iconId: "fr-icon-theme-fill",
       },
-      <FooterConsentManagementItem key="FooterConsentManagementItem" />,
     ]}
     termsLinkProps={{ href: "/mentions-legales" }}
     license={
@@ -75,11 +97,19 @@ export const Footer = ({ type }: FooterProps) => (
     linkList={[
       {
         categoryName: "Liens utiles",
-        links: [type === "company" ? referenteDownloadLink : helpLink, githubLink],
+        links: [contactLink, referenteDownloadLink],
       },
       {
         categoryName: " ",
-        links: [type === "company" ? helpLink : contactLink],
+        links: [helpLink, helpMCP],
+      },
+      {
+        categoryName: " ",
+        links: [labourMinistryIndex, labourMinistryRepeq],
+      },
+      {
+        categoryName: " ",
+        links: [githubLink],
       },
     ]}
   />

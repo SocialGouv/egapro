@@ -31,7 +31,7 @@ const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error
           <Alert title="Erreur" severity="error" description={errorMessage} />
         </CenteredContainer>
       </main>
-      <Footer type="public" />
+      <Footer />
     </>
   );
 };

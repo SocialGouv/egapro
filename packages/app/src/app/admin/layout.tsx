@@ -36,7 +36,7 @@ const AdminLayout = ({ children }: PropsWithChildren) => (
     <main role="main" id="content" className={styles.content}>
       {children}
     </main>
-    <Footer type="public" />
+    <Footer />
   </div>
 );
 

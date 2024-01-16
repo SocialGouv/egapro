@@ -19,7 +19,7 @@ const ErrorPage = ({ error }: NextErrorPageProps) => {
           <Alert title="Erreur" severity="error" description={error.message} />
         </CenteredContainer>
       </main>
-      <Footer type="public" />
+      <Footer />
     </>
   );
 };

@@ -14,7 +14,7 @@ const DefaultLayout = async ({ children }: PropsWithChildren) => {
       <main role="main" id="content" className={styles.content}>
         {children}
       </main>
-      <Footer type="company" />
+      <Footer />
     </div>
   );
 };
