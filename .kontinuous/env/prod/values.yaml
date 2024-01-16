@@ -7,11 +7,11 @@ api:
     enabled: true
   resources:
     requests:
-      cpu: 100m
-      memory: 640M
-    limits:
-      cpu: 1
+      cpu: 500m
       memory: 1G
+    limits:
+      cpu: 2
+      memory: 2G
   vars:
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
   envFrom:
@@ -41,11 +41,11 @@ app:
     enabled: true
   resources:
     requests:
-      cpu: 20m
-      memory: 256M
-    limits:
-      cpu: 1
+      cpu: 500m
       memory: 1G
+    limits:
+      cpu: 2
+      memory: 2G
 
 jobs:
   runs:
