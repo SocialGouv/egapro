@@ -264,25 +264,29 @@ export const Indic2and3Form = () => {
                             text={
                               <>
                                 Écart en nombre équivalent de salariés, arrondi à la première décimale
-                                <strong>
-                                  <sup>*</sup>
-                                </strong>{" "}
+                                {(raisedCount?.men || raisedCount?.women) && (
+                                  <strong>
+                                    <sup>*</sup>
+                                  </strong>
+                                )}{" "}
                                 : <strong>{computed?.equivalentEmployeeCountGap}</strong>
                               </>
                             }
                           />
-                          <i>
-                            <Text
-                              mb="1w"
-                              variant={["sm"]}
-                              text={
-                                <>
-                                  <strong>*</strong>
-                                  {computed?.ifadvantage ? ifAdvantageText[computed.ifadvantage] : ""}
-                                </>
-                              }
-                            />
-                          </i>
+                          {(raisedCount?.men || raisedCount?.women) && (
+                            <i>
+                              <Text
+                                mb="1w"
+                                variant={["sm"]}
+                                text={
+                                  <>
+                                    <strong>*</strong>
+                                    {computed?.ifadvantage ? ifAdvantageText[computed.ifadvantage] : ""}
+                                  </>
+                                }
+                              />
+                            </i>
+                          )}
                         </GridCol>
                       </Grid>
                     </Container>
