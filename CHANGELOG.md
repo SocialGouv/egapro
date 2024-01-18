@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/SocialGouv/egapro/compare/v3.0.1...v3.0.2) (2024-01-18)
+
+
+### Bug Fixes
+
+* add logs to auth ([#2041](https://github.com/SocialGouv/egapro/issues/2041)) ([e17ac50](https://github.com/SocialGouv/egapro/commit/e17ac50ee0e3c53602dd6a404cddb02c0d470fea))
+
 ## [3.0.1](https://github.com/SocialGouv/egapro/compare/v3.0.0...v3.0.1) (2024-01-16)
 
 
