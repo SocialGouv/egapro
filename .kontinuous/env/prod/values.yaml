@@ -28,6 +28,9 @@ app:
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"
+  vars:
+    SECURITY_MONCOMPTEPRO_CLIENT_ID: "$(SECURITY_MONCOMPTEPRO_CLIENT_ID)"
+    SECURITY_MONCOMPTEPRO_CLIENT_SECRET: "$(SECURITY_MONCOMPTEPRO_CLIENT_SECRET)"
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
