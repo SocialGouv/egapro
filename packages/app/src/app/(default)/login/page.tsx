@@ -1,4 +1,5 @@
 import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { logger } from "@api/utils/pino";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer } from "@design-system";
@@ -39,6 +40,10 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
 
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
+
+  logger.child({ callbackUrl }).info(`LoginPage, callbackUrl:`);
+  logger.child({ error }).info(`LoginPage, error:`);
+  logger.child({ authConfig }).info(`auth config`);
 
   return (
     <CenteredContainer py="6w">
