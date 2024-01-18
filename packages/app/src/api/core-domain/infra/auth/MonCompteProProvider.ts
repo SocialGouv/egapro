@@ -1,3 +1,4 @@
+import { logger } from "@api/utils/pino";
 import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers";
 
 export interface Organization {
@@ -26,6 +27,9 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
   const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
+
+  logger.child({ options }).info(`MonCompteProProvider, issuer: ${issuer}`);
+
   return {
     id: "moncomptepro",
     name: "Mon Compte Pro",
@@ -40,6 +44,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
     checks: ["pkce", "state"],
     userinfo: {
       async request({ tokens: { access_token }, client }) {
+        logger.child({ tokens: { access_token } }).info(`userinfo request`);
         if (!access_token) {
           throw new Error("MonCompteProProvider - Userinfo request is missing access_token.");
         }
@@ -48,12 +53,13 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
       },
     },
     profile(profile) {
+      logger.child({ profile }).info(`profile`);
       return {
         id: profile.sub,
         email: profile.email,
         name: profile.given_name,
       };
     },
-    options,
+    ...options,
   };
 }
