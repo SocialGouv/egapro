@@ -1,3 +1,10 @@
+## [3.0.3](https://github.com/SocialGouv/egapro/compare/v3.0.2...v3.0.3) (2024-01-18)
+
+
+### Bug Fixes
+
+* add env vars in values.yaml ([1dd0942](https://github.com/SocialGouv/egapro/commit/1dd09428d657cdd6c019daf8f05724a836533821))
+
 ## [3.0.2](https://github.com/SocialGouv/egapro/compare/v3.0.1...v3.0.2) (2024-01-18)
 
 
