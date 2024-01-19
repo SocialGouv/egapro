@@ -1,3 +1,10 @@
+## [3.0.7](https://github.com/SocialGouv/egapro/compare/v3.0.6...v3.0.7) (2024-01-19)
+
+
+### Bug Fixes
+
+* mailer config ([#2044](https://github.com/SocialGouv/egapro/issues/2044)) ([fd4a0f3](https://github.com/SocialGouv/egapro/commit/fd4a0f3400a166b0cab45bb1a310405053e70091))
+
 ## [3.0.6](https://github.com/SocialGouv/egapro/compare/v3.0.5...v3.0.6) (2024-01-19)
 
 
