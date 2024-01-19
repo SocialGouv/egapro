@@ -45,7 +45,7 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
               <li>
                 <a
                   className="fr-nav__link"
-                  href={`https://app${process.env.EGAPRO_ENV === "prod" ? "" : "-test"}.moncomptepro.beta.gouv.fr`}
+                  href={`https://app.moncomptepro.beta.gouv.fr`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
