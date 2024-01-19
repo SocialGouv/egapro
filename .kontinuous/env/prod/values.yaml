@@ -25,6 +25,8 @@ api:
         name: smtp
 
 app:
+  vars:
+    MAILER_ENABLE: "True"
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"
