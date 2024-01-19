@@ -1,3 +1,10 @@
+## [3.0.8](https://github.com/SocialGouv/egapro/compare/v3.0.7...v3.0.8) (2024-01-19)
+
+
+### Bug Fixes
+
+* nodemailer config ([45b0f18](https://github.com/SocialGouv/egapro/commit/45b0f18316c37214df6a0e1ebc99490a5e3e4fe6))
+
 ## [3.0.7](https://github.com/SocialGouv/egapro/compare/v3.0.6...v3.0.7) (2024-01-19)
 
 
