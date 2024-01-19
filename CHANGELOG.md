@@ -1,3 +1,10 @@
+## [3.0.9](https://github.com/SocialGouv/egapro/compare/v3.0.8...v3.0.9) (2024-01-19)
+
+
+### Bug Fixes
+
+* make home page static ([97af144](https://github.com/SocialGouv/egapro/commit/97af14479dc667408ec6de5afe8e0c83e94e9b7d))
+
 ## [3.0.8](https://github.com/SocialGouv/egapro/compare/v3.0.7...v3.0.8) (2024-01-19)
 
 
