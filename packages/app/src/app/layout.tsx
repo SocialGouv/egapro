@@ -22,6 +22,8 @@ import style from "./root.module.scss";
 import { SessionProvider } from "./SessionProvider";
 import { StartDsfr } from "./StartDsfr";
 
+export const dynamic = "force-static";
+
 const description =
   "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
 

@@ -9,6 +9,13 @@ api:
     EGAPRO_SMTP_SSL: ""
 
 app:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 640M
+    limits:
+      cpu: 500m
+      memory: 1G
   ~needs: [build-app, create-db]
   vars:
     MAILER_ENABLE: "True"
