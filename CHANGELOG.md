@@ -1,3 +1,10 @@
+## [3.0.5](https://github.com/SocialGouv/egapro/compare/v3.0.4...v3.0.5) (2024-01-19)
+
+
+### Bug Fixes
+
+* mon compte pro link ([b6fd710](https://github.com/SocialGouv/egapro/commit/b6fd710a01040d9213c561d9253fc203327698be))
+
 ## [3.0.4](https://github.com/SocialGouv/egapro/compare/v3.0.3...v3.0.4) (2024-01-18)
 
 
