@@ -4,6 +4,8 @@ import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system"
 
 import styles from "./index.module.css";
 
+export const dynamic = "force-static";
+
 const Home = () => {
   return (
     <>
