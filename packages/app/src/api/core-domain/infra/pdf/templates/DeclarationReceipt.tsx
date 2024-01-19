@@ -27,7 +27,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
       ],
     },
     {
-      title: "Informations entreprise",
+      title: "Informations entreprise/UES",
       rows: [
         {
           key: "Structure",
@@ -35,7 +35,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         },
         {
           key: "Tranche effectifs",
-          value: declaration.company.range?.getValue(),
+          value: declaration.company.range?.getLabel(),
         },
         {
           key: "Raison sociale",
@@ -64,20 +64,20 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
               },
               {
                 key: "Nombre d'entreprises composant l'UES",
-                value: declaration.company.ues?.companies.length,
+                value: declaration.company.ues?.companies.length + 1,
               },
             ]),
       ],
     },
     {
-      title: "Période de référence",
+      title: "Informations calcul et période de référence",
       rows: [
         {
-          key: "Année au titre de laquelle les écarts sont calculés",
+          key: "Année au titre de laquelle les indicateurs sont calculés",
           value: declaration.year.getValue(),
         },
         {
-          key: "Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts",
+          key: "Date de fin de la période de référence",
           value: declaration.endReferencePeriod ? formatDateToFr(declaration.endReferencePeriod) : "NA",
         },
         {
@@ -106,6 +106,14 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
                   ? declaration.remunerations.mode.getLabel()
                   : "",
             },
+            ...(declaration.remunerations.categories
+              ? [
+                  {
+                    key: "Nombre de niveaux ou coefficients",
+                    value: declaration.remunerations.categories.length,
+                  },
+                ]
+              : []),
             ...(declaration.remunerations.cseConsultationDate
               ? [
                   {
@@ -158,7 +166,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
               value: declaration.salaryRaisesAndPromotions?.percentScore?.getValue(),
             },
             {
-              key: "Nombre de points obtenus",
+              key: "Nombre de points obtenus sur le résultat final en nombre de salariés",
               value: declaration.salaryRaisesAndPromotions?.score?.getValue(),
             },
           ],
@@ -272,7 +280,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         value: declaration.points?.getValue(),
       },
       {
-        key: "Points maximum obtenable aux indicateurs calculables",
+        key: "Nombre de points maximum pouvant être obtenus",
         value: declaration.computablePoints?.getValue(),
       },
       {
@@ -282,8 +290,8 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
       ...(declaration.correctiveMeasures?.getValue()
         ? [
             {
-              key: "Mesures de corrections prévues",
-              value: declaration.correctiveMeasures.getValue(),
+              key: "Mesures de correction prévues",
+              value: declaration.correctiveMeasures?.getLabel(),
             },
           ]
         : []),
@@ -292,7 +300,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
 
   if (declaration.publication) {
     table.push({
-      title: "Publication",
+      title: "Publication des résultats obtenus",
       rows: [
         {
           key: "Date de publication",
@@ -306,7 +314,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
               },
             ]
           : []),
-        ...(declaration.publication.modalities
+        ...(declaration.publication.modalities && !declaration.publication?.url
           ? [
               {
                 key: "Modalités de communication auprès des salariés",
@@ -321,17 +329,11 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
   if (declaration.index && declaration.index.getValue() < 85) {
     const rows: [BaseReceiptTemplateProps.Row, ...BaseReceiptTemplateProps.Row[]] = [
       {
-        key: "Date de publication des objectifs",
-        value: input.objectivesPublishDate ? formatDateToFr(input.objectivesPublishDate) : "À définir",
+        key: "",
+        value: "",
       },
     ];
 
-    if (declaration.index.getValue() < 75) {
-      rows.push({
-        key: "Date de publication des mesures de correction",
-        value: input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
-      });
-    }
     if (!declaration.remunerations?.notComputableReason) {
       if (declaration.remunerations?.score?.getValue() !== indicatorNoteMax["remunerations"])
         rows.push({
@@ -373,28 +375,40 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           });
         }
       }
+    }
 
-      if (!declaration.maternityLeaves?.notComputableReason) {
-        if (declaration.maternityLeaves?.score?.getValue() !== indicatorNoteMax["conges-maternite"]) {
-          rows.push({
-            key: "Objectif Indicateur retour de congé maternité",
-            value: input.objectiveMaternityLeaves?.getValue() ?? "À définir",
-            showAsBlock: true,
-          });
-        }
-      }
-
-      if (declaration.highRemunerations?.score?.getValue() !== indicatorNoteMax["hautes-remunerations"]) {
+    if (!declaration.maternityLeaves?.notComputableReason) {
+      if (declaration.maternityLeaves?.score?.getValue() !== indicatorNoteMax["conges-maternite"]) {
         rows.push({
-          key: "Objectif Indicateur dix plus hautes rémunérations",
-          value: input.objectiveHighRemunerations?.getValue() ?? "À définir",
+          key: "Objectif Indicateur retour de congé maternité",
+          value: input.objectiveMaternityLeaves?.getValue() ?? "À définir",
           showAsBlock: true,
         });
       }
+    }
 
-      if (!declaration.publication?.url || declaration.index.getValue() < 75) {
+    if (declaration.highRemunerations?.score?.getValue() !== indicatorNoteMax["hautes-remunerations"]) {
+      rows.push({
+        key: "Objectif Indicateur dix plus hautes rémunérations",
+        value: input.objectiveHighRemunerations?.getValue() ?? "À définir",
+        showAsBlock: true,
+      });
+    }
+
+    rows.push({
+      key: "Date de publication des objectifs",
+      value: input.objectivesPublishDate ? formatDateToFr(input.objectivesPublishDate) : "À définir",
+    });
+
+    if (declaration.index.getValue() < 75) {
+      rows.push({
+        key: "Date de publication des mesures de correction",
+        value: input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
+      });
+
+      if (declaration.publication?.url || declaration.index.getValue() < 75) {
         rows.push({
-          key: "Modalités de communication auprès des salariés",
+          key: "Modalités de communication des mesures de correction auprès des salariés",
           value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
           showAsBlock: true,
         });
@@ -402,7 +416,10 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
     }
 
     table.push({
-      title: "Objectifs de progression et mesures de correction",
+      title:
+        declaration.index.getValue() >= 75 && declaration.index.getValue() <= 84
+          ? "Objectifs de progression"
+          : "Objectifs de progression et mesures de correction",
       rows,
     });
   }
@@ -410,7 +427,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
   return (
     <BaseReceiptTemplate
       title="Déclaration"
-      subject="Récapitulatif de la déclaration Egapro"
+      subject="Récapitulatif de la déclaration de votre index de l'égalité professionnelle entre les femmes et les hommes"
       declaredAt={declaration.declaredAt}
       modifiedAt={isEqual(declaration.declaredAt, declaration.modifiedAt) ? undefined : declaration.modifiedAt}
       siren={declaration.siren.getValue()}
