@@ -27,7 +27,7 @@ const ConsultationLayout = ({ children }: PropsWithChildren) => {
         </Container>
         {children}
       </main>
-      <Footer type="public" />
+      <Footer />
     </>
   );
 };
