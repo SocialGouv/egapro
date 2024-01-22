@@ -1,3 +1,12 @@
+## [3.0.10](https://github.com/SocialGouv/egapro/compare/v3.0.9...v3.0.10) (2024-01-22)
+
+
+### Bug Fixes
+
+* load tests ([#2049](https://github.com/SocialGouv/egapro/issues/2049)) ([4fcddee](https://github.com/SocialGouv/egapro/commit/4fcddee61795cdc82b3643f79930f6be8b27d347))
+* update declaration PDF receipts ([#2045](https://github.com/SocialGouv/egapro/issues/2045)) ([80bfaab](https://github.com/SocialGouv/egapro/commit/80bfaab49d3d1d17de6d8ce521581a8131c0ddb4))
+* update footer links ([#2033](https://github.com/SocialGouv/egapro/issues/2033)) ([10e0232](https://github.com/SocialGouv/egapro/commit/10e0232df5db8e852eef7373a21091a22033aaff))
+
 ## [3.0.9](https://github.com/SocialGouv/egapro/compare/v3.0.8...v3.0.9) (2024-01-19)
 
 
