@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/SocialGouv/egapro/compare/v3.0.10...v3.1.0) (2024-01-22)
+
+
+### Features
+
+* open new declaration year ([#2050](https://github.com/SocialGouv/egapro/issues/2050)) ([e716082](https://github.com/SocialGouv/egapro/commit/e7160820adc6dafd62323c2ca42363b848bd23d8))
+
 ## [3.0.10](https://github.com/SocialGouv/egapro/compare/v3.0.9...v3.0.10) (2024-01-22)
 
 
