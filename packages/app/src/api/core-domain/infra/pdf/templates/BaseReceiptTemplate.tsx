@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   },
   sectionRowValue: {
     textAlign: "right",
+    maxWidth: "70%",
   },
 });
 
