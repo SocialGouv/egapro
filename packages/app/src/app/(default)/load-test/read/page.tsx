@@ -10,7 +10,7 @@ import {
   getAllDeclarationOpmcSirenAndYear,
   getAllDeclarationsBySiren,
   getAllRepresentationEquilibreeBySiren,
-} from "../mon-espace/actions";
+} from "../actions";
 import { IndexList } from "./IndexList";
 import { RepeqList } from "./RepeqList";
 

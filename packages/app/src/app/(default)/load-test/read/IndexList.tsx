@@ -9,7 +9,7 @@ import { Heading, Link } from "@design-system";
 import { isBefore, sub } from "date-fns";
 import { capitalize, upperCase } from "lodash";
 
-import { buildHelpersObjectifsMesures } from "../index-egapro/objectifs-mesures/[siren]/[year]/ObjectifsMesuresForm";
+import { buildHelpersObjectifsMesures } from "../../index-egapro/objectifs-mesures/[siren]/[year]/ObjectifsMesuresForm";
 
 //Note: For 2022, first year of OPMC, we consider that the duration to be frozen is 2 years, but for next years, it will be 1 year like isFrozenDeclaration.
 const OPMC_FROZEN_DURATION = { years: 2 };
