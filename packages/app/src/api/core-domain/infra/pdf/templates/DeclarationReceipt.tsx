@@ -1,6 +1,7 @@
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
+import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { NAF } from "@common/dict";
 import { formatDateToFr } from "@common/utils/date";
 import { isEqual } from "date-fns";
@@ -106,7 +107,8 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
                   ? declaration.remunerations.mode.getLabel()
                   : "",
             },
-            ...(declaration.remunerations.categories
+            ...(declaration.remunerations.categories &&
+            declaration.remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
               ? [
                   {
                     key: "Nombre de niveaux ou coefficients",
@@ -114,7 +116,8 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
                   },
                 ]
               : []),
-            ...(declaration.remunerations.cseConsultationDate
+            ...(declaration.remunerations.cseConsultationDate &&
+            declaration.remunerations.mode?.getValue() !== RemunerationsMode.Enum.CSP
               ? [
                   {
                     key: "Date de consultation du CSE",
