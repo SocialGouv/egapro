@@ -1,23 +1,16 @@
 import { entrepriseService } from "@api/core-domain/infra/services";
 import { declarationRepo } from "@api/core-domain/repo";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
-import { DeclarationSpecificationError } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { ValidationError } from "@common/shared-domain";
-import { type NextRouteHandler } from "@common/utils/next";
-import { NextResponse } from "next/server";
+import { type NextServerPageProps } from "@common/utils/next";
 
-// Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
-// export const revalidate = 86400; // 24h
-export const dynamic = "force-dynamic";
-// export const revalidate = 86_400; // 24h
-
-export const POST: NextRouteHandler = async (req: Request) => {
-  const body = await req.json();
-
-  if (!body) return NextResponse.json({ ok: false, error: "No body" });
-  if (body.key !== "egapro-load-test") return NextResponse.json({ ok: false, error: "unauthorized" });
-
+const LoadTestPage = async ({ searchParams }: NextServerPageProps<never, { key: string; siren: string }>) => {
+  try {
+    if (!searchParams || !searchParams.key) throw new Error("Missing search params");
+    if (searchParams.key !== "egapro-load-test") throw new Error("Invalid key");
+  } catch (e) {
+    throw new Error("Load test error");
+  }
   const declaration = {
     "declaration-existante": {
       status: "creation",
@@ -149,17 +142,10 @@ export const POST: NextRouteHandler = async (req: Request) => {
   try {
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
     await useCase.execute({ declaration });
-    return NextResponse.json({ ok: true });
   } catch (error: unknown) {
-    if (error instanceof DeclarationSpecificationError || error instanceof ValidationError) {
-      return NextResponse.json({
-        ok: false,
-        error: error.message ?? error.previousError,
-      });
-    }
-    return NextResponse.json({
-      ok: false,
-      error: "Une erreur est survenue, veuillez réessayer.",
-    });
+    return <p>erreur</p>;
   }
+  return <p>enregistré</p>;
 };
+
+export default LoadTestPage;
