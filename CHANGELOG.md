@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/SocialGouv/egapro/compare/v3.1.1...v3.1.2) (2024-01-23)
+
+
+### Bug Fixes
+
+* GetAllDeclarationsBySiren mapping ([#2054](https://github.com/SocialGouv/egapro/issues/2054)) ([2233301](https://github.com/SocialGouv/egapro/commit/22333016345f4f44787ca3fc935b6912bae51c5c))
+
 ## [3.1.1](https://github.com/SocialGouv/egapro/compare/v3.1.0...v3.1.1) (2024-01-23)
 
 
