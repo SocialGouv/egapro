@@ -1,3 +1,10 @@
+## [3.1.3](https://github.com/SocialGouv/egapro/compare/v3.1.2...v3.1.3) (2024-01-23)
+
+
+### Bug Fixes
+
+* increase perf by adding nginx caching ([#2053](https://github.com/SocialGouv/egapro/issues/2053)) ([8535c18](https://github.com/SocialGouv/egapro/commit/8535c1892470a35f5ef493e8cd3012c0c40bb502))
+
 ## [3.1.2](https://github.com/SocialGouv/egapro/compare/v3.1.1...v3.1.2) (2024-01-23)
 
 
