@@ -55,7 +55,7 @@ app:
 
 nginx:
   ~chart: app
-  ~needs: [build-ningx]
+  ~needs: [build-nginx]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
