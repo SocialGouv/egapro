@@ -63,12 +63,7 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     requestHeaders.set(key, value);
   });
 
-  return NextResponse.next({
-    headers: responseHeaders,
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return NextResponse.next();
 };
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
