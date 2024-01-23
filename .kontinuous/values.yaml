@@ -66,7 +66,19 @@ nginx:
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
-  containerPort: 80
+  containerPort: 8080
+  livenessProbe:
+    httpGet:
+      path: /live
+      port: 8080
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+  lifecycle:
+    preStop:
+      exec:
+        command: ["/pre-stop.sh"]
 
 api:
   ~chart: app
