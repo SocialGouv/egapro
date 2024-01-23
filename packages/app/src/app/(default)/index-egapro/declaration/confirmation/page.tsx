@@ -258,7 +258,7 @@ const ConfirmationPage = () => {
           href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-declaration&key=73366ddb13d498f4c77d01c2983bab48"
           target="_blank"
           rel="noreferrer"
-          className="hidden"
+          className="no-bg"
         >
           <ImgJDMA />
         </Link>
