@@ -247,78 +247,85 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     };
 
     // Indicators.
-    const salaryRaises = obj.salaryRaises;
-    if (salaryRaises) {
-      if (salaryRaises.notComputableReason) {
-        dto["augmentations"] = {
-          estCalculable: "non",
-          motifNonCalculabilité: salaryRaises.notComputableReason.getValue(),
-        };
-      } else {
-        dto["augmentations"] = {
-          estCalculable: "oui",
-          note: salaryRaises.score?.getValue() ?? 0,
-          résultat: salaryRaises.result?.getValue() ?? 0,
-          populationFavorable: toBinaryFavorablePopulation(salaryRaises.favorablePopulation!.getValue()),
-          catégories: {
-            [CSP.Enum.OUVRIERS]: salaryRaises.categories[0]?.getValue() || "",
-            [CSP.Enum.EMPLOYES]: salaryRaises.categories[1]?.getValue() || "",
-            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: salaryRaises.categories[2]?.getValue() || "",
-            [CSP.Enum.INGENIEURS_CADRES]: salaryRaises.categories[3]?.getValue() || "",
-          },
-        };
-      }
-    }
+    if (obj.company.range?.getValue() !== CompanyWorkforceRange.Enum.FROM_50_TO_250) {
+      const salaryRaises = obj.salaryRaises;
 
-    const promotions = obj.promotions;
-    if (promotions) {
-      if (promotions.notComputableReason) {
-        dto["promotions"] = {
-          estCalculable: "non",
-          motifNonCalculabilité: promotions.notComputableReason.getValue(),
-        };
-      } else {
-        dto["promotions"] = {
-          estCalculable: "oui",
-          note: promotions.score?.getValue() ?? 0,
-          résultat: promotions.result?.getValue() ?? 0,
-          populationFavorable: toBinaryFavorablePopulation(promotions.favorablePopulation!.getValue()),
-          catégories: {
-            [CSP.Enum.OUVRIERS]: promotions.categories[0]?.getValue() || "",
-            [CSP.Enum.EMPLOYES]: promotions.categories[1]?.getValue() || "",
-            [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: promotions.categories[2]?.getValue() || "",
-            [CSP.Enum.INGENIEURS_CADRES]: promotions.categories[3]?.getValue() || "",
-          },
-        };
+      if (salaryRaises) {
+        if (salaryRaises.notComputableReason) {
+          dto["augmentations"] = {
+            estCalculable: "non",
+            motifNonCalculabilité: salaryRaises.notComputableReason.getValue(),
+          };
+        } else {
+          dto["augmentations"] = {
+            estCalculable: "oui",
+            note: salaryRaises.score?.getValue() ?? 0,
+            résultat: salaryRaises.result?.getValue() ?? 0,
+            populationFavorable: toBinaryFavorablePopulation(salaryRaises.favorablePopulation!.getValue()),
+            catégories: {
+              [CSP.Enum.OUVRIERS]: salaryRaises.categories[0]?.getValue() || "",
+              [CSP.Enum.EMPLOYES]: salaryRaises.categories[1]?.getValue() || "",
+              [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: salaryRaises.categories[2]?.getValue() || "",
+              [CSP.Enum.INGENIEURS_CADRES]: salaryRaises.categories[3]?.getValue() || "",
+            },
+          };
+        }
       }
-    }
 
-    const salaryRaisesAndPromotions = obj.salaryRaisesAndPromotions;
-    if (salaryRaisesAndPromotions) {
-      if (salaryRaisesAndPromotions.notComputableReason) {
-        dto["augmentations-et-promotions"] = {
-          estCalculable: "non",
-          motifNonCalculabilité: salaryRaisesAndPromotions.notComputableReason.getValue(),
-        };
-      } else {
-        dto["augmentations-et-promotions"] = {
-          estCalculable: "oui",
-          note: salaryRaisesAndPromotions.score?.getValue() ?? 0,
-          noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue() ?? 0,
-          notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue() ?? 0,
-          populationFavorable: toBinaryFavorablePopulation(salaryRaisesAndPromotions.favorablePopulation!.getValue()),
-          résultat: salaryRaisesAndPromotions.result?.getValue() ?? 0,
-          résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue() ?? 0,
-        };
+      const promotions = obj.promotions;
+      if (promotions) {
+        if (promotions.notComputableReason) {
+          dto["promotions"] = {
+            estCalculable: "non",
+            motifNonCalculabilité: promotions.notComputableReason.getValue(),
+          };
+        } else {
+          dto["promotions"] = {
+            estCalculable: "oui",
+            note: promotions.score?.getValue() ?? 0,
+            résultat: promotions.result?.getValue() ?? 0,
+            populationFavorable: toBinaryFavorablePopulation(promotions.favorablePopulation!.getValue()),
+            catégories: {
+              [CSP.Enum.OUVRIERS]: promotions.categories[0]?.getValue() || "",
+              [CSP.Enum.EMPLOYES]: promotions.categories[1]?.getValue() || "",
+              [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: promotions.categories[2]?.getValue() || "",
+              [CSP.Enum.INGENIEURS_CADRES]: promotions.categories[3]?.getValue() || "",
+            },
+          };
+        }
+      }
+    } else {
+      const salaryRaisesAndPromotions = obj.salaryRaisesAndPromotions;
+      if (salaryRaisesAndPromotions) {
+        if (salaryRaisesAndPromotions.notComputableReason) {
+          dto["augmentations-et-promotions"] = {
+            estCalculable: "non",
+            motifNonCalculabilité: salaryRaisesAndPromotions.notComputableReason.getValue(),
+          };
+        } else {
+          dto["augmentations-et-promotions"] = {
+            estCalculable: "oui",
+            note: salaryRaisesAndPromotions.score?.getValue() ?? 0,
+            noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue() ?? 0,
+            notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue() ?? 0,
+            populationFavorable: salaryRaisesAndPromotions.favorablePopulation
+              ? toBinaryFavorablePopulation(salaryRaisesAndPromotions.favorablePopulation!.getValue())
+              : undefined,
+            résultat: salaryRaisesAndPromotions.result?.getValue() ?? 0,
+            résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue() ?? 0,
+          };
+        }
       }
     }
 
     const remunerations = obj.remunerations;
     if (remunerations) {
       dto["remunerations-resultat"] = {
-        note: remunerations.score?.getValue() ?? 0,
-        populationFavorable: toBinaryFavorablePopulation(remunerations.favorablePopulation!.getValue()),
-        résultat: remunerations.result?.getValue() ?? 0,
+        note: remunerations.score ? remunerations.score?.getValue() : 0,
+        populationFavorable: remunerations.favorablePopulation
+          ? toBinaryFavorablePopulation(remunerations.favorablePopulation!.getValue())
+          : undefined,
+        résultat: remunerations.result ? remunerations.result?.getValue() : 0,
       };
 
       if (remunerations.notComputableReason) {
