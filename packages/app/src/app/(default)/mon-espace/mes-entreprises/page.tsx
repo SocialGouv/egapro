@@ -1,10 +1,10 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
+import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import * as process from "process";
 
 import { getAllEmailsBySiren } from "../actions";
 import { SelectSiren } from "./SelectSiren";
@@ -24,7 +24,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <a
               target="_blank"
               href={`https://app${
-                process.env.EGAPRO_ENV === "prod" ? "" : "-test"
+                config.api.security.moncomptepro.appTest ? "-test" : ""
               }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
             >
               Connectez-vous sur Mon Compte Pro

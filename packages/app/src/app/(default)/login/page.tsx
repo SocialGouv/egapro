@@ -1,9 +1,8 @@
-import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { logger } from "@api/utils/pino";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer } from "@design-system";
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 
 import { GithubLogin } from "./GithubLogin";
@@ -36,8 +35,6 @@ const signinErrors: Record<string, string> = {
 
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
   const session = await getServerSession(authConfig);
-  const monCompteProHost = monCompteProProvider.issuer;
-
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
 
@@ -74,14 +71,6 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                 Le compte utilisé doit correspondre à celui de la personne à contacter par les services de l'inspection
                 du travail en cas de besoin. L'email associé sera celui sur lequel sera adressé l'accusé de réception en
                 fin de déclaration.
-                <br />
-                <br />
-                Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez vous assurer que votre
-                compte est{" "}
-                <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
-                  rattaché à votre entreprise
-                </Link>
-                .
               </>
             }
           />
