@@ -1,3 +1,13 @@
+## [3.1.1](https://github.com/SocialGouv/egapro/compare/v3.1.0...v3.1.1) (2024-01-23)
+
+
+### Bug Fixes
+
+* hide tooltip simu indic2-3 when form empty ([#2037](https://github.com/SocialGouv/egapro/issues/2037)) ([a76a6dd](https://github.com/SocialGouv/egapro/commit/a76a6dd4f68ea977737927a372f9253cb14b1400))
+* homepage links ([#2051](https://github.com/SocialGouv/egapro/issues/2051)) ([77981c0](https://github.com/SocialGouv/egapro/commit/77981c08c56850eee1b26093a7432a96a8e93e6b))
+* temporarily disable csp ([005b8b4](https://github.com/SocialGouv/egapro/commit/005b8b4b24f2703a6c299473957ef2305e5b9c89))
+* update CSP case in declaration PDF receipts ([4701376](https://github.com/SocialGouv/egapro/commit/47013769087f22fe5be3aaa2aa293297d342d320))
+
 # [3.1.0](https://github.com/SocialGouv/egapro/compare/v3.0.10...v3.1.0) (2024-01-22)
 
 
