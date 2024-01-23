@@ -67,6 +67,7 @@ nginx:
       nginx.ingress.kubernetes.io/configuration-snippet: *headers
   certSecretName: api-crt
   containerPort: 8080
+  probesPath: /live
   livenessProbe:
     httpGet:
       path: /live
