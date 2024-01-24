@@ -250,7 +250,7 @@ export const RecapSimu = () => {
                         text={`L'indicateur écart de taux ${
                           indicateur === 2 ? "d'augmentations" : "de promotions"
                         } est non calculable`}
-                        legend="Les catégories valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
+                        legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
                       />
                     );
                   }
