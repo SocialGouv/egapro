@@ -1,6 +1,7 @@
-import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { config } from "@common/config";
 import { Link } from "@design-system";
 import { getServerSession } from "next-auth";
 
@@ -19,7 +20,9 @@ export const metadata = {
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProHost = monCompteProProvider.issuer;
+  const monCompteProUrl = `https://app${
+    config.api.security.moncomptepro.appTest ? "-test" : ""
+  }.moncomptepro.beta.gouv.fr`;
 
   return (
     <>
@@ -37,7 +40,7 @@ const DeclarantPage = async () => {
             modifier le cas échéant, à l'exception de l'email.
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
-            <Link href={`${monCompteProHost}/personal-information`} target="_blank">
+            <Link href={`${monCompteProUrl}/personal-information`} target="_blank">
               votre profil MonComptePro
             </Link>
             .
