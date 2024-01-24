@@ -193,7 +193,14 @@ export const PromotionsForm = () => {
 
                 {/* Don't forget that résultat can be undefined, for some reasons. */}
                 {/* We must handle this case, because of shouldUnregister mode. */}
-                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType>
+                  label="Résultat final obtenu à l'indicateur en %"
+                  name="résultat"
+                  min={0}
+                  hintText={
+                    "(il s'agit de la valeur absolue de l’écart global de taux de promotions, arrondie à la première décimale.)"
+                  }
+                />
 
                 {résultat !== 0 && résultat !== "" && résultat != undefined && <PopulationFavorable />}
 

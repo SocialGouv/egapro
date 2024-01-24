@@ -91,7 +91,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
 
       <Input
         label="Email du déclarant"
-        hintText={isStaff ? "Modifiable en tant que staff" : "Saisi lors de l'authentification"}
+        hintText={isStaff ? "Modifiable en tant que staff" : "Saisi lors de la création de votre compte MonComptePro"}
         state={errors[emailKey] && "error"}
         stateRelatedMessage={errors[emailKey]?.message}
         nativeInputProps={{

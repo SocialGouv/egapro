@@ -6,6 +6,7 @@ import { type Path, useFormContext } from "react-hook-form";
 
 interface Props<FormType> {
   disabled?: boolean;
+  hintText?: ReactNode;
   label?: ReactNode;
   max?: number;
   min?: number;
@@ -32,6 +33,7 @@ export const PercentageInput = <FormType extends SimpleObject>({
   max,
   name: _name,
   disabled,
+  hintText,
 }: Props<FormType>) => {
   const {
     register,
@@ -46,6 +48,7 @@ export const PercentageInput = <FormType extends SimpleObject>({
       <Input
         label={label}
         iconId="ri-percent-line"
+        hintText={hintText}
         nativeInputProps={{
           type: "number",
           min,

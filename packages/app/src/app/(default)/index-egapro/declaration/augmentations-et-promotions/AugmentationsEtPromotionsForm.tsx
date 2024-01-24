@@ -187,12 +187,18 @@ export const AugmentationEtPromotionsForm = () => {
 
             {estCalculable === "oui" && (
               <>
-                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType>
+                  label="Résultat final obtenu à l'indicateur en %"
+                  name="résultat"
+                  hintText={"(il s'agit de l'écart absolu de taux d’augmentations, arrondi à la première décimale.)"}
+                  min={0}
+                />
 
                 <PercentageInput<FormType>
                   label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
                   name="résultatEquivalentSalarié"
                   min={0}
+                  hintText={"(il s'agit de l'écart en nombre équivalent de salariés, arrondi à la première décimale.)"}
                 />
 
                 {(résultat !== 0 || résultatEquivalentSalarié !== 0) && <PopulationFavorable />}
