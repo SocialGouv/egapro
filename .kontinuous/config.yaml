@@ -7,3 +7,4 @@ dependencies:
     import: SocialGouv/kontinuous/plugins/fabrique
     extends:
       - name: buildkit-service
+      - name: ovh

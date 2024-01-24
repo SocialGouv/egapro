@@ -30,6 +30,7 @@ app:
   containerPort: 3000
   ingress:
     enabled: false
+  instances: 2
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
@@ -41,6 +42,15 @@ app:
         name: "moncomptepro"
     - secretRef:
         name: github-oauth
+  autoscale:
+    enabled: true
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1G
+    limits:
+      cpu: 2
+      memory: 2G
   vars:
     POSTGRES_HOST: "$(PGHOST)"
     POSTGRES_DB: "$(PGDATABASE)"
@@ -54,6 +64,7 @@ app:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
 
 nginx:
+  instances: 2
   ~chart: app
   ~needs: [build-nginx]
   imagePackage: nginx
