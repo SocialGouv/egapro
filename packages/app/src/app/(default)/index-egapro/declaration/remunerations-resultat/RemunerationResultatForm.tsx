@@ -102,7 +102,14 @@ export const RemunerationResultatForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
-            <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+            <PercentageInput<FormType>
+              label="Résultat final obtenu à l'indicateur en %"
+              name="résultat"
+              min={0}
+              hintText={
+                "(il s'agit de la valeur absolue de l’écart global de rémunération, arrondie à la première décimale)"
+              }
+            />
 
             {résultat !== 0 && résultat !== "" && <PopulationFavorable />}
 

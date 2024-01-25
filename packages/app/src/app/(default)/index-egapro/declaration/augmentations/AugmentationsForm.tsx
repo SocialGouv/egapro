@@ -187,7 +187,14 @@ export const AugmentationsForm = () => {
 
                 <br />
 
-                <PercentageInput<FormType> label="Résultat final obtenu à l'indicateur en %" name="résultat" min={0} />
+                <PercentageInput<FormType>
+                  label="Résultat final obtenu à l'indicateur en %"
+                  name="résultat"
+                  min={0}
+                  hintText={
+                    "(il s'agit de la valeur absolue de l’écart global de taux d’augmentations, arrondie à la première décimale.)"
+                  }
+                />
 
                 {/* Don't forget that résultat can be undefined, for some reasons. */}
                 {/* We must handle this case, because of shouldUnregister mode. */}
