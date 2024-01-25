@@ -42,7 +42,7 @@ const referenteDownloadLink = {
   text: "Télécharger la liste des référents Egapro - Dreets",
   linkProps: {
     title: "Télécharger la liste des référents au format xlsx",
-    href: "https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx",
+    href: "https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle-9-2.xlsx",
     target: "_blank",
     rel: "noreferrer",
   },
