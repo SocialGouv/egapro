@@ -155,7 +155,7 @@ export const authConfig: AuthOptions = {
             siren: orga.siret.substring(0, 9),
             label: orga.label,
           })) ?? [];
-        token.user.staff = false;
+        token.user.staff = config.api.staff.includes(profile?.email ?? "");
         token.user.firstname = profile?.given_name ?? void 0;
         token.user.lastname = profile?.family_name ?? void 0;
         token.user.phoneNumber = profile?.phone_number ?? void 0;
