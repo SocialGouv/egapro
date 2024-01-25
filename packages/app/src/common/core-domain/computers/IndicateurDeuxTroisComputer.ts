@@ -66,7 +66,8 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
     const result = Math.round(Math.abs(rawGap * 100) * 10) / 10;
 
     let ifadvantage: AdditionalOutput["ifadvantage"] = "equality";
-    if (equivalentEmployeeCountGapRaw >= 0.0005 && this.input.menCount >= this.input.womenCount) {
+    if (result === 0) ifadvantage = "equality";
+    else if (equivalentEmployeeCountGapRaw >= 0.0005 && this.input.menCount >= this.input.womenCount) {
       ifadvantage = "men-women";
     } else if (equivalentEmployeeCountGapRaw >= 0.0005 && this.input.menCount < this.input.womenCount) {
       ifadvantage = "men-men";
