@@ -274,6 +274,77 @@ Les services de l’administration du travail.
     ),
 });
 
+export const opmc_receipt = (): MailTemplate => ({
+  subject:
+    "Egapro - Déclaration des objectifs de progression et mesures de correction de l’index égalité professionnelle femmes-hommes",
+  text: `Madame, Monsieur,
+
+Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression et mesures de correction. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+
+Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
+
+Veuillez agréer, Madame, Monsieur, nos salutations distinguées,
+
+Les services de l’administration du travail.
+  `,
+  html:
+    "<!doctype html>" +
+    renderToStaticMarkup(
+      <html>
+        <body>
+          <p>Madame, Monsieur,</p>
+
+          <p>
+            Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de
+            progression et mesures de correction. L’administration du travail accuse réception par le présent message de
+            votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+          </p>
+          <p>
+            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
+            sein de votre DREETS en répondant à ce message.
+          </p>
+          <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
+          <p>Les services de l’administration du travail.</p>
+        </body>
+      </html>,
+    ),
+});
+
+export const op_receipt = (): MailTemplate => ({
+  subject: "Egapro - Déclaration des objectifs de progression de l’index égalité professionnelle femmes-homme",
+  text: `Madame, Monsieur,
+
+Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+
+Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
+
+Veuillez agréer, Madame, Monsieur, nos salutations distinguées,
+
+Les services de l’administration du travail.
+  `,
+  html:
+    "<!doctype html>" +
+    renderToStaticMarkup(
+      <html>
+        <body>
+          <p>Madame, Monsieur,</p>
+
+          <p>
+            Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de
+            progression. L’administration du travail accuse réception par le présent message de votre due transmission.
+            Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+          </p>
+          <p>
+            Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
+            sein de votre DREETS en répondant à ce message.
+          </p>
+          <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
+          <p>Les services de l’administration du travail.</p>
+        </body>
+      </html>,
+    ),
+});
+
 export const balancedRepresentation_receipt = (url: string, year: number): MailTemplate => ({
   subject: "Egapro - Déclaration des écarts éventuels de représentation femmes‑hommes dans les postes de direction",
   text: `Madame, Monsieur,

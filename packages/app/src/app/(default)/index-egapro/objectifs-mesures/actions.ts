@@ -4,7 +4,7 @@ import { authConfig } from "@api/core-domain/infra/auth/config";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { declarationRepo } from "@api/core-domain/repo";
 import { GetDeclarationOpmcBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationOpmcBySirenAndYear";
-import { SendDeclarationReceipt } from "@api/core-domain/useCases/SendDeclarationReceipt";
+import { SendOpmcReceipt } from "@api/core-domain/useCases/SendOpmcReceipt";
 import { UpdateDeclarationWithOpMc } from "@api/core-domain/useCases/UpdateDeclarationWithOpMc";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
@@ -56,7 +56,7 @@ export async function updateDeclarationOpmc({
     const useCase = new UpdateDeclarationWithOpMc(declarationRepo);
     await useCase.execute({ opmc, siren, year });
 
-    const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+    const receiptUseCase = new SendOpmcReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
     assert(siren, "Siren is required");
     assert(year, "Year is required");
