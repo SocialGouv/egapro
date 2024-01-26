@@ -1,3 +1,17 @@
+## [3.1.4](https://github.com/SocialGouv/egapro/compare/v3.1.3...v3.1.4) (2024-01-26)
+
+
+### Bug Fixes
+
+* add hint text in declaration input fields ([#2061](https://github.com/SocialGouv/egapro/issues/2061)) ([30cd78c](https://github.com/SocialGouv/egapro/commit/30cd78c68b688abe50ebef96681c336582552c6d))
+* add staff roles for prod ([#2065](https://github.com/SocialGouv/egapro/issues/2065)) ([fc18628](https://github.com/SocialGouv/egapro/commit/fc18628f4f5a9156dd2bba8f106abd3b05d21b65))
+* add survey button on index declaration ([#2056](https://github.com/SocialGouv/egapro/issues/2056)) ([167ffd6](https://github.com/SocialGouv/egapro/commit/167ffd64fc58e245076d125973c6ce8f51c4ddc6))
+* equality message on indicator2and3 ([#2066](https://github.com/SocialGouv/egapro/issues/2066)) ([8bd8e25](https://github.com/SocialGouv/egapro/commit/8bd8e25630c51a519b6e2ca40d080f436136ba75))
+* udpate referents footer link ([#2062](https://github.com/SocialGouv/egapro/issues/2062)) ([db5d638](https://github.com/SocialGouv/egapro/commit/db5d638c9c50f53c54e622c0a7da3ad3c84c609f))
+* update MCP link based on env ([#2057](https://github.com/SocialGouv/egapro/issues/2057)) ([8c71393](https://github.com/SocialGouv/egapro/commit/8c713935f1185e92472c7901ec08626b539a31ee))
+* update opmc receipt email ([#2064](https://github.com/SocialGouv/egapro/issues/2064)) ([c0968c6](https://github.com/SocialGouv/egapro/commit/c0968c665d443933167c2a75646e64d37da3382d))
+* wording simu recap indicator 2 & 3 ([#2063](https://github.com/SocialGouv/egapro/issues/2063)) ([63d3b84](https://github.com/SocialGouv/egapro/commit/63d3b84f7df5a20397dbfd16eac3aa4790e6d9f6))
+
 ## [3.1.3](https://github.com/SocialGouv/egapro/compare/v3.1.2...v3.1.3) (2024-01-23)
 
 
