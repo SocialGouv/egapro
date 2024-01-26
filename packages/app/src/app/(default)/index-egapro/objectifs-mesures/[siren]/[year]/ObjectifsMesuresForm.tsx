@@ -131,11 +131,15 @@ const RowProgression = ({
   );
 };
 
-function buildWordings(index: number | undefined, publicationSurSiteInternet: boolean) {
+function buildWordings(index: number | undefined, publicationSurSiteInternet: boolean, declarationYear: number) {
   const title =
     index !== undefined && index < 75
-      ? "Déclaration des objectifs de progression et des mesures de correction"
-      : "Déclaration des objectifs de progression";
+      ? `Déclaration des objectifs de progression et des mesures de correction pour votre index ${
+          declarationYear + 1
+        } au titre des données ${declarationYear}`
+      : `Déclaration des objectifs de progression pour votre index ${
+          declarationYear + 1
+        } au titre des données ${declarationYear}`;
 
   const warningText =
     index !== undefined && index < 75
@@ -149,8 +153,8 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
 
   const finalMessage =
     index !== undefined && index < 75
-      ? "Vous venez de transmettre aux services du ministre chargé du travail vos objectifs de progression et mesures de correction"
-      : "Vous venez de transmettre aux services du ministre chargé du travail vos objectifs de progression";
+      ? "Vous avez transmis aux services du ministre chargé du travail les informations relatives aux objectifs de progression et mesures de correction."
+      : "Vous avez transmis aux services du ministre chargé du travail les informations relatives aux objectifs de progression.";
 
   const siteWebLabel =
     index !== undefined && index < 75
@@ -305,7 +309,7 @@ export function buildHelpersObjectifsMesures(declaration?: DeclarationOpmcDTO) {
                   val.modalitesPublicationObjectifsMesures.trim().length
                 : val.modalitesPublicationObjectifsMesures === undefined,
           {
-            message: required_error,
+            message: "La description des modalités de communication est obligatoire",
             path: ["modalitesPublicationObjectifsMesures"],
           },
         )
@@ -380,6 +384,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
   const { title, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
     index,
     publicationSurSiteInternet,
+    declaration?.commencer?.annéeIndicateurs ? declaration?.commencer?.annéeIndicateurs : new Date().getFullYear(),
   );
 
   const methods = useForm<UpdateOpMcDTO>({
@@ -415,7 +420,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
     const result = await updateDeclarationOpmc({ opmc, siren, year });
 
     if (result.ok) {
-      setMessage({ text: finalMessage, severity: "success" });
+      setMessage({ text: finalMessage, severity: "success", title: "Votre déclaration a été validée et transmise" });
     } else {
       setMessage({ text: result.error || "Erreur lors de la sauvegarde des informations", severity: "error" });
     }
@@ -441,6 +446,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
             <p className={fr.cx("fr-mt-4w", "fr-text--xs")}>{legalText}</p>
 
             <>
+              <Heading as="h3" text="Objectifs de progression" className={fr.cx("fr-mt-6w")} />
               <p className={fr.cx("fr-text--xs")}>
                 Conformément à la loi n° 2020-1721 du 29 décembre 2020 de finances pour 2021 et aux articles L. 1142-9-1
                 et D. 1142-6-1 du code du travail, indiquer les objectifs de progression fixés pour chaque indicateur
@@ -617,11 +623,11 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
         <BackNextButtonsGroup
           className={fr.cx("fr-my-6w")}
           backProps={{
-            onClick: () => router.push("/"),
+            onClick: () => router.push("/mon-espace/mes-declarations"),
           }}
           backIcon={false}
-          backLabel="Annuler"
-          nextLabel="Enregistrer"
+          backLabel="Retour"
+          nextLabel="Valider et transmettre les informations"
           nextDisabled={!isValid || isReadonly}
           nextIcon={false}
         />
