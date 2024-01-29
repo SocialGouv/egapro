@@ -1,3 +1,10 @@
+## [3.1.5](https://github.com/SocialGouv/egapro/compare/v3.1.4...v3.1.5) (2024-01-29)
+
+
+### Bug Fixes
+
+* MCP link ([#2074](https://github.com/SocialGouv/egapro/issues/2074)) ([10b983e](https://github.com/SocialGouv/egapro/commit/10b983e7535afdbac25c5112ec97a68eef823005))
+
 ## [3.1.4](https://github.com/SocialGouv/egapro/compare/v3.1.3...v3.1.4) (2024-01-26)
 
 
