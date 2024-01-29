@@ -14,14 +14,14 @@ ENV EGAPRO_ENV $EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL $NEXTAUTH_URL
 
-WORKDIR /app/packages/app
+WORKDIR /app
 
 COPY yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
 RUN yarn fetch --immutable
 
 
-COPY packages/app/ ./
+COPY packages/app/ ./packages/app/
 
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 

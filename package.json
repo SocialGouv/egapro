@@ -17,7 +17,7 @@
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
     "egapro:local": "packages/api/egapro/bin/egapro",
-    "lint": "yarn workspaces -A run lint",
+    "lint": "yarn workspaces foreach -A run lint",
     "fresh-install": "scripts/fresh-install",
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
