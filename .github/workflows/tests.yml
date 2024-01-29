@@ -30,7 +30,7 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
-          yarn install --frozen-lockfile --force --non-interactive
+          yarn --immutable
           yarn setup-python
 
       - name: Up for tests API
