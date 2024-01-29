@@ -6,14 +6,14 @@ WORKDIR /app
 # BUILD ENVIRONMENTS
 FROM node as builder
 
-COPY packages/simulateur/package.json yarn.lock ./
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+RUN yarn fetch workspaces focus simulateur
 
-RUN yarn --frozen-lockfile
-
-COPY packages/simulateur/public ./public
-COPY packages/simulateur/tsconfig.json ./
-COPY packages/simulateur/.eslintrc.js ./
-COPY packages/simulateur/src ./src
+COPY packages/simulateur/public ./packages/simulateur/public
+COPY packages/simulateur/tsconfig.json ./packages/simulateur/
+COPY packages/simulateur/.eslintrc.js ./packages/simulateur/
+COPY packages/simulateur/src ./packages/simulateur/src
 
 ARG REACT_APP_EGAPRO_API_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/api
 ENV REACT_APP_EGAPRO_API_URL=$REACT_APP_EGAPRO_API_URL
@@ -31,9 +31,9 @@ ARG PUBLIC_URL
 ENV PUBLIC_URL=${PUBLIC_URL}
 
 ENV NODE_ENV=production
-RUN yarn build && yarn --frozen-lockfile --production
+RUN yarn workspace simulateur build
 
 # SERVER
 FROM ghcr.io/socialgouv/docker/nginx4spa:7.1.0
 
-COPY --from=builder --chown=nginx:nginx /app/build /usr/share/nginx/html
+COPY --from=builder --chown=nginx:nginx /app/packages/simulateur/build /usr/share/nginx/html
