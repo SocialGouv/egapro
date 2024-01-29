@@ -5358,9 +5358,9 @@ hyphen@^1.6.4:
   integrity sha512-4MsN8EkSFRaj8w/ZT2Xt7Lr6obCJD3j4GhrIQsB9H6KgjsyiQAMxnFR6FHAeO0W7Sj6EPIhcouX8l/zodpMVHw==
 
 i18next@^23.5.1:
-  version "23.7.14"
-  resolved "https://registry.yarnpkg.com/i18next/-/i18next-23.7.14.tgz#521aae2837d9b3cade98907bb94a2fedc038c7ca"
-  integrity sha512-URAhZ3zvqQOIiKUDUyv/f5sCSS0+QnFaEPS0qGSTea0p4tQ1kgddeR3/dUZDoyoqf3zSRQCPZAgLs/+LFKj8yw==
+  version "23.8.0"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-23.8.0.tgz#87e1d258eac2b0a774ec583b498342abc23ad402"
+  integrity sha512-1H+39doU9dQZrRprpnZ2aZetbX9I1N3bM/YGHN/ZkMJ//wJqrxDEqgI5mmSsh/rglsFBiNxI6UtFZfUO2A6XbA==
   dependencies:
     "@babel/runtime" "^7.23.2"
 
