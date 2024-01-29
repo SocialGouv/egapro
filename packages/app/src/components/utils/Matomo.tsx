@@ -1,20 +1,20 @@
 "use client";
 
-import { config } from "@common/config";
+import { type config } from "@common/config";
 import { init, push } from "@socialgouv/matomo-next";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useConsent } from "../../app/consentManagement";
 
-export type MatomoProps = Pick<typeof config, "env"> & { nonce?: string };
+export type MatomoProps = Pick<typeof config, "env"> & Pick<typeof config, "matomo"> & { nonce?: string };
 
 /**
  * Handle Matomo init and consent.
  *
  * Uses `useSearchParams()` internally, must be Suspense-d in server component.
  */
-export const Matomo = ({ env, nonce }: MatomoProps) => {
+export const Matomo = ({ env, nonce, matomo }: MatomoProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { finalityConsent } = useConsent();
@@ -29,7 +29,7 @@ export const Matomo = ({ env, nonce }: MatomoProps) => {
 
     if (!inited) {
       init({
-        ...config.matomo,
+        ...matomo,
         nonce,
         onInitialization: () => {
           push(["optUserOut"]);
@@ -51,7 +51,7 @@ export const Matomo = ({ env, nonce }: MatomoProps) => {
       push(["forgetCookieConsentGiven"]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- don't listen on inited
-  }, [env, matomoConsent]);
+  }, [env, matomoConsent, matomo]);
 
   /* The @socialgouv/matomo-next does not work with next 13 */
   useEffect(() => {

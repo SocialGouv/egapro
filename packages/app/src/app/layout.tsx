@@ -67,7 +67,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
         <meta property="csp-nonce" content={nonce} />
 
         <Suspense>
-          <Matomo env={config.env} nonce={nonce} />
+          <Matomo env={config.env} nonce={nonce} matomo={config.matomo} />
         </Suspense>
       </head>
       <body>
