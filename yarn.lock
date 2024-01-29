@@ -10489,9 +10489,9 @@ yocto-queue@^1.0.0:
   integrity sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==
 
 zod-i18n-map@^2.19.0:
-  version "2.23.0"
-  resolved "https://registry.yarnpkg.com/zod-i18n-map/-/zod-i18n-map-2.23.0.tgz#8fb2e913b2342a3c8ba15a7ff490aa1b8e637cbc"
-  integrity sha512-I1SbeCnNPvx9tlbuiyas6KhiTDH27h5pTdJ3D9DDmzPMnJNONcEJ9utYjRhgLayL44PPpbWi+oH+KI7oBfYYzQ==
+  version "2.26.0"
+  resolved "https://registry.yarnpkg.com/zod-i18n-map/-/zod-i18n-map-2.26.0.tgz#4bb698dfec12bd38f5a3465f99546e73359a5b2f"
+  integrity sha512-/aAMoPM8vUDKPBM5ci5HbIXeZYDUAlMt36f7Zn0J+V5bY7guOMfzJE8CHmZnSon8wXHceZQ8ajEVEQNrcMKVpw==
 
 zod@^3.21.4:
   version "3.22.4"
