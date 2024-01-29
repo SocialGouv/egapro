@@ -18,15 +18,14 @@ WORKDIR /app
 
 COPY yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
-RUN yarn fetch --immutable
-
+RUN yarn fetch workspaces focus app
 
 COPY packages/app/ ./packages/app/
 
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 
-RUN yarn build
-RUN yarn workspaces focus --production && yarn cache clean
+RUN yarn workspace app build
+RUN yarn workspaces focus app --production && yarn cache clean
 
 # Runner
 FROM node:$NODE_VERSION AS runner
