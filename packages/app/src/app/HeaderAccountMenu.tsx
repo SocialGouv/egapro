@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { config } from "@common/config";
 import { type Session } from "next-auth";
 
 import style from "./root.module.scss";
@@ -46,9 +45,7 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
               <li>
                 <a
                   className="fr-nav__link"
-                  href={`https://app${
-                    config.api.security.moncomptepro.appTest ? "-test" : ""
-                  }.moncomptepro.beta.gouv.fr`}
+                  href={`https://app.moncomptepro.beta.gouv.fr`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
