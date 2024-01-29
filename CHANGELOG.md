@@ -1,3 +1,12 @@
+## [3.1.6](https://github.com/SocialGouv/egapro/compare/v3.1.5...v3.1.6) (2024-01-29)
+
+
+### Bug Fixes
+
+* add phone number from MCP in declarant form ([#2068](https://github.com/SocialGouv/egapro/issues/2068)) ([ee7d513](https://github.com/SocialGouv/egapro/commit/ee7d513969e1ef8a741718d8e73f0a0dd3bd9a4f))
+* matomo ([#2076](https://github.com/SocialGouv/egapro/issues/2076)) ([3ad606f](https://github.com/SocialGouv/egapro/commit/3ad606fb9ee6eb90f01b32b02a2f46e5c9563c59))
+* wording on OPMC declaration ([#2069](https://github.com/SocialGouv/egapro/issues/2069)) ([3bb1c05](https://github.com/SocialGouv/egapro/commit/3bb1c057334abfb967f11c9c53b8b4acbd390a7e))
+
 ## [3.1.5](https://github.com/SocialGouv/egapro/compare/v3.1.4...v3.1.5) (2024-01-29)
 
 
