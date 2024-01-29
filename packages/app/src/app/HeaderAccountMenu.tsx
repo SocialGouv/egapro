@@ -4,7 +4,11 @@ import { type Session } from "next-auth";
 
 import style from "./root.module.scss";
 
-export const HeaderAccountMenu = (props: { session: { data: Session }; staff: boolean }) => {
+export const HeaderAccountMenu = (props: {
+  isMonCompteProTest: boolean;
+  session: { data: Session };
+  staff: boolean;
+}) => {
   const staffLinkText = props.staff ? "Les" : "Mes";
   return (
     <nav className="fr-nav fr-pr-4v">
@@ -45,7 +49,7 @@ export const HeaderAccountMenu = (props: { session: { data: Session }; staff: bo
               <li>
                 <a
                   className="fr-nav__link"
-                  href={`https://app.moncomptepro.beta.gouv.fr`}
+                  href={`https://app${props.isMonCompteProTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

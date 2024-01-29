@@ -57,7 +57,7 @@ export const config = {
       moncomptepro: {
         clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
-        appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, true),
+        appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, false),
       },
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
