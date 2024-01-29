@@ -16,16 +16,17 @@ ENV NEXTAUTH_URL $NEXTAUTH_URL
 
 WORKDIR /app/packages/app
 
-COPY packages/app/package.json yarn.lock ./
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+RUN yarn fetch --immutable
 
-RUN yarn install --frozen-lockfile
 
 COPY packages/app/ ./
 
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 
-RUN yarn build && \
-  yarn install --production
+RUN yarn build
+RUN yarn workspaces focus --production && yarn cache clean
 
 # Runner
 FROM node:$NODE_VERSION AS runner

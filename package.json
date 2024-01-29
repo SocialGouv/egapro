@@ -32,5 +32,6 @@
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
     "semantic-release": "^19"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }

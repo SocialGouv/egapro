@@ -3,6 +3,15 @@
 **/node_modules
 **/.gitignore
 
+.git
+.github
+.kontinuous
+.socialgouv.yaml
+.releaserc.yml
+*.md
+LICENSE
+node_modules
+
 /packages/api/__pycache__
 /packages/api/*.egg-info
 /packages/api/*.db
