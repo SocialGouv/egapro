@@ -48,7 +48,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
       nom: formData[stepName]?.nom || user?.lastname,
       prénom: formData[stepName]?.prénom || user?.firstname,
       email: formData[stepName]?.email || user?.email,
-      téléphone: formData[stepName]?.téléphone || "",
+      téléphone: formData[stepName]?.téléphone || user?.phoneNumber,
       accordRgpd: true,
     },
   });

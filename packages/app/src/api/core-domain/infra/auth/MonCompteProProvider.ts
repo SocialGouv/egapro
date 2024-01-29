@@ -38,7 +38,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
     allowDangerousEmailAccountLinking: true,
     authorization: {
       params: {
-        scope: "openid email profile organizations",
+        scope: "openid email profile organizations phone",
       },
     },
     checks: ["pkce", "state"],
@@ -58,6 +58,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
         id: profile.sub,
         email: profile.email,
         name: profile.given_name,
+        phone_number: profile.phone_number,
       };
     },
     ...options,
