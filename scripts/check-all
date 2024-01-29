@@ -2,8 +2,8 @@
 
 set -e
 
-yarn workspaces run lint
-yarn workspaces run build --no-lint
+yarn workspaces -A run lint
+yarn workspaces -A run build --no-lint
 
 # Tests API
 yarn test:api
