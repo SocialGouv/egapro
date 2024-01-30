@@ -2,11 +2,12 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurDeuxTroisComputer } from "@common/core-domain/computers/IndicateurDeuxTroisComputer";
 import { IndicateurUnComputer } from "@common/core-domain/computers/IndicateurUnComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodNumberOrEmptyString } from "@common/utils/form";
+import { setValueAsFloatOrEmptyString, zodNumberOrEmptyString } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { MotifNC } from "@components/RHF/MotifNC";
@@ -21,7 +22,7 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { type FieldErrors, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { MANDATORY_FAVORABLE_POPULATION, MANDATORY_RESULT, NOT_BELOW_0 } from "../../../messages";
@@ -93,6 +94,7 @@ const formSchema = zodFr
   });
 
 type FormType = z.infer<typeof formSchema>;
+type FormTypeWhenCalculable = Extract<FormType, { estCalculable: "oui" }>;
 
 const stepName: FunnelKey = "augmentations-et-promotions";
 
@@ -112,7 +114,7 @@ export const AugmentationEtPromotionsForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors },
     setValue,
     getValues,
     unregister,
@@ -126,6 +128,7 @@ export const AugmentationEtPromotionsForm = () => {
   const notePourcentage = watch("notePourcentage");
   const populationFavorable = watch("populationFavorable");
   const noteNombreSalaries = watch("noteNombreSalaries");
+  const errorsWhenCalculable = errors as FieldErrors<FormTypeWhenCalculable>;
 
   const estUnRattrapage =
     formData["remunerations-resultat"]?.populationFavorable &&
@@ -194,11 +197,27 @@ export const AugmentationEtPromotionsForm = () => {
                   min={0}
                 />
 
-                <PercentageInput<FormType>
+                <Input
+                  nativeInputProps={{
+                    type: "number",
+                    min: 0,
+                    step: 0.1,
+                    defaultValue: "",
+                    ...register("résultatEquivalentSalarié", {
+                      setValueAs: setValueAsFloatOrEmptyString,
+                    }),
+                    onBlur: e => {
+                      // Round number to 1 decimal.
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        setValue("résultatEquivalentSalarié", Math.round(value * 10) / 10, { shouldValidate: true });
+                      }
+                    },
+                  }}
                   label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
-                  name="résultatEquivalentSalarié"
-                  min={0}
                   hintText={"(il s'agit de l'écart en nombre équivalent de salariés, arrondi à la première décimale.)"}
+                  state={errorsWhenCalculable["résultatEquivalentSalarié"] && "error"}
+                  stateRelatedMessage={errorsWhenCalculable["résultatEquivalentSalarié"]?.message || ""}
                 />
 
                 {(résultat !== 0 || résultatEquivalentSalarié !== 0) && <PopulationFavorable />}
