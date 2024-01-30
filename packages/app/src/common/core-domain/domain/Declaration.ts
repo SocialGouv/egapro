@@ -84,6 +84,9 @@ export class Declaration extends JsonAggregateRoot<DeclarationProps, Declaration
     this.props.modifiedAt = new Date(modifiedAt);
   }
 
+  public deleteCorrectiveMeasures(): void {
+    this.props.correctiveMeasures = undefined;
+  }
   public setRemunerationsScore(score: PositiveInteger) {
     this.props.remunerations?.setScore(score);
   }
