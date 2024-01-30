@@ -297,7 +297,9 @@ export class SaveDeclaration implements UseCase<Input, void> {
       }
 
       const specification = new DeclarationSpecification();
-
+      if (found && declaration && declaration.index && declaration.index?.getValue() >= 75) {
+        declaration.deleteCorrectiveMeasures();
+      }
       if (specification.isSatisfiedBy(declaration)) {
         await this.declarationRepo.saveWithIndex(declaration);
       } else {
