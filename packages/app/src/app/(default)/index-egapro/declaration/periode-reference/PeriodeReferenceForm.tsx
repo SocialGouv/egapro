@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { zodDateSchema, zodPositiveIntegerSchema } from "@common/utils/form";
+import { zodDateSchema, zodPositiveOrZeroIntegerSchema } from "@common/utils/form";
 import { zodFr } from "@common/utils/zod";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -30,7 +30,7 @@ const formSchema = zodFr
     périodeSuffisante: z.literal("oui"),
     annéeIndicateurs: z.number(),
     finPériodeRéférence: zodDateSchema,
-    effectifTotal: zodPositiveIntegerSchema,
+    effectifTotal: zodPositiveOrZeroIntegerSchema,
   })
   .superRefine(({ annéeIndicateurs, finPériodeRéférence }, ctx) => {
     if (getYear(new Date(finPériodeRéférence)) !== annéeIndicateurs) {
