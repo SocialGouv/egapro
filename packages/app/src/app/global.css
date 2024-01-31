@@ -127,3 +127,31 @@
     background-color: var(--background-alt-grey);
 }
 /* === */
+
+/* stepper (dsfr implementation stops at 8) */
+.fr-stepper__steps[data-fr-steps="13"] {
+    --steps: 13;
+    --step-width: calc(100% / 13);
+}
+
+.fr-stepper__steps[data-fr-current-step="9"] {
+    --current-step: 9;
+}
+
+.fr-stepper__steps[data-fr-current-step="10"] {
+    --current-step: 10;
+}
+
+.fr-stepper__steps[data-fr-current-step="11"] {
+    --current-step: 11;
+}
+
+.fr-stepper__steps[data-fr-current-step="12"] {
+    --current-step: 12;
+}
+
+.fr-stepper__steps[data-fr-current-step="13"] {
+    --current-step: 13;
+}
+
+/* === */
