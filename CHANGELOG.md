@@ -1,3 +1,12 @@
+## [3.1.7](https://github.com/SocialGouv/egapro/compare/v3.1.6...v3.1.7) (2024-01-31)
+
+
+### Bug Fixes
+
+* allow 0 in workforce count ([#2080](https://github.com/SocialGouv/egapro/issues/2080)) ([c362e8e](https://github.com/SocialGouv/egapro/commit/c362e8ecad69554d86c7050f064781967311a1e2))
+* change input field type in raises rate form ([#2083](https://github.com/SocialGouv/egapro/issues/2083)) ([594eed8](https://github.com/SocialGouv/egapro/commit/594eed8c2f6939378c2b24aa1157703c0661e50c))
+* corrective measure when edit declaration ([#2081](https://github.com/SocialGouv/egapro/issues/2081)) ([9da88a8](https://github.com/SocialGouv/egapro/commit/9da88a86653c578b33b59c28a2d9279b49b0850e))
+
 ## [3.1.6](https://github.com/SocialGouv/egapro/compare/v3.1.5...v3.1.6) (2024-01-29)
 
 
