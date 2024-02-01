@@ -118,7 +118,7 @@ export const IndexList = ({
 }) => {
   const headers = [
     "SIREN",
-    "ANNÉE INDICATEUR",
+    "ANNÉE INDICATEURS",
     "STRUCTURE",
     "TRANCHE D'EFFECTIF",
     "DATE DE DÉCLARATION",

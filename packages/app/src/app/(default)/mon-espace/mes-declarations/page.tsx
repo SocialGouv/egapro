@@ -74,6 +74,8 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
   if (selectedSiren || sirenList.length > 0) {
     declarations = await getAllDeclarationsBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
     repEq = await getAllRepresentationEquilibreeBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
+    declarations.sort((a, b) => (b.commencer?.annéeIndicateurs || 0) - (a.commencer?.annéeIndicateurs || 0));
+    repEq.sort((a, b) => (b.year || 0) - (a.year || 0));
     for (const siren of sirenList) {
       const result = await getCompany(siren);
       if (result.ok) {
