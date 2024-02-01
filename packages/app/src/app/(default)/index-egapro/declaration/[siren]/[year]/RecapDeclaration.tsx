@@ -117,10 +117,11 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                   .
                 </p>
                 <p>
-                  {déclaration["periode-reference"].effectifTotal && (
+                  {déclaration["periode-reference"].effectifTotal >= 0 && (
                     <>
-                      <strong>{déclaration["periode-reference"].effectifTotal}</strong> salariés pris en compte pour le
-                      calcul des indicateurs sur la période de référence (en effectif physique)
+                      <strong>{déclaration["periode-reference"].effectifTotal}</strong> salarié
+                      {déclaration["periode-reference"].effectifTotal > 1 ? "s" : ""} pris en compte pour le calcul des
+                      indicateurs sur la période de référence (en effectif physique)
                     </>
                   )}
                 </p>
