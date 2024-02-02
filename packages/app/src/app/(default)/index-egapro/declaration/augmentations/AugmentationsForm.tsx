@@ -15,6 +15,7 @@ import { PercentageInput } from "@components/RHF/PercentageInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { getModifiedFormValues } from "@components/utils/getModifiedFormValues";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -112,7 +113,7 @@ export const AugmentationsForm = () => {
 
   const {
     handleSubmit,
-    formState: { isValid, errors: _errors },
+    formState: { isValid, errors: _errors, dirtyFields },
     setValue,
     getValues,
     watch,
@@ -143,7 +144,12 @@ export const AugmentationsForm = () => {
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
-      draft[stepName] = data as DeclarationDTO[typeof stepName];
+      // Prevent stale data mixing with new data
+      if (data.estCalculable !== formData[stepName]?.estCalculable) {
+        draft[stepName] = getModifiedFormValues(dirtyFields, data) as DeclarationDTO[typeof stepName];
+      } else {
+        draft[stepName] = data as DeclarationDTO[typeof stepName];
+      }
     });
 
     saveFormData(newFormData);
