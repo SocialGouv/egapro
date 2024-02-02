@@ -1,3 +1,12 @@
+## [3.1.8](https://github.com/SocialGouv/egapro/compare/v3.1.7...v3.1.8) (2024-02-02)
+
+
+### Bug Fixes
+
+* declaration recap wording when effective count is 0 ([#2092](https://github.com/SocialGouv/egapro/issues/2092)) ([6199e0b](https://github.com/SocialGouv/egapro/commit/6199e0b08246f50ecd3b1415668600d7ef4d38f4))
+* display stepper in declaration ([#2084](https://github.com/SocialGouv/egapro/issues/2084)) ([5e29226](https://github.com/SocialGouv/egapro/commit/5e29226115bc57900d81b29bbe9494ae7f4357a5))
+* my declarations wording and sorting ([#2091](https://github.com/SocialGouv/egapro/issues/2091)) ([e4091c8](https://github.com/SocialGouv/egapro/commit/e4091c819a05189007f8cd07c6bb915ec172b4a8))
+
 ## [3.1.7](https://github.com/SocialGouv/egapro/compare/v3.1.6...v3.1.7) (2024-01-31)
 
 
