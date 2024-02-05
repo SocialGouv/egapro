@@ -80,7 +80,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
           </GridCol>
           <GridCol sm={3}>
             <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
-              <span className={styles.numberOfEmployees}>{mapRange(workforce?.range)}</span>
+              <span className={styles.numberOfEmployees}>{workforce?.total}</span>
               <span className={styles.employeeslegend}>{` Salariés${
                 workforce?.range === CompanyWorkforceRange.Enum.FROM_1000_TO_MORE ? " ou plus" : ""
               }`}</span>
@@ -177,7 +177,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                     </li>
                     <li>
                       Écart taux d'augmentation :{" "}
-                      {company[row.year].workforce?.range === CompanyWorkforceRange.Enum.FROM_251_TO_999 ? (
+                      {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 ? (
                         <>
                           <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
                           {row.notComputableReasonSalaryRaisesAndPromotions && (
@@ -203,7 +203,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                         </>
                       )}
                     </li>
-                    {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 && (
+                    {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_50_TO_250 && (
                       <li>
                         Écart taux promotion : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
                         {row.notComputableReasonPromotions && (
