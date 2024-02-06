@@ -147,7 +147,7 @@ function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicC
     ...(data.company.total || data.company.range
       ? {
           workforce: {
-            total: data.company.total,
+            total: data.company.total?.getValue(),
             range: data.company.range?.getValue(),
           },
         }

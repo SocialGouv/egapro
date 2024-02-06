@@ -22,8 +22,8 @@ export interface CompanyProps {
   range?: CompanyWorkforceRange;
   region?: Region;
   siren: Siren;
+  total?: PositiveNumber;
   ues?: UES;
-  /** Total effectif */
   workforce?: { range: CompanyWorkforceRange; total: PositiveNumber };
 }
 
@@ -81,12 +81,12 @@ export class Company extends JsonEntity<CompanyProps, never> {
     return this.props.ues;
   }
 
-  get total(): number | undefined {
-    return this.props.workforce?.total.getValue();
+  get total(): PositiveNumber | undefined {
+    return this.props.total;
   }
 
   get range(): CompanyWorkforceRange | undefined {
-    return this.props.workforce?.range;
+    return this.props.range;
   }
 
   public fromJson(json: EntityPropsToJson<CompanyProps>) {
@@ -123,6 +123,8 @@ export class Company extends JsonEntity<CompanyProps, never> {
     }
 
     if (json.workforce) {
+      props.total = new PositiveNumber(json.workforce.total);
+      props.range = new CompanyWorkforceRange(json.workforce.range);
       props.workforce = {
         range: new CompanyWorkforceRange(json.workforce.range),
         total: new PositiveNumber(json.workforce.total),
