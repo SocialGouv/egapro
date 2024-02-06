@@ -64,8 +64,8 @@ export const declarationSearchResultMap: Mapper<
                   }
                 : void 0,
               workforce: {
-                range: value.entreprise.effectif?.tranche,
-                total: value.entreprise.effectif?.total,
+                range: value.entreprise.effectif?.tranche ?? "50:250",
+                total: value.entreprise.effectif?.total ?? 0,
               },
               nafCode: value.entreprise.code_naf,
             },
