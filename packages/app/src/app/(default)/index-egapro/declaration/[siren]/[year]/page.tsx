@@ -111,7 +111,7 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
               <DownloadCard
                 title="Télécharger le récapitulatif"
                 endDetail="PDF"
-                href={`/api/declaration/${siren}/${year}/pdf`}
+                href={`/index-egapro/declaration/${siren}/${year}/pdf`}
                 filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
                 fileType="application/pdf"
                 desc={`Année ${year + 1} au titre des données ${year}`}

@@ -54,7 +54,7 @@ const ConfirmationPage = () => {
 
   if (formData.commencer?.annéeIndicateurs === undefined || formData.commencer?.siren === undefined) return null;
 
-  const année = Number(formData.commencer.annéeIndicateurs);
+  const year = Number(formData.commencer.annéeIndicateurs);
   const siren = formData.commencer.siren;
   const index = formData["resultat-global"]?.index;
 
@@ -63,13 +63,13 @@ const ConfirmationPage = () => {
   };
 
   const sendReceipt = () => {
-    if (!siren || !année) {
+    if (!siren || !year) {
       return;
     }
 
     setReceiptProcessing(true);
 
-    sendDeclarationReceipt(siren, année)
+    sendDeclarationReceipt(siren, year)
       .catch(error => {
         console.error(error);
         setError("Une erreur est survenue, veuillez réessayer ultérieurement.");
@@ -135,10 +135,10 @@ const ConfirmationPage = () => {
           <DownloadCard
             title="Télécharger le récapitulatif"
             endDetail="PDF"
-            href={`/api/declaration/${siren}/${année}/pdf`}
-            filename={`declaration_egapro_${siren}_${Number(année) + 1}.pdf`}
+            href={`/index-egapro/declaration/${siren}/${year}/pdf`}
+            filename={`declaration_egapro_${siren}_${Number(year) + 1}.pdf`}
             fileType="application/pdf"
-            desc={`Année ${année + 1} au titre des données ${année}`}
+            desc={`Année ${year + 1} au titre des données ${year}`}
           />
         </GridCol>
       </Grid>
@@ -153,7 +153,7 @@ const ConfirmationPage = () => {
                   footer={
                     <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                       <li>
-                        <ButtonOpMc index={index} siren={siren} year={année} />
+                        <ButtonOpMc index={index} siren={siren} year={year} />
                       </li>
                     </ul>
                   }
@@ -189,7 +189,7 @@ const ConfirmationPage = () => {
                       footer={
                         <ul className="fr-btns-group fr-btns-group--inline-reverse fr-btns-group--inline-lg">
                           <li>
-                            <ButtonOpMc index={index} siren={siren} year={année} />
+                            <ButtonOpMc index={index} siren={siren} year={year} />
                           </li>
                         </ul>
                       }

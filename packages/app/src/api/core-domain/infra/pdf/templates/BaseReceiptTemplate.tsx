@@ -90,12 +90,12 @@ const styles = StyleSheet.create({
   },
   sectionRowKey: {
     fontWeight: "bold",
-    maxWidth: "70%",
+    maxWidth: "50%",
     lineHeight: 1.25,
   },
   sectionRowValue: {
     textAlign: "right",
-    maxWidth: "70%",
+    maxWidth: "50%",
   },
 });
 
@@ -157,7 +157,9 @@ export const BaseReceiptTemplate = ({
                   <>
                     <View key={`section-${sectionIdx}-row-${rowIdx}`} style={styles.sectionRow}>
                       <Text style={styles.sectionRowKey}>{row.key}</Text>
-                      <Text style={styles.sectionRowValue}>{row.value ?? "-"}</Text>
+                      <Text wrap hyphenationCallback={string => [string]} style={styles.sectionRowValue}>
+                        {row.value ?? "-"}
+                      </Text>
                     </View>
                   </>
                 ),
