@@ -142,3 +142,11 @@ export const radioBoolToString = (value: boolean | undefined): RadioInputValueTy
  * This is not recommended by React docs to use null or undefined as it will induce it to be an uncontrolled input.
  */
 export const setValueAsFloatOrEmptyString = (value: string) => (isNaN(parseFloat(value)) ? "" : parseFloat(value));
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+export const deleteEmptyStringOnPaste = (e: ClipboardEvent<HTMLInputElement>) => {
+  e.preventDefault();
+  const text = e.clipboardData?.getData("text/plain") || "";
+  console.log(text);
+  document.execCommand("insertText", false, text.replace(/\s/g, ""));
+};

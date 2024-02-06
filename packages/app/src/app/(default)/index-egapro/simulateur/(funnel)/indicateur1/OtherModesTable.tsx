@@ -13,7 +13,7 @@ import {
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { setValueAsFloatOrEmptyString } from "@common/utils/form";
+import { deleteEmptyStringOnPaste, setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { TooltipWrapper } from "@components/utils/TooltipWrapper";
 import { AlternativeTable, type AlternativeTableProps, CenteredContainer } from "@design-system";
@@ -115,6 +115,7 @@ export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTa
                             errors.remunerations?.[remunerationsFieldIndex]?.category?.[ageRange] as Any
                           )?.womenCount?.message,
                           nativeInputProps: {
+                            onPaste: deleteEmptyStringOnPaste,
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`, {
                               setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`,
@@ -133,6 +134,7 @@ export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTa
                             errors.remunerations?.[remunerationsFieldIndex]?.category?.[ageRange] as Any
                           )?.menCount?.message,
                           nativeInputProps: {
+                            onPaste: deleteEmptyStringOnPaste,
                             ...register(`remunerations.${remunerationsFieldIndex}.category.${ageRange}.menCount`, {
                               setValueAs: setValueAsFloatOrEmptyString,
                               deps: `remunerations.${remunerationsFieldIndex}.category.${ageRange}.womenCount`,

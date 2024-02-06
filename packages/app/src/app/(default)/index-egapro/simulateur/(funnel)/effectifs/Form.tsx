@@ -9,7 +9,7 @@ import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { AgeRange } from "@common/core-domain/domain/valueObjects/declaration/AgeRange";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
-import { setValueAsFloatOrEmptyString } from "@common/utils/form";
+import { deleteEmptyStringOnPaste, setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { type Any } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
 import { AlternativeTable, type AlternativeTableProps, BackNextButtonsGroup, Link } from "@design-system";
@@ -286,6 +286,7 @@ export const EffectifsForm = () => {
                   {
                     label: `${category}, ${ageRange}, femmes`,
                     nativeInputProps: {
+                      onPaste: deleteEmptyStringOnPaste,
                       ...register(`csp.${category}.ageRanges.${ageRange}.women`, {
                         setValueAs: setValueAsFloatOrEmptyString,
                       }),
@@ -299,6 +300,7 @@ export const EffectifsForm = () => {
                   {
                     label: `${category}, ${ageRange}, hommes`,
                     nativeInputProps: {
+                      onPaste: deleteEmptyStringOnPaste,
                       ...register(`csp.${category}.ageRanges.${ageRange}.men`, {
                         setValueAs: setValueAsFloatOrEmptyString,
                       }),
