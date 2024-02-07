@@ -8,6 +8,14 @@ import { isEqual } from "date-fns";
 
 import { BaseReceiptTemplate, type BaseReceiptTemplateProps } from "./BaseReceiptTemplate";
 
+const insertSoftHyphens = (url: string, everyNChars: number) => {
+  const parts = [];
+  for (let i = 0; i < url.length; i += everyNChars) {
+    parts.push(url.substring(i, i + everyNChars));
+  }
+  return parts.join(" ");
+};
+
 export const DeclarationReceipt = (input: DeclarationOpmc) => {
   const declaration = input.declaration;
 
@@ -172,6 +180,10 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
               key: "Nombre de points obtenus sur le résultat final en nombre de salariés",
               value: declaration.salaryRaisesAndPromotions?.score?.getValue(),
             },
+            {
+              key: "Nombre de points obtenus à l'indicateur",
+              value: declaration.salaryRaisesAndPromotions?.score?.getValue(),
+            },
           ],
     });
   } else {
@@ -313,7 +325,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           ? [
               {
                 key: "Site Internet de publication",
-                value: declaration.publication.url,
+                value: insertSoftHyphens(declaration.publication.url, 50),
               },
             ]
           : []),
@@ -409,13 +421,26 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         value: input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
       });
 
-      if (declaration.publication?.url || declaration.index.getValue() < 75) {
+      if (!declaration.publication?.url && declaration.year.getValue() > 2020) {
         rows.push({
-          key: "Modalités de communication des mesures de correction auprès des salariés",
+          key: "Modalités de communication auprès des salariés",
           value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
           showAsBlock: true,
         });
       }
+    }
+
+    if (
+      !declaration.publication?.url &&
+      declaration.year.getValue() > 2020 &&
+      declaration.index.getValue() >= 75 &&
+      declaration.index.getValue() <= 84
+    ) {
+      rows.push({
+        key: "Modalités de communication auprès des salariés",
+        value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
+        showAsBlock: true,
+      });
     }
 
     table.push({
@@ -430,7 +455,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
   return (
     <BaseReceiptTemplate
       title="Déclaration"
-      subject="Récapitulatif de la déclaration de votre index de l'égalité professionnelle entre les femmes et les hommes"
+      subject="Récapitulatif de la déclaration de l'index de l'égalité professionnelle femmes-hommes"
       declaredAt={declaration.declaredAt}
       modifiedAt={isEqual(declaration.declaredAt, declaration.modifiedAt) ? undefined : declaration.modifiedAt}
       siren={declaration.siren.getValue()}

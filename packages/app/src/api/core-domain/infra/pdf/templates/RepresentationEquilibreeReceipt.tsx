@@ -6,6 +6,14 @@ import { isEqual } from "date-fns";
 
 import { BaseReceiptTemplate, type BaseReceiptTemplateProps } from "./BaseReceiptTemplate";
 
+const insertSoftHyphens = (url: string, everyNChars: number) => {
+  const parts = [];
+  for (let i = 0; i < url.length; i += everyNChars) {
+    parts.push(url.substring(i, i + everyNChars));
+  }
+  return parts.join(" ");
+};
+
 export interface RepresentationEquilibreeReceiptProps {
   repEq: RepresentationEquilibree;
 }
@@ -105,7 +113,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
 
   if (repEq.publication) {
     table.push({
-      title: "Publication",
+      title: "Publication des écarts de représentation",
       rows: [
         {
           key: "Date de publication",
@@ -114,7 +122,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         repEq.publication.url
           ? {
               key: "Site Internet de publication",
-              value: repEq.publication.url,
+              value: insertSoftHyphens(repEq.publication.url, 50),
             }
           : {
               key: "Modalités de communication auprès des salariés",
