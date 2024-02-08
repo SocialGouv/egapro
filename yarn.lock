@@ -3390,7 +3390,7 @@ __metadata:
     moize: "npm:^6.1.3"
     next: "npm:14.0.4"
     next-auth: "npm:^4.24.5"
-    nodemailer: "npm:^6.8.0"
+    nodemailer: "npm:^6.9.9"
     pg: "npm:^8.8.0"
     pino: "npm:^8.17.2"
     pino-pretty: "npm:^10.3.1"
@@ -10020,10 +10020,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:^6.8.0":
-  version: 6.9.8
-  resolution: "nodemailer@npm:6.9.8"
-  checksum: 9332587975240ac648e1295b1df15e339fcace3f7fab8af0382e7f2dd10e48296344dfa698d58f1667f220f7fe13c779d55d39144c9cd9ed6f5f559714183c75
+"nodemailer@npm:^6.9.9":
+  version: 6.9.9
+  resolution: "nodemailer@npm:6.9.9"
+  checksum: ba72da4ca8a003921c86f3d132d64d9bb86c1a3d79d248664b3de28f6a7a621f0476273ad7cf3ecc48d3b78a66ae4ec62b7c4c8ab6f07d9ca26d4bad4d08802e
   languageName: node
   linkType: hard
 
