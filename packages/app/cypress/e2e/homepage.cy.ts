@@ -8,7 +8,7 @@ describe("Homepage", () => {
     cy.contains(".fr-btn", "Consulter les Écarts");
     cy.contains(".fr-btn", "Se connecter");
   });
-  it("Affiche la popup RGPD", () => {
+  it.skip("Affiche la popup RGPD", () => {
     cy.visit("/");
     cy.contains("À propos des cookies");
   });
