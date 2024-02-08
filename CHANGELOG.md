@@ -1,3 +1,14 @@
+## [3.1.9](https://github.com/SocialGouv/egapro/compare/v3.1.8...v3.1.9) (2024-02-08)
+
+
+### Bug Fixes
+
+* adjust exports whitelist ([#2111](https://github.com/SocialGouv/egapro/issues/2111)) ([1223974](https://github.com/SocialGouv/egapro/commit/122397472b5c95ced2df508d61ef9d3a0700b552))
+* declaration and repeq receipt pdf formatting ([#2109](https://github.com/SocialGouv/egapro/issues/2109)) ([bd03376](https://github.com/SocialGouv/egapro/commit/bd03376474ea6997c043bad01d34e62e50e3797d))
+* delete spaces when copy paste ([#2108](https://github.com/SocialGouv/egapro/issues/2108)) ([1b42536](https://github.com/SocialGouv/egapro/commit/1b425360fb16c1a6ffa2cfc4fb1c10c4f73b6c74))
+* remove stale form data when editing declaration ([#2098](https://github.com/SocialGouv/egapro/issues/2098)) ([a485f31](https://github.com/SocialGouv/egapro/commit/a485f31b732897be5e69e3a7ee6d96560a03ec8a))
+* workforce on index consultation search ([#2107](https://github.com/SocialGouv/egapro/issues/2107)) ([87982e4](https://github.com/SocialGouv/egapro/commit/87982e4f40c8d7683cdf1629c6fb50ff6fbab44d))
+
 ## [3.1.8](https://github.com/SocialGouv/egapro/compare/v3.1.7...v3.1.8) (2024-02-02)
 
 
