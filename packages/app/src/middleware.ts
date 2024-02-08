@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   // In dev environment, Next injects scripts for HMR, so we need to desactivate script-src.
 
@@ -40,9 +40,10 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval';
+    script-src 'self' https://*.gouv.fr 'unsafe-inline' 'unsafe-eval';
     frame-src 'self' https://*.gouv.fr;
-    style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
+    style-src 'self' https://*.gouv.fr 'unsafe-inline';
+    worker-src 'self' blob:;
     frame-ancestors 'self' https://*.gouv.fr;
     object-src 'none';
     base-uri 'self' https://*.gouv.fr;
@@ -51,7 +52,7 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     upgrade-insecure-requests; `;
 
   const responseHeaders = new Headers();
-  responseHeaders.set("x-nonce", nonce);
+  //responseHeaders.set("x-nonce", nonce);
   responseHeaders.set(
     "Content-Security-Policy",
     // Replace newline characters and spaces
@@ -63,7 +64,12 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     requestHeaders.set(key, value);
   });
 
-  return NextResponse.next();
+  return NextResponse.next({
+    headers: responseHeaders,
+    request: {
+      headers: requestHeaders,
+    },
+  });
 };
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {

@@ -28,8 +28,6 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
 ): OAuthConfig<P> {
   const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
 
-  logger.child({ options }).info(`MonCompteProProvider, issuer: ${issuer}`);
-
   return {
     id: "moncomptepro",
     name: "Mon Compte Pro",
@@ -53,7 +51,6 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
       },
     },
     profile(profile) {
-      logger.child({ profile }).info(`profile`);
       return {
         id: profile.sub,
         email: profile.email,
