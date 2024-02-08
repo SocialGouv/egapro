@@ -334,6 +334,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
               {
                 key: "Modalités de communication auprès des salariés",
                 value: declaration.publication.modalities,
+                showAsBlock: true,
               },
             ]
           : []),
