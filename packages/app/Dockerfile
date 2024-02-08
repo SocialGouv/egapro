@@ -14,18 +14,19 @@ ENV EGAPRO_ENV $EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL $NEXTAUTH_URL
 
-WORKDIR /app/packages/app
+WORKDIR /app
 
-COPY packages/app/package.json yarn.lock ./
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+RUN yarn fetch workspaces focus app
 
-RUN yarn install --frozen-lockfile
-
-COPY packages/app/ ./
+COPY packages/app/ ./packages/app/
 
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 
-RUN yarn build && \
-  yarn install --production
+RUN yarn workspace app build
+RUN yarn workspaces focus app --production && yarn cache clean
+RUN mkdir -p ./packages/app/node_modules
 
 # Runner
 FROM node:$NODE_VERSION AS runner
@@ -40,7 +41,8 @@ COPY --from=builder /app/packages/app/package.json .
 COPY --from=builder /app/packages/app/.env.production .
 COPY --from=builder /app/packages/app/.env.development .
 COPY --from=builder /app/packages/app/public ./public
-COPY --from=builder /app/packages/app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/app/node_modules ./packages/app/node_modules
 COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 
 USER 1001

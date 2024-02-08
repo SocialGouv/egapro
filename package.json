@@ -2,11 +2,9 @@
   "name": "~egapro-dev",
   "version": "3.1.9",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/app"
-    ]
-  },
+  "workspaces": [
+    "packages/app"
+  ],
   "engines": {
     "node": "20"
   },
@@ -19,7 +17,7 @@
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
     "egapro:local": "packages/api/egapro/bin/egapro",
-    "lint": "yarn workspaces run lint",
+    "lint": "yarn workspaces foreach -A run lint",
     "fresh-install": "scripts/fresh-install",
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
@@ -32,5 +30,6 @@
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
     "semantic-release": "^19"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }
