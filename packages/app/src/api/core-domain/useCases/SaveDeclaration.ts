@@ -245,8 +245,13 @@ export class SaveDeclaration implements UseCase<Input, void> {
         if (olderThanOneYear) {
           throw new SaveDeclarationOverOneYearError("Déclaration is older than one year.");
         }
-
-        declaration = found.fromJson({ ...partialDeclaration, modifiedAt: now });
+        declaration = Declaration.fromJson({
+          ...partialDeclaration,
+          declaredAt: found.declaredAt,
+          modifiedAt: now,
+          siren,
+          year,
+        });
       } else {
         declaration = Declaration.fromJson({
           ...partialDeclaration,
