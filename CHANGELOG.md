@@ -1,3 +1,11 @@
+## [3.1.12](https://github.com/SocialGouv/egapro/compare/v3.1.11...v3.1.12) (2024-02-09)
+
+
+### Bug Fixes
+
+* cross origin resource policy on kontinious ([c6b5256](https://github.com/SocialGouv/egapro/commit/c6b5256bcabbf8e781bc50be6e64a720ff9e9b3e))
+* total workforce ([8671212](https://github.com/SocialGouv/egapro/commit/8671212e15a3a75d9bc6359bf57ac298c367dbad))
+
 ## [3.1.11](https://github.com/SocialGouv/egapro/compare/v3.1.10...v3.1.11) (2024-02-09)
 
 
