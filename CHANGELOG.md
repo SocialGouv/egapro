@@ -1,3 +1,10 @@
+## [3.1.13](https://github.com/SocialGouv/egapro/compare/v3.1.12...v3.1.13) (2024-02-09)
+
+
+### Bug Fixes
+
+* hot fix for syncOwnership ([5f75314](https://github.com/SocialGouv/egapro/commit/5f75314176e2055df48e1c97e94cf84884fd455d))
+
 ## [3.1.12](https://github.com/SocialGouv/egapro/compare/v3.1.11...v3.1.12) (2024-02-09)
 
 
