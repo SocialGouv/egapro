@@ -38,20 +38,22 @@ const InfoText = () => (
   </>
 );
 
-const sirenToGet = (isImpersonating: boolean, sirenList: string[], selectedSiren: string) => {
-  if (isImpersonating) {
-    return sirenList[0];
-  }
-  return selectedSiren || sirenList[0];
+const checkSirenToGet = (isImpersonating: boolean, sirenList: string[], selectedSiren: string) => {
+  if (isImpersonating && sirenList.length > 0) return sirenList[0];
+  return selectedSiren || sirenList[0] || null;
 };
 
 const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
-  const isStaff = session?.user?.staff || session?.staff?.impersonating || false;
+
+  const isStaff = session?.user?.staff || false;
   const isImpersonating = session?.staff?.impersonating || false;
+
   const sirenList = (session?.user.companies || []).map(company => company.siren);
   const selectedSiren = searchParams && typeof searchParams.siren === "string" ? searchParams.siren : "";
+  const sirenToGet = checkSirenToGet(isImpersonating, sirenList, selectedSiren);
+
   const titleText = isStaff && !isImpersonating ? "Les déclarations" : "Mes déclarations";
 
   let declarations: DeclarationDTO[] = [];
@@ -71,9 +73,9 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
     );
   }
 
-  if (selectedSiren || sirenList.length > 0) {
-    declarations = await getAllDeclarationsBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
-    repEq = await getAllRepresentationEquilibreeBySiren(sirenToGet(isImpersonating, sirenList, selectedSiren));
+  if (sirenToGet) {
+    declarations = await getAllDeclarationsBySiren(sirenToGet);
+    repEq = await getAllRepresentationEquilibreeBySiren(sirenToGet);
     declarations.sort((a, b) => (b.commencer?.annéeIndicateurs || 0) - (a.commencer?.annéeIndicateurs || 0));
     repEq.sort((a, b) => (b.year || 0) - (a.year || 0));
     for (const siren of sirenList) {
