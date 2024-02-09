@@ -1,6 +1,7 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
+import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
@@ -147,8 +148,12 @@ export const authConfig: AuthOptions = {
       } else {
         const sirenList = profile?.organizations.map(orga => orga.siret.substring(0, 9));
         if (profile?.email && sirenList) {
-          const useCase = new SyncOwnership(ownershipRepo);
-          await useCase.execute({ sirens: sirenList, email: profile.email });
+          try {
+            const useCase = new SyncOwnership(ownershipRepo);
+            await useCase.execute({ sirens: sirenList, email: profile.email });
+          } catch (error: unknown) {
+            logger.error("Error while syncing ownerships", error);
+          }
         }
         token.user.companies =
           profile?.organizations.map(orga => ({
