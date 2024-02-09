@@ -1,3 +1,10 @@
+## [3.1.14](https://github.com/SocialGouv/egapro/compare/v3.1.13...v3.1.14) (2024-02-09)
+
+
+### Bug Fixes
+
+* hot fix ross-Origin-Embedder-Policy header for matomo ([adb3f31](https://github.com/SocialGouv/egapro/commit/adb3f31687cbc92014c50c7755e880a2029a561a))
+
 ## [3.1.13](https://github.com/SocialGouv/egapro/compare/v3.1.12...v3.1.13) (2024-02-09)
 
 
