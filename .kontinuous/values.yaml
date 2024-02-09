@@ -16,7 +16,7 @@ x-secure-headers: &headers >-
   web-share=(),
   geolocation=()"
 
-  more_set_headers "Cross-Origin-Embedder-Policy: require-corp";
+  more_set_headers "Cross-Origin-Embedder-Policy: credentialless";
 
   more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
 
