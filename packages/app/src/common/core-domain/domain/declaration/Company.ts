@@ -131,6 +131,10 @@ export class Company extends JsonEntity<CompanyProps, never> {
       };
     }
 
+    if (json.total) {
+      props.total = new PositiveNumber(json.total);
+    }
+
     if (json.range) {
       props.range = new CompanyWorkforceRange(json.range);
     }
