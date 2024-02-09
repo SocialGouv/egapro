@@ -1,3 +1,10 @@
+## [3.1.11](https://github.com/SocialGouv/egapro/compare/v3.1.10...v3.1.11) (2024-02-09)
+
+
+### Bug Fixes
+
+* cross origine resource policy for matomo ([167942a](https://github.com/SocialGouv/egapro/commit/167942aed4082c62b9c59129dfe5c2b93499faa0))
+
 ## [3.1.10](https://github.com/SocialGouv/egapro/compare/v3.1.9...v3.1.10) (2024-02-09)
 
 
