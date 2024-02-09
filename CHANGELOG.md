@@ -1,3 +1,15 @@
+## [3.1.10](https://github.com/SocialGouv/egapro/compare/v3.1.9...v3.1.10) (2024-02-09)
+
+
+### Bug Fixes
+
+* add entry to exports whitelist ([#2117](https://github.com/SocialGouv/egapro/issues/2117)) ([80801c0](https://github.com/SocialGouv/egapro/commit/80801c0ddb24b572a8ffd66ff3753b6f2d6b74d0))
+* ci workflow release ([b08da0a](https://github.com/SocialGouv/egapro/commit/b08da0a201c721bf985d2c8ba00726cf0a6f0862))
+* csp headers for matomo ([#2116](https://github.com/SocialGouv/egapro/issues/2116)) ([c7ac7c0](https://github.com/SocialGouv/egapro/commit/c7ac7c0ed823f837f10f1b54b9d795d58acf3622))
+* e2e tests ([9e5c7bb](https://github.com/SocialGouv/egapro/commit/9e5c7bb264d82ada99b14495265a3ae604386bd0))
+* formatting declaration receipt field ([#2112](https://github.com/SocialGouv/egapro/issues/2112)) ([880b9fc](https://github.com/SocialGouv/egapro/commit/880b9fc8dbec3026d4c53de78960a67fbb6fe1c6))
+* yarn berry + yarn fetch + docker opti ([#2075](https://github.com/SocialGouv/egapro/issues/2075)) ([d8582d4](https://github.com/SocialGouv/egapro/commit/d8582d4522e0b911a99f870cdedb68c953b9da25))
+
 ## [3.1.9](https://github.com/SocialGouv/egapro/compare/v3.1.8...v3.1.9) (2024-02-08)
 
 
