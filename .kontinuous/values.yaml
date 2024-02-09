@@ -18,7 +18,7 @@ x-secure-headers: &headers >-
 
   more_set_headers "Cross-Origin-Embedder-Policy: require-corp";
 
-  more_set_headers "Cross-Origin-Resource-Policy: same-origin";
+  more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
 
   more_set_headers "Cross-Origin-Opener-Policy: same-origin";
 

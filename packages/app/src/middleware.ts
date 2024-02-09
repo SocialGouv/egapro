@@ -59,7 +59,6 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     cspHeader.replace(/\s{2,}/g, " ").trim(),
   );
 
-  responseHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
   const requestHeaders = new Headers(req.headers);
   responseHeaders.forEach((value, key) => {
     requestHeaders.set(key, value);
