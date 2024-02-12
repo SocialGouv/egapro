@@ -135,10 +135,10 @@ export const AugmentationsForm = () => {
     if (résultat !== undefined) {
       if (résultat !== "") {
         const note = new IndicateurDeuxComputer(new IndicateurUnComputer()).computeNote(résultat);
-        setValue("note", note, { shouldValidate: true });
+        setValue("note", note, { shouldValidate: true, shouldDirty: true });
       }
       //If it is a compensation, we set the note to the max value.
-      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
+      if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true, shouldDirty: true });
     }
   }, [estUnRattrapage, résultat, setValue]);
 

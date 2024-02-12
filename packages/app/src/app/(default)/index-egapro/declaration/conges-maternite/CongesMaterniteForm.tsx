@@ -102,7 +102,7 @@ export const CongesMaterniteForm = () => {
     if (résultat !== "" && résultat !== undefined) {
       const resultAsFloat = Math.floor(résultat / 100);
       const note = new IndicateurQuatreComputer().computeNote(resultAsFloat);
-      setValue("note", note, { shouldValidate: true });
+      setValue("note", note, { shouldValidate: true, shouldDirty: true });
     }
   }, [résultat, setValue]);
 
