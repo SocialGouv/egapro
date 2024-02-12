@@ -9,6 +9,7 @@ import { zodFr } from "@common/utils/zod";
 import { MotifNC } from "@components/RHF/MotifNC";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { getModifiedFormValues } from "@components/utils/getModifiedFormValues";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -117,7 +118,7 @@ export const RemunerationForm = () => {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors, isValid, dirtyFields },
   } = methods;
 
   const estCalculable = watch("estCalculable");
@@ -152,7 +153,12 @@ export const RemunerationForm = () => {
         });
       }
 
-      draft[stepName] = data as DeclarationDTO[typeof stepName];
+      // Prevent stale data mixing with new data
+      if (data.estCalculable !== formData[stepName]?.estCalculable) {
+        draft[stepName] = getModifiedFormValues(dirtyFields, data) as DeclarationDTO[typeof stepName];
+      } else {
+        draft[stepName] = data as DeclarationDTO[typeof stepName];
+      }
     });
 
     saveFormData(newFormData);
