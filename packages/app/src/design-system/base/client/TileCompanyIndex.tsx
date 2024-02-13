@@ -79,12 +79,12 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
             {address && <TileCompanyLocation>{address}</TileCompanyLocation>}
           </GridCol>
           <GridCol sm={3}>
-            <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
-              <span className={styles.numberOfEmployees}>{workforce?.total}</span>
-              <span className={styles.employeeslegend}>{` Salariés${
-                workforce?.range === CompanyWorkforceRange.Enum.FROM_1000_TO_MORE ? " ou plus" : ""
-              }`}</span>
-            </div>
+            {workforce && workforce.range && (
+              <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
+                <span className={styles.numberOfEmployees}>Effectif:</span>
+                <span className={styles.employeeslegend}>{CompanyWorkforceRange.Label[workforce.range]}</span>
+              </div>
+            )}
           </GridCol>
         </Grid>
       </Container>
