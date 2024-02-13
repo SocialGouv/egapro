@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type SimpleObject } from "@common/utils/types";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Grid, GridCol } from "../../design-system/base/Grid";
@@ -31,12 +32,21 @@ export const DeclarantFields = <FormType extends SimpleObject>({
     register,
     formState: { errors },
     setValue,
+    getValues,
+    watch,
+    trigger,
   } = useFormContext<FakeFormType>();
 
   const firstnameKey = firstname as FakeKey;
   const lastnameKey = lastname as FakeKey;
   const phoneNumberKey = phoneNumber as FakeKey;
   const emailKey = email as FakeKey;
+
+  const phoneValue = watch(phoneNumberKey) || getValues(phoneNumberKey);
+
+  useEffect(() => {
+    trigger();
+  }, [phoneValue]);
 
   return (
     <>
