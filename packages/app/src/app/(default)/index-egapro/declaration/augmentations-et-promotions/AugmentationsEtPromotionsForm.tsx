@@ -150,11 +150,11 @@ export const AugmentationEtPromotionsForm = () => {
       setValue("noteNombreSalaries", noteNombreSalaries, { shouldValidate: true });
     }
     if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
-      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true });
+      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true, shouldDirty: true });
     }
 
     // If it is a compensation, we set the note to the max value.
-    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true });
+    if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true, shouldDirty: true });
   }, [
     estCalculable,
     estUnRattrapage,
