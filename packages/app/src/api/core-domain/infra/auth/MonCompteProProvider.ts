@@ -55,7 +55,7 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
         id: profile.sub,
         email: profile.email,
         name: profile.given_name,
-        phone_number: profile.phone_number,
+        phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""), //TODO: remove when handled in MCP
       };
     },
     ...options,
