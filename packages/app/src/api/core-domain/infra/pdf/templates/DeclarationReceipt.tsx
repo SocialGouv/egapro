@@ -3,6 +3,7 @@ import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { NAF } from "@common/dict";
+import { type NonEmptyString } from "@common/shared-domain/domain/valueObjects/NonEmptyString";
 import { formatDateToFr } from "@common/utils/date";
 import { isEqual } from "date-fns";
 
@@ -14,6 +15,21 @@ const insertSoftHyphens = (url: string, everyNChars: number) => {
     parts.push(url.substring(i, i + everyNChars));
   }
   return parts.join(" ");
+};
+
+const pushRow = (
+  rows: BaseReceiptTemplateProps.Row[],
+  key: string,
+  value: NonEmptyString | string | { getValue: () => string | undefined } | undefined,
+  showAsBlock: boolean = true,
+) => {
+  const valueStr = typeof value === "string" ? value : value?.getValue ? value.getValue() : undefined;
+
+  rows.push({
+    key: key,
+    value: valueStr ?? "À définir",
+    showAsBlock: showAsBlock,
+  });
 };
 
 export const DeclarationReceipt = (input: DeclarationOpmc) => {
@@ -350,84 +366,80 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
       },
     ];
 
-    if (!declaration.remunerations?.notComputableReason) {
-      if (declaration.remunerations?.score?.getValue() !== indicatorNoteMax["remunerations"])
-        rows.push({
-          key: "Objectif Indicateur écart de rémunération",
-          value: input.objectiveRemunerations?.getValue() ?? "À définir",
-          showAsBlock: true,
-        });
+    if (
+      !declaration.remunerations?.notComputableReason &&
+      declaration.remunerations?.score?.getValue() !== indicatorNoteMax["remunerations"]
+    ) {
+      pushRow(rows, "Objectif Indicateur écart de rémunération", input.objectiveRemunerations);
     }
 
     if (declaration.company.range?.getValue() === CompanyWorkforceRange.Enum.FROM_50_TO_250) {
-      if (!declaration.salaryRaisesAndPromotions?.notComputableReason) {
-        if (
-          declaration.salaryRaisesAndPromotions?.score?.getValue() !== indicatorNoteMax["augmentations-et-promotions"]
-        ) {
-          rows.push({
-            key: "Objectif Indicateur écart de taux d'augmentations individuelles",
-            value: input.objectiveSalaryRaiseAndPromotions?.getValue() ?? "À définir",
-            showAsBlock: true,
-          });
-        }
+      if (
+        !declaration.salaryRaisesAndPromotions?.notComputableReason &&
+        declaration.salaryRaisesAndPromotions?.score?.getValue() !== indicatorNoteMax["augmentations-et-promotions"]
+      ) {
+        pushRow(
+          rows,
+          "Objectif Indicateur écart de taux d'augmentations individuelles",
+          input.objectiveSalaryRaiseAndPromotions,
+        );
       }
     } else {
-      if (!declaration.salaryRaises?.notComputableReason) {
-        if (declaration.salaryRaises?.score?.getValue() != indicatorNoteMax["augmentations"]) {
-          rows.push({
-            key: "Objectif Indicateur écart de taux d'augmentations individuelles (hors promotions)",
-            value: input.objectiveSalaryRaise?.getValue() ?? "À définir",
-            showAsBlock: true,
-          });
-        }
+      if (
+        !declaration.salaryRaises?.notComputableReason &&
+        declaration.salaryRaises?.score?.getValue() != indicatorNoteMax["augmentations"]
+      ) {
+        pushRow(
+          rows,
+          "Objectif Indicateur écart de taux d'augmentations individuelles (hors promotions)",
+          input.objectiveSalaryRaise,
+        );
       }
 
-      if (!declaration.promotions?.notComputableReason) {
-        if (declaration.promotions?.score?.getValue() !== indicatorNoteMax["promotions"]) {
-          rows.push({
-            key: "Objectif Indicateur écart de taux de promotions",
-            value: input.objectivePromotions?.getValue() ?? "À définir",
-            showAsBlock: true,
-          });
-        }
+      if (
+        !declaration.promotions?.notComputableReason &&
+        declaration.promotions?.score?.getValue() !== indicatorNoteMax["promotions"]
+      ) {
+        pushRow(rows, "Objectif Indicateur écart de taux de promotions", input.objectivePromotions);
       }
     }
 
-    if (!declaration.maternityLeaves?.notComputableReason) {
-      if (declaration.maternityLeaves?.score?.getValue() !== indicatorNoteMax["conges-maternite"]) {
-        rows.push({
-          key: "Objectif Indicateur retour de congé maternité",
-          value: input.objectiveMaternityLeaves?.getValue() ?? "À définir",
-          showAsBlock: true,
-        });
-      }
+    if (
+      !declaration.maternityLeaves?.notComputableReason &&
+      declaration.maternityLeaves?.score?.getValue() !== indicatorNoteMax["conges-maternite"]
+    ) {
+      pushRow(rows, "Objectif Indicateur retour de congé maternité", input.objectiveMaternityLeaves);
     }
 
     if (declaration.highRemunerations?.score?.getValue() !== indicatorNoteMax["hautes-remunerations"]) {
-      rows.push({
-        key: "Objectif Indicateur dix plus hautes rémunérations",
-        value: input.objectiveHighRemunerations?.getValue() ?? "À définir",
-        showAsBlock: true,
-      });
+      pushRow(rows, "Objectif Indicateur dix plus hautes rémunérations", input.objectiveHighRemunerations);
     }
 
-    rows.push({
-      key: "Date de publication des objectifs",
-      value: input.objectivesPublishDate ? formatDateToFr(input.objectivesPublishDate) : "À définir",
-    });
+    pushRow(
+      rows,
+      "Date de publication des objectifs",
+      input.objectivesPublishDate ? formatDateToFr(input.objectivesPublishDate) : "À définir",
+      false,
+    );
 
     if (declaration.index.getValue() < 75) {
-      rows.push({
-        key: "Date de publication des mesures de correction",
-        value: input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
-      });
+      pushRow(
+        rows,
+        "Date de publication des mesures de correction",
+        input.measuresPublishDate ? formatDateToFr(input.measuresPublishDate) : "À définir",
+        false,
+      );
 
       if (!declaration.publication?.url && declaration.year.getValue() > 2020) {
-        rows.push({
-          key: "Modalités de communication auprès des salariés",
-          value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
-          showAsBlock: true,
-        });
+        pushRow(rows, "Modalités de communication auprès des salariés", input.objectivesMeasuresModalities);
+      }
+
+      if (declaration.publication?.url) {
+        pushRow(
+          rows,
+          "Modalités de communication des mesures de correction auprès des salariés",
+          input.objectivesMeasuresModalities,
+        );
       }
     }
 
@@ -437,11 +449,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
       declaration.index.getValue() >= 75 &&
       declaration.index.getValue() <= 84
     ) {
-      rows.push({
-        key: "Modalités de communication auprès des salariés",
-        value: input.objectivesMeasuresModalities?.getValue() ?? "À définir",
-        showAsBlock: true,
-      });
+      pushRow(rows, "Modalités de communication auprès des salariés", input.objectivesMeasuresModalities);
     }
 
     table.push({
