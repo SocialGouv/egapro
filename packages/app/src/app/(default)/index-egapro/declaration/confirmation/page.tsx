@@ -23,12 +23,10 @@ type Props = {
 };
 
 const ButtonOpMc = ({ index, siren, year }: Props) => {
-  const router = useRouter();
-
   if (index === undefined || index > 85) return null;
 
   return (
-    <Button onClick={() => router.push(`/index-egapro/objectifs-mesures/${siren}/${year}`)}>
+    <Button onClick={() => window.open(`/index-egapro/objectifs-mesures/${siren}/${year}`, "_blank")}>
       {index >= 75
         ? "Déclarer les objectifs de progression"
         : "Déclarer les objectifs de progression et mesures de correction"}
