@@ -1,3 +1,17 @@
+## [3.1.15](https://github.com/SocialGouv/egapro/compare/v3.1.14...v3.1.15) (2024-02-16)
+
+
+### Bug Fixes
+
+* check renumeration declaration step for stale save data ([#2121](https://github.com/SocialGouv/egapro/issues/2121)) ([116d0df](https://github.com/SocialGouv/egapro/commit/116d0df21c57c1eb1fa4d59194374b57c1ecc593))
+* consultation index put range ([#2124](https://github.com/SocialGouv/egapro/issues/2124)) ([3444c68](https://github.com/SocialGouv/egapro/commit/3444c687447f599c6e8921a10d9b6fa926cbfb71))
+* declaration pdf receipt formatting and wording ([#2130](https://github.com/SocialGouv/egapro/issues/2130)) ([3fb5d20](https://github.com/SocialGouv/egapro/commit/3fb5d20e4139cf456256a73488e2d0e0065ac338))
+* format and check phone number from MCP data ([#2125](https://github.com/SocialGouv/egapro/issues/2125)) ([bd81ea2](https://github.com/SocialGouv/egapro/commit/bd81ea2b19181198d1604b4f21d6d9450f0edbed))
+* improve siren validation and selection in my-declarations ([#2119](https://github.com/SocialGouv/egapro/issues/2119)) ([413a0bf](https://github.com/SocialGouv/egapro/commit/413a0bf414e6f2f096edc17cc680446c2eea21ef))
+* keep modified note when modifying declaration ([#2122](https://github.com/SocialGouv/egapro/issues/2122)) ([ae0112e](https://github.com/SocialGouv/egapro/commit/ae0112e12d7e464519426ecc6dc0740892b20e95))
+* open new window from declaration confirmation to OPMC ([#2129](https://github.com/SocialGouv/egapro/issues/2129)) ([07c4ce2](https://github.com/SocialGouv/egapro/commit/07c4ce23a6a5adad233c1024da4105e972f4b6b4))
+* update index when modified declaration is NC ([#2118](https://github.com/SocialGouv/egapro/issues/2118)) ([9e89095](https://github.com/SocialGouv/egapro/commit/9e89095b9b6ab5ec8f32a003147b0518f48a4798))
+
 ## [3.1.14](https://github.com/SocialGouv/egapro/compare/v3.1.13...v3.1.14) (2024-02-09)
 
 
