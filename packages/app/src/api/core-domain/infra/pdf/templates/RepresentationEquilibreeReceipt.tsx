@@ -127,6 +127,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
           : {
               key: "Modalités de communication auprès des salariés",
               value: repEq.publication.modalities,
+              showAsBlock: true,
             },
       ],
     });
