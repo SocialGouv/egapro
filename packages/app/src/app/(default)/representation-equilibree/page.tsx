@@ -86,7 +86,7 @@ const RepresentationEquilibree = () => (
                 </p>
                 <p>
                   Pour plus d'informations sur l'obligation de représentation équilibrée, vous pouvez consulter le site
-                  internet du Ministère du Travail, du Plein emploi et de l'Insertion.
+                  internet du Ministère du Travail, de la Santé et des Solidarités.
                 </p>
               </>
             }

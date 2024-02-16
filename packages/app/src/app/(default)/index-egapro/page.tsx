@@ -167,8 +167,7 @@ const IndexEgapro = () => {
                 </p>
                 <p>
                   Pour plus d'informations sur l'index de l'égalité professionnelle, vous pouvez consulter le site
-                  internet du Ministère du Travail, du Plein emploi et de l'Insertion ou l'aide pour le calcul de
-                  l'index.
+                  internet du Ministère du Travail, de la Santé et des Solidarités ou l'aide pour le calcul de l'index.
                 </p>
               </>
             }
