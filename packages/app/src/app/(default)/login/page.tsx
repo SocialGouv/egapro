@@ -56,16 +56,27 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
           )}
           <Alert
             severity="info"
-            title="Identification unique"
+            small
             description={
               <>
-                Afin de simplifier et sécuriser votre parcours, Egapro utilise le service d'identification MonComptePro
-                afin de garantir l'appartenance de ses utilisateurs aux entreprises déclarantes.
+                <p>
+                  Egapro utilise le service d’identification MonComptePro afin de garantir l’appartenance de ses
+                  utilisateurs aux entreprises déclarantes.
+                </p>
                 <br />
+                <p>
+                  Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse mail professionnelle</b>,
+                  celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
+                  cas de besoin.
+                </p>
                 <br />
-                Le compte utilisé doit correspondre à celui de la personne à contacter par les services de l'inspection
-                du travail en cas de besoin. L'email associé sera celui sur lequel sera adressé l'accusé de réception en
-                fin de déclaration.
+                <p>
+                  <strong>
+                    Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
+                    entreprise cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur
+                    Egapro.
+                  </strong>
+                </p>
               </>
             }
           />
