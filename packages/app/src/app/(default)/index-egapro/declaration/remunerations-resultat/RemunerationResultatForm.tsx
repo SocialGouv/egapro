@@ -66,7 +66,7 @@ export const RemunerationResultatForm = () => {
     mode: "onChange",
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
-    defaultValues: formData[stepName],
+    defaultValues: formData[stepName] || { résultat: "" },
   });
 
   const {
