@@ -81,7 +81,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
           <GridCol sm={3}>
             {workforce && workforce.range && (
               <div className={fr.cx("fr-mt-1v", "fr-mt-md-0")}>
-                <span className={styles.numberOfEmployees}>Effectif:</span>
+                <span className={styles.numberOfEmployees}>Tranche effectifs assujettis :</span>
                 <span className={styles.employeeslegend}>{CompanyWorkforceRange.Label[workforce.range]}</span>
               </div>
             )}
