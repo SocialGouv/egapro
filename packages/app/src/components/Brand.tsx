@@ -2,7 +2,7 @@ export const Brand = () => (
   <>
     Ministère <br />
     du Travail,
-    <br /> du plein Emploi
-    <br /> et de l’Insertion
+    <br /> de la Santé
+    <br /> et des Solidarités
   </>
 );
