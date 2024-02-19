@@ -102,7 +102,7 @@ const stepName: FunnelKey = "remunerations";
 
 export const RemunerationForm = () => {
   const router = useRouter();
-  const { formData, saveFormData } = useDeclarationFormManager();
+  const { formData, saveFormData, savePageData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
 
@@ -153,14 +153,17 @@ export const RemunerationForm = () => {
         });
       }
 
-      // Prevent stale data mixing with new data
+      //FIXME: changing estCalculable to non on modified déclaration desyncs remunerations-resultat
+      if (data.estCalculable === "non") {
+        draft["remunerations-resultat"] = undefined;
+        savePageData("remunerations-resultat", undefined);
+      }
       if (data.estCalculable !== formData[stepName]?.estCalculable) {
         draft[stepName] = getModifiedFormValues(dirtyFields, data) as DeclarationDTO[typeof stepName];
       } else {
         draft[stepName] = data as DeclarationDTO[typeof stepName];
       }
     });
-
     saveFormData(newFormData);
 
     return router.push(funnelConfig(newFormData)[stepName].next().url);

@@ -51,7 +51,7 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
             </p>
           )}
 
-          {note !== undefined && (
+          {note !== undefined && !motifNc && (
             <IndicatorNote
               note={note}
               max={indicatorNoteMax[name]}

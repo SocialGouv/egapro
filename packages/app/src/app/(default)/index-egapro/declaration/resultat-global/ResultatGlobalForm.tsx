@@ -49,9 +49,14 @@ const stepName: FunnelKey = "resultat-global";
 
 export const ResultatGlobalForm = () => {
   const router = useRouter();
-  const { formData, saveFormData } = useDeclarationFormManager();
+  const { formData, saveFormData, savePageData } = useDeclarationFormManager();
 
   assertOrRedirectCommencerStep(formData);
+
+  //FIXME: Sync renumaration with renuerationResultat when editing
+  if (formData.remunerations?.estCalculable === "non") {
+    savePageData("remunerations-resultat", undefined);
+  }
 
   const computed = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData));
 
