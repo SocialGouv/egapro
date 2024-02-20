@@ -36,6 +36,22 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
       : indicateur?.populationFavorable;
   const motifNc = indicateur?.estCalculable === "non" ? indicateur.motifNonCalculabilité : undefined;
 
+  const getLegend = () => {
+    if (name === "conges-maternite") {
+      return "";
+    } else if (populationFavorable === FavorablePopulation.Enum.EQUALITY) {
+      return "Égalité de l'indicateur";
+    } else if (populationFavorable === undefined) {
+      return "Les femmes et les hommes sont à parité";
+    } else if (name === "hautes-remunerations") {
+      return `${capitalize(populationFavorable)} sur-représenté${
+        populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
+      }s`;
+    } else {
+      return `Écart en faveur des ${populationFavorable}`;
+    }
+  };
+
   return (
     <RecapCard
       title={funnelStaticConfig[name].title}
@@ -56,17 +72,7 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
               note={note}
               max={indicatorNoteMax[name]}
               text="Nombre de points obtenus à l'indicateur"
-              legend={
-                name === "conges-maternite"
-                  ? ""
-                  : populationFavorable === FavorablePopulation.Enum.EQUALITY
-                    ? "Égalité de l'indicateur"
-                    : name === "hautes-remunerations"
-                      ? `${capitalize(populationFavorable)} sur-représenté${
-                          populationFavorable === FavorablePopulation.Enum.WOMEN ? "e" : ""
-                        }s`
-                      : `Écart en faveur des ${populationFavorable}`
-              }
+              legend={getLegend()}
             />
           )}
         </>
