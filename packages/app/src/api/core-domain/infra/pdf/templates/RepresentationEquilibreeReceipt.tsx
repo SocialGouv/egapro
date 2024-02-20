@@ -122,7 +122,8 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         repEq.publication.url
           ? {
               key: "Site Internet de publication",
-              value: insertSoftHyphens(repEq.publication.url, 50),
+              value: insertSoftHyphens(repEq.publication.url, 70),
+              showAsBlock: true,
             }
           : {
               key: "Modalités de communication auprès des salariés",
