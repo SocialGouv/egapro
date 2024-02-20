@@ -341,7 +341,8 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           ? [
               {
                 key: "Site Internet de publication",
-                value: insertSoftHyphens(declaration.publication.url, 50),
+                value: insertSoftHyphens(declaration.publication.url, 70),
+                showAsBlock: true,
               },
             ]
           : []),
