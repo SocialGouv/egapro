@@ -1,3 +1,17 @@
+## [3.1.16](https://github.com/SocialGouv/egapro/compare/v3.1.15...v3.1.16) (2024-02-21)
+
+
+### Bug Fixes
+
+* consultation index range name ([#2140](https://github.com/SocialGouv/egapro/issues/2140)) ([6bd460c](https://github.com/SocialGouv/egapro/commit/6bd460c961b86a1d15f5728ad5ad711a77f30414))
+* Declarant form phone number error wording ([#2145](https://github.com/SocialGouv/egapro/issues/2145)) ([2f1f11c](https://github.com/SocialGouv/egapro/commit/2f1f11c7da7f0359a08fd6bc58320315578b3047))
+* Declaration recap indicators wording ([#2141](https://github.com/SocialGouv/egapro/issues/2141)) ([87c0cc5](https://github.com/SocialGouv/egapro/commit/87c0cc5c9081d24c3d00b63727a95801528bb5cc))
+* Declaration receipt long publication url handling ([#2143](https://github.com/SocialGouv/egapro/issues/2143)) ([d9a8d7c](https://github.com/SocialGouv/egapro/commit/d9a8d7cb155dabe3c01caa5cb1256fc6ed863d45))
+* Header, footer, receipt logo update and wording ([#2134](https://github.com/SocialGouv/egapro/issues/2134)) ([0081862](https://github.com/SocialGouv/egapro/commit/0081862104a51f02f5987f24b33aee76a9809a86))
+* login page helper text wording ([#2133](https://github.com/SocialGouv/egapro/issues/2133)) ([7d9fd71](https://github.com/SocialGouv/egapro/commit/7d9fd71389c069db244cd7cc0b346791dba19ee9))
+* repeq receipt formatting ([#2135](https://github.com/SocialGouv/egapro/issues/2135)) ([68d67ee](https://github.com/SocialGouv/egapro/commit/68d67ee9345eb14f7d83d9b52bb6ac016ad2e93d))
+* sync modified data state in déclaration indicator rénumeration ([#2136](https://github.com/SocialGouv/egapro/issues/2136)) ([7ffa439](https://github.com/SocialGouv/egapro/commit/7ffa439200bd4904fc53193e24cb8811b68779b0))
+
 ## [3.1.15](https://github.com/SocialGouv/egapro/compare/v3.1.14...v3.1.15) (2024-02-16)
 
 
