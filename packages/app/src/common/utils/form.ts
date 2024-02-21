@@ -127,7 +127,12 @@ export const zodEmail = z.string().superRefine(zodValueObjectSuperRefine(Email))
 export const zodPhone = z
   .string()
   .nonempty("Le numéro de téléphone est requis")
-  .superRefine(zodValueObjectSuperRefine(FrenchPhoneNumber, "Le numéro de téléphone est invalide"));
+  .superRefine(
+    zodValueObjectSuperRefine(
+      FrenchPhoneNumber,
+      "Le numéro de téléphone est invalide et doit être saisi sous le format 0122334455",
+    ),
+  );
 
 export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;
 
