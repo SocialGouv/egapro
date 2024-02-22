@@ -1,13 +1,16 @@
 import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
+import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
+import { UnexpectedError } from "@common/shared-domain";
 import { Octokit } from "@octokit/rest";
 import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT } from "next-auth/jwt";
+import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
@@ -66,6 +69,15 @@ export const authConfig: AuthOptions = {
     maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60, // 24 hours in prod and preprod, 7 days in dev
   },
   providers: [
+    EmailProvider({
+      async sendVerificationRequest({ identifier: to, url }) {
+        await globalMailerService.init();
+        const [, rejected] = await globalMailerService.sendMail("login_sendVerificationUrl", { to }, url);
+        if (rejected.length) {
+          throw new UnexpectedError(`Cannot send verification request to email(s) : ${rejected.join(", ")}`);
+        }
+      },
+    }),
     GithubProvider({
       ...config.api.security.github,
       ...(config.env !== "prod"

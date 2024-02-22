@@ -4,6 +4,7 @@ import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer } from "@design-system";
 import { getServerSession } from "next-auth";
 
+import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
 import { MonCompteProLogin } from "./MonCompteProLogin";
 
@@ -83,6 +84,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
           <Box className="text-center" mt="2w">
             <MonCompteProLogin callbackUrl={callbackUrl} />
             <GithubLogin callbackUrl={callbackUrl} />
+            <EmailLogin callbackUrl={callbackUrl} />
           </Box>
         </>
       )}
