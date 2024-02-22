@@ -261,7 +261,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
             estCalculable: "oui",
             note: salaryRaises.score?.getValue() ?? 0,
             résultat: salaryRaises.result?.getValue() ?? 0,
-            populationFavorable: toBinaryFavorablePopulation(salaryRaises.favorablePopulation!.getValue()),
+            populationFavorable: toBinaryFavorablePopulation(
+              salaryRaises.favorablePopulation?.getValue() || FavorablePopulation.Enum.EQUALITY,
+            ),
             catégories: {
               [CSP.Enum.OUVRIERS]: salaryRaises.categories[0]?.getValue() || "",
               [CSP.Enum.EMPLOYES]: salaryRaises.categories[1]?.getValue() || "",
@@ -284,7 +286,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
             estCalculable: "oui",
             note: promotions.score?.getValue() ?? 0,
             résultat: promotions.result?.getValue() ?? 0,
-            populationFavorable: toBinaryFavorablePopulation(promotions.favorablePopulation!.getValue()),
+            populationFavorable: toBinaryFavorablePopulation(
+              promotions.favorablePopulation?.getValue() || FavorablePopulation.Enum.EQUALITY,
+            ),
             catégories: {
               [CSP.Enum.OUVRIERS]: promotions.categories[0]?.getValue() || "",
               [CSP.Enum.EMPLOYES]: promotions.categories[1]?.getValue() || "",
@@ -309,7 +313,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
             noteNombreSalaries: salaryRaisesAndPromotions.employeesCountScore?.getValue() ?? 0,
             notePourcentage: salaryRaisesAndPromotions.percentScore?.getValue() ?? 0,
             populationFavorable: salaryRaisesAndPromotions.favorablePopulation
-              ? toBinaryFavorablePopulation(salaryRaisesAndPromotions.favorablePopulation!.getValue())
+              ? toBinaryFavorablePopulation(
+                  salaryRaisesAndPromotions.favorablePopulation?.getValue() || FavorablePopulation.Enum.EQUALITY,
+                )
               : undefined,
             résultat: salaryRaisesAndPromotions.result?.getValue() ?? 0,
             résultatEquivalentSalarié: salaryRaisesAndPromotions.employeesCountResult?.getValue() ?? 0,
@@ -323,7 +329,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       dto["remunerations-resultat"] = {
         note: remunerations.score ? remunerations.score?.getValue() : 0,
         populationFavorable: remunerations.favorablePopulation
-          ? toBinaryFavorablePopulation(remunerations.favorablePopulation!.getValue())
+          ? toBinaryFavorablePopulation(
+              remunerations.favorablePopulation?.getValue() || FavorablePopulation.Enum.EQUALITY,
+            )
           : undefined,
         résultat: remunerations.result ? remunerations.result?.getValue() : 0,
       };
@@ -442,7 +450,9 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
     if (highRemunerations) {
       dto["hautes-remunerations"] = {
         note: obj.highRemunerations!.score.getValue(),
-        populationFavorable: toBinaryFavorablePopulation(obj.highRemunerations!.favorablePopulation.getValue()),
+        populationFavorable: toBinaryFavorablePopulation(
+          obj.highRemunerations?.favorablePopulation?.getValue() || FavorablePopulation.Enum.EQUALITY,
+        ),
         résultat: obj.highRemunerations!.result.getValue(),
       };
     }
