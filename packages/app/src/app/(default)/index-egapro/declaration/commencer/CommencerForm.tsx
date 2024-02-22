@@ -56,7 +56,7 @@ const buildConfirmMessage = ({ siren, annéeIndicateurs }: { annéeIndicateurs: 
 /**
  * Check if declaration exists, merge it with state if any and save the state the in local storage.
  */
-const prepareDataWithExistingDeclaration = async (
+export const prepareDataWithExistingDeclaration = async (
   siren: string,
   year: number,
   formData: DeclarationDTO,

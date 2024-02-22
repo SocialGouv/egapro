@@ -104,7 +104,7 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
       {canEdit && year && (
         <>
-          <EditButton déclaration={déclaration} />
+          <EditButton déclaration={déclaration} year={year} />
 
           <Grid align="center" mb="6w">
             <GridCol md={10} lg={8}>
