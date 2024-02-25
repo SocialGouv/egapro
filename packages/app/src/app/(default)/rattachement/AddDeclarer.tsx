@@ -9,11 +9,11 @@ import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, useFeatureStatus } from "@components/utils/FeatureStatusProvider";
 import { Container, Grid, GridCol } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-// import { type NextPageWithLayout } from "./_app";
-// import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
+import { putOwnershipRequest } from "./actions";
 
 const zodUniqueEmailArray = z.string().transform((val, ctx) => {
   const splitted = val.split(",").map(v => v.trim());
@@ -85,32 +85,30 @@ const formSchema = z.object({
 
 const title = "Demande d’ajout de nouveaux déclarants";
 
-export const AddDeclarer = () => {
-  //const { user } = useUser();
+export const AddDeclarer = ({ email }: { email: string }) => {
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors, isValid },
   } = useForm<z.input<typeof formSchema>>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
   });
 
-  // useEffect(() => {
-  // reset({
-  //   askerEmail: user?.email,
-  //   emails: user?.email,
-  // });
-  // }, []);
+  useEffect(() => {
+    reset({
+      askerEmail: email,
+      emails: email,
+    });
+  }, [reset, email]);
 
   const onSubmit = async (formData: CreateOwnershipRequestDTO) => {
     try {
       setFeatureStatus({ type: "loading" });
-      // await putOwnershipRequest(formData);
+      await putOwnershipRequest(formData);
       setFeatureStatus({ type: "success", message: "La demande a été prise en compte." });
     } catch (error: unknown) {
       setFeatureStatus({
@@ -175,6 +173,7 @@ export const AddDeclarer = () => {
                     state={errors.askerEmail && "error"}
                     stateRelatedMessage={errors.askerEmail?.message}
                     label="Email demandeur"
+                    disabled
                     nativeInputProps={{ ...register("askerEmail") }}
                   />
                   <Input
@@ -201,13 +200,3 @@ export const AddDeclarer = () => {
     </section>
   );
 };
-//
-// AddDeclarer.getLayout = ({ children }) => {
-//   return (
-//     <BasicLayoutPublic title={title}>
-//       <FeatureStatusProvider>{children}</FeatureStatusProvider>
-//     </BasicLayoutPublic>
-//   );
-// };
-//
-// export default AddDeclarer;
