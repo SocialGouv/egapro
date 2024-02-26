@@ -1,3 +1,19 @@
+# [3.2.0](https://github.com/SocialGouv/egapro/compare/v3.1.16...v3.2.0) (2024-02-26)
+
+
+### Bug Fixes
+
+* Declaration data to DTO when default data missing ([#2148](https://github.com/SocialGouv/egapro/issues/2148)) ([15a86e0](https://github.com/SocialGouv/egapro/commit/15a86e0511cbcde17b64ac1aa7bde1312b235bb4))
+* Declaration recap measures formatting ([#2156](https://github.com/SocialGouv/egapro/issues/2156)) ([88bf9ba](https://github.com/SocialGouv/egapro/commit/88bf9ba6343276ae59264dbd4b01488cfeb210ab))
+* edit existing declaration from recap ([#2151](https://github.com/SocialGouv/egapro/issues/2151)) ([68983ae](https://github.com/SocialGouv/egapro/commit/68983ae26eb6556fba4aaecd90c54ec156af64d4))
+* my-delcarations page OPMC wording ([#2154](https://github.com/SocialGouv/egapro/issues/2154)) ([93a3a7b](https://github.com/SocialGouv/egapro/commit/93a3a7b5fcf94c58195f1faeb26abaf774345fd5))
+* provide MCP link config to client side components ([#2077](https://github.com/SocialGouv/egapro/issues/2077)) ([00de7dd](https://github.com/SocialGouv/egapro/commit/00de7ddb87712cbb51f9f8991de3b440ed595453))
+
+
+### Features
+
+* add logo and header to mail templates ([#2153](https://github.com/SocialGouv/egapro/issues/2153)) ([4294ce2](https://github.com/SocialGouv/egapro/commit/4294ce28b6167b1db5ea935986bae29375b5a3fa))
+
 ## [3.1.16](https://github.com/SocialGouv/egapro/compare/v3.1.15...v3.1.16) (2024-02-21)
 
 
