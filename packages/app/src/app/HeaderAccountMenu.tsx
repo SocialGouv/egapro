@@ -5,6 +5,7 @@ import { type Session } from "next-auth";
 import style from "./root.module.scss";
 
 export const HeaderAccountMenu = (props: {
+  isEmailLogin: boolean;
   isMonCompteProTest: boolean;
   session: { data: Session };
   staff: boolean;
@@ -47,14 +48,20 @@ export const HeaderAccountMenu = (props: {
                 </a>
               </li>
               <li>
-                <a
-                  className="fr-nav__link"
-                  href={`https://app${props.isMonCompteProTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Accès à mon compte MonComptePro
-                </a>
+                {props.isEmailLogin ? (
+                  <a className="fr-nav__link" href={"/rattachement"} rel="noopener noreferrer">
+                    Demande de rattachement
+                  </a>
+                ) : (
+                  <a
+                    className="fr-nav__link"
+                    href={`https://app${props.isMonCompteProTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Accès à mon compte MonComptePro
+                  </a>
+                )}
               </li>
             </ul>
           </div>

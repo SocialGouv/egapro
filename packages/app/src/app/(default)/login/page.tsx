@@ -1,9 +1,11 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer } from "@design-system";
 import { getServerSession } from "next-auth";
 
+import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
 import { MonCompteProLogin } from "./MonCompteProLogin";
 
@@ -36,6 +38,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
   const session = await getServerSession(authConfig);
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
+  const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   return (
     <CenteredContainer py="6w">
@@ -54,35 +57,43 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               <br />
             </>
           )}
-          <Alert
-            severity="info"
-            small
-            description={
-              <>
-                <p>
-                  Egapro utilise le service d’identification MonComptePro afin de garantir l’appartenance de ses
-                  utilisateurs aux entreprises déclarantes.
-                </p>
-                <br />
-                <p>
-                  Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse mail professionnelle</b>,
-                  celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
-                  cas de besoin.
-                </p>
-                <br />
-                <p>
-                  <strong>
-                    Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
-                    entreprise cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur
-                    Egapro.
-                  </strong>
-                </p>
-              </>
-            }
-          />
+          {!isEmailLogin && (
+            <Alert
+              severity="info"
+              small
+              description={
+                <>
+                  <p>
+                    Egapro utilise le service d’identification MonComptePro afin de garantir l’appartenance de ses
+                    utilisateurs aux entreprises déclarantes.
+                  </p>
+                  <br />
+                  <p>
+                    Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse mail professionnelle</b>,
+                    celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
+                    cas de besoin.
+                  </p>
+                  <br />
+                  <p>
+                    <strong>
+                      Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
+                      entreprise cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur
+                      Egapro.
+                    </strong>
+                  </p>
+                </>
+              }
+            />
+          )}
           <Box className="text-center" mt="2w">
-            <MonCompteProLogin callbackUrl={callbackUrl} />
-            <GithubLogin callbackUrl={callbackUrl} />
+            {isEmailLogin ? (
+              <EmailLogin callbackUrl={callbackUrl} />
+            ) : (
+              <>
+                <MonCompteProLogin callbackUrl={callbackUrl} />
+                <GithubLogin callbackUrl={callbackUrl} />
+              </>
+            )}
           </Box>
         </>
       )}

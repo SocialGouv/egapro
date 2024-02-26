@@ -24,6 +24,11 @@ export const adminMenuItems = [
     href: "/admin/declarations",
     segment: "declarations",
   },
+  {
+    text: "Gestion des demandes de rattachement",
+    href: "/admin/rattachements",
+    segment: "rattachement",
+  },
 ];
 
 export const Navigation = () => {
