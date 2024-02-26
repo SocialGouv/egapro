@@ -72,7 +72,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         },
         {
           key: "Code NAF",
-          value: `${nafCode} - ${NAF[nafCode].description}`,
+          value: `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`,
         },
         {
           key: "Adresse",
