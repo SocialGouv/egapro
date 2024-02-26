@@ -1,4 +1,5 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
+import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
@@ -6,12 +7,15 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { getAllEmailsBySiren } from "../actions";
+import { AddOwnershipForm } from "../AddOwnershipForm";
+import { EmailOwnerList } from "../EmailOwnerList";
 import { SirenInput } from "./SirenInput";
 
 const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
   if (!session.user.staff) redirect("/mon-espace/mon-profil");
+  const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   if (typeof searchParams.siren !== "string")
     return (
@@ -39,11 +43,8 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           <Box mt="4w">
             <Heading as="h1" variant="h6" text="Responsables" />
-            <ul>
-              {emails.map((email, index) => (
-                <li key={`owner-${index}`}>{email}</li>
-              ))}
-            </ul>
+            <EmailOwnerList isEmailLogin={isEmailLogin} siren={selectedSiren} emails={emails} />
+            {isEmailLogin && <AddOwnershipForm siren={selectedSiren} />}
           </Box>
         </Box>
       </MessageProvider>
