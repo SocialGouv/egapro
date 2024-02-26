@@ -2,6 +2,7 @@ import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
+import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
@@ -195,17 +196,19 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
                   Nombre de points maximum pouvant être obtenus aux indicateurs calculables&nbsp;:{" "}
                   <strong>{déclaration["resultat-global"]?.pointsCalculables}</strong>
                 </p>
+                {déclaration["resultat-global"]?.mesures && (
+                  <p>
+                    Mesures de correction prévues à l'article D. 1142-6:{" "}
+                    <i>{CorrectiveMeasures.Label[déclaration["resultat-global"]?.mesures]}</i>
+                  </p>
+                )}
               </>
             }
           />
         }
       />
 
-      <RecapCardPublication
-        edit={edit}
-        publication={déclaration.publication}
-        mesures={déclaration["resultat-global"]?.mesures}
-      />
+      <RecapCardPublication edit={edit} publication={déclaration.publication} />
 
       {year > 2020 && déclaration["periode-reference"]?.périodeSuffisante === "oui" && (
         <RecapCard
