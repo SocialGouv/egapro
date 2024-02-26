@@ -60,16 +60,12 @@ export const ResultatGlobalForm = () => {
 
   const computed = computeDeclarationIndex(DeclarationComputerInputBuilder.fromDeclarationDTO(formData));
 
-  // We don't compute the index if we only read an existing declaration.
-  const defaultValues =
-    formData["declaration-existante"].status === "consultation"
-      ? formData[stepName]
-      : {
-          ...formData[stepName],
-          index: computed.index,
-          points: computed.points,
-          pointsCalculables: computed.computablePoints,
-        };
+  const defaultValues = {
+    ...formData[stepName],
+    index: computed.index,
+    points: computed.points,
+    pointsCalculables: computed.computablePoints,
+  };
 
   const methods = useForm<FormType>({
     mode: "onChange",
