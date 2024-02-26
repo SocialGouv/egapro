@@ -20,7 +20,6 @@ const isFrozenDeclarationForOPMC = (declaration: DeclarationOpmcDTO) =>
     : false;
 
 enum declarationOpmcStatus {
-  ALREADY_FILLED = "Déjà renseignés",
   COMPLETED = "Renseignés",
   INDEX_OVER_85 = "Index supérieur à 85",
   NOT_APPLICABLE = "Non applicable",
@@ -65,7 +64,7 @@ const formatDeclarationOpmcStatus = (status: declarationOpmcStatus, siren: strin
     case declarationOpmcStatus.NOT_APPLICABLE:
       return declarationOpmcStatus.NOT_APPLICABLE;
     case declarationOpmcStatus.NOT_MODIFIABLE_CORRECT:
-      return withLink(declarationOpmcStatus.ALREADY_FILLED);
+      return withLink(declarationOpmcStatus.COMPLETED);
     case declarationOpmcStatus.NOT_MODIFIABLE_INCORRECT:
       return withLink(declarationOpmcStatus.NOT_MODIFIABLE);
     case declarationOpmcStatus.TO_COMPLETE:
