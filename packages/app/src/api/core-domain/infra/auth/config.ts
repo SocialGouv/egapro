@@ -6,6 +6,7 @@ import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { UnexpectedError } from "@common/shared-domain";
+import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
 import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
@@ -157,6 +158,12 @@ export const authConfig: AuthOptions = {
         const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
         token.user.firstname = firstname;
         token.user.lastname = lastname;
+      } else if (account?.provider === "email") {
+        token.user.staff = config.api.staff.includes(profile?.email ?? "");
+        if (token.email && !token.user.staff) {
+          const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email));
+          token.user.companies = companies.map(siren => ({ label: "", siren }));
+        }
       } else {
         const sirenList = profile?.organizations.map(orga => orga.siret.substring(0, 9));
         if (profile?.email && sirenList) {
