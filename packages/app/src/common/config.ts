@@ -65,6 +65,7 @@ export const config = {
       },
       auth: {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
+        isEmailLogin: ensureApiEnvVar(process.env.EMAIL_LOGIN, false),
         privateRoutes: [
           "/index-egapro/declaration/augmentations",
           "/index-egapro/declaration/augmentations-et-promotions",

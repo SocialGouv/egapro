@@ -17,7 +17,14 @@ export const UserHeaderItem = () => {
   switch (session.status) {
     case "authenticated":
       isStaff = session.data.user.staff || session.data.staff.impersonating || false;
-      return <HeaderAccountMenu staff={isStaff} session={session} isMonCompteProTest={config.isMonCompteProTest} />;
+      return (
+        <HeaderAccountMenu
+          staff={isStaff}
+          session={session}
+          isEmailLogin={config.isEmailLogin}
+          isMonCompteProTest={config.isMonCompteProTest}
+        />
+      );
     case "loading":
       return (
         <HeaderQuickAccessItem

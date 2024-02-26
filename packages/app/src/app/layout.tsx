@@ -44,7 +44,10 @@ export const metadata = {
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   const nonce = headers().get("x-nonce") ?? void 0;
-  const mcpconfig = { isMonCompteProTest: config.api.security.moncomptepro.appTest };
+  const mcpconfig = {
+    isMonCompteProTest: config.api.security.moncomptepro.appTest,
+    isEmailLogin: config.api.security.auth.isEmailLogin,
+  };
   return (
     <html lang="fr" {...getHtmlAttributes({ defaultColorScheme })} className={style.app}>
       <head>

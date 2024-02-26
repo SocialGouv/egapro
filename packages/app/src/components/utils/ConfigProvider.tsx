@@ -2,10 +2,11 @@
 
 import { createContext, type ReactNode } from "react";
 
-export const ConfigContext = createContext({ isMonCompteProTest: false });
+export const ConfigContext = createContext({ isMonCompteProTest: false, isEmailLogin: false });
 ConfigContext.displayName = "ConfigContext";
 
 type ConfigType = {
+  isEmailLogin: boolean;
   isMonCompteProTest: boolean;
 };
 
