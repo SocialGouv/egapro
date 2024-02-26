@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-dom-props */
 import { type MailTemplate } from "@api/shared-domain/infra/mail/type";
 import { config } from "@common/config";
 import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
@@ -6,6 +7,22 @@ import path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires -- Nextjs don't like react-dom/server on routes, so we should "hide it" from him by using require instead of import
 const { renderToStaticMarkup } = require("react-dom/server");
+
+const MailHeader = () => (
+  <header style={{ display: "flex", alignItems: "center", marginBottom: "20px", fontFamily: "arial, sans-serif" }}>
+    <img
+      src={"https://egapro.travail.gouv.fr/logo.png"}
+      alt="Egapro Logo"
+      style={{ maxWidth: "150px", marginRight: "20px" }}
+    />
+    <div>
+      <h1 style={{ margin: 0, fontSize: "24px" }}>Egapro</h1>
+      <p style={{ margin: 0, fontSize: "16px", color: "#666" }}>
+        Index de l’égalité professionnelle et représentation équilibrée femmes‑hommes
+      </p>
+    </div>
+  </header>
+);
 
 export const ownershipRequest_toAskerAfterValidation = (
   combo: Array<[email: string, siren: string]>,
@@ -23,7 +40,8 @@ ${config.api.mailer.signature}`,
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Bonjour,</p>
           <p>Les emails suivants ont été ajoutés aux numéros Siren de vos entreprises :</p>
           <p>
@@ -56,7 +74,8 @@ ${config.api.mailer.signature}`,
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Bonjour,</p>
           <p>
             Les emails suivants ont été refusés et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :
@@ -97,7 +116,8 @@ ${config.api.mailer.signature}`,
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Bonjour,</p>
           <p>
             L'email {email} a été ajouté au numéro Siren {siren} de votre entreprise.
@@ -129,7 +149,8 @@ ${config.api.mailer.signature}`,
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Bonjour,</p>
           <p>Voici le lien vous permettant de valider votre email :</p>
           <p>
@@ -198,7 +219,8 @@ Les services de l’administration du travail.
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Madame, Monsieur,</p>
 
           <p>
@@ -291,7 +313,8 @@ Les services de l’administration du travail.
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Madame, Monsieur,</p>
 
           <p>
@@ -326,7 +349,8 @@ Les services de l’administration du travail.
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Madame, Monsieur,</p>
 
           <p>
@@ -367,7 +391,8 @@ Les services de l’administration du travail.
     "<!doctype html>" +
     renderToStaticMarkup(
       <html>
-        <body>
+        <MailHeader />
+        <body style={{ fontFamily: "arial, sans-serif" }}>
           <p>Madame, Monsieur,</p>
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos écarts éventuels
