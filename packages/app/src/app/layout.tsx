@@ -7,6 +7,7 @@ import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
+import { ConfigProvider } from "@components/utils/ConfigProvider";
 import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
@@ -43,6 +44,7 @@ export const metadata = {
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   const nonce = headers().get("x-nonce") ?? void 0;
+  const mcpconfig = { isMonCompteProTest: config.api.security.moncomptepro.appTest };
   return (
     <html lang="fr" {...getHtmlAttributes({ defaultColorScheme })} className={style.app}>
       <head>
@@ -96,7 +98,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
                   ]}
                 />
                 <ConsentBannerAndConsentManagement />
-                {children}
+                <ConfigProvider config={mcpconfig}>{children}</ConfigProvider>
               </SkeletonTheme>
             </DsfrProvider>
           </SessionProvider>

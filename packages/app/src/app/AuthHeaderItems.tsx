@@ -2,19 +2,22 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
+import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { signOut, useSession } from "next-auth/react";
+import { useContext } from "react";
 
 import { HeaderAccountMenu } from "./HeaderAccountMenu";
 
 export const UserHeaderItem = () => {
   const session = useSession();
+  const config = useContext(ConfigContext);
 
   let isStaff = false;
   switch (session.status) {
     case "authenticated":
       isStaff = session.data.user.staff || session.data.staff.impersonating || false;
-      return <HeaderAccountMenu staff={isStaff} session={session} />;
+      return <HeaderAccountMenu staff={isStaff} session={session} isMonCompteProTest={config.isMonCompteProTest} />;
     case "loading":
       return (
         <HeaderQuickAccessItem
