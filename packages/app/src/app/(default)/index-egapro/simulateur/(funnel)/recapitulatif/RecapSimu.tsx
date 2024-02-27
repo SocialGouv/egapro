@@ -441,7 +441,7 @@ export const RecapSimu = () => {
         className="fr-mt-4w"
         severity="warning"
         title="Attention, le calcul de vos indicateurs et de votre index n'est pas conservé."
-        description="Si vous poursuivez vers la déclaration, seuls les informations de calcul nécessaires à la déclaration seront conservées et préremplies."
+        description="Si vous poursuivez vers la déclaration, seules les informations de calcul nécessaires à la déclaration seront conservées et préremplies."
       />
       <ButtonsGroup
         className="fr-mt-4w"
