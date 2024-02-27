@@ -32,6 +32,7 @@ enum declarationOpmcStatus {
 
 const getDeclarationOpmcStatus = (declaration?: DeclarationOpmcDTO) => {
   if (!declaration) return declarationOpmcStatus.NOT_APPLICABLE;
+  if (declaration?.["periode-reference"]?.périodeSuffisante === "non") return declarationOpmcStatus.NOT_APPLICABLE;
   const { after2021, index, initialValuesObjectifsMesures, objectifsMesuresSchema } =
     buildHelpersObjectifsMesures(declaration);
 
