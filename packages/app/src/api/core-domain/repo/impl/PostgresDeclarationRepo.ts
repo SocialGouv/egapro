@@ -73,7 +73,9 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async getAllBySiren(siren: Siren): Promise<Declaration[]> {
     try {
-      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${this.postgresLimit}`;
+      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} and data notnull ${
+        this.postgresLimit
+      }`;
 
       return raws.map(declarationMap.toDomain);
     } catch (error: unknown) {
