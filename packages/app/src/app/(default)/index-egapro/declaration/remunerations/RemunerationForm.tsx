@@ -158,6 +158,10 @@ export const RemunerationForm = () => {
         draft["remunerations-resultat"] = undefined;
         savePageData("remunerations-resultat", undefined);
       }
+      if (data.estCalculable === "oui" && formData[stepName]?.estCalculable === "non") {
+        draft["remunerations-resultat"] = undefined;
+        savePageData("remunerations-resultat", undefined);
+      }
       if (data.estCalculable !== formData[stepName]?.estCalculable) {
         draft[stepName] = getModifiedFormValues(dirtyFields, data) as DeclarationDTO[typeof stepName];
       } else {
