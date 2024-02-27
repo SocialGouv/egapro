@@ -44,7 +44,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
           <GridCol sm={9} className="fr-pb-0">
             <strong>Code NAF</strong>
             <br />
-            {nafCode} - {NAF[nafCode].description}
+            {nafCode} - {NAF[nafCode] ? NAF[nafCode].description : ""}
           </GridCol>
         )}
         <GridCol sm={12}>
@@ -68,7 +68,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
       <br />
       Siren : <strong>{siren}</strong>
       <br />
-      Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode].description}
+      Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode] ? NAF[nafCode].description : ""}
       <br />
       {workforce?.range && (
         <>
