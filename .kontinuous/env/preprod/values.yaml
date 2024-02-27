@@ -22,6 +22,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
+    EMAIL_LOGIN: true
   autoscale:
     enabled: true
   resources:
