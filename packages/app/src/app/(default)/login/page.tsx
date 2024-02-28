@@ -91,9 +91,9 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
             ) : (
               <>
                 <MonCompteProLogin callbackUrl={callbackUrl} />
-                <GithubLogin callbackUrl={callbackUrl} />
               </>
             )}
+            <GithubLogin callbackUrl={callbackUrl} />
           </Box>
         </>
       )}
