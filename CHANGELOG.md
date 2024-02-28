@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/SocialGouv/egapro/compare/v3.3.0...v3.3.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* allow over 100% results for promotion, renumeration and raises indicators ([#2170](https://github.com/SocialGouv/egapro/issues/2170)) ([60b1cab](https://github.com/SocialGouv/egapro/commit/60b1cab86476e263e4aa94fadb3c9f78edea0d82))
+
 # [3.3.0](https://github.com/SocialGouv/egapro/compare/v3.2.0...v3.3.0) (2024-02-28)
 
 
