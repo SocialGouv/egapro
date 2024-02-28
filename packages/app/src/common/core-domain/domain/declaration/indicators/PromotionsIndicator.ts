@@ -1,5 +1,10 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
-import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
+import {
+  type Percentage,
+  PositiveInteger,
+  PositiveNumber,
+  SimpleNumber,
+} from "@common/shared-domain/domain/valueObjects";
 
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonPromotions } from "../../valueObjects/declaration/indicators/NotComputableReasonPromotions";
@@ -49,7 +54,7 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
     if (json.notComputableReason)
       props.notComputableReason = new NotComputableReasonPromotions(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
-    if (typeof json.result === "number") props.result = new Percentage(json.result);
+    if (typeof json.result === "number") props.result = new PositiveNumber(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);
 
     return new PromotionsIndicator(props) as this;

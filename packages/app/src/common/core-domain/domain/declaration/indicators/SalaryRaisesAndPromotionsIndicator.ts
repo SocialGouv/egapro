@@ -52,7 +52,7 @@ export class SalaryRaisesAndPromotionsIndicator extends AbstractIndicator<Salary
     if (json.notComputableReason)
       props.notComputableReason = new NotComputableReasonSalaryRaisesAndPromotions(json.notComputableReason);
     if (json.favorablePopulation) props.favorablePopulation = new FavorablePopulation(json.favorablePopulation);
-    if (typeof json.result === "number") props.result = new Percentage(json.result);
+    if (typeof json.result === "number") props.result = new PositiveNumber(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);
     if (typeof json.employeesCountResult === "number")
       props.employeesCountResult = new PositiveNumber(json.employeesCountResult);

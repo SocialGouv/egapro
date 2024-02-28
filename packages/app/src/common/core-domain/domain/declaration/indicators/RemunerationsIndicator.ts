@@ -1,5 +1,10 @@
 import { type EntityPropsToJson } from "@common/shared-domain";
-import { Percentage, PositiveInteger, SimpleNumber } from "@common/shared-domain/domain/valueObjects";
+import {
+  type Percentage,
+  PositiveInteger,
+  PositiveNumber,
+  SimpleNumber,
+} from "@common/shared-domain/domain/valueObjects";
 
 import { type AgeRange } from "../../valueObjects/declaration/AgeRange";
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
@@ -71,7 +76,7 @@ export class RemunerationsIndicator extends AbstractIndicator<RemunerationsIndic
     if (json.notComputableReason)
       props.notComputableReason = new NotComputableReasonRemunerations(json.notComputableReason);
 
-    if (typeof json.result === "number") props.result = new Percentage(json.result);
+    if (typeof json.result === "number") props.result = new PositiveNumber(json.result);
     if (typeof json.score === "number") props.score = new PositiveInteger(json.score);
 
     return new RemunerationsIndicator(props) as this;
