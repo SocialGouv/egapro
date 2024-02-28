@@ -1,3 +1,20 @@
+# [3.3.0](https://github.com/SocialGouv/egapro/compare/v3.2.0...v3.3.0) (2024-02-28)
+
+
+### Bug Fixes
+
+* activate alternative login ([#2164](https://github.com/SocialGouv/egapro/issues/2164)) ([813f9f8](https://github.com/SocialGouv/egapro/commit/813f9f820b0760be427992a55a5eebdd77913fd1))
+* add github login with email ([#2168](https://github.com/SocialGouv/egapro/issues/2168)) ([4706806](https://github.com/SocialGouv/egapro/commit/4706806839e4f5620854e7035984f497bfa50e9b))
+* Default if NAF code description not available ([#2162](https://github.com/SocialGouv/egapro/issues/2162)) ([b44b75b](https://github.com/SocialGouv/egapro/commit/b44b75b6993e8ca4fb4f35fae68d45931b55f133))
+* handle declarations with missing data or insufficient duration ([#2165](https://github.com/SocialGouv/egapro/issues/2165)) ([fb10251](https://github.com/SocialGouv/egapro/commit/fb102513cf9ec410a3eb0847a9d19b179ae8f565))
+* Prevent 0 on renumeration results step if declaration modified ([#2163](https://github.com/SocialGouv/egapro/issues/2163)) ([cf292a9](https://github.com/SocialGouv/egapro/commit/cf292a930b7e43dcec1fc1bd3be2886021aa247a))
+* recap simu wording ([#2167](https://github.com/SocialGouv/egapro/issues/2167)) ([3f60cd8](https://github.com/SocialGouv/egapro/commit/3f60cd8292bad898dcc06db28c87df333c4e32a1))
+
+
+### Features
+
+* alternative login ([#2159](https://github.com/SocialGouv/egapro/issues/2159)) ([7041919](https://github.com/SocialGouv/egapro/commit/704191932dcd466a5985bf56d75767340a068869))
+
 # [3.2.0](https://github.com/SocialGouv/egapro/compare/v3.1.16...v3.2.0) (2024-02-26)
 
 
