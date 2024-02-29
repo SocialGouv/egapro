@@ -42,7 +42,6 @@ export const DisplayIndexResults = async (inputDto: SearchConsultationDTO) => {
           text={`${cumulLength} ${totalCount > 10 ? `sur ${totalCount}` : ""} résultat${totalCount > 1 ? "s" : ""}`}
         />
         <ClientAnimate className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-          {/* @ts-ignore */}
           <PageDisplay results={resultsPage0} />
           {pages}
         </ClientAnimate>
