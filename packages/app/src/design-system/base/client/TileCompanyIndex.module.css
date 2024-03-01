@@ -4,7 +4,9 @@
 }
 
 .list li {
-    line-height: 1.25rem;
+    line-height: inherit;
+    break-inside: avoid;
+    page-break-inside: avoid;
 }
 
 @media (min-width: 1024px) {
