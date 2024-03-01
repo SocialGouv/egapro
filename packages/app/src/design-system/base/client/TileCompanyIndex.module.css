@@ -1,18 +1,18 @@
 .list {
     list-style: none;
     text-align: left;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .list li {
-    line-height: inherit;
-    break-inside: avoid;
-    page-break-inside: avoid;
+    flex: 1 1 calc(50% - 1rem);
+    display: flex;
+    align-items: center;
 }
 
-@media (min-width: 1024px) {
-    .list {
-        columns: 2 2rem;
-    }
+.list li span {
+    padding-left: 0.25rem;
 }
 
 .numberOfEmployees {
