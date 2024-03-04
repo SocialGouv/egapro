@@ -203,7 +203,11 @@ ${
       ? "non calculable"
       : declaration.maternityLeaves.score.getValue()
   }}
-- indicateur hautes rémunérations: ${declaration.highRemunerations?.score.getValue()}}
+- indicateur hautes rémunérations: ${
+    declaration.highRemunerations?.score?.getValue() === undefined
+      ? "non calculable"
+      : declaration.highRemunerations.score.getValue()
+  }}
 
 Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
 
@@ -275,7 +279,12 @@ Les services de l’administration du travail.
                 ? "non calculable"
                 : declaration.maternityLeaves.score.getValue()}
             </li>
-            <li>indicateur hautes rémunérations: {declaration.highRemunerations?.score.getValue()}</li>
+            <li>
+              indicateur hautes rémunérations:{" "}
+              {declaration.highRemunerations?.score?.getValue() === undefined
+                ? "non calculable"
+                : declaration.highRemunerations.score.getValue()}
+            </li>
           </ul>
 
           <p>
