@@ -4,7 +4,7 @@ import { type AgeRange } from "@common/core-domain/domain/valueObjects/declarati
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
 import { type createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { deleteEmptyStringOnPaste, setValueAsFloatOrEmptyString } from "@common/utils/form";
-import { currencyFormat, precisePercentFormat } from "@common/utils/number";
+import { precisePercentFormat } from "@common/utils/number";
 import { AideSimulationIndicateurUn } from "@components/aide-simulation/IndicateurUn";
 import { type AlternativeTableProps } from "@design-system";
 import { type FieldErrors, type UseFormRegister } from "react-hook-form";
@@ -249,12 +249,8 @@ export const getCommonFooter = ({ computer, effectifsCsp }: CommonFooterProps): 
       data: metadata.totalGroupCount,
     },
     {
-      label: "Salaire moyen Femmes",
-      data: currencyFormat.format(metadata.additionalMetadata.averageWomenSalary),
-    },
-    {
-      label: "Salaire moyen Hommes",
-      data: currencyFormat.format(metadata.additionalMetadata.averageMenSalary),
+      label: "",
+      colspan: 2,
     },
     {
       label: "Écart total",
