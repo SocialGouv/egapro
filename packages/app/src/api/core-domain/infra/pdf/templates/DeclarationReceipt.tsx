@@ -37,6 +37,16 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
 
   const nafCode = declaration.company.nafCode.getValue();
 
+  const { address, postalCode, city } = declaration.company;
+  let addressValue = "Information non diffusible";
+  if (
+    !(address?.includes("[ND]") || address === undefined) &&
+    !(postalCode?.getValue()?.includes("[ND]") || postalCode?.getValue() === undefined) &&
+    !(city?.includes("[ND]") || city === undefined)
+  ) {
+    addressValue = `${address} ${postalCode?.getValue()} ${city}`;
+  }
+
   const table: BaseReceiptTemplateProps["table"] = [
     {
       title: "Informations déclarant",
@@ -76,9 +86,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         },
         {
           key: "Adresse",
-          value: `${declaration.company.address} ${declaration.company.postalCode?.getValue()} ${
-            declaration.company.city
-          }`,
+          value: addressValue,
         },
         ...(declaration.company.ues?.name === undefined
           ? []

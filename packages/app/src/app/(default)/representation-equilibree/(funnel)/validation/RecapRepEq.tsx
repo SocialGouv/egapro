@@ -91,13 +91,15 @@ export const ValidationRecapRepEq = () => {
     declaredAt: "",
     modifiedAt: "",
     company: {
-      address,
-      city: company.firstMatchingEtablissement.libelleCommuneEtablissement,
+      address: address.includes("[ND]") ? "Information non diffusible" : address,
+      city: company.firstMatchingEtablissement.libelleCommuneEtablissement.includes("[ND]")
+        ? ""
+        : company.firstMatchingEtablissement.libelleCommuneEtablissement,
       countryCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
       county: countyCode ?? void 0,
       nafCode: company.activitePrincipaleUniteLegale,
       name: company.simpleLabel,
-      postalCode: postalCode ?? "",
+      postalCode: postalCode?.includes("[ND]") ? "" : postalCode ?? "",
       region: regionCode ?? void 0,
     },
   };
