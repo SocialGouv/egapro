@@ -21,6 +21,16 @@ export interface RepresentationEquilibreeReceiptProps {
 export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilibreeReceiptProps) => {
   const nafCode = repEq.company.nafCode.getValue();
 
+  const { address, postalCode, city } = repEq.company;
+  let addressValue = "Information non diffusible";
+  if (
+    !(address?.includes("[ND]") || address === undefined) &&
+    !(postalCode?.getValue()?.includes("[ND]") || postalCode?.getValue() === undefined) &&
+    !(city?.includes("[ND]") || city === undefined)
+  ) {
+    addressValue = `${address} ${postalCode?.getValue()} ${city}`;
+  }
+
   const table: BaseReceiptTemplateProps["table"] = [
     {
       title: "Informations déclarant",
@@ -52,7 +62,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         },
         {
           key: "Adresse",
-          value: `${repEq.company.address} ${repEq.company.postalCode?.getValue()} ${repEq.company.city}`,
+          value: addressValue,
         },
       ],
     },

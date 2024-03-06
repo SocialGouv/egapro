@@ -106,15 +106,21 @@ export const prepareDataWithExistingDeclaration = async (
       entreprise: {
         ...baseFormData.entreprise,
         entrepriseDéclarante: {
-          adresse: company?.firstMatchingEtablissement.address,
+          adresse: company?.firstMatchingEtablissement.address.includes("[ND]")
+            ? "Information non diffusible"
+            : company?.firstMatchingEtablissement.address,
           codeNaf: company.activitePrincipaleUniteLegale,
-          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement,
+          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement.includes("[ND]")
+            ? undefined
+            : company.firstMatchingEtablissement?.codePostalEtablissement,
           codePays: company.firstMatchingEtablissement?.codePaysEtrangerEtablissement
             ? COUNTRIES_COG_TO_ISO[company.firstMatchingEtablissement?.codePaysEtrangerEtablissement]
             : undefined,
           raisonSociale: company.simpleLabel,
           siren,
-          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement,
+          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement.includes("[ND]")
+            ? undefined
+            : company.firstMatchingEtablissement?.libelleCommuneEtablissement,
           département: countyCode,
           région: countyCode ? COUNTY_TO_REGION[countyCode] : undefined,
         },

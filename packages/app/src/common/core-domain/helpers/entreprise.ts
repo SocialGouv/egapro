@@ -7,9 +7,11 @@ export const getAdditionalMeta = (company: Entreprise) => {
     ? inseeCodeToCounty(company.firstMatchingEtablissement.codeCommuneEtablissement)
     : undefined;
   const regionCode = countyCode ? COUNTY_TO_REGION[countyCode] : null;
-  const postalCode = company.firstMatchingEtablissement.codePostalEtablissement
-    ? company.firstMatchingEtablissement.codePostalEtablissement
-    : undefined;
+  const postalCode =
+    company.firstMatchingEtablissement.codePostalEtablissement &&
+    !company.firstMatchingEtablissement.codePostalEtablissement.includes("[ND]")
+      ? company.firstMatchingEtablissement.codePostalEtablissement
+      : undefined;
   const address = postalCode
     ? company.firstMatchingEtablissement.address.split(postalCode)[0].trim()
     : company.firstMatchingEtablissement.address;
