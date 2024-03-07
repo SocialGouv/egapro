@@ -23,6 +23,7 @@ import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
 
 interface Input {
   declaration: CreateDeclarationDTO;
+  override?: boolean;
 }
 
 export class SaveDeclaration implements UseCase<Input, void> {
@@ -31,7 +32,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
     private readonly entrepriseService: IEntrepriseService,
   ) {}
 
-  public async execute({ declaration: dto }: Input): Promise<void> {
+  public async execute({ declaration: dto, override }: Input): Promise<void> {
     const now = new Date();
 
     const siren = dto.entreprise?.entrepriseDéclarante?.siren;
@@ -242,7 +243,7 @@ export class SaveDeclaration implements UseCase<Input, void> {
       if (found) {
         const olderThanOneYear = isAfter(new Date(), add(found.declaredAt, { years: 1 }));
 
-        if (olderThanOneYear) {
+        if (olderThanOneYear && !override) {
           throw new SaveDeclarationOverOneYearError("Déclaration is older than one year.");
         }
         declaration = Declaration.fromJson({

@@ -54,7 +54,9 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const session = await getServerSession(authConfig);
   const isOwner = !!session?.user.companies.some(company => company.siren === siren) || session?.user.staff;
 
-  const olderThanOneYear = isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
+  const olderThanOneYear = session?.user?.staff
+    ? false
+    : isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
   const monCompteProHost = monCompteProProvider.issuer;
 
   return (

@@ -85,7 +85,9 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const canEdit = canEditSiren(session?.user)(siren);
 
   if (!declarationDate) return <SkeletonForm fields={8} />;
-  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
+  const olderThanOneYear = session?.user?.staff
+    ? false
+    : isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   return (
     <>

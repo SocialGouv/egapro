@@ -7,16 +7,20 @@ import { config } from "@common/config";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
+import { useSession } from "next-auth/react";
 
 export const AlertExistingDeclaration = () => {
   const { formData } = useDeclarationFormManager();
   const hasMounted = useHasMounted();
+  const session = useSession();
 
   const declarationDate = formData["declaration-existante"].date;
 
   if (!hasMounted || !declarationDate) return null;
 
-  const olderThanOneYear = isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
+  const olderThanOneYear = session?.data?.staff
+    ? false
+    : isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
   return (
     <Alert
