@@ -7,6 +7,7 @@ import { BackNextButtonsGroup } from "@design-system";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { type PropsWithChildren } from "react";
 
 import { prepareDataWithExistingDeclaration } from "../../commencer/CommencerForm";
@@ -18,12 +19,15 @@ type Props = {
 };
 
 export const EditButton = ({ déclaration, year }: PropsWithChildren<Props>) => {
+  const session = useSession();
   const router = useRouter();
   const { setStatus, saveFormData, resetFormData } = useDeclarationFormManager();
 
   const date = déclaration["declaration-existante"].date;
 
-  const olderThanOneYear = date === undefined || isAfter(new Date(), add(new Date(date), { years: 1 }));
+  const olderThanOneYear = session?.data?.staff
+    ? false
+    : date === undefined || isAfter(new Date(), add(new Date(date), { years: 1 }));
   const saveAndGoNext = async (
     { siren, annéeIndicateurs }: { annéeIndicateurs: number; siren: string },
     formData: DeclarationDTO,

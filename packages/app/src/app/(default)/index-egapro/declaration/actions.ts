@@ -34,7 +34,7 @@ export async function getDeclaration(siren: string, year: number) {
 export async function saveDeclaration(
   declaration: CreateDeclarationDTO,
 ): Promise<ServerActionResponse<undefined, string>> {
-  await assertServerSession({
+  const session = await assertServerSession({
     owner: {
       check: declaration.commencer?.siren || "",
       message: "Not authorized to save declaration for this Siren.",
@@ -48,7 +48,7 @@ export async function saveDeclaration(
 
   try {
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
-    await useCase.execute({ declaration });
+    await useCase.execute({ declaration, override: session?.user?.staff });
 
     const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
 
