@@ -200,7 +200,6 @@ export const Indic1Form = () => {
                             mode === RemunerationsMode.Enum.CSP
                               ? lastCspRemunerations ?? defaultCspModeRemunerations
                               : lastOtherRemunerations ?? defaultOtherModesRemunerations;
-
                           if (lastMode && currentRemunerations?.length) {
                             if (lastMode === RemunerationsMode.Enum.CSP) {
                               setLastCspRemunerations(currentRemunerations as ExternalRemunerations);
@@ -210,7 +209,7 @@ export const Indic1Form = () => {
                           }
 
                           setLastMode(mode);
-                          if (mode === RemunerationsMode.Enum.CSP || currentRemunerations?.length) {
+                          if (mode === RemunerationsMode.Enum.CSP) {
                             resetField("remunerations", { defaultValue });
                           } else {
                             // we cannot reset before useFieldArray has been initialized
