@@ -147,10 +147,16 @@ export const createSteps = {
                 zodFr.nativeEnum(AgeRange.Enum),
                 zodFr.object({
                   womenSalary: zodFr
-                    .number({ invalid_type_error: "Le champ est requis" })
+                    .number({
+                      invalid_type_error: "Le champs doit être un nombre",
+                      required_error: "Le champ est requis",
+                    })
                     .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
                   menSalary: zodFr
-                    .number({ invalid_type_error: "Le champ est requis" })
+                    .number({
+                      invalid_type_error: "Le champs doit être un nombre",
+                      required_error: "Le champ est requis",
+                    })
                     .positive("La rémunération ne peut pas être inférieure ou égale à 0"),
                 }),
               )
