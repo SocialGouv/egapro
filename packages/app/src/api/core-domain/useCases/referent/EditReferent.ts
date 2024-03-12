@@ -36,10 +36,12 @@ export class EditReferent implements UseCase<EditReferentDTO, ReferentDTO> {
             : found.value,
           county: dto.county ? new County(dto.county) : found.county,
           region: dto.region ? new Region(dto.region) : found.region,
-          substitute: {
-            email: dto.substitute?.email ? new Email(dto.substitute.email) : found.substitute?.email,
-            name: dto.substitute?.name ?? found.substitute?.name, // ?? because "" is allowed
-          },
+          substitute: Object.keys(dto.substitute || {}).length
+            ? {
+                email: dto.substitute?.email ? new Email(dto.substitute.email) : found.substitute?.email,
+                name: dto.substitute?.name ?? found.substitute?.name, // ?? because "" is allowed
+              }
+            : undefined,
         },
         new UniqueID(dto.id),
       );

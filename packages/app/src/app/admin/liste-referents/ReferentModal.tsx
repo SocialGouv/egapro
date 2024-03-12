@@ -13,7 +13,7 @@ import { FormFieldset, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { noop, sortBy } from "lodash";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { createReferent, saveReferent } from "./actions";
@@ -42,14 +42,6 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
     mode: "onChange",
   });
 
-  const cleanForm = useCallback(() => {
-    reset({
-      type: "email",
-      principal: true,
-      region: void 0,
-    });
-  }, [reset]);
-
   useEffect(() => {
     if (mode === "edit") {
       reset({
@@ -60,8 +52,8 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
           name: currentEdited?.substitute?.name ?? "",
         },
       });
-    } else cleanForm();
-  }, [reset, currentEdited, mode, cleanForm]);
+    }
+  }, [reset, currentEdited, mode]);
 
   const writtenName = watch("name");
   const selectedRegion = watch("region");
@@ -71,11 +63,14 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
   const doSave = async () => {
     const go = await trigger();
     if (go) {
-      handleSubmit(async formData => {
+      await handleSubmit(async formData => {
         if (mode === "edit") {
-          saveReferent(formData);
+          if (formData.substitute?.name === "" && formData.substitute?.email === "") {
+            formData.substitute = void 0;
+          }
+          await saveReferent(formData);
         } else {
-          createReferent(formData);
+          await createReferent(formData);
         }
         modal.close();
         router.refresh();
@@ -93,9 +88,9 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
           children: "Sauvegarder",
           disabled: !isValid || !isDirty,
           doClosesModal: false,
-          onClick() {
-            doSave();
-            cleanForm();
+          async onClick() {
+            await doSave();
+            reset();
           },
         },
       ]}
@@ -180,12 +175,15 @@ export const ReferentModal = ({ mode = "edit", modal }: ReferentModalProps) => {
                 label: "Email",
                 nativeInputProps: {
                   value: "email",
-                  ...register("type", { deps: "value" }),
+                  ...register("type"),
                 },
               },
               {
                 label: "URL",
-                nativeInputProps: { value: "url", ...register("type", { deps: "value" }) },
+                nativeInputProps: {
+                  value: "url",
+                  ...register("type", { setValueAs: value => (value === "URL" ? "url" : "email") }),
+                },
               },
             ]}
           />
