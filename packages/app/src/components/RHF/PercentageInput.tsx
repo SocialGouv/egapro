@@ -63,7 +63,7 @@ export const PercentageInput = <FormType extends SimpleObject>({
             // Round number to 1 decimal.
             const value = parseFloat(e.target.value);
             if (!isNaN(value)) {
-              setValue(name, Math.round(value * 10) / 10, { shouldValidate: true });
+              setValue(name, Math.round(value * 1000) / 1000, { shouldValidate: true });
             }
           },
         }}
