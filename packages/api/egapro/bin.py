@@ -11,6 +11,9 @@ import progressist
 import yaml
 import ujson as json
 from openpyxl import load_workbook
+import aioschedule as schedule
+import functools
+import asyncio
 
 from egapro import (
     config,
@@ -32,25 +35,97 @@ from egapro.exporter import dump  # pyright: ignore
 from egapro.utils import json_dumps
 
 
-@minicli.cli
-async def export_representation(path: Path, max_rows: int = None):
+def catch_exceptions(cancel_on_failure=False):
+    def catch_exceptions_decorator(job_func):
+        @functools.wraps(job_func)
+        def wrapper_function(*args, **kwargs):
+            try:
+                return job_func(*args, **kwargs)
+            except:
+                import traceback
+                print(traceback.format_exc())
+                if cancel_on_failure:
+                    return schedule.CancelJob
+
+        return wrapper_function
+
+    return catch_exceptions_decorator
+
+
+@catch_exceptions(cancel_on_failure=False)
+async def run_export_representation(path: Path, max_rows: int = None):
     wb = await csv_representation.as_xlsx(max_rows)
     print("Writing the dgt XLSX to", path)
     wb.save(path)
 
 
-@minicli.cli
-async def dump_dgt(path: Path, max_rows: int = None):
+@catch_exceptions(cancel_on_failure=False)
+async def run_dump_dgt(path: Path, max_rows: int = None):
     wb = await dgt.as_xlsx(max_rows)
     print("Writing the dgt XLSX to", path)
     wb.save(path)
 
 
-@minicli.cli
-async def dump_dgt_representation(path: Path, max_rows: int = None):
+@catch_exceptions(cancel_on_failure=False)
+async def run_dump_dgt_representation(path: Path, max_rows: int = None):
     wb = await dgt_representation.as_xlsx(max_rows)
     print("Writing the dgt_representation XLSX to", path)
     wb.save(path)
+
+
+@catch_exceptions(cancel_on_failure=False)
+async def run_export_public_data(path: Path):
+    wb = await exporter.public_data_as_xlsx()
+    print("Writing public_data XLSX to", path)
+    wb.save(path)
+    print("Done")
+
+
+@catch_exceptions(cancel_on_failure=False)
+async def run_export_indexes(path: Path):
+    print("Writing the CSV to", path)
+    with path.open("w") as f:
+        await exporter.indexes(f)
+    print("Done")
+
+
+@catch_exceptions(cancel_on_failure=False)
+async def run_full(path: Path):
+    """Create a full JSON export."""
+    print("Writing to", path)
+    with path.open("w") as f:
+        await exporter.full(f)
+    print("Done")
+
+
+@minicli.cli
+async def scheduler():
+    print("Scheduler started")
+    schedule.every().day.at("00:00").do(run_export_representation, Path("/mnt/files/dgt-export-representation.xlsx"))
+    schedule.every().day.at("00:00").do(run_dump_dgt, Path("/mnt/files/dgt.xlsx"))
+    schedule.every().day.at("00:00").do(run_dump_dgt_representation, Path("/mnt/files/dgt-representation.xlsx"))
+    schedule.every().day.at("00:00").do(run_export_public_data, Path("/mnt/files/index-egalite-fh.xlsx"))
+    schedule.every().day.at("00:00").do(run_export_indexes, Path("/mnt/files/indexes.csv"))
+    schedule.every().day.at("00:00").do(run_full, Path("/mnt/files/full.ndjson"))
+
+    while True:
+        await schedule.run_pending()
+        await asyncio.sleep(1)
+
+
+@minicli.cli
+async def export_representation(path: Path, max_rows: int = None):
+    await run_export_representation(path, max_rows)
+
+
+@minicli.cli
+async def dump_dgt(path: Path, max_rows: int = None):
+    await run_dump_dgt(path, max_rows)
+
+
+@minicli.cli
+async def dump_dgt_representation(path: Path, max_rows: int = None):
+    await run_dump_dgt_representation(path, max_rows)
 
 
 @minicli.cli
@@ -61,6 +136,7 @@ async def search(q, verbose=False):
         print(f"{data.siren} | {data.year} | {data.company}")
         if verbose:
             print(row)
+
 
 @minicli.cli
 async def search_representation_equilibree(q, verbose=False):
@@ -74,27 +150,17 @@ async def search_representation_equilibree(q, verbose=False):
 
 @minicli.cli
 async def export_public_data(path: Path):
-    wb = await exporter.public_data_as_xlsx()
-    print("Writing public_data XLSX to", path)
-    wb.save(path)
-    print("Done")
+    await run_export_public_data(path)
 
 
 @minicli.cli
 async def export_indexes(path: Path):
-    print("Writing the CSV to", path)
-    with path.open("w") as f:
-        await exporter.indexes(f)
-    print("Done")
+    await run_export_indexes(path)
 
 
 @minicli.cli
 async def full(path: Path):
-    """Create a full JSON export."""
-    print("Writing to", path)
-    with path.open("w") as f:
-        await exporter.full(f)
-    print("Done")
+    await run_full(path)
 
 
 @minicli.cli
@@ -142,6 +208,7 @@ async def reindex():
     for record in bar.iter(records):
         await db.search.index(record.data)
 
+
 @minicli.cli
 async def reindex_representation_equilibree():
     """Reindex Full Text search_representation_equilibree."""
@@ -150,6 +217,7 @@ async def reindex_representation_equilibree():
     bar = progressist.ProgressBar(prefix="Reindexing representation equilibree", total=len(records), throttle=100)
     for record in bar.iter(records):
         await db.search_representation_equilibree.index(record.data)
+
 
 @minicli.cli
 def serve(reload=False):
