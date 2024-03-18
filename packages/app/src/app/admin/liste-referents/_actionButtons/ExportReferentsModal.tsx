@@ -1,3 +1,5 @@
+"use client";
+
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { config } from "@common/config";

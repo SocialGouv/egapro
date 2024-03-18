@@ -1,3 +1,5 @@
+"use client";
+
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 import { CreateReferentModal, createReferentModalButtonProps } from "./CreateReferentModal";
