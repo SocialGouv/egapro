@@ -128,6 +128,39 @@ files:
   volumeMounts:
     - name: files
       mountPath: /usr/share/nginx/html
+  sidecars:
+    - name: scheduler
+      envFrom:
+        - secretRef:
+            name: "{{ .Values.global.pgSecretName }}"
+        - secretRef:
+            name: "staff"
+        - secretRef:
+            name: "egapro-secret"
+      env:
+        - name: EGAPRO_DBHOST
+          value: "$(PGHOST)"
+        - name: EGAPRO_DBNAME
+          value: "$(PGDATABASE)"
+        - name: EGAPRO_DBPORT
+          value: "$(PGPORT)"
+        - name: EGAPRO_DBUSER
+          value: "$(PGUSER)"
+        - name: EGAPRO_DBPASS
+          value: "$(PGPASSWORD)"
+        - name: EGAPRO_DBSSL
+          value: "$(PGSSLMODE)"
+        - name: EGAPRO_SENTRY_DSN
+          value: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+        - name: SCHEDULER
+          value: "True"
+      volumes:
+        - name: files
+          persistentVolumeClaim:
+            claimName: files
+      volumeMounts:
+        - name: files
+          mountPath: /usr/share/nginx/html
 
 project:
   apiJobs:
