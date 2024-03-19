@@ -130,7 +130,7 @@ files:
       mountPath: /usr/share/nginx/html
   sidecars:
     - name: scheduler
-      image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
+      ~tpl~image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
       envFrom:
         - secretRef:
             name: "{{ .Values.global.pgSecretName }}"
