@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { BackNextButtonsGroup, CenteredContainer, Heading, Text } from "@design-system";
+import { BackNextButtonsGroup, CenteredContainer, Heading, Link, Text } from "@design-system";
 
 import { TITLES } from "../(funnel)/navigation";
 
@@ -25,6 +25,21 @@ const CommencerPage = async () => {
         variant="bold"
         text="Vous allez commencer le calcul des indicateurs et de l'index de l'égalité professionnelle pour votre entreprise ou unité économique et sociale (UES)."
       />
+
+      <Alert
+        severity="info"
+        description={
+          <p>
+            Pour consulter l'aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes,{" "}
+            <Link href={`/aide-simulation`} target="_blank">
+              cliquez ici
+            </Link>
+          </p>
+        }
+        small
+        className="fr-mb-3w"
+      />
+
       <Text text="Suite au calcul, vous pourrez poursuivre vers la déclaration afin de transmettre les résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations nécessaires à la déclaration." />
       <Alert
         className={fr.cx("fr-mb-2w")}

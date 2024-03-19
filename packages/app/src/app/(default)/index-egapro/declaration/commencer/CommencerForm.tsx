@@ -135,7 +135,7 @@ export const prepareDataWithExistingDeclaration = async (
   }
 };
 
-export const CommencerForm = () => {
+export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }) => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
 
@@ -276,10 +276,7 @@ export const CommencerForm = () => {
           )}
 
           <p>
-            <Link
-              href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
-              target="_blank"
-            >
+            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
               Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
             </Link>
           </p>

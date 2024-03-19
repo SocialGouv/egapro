@@ -1,7 +1,7 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Heading } from "@design-system";
+import { Box, Heading, Link } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -25,6 +25,11 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <Box mt="2w">
             <SirenInput />
           </Box>
+          <p>
+            <br />
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+          </p>
         </Box>
       </MessageProvider>
     );
@@ -41,6 +46,11 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <Box mt="2w">
             <SirenInput loadedSiren={selectedSiren} />
           </Box>
+          <p>
+            <br />
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+          </p>
           <Box mt="4w">
             <Heading as="h1" variant="h6" text="Responsables" />
             <EmailOwnerList isEmailLogin={isEmailLogin} siren={selectedSiren} emails={emails} />
@@ -58,6 +68,11 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <Box mt="2w">
               <SirenInput />
             </Box>
+            <p>
+              <br />
+              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+              <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+            </p>
             <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
           </Box>
         </MessageProvider>

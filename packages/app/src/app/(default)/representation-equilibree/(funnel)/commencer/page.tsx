@@ -68,7 +68,7 @@ const CommencerPage = async () => {
         description="Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
           correspondantes à la déclaration."
       />
-      <CommencerForm session={session} />
+      <CommencerForm session={session} monCompteProHost={monCompteProHost ?? ""} />
     </>
   );
 };

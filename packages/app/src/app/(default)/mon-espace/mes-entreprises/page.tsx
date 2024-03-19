@@ -1,7 +1,7 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Heading } from "@design-system";
+import { Box, Heading, Link } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -58,6 +58,11 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <Heading as="h1" text="Mes entreprises" />
           <Box mt="2w">
             <SelectSiren sirenList={sirenList} loadedSiren={selectedSiren} />
+            <p>
+              <br />
+              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+              <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+            </p>
           </Box>
           {typeof selectedSiren === "string" && (
             <Box mt="4w">
@@ -77,6 +82,11 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <Heading as="h1" text="Mes entreprises" />
             <Box mt="2w">
               <SelectSiren sirenList={sirenList} />
+              <p>
+                <br />
+                Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+                <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+              </p>
             </Box>
             <Box mt="4w">Le siren fournit est invalide.</Box>
           </Box>

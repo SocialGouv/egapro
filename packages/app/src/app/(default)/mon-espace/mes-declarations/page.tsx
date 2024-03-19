@@ -4,7 +4,7 @@ import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Heading } from "@design-system";
+import { Box, Heading, Link } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
 import { redirect } from "next/navigation";
@@ -68,6 +68,11 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
         <Alert severity="info" small description={<InfoText />} />
         <Box mt="2w" mb="8w">
           <SelectSirenStaff currentSiren={selectedSiren} />
+          <p>
+            <br />
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+          </p>
         </Box>
       </MessageProvider>
     );
@@ -106,6 +111,11 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
           (sirenWithCompanyName.length > 0 && (
             <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
           ))}
+        <p>
+          <br />
+          Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+          <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+        </p>
       </Box>
       <Box mt="10w">
         <IndexList declarations={declarations} declarationOpmcList={declarationOpmcList} />

@@ -23,8 +23,7 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
-
-export const CommencerForm = ({ session }: { session: Session }) => {
+export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost: string; session: Session }) => {
   const router = useRouter();
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
@@ -169,10 +168,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
             </Select>
           )}
           <p>
-            <Link
-              href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
-              target="_blank"
-            >
+            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
               Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
             </Link>
           </p>
