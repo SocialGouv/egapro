@@ -134,7 +134,7 @@ files:
       extraSpec:
         envFrom:
         - secretRef:
-            name: "{{ .Values.global.pgSecretName }}"
+            ~tpl~name: "{{ .Values.global.pgSecretName }}"
         - secretRef:
             name: "staff"
         - secretRef:
