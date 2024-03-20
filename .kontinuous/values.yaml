@@ -131,14 +131,15 @@ files:
   sidecars:
     - name: scheduler
       ~tpl~image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
-      envFrom:
+      extraSpec:
+        envFrom:
         - secretRef:
             name: "{{ .Values.global.pgSecretName }}"
         - secretRef:
             name: "staff"
         - secretRef:
             name: "egapro-secret"
-      env:
+        env:
         - name: EGAPRO_DBHOST
           value: "$(PGHOST)"
         - name: EGAPRO_DBNAME
@@ -155,11 +156,11 @@ files:
           value: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
         - name: SCHEDULER
           value: "True"
-      volumes:
+        volumes:
         - name: files
           persistentVolumeClaim:
             claimName: files
-      volumeMounts:
+        volumeMounts:
         - name: files
           mountPath: /usr/share/nginx/html
 
