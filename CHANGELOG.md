@@ -1,3 +1,10 @@
+## [3.4.2](https://github.com/SocialGouv/egapro/compare/v3.4.1...v3.4.2) (2024-03-21)
+
+
+### Bug Fixes
+
+* user ID ([11ff87a](https://github.com/SocialGouv/egapro/commit/11ff87af801e02e3c588948ffa5c2cdecea544f8))
+
 ## [3.4.1](https://github.com/SocialGouv/egapro/compare/v3.4.0...v3.4.1) (2024-03-21)
 
 
