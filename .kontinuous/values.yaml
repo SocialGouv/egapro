@@ -131,6 +131,10 @@ files:
     - name: files
       persistentVolumeClaim:
         claimName: files
+  replicas: 1 # mandatory because volume is RWO
+  strategyType: Recreate # idem
+  securityContext:
+    fsGroup: 101
   volumeMounts:
     - name: files
       mountPath: /usr/share/nginx/html
