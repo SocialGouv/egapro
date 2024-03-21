@@ -1,4 +1,4 @@
-import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
@@ -25,7 +25,9 @@ const CommencerPage = async () => {
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  const monCompteProHost = monCompteProProvider.issuer;
+  const monCompteProHost = `https://app${
+    config.api.security.moncomptepro.appTest ? "-test" : ""
+  }.moncomptepro.beta.gouv.fr`;
 
   if (!session.user.companies.length && !session.user.staff) {
     return isEmailLogin ? (

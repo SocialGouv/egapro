@@ -1,4 +1,4 @@
-import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
@@ -20,7 +20,9 @@ export const metadata = {
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProHost = monCompteProProvider.issuer;
+  const monCompteProHost = `https://app${
+    config.api.security.moncomptepro.appTest ? "-test" : ""
+  }.moncomptepro.beta.gouv.fr`;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   if (!(session.user.companies.length || session.user.staff)) {

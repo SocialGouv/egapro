@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- server components */
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { config } from "@common/config";
 import { type SearchConsultationDTO } from "@common/core-domain/dtos/helpers/common";
@@ -13,12 +12,10 @@ import { type NextServerPageProps, withSearchParamsValidation } from "@common/ut
 import { DebugButton } from "@components/utils/debug/DebugButton";
 import { Box, Container, DetailedDownload, Grid, GridCol, Heading, Stat, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
-import { SimpleSubmitForm } from "@design-system/utils/client/SimpleSubmitForm";
 import { getStats } from "@services/server/getDeclarationStats";
 import { Suspense } from "react";
 
 import { SearchSirenForm } from "../../SearchSirenForm";
-import { AverageIndicatorForm } from "./AverageIndicatorForm";
 import { DisplayIndexResults } from "./DisplayIndexResults";
 
 export const dynamic = "force-dynamic";
@@ -60,21 +57,8 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
               </>
             )}
             <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
-            {isLandingPage ? (
-              <SimpleSubmitForm noValidate>
-                <Input
-                  label="Rechercher"
-                  nativeInputProps={{
-                    placeholder: "Nom ou numéro de SIREN de l'entreprise",
-                    name: "query",
-                    type: "search",
-                  }}
-                  className={fr.cx("fr-pb-2w")}
-                />
-              </SimpleSubmitForm>
-            ) : (
-              <SearchSirenForm searchParams={searchParams} />
-            )}
+
+            <SearchSirenForm searchParams={searchParams} />
             {/* @ts-ignore */}
             <DetailedDownload
               href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
@@ -125,9 +109,9 @@ const StatsSection = async (statsInput: GetDeclarationStatsInput) => {
             <Stat display={{ asTitle: "lg" }} text="N/A" helpText={`Index Moyen ${+statsInput.year}`} />
           )}
         </GridCol>
-        <GridCol sm={12} md={10} lg={8}>
-          <AverageIndicatorForm searchParams={statsInput} />
-        </GridCol>
+        {/*<GridCol sm={12} md={10} lg={8}>*/}
+        {/*  <AverageIndicatorForm searchParams={statsInput} />*/}
+        {/*</GridCol>*/}
       </Grid>
     </Container>
   );

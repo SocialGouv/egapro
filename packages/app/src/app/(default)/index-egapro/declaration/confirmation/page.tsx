@@ -231,6 +231,7 @@ const ConfirmationPage = () => {
                   <a
                     className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
                     href="/mon-espace/mes-declarations"
+                    target="_blank"
                   >
                     Accéder à mon espace
                   </a>
