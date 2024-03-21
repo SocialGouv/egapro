@@ -1,3 +1,12 @@
+## [3.4.3](https://github.com/SocialGouv/egapro/compare/v3.4.2...v3.4.3) (2024-03-21)
+
+
+### Bug Fixes
+
+* needs ([57481df](https://github.com/SocialGouv/egapro/commit/57481dfaf3c383c37a30337a6a027912d75a6f93))
+* sslrequire ([c38c7c8](https://github.com/SocialGouv/egapro/commit/c38c7c89ecc2918c54e4cdf9905b7c6d131d5991))
+* useradd ([856dbdc](https://github.com/SocialGouv/egapro/commit/856dbdc945d95dc3524bb468e089c9fe3ebc0609))
+
 ## [3.4.2](https://github.com/SocialGouv/egapro/compare/v3.4.1...v3.4.2) (2024-03-21)
 
 
