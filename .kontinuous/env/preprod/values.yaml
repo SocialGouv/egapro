@@ -6,8 +6,6 @@ api:
     EGAPRO_SMTP_LOGIN: ""
     EGAPRO_SMTP_PASSWORD: ""
     EGAPRO_SMTP_SSL: ""
-  autoscale:
-    enabled: true
   resources:
     requests:
       cpu: 100m
@@ -23,8 +21,6 @@ app:
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
 #    EMAIL_LOGIN: "True"
-  autoscale:
-    enabled: true
   resources:
     requests:
       cpu: 20m
