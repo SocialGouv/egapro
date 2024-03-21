@@ -2,9 +2,9 @@ FROM python:3.9.7
 
 WORKDIR /app
 
-RUN useradd -m myapp
-RUN chown myapp:myapp /app
-USER myapp
+RUN useradd -m myapp -u 1001 -g 1001
+RUN chown 1001:1001 /app
+USER 1001
 ENV PATH $PATH:/home/myapp/.local/bin
 
 RUN pip3 install pipenv --user
@@ -15,8 +15,6 @@ RUN	pip install -e .[dev,test,prod]
 RUN cp -r egapro.egg-info /tmp/egapro.egg-info
 
 EXPOSE 2626
-
-CMD ["./entrypoint.sh"]
 
 ## PROD
 ENV PRODUCTION="true"
