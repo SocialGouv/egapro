@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/SocialGouv/egapro/compare/v3.4.0...v3.4.1) (2024-03-21)
+
+
+### Bug Fixes
+
+* volume settings ([d269974](https://github.com/SocialGouv/egapro/commit/d26997418a5cc87c15f9cc533ae2b9c5a58aba3a))
+
 # [3.4.0](https://github.com/SocialGouv/egapro/compare/v3.3.1...v3.4.0) (2024-03-21)
 
 
