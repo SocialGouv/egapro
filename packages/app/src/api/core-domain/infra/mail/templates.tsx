@@ -169,7 +169,7 @@ export const declaration_receipt = (url: string, { declaration }: DeclarationOpm
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos indicateurs et de votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année ${
     declaration.year.getValue() + 1
-  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+  } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
 
 Vous avez déclaré un index global ${
     declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"
@@ -232,8 +232,8 @@ Les services de l’administration du travail.
             votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes pour l'année{" "}
             {declaration.year.getValue() + 1} au titre des données {declaration.year.getValue()} conformément aux
             dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le
-            présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre
-            déclaration.
+            présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de
+            votre déclaration.
           </p>
 
           <p>
@@ -310,7 +310,7 @@ export const opmc_receipt = (): MailTemplate => ({
     "Egapro - Déclaration des objectifs de progression et mesures de correction de l’index égalité professionnelle femmes-hommes",
   text: `Madame, Monsieur,
 
-Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression et mesures de correction. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression et mesures de correction. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
 
 Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
 
@@ -329,7 +329,7 @@ Les services de l’administration du travail.
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de
             progression et mesures de correction. L’administration du travail accuse réception par le présent message de
-            votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+            votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
           </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
@@ -346,7 +346,7 @@ export const op_receipt = (): MailTemplate => ({
   subject: "Egapro - Déclaration des objectifs de progression de l’index égalité professionnelle femmes-homme",
   text: `Madame, Monsieur,
 
-Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de progression. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
 
 Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
 
@@ -365,7 +365,7 @@ Les services de l’administration du travail.
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos objectifs de
             progression. L’administration du travail accuse réception par le présent message de votre due transmission.
-            Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+            Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
           </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
@@ -384,7 +384,7 @@ export const balancedRepresentation_receipt = (url: string, year: number): MailT
 
 Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos écarts éventuels de représentation entre les femmes et les hommes pour l'année ${
     year + 1
-  } au titre des données ${year}. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé réception ne vaut pas contrôle de conformité de votre déclaration.
+  } au titre des données ${year}. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
 
 Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
 
@@ -406,7 +406,7 @@ Les services de l’administration du travail.
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos écarts éventuels
             de représentation entre les femmes et les hommes pour l'année {year + 1} au titre des données {year}.
-            L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé
+            L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de
             réception ne vaut pas contrôle de conformité de votre déclaration.
           </p>
           <p>
