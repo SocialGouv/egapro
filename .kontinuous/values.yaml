@@ -122,6 +122,7 @@ pg:
 
 files:
   ~chart: app
+  ~needs: [build-api] # sidecar image
   image: ghcr.io/socialgouv/docker/nginx:7.0.1
   containerPort: 8080
   probesPort: 8080
