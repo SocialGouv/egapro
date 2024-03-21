@@ -2,8 +2,8 @@ FROM python:3.9.7
 
 WORKDIR /app
 
-RUN useradd -m myapp -u 1001 -g 1001
-RUN chown 1001:1001 /app
+RUN useradd -m myapp -u 1001
+RUN chown myapp:myapp /app
 USER 1001
 ENV PATH $PATH:/home/myapp/.local/bin
 
