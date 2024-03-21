@@ -1,3 +1,10 @@
+## [3.4.4](https://github.com/SocialGouv/egapro/compare/v3.4.3...v3.4.4) (2024-03-21)
+
+
+### Bug Fixes
+
+* sslrequire revert ([5de4888](https://github.com/SocialGouv/egapro/commit/5de4888f76725fe32c9fd9720e2742a8d9945d04))
+
 ## [3.4.3](https://github.com/SocialGouv/egapro/compare/v3.4.2...v3.4.3) (2024-03-21)
 
 
