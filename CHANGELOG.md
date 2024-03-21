@@ -1,3 +1,36 @@
+# [3.4.0](https://github.com/SocialGouv/egapro/compare/v3.3.1...v3.4.0) (2024-03-21)
+
+
+### Bug Fixes
+
+* accept 3 number after comma in declaration ([50a0e42](https://github.com/SocialGouv/egapro/commit/50a0e42206af633c013e75da4c91a0bc91559315))
+* admin referent list buttons and edit actions ([#2210](https://github.com/SocialGouv/egapro/issues/2210)) ([e7717d5](https://github.com/SocialGouv/egapro/commit/e7717d5032b348dea06e12ebda6a0ad5acc05a6a))
+* bump ([3ba30f8](https://github.com/SocialGouv/egapro/commit/3ba30f82c307e42636ecfc13144b167ebb40a301))
+* clean ([962d046](https://github.com/SocialGouv/egapro/commit/962d046c1bc338b2cd1f940134be185e2acd52f1))
+* Consultation page company details formatting ([#2173](https://github.com/SocialGouv/egapro/issues/2173)) ([aa5ba06](https://github.com/SocialGouv/egapro/commit/aa5ba0682a10fdf930d8c7f935f1661b5efd641c))
+* declaration receipt high renumerations missing wording when non calculable ([#2180](https://github.com/SocialGouv/egapro/issues/2180)) ([c03596b](https://github.com/SocialGouv/egapro/commit/c03596bd89236f48a27200636ed3504b791e2327))
+* delete SENTRY_AUTH_TOKEN ([#2172](https://github.com/SocialGouv/egapro/issues/2172)) ([30f7399](https://github.com/SocialGouv/egapro/commit/30f7399ef1bc2159706accc94faa25a80e7b822c))
+* firefox problems ([972d642](https://github.com/SocialGouv/egapro/commit/972d642eca60316bc38031a84628d44a7205d378))
+* info icons on consult company info ([#2171](https://github.com/SocialGouv/egapro/issues/2171)) ([f152056](https://github.com/SocialGouv/egapro/commit/f1520566934e0ae94bbc0b6b2d6e7e5141924bf7))
+* reduce sentry performance transtaction sampling ([8e8d691](https://github.com/SocialGouv/egapro/commit/8e8d691021a76582697439ef7dcaf407dc7ddf94))
+* remove average salaries calculation in simulation ([#2178](https://github.com/SocialGouv/egapro/issues/2178)) ([b9c30e9](https://github.com/SocialGouv/egapro/commit/b9c30e9a4401ab0206402cfe8cb1f61ddf9ee3d9))
+* scheduler sidecar image path config ([e6a243e](https://github.com/SocialGouv/egapro/commit/e6a243e7f980ec6683ceb23d6376d70b62911f1a))
+* sidecar mountpoint ([a00bba4](https://github.com/SocialGouv/egapro/commit/a00bba4f8a848cc8098d269af69810642baaef61))
+* sidecars ([36dcc00](https://github.com/SocialGouv/egapro/commit/36dcc008e74f66d2a952901ee8117d7279fa32eb))
+* sidecars ([a4cf02b](https://github.com/SocialGouv/egapro/commit/a4cf02bf25b4ac1dba6bdbb171b69e6c580f09b8))
+* sidecars ([00e2ae9](https://github.com/SocialGouv/egapro/commit/00e2ae98f3200848e9e53e8f4578bce370356d1f))
+* simu keep data in form in remunerations ([103974e](https://github.com/SocialGouv/egapro/commit/103974e2b93f5ee41af9390768712e0b5fd1107b))
+* tplize sidecar image ([76a5b77](https://github.com/SocialGouv/egapro/commit/76a5b77b7947e8824c99cf7a534a0cef877c4661))
+* wording and allow if company has privated data ([#2181](https://github.com/SocialGouv/egapro/issues/2181)) ([d3ebb40](https://github.com/SocialGouv/egapro/commit/d3ebb40f43b1e27b012e5314c54d28744f4a682e))
+* wording and links ([10284f1](https://github.com/SocialGouv/egapro/commit/10284f143e538bc17215b8b297f7e4347ae4fcb5))
+* wordings ([#2232](https://github.com/SocialGouv/egapro/issues/2232)) ([5e4af5c](https://github.com/SocialGouv/egapro/commit/5e4af5c69b1f8c32b94f349c4a51aa43ae247572))
+
+
+### Features
+
+* python API export tasks scheduler ([#2221](https://github.com/SocialGouv/egapro/issues/2221)) ([02b3290](https://github.com/SocialGouv/egapro/commit/02b3290179e6582e3e156e693f073b3bcbcb86e9))
+* staff can edit declaration if older than one year ([#2206](https://github.com/SocialGouv/egapro/issues/2206)) ([ce4d616](https://github.com/SocialGouv/egapro/commit/ce4d6165a6c49d347b14483d6a44c42701262deb))
+
 ## [3.3.1](https://github.com/SocialGouv/egapro/compare/v3.3.0...v3.3.1) (2024-02-28)
 
 
