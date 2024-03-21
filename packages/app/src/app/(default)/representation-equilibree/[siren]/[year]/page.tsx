@@ -1,4 +1,4 @@
-import { authConfig, monCompteProProvider } from "@api/core-domain/infra/auth/config";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 import { representationEquilibreeRepo } from "@api/core-domain/repo";
 import {
   GetRepresentationEquilibreeBySirenAndYear,
@@ -8,6 +8,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
+import { config } from "@common/config";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { type NextServerPageProps } from "@common/utils/next";
@@ -57,7 +58,9 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const olderThanOneYear = session?.user?.staff
     ? false
     : isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
-  const monCompteProHost = monCompteProProvider.issuer;
+  const monCompteProHost = `https://app${
+    config.api.security.moncomptepro.appTest ? "-test" : ""
+  }.moncomptepro.beta.gouv.fr`;
 
   return (
     <CenteredContainer pb="6w">

@@ -1,5 +1,6 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type ComputedResult } from "@common/core-domain/computers/AbstractComputer";
 import { IndicateurDeuxComputer, type Percentages } from "@common/core-domain/computers/IndicateurDeuxComputer";
@@ -27,6 +28,7 @@ import {
   Box,
   CenteredContainer,
   FormLayout,
+  Link,
 } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,6 +171,61 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <ClientAnimate>
+          {indicateur == 2 ? (
+            <Alert
+              className={fr.cx("fr-mb-2w")}
+              severity="info"
+              title="Aide au calcul"
+              description={
+                <p>
+                  La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
+                  salarié concerné y compris celle liée à une promotion. L’indicateur n’est pas calculable:
+                  <br />
+                  <ul>
+                    <li>s’il n’a eu aucune augmentation au cours de la période de référence</li>
+                    <li>
+                      si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
+                      des indicateurs
+                    </li>
+                  </ul>
+                  Pour en savoir plus sur le calcul de cet indicateur,{" "}
+                  <Link
+                    target="_blank"
+                    href="/aide-simulation#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries"
+                  >
+                    cliquez ici
+                  </Link>
+                </p>
+              }
+            />
+          ) : (
+            <Alert
+              className={fr.cx("fr-mb-2w")}
+              severity="info"
+              title="Aide au calcul"
+              description={
+                <p>
+                  La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur
+                  l'indicateur n'est pas calculable:
+                  <br />
+                  <ul>
+                    <li>s'il n'a eu aucune promotion au cours de la période de référence</li>
+                    <li>
+                      si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
+                      des indicateurs
+                    </li>
+                  </ul>
+                  Pour en savoir plus sur le calcul de cet indicateur,{" "}
+                  <Link
+                    target="_blank"
+                    href="/aide-simulation#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries"
+                  >
+                    cliquez ici
+                  </Link>
+                </p>
+              }
+            />
+          )}
           {!canCompute ? (
             <Alert
               className="fr-mb-3w"

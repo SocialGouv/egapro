@@ -14,7 +14,7 @@ interface Props {
 
 const augmentations = {
   advantageTextStart: "Un écart de taux d'augmentations",
-  ncText: "L'indicateur écart de taux d'augmentations individuelles est non calculable",
+  ncText: "L'indicateur écart de taux d'augmentations individuelles n'est pas calculable",
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
   resultText: "Écart global de taux d'augmentations en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux d'augmentations individuelles",
@@ -24,7 +24,7 @@ const augmentations = {
 
 const promotions = {
   advantageTextStart: "Un écart de taux de promotions",
-  ncText: "L'indicateur écart de taux de promotions est non calculable",
+  ncText: "L'indicateur écart de taux de promotions n'est pas calculable",
   balanceText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",
   resultText: "Écart global de taux de promotions en valeur absolue",
   noteText: "Nombre de points obtenus à l'indicateur écart de taux de promotions",

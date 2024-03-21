@@ -53,14 +53,44 @@ export const Navigation = () => {
               },
               isActive: segments.includes("declaration") && segments.includes("index-egapro"),
             },
+            {
+              text: "Consulter l'index",
+              linkProps: {
+                href: "/index-egapro/recherche",
+              },
+              isActive: segments.includes("recherche") && segments.includes("index-egapro"),
+            },
           ],
         },
         {
           text: "Représentation équilibrée",
-          linkProps: {
-            href: "/representation-equilibree",
-          },
           isActive: segment === "representation-equilibree",
+          buttonProps: {
+            id: "main-navigation-index-link",
+          },
+          menuLinks: [
+            {
+              text: "À propos des écarts",
+              linkProps: {
+                href: "/representation-equilibree",
+              },
+              isActive: segments.includes("representation-equilibree") && segments.length === 1,
+            },
+            {
+              text: "Déclarer les écarts",
+              linkProps: {
+                href: "/representation-equilibree/assujetti",
+              },
+              isActive: segments.includes("assujetti") && segments.includes("representation-equilibree"),
+            },
+            {
+              text: "Consulter les écarts",
+              linkProps: {
+                href: "/representation-equilibree/recherche",
+              },
+              isActive: segments.includes("recherche") && segments.includes("representation-equilibree"),
+            },
+          ],
         },
         ...(isStaff
           ? [

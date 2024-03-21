@@ -1,5 +1,5 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { CenteredContainer } from "@design-system";
+import { CenteredContainer, Link } from "@design-system";
 
 import { TITLES } from "../navigation";
 import { Indic4Form } from "./Form";
@@ -30,6 +30,20 @@ const Indicateur4Page = () => {
             congé parental) pendant la période de référence si au moins une augmentation a été faite pendant son congé.
             La prise en compte de chaque salariée est donc appréciée individuellement et dépend des éventuelles
             augmentations ayant eu lieu pendant leur congé maternité.
+            <br />
+            L’indicateur n’est pas calculable::
+            <br />
+            <ul>
+              <li>s’il n’y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence</li>
+              <li>s’il n’y a eu aucune augmentation ‘individuelle ou collective) au cours des congés maternité</li>
+            </ul>
+            Pour en savoir plus sur le calcul de cet indicateur,{" "}
+            <Link
+              target="_blank"
+              href="/aide-simulation#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
+            >
+              cliquez ici
+            </Link>
           </>
         }
       />

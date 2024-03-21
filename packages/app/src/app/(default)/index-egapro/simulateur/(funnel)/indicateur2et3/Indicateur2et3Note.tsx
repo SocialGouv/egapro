@@ -42,7 +42,7 @@ export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detail
           noBorder={noBorder}
           note="NC"
           size="small"
-          text="L'indicateur écart de taux d'augmentations est non calculable"
+          text="L'indicateur écart de taux d'augmentations n'est pas calculable"
           legend="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes"
         />
       ) : (

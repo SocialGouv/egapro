@@ -112,6 +112,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
     if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le parcours ?")) {
       resetFunnel();
       resetForm();
+      if (session.user.staff) setValue("siren", "");
     }
   };
 

@@ -8,7 +8,7 @@ interface NavigationItem {
 }
 
 export const TITLES = {
-  commencer: "Commencer une simlulation de calcul",
+  commencer: "Commencer une simulation de calcul",
   effectifs: "Effectifs assujettis et pris en compte",
   indicateur1: "Indicateur écart de rémunération",
   indicateur2: "Indicateur écart de taux d’augmentations",

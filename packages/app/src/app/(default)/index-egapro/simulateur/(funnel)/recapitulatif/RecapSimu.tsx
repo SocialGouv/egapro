@@ -182,7 +182,7 @@ export const RecapSimu = () => {
                 noBorder
                 note="NC"
                 size="small"
-                text="L'indicateur écart de rémunération est non calculable"
+                text="L'indicateur écart de rémunération n'est pas calculable"
                 legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs"
               />
             )}
@@ -200,7 +200,7 @@ export const RecapSimu = () => {
                   noBorder
                   note="NC"
                   size="small"
-                  text="L'indicateur écart de taux d'augmentations est non calculable"
+                  text="L'indicateur écart de taux d'augmentations n'est pas calculable"
                   legend="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes"
                 />
               );
@@ -212,7 +212,7 @@ export const RecapSimu = () => {
                   noBorder
                   note="NC"
                   size="small"
-                  text="L'indicateur écart de taux d'augmentations est non calculable"
+                  text="L'indicateur écart de taux d'augmentations n'est pas calculable"
                   legend="Il n'y a pas eu d'augmentations durant la période de référence"
                 />
               );
@@ -249,7 +249,7 @@ export const RecapSimu = () => {
                         size="small"
                         text={`L'indicateur écart de taux ${
                           indicateur === 2 ? "d'augmentations" : "de promotions"
-                        } est non calculable`}
+                        } n'est pas calculable`}
                         legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
                       />
                     );
@@ -264,7 +264,7 @@ export const RecapSimu = () => {
                         size="small"
                         text={`L'indicateur écart de taux ${
                           indicateur === 2 ? "d'augmentations" : "de promotions"
-                        } est non calculable`}
+                        } n'est pas calculable`}
                         legend={`Il n'y a pas eu ${
                           indicateur === 2 ? "d'augmentations" : "de promotions"
                         } durant la période de référence`}
@@ -339,7 +339,7 @@ export const RecapSimu = () => {
                 noBorder
                 note="NC"
                 size="small"
-                text="L'indicateur retour de congé maternité est non calculable"
+                text="L'indicateur retour de congé maternité n'est pas calculable"
                 legend="Absence d'augmentations salariales pendant la durée du ou des congés maternité"
               />
             );
@@ -351,7 +351,7 @@ export const RecapSimu = () => {
                 noBorder
                 note="NC"
                 size="small"
-                text="L'indicateur retour de congé maternité est non calculable"
+                text="L'indicateur retour de congé maternité n'est pas calculable"
                 legend="Il n'y a pas eu de retour de congé maternité durant la période de référence"
               />
             );

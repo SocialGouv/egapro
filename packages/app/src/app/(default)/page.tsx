@@ -59,6 +59,7 @@ const Home = () => {
                       children: "Consulter l'Index",
                       linkProps: {
                         href: "/index-egapro/recherche",
+                        target: "_blank",
                       },
                       priority: "tertiary no outline",
                     },
@@ -93,6 +94,7 @@ const Home = () => {
                       children: "Consulter les Écarts",
                       linkProps: {
                         href: "/representation-equilibree/recherche",
+                        target: "_blank",
                       },
                       priority: "tertiary no outline",
                     },
