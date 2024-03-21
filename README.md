@@ -101,6 +101,17 @@ Les fichiers suivants, sont accessibles uniquement si authentifié ou pour certa
 - full.ndjson
 - indexes.csv
 
+### Commandes pour générer les fichiers manuellement
+
+```sh
+egapro export-public-data /mnt/files/index-egalite-fh.xlsx
+egapro dump-dgt /mnt/files/dgt.xlsx
+egapro dump-dgt-representation /mnt/files/dgt-representation.xlsx
+egapro full /mnt/files/full.ndjson
+egapro export-indexes /mnt/files/indexes.csv
+egapro export-representation /mnt/files/dgt-export-representation.xlsx
+```
+
 ## Helpers egapro
 
 L'API contient un CLI avec certaines commandes utiles :

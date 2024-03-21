@@ -161,19 +161,6 @@ files:
           mountPath: /mnt/files
 
 project:
-  apiJobs:
-    - name: export-public-data
-      command: egapro export-public-data /mnt/files/index-egalite-fh.xlsx
-    - name: dump-dgt
-      command: egapro dump-dgt /mnt/files/dgt.xlsx
-    - name: dump-dgt-representation
-      command: egapro dump-dgt-representation /mnt/files/dgt-representation.xlsx
-    - name: full
-      command: egapro full /mnt/files/full.ndjson
-    - name: export-indexes
-      command: egapro export-indexes /mnt/files/indexes.csv
-    - name: export-representation
-      command: egapro export-representation /mnt/files/dgt-export-representation.xlsx
   whitelist:
     # DigDash dev
     - "94.23.250.213"
