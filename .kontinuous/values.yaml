@@ -158,7 +158,7 @@ files:
           value: "True"
         volumeMounts:
         - name: files
-          mountPath: /usr/share/nginx/html
+          mountPath: /mnt/files
 
 project:
   apiJobs:
