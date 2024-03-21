@@ -49,6 +49,12 @@ const AideMonCompteProPage = () => {
             className="fr-my-6w"
             links={[
               {
+                text: "Comment contacter MonComptePro ?",
+                linkProps: {
+                  href: "#Comment-contacter-MonComptePro",
+                },
+              },
+              {
                 text: "Comment s'identifier avec MonComptePro ?",
                 linkProps: {
                   href: "#Comment-s-identifier-avec-MonComptePro",
@@ -70,6 +76,15 @@ const AideMonCompteProPage = () => {
           />
 
           <ContentWithChapter>
+            <AnchorLink as="h2" anchor="Comment-contacter-MonComptePro">
+              Comment contacter MonComptePro ?
+            </AnchorLink>
+            <p>
+              Pour tout problème lié à la connexion sur votre espace MonComptePro, veuillez consulter le support{" "}
+              <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target="_blank" rel="noopener noreferrer">
+                contact@moncomptepro.beta.gouv.fr
+              </Link>
+            </p>
             <AnchorLink as="h2" anchor="Comment-s-identifier-avec-MonComptePro">
               Comment s'identifier avec MonComptePro ?
             </AnchorLink>
