@@ -674,12 +674,6 @@ async def set_type_codecs(conn):
 
 async def init():
     try:
-        if config.DBSSL == "require":
-            sslctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-            sslctx.check_hostname = False
-            sslctx.verify_mode = ssl.CERT_NONE
-        else:
-            sslctx = config.DBSSL
         table.pool = await asyncpg.create_pool(
             database=config.DBNAME,
             host=config.DBHOST,
@@ -689,7 +683,7 @@ async def init():
             min_size=config.DBMINSIZE,
             max_size=config.DBMAXSIZE,
             init=set_type_codecs,
-            ssl=sslctx,
+            ssl=config.DBSSL,
         )
     except (OSError, PostgresError) as err:
         raise RuntimeError(f"CRITICAL Cannot connect to DB: {err}")
