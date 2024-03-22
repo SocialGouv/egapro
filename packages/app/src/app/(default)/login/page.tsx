@@ -2,7 +2,7 @@ import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, CenteredContainer } from "@design-system";
+import { Box, CenteredContainer, Link } from "@design-system";
 import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
@@ -80,6 +80,13 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                       entreprise cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur
                       Egapro.
                     </strong>
+                  </p>
+                  <br />
+                  <p className={"text-dsfr-error"}>
+                    Si vous rencontrez des difficultés pour vous connecter, vous devez contacter le support{" "}
+                    <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target={"_blank"}>
+                      MonComptePro
+                    </Link>
                   </p>
                 </>
               }
