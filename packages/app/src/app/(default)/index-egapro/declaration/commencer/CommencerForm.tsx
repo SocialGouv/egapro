@@ -106,11 +106,11 @@ export const prepareDataWithExistingDeclaration = async (
       entreprise: {
         ...baseFormData.entreprise,
         entrepriseDéclarante: {
-          adresse: company?.firstMatchingEtablissement.address.includes("[ND]")
+          adresse: company.firstMatchingEtablissement.address?.includes("[ND]")
             ? "Information non diffusible"
             : company?.firstMatchingEtablissement.address,
           codeNaf: company.activitePrincipaleUniteLegale,
-          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement.includes("[ND]")
+          codePostal: company.firstMatchingEtablissement?.codePostalEtablissement?.includes("[ND]")
             ? undefined
             : company.firstMatchingEtablissement?.codePostalEtablissement,
           codePays: company.firstMatchingEtablissement?.codePaysEtrangerEtablissement
@@ -118,7 +118,7 @@ export const prepareDataWithExistingDeclaration = async (
             : undefined,
           raisonSociale: company.simpleLabel,
           siren,
-          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement.includes("[ND]")
+          commune: company.firstMatchingEtablissement?.libelleCommuneEtablissement?.includes("[ND]")
             ? undefined
             : company.firstMatchingEtablissement?.libelleCommuneEtablissement,
           département: countyCode,
