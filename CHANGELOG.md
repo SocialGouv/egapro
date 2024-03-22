@@ -1,3 +1,13 @@
+## [3.4.5](https://github.com/SocialGouv/egapro/compare/v3.4.4...v3.4.5) (2024-03-22)
+
+
+### Bug Fixes
+
+* enterprise missing info check ([27c80bd](https://github.com/SocialGouv/egapro/commit/27c80bd7b5a251c1eb231c6140ef74c1f8a8cfe6))
+* MCP help page wording ([#2233](https://github.com/SocialGouv/egapro/issues/2233)) ([8d9cdde](https://github.com/SocialGouv/egapro/commit/8d9cdde78223ec19e731abccb204a6e3d84b1347))
+* MCP login page wording ([#2234](https://github.com/SocialGouv/egapro/issues/2234)) ([ba6225c](https://github.com/SocialGouv/egapro/commit/ba6225cbe539c7a52ac8fdd9de2bb2ccf9ea350e))
+* ovh domains ([#2236](https://github.com/SocialGouv/egapro/issues/2236)) ([2f99849](https://github.com/SocialGouv/egapro/commit/2f9984953eb0a09c6803905dd0b05d4113f46d97))
+
 ## [3.4.4](https://github.com/SocialGouv/egapro/compare/v3.4.3...v3.4.4) (2024-03-21)
 
 
