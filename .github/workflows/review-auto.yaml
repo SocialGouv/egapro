@@ -36,7 +36,7 @@ jobs:
         uses: socialgouv/kontinuous/.github/actions/env@v1
       - name: Set env
         run: |
-          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.dev.fabrique.social.gouv.fr" >> $GITHUB_ENV
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
           echo "$SITE_URL"
       - name: Cypress run
         uses: cypress-io/github-action@v5

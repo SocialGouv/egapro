@@ -28,7 +28,7 @@ Où `siren` est le numéro de siren de l'entreprise ou UES déclarant, et `year`
 
 Pour aller voir les mails envoyés par le serveur de dev:
 
-https://mailtrap.dev.egapro.fabrique.social.gouv.fr/
+https://mailtrap.ovh.egapro.fabrique.social.gouv.fr/
 
 (Demander un accès.)
 

@@ -208,7 +208,7 @@ declare namespace NodeJS {
          */
         SECURITY_GITHUB_CLIENT_SECRET?: string;
         /**
-         * Dist: `https://egapro-charon.dev.fabrique.social.gouv.fr`  
+         * Dist: `https://egapro-charon.ovh.fabrique.social.gouv.fr`  
          * {@link [Local Env Dist](.env.development)}
          */
         SECURITY_CHARON_URL?: string;
