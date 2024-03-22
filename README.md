@@ -4,7 +4,7 @@
 
 Prod : <https://egapro.travail.gouv.fr/>
 
-Préprod : <https://egapro-preprod.dev.fabrique.social.gouv.fr/>
+Préprod : <https://egapro-preprod.ovh.fabrique.social.gouv.fr/>
 
 ## Installer
 
@@ -84,9 +84,9 @@ yarn workspaces run lint
 
 Ajouter le préfixe `maildev-` devant l'URL.
 
-Si l'environnement est `https://egapro-feat-limit-char-11oson.dev.fabrique.social.gouv.fr/`.
+Si l'environnement est `https://egapro-feat-limit-char-11oson.ovh.fabrique.social.gouv.fr/`.
 
-Le maildev se trouvera alors à `https://maildev-egapro-feat-limit-char-11oson.dev.fabrique.social.gouv.fr/`
+Le maildev se trouvera alors à `https://maildev-egapro-feat-limit-char-11oson.ovh.fabrique.social.gouv.fr/`
 
 ## Fichiers
 

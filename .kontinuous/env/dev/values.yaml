@@ -1,5 +1,5 @@
 api:
-  ~needs: [build-api,create-db]
+  ~needs: [build-api]
   vars:
     EGAPRO_SEND_EMAILS: "True"
     EGAPRO_SMTP_HOST: maildev
@@ -9,7 +9,7 @@ api:
     EGAPRO_SMTP_SSL: ""
 
 app:
-  ~needs: [build-app, create-db]
+  ~needs: [build-app]
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
@@ -18,8 +18,3 @@ app:
 
 maildev: {}
 pgweb: {}
-
-jobs:
-  runs:
-    create-db:
-      use: create-db

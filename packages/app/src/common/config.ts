@@ -96,7 +96,7 @@ export const config = {
         staffRoutes: ["/admin/liste-referents", "/admin/impersonate"],
         charonUrl: ensureApiEnvVar(
           process.env.SECURITY_CHARON_URL,
-          "https://egapro-charon.dev.fabrique.social.gouv.fr",
+          "https://egapro-charon.ovh.fabrique.social.gouv.fr",
         ),
       },
     },

@@ -96,10 +96,10 @@ services:
   oauth2-proxy-github:
     image: bitnami/oauth2-proxy
     command:
-      # - --redirect-url=https://oauth-egapro.preprod.dev.fabrique.social.gouv.fr/callback
+      # - --redirect-url=https://oauth-egapro.preprod.ovh.fabrique.social.gouv.fr/callback
       - --redirect-url=http://localhost:4180/oauth2/callback
       - --upstream=file:///dev/null
-      - --whitelist-domain=.dev.fabrique.social.gouv.fr
+      - --whitelist-domain=.ovh.fabrique.social.gouv.fr
       - --whitelist-domain=localhost:3000
     ports:
       - 4180:4180
