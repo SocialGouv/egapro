@@ -14344,12 +14344,12 @@ __metadata:
   linkType: hard
 
 "zod-i18n-map@npm:^2.19.0":
-  version: 2.23.0
-  resolution: "zod-i18n-map@npm:2.23.0"
+  version: 2.27.0
+  resolution: "zod-i18n-map@npm:2.27.0"
   peerDependencies:
     i18next: ">=21.3.0"
     zod: ">=3.17.0"
-  checksum: b66096600d5d128eb81b4c9cb56ba918f6f1f0e86c689cca914771e3c018fb9b764ac3890060431a23380dd1222abea7937f3ce27835e7fc28c435a8bc35288b
+  checksum: ecaa2df6489a3349d12cc5401c844b3b5a1f2aab0ee696f29fec54c9708cf31a8584a17769edb360d2f8f47ee7683c38c932774d6bd9522e6ba4f147a23bae02
   languageName: node
   linkType: hard
 
