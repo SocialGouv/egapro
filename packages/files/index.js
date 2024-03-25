@@ -44,7 +44,7 @@ function getClientIp(req) {
     const xForwardedFor = req.headers['x-original-forwarded-for'];
     return xForwardedFor.split(',')[0]; // Assuming the client IP is the first one in the list
   }
-  return null; // Client IP could not be validated
+  return req.headers['x-forwarded-for'];
 }
 
 
