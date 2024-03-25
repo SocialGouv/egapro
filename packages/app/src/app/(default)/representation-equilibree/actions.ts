@@ -2,7 +2,7 @@
 
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { entrepriseService } from "@api/core-domain/infra/services";
-import { representationEquilibreeRepo } from "@api/core-domain/repo";
+import { referentRepo, representationEquilibreeRepo } from "@api/core-domain/repo";
 import { GetRepresentationEquilibreeBySirenAndYear } from "@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear";
 import { SaveRepresentationEquilibree } from "@api/core-domain/useCases/SaveRepresentationEquilibree";
 import {
@@ -43,6 +43,7 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
 
   const receiptUseCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
+    referentRepo,
     globalMailerService,
     jsxPdfService,
   );
@@ -65,6 +66,7 @@ export async function sendRepresentationEquilibreeReceipt(siren: string, year: n
 
   const useCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
+    referentRepo,
     globalMailerService,
     jsxPdfService,
   );

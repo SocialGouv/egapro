@@ -1,6 +1,7 @@
 import { type ReferentRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type Referent } from "@common/core-domain/domain/Referent";
+import { type Region } from "@common/core-domain/domain/valueObjects/Region";
 import { referentMap } from "@common/core-domain/mappers/referentMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
@@ -41,6 +42,14 @@ export class PostgresReferentRepo implements IReferentRepo {
 
   public async getOne(id: UniqueID): Promise<Referent | null> {
     const [raw] = await this.sql`select * from ${this.table} where id = ${id.getValue()} limit 1`;
+
+    if (!raw) return null;
+    return referentMap.toDomain(raw);
+  }
+
+  public async getOneByRegion(region?: Region): Promise<Referent | null> {
+    if (!region) return null;
+    const [raw] = await this.sql`select * from ${this.table} where region = ${region.getValue()} limit 1`;
 
     if (!raw) return null;
     return referentMap.toDomain(raw);

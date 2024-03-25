@@ -1,5 +1,6 @@
 import { type IJsxPdfService } from "@api/shared-domain/infra/pdf/IJsxPdfService";
 import { config } from "@common/config";
+import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/ReferentType";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
@@ -7,6 +8,7 @@ import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { type IGlobalMailerService } from "../infra/mail/IGlobalMailerService";
 import { DeclarationReceipt } from "../infra/pdf/templates/DeclarationReceipt";
 import { type IDeclarationRepo } from "../repo/IDeclarationRepo";
+import { type IReferentRepo } from "../repo/IReferentRepo";
 
 interface Input {
   email: string;
@@ -17,6 +19,7 @@ interface Input {
 export class SendDeclarationReceipt implements UseCase<Input, void> {
   constructor(
     private readonly declarationRepo: IDeclarationRepo,
+    private readonly referentRepo: IReferentRepo,
     private readonly globalMailerService: IGlobalMailerService,
     private readonly jsxPdfService: IJsxPdfService,
   ) {}
@@ -31,6 +34,7 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
         throw new SendDeclarationReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
+      const referent = await this.referentRepo.getOneByRegion(declaration.declaration?.company?.region);
       const buffer = await this.jsxPdfService.buffer(DeclarationReceipt(declaration));
 
       const url = `${config.host}/index-egapro/declaration/${siren}/${year}`;
@@ -39,6 +43,10 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
         "declaration_receipt",
         {
           to: email,
+          replyTo:
+            referent?.value?.getValue() && referent?.type.getValue() === ReferentType.Enum.EMAIL
+              ? referent?.value?.getValue()
+              : undefined,
           attachments: [
             {
               content: buffer,
