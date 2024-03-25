@@ -1,4 +1,5 @@
 FROM node:20
+WORKDIR /tmp
 USER 1000
 COPY package.json yarn.lock
 COPY .yarn .yarn
