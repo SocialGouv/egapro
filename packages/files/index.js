@@ -9,8 +9,8 @@ const rootPath = process.env.ROOT_PATH || process.cwd();
 const trustedProxyIP = process.env.TRUSTED_PROXY_IP;
 const authPasswdFile = process.env.AUTH_PASSWD_FILE;
 const whiteListIP = process.env.WHITELIST_IP.split(",");
-const filesPublic = process.env.FILES_PUBLIC.split(",");
-const filesRestricted = process.env.FILES_RESTRICTED.split(",");
+const filesPublic = process.env.FILES_PUBLIC.split(",").map(f=>`/${f}`);
+const filesRestricted = process.env.FILES_RESTRICTED.split(",").map(f=>`/${f}`);
 
 function readAuthFile(filePath) {
   const credentials = {};
