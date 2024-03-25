@@ -31,6 +31,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bcryptjs@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: b969467087ed7a01ff905a1c6a0c45014ec586248a448ea08370c8ed8bb314bda16a870ca23e0961d7d23bdce1a04c76fa70a9d680be814fa9ac7d8fc61870a3
+  languageName: node
+  linkType: hard
+
 "body-parser@npm:2.0.0-beta.2":
   version: 2.0.0-beta.2
   resolution: "body-parser@npm:2.0.0-beta.2"
@@ -233,6 +240,7 @@ __metadata:
   resolution: "files@workspace:."
   dependencies:
     basic-auth: "npm:^2.0.1"
+    bcryptjs: "npm:^2.4.3"
     express: "npm:^5.0.0-beta.3"
   languageName: unknown
   linkType: soft

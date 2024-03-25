@@ -4,6 +4,19 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 const port = 8080;
+const bcrypt = require('bcryptjs');
+
+
+async function verifyPassword(providedPassword, storedHash) {
+    try {
+        const match = await bcrypt.compare(providedPassword, storedHash);
+        return match;
+    } catch (error) {
+        console.error('Error verifying password:', error);
+        return false;
+    }
+}
+
 
 const rootPath = process.env.ROOT_PATH || process.cwd();
 const trustedProxyIP = process.env.TRUSTED_PROXY_IP;
@@ -34,14 +47,18 @@ function getClientIp(req) {
   return null; // Client IP could not be validated
 }
 
+
 function basicAuthentication(req, res, next) {
-  const user = basicAuth(req);
-  if (!user || !users[user.name] || users[user.name] !== user.pass) {
-    res.set('WWW-Authenticate', 'Basic realm="401"');
-    res.status(401).send('Authentication required.');
-    return;
+  const user = basicAuth(req);   
+  if(user && users[user.name]){
+    const hash = users[user.name]
+    if(verifyPassword(user.pass, hash)){
+      next();
+      return;
+    }
   }
-  next();
+  res.set('WWW-Authenticate', 'Basic realm="401"');
+  res.status(401).send('Authentication required.');
 }
 
 app.use((req, res, next) => {
