@@ -44,7 +44,7 @@ function basicAuthentication(req, res, next) {
   next();
 }
 
-app.get("/", (req, res, next) => {
+app.use((req, res, next) => {
   const filePath = req.path
   if(filesPublic.includes(filePath)){
     next();
@@ -60,11 +60,12 @@ app.get("/", (req, res, next) => {
     res.status(404).send()
     return
   }
-}, (_req, res) => {
+});
+app.use((req, res) => {
   const filePath = req.path
   res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(filePath));
   res.sendFile(filePath, { root: rootPath });
-});
+})
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
