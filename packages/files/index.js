@@ -2,7 +2,6 @@ const express = require('express');
 const basicAuth = require('basic-auth');
 const fs = require('fs');
 const path = require('path');
-const mime = require('mime');
 const app = express();
 const port = 8080;
 
@@ -63,8 +62,6 @@ app.get("/", (req, res, next) => {
   }
 }, (_req, res) => {
   const filePath = req.path
-  const fileType = mime.getType(filePath);
-  res.setHeader('Content-Type', fileType);
   res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(filePath));
   res.sendFile(filePath, { root: rootPath });
 });
