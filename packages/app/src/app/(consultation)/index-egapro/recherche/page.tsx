@@ -59,7 +59,6 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
             <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
 
             <SearchSirenForm searchParams={searchParams} />
-            {/* @ts-ignore */}
             <DetailedDownload
               href={new URL("/index-egalite-fh.xlsx", config.host).toString()}
               label={date => `Télécharger le fichier des index des entreprises au ${date}`}

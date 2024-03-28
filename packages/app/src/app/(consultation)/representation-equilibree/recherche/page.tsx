@@ -69,7 +69,6 @@ export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchem
                   </Suspense>
                 )}
               </ClientAnimate>
-              {/* @ts-ignore */}
               <DetailedDownload
                 href={new URL("/dgt-export-representation.xlsx", config.host).toString()}
                 label={date => `Télécharger le fichier des représentations équilibrées au ${date}`}
