@@ -1,5 +1,7 @@
+import { type IReferentRepo } from "@api/core-domain/repo/IReferentRepo";
 import { type IJsxPdfService } from "@api/shared-domain/infra/pdf/IJsxPdfService";
 import { config } from "@common/config";
+import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/ReferentType";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
@@ -17,6 +19,7 @@ interface Input {
 export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void> {
   constructor(
     private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo,
+    private readonly referentRepo: IReferentRepo,
     private readonly globalMailerService: IGlobalMailerService,
     private readonly jsxPdfService: IJsxPdfService,
   ) {}
@@ -33,6 +36,7 @@ export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void>
         );
       }
 
+      const referent = await this.referentRepo.getOneByRegion(representationEquilibree.company?.region);
       const buffer = await this.jsxPdfService.buffer(
         RepresentationEquilibreeReceipt({ repEq: representationEquilibree }),
       );
@@ -43,6 +47,10 @@ export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void>
         "balancedRepresentation_receipt",
         {
           to: email,
+          replyTo:
+            referent?.value?.getValue() && referent?.type.getValue() === ReferentType.Enum.EMAIL
+              ? referent?.value?.getValue()
+              : undefined,
           attachments: [
             {
               content: buffer,

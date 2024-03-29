@@ -1,4 +1,6 @@
+import { type IReferentRepo } from "@api/core-domain/repo/IReferentRepo";
 import { type IJsxPdfService } from "@api/shared-domain/infra/pdf/IJsxPdfService";
+import { ReferentType } from "@common/core-domain/domain/valueObjects/referent/ReferentType";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
@@ -16,6 +18,7 @@ interface Input {
 export class SendOpmcReceipt implements UseCase<Input, void> {
   constructor(
     private readonly declarationRepo: IDeclarationRepo,
+    private readonly referentRepo: IReferentRepo,
     private readonly globalMailerService: IGlobalMailerService,
     private readonly jsxPdfService: IJsxPdfService,
   ) {}
@@ -30,6 +33,7 @@ export class SendOpmcReceipt implements UseCase<Input, void> {
         throw new SendOpmcReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
+      const referent = await this.referentRepo.getOneByRegion(declarationOpmc.declaration?.company?.region);
       const buffer = await this.jsxPdfService.buffer(DeclarationReceipt(declarationOpmc));
 
       await this.globalMailerService.init();
@@ -37,6 +41,10 @@ export class SendOpmcReceipt implements UseCase<Input, void> {
       if ((declarationOpmc?.declaration?.index?.getValue() || 0) < 75) {
         [, rejected] = await this.globalMailerService.sendMail("opmc_receipt", {
           to: email,
+          replyTo:
+            referent?.value?.getValue() && referent?.type.getValue() === ReferentType.Enum.EMAIL
+              ? referent?.value?.getValue()
+              : undefined,
           attachments: [
             {
               content: buffer,
@@ -48,6 +56,10 @@ export class SendOpmcReceipt implements UseCase<Input, void> {
       } else {
         [, rejected] = await this.globalMailerService.sendMail("op_receipt", {
           to: email,
+          replyTo:
+            referent?.value?.getValue() && referent?.type.getValue() === ReferentType.Enum.EMAIL
+              ? referent?.value?.getValue()
+              : undefined,
           attachments: [
             {
               content: buffer,

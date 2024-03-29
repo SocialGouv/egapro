@@ -2,7 +2,7 @@
 
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { entrepriseService } from "@api/core-domain/infra/services";
-import { declarationRepo } from "@api/core-domain/repo";
+import { declarationRepo, referentRepo } from "@api/core-domain/repo";
 import { GetDeclarationBySirenAndYear } from "@api/core-domain/useCases/GetDeclarationBySirenAndYear";
 import { SaveDeclaration } from "@api/core-domain/useCases/SaveDeclaration";
 import { SendDeclarationReceipt } from "@api/core-domain/useCases/SendDeclarationReceipt";
@@ -50,7 +50,12 @@ export async function saveDeclaration(
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
     await useCase.execute({ declaration, override: session?.user?.staff });
 
-    const receiptUseCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+    const receiptUseCase = new SendDeclarationReceipt(
+      declarationRepo,
+      referentRepo,
+      globalMailerService,
+      jsxPdfService,
+    );
 
     assert(siren, "Siren is required");
     assert(year, "Year is required");
@@ -92,7 +97,7 @@ export async function sendDeclarationReceipt(siren: string, year: number) {
     staff: true,
   });
 
-  const useCase = new SendDeclarationReceipt(declarationRepo, globalMailerService, jsxPdfService);
+  const useCase = new SendDeclarationReceipt(declarationRepo, referentRepo, globalMailerService, jsxPdfService);
 
   await useCase.execute({ siren, year, email: session.user.email });
 }
