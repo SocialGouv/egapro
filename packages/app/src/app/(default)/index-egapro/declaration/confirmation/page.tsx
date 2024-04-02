@@ -225,19 +225,6 @@ const ConfirmationPage = () => {
         <GridCol md="10">
           <Card
             title="Informations"
-            footer={
-              <ul className="fr-links-group">
-                <li>
-                  <a
-                    className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
-                    href="/mon-espace/mes-declarations"
-                    target="_blank"
-                  >
-                    Accéder à mon espace
-                  </a>
-                </li>
-              </ul>
-            }
             desc={
               <>
                 <p>
@@ -247,6 +234,17 @@ const ConfirmationPage = () => {
                   </strong>
                 </p>
                 <p>Vous pouvez également télécharger le récapitulatif de vos déclarations.</p>
+                <ul className="fr-links-group">
+                  <li>
+                    <a
+                      className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
+                      href="/mon-espace/mes-declarations"
+                      target="_blank"
+                    >
+                      Accéder à mon espace
+                    </a>
+                  </li>
+                </ul>
               </>
             }
           />

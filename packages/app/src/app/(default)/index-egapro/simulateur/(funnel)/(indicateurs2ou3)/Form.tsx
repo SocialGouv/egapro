@@ -205,7 +205,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               title="Aide au calcul"
               description={
                 <p>
-                  La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur
+                  La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.
                   l'indicateur n'est pas calculable:
                   <br />
                   <ul>

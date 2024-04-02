@@ -22,7 +22,7 @@ const Indicateur4Page = () => {
       </p>
       <Alert
         className="fr-mb-4w"
-        title="Salariées considérées"
+        title="Aide au calcul"
         severity="info"
         description={
           <>

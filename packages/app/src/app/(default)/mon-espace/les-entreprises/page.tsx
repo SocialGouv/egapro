@@ -27,7 +27,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           <p>
             <br />
-            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
             <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
           </p>
         </Box>
@@ -48,7 +48,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           <p>
             <br />
-            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
             <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
           </p>
           <Box mt="4w">
@@ -70,7 +70,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             </Box>
             <p>
               <br />
-              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+              Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
               <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
             </p>
             <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
