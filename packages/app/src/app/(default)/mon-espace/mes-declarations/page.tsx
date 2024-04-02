@@ -70,7 +70,7 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
           <SelectSirenStaff currentSiren={selectedSiren} />
           <p>
             <br />
-            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
             <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
           </p>
         </Box>
@@ -113,7 +113,7 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
           ))}
         <p>
           <br />
-          Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+          Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
           <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
         </p>
       </Box>

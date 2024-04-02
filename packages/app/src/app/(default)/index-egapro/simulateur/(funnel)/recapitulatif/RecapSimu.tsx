@@ -100,7 +100,7 @@ export const RecapSimu = () => {
   // actions
   const sendToDeclaration = () => {
     saveFormData(simuFunnelToDeclarationDTO(funnel));
-    window.open("/index-egapro/declaration/commencer", "_blank");
+    window.open("/index-egapro/declaration/assujetti", "_blank");
   };
 
   return (
