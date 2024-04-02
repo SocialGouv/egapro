@@ -1,3 +1,15 @@
+## [3.4.6](https://github.com/SocialGouv/egapro/compare/v3.4.5...v3.4.6) (2024-04-02)
+
+
+### Bug Fixes
+
+* compat with future dns update to ovh ([6d0d8b0](https://github.com/SocialGouv/egapro/commit/6d0d8b09438fe11a26c692fb7f60921c6af8298a))
+* mail templates wording and add referent ([#2242](https://github.com/SocialGouv/egapro/issues/2242)) ([25e5b6c](https://github.com/SocialGouv/egapro/commit/25e5b6c5286b117424b0187de5236f0f19b30445))
+* proxy files express temp ([#2241](https://github.com/SocialGouv/egapro/issues/2241)) ([e2592e4](https://github.com/SocialGouv/egapro/commit/e2592e409a226f7eb18f9deee6099ea5976c48d0))
+* Replace referents export URL by API export ([#2244](https://github.com/SocialGouv/egapro/issues/2244)) ([3c7f1c4](https://github.com/SocialGouv/egapro/commit/3c7f1c4d5e37e7c807f5288f739dd2dd82c2d888))
+* Search form wording ([#2246](https://github.com/SocialGouv/egapro/issues/2246)) ([59494d5](https://github.com/SocialGouv/egapro/commit/59494d5171386a4bf20fc1944ad4b7c461b712d8))
+* Simulateur final step wording ([#2245](https://github.com/SocialGouv/egapro/issues/2245)) ([4feb84a](https://github.com/SocialGouv/egapro/commit/4feb84a0a36213b7398a1624558cce1de0e627ee))
+
 ## [3.4.5](https://github.com/SocialGouv/egapro/compare/v3.4.4...v3.4.5) (2024-03-22)
 
 
