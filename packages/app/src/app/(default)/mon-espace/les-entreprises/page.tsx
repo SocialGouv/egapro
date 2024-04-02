@@ -1,4 +1,5 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, Heading, Link } from "@design-system";
@@ -11,6 +12,39 @@ import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
 import { SirenInput } from "./SirenInput";
 
+const MesEntreprisesInfoAlert = () => (
+  <Alert
+    severity="info"
+    small
+    description={
+      <>
+        <p>
+          Dans ce menu, vous pouvez consulter les adresses mails rattachées à une entreprise en sélectionnant au
+          préalable dans la liste déroulante le numéro Siren de l'entreprise concernée si vous gérez plusieurs
+          entreprises.
+        </p>
+        <p>
+          {" "}
+          Si vous souhaitez supprimer une adresse mail rattachée à un siren, veuillez{" "}
+          <Link target="_blank" href={"mailto:contact@moncomptepro.beta.gouv.fr"}>
+            contacter MonComptePro
+          </Link>{" "}
+          pour envoyer votre demande. Il faut{" "}
+          <Link
+            target="_blank"
+            href={`https://app${
+              config.api.security.moncomptepro.appTest ? "-test" : ""
+            }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
+          >
+            créer un nouveau compte MonComptePro
+          </Link>{" "}
+          pour rattacher une autre adresse mail à un numéro Siren.
+        </p>
+      </>
+    }
+  />
+);
+
 const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
   if (!session) redirect("/login");
@@ -22,6 +56,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       <MessageProvider>
         <Box mb="10w">
           <Heading as="h1" text="Les entreprises" />
+          <MesEntreprisesInfoAlert />
           <Box mt="2w">
             <SirenInput />
           </Box>
@@ -43,6 +78,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       <MessageProvider>
         <Box mb="10w">
           <Heading as="h1" text="Les entreprises" />
+          <MesEntreprisesInfoAlert />
           <Box mt="2w">
             <SirenInput loadedSiren={selectedSiren} />
           </Box>
@@ -65,6 +101,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
         <MessageProvider>
           <Box mb="10w">
             <Heading as="h1" text="Les entreprises" />
+            <MesEntreprisesInfoAlert />
             <Box mt="2w">
               <SirenInput />
             </Box>
