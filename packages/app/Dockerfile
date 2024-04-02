@@ -45,6 +45,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/app/node_modules ./packages/app/node_modules
 COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 
-USER 1001
+USER 1000
 
 CMD ["node_modules/.bin/next", "start"]
