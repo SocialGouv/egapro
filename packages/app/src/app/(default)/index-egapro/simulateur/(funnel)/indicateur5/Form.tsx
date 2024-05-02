@@ -60,11 +60,11 @@ export const Indic5Form = () => {
           <NumberPairInputs<Indic5FormType>
             first={{
               formKey: "women",
-              label: "Nombre de femmes parmi les 10 plus hautes rémunérations",
+              label: "Nombre de femmes parmi les 10 plus hautes rémunérations*",
             }}
             second={{
               formKey: "men",
-              label: "Nombre d'hommes parmi les 10 plus hautes rémunérations",
+              label: "Nombre d'hommes parmi les 10 plus hautes rémunérations*",
             }}
             options={{
               max: 10,

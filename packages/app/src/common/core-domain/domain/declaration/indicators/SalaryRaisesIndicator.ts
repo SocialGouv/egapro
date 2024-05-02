@@ -47,7 +47,7 @@ export class SalaryRaisesIndicator extends AbstractIndicator<SalaryRaisesIndicat
   }
 
   public fromJson(json: EntityPropsToJson<SalaryRaisesIndicatorProps>): this {
-    const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
+    const categories = json.categories.map(cat => (typeof cat === "number" ? new SimpleNumber(cat) : null));
     const props: SalaryRaisesIndicatorProps = {
       categories,
     };

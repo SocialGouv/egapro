@@ -46,7 +46,7 @@ export class PromotionsIndicator extends AbstractIndicator<PromotionsIndicatorPr
   }
 
   public fromJson(json: EntityPropsToJson<PromotionsIndicatorProps>): this {
-    const categories = json.categories.map(cat => (cat ? new SimpleNumber(cat) : null));
+    const categories = json.categories.map(cat => (typeof cat === "number" ? new SimpleNumber(cat) : null));
     const props: PromotionsIndicatorProps = {
       categories,
     };
