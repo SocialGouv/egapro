@@ -170,7 +170,7 @@ export const Indic4Form = () => {
                     </GridCol>
                     <GridCol sm={12}>
                       <Input
-                        label="Total des salariées de retour de congé maternité"
+                        label="Total des salariées de retour de congé maternité*"
                         hintText="Indiquez le nombre total de salariées revenues de congé maternité pendant la période de référence. Doivent être retenues les salariées qui sont revenues de congé maternité pendant la période de référence, si au moins une augmentation salariale a été faite pendant leur congé."
                         state={whenCalculableErrors.count?.total && "error"}
                         stateRelatedMessage={whenCalculableErrors.count?.total?.message}
@@ -193,7 +193,7 @@ export const Indic4Form = () => {
                     </GridCol>
                     <GridCol sm={12}>
                       <Input
-                        label="Nombre de salariées augmentées à leur retour"
+                        label="Nombre de salariées augmentées à leur retour*"
                         hintText={
                           hasTotal ? (
                             count.total === 0 ? (

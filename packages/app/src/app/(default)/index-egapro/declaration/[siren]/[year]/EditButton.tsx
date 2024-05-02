@@ -39,7 +39,7 @@ export const EditButton = ({ déclaration, year }: PropsWithChildren<Props>) => 
       // Save in storage (savePageData is not used because we want to save commencer page and declaration-existante).
       saveFormData(newData);
 
-      router.push(funnelConfig(newData)["declarant"].next().url);
+      router.push(funnelConfig(newData)["commencer"].next().url);
     } catch (error: unknown) {
       console.error("Unexpected API error", error);
     }

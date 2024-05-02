@@ -162,7 +162,7 @@ export const EffectifsForm = () => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <RadioButtons
-          legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)"
+          legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES) *"
           state={errors.workforceRange && "error"}
           stateRelatedMessage={errors.workforceRange?.message}
           options={[

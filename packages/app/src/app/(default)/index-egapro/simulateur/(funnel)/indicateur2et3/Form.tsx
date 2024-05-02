@@ -176,7 +176,7 @@ export const Indic2and3Form = () => {
             ) : (
               <>
                 <RadioOuiNon
-                  legend="Y a-t-il eu des augmentations individuelles durant la période de référence ?"
+                  legend="Y a-t-il eu des augmentations individuelles durant la période de référence ?*"
                   name="calculable"
                   triggerValidation={true}
                 />
@@ -185,7 +185,7 @@ export const Indic2and3Form = () => {
                     <Container className={cx(fr.cx("fr-px-md-3v", "fr-px-2v", "fr-mb-6w"), style["form-input-card"])}>
                       <Grid haveGutters>
                         <GridCol className={style["form-input-card-title"]}>
-                          <Text text="Nombre de salariés augmentés" inline variant={["xl", "bold"]} mb="auto" />
+                          <Text text="Nombre de salariés augmentés*" inline variant={["xl", "bold"]} mb="auto" />
                           <Button
                             title="Information indicateur écart de taux d'augmentation"
                             iconId="fr-icon-information-fill"
