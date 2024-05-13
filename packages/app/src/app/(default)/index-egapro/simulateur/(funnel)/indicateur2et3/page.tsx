@@ -24,7 +24,7 @@ const Indicateur2et3Page = () => {
         description={
           <p>
             La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
-            salarié concerné en excluant celle liée à une promotion. L’indicateur n’est pas calculable:
+            salarié concerné y compris celle liée à une promotion. L’indicateur n’est pas calculable:
             <br />
             <ul>
               <li>s’il n’a eu aucune augmentation au cours de la période de référence</li>

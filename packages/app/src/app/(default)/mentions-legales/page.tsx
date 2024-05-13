@@ -16,7 +16,7 @@ const LegalNotice = () => {
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
             <h2>Éditeur de la plateforme</h2>
-            <p>Index Egapro est édité par la Fabrique Numérique des Ministères sociaux située&nbsp;:</p>
+            <p>Egapro est édité par la Fabrique Numérique des Ministères sociaux située&nbsp;:</p>
             <p>
               Tour Mirabeau
               <br />

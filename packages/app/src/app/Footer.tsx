@@ -2,8 +2,6 @@ import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import DsfrFooter, { type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { config } from "@common/config";
 
-import { FooterPersonalDataPolicyItem } from "./consentManagement";
-
 const githubLink = {
   text: "Contribuer sur Github",
   linkProps: {
@@ -75,10 +73,17 @@ export const Footer = () => (
     contentDescription={`Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.`}
     bottomItems={[
       {
+        text: "Déclaration d'accesibilité",
+        linkProps: { href: "/declaration-accessibilite" },
+      },
+      {
         text: "CGU",
         linkProps: { href: "/cgu" },
       },
-      <FooterPersonalDataPolicyItem key="FooterPersonalDataPolicyItem" />,
+      {
+        text: "Politique de confidentialité",
+        linkProps: { href: "/politique-de-confidentialite-v2" },
+      },
       {
         ...headerFooterDisplayItem,
         iconId: "fr-icon-theme-fill",

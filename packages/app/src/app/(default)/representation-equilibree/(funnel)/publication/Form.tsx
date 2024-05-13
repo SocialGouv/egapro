@@ -87,9 +87,10 @@ export const PublicationForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
       <FormLayout>
         <Input
-          label="Date de publication des écarts calculables"
+          label="Date de publication des écarts calculables *"
           state={errors.publishDate && "error"}
           stateRelatedMessage={errors.publishDate?.message}
           nativeInputProps={{
@@ -101,7 +102,7 @@ export const PublicationForm = () => {
         />
 
         <RadioButtons
-          legend="Avez-vous un site Internet pour publier les écarts calculables ?"
+          legend="Avez-vous un site Internet pour publier les écarts calculables ? *"
           orientation="horizontal"
           options={[
             {
@@ -131,7 +132,7 @@ export const PublicationForm = () => {
           ]}
         />
         <Input
-          label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables"
+          label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables *"
           state={errors.publishUrl && "error"}
           stateRelatedMessage={errors.publishUrl?.message}
           className={hasWebsite ? "block" : "hidden"}
@@ -146,7 +147,7 @@ export const PublicationForm = () => {
         />
         <Input
           textArea
-          label="Préciser les modalités de communication des écarts calculables auprès de vos salariés"
+          label="Préciser les modalités de communication des écarts calculables auprès de vos salariés *"
           state={errors.publishModalities && "error"}
           stateRelatedMessage={errors.publishModalities?.message}
           className={hasWebsite === false ? "block" : "hidden"}

@@ -105,6 +105,7 @@ export const ResultatGlobalForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <BigNote
@@ -128,7 +129,7 @@ export const ResultatGlobalForm = () => {
             {index !== undefined && index < 75 && (
               <>
                 <Select
-                  label="Mesures de correction prévues à l'article D. 1142-6"
+                  label="Mesures de correction prévues à l'article D. 1142-6 *"
                   state={errors.mesures && "error"}
                   stateRelatedMessage={errors.mesures?.message}
                   nativeSelectProps={{

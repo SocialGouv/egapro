@@ -132,9 +132,10 @@ export const PeriodeReferenceForm = () => {
         est l'année au titre de laquelle les indicateurs sont calculés.
       </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <RadioOuiNon
-            legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ?"
+            legend="Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ? *"
             name="périodeSuffisante"
           />
 
@@ -142,7 +143,7 @@ export const PeriodeReferenceForm = () => {
             {périodeSuffisante === "oui" && (
               <>
                 <Input
-                  label="Date de fin de la période de référence choisie pour le calcul des indicateurs"
+                  label="Date de fin de la période de référence choisie pour le calcul des indicateurs *"
                   nativeInputProps={{
                     type: "date",
                     min: `${year}-01-01`,
@@ -162,7 +163,7 @@ export const PeriodeReferenceForm = () => {
                   Sélectionner la fin de l'année civile
                 </Button>
                 <Input
-                  label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique)"
+                  label="Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *"
                   nativeInputProps={{
                     type: "number",
                     min: 1,

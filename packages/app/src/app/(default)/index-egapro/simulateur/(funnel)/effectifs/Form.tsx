@@ -161,6 +161,7 @@ export const EffectifsForm = () => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <RadioButtons
           legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES) *"
           state={errors.workforceRange && "error"}

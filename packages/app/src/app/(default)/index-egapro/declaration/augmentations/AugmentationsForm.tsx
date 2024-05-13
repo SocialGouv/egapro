@@ -160,9 +160,10 @@ export const AugmentationsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ?"
+            legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ? *"
             name="estCalculable"
           />
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
@@ -194,7 +195,7 @@ export const AugmentationsForm = () => {
                 <br />
 
                 <PercentageInput<FormType>
-                  label="Résultat final obtenu à l'indicateur en %"
+                  label="Résultat final obtenu à l'indicateur en % *"
                   name="résultat"
                   min={0}
                   hintText={

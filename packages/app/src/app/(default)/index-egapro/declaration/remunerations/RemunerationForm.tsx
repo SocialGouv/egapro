@@ -179,8 +179,9 @@ export const RemunerationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
-          <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ?" name="estCalculable" />
+          <RadioOuiNon legend="L’indicateur sur l’écart de rémunération est-il calculable ? *" name="estCalculable" />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             {estCalculable === "non" && (
@@ -189,7 +190,7 @@ export const RemunerationForm = () => {
                   options={[
                     {
                       label:
-                        "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable.",
+                        "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable. *",
                       nativeInputProps: register("déclarationCalculCSP"),
                     },
                   ]}
@@ -205,7 +206,7 @@ export const RemunerationForm = () => {
             {estCalculable === "oui" && (
               <>
                 <RadioButtons
-                  legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération`}
+                  legend={`Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération *`}
                   options={[
                     {
                       label: "Par catégorie socio-professionnelle",

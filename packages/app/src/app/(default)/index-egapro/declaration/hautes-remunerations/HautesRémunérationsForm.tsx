@@ -114,11 +114,12 @@ export const HautesRémunérationsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <>
               <Input
-                label="Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté"
+                label="Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté *"
                 nativeInputProps={{
                   type: "number",
                   min: 0,
@@ -141,7 +142,7 @@ export const HautesRémunérationsForm = () => {
                 stateRelatedMessage={get(errors, "résultat")?.message || ""}
               />
 
-              {résultat !== 5 && <PopulationFavorable legend="Sexe des salariés sur-représentés" />}
+              {résultat !== 5 && <PopulationFavorable legend="Sexe des salariés sur-représentés *" />}
 
               {note !== undefined && isValid && (
                 <>
