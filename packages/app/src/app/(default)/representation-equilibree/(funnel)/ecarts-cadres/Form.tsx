@@ -74,9 +74,10 @@ export const EcartsCadresForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
       <FormLayout>
         <RadioButtons
-          legend="L’écart de représentation est-il calculable ?"
+          legend="L’écart de représentation est-il calculable ? *"
           orientation="horizontal"
           options={[
             {
@@ -105,8 +106,8 @@ export const EcartsCadresForm = () => {
         <Box className={isComputable ? "block" : "hidden"}>
           <FormProvider {...methods}>
             <NumberPairInputs<EcartsCadresFormType>
-              first={{ formKey: "executiveWomenPercent", label: "Pourcentage de femmes parmi les cadres dirigeants" }}
-              second={{ formKey: "executiveMenPercent", label: "Pourcentage d'hommes parmi les cadres dirigeants" }}
+              first={{ formKey: "executiveWomenPercent", label: "Pourcentage de femmes parmi les cadres dirigeants *" }}
+              second={{ formKey: "executiveMenPercent", label: "Pourcentage d'hommes parmi les cadres dirigeants *" }}
               options={{
                 disabled: isComputable === false,
                 max: 100,

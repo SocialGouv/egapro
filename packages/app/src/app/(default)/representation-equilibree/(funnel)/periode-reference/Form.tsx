@@ -61,6 +61,7 @@ export const PeriodeReferenceForm = () => {
 
   return (
     <>
+      <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
       <Highlight className="fr-ml-0" size="lg">
         <u>
           <strong>{hydrated ? funnel?.year : <Skeleton inline width="4ch" />}</strong>
@@ -70,7 +71,7 @@ export const PeriodeReferenceForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <Input
-            label="Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts"
+            label="Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts *"
             state={errors.endOfPeriod && "error"}
             stateRelatedMessage={errors.endOfPeriod?.message}
             nativeInputProps={{

@@ -124,8 +124,9 @@ export const CongesMaterniteForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
-          <RadioOuiNon legend="L'indicateur est-il calculable ?" name="estCalculable" />
+          <RadioOuiNon legend="L'indicateur est-il calculable ? *" name="estCalculable" />
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             {estCalculable && (
@@ -137,7 +138,7 @@ export const CongesMaterniteForm = () => {
                 ) : (
                   <>
                     <PercentageInput<FormType>
-                      label="Résultat final obtenu à l'indicateur en %"
+                      label="Résultat final obtenu à l'indicateur en % *"
                       name="résultat"
                       min={0}
                       max={100}

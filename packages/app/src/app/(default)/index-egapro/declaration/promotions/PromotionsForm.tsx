@@ -159,9 +159,10 @@ export const PromotionsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux de promotions est-il calculable ?"
+            legend="L'indicateur sur l'écart de taux de promotions est-il calculable ? *"
             name="estCalculable"
           />
 
@@ -175,7 +176,7 @@ export const PromotionsForm = () => {
             {estCalculable === "oui" && (
               <>
                 <p>
-                  <strong>Écarts de taux de promotions par CSP en %</strong>
+                  <strong>Écarts de taux de promotions par CSP en % *</strong>
                 </p>
 
                 <p>
@@ -200,7 +201,7 @@ export const PromotionsForm = () => {
                 {/* Don't forget that résultat can be undefined, for some reasons. */}
                 {/* We must handle this case, because of shouldUnregister mode. */}
                 <PercentageInput<FormType>
-                  label="Résultat final obtenu à l'indicateur en %"
+                  label="Résultat final obtenu à l'indicateur en % *"
                   name="résultat"
                   min={0}
                   hintText={

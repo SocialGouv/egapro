@@ -206,7 +206,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               description={
                 <p>
                   La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.
-                  l'indicateur n'est pas calculable:
+                  L'indicateur n'est pas calculable:
                   <br />
                   <ul>
                     <li>s'il n'a eu aucune promotion au cours de la période de référence</li>
@@ -226,6 +226,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               }
             />
           )}
+          <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
           {!canCompute ? (
             <Alert
               className="fr-mb-3w"
@@ -239,7 +240,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                 <RadioOuiNon
                   legend={`Y a-t-il eu des ${
                     indicateur === 2 ? "augmentations" : "promotions"
-                  } individuelles durant la période de référence ?`}
+                  } individuelles durant la période de référence ? *`}
                   name="calculable"
                   triggerValidation={true}
                 />

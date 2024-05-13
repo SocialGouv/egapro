@@ -19,7 +19,7 @@ export const PopulationFavorable = ({ legend, disabled }: Props) => {
 
   return (
     <RadioButtons
-      legend={legend || "Population envers laquelle l'écart est favorable"}
+      legend={legend || "Population envers laquelle l'écart est favorable *"}
       disabled={disabled}
       options={[
         {

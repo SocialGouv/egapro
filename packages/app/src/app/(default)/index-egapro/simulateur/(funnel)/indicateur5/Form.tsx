@@ -56,15 +56,16 @@ export const Indic5Form = () => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <FormLayout>
           <NumberPairInputs<Indic5FormType>
             first={{
               formKey: "women",
-              label: "Nombre de femmes parmi les 10 plus hautes rémunérations*",
+              label: "Nombre de femmes parmi les 10 plus hautes rémunérations *",
             }}
             second={{
               formKey: "men",
-              label: "Nombre d'hommes parmi les 10 plus hautes rémunérations*",
+              label: "Nombre d'hommes parmi les 10 plus hautes rémunérations *",
             }}
             options={{
               max: 10,

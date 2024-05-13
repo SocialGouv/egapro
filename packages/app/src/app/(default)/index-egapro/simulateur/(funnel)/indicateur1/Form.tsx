@@ -166,13 +166,14 @@ export const Indic1Form = () => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <CenteredContainer>
+          <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
           <Controller
             control={control}
             name="mode"
             render={({ field }) => {
               return (
                 <RadioButtons
-                  legend="Modalité de calcul choisie pour cet indicateur*"
+                  legend="Modalité de calcul choisie pour cet indicateur *"
                   options={[
                     ...[
                       RemunerationsMode.Enum.CSP,

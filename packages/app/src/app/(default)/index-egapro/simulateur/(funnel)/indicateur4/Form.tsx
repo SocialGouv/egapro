@@ -95,6 +95,7 @@ export const Indic4Form = () => {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <FormLayout>
           <ClientBodyPortal>
             <infoModal.Component title="Information indicateur retour de congé maternité">
@@ -107,7 +108,7 @@ export const Indic4Form = () => {
             render={({ field, fieldState }) => (
               <RadioButtons
                 orientation="horizontal"
-                legend="Y a-t-il eu des retours de congé maternité pendant la période de référence ?"
+                legend="Y a-t-il eu des retours de congé maternité pendant la période de référence? *"
                 state={fieldState.error && "error"}
                 stateRelatedMessage={fieldState.error?.message}
                 options={[
@@ -170,7 +171,7 @@ export const Indic4Form = () => {
                     </GridCol>
                     <GridCol sm={12}>
                       <Input
-                        label="Total des salariées de retour de congé maternité*"
+                        label="Total des salariées de retour de congé maternité *"
                         hintText="Indiquez le nombre total de salariées revenues de congé maternité pendant la période de référence. Doivent être retenues les salariées qui sont revenues de congé maternité pendant la période de référence, si au moins une augmentation salariale a été faite pendant leur congé."
                         state={whenCalculableErrors.count?.total && "error"}
                         stateRelatedMessage={whenCalculableErrors.count?.total?.message}
@@ -193,7 +194,7 @@ export const Indic4Form = () => {
                     </GridCol>
                     <GridCol sm={12}>
                       <Input
-                        label="Nombre de salariées augmentées à leur retour*"
+                        label="Nombre de salariées augmentées à leur retour *"
                         hintText={
                           hasTotal ? (
                             count.total === 0 ? (

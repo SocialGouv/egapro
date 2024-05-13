@@ -93,10 +93,11 @@ export const PublicationForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <Input
-              label="Date de publication des résultats obtenus"
+              label="Date de publication des résultats obtenus *"
               nativeInputProps={{
                 ...register("date"),
                 type: "date",
@@ -106,11 +107,14 @@ export const PublicationForm = () => {
               stateRelatedMessage={errors.date?.message}
             />
 
-            <RadioOuiNon name="choixSiteWeb" legend="Avez-vous un site Internet pour publier les résultats obtenus ?" />
+            <RadioOuiNon
+              name="choixSiteWeb"
+              legend="Avez-vous un site Internet pour publier les résultats obtenus ? *"
+            />
 
             {choixSiteWeb === "oui" && (
               <Input
-                label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus"
+                label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus *"
                 nativeInputProps={{
                   ...register("url"),
                   type: "url",
@@ -122,7 +126,7 @@ export const PublicationForm = () => {
             )}
             {choixSiteWeb === "non" && (
               <Input
-                label="Préciser les modalités de communication des résultats obtenus auprès de vos salariés"
+                label="Préciser les modalités de communication des résultats obtenus auprès de vos salariés *"
                 textArea
                 state={errors.modalités && "error"}
                 stateRelatedMessage={errors.modalités?.message}
@@ -134,8 +138,8 @@ export const PublicationForm = () => {
               name="planRelance"
               legend={
                 formData.entreprise?.type === "ues"
-                  ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ?"
-                  : "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ?"
+                  ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
+                  : "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
               }
             />
           </ClientOnly>

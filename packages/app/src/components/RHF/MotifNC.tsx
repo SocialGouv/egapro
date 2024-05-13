@@ -29,7 +29,7 @@ export const MotifNC = ({ stepName }: PropsWithChildren<Props>) => {
   return (
     <>
       <Select
-        label="Motif de non calculabilité de l'indicateur"
+        label="Motif de non calculabilité de l'indicateur *"
         nativeSelectProps={{ ...register("motifNonCalculabilité") }}
         state={errors.motifNonCalculabilité && "error"}
         stateRelatedMessage={errors.motifNonCalculabilité?.message as string | undefined}

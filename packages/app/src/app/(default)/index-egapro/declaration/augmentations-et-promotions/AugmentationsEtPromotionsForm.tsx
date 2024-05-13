@@ -184,10 +184,11 @@ export const AugmentationEtPromotionsForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           {/* Needs to be outside ClientOnly to not be unregistered by RHF. Be careful! */}
           <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ?"
+            legend="L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ? *"
             name="estCalculable"
           />
 
@@ -197,7 +198,7 @@ export const AugmentationEtPromotionsForm = () => {
             {estCalculable === "oui" && (
               <>
                 <PercentageInput<FormType>
-                  label="Résultat final obtenu à l'indicateur en %"
+                  label="Résultat final obtenu à l'indicateur en % *"
                   name="résultat"
                   hintText={"(il s'agit de l'écart absolu de taux d’augmentations, arrondi à la première décimale.)"}
                   min={0}
@@ -220,7 +221,7 @@ export const AugmentationEtPromotionsForm = () => {
                       }
                     },
                   }}
-                  label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés"
+                  label="Résultat final obtenu à l'indicateur en nombre équivalent de salariés *"
                   hintText={"(il s'agit de l'écart en nombre équivalent de salariés, arrondi à la première décimale.)"}
                   state={errorsWhenCalculable["résultatEquivalentSalarié"] && "error"}
                   stateRelatedMessage={errorsWhenCalculable["résultatEquivalentSalarié"]?.message || ""}

@@ -67,10 +67,11 @@ export const EntrepriseUESForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
       <FormLayout>
         <ClientAnimate>
           <RadioButtons
-            legend="Vous déclarez votre index en tant que"
+            legend="Vous déclarez votre index en tant que *"
             options={[
               {
                 label: "Entreprise",
@@ -92,7 +93,7 @@ export const EntrepriseUESForm = () => {
 
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
             <RadioButtons
-              legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"}`}
+              legend={`Tranche d'effectifs assujettis de l'${type === "ues" ? "UES" : "entreprise"} *`}
               options={Object.entries(CompanyWorkforceRange.Label).map(([value, label]) => ({
                 label,
                 nativeInputProps: {
