@@ -258,7 +258,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                         label: "Catégories socioprofessionnelles",
                       },
                       {
-                        label: `Pourcentage de salariés ${indicateur === 2 ? "augmentés" : "promus"}`,
+                        label: `Pourcentage de salariés ${indicateur === 2 ? "augmentés" : "promus"} *`,
                         subCols: [
                           {
                             label: "Femmes",

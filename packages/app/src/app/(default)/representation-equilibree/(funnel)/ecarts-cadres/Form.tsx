@@ -119,7 +119,7 @@ export const EcartsCadresForm = () => {
           </FormProvider>
         </Box>
         <Select
-          label="Motif de non calculabilité"
+          label="Motif de non calculabilité *"
           state={errors.notComputableReasonExecutives && "error"}
           stateRelatedMessage={errors.notComputableReasonExecutives?.message}
           className={isComputable === false ? "block" : "hidden"}

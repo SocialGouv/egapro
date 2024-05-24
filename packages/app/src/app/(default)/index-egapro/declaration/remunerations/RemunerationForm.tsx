@@ -240,7 +240,7 @@ export const RemunerationForm = () => {
                       <input {...register(`cse`, { value: "oui" })} type="hidden" />
                     ) : (
                       <RadioOuiNon
-                        legend="Un CSE a-t-il été mis en place ?"
+                        legend="Un CSE a-t-il été mis en place ? *"
                         name="cse"
                         disabled={!!formData.ues?.nom}
                       />
@@ -248,7 +248,7 @@ export const RemunerationForm = () => {
 
                     {cse === "oui" && (
                       <Input
-                        label="Date de consultation du CSE pour le choix de cette modalité de calcul"
+                        label="Date de consultation du CSE pour le choix de cette modalité de calcul *"
                         nativeInputProps={{
                           ...register("dateConsultationCSE"),
                           type: "date",

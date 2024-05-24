@@ -11,6 +11,7 @@ interface Props<FormType> {
   max?: number;
   min?: number;
   name: Path<FormType>;
+  roundNumber?: number;
 }
 
 type FakeFormType = {
@@ -34,6 +35,7 @@ export const PercentageInput = <FormType extends SimpleObject>({
   name: _name,
   disabled,
   hintText,
+  roundNumber = 3,
 }: Props<FormType>) => {
   const {
     register,
@@ -63,7 +65,8 @@ export const PercentageInput = <FormType extends SimpleObject>({
             // Round number to 1 decimal.
             const value = parseFloat(e.target.value);
             if (!isNaN(value)) {
-              setValue(name, Math.round(value * 1000) / 1000, { shouldValidate: true });
+              const rounder = Math.pow(10, roundNumber);
+              setValue(name, Math.round(value * rounder) / rounder, { shouldValidate: true });
             }
           },
         }}

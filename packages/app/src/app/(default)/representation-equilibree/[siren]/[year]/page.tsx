@@ -54,12 +54,13 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
   const session = await getServerSession(authConfig);
   const isOwner = !!session?.user.companies.some(company => company.siren === siren) || session?.user.staff;
-
-  const olderThanOneYear = session?.user?.staff
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const olderThanOneYear = session?.data?.user.staff
     ? false
-    : isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
+    : repEq.declaredAt === undefined || isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
   const monCompteProHost = `https://app${
-    config.api.security.moncomptepro.appTest ? "-test" : ""
+    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
   }.moncomptepro.beta.gouv.fr`;
 
   return (

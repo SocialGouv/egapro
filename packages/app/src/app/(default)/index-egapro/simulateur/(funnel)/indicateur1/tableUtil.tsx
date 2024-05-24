@@ -22,7 +22,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
     label: "Tranche d’âge",
   },
   {
-    label: "Nombre de salariés (en effectif physique)",
+    label: "Nombre de salariés (en effectif physique) *",
     subCols: [
       {
         label: "Femmes",
@@ -38,7 +38,7 @@ export const getCommonHeader = ({ firstColumnLabel }: CommonHeaderProps): Altern
       "Ce sont les effectifs retenus pour le calcul de l’indicateur comportant au moins 3 femmes et 3 hommes.",
   },
   {
-    label: "Rémunération annuelle brute moyenne en équivalent temps plein",
+    label: "Rémunération annuelle brute moyenne en équivalent temps plein *",
     informations: <AideSimulationIndicateurUn.Définition />,
     subCols: [
       {

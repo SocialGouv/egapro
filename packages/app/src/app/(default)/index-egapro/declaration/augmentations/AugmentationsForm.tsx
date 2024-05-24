@@ -172,7 +172,7 @@ export const AugmentationsForm = () => {
             {estCalculable === "oui" && (
               <>
                 <p>
-                  <strong>Écarts de taux d’augmentations par CSP en %</strong>
+                  <strong>Écarts de taux d’augmentations par CSP en % *</strong>
                 </p>
 
                 <p>
@@ -198,6 +198,7 @@ export const AugmentationsForm = () => {
                   label="Résultat final obtenu à l'indicateur en % *"
                   name="résultat"
                   min={0}
+                  roundNumber={1}
                   hintText={
                     "(il s'agit de la valeur absolue de l’écart global de taux d’augmentations, arrondie à la première décimale.)"
                   }

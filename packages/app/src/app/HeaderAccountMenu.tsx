@@ -55,7 +55,7 @@ export const HeaderAccountMenu = (props: {
                 ) : (
                   <a
                     className="fr-nav__link"
-                    href={`https://app${props.isMonCompteProTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`}
+                    href={`https://app${props.isMonCompteProTest ? "-sandbox" : ""}.moncomptepro.beta.gouv.fr`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

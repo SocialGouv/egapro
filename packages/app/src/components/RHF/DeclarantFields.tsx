@@ -53,7 +53,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
       <Grid haveGutters>
         <GridCol sm={6}>
           <Input
-            label="Nom du déclarant"
+            label="Nom du déclarant *"
             state={errors[lastnameKey] && "error"}
             stateRelatedMessage={errors[lastnameKey]?.message}
             nativeInputProps={register(lastnameKey)}
@@ -61,7 +61,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
         </GridCol>
         <GridCol sm={6}>
           <Input
-            label="Prénom du déclarant"
+            label="Prénom du déclarant *"
             state={errors[firstnameKey] && "error"}
             stateRelatedMessage={errors[firstnameKey]?.message}
             nativeInputProps={register(firstnameKey)}
@@ -100,7 +100,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
       </Grid>
 
       <Input
-        label="Email du déclarant"
+        label="Email du déclarant *"
         hintText={isStaff ? "Modifiable en tant que staff" : "Saisi lors de la création de votre compte MonComptePro"}
         state={errors[emailKey] && "error"}
         stateRelatedMessage={errors[emailKey]?.message}

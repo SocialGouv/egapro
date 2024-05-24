@@ -16,7 +16,7 @@ const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
   const monCompteProUrl = `https://app${
-    config.api.security.moncomptepro.appTest ? "-test" : ""
+    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
   }.moncomptepro.beta.gouv.fr`;
 
   return (

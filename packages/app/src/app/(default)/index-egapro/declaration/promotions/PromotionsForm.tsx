@@ -204,6 +204,7 @@ export const PromotionsForm = () => {
                   label="Résultat final obtenu à l'indicateur en % *"
                   name="résultat"
                   min={0}
+                  roundNumber={1}
                   hintText={
                     "(il s'agit de la valeur absolue de l’écart global de taux de promotions, arrondie à la première décimale.)"
                   }
