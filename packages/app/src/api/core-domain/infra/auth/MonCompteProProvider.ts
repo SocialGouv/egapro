@@ -22,7 +22,7 @@ export interface MonCompteProProfile {
   updated_at: Date;
 }
 
-const ISSUER = (appTest: boolean) => `https://app${appTest ? "-test" : ""}.moncomptepro.beta.gouv.fr`;
+const ISSUER = (appTest: boolean) => `https://app${appTest ? "-sandbox" : ""}.moncomptepro.beta.gouv.fr`;
 export function MonCompteProProvider<P extends MonCompteProProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {

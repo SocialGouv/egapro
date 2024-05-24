@@ -74,7 +74,7 @@ export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTa
       <AlternativeTable
         withTooltip
         classeName={fr.cx("fr-mb-1w")}
-        header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique" })}
+        header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique *" })}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
           (remunerationsField, remunerationsFieldIndex) => {
             return {

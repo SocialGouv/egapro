@@ -26,7 +26,7 @@ const CommencerPage = async () => {
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   const monCompteProHost = `https://app${
-    config.api.security.moncomptepro.appTest ? "-test" : ""
+    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
   }.moncomptepro.beta.gouv.fr`;
 
   if (!session.user.companies.length && !session.user.staff) {

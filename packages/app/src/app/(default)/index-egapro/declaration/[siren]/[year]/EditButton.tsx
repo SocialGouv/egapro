@@ -25,7 +25,7 @@ export const EditButton = ({ déclaration, year }: PropsWithChildren<Props>) => 
 
   const date = déclaration["declaration-existante"].date;
 
-  const olderThanOneYear = session?.data?.staff
+  const olderThanOneYear = session?.data?.user.staff
     ? false
     : date === undefined || isAfter(new Date(), add(new Date(date), { years: 1 }));
   const saveAndGoNext = async (

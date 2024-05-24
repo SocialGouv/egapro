@@ -12,7 +12,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
-import { isBefore, parseISO } from "date-fns";
+import { isBefore, isEqual, parseISO } from "date-fns";
 import { produce } from "immer";
 import { redirect, useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
@@ -72,10 +72,10 @@ export const PublicationForm = () => {
   const choixSiteWeb = watch("choixSiteWeb");
 
   const onSubmit = async (data: FormType) => {
-    if (isBefore(parseISO(data.date), parseISO(endOfPeriod))) {
+    if (isBefore(parseISO(data.date), parseISO(endOfPeriod)) || isEqual(parseISO(data.date), parseISO(endOfPeriod))) {
       return setError("date", {
         type: "manual",
-        message: `La date de publication ne peut précéder la date de fin de la période de référence (${formatIsoToFr(
+        message: `La date de publication doit être postérieure à la date de fin de la période de référence (${formatIsoToFr(
           endOfPeriod,
         )})`,
       });

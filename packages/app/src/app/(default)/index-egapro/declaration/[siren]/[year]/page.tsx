@@ -82,13 +82,13 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
 
   const declarationDate = déclaration["declaration-existante"].date;
 
-  const canEdit = canEditSiren(session?.user)(siren);
-
   if (!declarationDate) return <SkeletonForm fields={8} />;
-  const olderThanOneYear = session?.user?.staff
-    ? false
-    : isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const olderThanOneYear = session?.data?.user.staff
+    ? false
+    : declarationDate === undefined || isAfter(new Date(), add(new Date(declarationDate), { years: 1 }));
   return (
     <>
       <Alert
@@ -104,24 +104,20 @@ const RecapPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
       />
       <RecapDeclaration déclaration={déclaration} />
 
-      {canEdit && year && (
-        <>
-          <EditButton déclaration={déclaration} year={year} />
+      <EditButton déclaration={déclaration} year={year} />
 
-          <Grid align="center" mb="6w">
-            <GridCol md={10} lg={8}>
-              <DownloadCard
-                title="Télécharger le récapitulatif"
-                endDetail="PDF"
-                href={`/index-egapro/declaration/${siren}/${year}/pdf`}
-                filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
-                fileType="application/pdf"
-                desc={`Année ${year + 1} au titre des données ${year}`}
-              />
-            </GridCol>
-          </Grid>
-        </>
-      )}
+      <Grid align="center" mb="6w">
+        <GridCol md={10} lg={8}>
+          <DownloadCard
+            title="Télécharger le récapitulatif"
+            endDetail="PDF"
+            href={`/index-egapro/declaration/${siren}/${year}/pdf`}
+            filename={`declaration_egapro_${siren}_${year + 1}.pdf`}
+            fileType="application/pdf"
+            desc={`Année ${year + 1} au titre des données ${year}`}
+          />
+        </GridCol>
+      </Grid>
     </>
   );
 };

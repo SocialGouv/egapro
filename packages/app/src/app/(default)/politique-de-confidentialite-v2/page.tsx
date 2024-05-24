@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
         <Grid align="center">
           <GridCol md={10} lg={8}>
             <h1>{title}</h1>
-            <h2>Qui est responsable d’Index Egapro&nbsp;?</h2>
+            <h2>Qui est responsable d’Egapro&nbsp;?</h2>
             <p>
               La plateforme Egapro est sous la responsabilité de la Direction générale du travail, représentée par
               Monsieur Pierre RAMAIN, directeur général du travail. Egapro permet aux entreprises de déclarer aux
@@ -28,12 +28,12 @@ const PrivacyPolicy = () => {
               les hommes dans les postes de direction.
             </p>
             <h2>Quelles sont les données à caractère personnel que nous traitons&nbsp;?</h2>
-            <p>Index Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
+            <p>Egapro traite les données à caractère personnel suivantes&nbsp;:</p>
             <ul className={"fr-mb-3w"}>
               <li>Nom, prénom, adresse e-mail et numéro de téléphone professionnel des utilisateurs.</li>
             </ul>
             <h2>Pourquoi traitons-nous des données à caractère personnel&nbsp;?</h2>
-            <p>Index Egapro traite des données à caractère personnel pour&nbsp;:</p>
+            <p>Egapro traite des données à caractère personnel pour&nbsp;:</p>
             <ul className={"fr-mb-3w"}>
               <li>Déclarer les résultats de l’index de l’égalité professionnelle entre les femmes et les hommes;</li>
               <li>
@@ -64,7 +64,7 @@ const PrivacyPolicy = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>Données des utilisateurs des Index Egapro</td>
+                  <td>Données des utilisateurs d'Egapro</td>
                   <td>
                     À compter de la suppression par l’utilisateur ou 2 ans à compter de la dernière déclaration ou de
                     l’inactivité du compte
@@ -108,7 +108,7 @@ const PrivacyPolicy = () => {
               Les accès aux données sont strictement encadrés et juridiquement justifiés. Les personnes suivantes vont
               avoir accès aux données&nbsp;:
               <ul className={"fr-mb-3w"}>
-                <li>Les membres de l’équipe d’Index Egapro;</li>
+                <li>Les membres de l’équipe d’Egapro;</li>
                 <li>Les agents autorisés au sein de la Direction générale du travail.</li>
               </ul>
             </p>
@@ -174,12 +174,12 @@ const PrivacyPolicy = () => {
               légale au sens du RGPD et doit être entendu au sens de l'article 6-1 a) du RGPD.
             </p>
             <p>
-              Index Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
+              Egapro utilise notamment la solution de mesure d’audience «&nbsp;Matomo&nbsp;» paramétrée en mode
               «&nbsp;exempté&nbsp;» et ne nécessitant pas le recueil de votre consentement conformément aux
               recommandations de la CNIL. La durée de vie du cookie n’excède pas 13 mois.
             </p>
             <p>
-              Vous êtes suivis de manière anonyme. Décochez la case pour ne plus être suivis même anonymement.&nbsp;:{" "}
+              Vous êtes suivis de manière anonyme. Décochez la case pour ne plus être suivis même anonymement&nbsp;:{" "}
               <FooterConsentManagementItem />
             </p>
             <p>

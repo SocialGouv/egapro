@@ -65,17 +65,12 @@ const labourMinistryRepeq = {
 
 export const Footer = () => (
   <DsfrFooter
-    accessibility="partially compliant"
+    accessibility="non compliant"
     accessibilityLinkProps={{
-      href: "https://ara.numerique.gouv.fr/rapports/_YKXqg3aJMpFGmPh1tA0d/resultats",
-      target: "_blank",
+      href: "/declaration-accessibilite",
     }}
     contentDescription={`Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique numérique des ministères sociaux.`}
     bottomItems={[
-      {
-        text: "Déclaration d'accesibilité",
-        linkProps: { href: "/declaration-accessibilite" },
-      },
       {
         text: "CGU",
         linkProps: { href: "/cgu" },

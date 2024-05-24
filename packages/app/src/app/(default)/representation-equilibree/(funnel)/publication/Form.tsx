@@ -10,7 +10,7 @@ import { storePicker } from "@common/utils/zustand";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isBefore, parseISO } from "date-fns";
+import { isBefore, isEqual, parseISO } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,10 +21,13 @@ import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeq
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
   .superRefine(({ endOfPeriod, publishDate }, ctx) => {
-    if (isBefore(parseISO(publishDate), parseISO(endOfPeriod))) {
+    if (
+      isBefore(parseISO(publishDate), parseISO(endOfPeriod)) ||
+      isEqual(parseISO(publishDate), parseISO(endOfPeriod))
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `La date de publication ne peut précéder la date de fin de la période de référence (${formatIsoToFr(
+        message: `La date de publication doit être postérieure à la date de fin de la période de référence (${formatIsoToFr(
           endOfPeriod,
         )})`,
         path: ["publishDate"],

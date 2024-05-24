@@ -202,6 +202,7 @@ export const AugmentationEtPromotionsForm = () => {
                   name="résultat"
                   hintText={"(il s'agit de l'écart absolu de taux d’augmentations, arrondi à la première décimale.)"}
                   min={0}
+                  roundNumber={1}
                 />
 
                 <Input

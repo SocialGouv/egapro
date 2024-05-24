@@ -33,7 +33,7 @@ const MesEntreprisesInfoAlert = () => (
           <Link
             target="_blank"
             href={`https://app${
-              config.api.security.moncomptepro.appTest ? "-test" : ""
+              config.api.security.moncomptepro.appTest ? "-sandbox" : ""
             }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
           >
             créer un nouveau compte MonComptePro
@@ -71,7 +71,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <a
                 target="_blank"
                 href={`https://app${
-                  config.api.security.moncomptepro.appTest ? "-test" : ""
+                  config.api.security.moncomptepro.appTest ? "-sandbox" : ""
                 }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
               >
                 Connectez-vous sur Mon Compte Pro

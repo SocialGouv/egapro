@@ -128,7 +128,7 @@ export const EcartsMembresForm = () => {
           </FormProvider>
         </Box>
         <Select
-          label="Motif de non calculabilité"
+          label="Motif de non calculabilité *"
           state={errors.notComputableReasonMembers && "error"}
           stateRelatedMessage={errors.notComputableReasonMembers?.message}
           className={isComputable === false ? "block" : "hidden"}
