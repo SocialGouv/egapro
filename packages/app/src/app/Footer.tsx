@@ -1,5 +1,5 @@
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
-import DsfrFooter, { type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
+import { Footer as DsfrFooter, type FooterProps as DsfrFooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { config } from "@common/config";
 
 const githubLink = {
