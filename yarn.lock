@@ -455,6 +455,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codegouvfr/react-dsfr@patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch":
+  version: 0.78.2
+  resolution: "@codegouvfr/react-dsfr@patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch::version=0.78.2&hash=0f2ee9"
+  dependencies:
+    tsafe: "npm:^1.6.3"
+  bin:
+    copy-dsfr-to-public: bin/copy-dsfr-to-public.js
+    only-include-used-icons: bin/only-include-used-icons.js
+  checksum: f00e19433ad50cf5a699da6c1dea83fb951ec3aa27b44cd08fbcadaf0ef0f81fa2fa192fe44c9b9322de1212f34996f9fa9dfcdcc7c8baafb1561413b1cdeb80
+  languageName: node
+  linkType: hard
+
 "@colors/colors@npm:1.5.0":
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
@@ -3330,7 +3342,7 @@ __metadata:
   resolution: "app@workspace:packages/app"
   dependencies:
     "@babel/core": "npm:^7.23.0"
-    "@codegouvfr/react-dsfr": "npm:0.78.2"
+    "@codegouvfr/react-dsfr": "patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch"
     "@faker-js/faker": "npm:^8.1.0"
     "@formkit/auto-animate": "npm:^0.8.0"
     "@hookform/devtools": "npm:^4.3.0"
