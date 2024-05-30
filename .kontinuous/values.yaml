@@ -60,6 +60,8 @@ nginx:
   ~chart: app
   ~needs: [build-nginx]
   imagePackage: nginx
+  autoscale:
+    enabled: true
   host: "{{ .Values.global.host }}"
   ingress:
     paths:
