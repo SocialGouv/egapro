@@ -1,3 +1,18 @@
+## [3.4.7](https://github.com/SocialGouv/egapro/compare/v3.4.6...v3.4.7) (2024-05-31)
+
+
+### Bug Fixes
+
+* autoscale prod ([#2296](https://github.com/SocialGouv/egapro/issues/2296)) ([6a5eb64](https://github.com/SocialGouv/egapro/commit/6a5eb6460716e54ad1d309e3b57be548ca7beafd))
+* declaration mapper ([#2272](https://github.com/SocialGouv/egapro/issues/2272)) ([6009325](https://github.com/SocialGouv/egapro/commit/6009325051621081364723e345e678fc6dc40fad))
+* declaration values of zero in csp ([#2271](https://github.com/SocialGouv/egapro/issues/2271)) ([07309ee](https://github.com/SocialGouv/egapro/commit/07309ee6253b7670ab347618b5f7dcf17c4f72bb))
+* docker image user ([#2251](https://github.com/SocialGouv/egapro/issues/2251)) ([abe295a](https://github.com/SocialGouv/egapro/commit/abe295ab733656a3d65671314c43e8e304a4f6e8))
+* fix site links ([#2291](https://github.com/SocialGouv/egapro/issues/2291)) ([674c930](https://github.com/SocialGouv/egapro/commit/674c930a4a5b70d691037f440c35f5eb16427a33))
+* my company page info wording ([#2247](https://github.com/SocialGouv/egapro/issues/2247)) ([98acb15](https://github.com/SocialGouv/egapro/commit/98acb1554c97a16405c6fab088b6bf0a23a529d8))
+* wording fixes ([#2250](https://github.com/SocialGouv/egapro/issues/2250)) ([050d308](https://github.com/SocialGouv/egapro/commit/050d308dfb8de1e17b2bcbcd7b757fb2fefbe472))
+* wordings ([#2278](https://github.com/SocialGouv/egapro/issues/2278)) ([f7bbc8e](https://github.com/SocialGouv/egapro/commit/f7bbc8e71fb509b6ac254e4e2f67860d91844a8d))
+* wordings ([#2290](https://github.com/SocialGouv/egapro/issues/2290)) ([3c725c3](https://github.com/SocialGouv/egapro/commit/3c725c3a03e361135241ceadbba368668292dddc))
+
 ## [3.4.6](https://github.com/SocialGouv/egapro/compare/v3.4.5...v3.4.6) (2024-04-02)
 
 
