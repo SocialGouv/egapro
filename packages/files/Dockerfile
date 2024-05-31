@@ -1,5 +1,6 @@
 FROM node:20
-COPY package.json yarn.lock ./
+WORKDIR /app
+COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
 RUN yarn
 COPY index.js .
