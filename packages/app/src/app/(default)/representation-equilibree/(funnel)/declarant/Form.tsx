@@ -54,6 +54,7 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <FormLayout>
           <DeclarantFields<DeclarantFormType>
             isStaff={session.user.staff}

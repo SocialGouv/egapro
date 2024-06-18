@@ -225,8 +225,9 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
           <Select
-            label="Année au titre de laquelle les indicateurs sont calculés"
+            label="Année au titre de laquelle les indicateurs sont calculés *"
             state={errors.annéeIndicateurs && "error"}
             stateRelatedMessage={errors.annéeIndicateurs?.message}
             nativeSelectProps={{
@@ -247,7 +248,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
 
           {user.staff ? (
             <Input
-              label="Siren entreprise (staff)"
+              label="Siren entreprise (staff) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeInputProps={{
@@ -258,7 +259,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
             />
           ) : (
             <Select
-              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)"
+              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeSelectProps={register("siren")}

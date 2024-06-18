@@ -57,6 +57,7 @@ export const Navigation = () => {
               text: "Consulter l'index",
               linkProps: {
                 href: "/index-egapro/recherche",
+                target: "_blank",
               },
               isActive: segments.includes("recherche") && segments.includes("index-egapro"),
             },
@@ -87,6 +88,7 @@ export const Navigation = () => {
               text: "Consulter les écarts",
               linkProps: {
                 href: "/representation-equilibree/recherche",
+                target: "_blank",
               },
               isActive: segments.includes("recherche") && segments.includes("representation-equilibree"),
             },

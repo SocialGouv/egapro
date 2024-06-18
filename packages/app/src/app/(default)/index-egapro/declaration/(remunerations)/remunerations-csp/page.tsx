@@ -9,6 +9,7 @@ const RemunerationCSPPage = () => {
     <>
       <DeclarationStepper stepName={stepName} />
 
+      <h4>Ecarts de rémunération par CSP et tranche d'âge en % *</h4>
       <p>
         Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les CSP
         et tranches d'âge pris en compte pour le calcul (zéro signifiant qu'il n'y a pas d'écart entre les femmes et les

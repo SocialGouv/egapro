@@ -22,6 +22,9 @@ export const config = {
   get base_declaration_url() {
     return "/index-egapro/declaration";
   },
+  get base_repeq_url() {
+    return "/representation-equilibree";
+  },
   matomo: {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),

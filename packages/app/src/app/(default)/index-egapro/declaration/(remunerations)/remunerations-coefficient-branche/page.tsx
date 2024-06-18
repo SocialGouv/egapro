@@ -11,6 +11,7 @@ const RemunerationCoefficientBranchePage = () => {
       <AlertExistingDeclaration />
       <DeclarationStepper stepName={stepName} />
 
+      <h4>Ecarts de rémunération par niveau ou coefficient et tranche d'âge en % *</h4>
       <p>
         Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les
         niveaux ou coefficients et tranches d'âge pris en compte pour le calcul (zéro signifiant qu'il n'y a pas d'écart

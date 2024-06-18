@@ -68,6 +68,7 @@ export const DeclarantForm = ({ session }: PropsWithChildren<Props>) => {
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onsubmit)}>
+          <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
           <FormLayout>
             <ClientOnly fallback={<SkeletonForm fields={3} />}>
               <DeclarantFields<FormType>
