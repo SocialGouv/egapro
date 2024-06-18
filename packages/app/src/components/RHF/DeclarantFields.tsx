@@ -72,7 +72,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
           <Input
             label={
               <>
-                Téléphone du déclarant
+                Téléphone du déclarant *
                 {isStaff && (
                   <Button
                     size="small"

@@ -5,7 +5,6 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { IndicateurCinqComputer } from "@common/core-domain/computers/IndicateurCinqComputer";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { setValueAsFloatOrEmptyString, zodNumberOrEmptyString } from "@common/utils/form";
 import { IndicatorNoteInput } from "@components/RHF/IndicatorNoteInput";
 import { PopulationFavorable } from "@components/RHF/PopulationFavorable";
 import { ClientOnly } from "@components/utils/ClientOnly";
@@ -20,42 +19,22 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import {
-  MANDATORY_FAVORABLE_POPULATION,
-  MANDATORY_RESULT,
-  NOT_BELOW_0,
-  NOT_HIGHER_THAN_N_RESULT,
-} from "../../../messages";
+import { MANDATORY_FAVORABLE_POPULATION, NOT_BELOW_0, NOT_HIGHER_THAN_N_RESULT } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const formSchema = z
   .object({
     populationFavorable: z.string().optional(),
-    résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
+    résultat: z
+      .number({ invalid_type_error: "La valeur est obligatoire" })
+      .int("La valeur doit être un nombre entier")
+      .lte(5, NOT_HIGHER_THAN_N_RESULT(5))
+      .gte(0, NOT_BELOW_0),
     note: z.number(),
   })
   .superRefine(({ résultat, populationFavorable }, ctx) => {
-    if (résultat === "") {
-      // But it won't accept an empty string thanks to superRefine rule.
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: MANDATORY_RESULT,
-        path: ["résultat"],
-      });
-    } else if (résultat < 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: NOT_BELOW_0,
-        path: ["résultat"],
-      });
-    } else if (résultat > 5) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: NOT_HIGHER_THAN_N_RESULT(5),
-        path: ["résultat"],
-      });
-    } else if (résultat !== 5 && !populationFavorable) {
+    if (résultat !== 5 && !populationFavorable) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: MANDATORY_FAVORABLE_POPULATION,
@@ -95,7 +74,7 @@ export const HautesRémunérationsForm = () => {
   const populationFavorable = watch("populationFavorable");
 
   useEffect(() => {
-    if (résultat !== "" && résultat !== undefined) {
+    if (résultat !== undefined) {
       const note = new IndicateurCinqComputer().computeNote(résultat);
       setValue("note", note, { shouldValidate: true });
     }
@@ -121,20 +100,21 @@ export const HautesRémunérationsForm = () => {
               <Input
                 label="Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté *"
                 nativeInputProps={{
-                  type: "number",
-                  min: 0,
-                  max: 5,
-                  step: 1,
+                  // type: "number",
+                  // min: 0,
+                  // max: 5,
+                  // step: 1,
                   ...register("résultat", {
-                    setValueAs: setValueAsFloatOrEmptyString,
+                    valueAsNumber: true,
+                    //  setValueAs: setValueAsFloatOrEmptyString,
                   }),
-                  onBlur: e => {
-                    // Round number to 1 decimal.
-                    const value = parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      setValue("résultat", Math.round(value), { shouldValidate: true });
-                    }
-                  },
+                  // onBlur: e => {
+                  //   const value = parseInt(e.target.value);
+                  //   console.log("value", value);
+                  //   if (!isNaN(value)) {
+                  //     setValue("résultat", Math.round(value), { shouldValidate: true });
+                  //   }
+                  // },
                 }}
                 state={get(errors, "résultat") && "error"}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

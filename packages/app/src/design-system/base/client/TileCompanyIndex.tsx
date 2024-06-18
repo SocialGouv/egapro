@@ -176,7 +176,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                       )}
                     </li>
                     <li>
-                      Écart taux d'augmentation :{" "}
+                      Écart taux d'augmentations :{" "}
                       {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 ? (
                         <>
                           <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
@@ -205,7 +205,7 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                     </li>
                     {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_50_TO_250 && (
                       <li>
-                        Écart taux promotion : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
+                        Écart taux promotions : <Text inline variant="bold" text={`${row.promotionsScore ?? "NC"}`} />
                         {row.notComputableReasonPromotions && (
                           <Icon
                             size="xs"

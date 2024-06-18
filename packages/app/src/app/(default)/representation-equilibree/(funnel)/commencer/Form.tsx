@@ -121,9 +121,10 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <FormLayout>
           <Select
-            label="Année au titre de laquelle les écarts de représentation sont calculés"
+            label="Année au titre de laquelle les écarts de représentation sont calculés *"
             state={errors.year && "error"}
             stateRelatedMessage={errors.year?.message}
             nativeSelectProps={register("year", {
@@ -141,7 +142,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
           </Select>
           {session.user.staff ? (
             <Input
-              label="Siren entreprise (staff)"
+              label="Siren entreprise (staff) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeInputProps={{
@@ -152,7 +153,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             />
           ) : (
             <Select
-              label="Entreprise"
+              label="Entreprise *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeSelectProps={register("siren")}

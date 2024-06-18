@@ -56,7 +56,11 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
                 />
               </>
             )}
-            <Heading as="h1" variant="h5" text="Rechercher l'index de l'égalité professionnelle d'une entreprise" />
+            <Heading
+              as="h1"
+              variant="h5"
+              text="Rechercher l'index de l'égalité professionnelle d'une entreprise ou unité économique et sociale (UES)"
+            />
 
             <SearchSirenForm searchParams={searchParams} />
             <DetailedDownload
