@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { config } from "@common/config";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { storePicker } from "@common/utils/zustand";
 import { add, isAfter } from "date-fns";
@@ -32,7 +33,7 @@ export const EditButton = ({ repEq }: EditButtonProps) => {
           children: "Précédent",
           priority: "secondary",
           onClick() {
-            router.back();
+            router.push(`${config.base_repeq_url}/commencer`);
           },
         },
         {
