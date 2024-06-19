@@ -149,9 +149,9 @@ export const RecapSimu = () => {
             <p className="fr-mb-1w">
               <strong>{RemunerationsMode.Label[funnel.indicateur1.mode]}</strong>
             </p>
-            <p className="fr-mb-1w">Ecarts de rémunération (avant application du seuil de pertinence)</p>
             {computerIndicateurUn.canCompute() ? (
               <>
+                <p className="fr-mb-1w">Ecarts de rémunération (avant application du seuil de pertinence)</p>
                 <AlternativeTable
                   bordered
                   classeName="fr-mb-1w"
@@ -422,7 +422,7 @@ export const RecapSimu = () => {
                   display={{
                     asTitle: "xs",
                   }}
-                  helpText={`Nombre de points maximum pouvant être obtenus est inferieur à 75, votre index ne peut être calculé.`}
+                  helpText={`Le nombre de points maximum pouvant être obtenus est inferieur à 75, votre index ne peut être calculé.`}
                   helpTextVariant={["light", "alt"]}
                 />
               )}
