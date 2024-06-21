@@ -170,8 +170,9 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             </Select>
           )}
           <p>
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
             <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
-              Vous ne trouvez pas le Siren sur lequel faire votre déclaration ?
+              cliquez ici
             </Link>
           </p>
           <BackNextButtonsGroup
