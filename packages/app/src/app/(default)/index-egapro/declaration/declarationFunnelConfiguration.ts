@@ -33,7 +33,7 @@ class StaticConfigItem {
  * Static configuration of the funnel. Reachable server side.
  */
 export const funnelStaticConfig: StaticConfig = {
-  commencer: new StaticConfigItem("commencer", "Commencer la déclaration"),
+  commencer: new StaticConfigItem("commencer", "Commencer la déclaration de l'index de l'égalité professionnelle"),
   "augmentations-et-promotions": new StaticConfigItem(
     "augmentations-et-promotions",
     "Écart de taux d’augmentations individuelles entre les femmes et les hommes",

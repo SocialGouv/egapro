@@ -1,5 +1,5 @@
 export const TITLES = {
-  commencer: "Commencer",
+  commencer: "Commencer la déclaration des écarts de représentation",
   declarant: "Informations déclarant",
   entreprise: "Informations entreprise",
   "periode-reference": "Période de référence",
