@@ -27,7 +27,10 @@ const formSchema = z
   .object({
     populationFavorable: z.string().optional(),
     résultat: z
-      .number({ invalid_type_error: "La valeur est obligatoire" })
+      .number({
+        invalid_type_error: "La valeur doit être un nombre entier",
+        required_error: "La valeur est obligatoire",
+      })
       .int("La valeur doit être un nombre entier")
       .lte(5, NOT_HIGHER_THAN_N_RESULT(5))
       .gte(0, NOT_BELOW_0),

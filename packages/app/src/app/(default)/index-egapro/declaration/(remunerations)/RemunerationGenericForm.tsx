@@ -129,7 +129,6 @@ export const RemunerationGenericForm = ({ mode }: { mode: Remunerations["mode"] 
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <AlertMessage title="Erreur" message={errors.catégories?.root?.message} />
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
