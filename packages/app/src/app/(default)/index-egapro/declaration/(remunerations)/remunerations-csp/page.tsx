@@ -8,7 +8,7 @@ const RemunerationCSPPage = () => {
   return (
     <>
       <DeclarationStepper stepName={stepName} />
-
+      <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
       <h4>Ecarts de rémunération par CSP et tranche d'âge en % *</h4>
       <p>
         Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les CSP
