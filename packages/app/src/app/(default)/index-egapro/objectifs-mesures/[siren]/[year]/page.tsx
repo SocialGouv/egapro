@@ -9,7 +9,7 @@ import { type NextServerPageProps } from "@common/utils/next";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { CenteredContainer } from "@design-system";
 import { MessageProvider } from "@design-system/client";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 
 import { getDeclarationOpmc } from "../../actions";
@@ -22,6 +22,8 @@ const canEditSiren = (user?: Session["user"]) => (siren?: string) => {
 
 const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = Number(strYear);
+  const session = await getServerSession(authConfig);
+  if (!session) redirect("/login");
 
   let declaration: DeclarationOpmcDTO | null = null;
   try {
@@ -73,7 +75,6 @@ const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextSe
   }
 
   const index = declaration["resultat-global"]?.index;
-  const session = await getServerSession(authConfig);
   const declarationDate = declaration["declaration-existante"].date;
   const canEdit = canEditSiren(session?.user)(siren);
 
@@ -92,7 +93,7 @@ const ObjectifsMesuresPage = async ({ params: { siren, year: strYear } }: NextSe
 
   return (
     <MessageProvider>
-      <ObjectifsMesuresForm declaration={declaration} />
+      <ObjectifsMesuresForm declaration={declaration} isStaff={session.user.staff} />
     </MessageProvider>
   );
 };
