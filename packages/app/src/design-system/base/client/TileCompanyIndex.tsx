@@ -177,7 +177,8 @@ export const TileCompanyIndex = (dto: SearchDeclarationResultDTO) => {
                     </li>
                     <li>
                       Écart taux d'augmentations :{" "}
-                      {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 ? (
+                      {company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_251_TO_999 &&
+                      company[row.year].workforce?.range !== CompanyWorkforceRange.Enum.FROM_1000_TO_MORE ? (
                         <>
                           <Text inline variant="bold" text={`${row.salaryRaisesAndPromotionsScore ?? "NC"}`} />
                           {row.notComputableReasonSalaryRaisesAndPromotions && (

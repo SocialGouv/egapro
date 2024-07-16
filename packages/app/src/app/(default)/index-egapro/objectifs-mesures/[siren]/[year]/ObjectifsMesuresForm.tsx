@@ -355,9 +355,10 @@ export const isEditable = (declaration?: DeclarationOpmcDTO) =>
 
 type Props = {
   declaration: DeclarationOpmcDTO;
+  isStaff: boolean;
 };
 
-export const ObjectifsMesuresForm = ({ declaration }: Props) => {
+export const ObjectifsMesuresForm = ({ declaration, isStaff }: Props) => {
   const router = useRouter();
   const { setMessage } = useMessageProvider();
 
@@ -414,7 +415,7 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
   assert(siren, "Le siren est obligatoire");
   assert(year, "L'année est obligatoire");
 
-  const isReadonly = !isEditable(declaration);
+  const isReadonly = !isEditable(declaration) && !isStaff;
 
   const onSubmit = async (opmc: UpdateOpMcDTO) => {
     const result = await updateDeclarationOpmc({ opmc, siren, year });
@@ -429,11 +430,15 @@ export const ObjectifsMesuresForm = ({ declaration }: Props) => {
   return (
     <FormProvider {...methods}>
       {isReadonly && (
-        <Alert
-          severity="warning"
-          title="Vos objectifs de progression et mesures de correction ne sont plus modifiables."
-          description="Vos objectifs de progression et mesures de correction ne sont plus modifiables car le délai est écoulé."
-        />
+        <>
+          <Alert
+            severity="info"
+            as="h2"
+            title="Cette déclaration a été validée et transmise."
+            description="Elle n'est plus modifiable car le délai d'un an est écoulé"
+            className={fr.cx("fr-mb-4w")}
+          />
+        </>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
