@@ -97,7 +97,14 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <p>
               <br />
               Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-              <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+              <Link
+                target="_blank"
+                href={`https://app${
+                  config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+                }.moncomptepro.beta.gouv.fr/manage-organizations`}
+              >
+                cliquez ici
+              </Link>
             </p>
           </Box>
           {typeof selectedSiren === "string" && (
@@ -122,7 +129,14 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <p>
                 <br />
                 Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-                <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+                <Link
+                  target="_blank"
+                  href={`https://app${
+                    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+                  }.moncomptepro.beta.gouv.fr/manage-organizations`}
+                >
+                  cliquez ici
+                </Link>
               </p>
             </Box>
             <Box mt="4w">Le siren fournit est invalide.</Box>

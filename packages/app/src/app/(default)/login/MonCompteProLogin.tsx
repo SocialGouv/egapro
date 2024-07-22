@@ -12,7 +12,7 @@ export const MonCompteProLogin = ({ callbackUrl }: MonCompteProLoginProps) => (
     <MonCompteProButton
       onClick={e => {
         e.preventDefault();
-        signIn("moncomptepro", { callbackUrl });
+        signIn("moncomptepro", { callbackUrl, redirect: true });
       }}
     />
     <Link href="/aide-moncomptepro" target="_blank">

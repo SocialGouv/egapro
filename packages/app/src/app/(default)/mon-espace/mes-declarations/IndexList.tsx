@@ -42,9 +42,9 @@ const getDeclarationOpmcStatus = (declaration?: DeclarationOpmcDTO) => {
 
   try {
     objectifsMesuresSchema.parse(initialValuesObjectifsMesures);
-    if (isFrozenDeclarationForOPMC(declaration)) return declarationOpmcStatus.NOT_MODIFIABLE_CORRECT;
+    // if (isFrozenDeclarationForOPMC(declaration)) return declarationOpmcStatus.NOT_MODIFIABLE_CORRECT;
   } catch (e) {
-    if (isFrozenDeclarationForOPMC(declaration)) return declarationOpmcStatus.NOT_MODIFIABLE_INCORRECT;
+    //if (isFrozenDeclarationForOPMC(declaration)) return declarationOpmcStatus.NOT_MODIFIABLE_INCORRECT;
     return declarationOpmcStatus.TO_COMPLETE;
   }
   return declarationOpmcStatus.COMPLETED;

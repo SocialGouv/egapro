@@ -71,7 +71,7 @@ const Recherche = withSearchParamsValidation(getDeclarationStatsInputSchema)(asy
           </GridCol>
         </Grid>
       </Container>
-      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"), "bg-dsfr-alt-grey")}>
+      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"))}>
         {!searchParamsError && (
           <Suspense>
             {isLandingPage ? (
