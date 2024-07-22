@@ -1,5 +1,6 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { config } from "@common/config";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
@@ -71,7 +72,14 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
           <p>
             <br />
             Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+            <Link
+              target="_blank"
+              href={`https://app${
+                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+              }.moncomptepro.beta.gouv.fr/manage-organizations`}
+            >
+              cliquez ici
+            </Link>
           </p>
         </Box>
       </MessageProvider>
@@ -114,7 +122,14 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
         <p>
           <br />
           Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-          <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+          <Link
+            target="_blank"
+            href={`https://app${
+              config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+            }.moncomptepro.beta.gouv.fr/manage-organizations`}
+          >
+            cliquez ici
+          </Link>
         </p>
       </Box>
       <Box mt="10w">

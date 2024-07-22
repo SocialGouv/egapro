@@ -1,10 +1,12 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { Grid, GridCol } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; sirenList: string[] }) => {
@@ -42,6 +44,11 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
           <span>{selectedCompanyName}</span>
         </div>
       </GridCol>
+      <Button
+        onClick={() => signIn("moncomptepro", { callbackUrl: `/mon-espace/mes-entreprises?siren=${currentSiren}` })}
+      >
+        Rafraichir MCP
+      </Button>
     </Grid>
   );
 };
