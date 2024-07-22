@@ -350,7 +350,8 @@ export function buildHelpersObjectifsMesures(declaration?: DeclarationOpmcDTO) {
 
 export const isEditable = (declaration?: DeclarationOpmcDTO) =>
   declaration?.["declaration-existante"].date
-    ? isBefore(new Date(), add(new Date(declaration?.["declaration-existante"].date), { years: 1 }))
+    ? !declaration?.opmc?.datePublicationObjectifs ||
+      isBefore(new Date(), add(new Date(declaration?.["declaration-existante"].date), { years: 1 }))
     : false;
 
 type Props = {
