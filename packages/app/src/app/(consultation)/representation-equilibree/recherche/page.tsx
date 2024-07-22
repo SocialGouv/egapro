@@ -57,7 +57,7 @@ export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchem
           </GridCol>
         </Grid>
       </Container>
-      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"), "bg-dsfr-alt-grey")}>
+      <Box className={cx(fr.cx("fr-pb-6w", "fr-pt-4w"))}>
         <Container as="section">
           <Grid haveGutters align="center">
             <GridCol sm={12} md={10} xl={8}>
