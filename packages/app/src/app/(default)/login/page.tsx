@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer, Link } from "@design-system";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
@@ -39,6 +40,8 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
   const isEmailLogin = config.api.security.auth.isEmailLogin;
+
+  if (session?.user) redirect(callbackUrl);
 
   return (
     <CenteredContainer py="6w">
