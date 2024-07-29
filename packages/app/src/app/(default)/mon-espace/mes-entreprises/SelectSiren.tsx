@@ -52,7 +52,7 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
         <Button
           onClick={e => {
             e.preventDefault();
-            window.sessionStorage.setItem("redirectUrl", window.location.href);
+            //window.sessionStorage.setItem("redirectUrl", window.location.href);
             signIn("moncomptepro", { redirect: false });
           }}
         >

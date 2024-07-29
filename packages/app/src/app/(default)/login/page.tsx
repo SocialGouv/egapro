@@ -35,13 +35,24 @@ const signinErrors: Record<string, string> = {
   default: "Impossible de se connecter.",
 };
 
+function getUriFromUrl(urlString: string): string {
+  try {
+    const url = new URL(urlString);
+    const uri = `${url.pathname}${url.search}${url.hash}`;
+    return uri;
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return "";
+  }
+}
+
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
   const session = await getServerSession(authConfig);
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  if (session?.user) redirect(callbackUrl);
+  if (session?.user) redirect(getUriFromUrl(callbackUrl) || "/");
 
   return (
     <CenteredContainer py="6w">

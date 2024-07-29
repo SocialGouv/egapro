@@ -184,7 +184,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             <Button
               onClick={e => {
                 e.preventDefault();
-                window.sessionStorage.setItem("redirectUrl", window.location.href);
+                //window.sessionStorage.setItem("redirectUrl", window.location.href);
                 signIn("moncomptepro", { redirect: false });
               }}
             >
