@@ -12,7 +12,8 @@ export const MonCompteProLogin = ({ callbackUrl }: MonCompteProLoginProps) => (
     <MonCompteProButton
       onClick={e => {
         e.preventDefault();
-        signIn("moncomptepro", { callbackUrl, redirect: true });
+        window.sessionStorage.setItem("redirectUrl", window.location.href);
+        signIn("moncomptepro", { redirect: false });
       }}
     />
     <Link href="/aide-moncomptepro" target="_blank">
