@@ -40,7 +40,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
           value: `${repEq.declarant.lastname} ${repEq.declarant.firstname}`,
         },
         {
-          key: "Adresse mail",
+          key: "Adresse email",
           value: repEq.declarant.email.getValue(),
         },
       ],

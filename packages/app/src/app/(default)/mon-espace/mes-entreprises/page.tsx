@@ -24,8 +24,7 @@ const MesEntreprisesInfoAlert = () => (
           entreprises.
         </p>
         <p>
-          {" "}
-          Si vous souhaitez supprimer une adresse mail rattachée à un siren, veuillez{" "}
+          Si vous souhaitez supprimer une adresse email rattachée à un siren, veuillez{" "}
           <Link target="_blank" href={"mailto:contact@moncomptepro.beta.gouv.fr"}>
             contacter MonComptePro
           </Link>{" "}
@@ -38,7 +37,7 @@ const MesEntreprisesInfoAlert = () => (
           >
             créer un nouveau compte MonComptePro
           </Link>{" "}
-          pour rattacher une autre adresse mail à un numéro Siren.
+          pour rattacher une autre adresse email à un numéro Siren.
         </p>
       </>
     }
@@ -96,7 +95,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <SelectSiren sirenList={sirenList} loadedSiren={selectedSiren} />
             <p>
               <br />
-              Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
+              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
               <Link
                 target="_blank"
                 href={`https://app${
@@ -128,7 +127,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <SelectSiren sirenList={sirenList} />
               <p>
                 <br />
-                Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
+                Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
                 <Link
                   target="_blank"
                   href={`https://app${

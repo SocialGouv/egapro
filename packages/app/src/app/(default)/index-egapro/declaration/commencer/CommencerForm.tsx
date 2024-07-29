@@ -2,6 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
@@ -11,7 +12,7 @@ import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup, Link } from "@design-system";
+import { BackNextButtonsGroup, Icon, Link } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
@@ -20,7 +21,7 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -282,6 +283,20 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
               cliquez ici
             </Link>
           </p>
+          <div className={fr.cx("fr-pt-3v")}>
+            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte MonComptePro, cliquez sur
+            ce bouton : <br />
+            <Button
+              onClick={e => {
+                e.preventDefault();
+                window.sessionStorage.setItem("redirectUrl", window.location.href);
+                signIn("moncomptepro", { redirect: false });
+              }}
+            >
+              <Icon icon="fr-icon-refresh-line" />
+              Rafraichir MCP
+            </Button>
+          </div>
 
           <ClientAnimate>
             {isValid && (

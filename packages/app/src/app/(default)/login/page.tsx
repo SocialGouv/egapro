@@ -69,9 +69,9 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                   </p>
                   <br />
                   <p>
-                    Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse mail professionnelle</b>,
-                    celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
-                    cas de besoin.
+                    Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse email professionnelle</b>
+                    , celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail
+                    en cas de besoin.
                   </p>
                   <br />
                   <p>

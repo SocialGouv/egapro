@@ -23,10 +23,10 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
 
     try {
       // TODO: confirm year with product owner
-      assert(
-        declaration.year.getValue() >= 2020 && declaration.year.getValue() <= new Date().getFullYear(),
-        "Règle 1 - Assertion année indicateurs",
-      );
+      // assert(
+      //   declaration.year.getValue() >= 2020 && declaration.year.getValue() <= new Date().getFullYear(),
+      //   "Règle 1 - Assertion année indicateurs",
+      // );
 
       // Règle 2 - Assertion champs obligatoiresx
       // siren, year are present by definition but we check them anyway.

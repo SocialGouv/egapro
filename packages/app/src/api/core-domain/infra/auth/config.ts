@@ -190,11 +190,6 @@ export const authConfig: AuthOptions = {
 
       return token;
     },
-
-    async redirect({ url, baseUrl }) {
-      logger.info(`Redirect called with URL: ${url} and Base URL: ${baseUrl}`);
-      return url.startsWith(baseUrl) ? url : baseUrl;
-    },
     // expose data from jwt to front
     session({ session, token }) {
       session.user = token.user;

@@ -107,8 +107,8 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
 
   const FormInput = z.object({
     email: z
-      .string({ required_error: "L'adresse mail est requise" })
-      .regex(EMAIL_REGEX, { message: "L'adresse mail est invalide" }),
+      .string({ required_error: "L'adresse email est requise" })
+      .regex(EMAIL_REGEX, { message: "L'adresse email est invalide" }),
   })
 
   return (
