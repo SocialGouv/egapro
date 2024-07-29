@@ -65,7 +65,7 @@ const labourMinistryRepeq = {
 
 export const Footer = () => (
   <DsfrFooter
-    accessibility="non compliant"
+    accessibility="partially compliant"
     accessibilityLinkProps={{
       href: "/declaration-accessibilite",
     }}

@@ -56,7 +56,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
           value: `${declaration.declarant.lastname} ${declaration.declarant.firstname}`,
         },
         {
-          key: "Adresse mail",
+          key: "Adresse email",
           value: declaration.declarant.email.getValue(),
         },
       ],

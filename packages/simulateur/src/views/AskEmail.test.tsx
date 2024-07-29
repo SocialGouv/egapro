@@ -12,7 +12,7 @@ test("AskEmail should not accept empty email", () => {
   render(<AskEmail />)
   expect(screen.getByLabelText(/Email/i)).toHaveValue("")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
-  expect(screen.getByText("L'adresse mail est requise")).toBeInTheDocument()
+  expect(screen.getByText("L'adresse email est requise")).toBeInTheDocument()
 })
 
 test("AskEmail should not accept invalid email", async () => {
@@ -25,7 +25,7 @@ test("AskEmail should not accept invalid email", async () => {
   })
   expect(input).toHaveValue("invalid")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
-  expect(screen.getByText("L'adresse mail est invalide")).toBeInTheDocument()
+  expect(screen.getByText("L'adresse email est invalide")).toBeInTheDocument()
 })
 
 test("AskEmail should accept valid email", async () => {

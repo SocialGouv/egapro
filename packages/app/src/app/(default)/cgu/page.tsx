@@ -66,7 +66,7 @@ const Cgu = () => {
           <p>
             Egapro utilise le service d’identification MonComptePro pour garantir l’appartenance de l’Utilisateur à
             l’entreprise déclarante. L’Utilisateur doit créer un compte MonComptePro, en renseignant notamment son
-            adresse mail, et s’identifier avec ce compte pour déclarer sur Egapro.
+            adresse email, et s’identifier avec ce compte pour déclarer sur Egapro.
           </p>
           <h3 className="fr-text--xl">
             3.2 Egapro sur la représentation équilibrée entre les femmes et les hommes dans les postes de direction des
@@ -80,7 +80,7 @@ const Cgu = () => {
           <p>
             Egapro utilise le service d’identification MonComptePro pour garantir l’appartenance de l’Utilisateur à
             l’entreprise déclarante. L’Utilisateur doit créer un compte MonComptePro, en renseignant notamment son
-            adresse mail, et s’identifier avec ce compte pour déclarer sur Egapro.
+            adresse email, et s’identifier avec ce compte pour déclarer sur Egapro.
           </p>
           <h2>Article 4 - Responsabilités</h2>
           <h3 className="fr-text--xl">4.1 L’Éditeur de la Plateforme</h3>

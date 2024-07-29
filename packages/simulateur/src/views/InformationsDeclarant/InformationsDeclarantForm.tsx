@@ -35,8 +35,8 @@ const FormInputs = z.object({
     message: "Le numéro de téléphone doit être composé de 10 chiffres",
   }),
   email: z
-    .string({ required_error: "L'adresse mail est requise" })
-    .regex(EMAIL_REGEX, { message: "L'adresse mail est invalide" }),
+    .string({ required_error: "L'adresse email est requise" })
+    .regex(EMAIL_REGEX, { message: "L'adresse email est invalide" }),
   acceptationCGU: z.literal(true, {
     invalid_type_error: "Veuillez accepter les CGUs",
   }),

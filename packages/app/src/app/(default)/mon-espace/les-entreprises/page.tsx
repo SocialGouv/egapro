@@ -25,7 +25,7 @@ const MesEntreprisesInfoAlert = () => (
         </p>
         <p>
           {" "}
-          Si vous souhaitez supprimer une adresse mail rattachée à un siren, veuillez{" "}
+          Si vous souhaitez supprimer une adresse email rattachée à un siren, veuillez{" "}
           <Link target="_blank" href={"mailto:contact@moncomptepro.beta.gouv.fr"}>
             contacter MonComptePro
           </Link>{" "}
@@ -38,7 +38,7 @@ const MesEntreprisesInfoAlert = () => (
           >
             créer un nouveau compte MonComptePro
           </Link>{" "}
-          pour rattacher une autre adresse mail à un numéro Siren.
+          pour rattacher une autre adresse email à un numéro Siren.
         </p>
       </>
     }
@@ -62,8 +62,10 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           <p>
             <br />
-            Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            <Link target="_blank" href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">
+              cliquez ici
+            </Link>
           </p>
         </Box>
       </MessageProvider>
@@ -84,8 +86,10 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           <p>
             <br />
-            Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
-            <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            <Link target="_blank" href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">
+              cliquez ici
+            </Link>
           </p>
           <Box mt="4w">
             <Heading as="h1" variant="h6" text="Responsables" />
@@ -107,7 +111,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             </Box>
             <p>
               <br />
-              Vous souhaitez rattacher votre adresse mail à un autre Siren,{" "}
+              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
               <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
             </p>
             <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>

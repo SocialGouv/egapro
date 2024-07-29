@@ -53,7 +53,7 @@ def main(data):
 
     cells = (
         ("Nom Prénom", "{nom} {prénom}".format(**data["déclarant"])),
-        ("Adresse mail", data.path("déclarant.email")),
+        ("Adresse email", data.path("déclarant.email")),
     )
     pdf.write_table("Informations déclarant", cells)
 

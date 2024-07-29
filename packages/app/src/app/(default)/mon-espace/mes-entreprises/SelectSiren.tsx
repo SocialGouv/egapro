@@ -46,8 +46,16 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
           </div>
         </GridCol>
       </Grid>
-      <div className={fr.cx("fr-pt-2v")}>
-        <Button onClick={() => signIn("moncomptepro", { redirect: true })}>
+      <div className={fr.cx("fr-pt-3v")}>
+        Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte MonComptePro, cliquez sur ce
+        bouton : <br />
+        <Button
+          onClick={e => {
+            e.preventDefault();
+            window.sessionStorage.setItem("redirectUrl", window.location.href);
+            signIn("moncomptepro", { redirect: false });
+          }}
+        >
           <Icon icon="fr-icon-refresh-line" />
           Rafraichir MCP
         </Button>

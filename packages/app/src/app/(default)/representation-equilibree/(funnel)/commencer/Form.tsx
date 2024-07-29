@@ -1,15 +1,18 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { YEARS_REPEQ } from "@common/dict";
-import { BackNextButtonsGroup, FormLayout, Link } from "@design-system";
+import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
+import { signIn } from "next-auth/react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -175,6 +178,20 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
               cliquez ici
             </Link>
           </p>
+          <div className={fr.cx("fr-pt-3v")}>
+            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte MonComptePro, cliquez sur
+            ce bouton : <br />
+            <Button
+              onClick={e => {
+                e.preventDefault();
+                window.sessionStorage.setItem("redirectUrl", window.location.href);
+                signIn("moncomptepro", { redirect: false });
+              }}
+            >
+              <Icon icon="fr-icon-refresh-line" />
+              Rafraichir MCP
+            </Button>
+          </div>
           <BackNextButtonsGroup
             backProps={{
               onClick: confirmReset,
