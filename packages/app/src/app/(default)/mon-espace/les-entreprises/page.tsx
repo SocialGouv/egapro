@@ -63,7 +63,12 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <p>
             <br />
             Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
-            <Link target="_blank" href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">
+            <Link
+              target="_blank"
+              href={`https://app${
+                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+              }.moncomptepro.beta.gouv.fr/manage-organizations`}
+            >
               cliquez ici
             </Link>
           </p>
@@ -87,7 +92,12 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <p>
             <br />
             Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
-            <Link target="_blank" href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">
+            <Link
+              target="_blank"
+              href={`https://app${
+                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+              }.moncomptepro.beta.gouv.fr/manage-organizations`}
+            >
               cliquez ici
             </Link>
           </p>
@@ -112,7 +122,14 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <p>
               <br />
               Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
-              <Link href="https://app.moncomptepro.beta.gouv.fr/manage-organizations">cliquez ici</Link>
+              <Link
+                target="_blank"
+                href={`https://app${
+                  config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+                }.moncomptepro.beta.gouv.fr/manage-organizations`}
+              >
+                cliquez ici
+              </Link>
             </p>
             <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
           </Box>
