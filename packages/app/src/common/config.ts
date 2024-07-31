@@ -70,6 +70,9 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         isEmailLogin: ensureApiEnvVar(process.env.EMAIL_LOGIN, isTruthy, false),
         privateRoutes: [
+          "/mon-espace/mes-declarations",
+          "/mon-espace/les-entreprises",
+          "/mon-espace/mes-entreprises",
           "/index-egapro/declaration/augmentations",
           "/index-egapro/declaration/augmentations-et-promotions",
           "/index-egapro/declaration/commencer",
