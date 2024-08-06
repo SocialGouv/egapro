@@ -1,3 +1,21 @@
+## [3.4.8](https://github.com/SocialGouv/egapro/compare/v3.4.7...v3.4.8) (2024-08-06)
+
+
+### Bug Fixes
+
+* accessibility ([#2310](https://github.com/SocialGouv/egapro/issues/2310)) ([28be68e](https://github.com/SocialGouv/egapro/commit/28be68e62957d2e77bfeb3b46e1c237ec6019670))
+* add privateRoute for redirection ([#2340](https://github.com/SocialGouv/egapro/issues/2340)) ([f66cab8](https://github.com/SocialGouv/egapro/commit/f66cab87236bb5344bef351e0bfe80a248c712ee))
+* last update wordings ([#2307](https://github.com/SocialGouv/egapro/issues/2307)) ([1e6dd6c](https://github.com/SocialGouv/egapro/commit/1e6dd6c9c15888e17ff6773565bd510d1257bc1c))
+* mcp redirect ([5bf52f1](https://github.com/SocialGouv/egapro/commit/5bf52f1f739cc296ea23b49f07906bb787effb6a))
+* mcp redirect ([#2338](https://github.com/SocialGouv/egapro/issues/2338)) ([6ddb586](https://github.com/SocialGouv/egapro/commit/6ddb5864653ee81470116d133ec0499806915778))
+* mcp redirect again ([e270085](https://github.com/SocialGouv/egapro/commit/e270085415b0826efb19d6cb3990646a6295f636))
+* mcp redirect clean ([6f36f47](https://github.com/SocialGouv/egapro/commit/6f36f4793665156789dc1fdddad5c1caa1b1b779))
+* mcp redirect test1 ([130e636](https://github.com/SocialGouv/egapro/commit/130e636fca61baf4038df4bc243551a40cd5453e))
+* mpc refresh ([#2322](https://github.com/SocialGouv/egapro/issues/2322)) ([25beaae](https://github.com/SocialGouv/egapro/commit/25beaae2629457027747e202a34e4b852042856a))
+* opmc ([#2320](https://github.com/SocialGouv/egapro/issues/2320)) ([9a48ff2](https://github.com/SocialGouv/egapro/commit/9a48ff2cbcaa23f0573dc63777e2a6c9f9453b33))
+* simu recap wording ([#2308](https://github.com/SocialGouv/egapro/issues/2308)) ([c5a9017](https://github.com/SocialGouv/egapro/commit/c5a90171ec34469e981c28684933f8c12133d88e))
+* wording for commencer page ([#2309](https://github.com/SocialGouv/egapro/issues/2309)) ([4bfd66d](https://github.com/SocialGouv/egapro/commit/4bfd66d4e33e0565cf3fd8e9e4d725559243168c))
+
 ## [3.4.7](https://github.com/SocialGouv/egapro/compare/v3.4.6...v3.4.7) (2024-05-31)
 
 
