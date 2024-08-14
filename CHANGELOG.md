@@ -1,3 +1,10 @@
+## [3.4.9](https://github.com/SocialGouv/egapro/compare/v3.4.8...v3.4.9) (2024-08-14)
+
+
+### Bug Fixes
+
+* declaration list ([#2344](https://github.com/SocialGouv/egapro/issues/2344)) ([76c1420](https://github.com/SocialGouv/egapro/commit/76c1420ec31bfcd684c8429cf5d789b9a2c7e512))
+
 ## [3.4.8](https://github.com/SocialGouv/egapro/compare/v3.4.7...v3.4.8) (2024-08-06)
 
 
