@@ -12,9 +12,9 @@ const githubLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const helpLink = {
-  text: "Consulter l'aide pour le calcul de l'index",
+  text: "Consulter l'aide concernant l'index",
   linkProps: {
-    href: "/aide-simulation",
+    href: "/aide-index",
     target: "_blank",
   },
 } satisfies DsfrFooterProps.LinkList.Link;

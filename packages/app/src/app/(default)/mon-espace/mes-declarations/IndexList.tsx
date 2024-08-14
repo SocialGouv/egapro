@@ -91,7 +91,11 @@ const formatTableData = (declarations: DeclarationDTO[], declarationOpmcList: De
         : capitalize(declaration.entreprise?.type),
       declaration.entreprise?.tranche ? CompanyWorkforceRange.Label[declaration.entreprise.tranche] : undefined,
       formatIsoToFr(declaration["declaration-existante"].date || ""),
-      declaration["resultat-global"]?.index || <span title="Non calculable">NC</span>,
+      typeof declaration["resultat-global"]?.index === "number" ? (
+        declaration["resultat-global"]?.index
+      ) : (
+        <span title="Non calculable">NC</span>
+      ),
       formatDeclarationOpmcStatus(
         getDeclarationOpmcStatus(
           declarationOpmcList.find(declarationOpmc => declarationOpmc.commencer?.annéeIndicateurs === rowYear),

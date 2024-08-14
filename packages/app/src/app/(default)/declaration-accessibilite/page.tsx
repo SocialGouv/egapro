@@ -27,7 +27,7 @@ const AccessibilityStatement = () => {
               )
             </p>
             <h2>Etat de conformité</h2>
-            <p>Egapro est non conforme avec le RGAA. Le site n’a encore pas été audité.</p>
+            <p>Egapro est partiellement conforme.</p>
             <p>
               Un audit{" "}
               <Link

@@ -34,13 +34,13 @@ jobs:
           yarn setup-python
 
       - name: Up for tests API
-        run: docker-compose up --build -d api db test_db
+        run: docker compose up --build -d api db test_db
 
       - name: Check types
         run: yarn check-all
 
       - name: Down for tests API
-        run: docker-compose down
+        run: docker compose down
 
       # TODO reenable. Next13 is not ready yet for proper testing
       # + using a mix between pageDir and appDir make tests harder to dev

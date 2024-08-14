@@ -97,9 +97,21 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                   </p>
                   <br />
                   <p className={"text-dsfr-error"}>
-                    Si vous rencontrez des difficultés pour vous connecter, vous devez contacter le support{" "}
+                    Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
+                    service informatique pour qu'il autorise les mails en provenance de MonComptePro.
+                  </p>
+                  <br />
+                  <p className={"text-dsfr-error"}>
+                    Pour tout problème lié à MonComptePro, vous devez contacter le support dédié à cette adresse email{" "}
                     <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target={"_blank"}>
-                      MonComptePro
+                      contact@moncomptepro.beta.gouv.fr
+                    </Link>
+                  </p>
+                  <br />
+                  <p>
+                    Pour consulter l'aide MonComptePro,{" "}
+                    <Link href={"/aide-moncomptepro"} target={"_blank"}>
+                      cliquez ici
                     </Link>
                   </p>
                 </>
