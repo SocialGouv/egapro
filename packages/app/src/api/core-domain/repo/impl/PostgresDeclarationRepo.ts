@@ -99,6 +99,12 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
     return raws.map(declarationMap.toDomain);
   }
+
+  public async getAllSirenAndYear(): Promise<Array<Partial<DeclarationRaw>>> {
+    const raws = await this.sql`select * from ${this.table} where data notnull ${this.postgresLimit}`;
+
+    return raws; //.map(declarationMap.toDomain);
+  }
   public async getOne([siren, year]: DeclarationPK): Promise<Declaration | null> {
     try {
       const [raw] = await this.sql`select * from ${

@@ -12,7 +12,7 @@ export const errorDetailLabel: Record<(typeof errorDetailCodes)[number], string>
   EMAIL_DELIVERY_KO: "L'envoi du mail a échoué",
   ALREADY_PROCESSED: "La demande a déjà été traitée",
   INVALID_EMAIL: "L'email est invalide",
-  INVALID_SIREN: "Le Siren est composé de 9 chiffres sans espace",
+  INVALID_SIREN: "Le Siren n'est pas valide",
   NOT_FOUND_SIREN: "Le SIREN n'existe pas",
 };
 
