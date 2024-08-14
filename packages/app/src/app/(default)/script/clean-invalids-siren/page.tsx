@@ -74,8 +74,8 @@ const CleanInvalidsSirenPage = async () => {
       <div>
         <p>nombre de sirens invalides: {invalidDeclarations.length}</p>
         <ul>
-          {invalidDeclarations.map(declaration => (
-            <li>
+          {invalidDeclarations.map((declaration, index) => (
+            <li key={`invalid-${index}`}>
               declaration siren:{declaration.siren}, declaration année: {declaration.year} invalid ues siren:{" "}
               {declaration.invalidSiren}
             </li>
