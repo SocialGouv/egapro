@@ -1,6 +1,5 @@
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import Button from "@codegouvfr/react-dsfr/Button";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import {
   Box,
@@ -35,18 +34,21 @@ const IndexEgapro = () => {
               </h1>
               <Text
                 variant={["lg", "bold"]}
-                text="L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes. Il permet de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises."
+                text="L’index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes. Il permet de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises."
               />
               <p>
-                Toutes les <strong>entreprises d’au moins 50 salariés</strong> doivent calculer et publier leur Index{" "}
-                <strong>chaque année au plus tard le 1er mars</strong>.
+                Toutes les <strong>entreprises et unités économiques et sociales (UES) d’au moins 50 salariés</strong>{" "}
+                doivent calculer et publier leur index <strong>chaque année au plus tard le 1er mars</strong>. Elles
+                doivent également le transmettre au comité social et économique et aux services du ministre chargé du
+                travail.
               </p>
               <p>
-                Les entreprises ayant obtenu un index inférieur à 75 points doivent publier, par une communication
-                externe et au sein de l’entreprise, les mesures de correction qu’elles ont définies par accord ou, à
-                défaut, par décision unilatérale. Par ailleurs, celles ayant obtenu un index inférieur à 85 points
-                doivent fixer, également par accord ou, à défaut, par décision unilatérale, et publier des objectifs de
-                progression de chacun des indicateurs de l’Index.
+                Les entreprises et UES ayant obtenu un index inférieur à 75 points doivent publier, par une
+                communication externe et au sein de l’entreprise, les mesures de correction qu’elles ont définies par
+                accord ou, à défaut, par décision unilatérale. Par ailleurs, celles ayant obtenu un index inférieur à 85
+                points doivent fixer, également par accord ou, à défaut, par décision unilatérale, et publier des
+                objectifs de progression de chacun des indicateurs de l’Index. Dans les deux cas, elles doivent
+                également les transmettre au comité social et économique et aux services du ministre chargé du travail.
               </p>
             </GridCol>
             <GridCol lg={5}>
@@ -59,7 +61,7 @@ const IndexEgapro = () => {
             horizontal
             detail={<Icon text="Étape 1" icon="fr-icon-arrow-right-line" size="sm" />}
             title="Calcul de l'index"
-            desc="Vous pouvez calculer votre index égalité professionnelle F/H et le déclarer à l'administration, si vous le souhaitez, suite au calcul, via le formulaire suivant."
+            desc="Vous pouvez calculer votre index égalité professionnelle F/H via le formulaire suivant."
             footer={
               <Button
                 linkProps={{
@@ -76,7 +78,7 @@ const IndexEgapro = () => {
             horizontal
             detail={<Icon text="Étape 2" icon="fr-icon-arrow-right-line" size="sm" />}
             title="Déclaration de l'index"
-            desc="Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le formulaire suivant."
+            desc="Vous pouvez transmettre aux services du ministre chargé du travail votre index égalité professionnelle F/H calculé par ailleurs directement via le formulaire de déclaration suivant."
             footer={
               <Button
                 linkProps={{
@@ -93,7 +95,7 @@ const IndexEgapro = () => {
             horizontal
             detail={<Icon text="Étape 3" icon="fr-icon-arrow-right-line" size="sm" />}
             title="Déclaration des objectifs de progression et mesures de correction"
-            desc="Vous pouvez déclarer vos mesures de correction si votre index est inférieur à 75 points et vos objectifs de progression si votre index est inférieur à 85 points via le formulaire accessible dans votre espace personnel."
+            desc="Vous pouvez transmettre aux services du ministre chargé du travail les informations relatives aux objectifs de progression, et le cas échéant aux mesures de correction, via le formulaire de déclaration accessible dans votre espace personnel (adresse email en haut à droite)."
             footer={
               <>
                 <Button
@@ -143,56 +145,40 @@ const IndexEgapro = () => {
             title="Besoin d'aide ?"
             desc={
               <>
-                <p>Aide pour l'utilisation du service d'identification MonComptePro :</p>
                 <p>
-                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"} target="_blank">
-                    Comment s'identifier avec MonComptePro ?
+                  Pour consulter l'aide du service d'identification MonComptePro (comment s'identifier, comment
+                  rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
+                  <Link href={"/aide-moncomptepro"} target="_blank">
+                    cliquez ici
                   </Link>
                 </p>
                 <p>
+                  Pour consulter l'aide pour le calcul, la publication et la transmission de l'index,{" "}
+                  <Link href={"/aide-index"} target="_blank">
+                    cliquez ici
+                  </Link>
+                </p>
+                <p>
+                  Pour consulter la FAQ sur le site internet du ministère chargé du travail,{" "}
                   <Link
-                    href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}
+                    href={
+                      "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
+                    }
                     target="_blank"
                   >
-                    Comment modifier mes informations personnelles sur MonComptePro ?
+                    cliquez ici
                   </Link>
                 </p>
                 <p>
+                  Pour contacter le référent égalité professionnelle au sein de votre DREETS,{" "}
                   <Link
-                    href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
+                    href={"https://egapro.travail.gouv.fr/apiv2/public/referents_egalite_professionnelle.xlsx"}
                     target="_blank"
                   >
-                    Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
+                    cliquez ici
                   </Link>
-                </p>
-                <p>
-                  Pour plus d'informations sur l'index de l'égalité professionnelle, vous pouvez consulter le site
-                  internet du Ministère du Travail, de la Santé et des Solidarités ou l'aide pour le calcul de l'index.
                 </p>
               </>
-            }
-            footer={
-              <ButtonsGroup
-                buttonsEquisized
-                buttonsSize="small"
-                inlineLayoutWhen="sm and up"
-                buttons={[
-                  {
-                    children: "Consulter le site du Ministère du Travail",
-                    priority: "secondary",
-                    linkProps: {
-                      href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
-                    },
-                  },
-                  {
-                    children: "Consulter l'aide du calcul de l'index",
-                    priority: "secondary",
-                    linkProps: {
-                      href: "/aide-simulation",
-                    },
-                  },
-                ]}
-              />
             }
           />
         </CenteredContainer>

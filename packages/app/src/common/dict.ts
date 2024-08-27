@@ -24,6 +24,7 @@ export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
 // export const PUBLIC_CURRENT_YEAR = 2022 as const;
 
 export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
+export const ADMIN_YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
 export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_PUBLIC_YEAR + 1)
   .fill(null)
   .map((_, idx) => FIRST_PUBLIC_YEAR + idx);

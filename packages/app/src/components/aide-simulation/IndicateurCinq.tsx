@@ -11,7 +11,7 @@ const CommentEstCalculéLIndicateur = () => (
   <>
     <p>
       Le nombre de salariés du sexe sous-représenté est calculé en comparant le nombre de femmes et le nombre d’hommes
-      parmi les 10 plus hautes rémunérations.
+      parmi les 10 plus hautes rémunérations sur la période de référence annuelle considérée.
     </p>
     <p>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>

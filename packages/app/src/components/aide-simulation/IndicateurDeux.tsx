@@ -3,27 +3,25 @@ import Table from "@codegouvfr/react-dsfr/Table";
 const Définition = () => (
   <>
     <p>
-      La notion d’
-      <strong>
-        augmentation individuelle correspond à une augmentation individuelle du salaire de base du salarié concerné
-      </strong>
-      .
+      L’indicateur concerne les entreprises et unités économiques et sociales (UES) dont l’effectif assujetti est de
+      plus de 250 salariés.
     </p>
     <p>
-      La notion d’augmentation individuelle pour le calcul de l’indicateur exclut les augmentations de salaires liées à
-      une promotion.
+      La notion d’augmentation individuelle correspond à une{" "}
+      <strong>augmentation individuelle du salaire de base du salarié concerné</strong>. Elle exclut les augmentations
+      de salaires liées à une promotion.
     </p>
-    <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
     <p>
-      Les groupes ne comportant pas <strong>au moins 10 femmes et 10 hommes</strong> ne sont pas retenus pour le calcul
-      de l’indicateur.
+      L’indicateur est calculé <strong>par catégorie socio-professionnelle</strong>.
     </p>
     <p>L’indicateur n’est pas calculable :</p>
     <ul>
-      <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence.</li>
       <li>
-        Ou si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul des
-        indicateurs.
+        Si aucune augmentation individuelle n’est intervenue au cours de la période de référence annuelle considérée.
+      </li>
+      <li>
+        Ou si l’effectif total des salariés retenus pour le calcul de l’indicateur est inférieur à 40% à l’effectif
+        total des salariés pris en compte pour le calcul des indicateurs.
       </li>
     </ul>
   </>
@@ -32,24 +30,37 @@ const Définition = () => (
 const CommentEstCalculéLIndicateur = () => (
   <>
     <p>
-      Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de l’indicateur.
+      Le calcul est possible si l’effectif total des salariés retenus représente au moins 40% de l’effectif total des
+      salariés pris en compte pour le calcul des indicateurs.
     </p>
     <ol>
       <li>
-        Le pourcentage de femmes et d’hommes augmentés au cours de la période de référence est calculé par catégorie
-        socio-professionnelle.
+        <p>Les salariés sont répartis par catégorie socio-professionnelle.</p>
+        <p>
+          Les catégories socio-professionnelles sont les suivantes :
+          <ul>
+            <li>ouvriers</li>
+            <li>employés</li>
+            <li>techniciens et agents de maîtrise</li>
+            <li>ingénieurs et cadres</li>
+          </ul>
+        </p>
       </li>
       <li>
-        L’écart de taux d’augmentations est calculé, en %, pour chacun des groupes, en soustrayant le pourcentage de
-        femmes augmentées à celui des hommes augmentés.
+        Seules les catégories socio-professionnelles comprenant au moins dix femmes et dix hommes sont prises en compte.
       </li>
       <li>
-        Les écarts obtenus sont multipliés par le ratio de l’effectif du groupe à l’effectif total des groupes pris en
-        compte.
+        Dans chacune des catégories socio-professionnelles, le pourcentage de femmes et d’hommes augmentés au cours de
+        la période de référence est calculé.
       </li>
       <li>
-        Les écarts des différents groupes sont ensuite additionnés pour obtenir l’écart global de taux d’augmentations
-        entre les femmes et les hommes.{" "}
+        L’écart de taux d’augmentations est calculé, en %, pour chacune des catégories socio-professionnelles, en
+        soustrayant le pourcentage de femmes augmentées à celui des hommes augmentés.
+      </li>
+      <li>
+        Les écarts obtenus sont multipliés par le ratio de l’effectif de la catégorie socio-professionnelle à l’effectif
+        total des catégories socio-professionnelles prises en compte, puis additionnés pour obtenir l’écart global de
+        taux d’augmentations entre les femmes et les hommes.
       </li>
       <li>
         Le résultat final est la valeur absolue de l’écart global de taux d’augmentations, arrondie à la première
@@ -57,9 +68,9 @@ const CommentEstCalculéLIndicateur = () => (
       </li>
     </ol>
     <p>
-      Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de rémunération), la note
-      maximale de 20 points est attribuée à l’entreprise (considérant que l’employeur a mis en place une politique de
-      rattrapage adaptée).
+      Si l’écart global joue en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), la note
+      maximale de 20 points est attribuée (considérant que l’employeur a mis en place une politique de rattrapage
+      adaptée).
     </p>
     <p>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>

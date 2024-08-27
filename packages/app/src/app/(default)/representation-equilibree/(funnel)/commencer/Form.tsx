@@ -5,7 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { YEARS_REPEQ } from "@common/dict";
+import { ADMIN_YEARS, PUBLIC_YEARS } from "@common/dict";
 import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,10 +73,12 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
           message: "Erreur lors de la récupération des données de l'entreprise, veuillez vérifier votre saisie",
         });
       } else if (company.data.dateCessation) {
-        return setError("siren", {
-          type: "manual",
-          message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
-        });
+        const cessationYear = new Date(company.data.dateCessation).getFullYear();
+        if (cessationYear <= year)
+          return setError("siren", {
+            type: "manual",
+            message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
+          });
       }
 
       // Otherwise, this is a creation.
@@ -119,8 +121,6 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
     }
   };
 
-  const yearsRepEq = YEARS_REPEQ.sort().reverse();
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -137,11 +137,17 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             <option value="" disabled>
               Sélectionnez une année
             </option>
-            {yearsRepEq.map(year => (
-              <option value={year} key={`year-select-${year}`}>
-                {year}
-              </option>
-            ))}
+            {session.user.staff
+              ? ADMIN_YEARS.map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))
+              : PUBLIC_YEARS.map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))}
           </Select>
           {session.user.staff ? (
             <Input

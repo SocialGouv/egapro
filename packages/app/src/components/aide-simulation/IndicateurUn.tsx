@@ -3,8 +3,8 @@ import Table from "@codegouvfr/react-dsfr/Table";
 const Définition = () => (
   <>
     <p>
-      La rémunération doit être reconstituée en <strong>équivalent temps plein</strong> sur toute la durée de la période
-      de référence.
+      La rémunération de chaque salarié, au sens de l’article L. 3221-3, doit être reconstituée en{" "}
+      <strong>équivalent temps plein</strong> sur la période de référence annuelle considérée.
     </p>
     <p>
       <strong>Doivent être pris en compte dans la rémunération :</strong>
@@ -40,12 +40,14 @@ const Définition = () => (
       <li>les primes d’intéressement et de participation.</li>
     </ul>
     <p>
-      Les groupes ne comportant pas <strong>au moins 3 femmes et 3 hommes</strong> ne doivent pas être retenus pour le
-      calcul de l’indicateur.
+      L'indicateur est calculé <strong>par tranche d’âge et par catégorie de postes équivalents</strong> (soit par
+      catégorie socio-professionnelle, soit, après consultation du comité social et économique, par niveau ou
+      coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des
+      postes).
     </p>
     <p>
-      Si le total des effectifs des groupes pouvant être pris en compte pour le calcul de l’indicateur est inférieur à
-      40% des effectifs totaux, l’indicateur et l’index ne sont pas calculables.
+      L’indicateur n'est pas calculable si l'effectif total des salariés retenus pour le calcul de l’indicateur est
+      inférieur à 40% de l'effectif total des salariés pris en compte pour le calcul des indicateurs.
     </p>
   </>
 );
@@ -56,16 +58,59 @@ interface CommentEstCalculéLIndicateurProps {
 const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLIndicateurProps) => (
   <>
     <p>
-      Seuls les groupes comprenant au moins 3 femmes et au moins 3 hommes sont pris en compte pour le calcul de
-      l’indicateur.
+      <strong>Comment est calculé l’indicateur</strong>
+    </p>
+    <p>
+      Le calcul est possible si l’effectif total des salariés retenus représente au moins 40% de l’effectif total des
+      salariés pris en compte pour le calcul des indicateurs.
     </p>
     <ol>
       {!skipRemuDetails && (
         <li>
-          La rémunération moyenne des femmes et des hommes est calculée pour chacun des groupes constitué en calculant
-          le salaire en équivalent temps plein pour chaque salarié puis en faisant la moyenne.
+          <p>Les salariés sont répartis en groupe, par tranche d’âge et par catégorie de postes équivalents.</p>
+          <p>
+            Les tranches d’âge sont les suivantes :
+            <ul>
+              <li>Moins de 30 ans</li>
+              <li>De 30 à 39 ans</li>
+              <li>De 40 à 49 ans</li>
+              <li>50 ans et plus</li>
+            </ul>
+          </p>
+          <p>
+            S’agissant des catégories de postes équivalents, l’employeur peut répartir les salariés, après consultation
+            du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification
+            de branche ou d’une autre méthode de cotation des postes. La méthode de cotation des postes est adoptée
+            après avis du comité social et économique.
+          </p>
+          <p>
+            Si l’employeur ne souhaite pas répartir les salariés par niveau ou coefficient hiérarchique , ou si cette
+            méthode de répartition ne permet pas de calculer l’indicateur, il répartit les salariés par catégorie
+            socio-professionnelle.
+          </p>
+          <p>
+            Les catégories socio-professionnelles sont les suivantes :
+            <ul>
+              <li>ouvriers</li>
+              <li>employés</li>
+              <li>techniciens et agents de maîtrise</li>
+              <li>ingénieurs et cadres</li>
+            </ul>
+          </p>
         </li>
       )}
+      <li>
+        <p>Seuls les groupes comprenant au moins trois femmes et au moins trois hommes sont pris en compte</p>
+        <p>
+          Si, en application de cette règle, le calcul de l’indicateur par niveau ou coefficient hiérarchique, dans les
+          conditions prévues au 1, est rendu impossible, la répartition par niveau ou coefficient hiérarchique n’est pas
+          retenue et les salariés sont répartis selon les quatre catégories socio-professionnelles définies au même 1.
+        </p>
+      </li>
+      <li>
+        La rémunération moyenne des femmes et des hommes est calculée pour chacun des groupes ainsi constitués en
+        calculant le salaire en équivalent temps plein pour chaque salarié puis en faisant la moyenne.
+      </li>
       <li>
         L’écart de rémunération est calculé, en pourcentage, pour chacun des groupes, en soustrayant la rémunération
         moyenne des femmes à la rémunération moyenne des hommes et en rapportant ce résultat à la rémunération moyenne
@@ -79,10 +124,10 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
         pertinence est ajouté à l’écart, sans toutefois pouvoir l’amener à devenir positif (plafond à zéro).
       </li>
       <li>
-        Les écarts ainsi ajustés en fonction des seuils pour chacun des groupes sont multipliés par le ratio de
-        l’effectif du groupe à l’effectif total des groupes pris en compte.
+        Les écarts ainsi ajustés en fonction des seuils pour chacun des groupes, sont multipliés par le ratio de
+        l’effectif du groupe à l’effectif total des groupes pris en compte, puis additionnés pour obtenir l’écart global
+        de rémunération entre les femmes et les hommes.
       </li>
-      <li>Les écarts sont additionnés pour obtenir l’écart global de rémunération entre les femmes et les hommes.</li>
       <li>
         Le résultat final obtenu est la valeur absolue de l’écart global de rémunération, arrondie à la première
         décimale.

@@ -3,18 +3,27 @@ import Table from "@codegouvfr/react-dsfr/Table";
 const Définition = () => (
   <>
     <p>
-      Seules les salariées qui sont rentrées de congé maternité (ou d’adoption) durant la période de référence sont
-      prises en considération.
+      Sont prises en compte les salariées qui sont <strong>revenues de congé maternité</strong> (ou d’adoption, et
+      éventuellement prolongé par un congé parental) au cours de la période de référence annuelle considérée,{" "}
+      <strong>si au moins une augmentation a été faite pendant leur congé</strong>. La prise en compte de chaque
+      salariée est donc appréciée individuellement et dépend des éventuelles augmentations ayant eu lieu pendant leur
+      congé maternité (ou d’adoption).
     </p>
     <p>
-      Sont considérées <strong>comme augmentées</strong> toutes salariées <strong>revenues de congé</strong> maternité
-      pendant l’année de référence et ayant bénéficié d’une augmentation (générale ou individuelle) à leur retour avant
-      la fin de cette même période.
+      Sont considérées <strong>comme augmentées</strong> toutes salariées{" "}
+      <strong>
+        ayant bénéficié, à leur retour de congé maternité (ou d’adoption) ou pendant celui-ci, d’une augmentation
+      </strong>{" "}
+      correspondant à la majoration de leur rémunération liée à l'obligation de rattrapage salarial au retour de congé
+      maternité (ou d’adoption).
     </p>
     <p>L’indicateur n’est pas calculable :</p>
     <ul>
-      <li>S’il n’y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence.</li>
-      <li>S’il n’y a eu aucune augmentation (individuelle ou collective) au cours des congés maternité.</li>
+      <li>
+        Si aucun retour de congé maternité (ou d’adoption) n’est intervenu au cours de la période de référence annuelle
+        considérée.
+      </li>
+      <li>Ou si aucune augmentation n’est intervenue durant la durée du ou des congés maternité (ou d’adoption).</li>
     </ul>
   </>
 );
@@ -22,9 +31,9 @@ const Définition = () => (
 const CommentEstCalculéLIndicateur = () => (
   <>
     <p>
-      L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou d’adoption pendant la
-      période de référence et ayant bénéficié d’une augmentation, avant la fin de celle-ci, si des augmentations ont eu
-      lieu pendant leur congé, d’une part, et, d’autre part, le nombre de salariés revenus, pendant la période de
+      L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou d’adoption au cours
+      de la période de référence et ayant bénéficié d’une augmentation, avant la fin de celle-ci, si des augmentations
+      ont eu lieu pendant leur congé, d’une part, et, d’autre part, le nombre de salariés revenus, pendant la période de
       référence, de congé maternité ou d’adoption, durant lequel il y a eu des augmentations salariales.
     </p>
     <p>

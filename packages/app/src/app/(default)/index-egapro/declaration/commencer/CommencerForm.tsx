@@ -9,7 +9,14 @@ import { config } from "@common/config";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
-import { type COUNTIES, COUNTRIES_COG_TO_ISO, COUNTY_TO_REGION, inseeCodeToCounty, PUBLIC_YEARS } from "@common/dict";
+import {
+  ADMIN_YEARS,
+  type COUNTIES,
+  COUNTRIES_COG_TO_ISO,
+  COUNTY_TO_REGION,
+  inseeCodeToCounty,
+  PUBLIC_YEARS,
+} from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Icon, Link } from "@design-system";
@@ -240,11 +247,17 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
             <option value="" disabled>
               Sélectionnez une année
             </option>
-            {PUBLIC_YEARS.map(year => (
-              <option value={year} key={`year-select-${year}`}>
-                {year}
-              </option>
-            ))}
+            {user.staff
+              ? ADMIN_YEARS.map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))
+              : PUBLIC_YEARS.map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))}
           </Select>
 
           {user.staff ? (

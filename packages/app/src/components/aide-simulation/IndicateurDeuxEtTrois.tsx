@@ -3,26 +3,30 @@ import Table from "@codegouvfr/react-dsfr/Table";
 const Définition = () => (
   <>
     <p>
-      La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du salarié
-      concerné.
+      L‘indicateur concerne les entreprises et unités économiques et sociales (UES) dont l’effectif assujetti est
+      compris entre 50 et 250 salariés inclus.
     </p>
     <p>
-      La notion d’augmentation individuelle pour le calcul de cet indicateur inclut les augmentations de salaire liées à
-      une promotion.
+      La notion d’augmentation individuelle correspond à une{" "}
+      <strong>augmentation individuelle du salaire de base du salarié concerné</strong>. Elle inclut les augmentations
+      de salaire liées à une promotion.
     </p>
     <p>
       L’indicateur est calculé <strong>au niveau de l’entreprise ou de l’unité économique et sociale (UES)</strong>, et
       non par groupes de salariés.
     </p>
     <p>
-      Pour le calcul de l’indicateur, l’employeur peut choisir une période de référence pluriannuelle, à partir des
-      données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans.
+      Pour le calcul de l’indicateur, une période de référence pluriannuelle peut être choisie, à partir des données des
+      deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans.
     </p>
     <p>L’indicateur n’est pas calculable :</p>
     <ul>
-      <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence</li>
       <li>
-        Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes et 5 hommes
+        si aucune augmentation individuelle n’est intervenue au cours de la période de référence annuelle considérée
+      </li>
+      <li>
+        ou si l’effectif total des salariés pris en compte pour le calcul des indicateurs ne compte pas au moins 5
+        femmes et 5 hommes
       </li>
     </ul>
   </>
@@ -40,33 +44,32 @@ const CommentEstCalculéLIndicateur = () => (
       </li>
       <li>
         Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre total de
-        femmes pris en compte pour le calcul. Le taux d’augmentation des hommes est calculé en rapportant le nombre
-        d’hommes augmentées au nombre total d’hommes pris en compte pour le calcul.
+        femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est calculé en
+        rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le calcul des indicateurs.
       </li>
       <li>
-        Un premier résultat est &quot;l’écart en %&quot; : il s’agit de la valeur absolue de l’écart entre les deux taux
-        calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des hommes
-        est de 30,00%, l’écart est ainsi de 3,13%.
+        Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux calculés
+        en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des hommes est de
+        30,00%, l’écart est ainsi de 3,13%.
       </li>
       <li>
-        Un second résultat est &quot;l’écart en nombre équivalent de salariés&quot; : l’écart de taux calculé en 3 est
-        appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de salariés
-        qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par exemple,
-        l’écart est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le
-        nombre équivalent de salariés est ainsi de 0,4695.
+        Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est appliqué au
+        plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de salariés qu’il aurait
+        fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par exemple, l’écart est de
+        3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre
+        équivalent de salariés est ainsi de 0,4695.
       </li>
       <li>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale. </li>
       <li>
         Le barème est appliqué à l’écart en % et à l’écart en nombre équivalent de salariés, et le résultat
         correspondant au nombre de points le plus élevé est retenu. En reprenant l’exemple en 4, c’est le résultat
-        obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui sera conservée, la note finale obtenu à
+        obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui sera conservée, la note finale obtenue à
         l’indicateur est ainsi de 35 points.
       </li>
     </ol>
     <p>
-      Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de rémunération), la note
-      maximale de 35 points est attribuée à l’entreprise (considérant que l’employeur a mis en place une politique de
-      rattrapage adaptée).
+      Si l’écart en % joue en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), la note maximale
+      de 35 points est attribuée (considérant que l’employeur a mis en place une politique de rattrapage adaptée).
     </p>
     <p>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
