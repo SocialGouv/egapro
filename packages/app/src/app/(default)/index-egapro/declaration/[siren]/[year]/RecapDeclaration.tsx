@@ -13,9 +13,9 @@ import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 import { RecapCardPublication } from "./RecapCardPublication";
 
-type Props = { déclaration: DeclarationDTO; edit?: boolean };
+type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boolean };
 
-export const RecapDeclaration = ({ déclaration, edit }: Props) => {
+export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
 
   const company: CompanyDTO = {
@@ -179,7 +179,7 @@ export const RecapDeclaration = ({ déclaration, edit }: Props) => {
       )}
 
       <RecapCard
-        title="Niveau de résultat global"
+        title="Index égalité professionnelle"
         content={
           <BigNote
             noBorder

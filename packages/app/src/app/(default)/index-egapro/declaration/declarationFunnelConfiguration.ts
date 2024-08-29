@@ -73,7 +73,7 @@ export const funnelStaticConfig: StaticConfig = {
     "Résultat final de l’écart de rémunération entre les femmes et les hommes",
   ),
   remunerations: new StaticConfigItem("remunerations", "Écart de rémunération entre les femmes et les hommes"),
-  "resultat-global": new StaticConfigItem("resultat-global", "Niveau de résultat global"),
+  "resultat-global": new StaticConfigItem("resultat-global", "Index égalité professionnelle"),
   ues: new StaticConfigItem("ues", "Informations UES"),
   "validation-transmission": new StaticConfigItem(
     "validation-transmission",

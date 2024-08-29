@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
@@ -20,7 +19,6 @@ import {
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Icon, Link } from "@design-system";
-import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -273,7 +271,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
             />
           ) : (
             <Select
-              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale) *"
+              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeSelectProps={register("siren")}
@@ -309,19 +307,6 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
               Rafraichir MCP
             </Button>
           </div>
-
-          <ClientAnimate>
-            {isValid && (
-              <Alert
-                severity="info"
-                small
-                description={`Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${
-                  year + 1
-                } au titre des données de ${year}.`}
-              />
-            )}
-          </ClientAnimate>
-
           <BackNextButtonsGroup
             className={fr.cx("fr-my-4w")}
             backLabel="Réinitialiser"

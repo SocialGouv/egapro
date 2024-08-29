@@ -2,10 +2,9 @@
 
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
-import { NotComputableReason } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReason";
 import { type DeclarationDTO, type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
 import { IndicatorNote, RecapCard } from "@design-system";
-import { capitalize, lowerFirst } from "lodash";
+import { capitalize } from "lodash";
 import { type PropsWithChildren } from "react";
 
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
@@ -24,6 +23,26 @@ type GenericFieldIndicator = Partial<{
   populationFavorable: FavorablePopulation.Enum;
   résultat: number;
 }>;
+
+enum Enum {
+  ABSAUGI = "absaugi",
+  ABSAUGPDTCM = "absaugpdtcm",
+  ABSPROM = "absprom",
+  ABSRCM = "absrcm",
+  AUCUNE_INSTANCE_DIRIGEANTE = "aucune_instance_dirigeante",
+  EGVI40PCET = "egvi40pcet",
+  ETSNO5F5H = "etsno5f5h",
+}
+
+const label = {
+  [Enum.ABSAUGPDTCM]: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
+  [Enum.ABSRCM]: "Absence de retours de congé maternité",
+  [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Aucune instance dirigeante",
+  [Enum.ABSPROM]: "Absence de promotions",
+  [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+  [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
+  [Enum.ETSNO5F5H]: "Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes",
+};
 
 export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: PropsWithChildren<Props>) => {
   if (!déclaration) return null;
@@ -61,10 +80,13 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
           {customContent}
 
           {motifNc && (
-            <p>
-              L'indicateur n'est pas calculable car{" "}
-              {lowerFirst(NotComputableReason.Label[motifNc as NotComputableReason.Enum])}
-            </p>
+            <IndicatorNote
+              noBorder
+              note="NC"
+              size="small"
+              text="L'indicateur écart de rémunération n'est pas calculable"
+              legend={label[motifNc as Enum]}
+            />
           )}
 
           {note !== undefined && !motifNc && (

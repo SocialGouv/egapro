@@ -312,7 +312,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
   }
 
   table.push({
-    title: "Niveau de résultat global",
+    title: "Index égalité professionnelle",
     rows: [
       {
         key: "Total de points obtenus",

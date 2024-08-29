@@ -26,10 +26,6 @@ const DeclarantPage = async () => {
 
   return (
     <>
-      <p>
-        Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services
-        de l’inspection du travail.
-      </p>
       <Alert
         small
         severity="info"
@@ -37,7 +33,7 @@ const DeclarantPage = async () => {
         description={
           <>
             Les informations déclarant sont préremplies à partir de votre compte MonComptePro mais vous pouvez les
-            modifier le cas échéant, à l'exception de l'email.
+            modifier le cas échéant, à l'exception de l'adresse email.
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
             <Link href={`${monCompteProUrl}/personal-information`} target="_blank">

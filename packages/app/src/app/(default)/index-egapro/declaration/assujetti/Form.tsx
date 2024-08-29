@@ -28,7 +28,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
           }}
           options={[
             {
-              label: "Oui, je suis concerné",
+              label: "Oui, mon entreprise ou UES a un effectif assujetti d'au moins 50 salariés au 1er mars",
               nativeInputProps: {
                 checked: isAssujetti,
                 onChange() {
@@ -40,7 +40,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
               },
             },
             {
-              label: "Non, je ne suis pas concerné",
+              label: "Non, mon entreprise ou UES n'a pas un effectif assujetti d'au moins 50 salariés au 1er mars",
               nativeInputProps: {
                 checked: !isAssujetti,
                 onChange() {
@@ -68,8 +68,8 @@ export const AssujettiForm = ({ title }: { title: string }) => {
             children: "Retour à la page d'accueil",
           }}
         >
-          Vous n'êtes pas assujetti à la publication et à la déclaration de l’index de l'égalité professionnelle entre
-          les femmes et les hommes.
+          Votre entreprise ou UES n'est pas concernée, vous ne devez pas déclarer à l'administration l'index de
+          l'égalité professionnelle.
         </CallOut>
       )}
     </div>

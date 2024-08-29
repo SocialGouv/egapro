@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { useHasMounted } from "@components/utils/ClientOnly";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { BackNextButtonsGroup } from "@design-system";
 import { AlertMessage } from "@design-system/client";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useRouter } from "next/navigation";
@@ -46,20 +46,18 @@ export const Recap = () => {
     <>
       <AlertMessage title="Erreur" message={error} />
 
-      <FormLayout>
-        <RecapDeclaration edit déclaration={formData} />
+      <RecapDeclaration edit déclaration={formData} />
 
-        <BackNextButtonsGroup
-          className={fr.cx("fr-my-4w")}
-          backProps={{
-            onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
-          }}
-          nextProps={{
-            onClick: onSubmit,
-          }}
-          nextLabel="Valider et transmettre les résultats"
-        />
-      </FormLayout>
+      <BackNextButtonsGroup
+        className={fr.cx("fr-my-4w")}
+        backProps={{
+          onClick: () => router.push(funnelConfig(formData)[stepName].previous().url),
+        }}
+        nextProps={{
+          onClick: onSubmit,
+        }}
+        nextLabel="Valider et transmettre les résultats"
+      />
     </>
   );
 };

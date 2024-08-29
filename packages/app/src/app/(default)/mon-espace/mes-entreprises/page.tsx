@@ -95,7 +95,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <SelectSiren sirenList={sirenList} loadedSiren={selectedSiren} />
             <p>
               <br />
-              Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+              Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
               <Link
                 target="_blank"
                 href={`https://app${
@@ -127,7 +127,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <SelectSiren sirenList={sirenList} />
               <p>
                 <br />
-                Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+                Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
                 <Link
                   target="_blank"
                   href={`https://app${

@@ -16,10 +16,13 @@ const ResultatGlobalPage = () => {
       <DeclarationStepper stepName={stepName} />
 
       <p>
-        L'index obtenu et les résultats obtenus à chaque indicateur sont publiés annuellement, au plus tard le 1er mars
-        de l’année en cours, au titre de l’année précédente, de manière visible et lisible, sur le site Internet de
-        l’entreprise lorsqu’il en existe un. A défaut de site Internet, ils sont portés à la connaissance des salariés
-        par tout moyen.
+        La note obtenue à l’index ainsi que celle obtenue à chacun des indicateurs doivent être{" "}
+        <strong>publiés de manière visible et lisible sur le site internet de l’entreprise</strong>, chaque année au
+        plus tard le 1er mars, et devront rester en ligne au moins jusqu’à la publication des résultats l’année
+        suivante.
+        <br /> En l’absence de site internet (au niveau de l’entreprise, du groupe ou de l’unité économique et sociale),
+        l’index et ses indicateurs doivent être communiqués aux salariés par tout moyen (courrier papier ou
+        électronique, affichage…).
       </p>
 
       <PublicationForm />
