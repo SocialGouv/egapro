@@ -103,7 +103,8 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           "la date de publication doit être renseignée quand l'index est calculable",
         );
 
-        assert(declaration.company.hasRecoveryPlan !== undefined, "Le champ plan de relance est obligatoire.");
+        if (declaration.year.getValue() > 2020)
+          assert(declaration.company.hasRecoveryPlan !== undefined, "Le champ plan de relance est obligatoire.");
 
         const modalitiesPresence = declaration.publication?.modalities ? 1 : 0;
         const urlPresence = declaration.publication?.url ? 1 : 0;

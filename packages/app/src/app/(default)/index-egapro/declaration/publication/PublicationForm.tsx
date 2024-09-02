@@ -36,7 +36,7 @@ const formSchema = zodFr.object({
     .superRefine(zodValueObjectSuperRefine(Url, "L'adresse de la page internet est invalide"))
     .optional(),
   modalités: z.string().trim().nonempty("La description des modalités de communication est obligatoire").optional(),
-  planRelance: zodRadioInputSchema,
+  planRelance: zodRadioInputSchema.optional(),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -65,6 +65,9 @@ export const PublicationForm = () => {
     formState: { isValid, errors },
   } = methods;
 
+  if (!formData?.commencer?.annéeIndicateurs) return null;
+  const is2020orOlder = formData.commencer.annéeIndicateurs <= 2020;
+  if (!formData["resultat-global"]?.index) router.push(funnelConfig(formData)[stepName].next().url);
   if (!formData["periode-reference"] || formData["periode-reference"]?.périodeSuffisante === "non") {
     redirect(funnelStaticConfig["periode-reference"].url);
   }
@@ -133,15 +136,16 @@ export const PublicationForm = () => {
                 nativeTextAreaProps={register("modalités")}
               />
             )}
-
-            <RadioOuiNon
-              name="planRelance"
-              legend={
-                formData.entreprise?.type === "ues"
-                  ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
-                  : "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
-              }
-            />
+            {!is2020orOlder && (
+              <RadioOuiNon
+                name="planRelance"
+                legend={
+                  formData.entreprise?.type === "ues"
+                    ? "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
+                    : "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *"
+                }
+              />
+            )}
           </ClientOnly>
 
           <BackNextButtons stepName={stepName} disabled={!isValid} />
