@@ -61,7 +61,13 @@ const IndexEgapro = () => {
             horizontal
             detail={<Icon text="Étape 1" icon="fr-icon-arrow-right-line" size="sm" />}
             title="Calcul de l'index"
-            desc="Vous pouvez calculer votre index égalité professionnelle F/H via le formulaire suivant."
+            desc={
+              <p>
+                Vous pouvez calculer votre index égalité professionnelle F/H via le formulaire suivant.
+                <br /> Suite au calcul, vous pourrez le transmettre aux services du ministre chargé du travail via le
+                formulaire de déclaration.
+              </p>
+            }
             footer={
               <Button
                 linkProps={{

@@ -427,7 +427,7 @@ const AideSimulation = () => {
             <p>
               Les résultats de l’index et de ses indicateurs, ainsi que toutes les informations nécessaires, doivent
               être transmis aux services du ministre chargé du travail{" "}
-              <strong>chaque année au plus tard le 1er mars</strong>, via un formulaire de déclaration accessible sur le
+              <strong>chaque année au plus tard le 1er mars</strong>, via un formulaire de déclaration accessible sur le{" "}
               <Link href="https://egapro.travail.gouv.fr/index-egapro" target="_blank">
                 site Egapro
               </Link>
@@ -448,7 +448,7 @@ const AideSimulation = () => {
             <p>
               Pour les entreprises et unités économique et sociales ayant obtenu un index compris entre 75 et 84 points
               inclus, les objectifs de progression ainsi que les modalités de publication de ces objectifs doivent être
-              transmis aux services du ministre chargé du travail, via un formulaire de déclaration accessible sur le
+              transmis aux services du ministre chargé du travail, via un formulaire de déclaration accessible sur le{" "}
               <Link href="https://egapro.travail.gouv.fr/index-egapro" target="_blank">
                 site Egapro
               </Link>

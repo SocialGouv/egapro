@@ -5,7 +5,8 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { ADMIN_YEARS, PUBLIC_YEARS } from "@common/dict";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
+import { PUBLIC_YEARS, REPEQ_ADMIN_YEARS } from "@common/dict";
 import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,18 +68,17 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
       }
 
       const company = await getCompany(siren);
+
       if (!company.ok) {
         return setError("siren", {
           type: "manual",
           message: "Erreur lors de la récupération des données de l'entreprise, veuillez vérifier votre saisie",
         });
-      } else if (company.data.dateCessation) {
-        const cessationYear = new Date(company.data.dateCessation).getFullYear();
-        if (cessationYear <= year)
-          return setError("siren", {
-            type: "manual",
-            message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
-          });
+      } else if (isCompanyClosed(company.data, year)) {
+        return setError("siren", {
+          type: "manual",
+          message: "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie",
+        });
       }
 
       // Otherwise, this is a creation.
@@ -138,11 +138,11 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
               Sélectionnez une année
             </option>
             {session.user.staff
-              ? ADMIN_YEARS.map(year => (
+              ? REPEQ_ADMIN_YEARS.map(year => (
                   <option value={year} key={`year-select-${year}`}>
                     {year}
                   </option>
-                ))
+                )).reverse()
               : PUBLIC_YEARS.map(year => (
                   <option value={year} key={`year-select-${year}`}>
                     {year}
@@ -162,7 +162,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             />
           ) : (
             <Select
-              label="Entreprise *"
+              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeSelectProps={register("siren")}
@@ -198,6 +198,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             </Button>
           </div>
           <BackNextButtonsGroup
+            className={fr.cx("fr-my-6w")}
             backProps={{
               onClick: confirmReset,
               iconId: void 0,

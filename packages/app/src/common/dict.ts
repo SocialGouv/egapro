@@ -25,6 +25,7 @@ export const PUBLIC_CURRENT_YEAR = CURRENT_YEAR;
 
 export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
 export const ADMIN_YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
+export const REPEQ_ADMIN_YEARS = times(CURRENT_YEAR - FIRST_YEAR_REPEQ + 1, idx => FIRST_YEAR_REPEQ + idx);
 export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_PUBLIC_YEAR + 1)
   .fill(null)
   .map((_, idx) => FIRST_PUBLIC_YEAR + idx);

@@ -71,6 +71,18 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
     }
   };
 
+  const getNxText = () => {
+    if (name === "conges-maternite") {
+      return "L'indicateur retour de congé maternité n'est pas calculable";
+    } else if (name === "remunerations") {
+      return "L'indicateur écart de rémunération n'est pas calculable";
+    } else if (name === "promotions") {
+      return "L'indicateur écart de taux de promotions n'est pas calculable";
+    } else if (name === "augmentations") {
+      return "L'indicateur écart de taux d'augmentations n'est pas calculable";
+    } else return "L'indicateur écart de taux d'augmentations n'est pas calculable";
+  };
+
   return (
     <RecapCard
       title={funnelStaticConfig[name].title}
@@ -80,13 +92,7 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
           {customContent}
 
           {motifNc && (
-            <IndicatorNote
-              noBorder
-              note="NC"
-              size="small"
-              text="L'indicateur écart de rémunération n'est pas calculable"
-              legend={label[motifNc as Enum]}
-            />
+            <IndicatorNote noBorder note="NC" size="small" text={getNxText()} legend={label[motifNc as Enum]} />
           )}
 
           {note !== undefined && !motifNc && (

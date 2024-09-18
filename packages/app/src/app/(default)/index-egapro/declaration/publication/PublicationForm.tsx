@@ -67,7 +67,8 @@ export const PublicationForm = () => {
 
   if (!formData?.commencer?.annéeIndicateurs) return null;
   const is2020orOlder = formData.commencer.annéeIndicateurs <= 2020;
-  if (!formData["resultat-global"]?.index) router.push(funnelConfig(formData)[stepName].next().url);
+  if (!formData["resultat-global"]?.index && formData.commencer.annéeIndicateurs < 2020)
+    router.push(funnelConfig(formData)[stepName].next().url);
   if (!formData["periode-reference"] || formData["periode-reference"]?.périodeSuffisante === "non") {
     redirect(funnelStaticConfig["periode-reference"].url);
   }

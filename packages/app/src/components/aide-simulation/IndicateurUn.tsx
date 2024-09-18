@@ -58,9 +58,6 @@ interface CommentEstCalculéLIndicateurProps {
 const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLIndicateurProps) => (
   <>
     <p>
-      <strong>Comment est calculé l’indicateur</strong>
-    </p>
-    <p>
       Le calcul est possible si l’effectif total des salariés retenus représente au moins 40% de l’effectif total des
       salariés pris en compte pour le calcul des indicateurs.
     </p>

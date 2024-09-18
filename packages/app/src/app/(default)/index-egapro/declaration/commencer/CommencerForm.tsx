@@ -250,7 +250,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
                   <option value={year} key={`year-select-${year}`}>
                     {year}
                   </option>
-                ))
+                )).reverse()
               : PUBLIC_YEARS.map(year => (
                   <option value={year} key={`year-select-${year}`}>
                     {year}
@@ -289,7 +289,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
           )}
 
           <p>
-            Vous souhaitez rattacher votre adresse email à un autre Siren,{" "}
+            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
             <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
               cliquez ici
             </Link>
@@ -308,7 +308,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
             </Button>
           </div>
           <BackNextButtonsGroup
-            className={fr.cx("fr-my-4w")}
+            className={fr.cx("fr-my-6w")}
             backLabel="Réinitialiser"
             backProps={{
               onClick: confirmReset,

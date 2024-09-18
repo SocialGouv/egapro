@@ -42,7 +42,7 @@ const AideMonCompteProPage = () => {
             </li>
             <li>
               Si vous déclarez pour le compte de plusieurs entreprises, vous devez créer un seul compte pour une des
-              entreprises, vous pourrez ensuite rattacher les autres entreprises depuis votre compte, cf. partie&nbsp;5.
+              entreprises, vous pourrez ensuite rattacher les autres entreprises depuis votre compte, cf. point&nbsp;5.
             </li>
             <li>
               Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur entreprise
@@ -181,7 +181,7 @@ const AideMonCompteProPage = () => {
               <li>
                 Si vous déclarez pour le compte de plusieurs entreprises, vous devez créer un seul compte pour une des
                 entreprises, vous pourrez ensuite rattacher les autres entreprises depuis votre compte, cf.
-                partie&nbsp;5.
+                point&nbsp;5.
               </li>
             </ul>
             <p>
