@@ -27,6 +27,14 @@ const helpMCP = {
   },
 } satisfies DsfrFooterProps.LinkList.Link;
 
+const statsLink = {
+  text: "Statistiques",
+  linkProps: {
+    href: "/stats",
+    target: "_blank",
+  },
+} satisfies DsfrFooterProps.LinkList.Link;
+
 const contactLink = {
   text: "Contact support technique : index@travail.gouv.fr",
   linkProps: {
@@ -96,7 +104,7 @@ export const Footer = () => (
     linkList={[
       {
         categoryName: "Liens utiles",
-        links: [contactLink, referenteDownloadLink],
+        links: [contactLink, referenteDownloadLink, statsLink],
       },
       {
         categoryName: " ",

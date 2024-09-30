@@ -39,7 +39,9 @@ export const StatsContent = async () => {
 
   return (
     <>
-      <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Index Egapro {CURRENT_YEAR}</h2>
+      <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
+        Index Egapro {CURRENT_YEAR + 1} au titre des données {CURRENT_YEAR}
+      </h2>
       <p>Index Egapro dans les entreprises et UES de plus de 50 salariés.</p>
       <Grid haveGutters className={fr.cx("fr-mt-4w")}>
         <GridCol md={12} lg={4}>
