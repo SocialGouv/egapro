@@ -27,7 +27,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
           }}
           options={[
             {
-              label: "Oui, je suis concerné",
+              label: "Oui, mon entreprise emploie au moins 1000 salariés pour le troisième exercice consécutif",
               nativeInputProps: {
                 checked: isAssujetti,
                 onChange() {
@@ -39,7 +39,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
               },
             },
             {
-              label: "Non, je ne suis pas concerné",
+              label: "Non, mon entreprise n'emploie pas au moins 1000 salariés pour le troisième exercice consécutif",
               nativeInputProps: {
                 checked: !isAssujetti,
                 onChange() {
@@ -67,8 +67,8 @@ export const AssujettiForm = ({ title }: { title: string }) => {
             children: "Retour à la page d'accueil",
           }}
         >
-          Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
-          les femmes et les hommes.
+          Votre entreprise n'est pas concernée, vous ne devez pas déclarer à l'administration les écarts éventuels de
+          représentation.
         </CallOut>
       )}
     </>

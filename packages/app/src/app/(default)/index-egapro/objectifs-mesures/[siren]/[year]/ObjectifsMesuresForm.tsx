@@ -147,9 +147,36 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
       : "Votre index étant inférieur à 85, veuillez renseigner les informations suivantes.";
 
   const legalText =
-    index !== undefined && index < 75
-      ? "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 75 points doivent publier, par une communication externe et au sein de l’entreprise, les mesures de correction qu’elles ont définies par accord ou, à défaut, par décision unilatérale. Par ailleurs, celles ayant obtenu un Index inférieur à 85 points doivent fixer, également par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les informations relatives aux mesures de correction, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique."
-      : "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 85 points doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique.";
+    index !== undefined && index < 75 ? (
+      <span>
+        Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique
+        et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises et unités économiques et
+        sociales (UES) ayant obtenu un <strong>index inférieur à 75 points</strong> doivent{" "}
+        <strong>publier par une communication externe et au sein de l’entreprise, les mesures de correction</strong>{" "}
+        qu’elles ont définies par accord ou, à défaut, par décision unilatérale.
+        <br />
+        Par ailleurs, elles doivent <strong>fixer,</strong> également par accord ou, à défaut, par décision unilatérale,
+        et <strong>publier des objectifs de progression</strong> pour chacun des indicateurs calculables de l’index dont
+        la note maximale n’a pas été atteinte.
+        <br />
+        Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que les modalités de publication de
+        ces objectifs et des mesures de correction doivent être{" "}
+        <strong>transmis au comité social et économique et aux services du ministre chargé du travail</strong>.
+      </span>
+    ) : (
+      <span>
+        Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique
+        et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises et unités économiques et
+        sociales (UES) ayant obtenu <strong>un index compris entre 75 et 84 points inclus</strong> doivent{" "}
+        <strong>fixer</strong> par accord ou, à défaut, par décision unilatérale, et{" "}
+        <strong>publier des objectifs de progression</strong>pour chacun des indicateurs calculables de l’index dont la
+        note maximale n’a pas été atteinte.
+        <br />
+        Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de publication
+        doivent être{" "}
+        <strong>transmis au comité social et économique et aux services du ministre chargé du travail</strong>.
+      </span>
+    );
 
   const finalMessage =
     index !== undefined && index < 75
@@ -449,11 +476,11 @@ export const ObjectifsMesuresForm = ({ declaration, isStaff }: Props) => {
 
             <Heading as="h2" text={title} />
 
-            <p className={fr.cx("fr-mt-4w", "fr-text--xs")}>{legalText}</p>
+            <p className={fr.cx("fr-mt-4w", "fr-text--md")}>{legalText}</p>
 
             <>
               <Heading as="h3" text="Objectifs de progression" className={fr.cx("fr-mt-6w")} />
-              <p className={fr.cx("fr-text--xs")}>
+              <p className={fr.cx("fr-text--md")}>
                 Conformément à la loi n° 2020-1721 du 29 décembre 2020 de finances pour 2021 et aux articles L. 1142-9-1
                 et D. 1142-6-1 du code du travail, indiquer les objectifs de progression fixés pour chaque indicateur
                 pour lequel la note maximale n'a pas été atteinte.
@@ -473,6 +500,7 @@ export const ObjectifsMesuresForm = ({ declaration, isStaff }: Props) => {
               <div className={fr.cx("fr-mb-8w")}>
                 <Text
                   variant={["sm"]}
+                  className="italic"
                   text="Attention, cet objectif doit permettre d’assurer le respect des dispositions relatives à l’égalité de
                 rémunération prévues à l’article L. 3221-2 du code du travail."
                 />
@@ -597,7 +625,9 @@ export const ObjectifsMesuresForm = ({ declaration, isStaff }: Props) => {
 
             {publicationSurSiteInternet && (
               <>
-                <p className={fr.cx("fr-mt-6w")}>{siteWebReminder}</p>
+                <p className={fr.cx("fr-mt-6w")}>
+                  <span className="italic"> {siteWebReminder}</span>
+                </p>
 
                 <Input
                   nativeInputProps={{

@@ -1,15 +1,27 @@
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
+import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
 
 import { funnelStaticConfig } from "../../app/(default)/index-egapro/declaration/declarationFunnelConfiguration";
 import { Grid, GridCol } from "./Grid";
 import { RecapCard } from "./RecapCard";
 import { Text } from "./Typography";
 
-type Props = { company: CompanyDTO; edit?: boolean; full?: boolean; title?: string };
+type Props = {
+  company: CompanyDTO;
+  edit?: boolean;
+  full?: boolean;
+  onSubmit?: (data: CompanyDTO) => void;
+  title?: string;
+};
 
 // TODO: replace with tooltip when available in DSFR
 const infoModale = createModal({
@@ -17,7 +29,23 @@ const infoModale = createModal({
   isOpenedByDefault: false,
 });
 
-export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
+const companyFormModal = createModal({
+  id: "company-form",
+  isOpenedByDefault: false,
+});
+
+const companySchema = zodFr.object({
+  name: zodFr.string(),
+  city: zodFr.string(),
+  address: zodFr.string(),
+  nafCode: zodFr.string(),
+  postalCode: zodFr.string(),
+  siren: zodFr.string(),
+});
+
+export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props) => {
+  const session = useSession();
+  const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues } = company;
 
   const titleFull = title ?? "Informations de l'entreprise déclarante";
@@ -26,6 +54,22 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
   const postalCodeCity = `${postalCode ?? ""} ${city ?? ""}`.trim();
   const countryLib =
     countryIsoCode && countryIsoCode !== "FR" && `${postalCodeCity && ", "}${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`;
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { isValid, errors },
+  } = useForm<CompanyDTO>({
+    resolver: zodResolver(companySchema),
+    defaultValues: company,
+  });
+  console.log("RecapCardCompany", isValid, errors, getValues());
+
+  const handleOnSummit = async (data: CompanyDTO) => {
+    if (onSubmit) onSubmit(data);
+    companyFormModal.close();
+  };
 
   const content = full ? (
     <>
@@ -84,12 +128,57 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
 
   return (
     <>
-      <ClientBodyPortal>
-        <infoModale.Component title="">
-          Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
-          l'INSEE)
-        </infoModale.Component>
-      </ClientBodyPortal>
+      {onSubmit && (
+        <ClientBodyPortal>
+          <infoModale.Component title="">
+            Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
+            l'INSEE)
+          </infoModale.Component>
+          <companyFormModal.Component title="Modifier les informations entreprise/UES">
+            <form onSubmit={handleSubmit(handleOnSummit)}>
+              <Input
+                nativeInputProps={{
+                  ...register("name"),
+                }}
+                label="Entreprise déclarante *"
+              />
+              <Input
+                nativeInputProps={{
+                  ...register("address"),
+                }}
+                label="Adresse *"
+              />
+              <Input
+                nativeInputProps={{
+                  ...register("postalCode"),
+                }}
+                label="Code postale *"
+              />
+              <Input
+                nativeInputProps={{
+                  ...register("city"),
+                }}
+                label="Ville *"
+              />
+              <Input
+                nativeInputProps={{
+                  ...register("siren"),
+                }}
+                label="Siren *"
+              />
+              <Input
+                nativeInputProps={{
+                  ...register("nafCode"),
+                }}
+                label="Code Naf *"
+              />
+              <Button type="submit" disabled={!isValid}>
+                Valider les modifications
+              </Button>
+            </form>
+          </companyFormModal.Component>
+        </ClientBodyPortal>
+      )}
       {edit ? (
         <RecapCard title={fullTitle} editLink={funnelStaticConfig["entreprise"].url} content={content} />
       ) : (
@@ -101,7 +190,7 @@ export const RecapCardCompany = ({ company, full, title, edit }: Props) => {
             priority: "tertiary no outline",
             style: { alignSelf: "center" },
             size: "small",
-            nativeButtonProps: infoModale.buttonProps,
+            nativeButtonProps: isStaff ? companyFormModal.buttonProps : infoModale.buttonProps,
           }}
           content={content}
         />

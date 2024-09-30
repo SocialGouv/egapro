@@ -62,11 +62,11 @@ const IndexEgapro = () => {
             detail={<Icon text="Étape 1" icon="fr-icon-arrow-right-line" size="sm" />}
             title="Calcul de l'index"
             desc={
-              <p>
+              <span>
                 Vous pouvez calculer votre index égalité professionnelle F/H via le formulaire suivant.
-                <br /> Suite au calcul, vous pourrez le transmettre aux services du ministre chargé du travail via le
-                formulaire de déclaration.
-              </p>
+                <br /> A la suite du calcul, vous pourrez le transmettre aux services du ministre chargé du travail via
+                le formulaire de déclaration.
+              </span>
             }
             footer={
               <Button
@@ -152,20 +152,20 @@ const IndexEgapro = () => {
             desc={
               <>
                 <p>
-                  Pour consulter l'aide du service d'identification MonComptePro (comment s'identifier, comment
-                  rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
+                  Pour consulter l'aide du service d'identification <strong>MonComptePro</strong> (comment s'identifier,
+                  comment rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
                   <Link href={"/aide-moncomptepro"} target="_blank">
                     cliquez ici
                   </Link>
                 </p>
                 <p>
-                  Pour consulter l'aide pour le calcul, la publication et la transmission de l'index,{" "}
+                  Pour consulter l'aide pour <strong>le calcul, la publication et la transmission de l'index</strong>,{" "}
                   <Link href={"/aide-index"} target="_blank">
                     cliquez ici
                   </Link>
                 </p>
                 <p>
-                  Pour consulter la FAQ sur le site internet du ministère chargé du travail,{" "}
+                  Pour consulter la <strong>FAQ</strong> sur le site internet du ministère chargé du travail,{" "}
                   <Link
                     href={
                       "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
@@ -176,7 +176,7 @@ const IndexEgapro = () => {
                   </Link>
                 </p>
                 <p>
-                  Pour contacter le référent égalité professionnelle au sein de votre DREETS,{" "}
+                  Pour contacter le <strong>référent égalité professionnelle</strong> au sein de votre DREETS,{" "}
                   <Link
                     href={"https://egapro.travail.gouv.fr/apiv2/public/referents_egalite_professionnelle.xlsx"}
                     target="_blank"

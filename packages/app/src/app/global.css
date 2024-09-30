@@ -37,6 +37,10 @@
     vertical-align: bottom;
 }
 
+.italic {
+    font-style: italic;
+}
+
 .break-words {
     overflow-wrap: break-word;
 }

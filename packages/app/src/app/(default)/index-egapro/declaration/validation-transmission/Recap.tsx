@@ -12,14 +12,15 @@ import { useState } from "react";
 
 import { RecapDeclaration } from "../[siren]/[year]/RecapDeclaration";
 import { saveDeclaration } from "../actions";
-import { assertOrRedirectCommencerStep, funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
+import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
 const stepName: FunnelKey = "validation-transmission";
 
 export const Recap = () => {
   const { formData, setStatus } = useDeclarationFormManager();
 
-  assertOrRedirectCommencerStep(formData);
+  // TODO redirection with
+  //assertOrRedirectCommencerStep(formData);
 
   const hasMounted = useHasMounted();
   const router = useRouter();

@@ -67,7 +67,7 @@ const CommencerPage = async () => {
         severity="info"
         small
         className={fr.cx("fr-mb-3w")}
-        description="Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
+        description="Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
           correspondantes à la déclaration."
       />
       <CommencerForm session={session} monCompteProHost={monCompteProHost ?? ""} />

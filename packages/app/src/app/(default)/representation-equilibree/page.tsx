@@ -2,7 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { ParagrapheList } from "@components/ParagrapheList";
-import { Box, Container, Grid, GridCol, ImgRepresentationEquilibree, Link } from "@design-system";
+import { Box, CenteredContainer, Container, Grid, GridCol, ImgRepresentationEquilibree, Link } from "@design-system";
 
 const title = "Déclaration des écarts de représentation F/H dans les postes de direction";
 const description =
@@ -22,8 +22,8 @@ const RepresentationEquilibree = () => (
       <Grid>
         <GridCol lg={7}>
           <h1>
-            <span className="fr-h3 fr-mb-0 block">Bienvenue sur</span> la déclaration des écarts de représentation F/H
-            dans les postes de direction
+            <span className="fr-h3 fr-mb-0 block">Bienvenue sur</span> la représentation équilibrée dans les postes de
+            direction
           </h1>
           <p>
             <Link
@@ -38,72 +38,78 @@ const RepresentationEquilibree = () => (
             <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
             <strong>obligation de transparence</strong> en la matière.
           </p>
-          <Button linkProps={{ href: "/representation-equilibree/assujetti/" }}>
-            Déclarer les écarts éventuels de représentation femmes‑hommes
-          </Button>
+          <p>
+            Toutes les <strong>entreprises qui emploient au moins 1000 salariés</strong> pour le troisième exercice
+            consécutif doivent calculer et publier <strong>chaque année au plus tard le 1er mars</strong> leurs écarts
+            éventuels de représentation entre les femmes et les hommes parmi leurs cadres dirigeants et les membres de
+            leurs instances dirigeantes. Elles doivent également transmettre leurs résultats au comité social et
+            économique et aux services du ministre chargé du travail.
+          </p>
         </GridCol>
         <GridCol lg={5}>
           <ImgRepresentationEquilibree />
         </GridCol>
       </Grid>
-      <Grid haveGutters mt="5w">
-        <GridCol lg={6}>
-          <Card
-            title="Êtes-vous assujetti ?"
-            desc="Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif doivent
-                  publier et déclarer chaque année au plus tard le 1er mars leurs écarts éventuels de représentation
-                  entre les femmes et les hommes parmi, d’une part, leurs cadres dirigeants, et d’autre part, les
-                  membres de leurs instances dirigeantes, en parallèle de la publication et de la déclaration de leur
-                  Index de l’égalité professionnelle."
-          />
-        </GridCol>
-        <GridCol lg={6}>
-          <Card
-            title="Besoin d’aide ?"
-            desc={
-              <>
-                <p>Aide pour l'utilisation du service d'identification MonComptePro :</p>
-                <p>
-                  <Link href={"/aide-moncomptepro#Comment-s-identifier-avec-MonComptePro"} target="_blank">
-                    Comment s'identifier avec MonComptePro ?
-                  </Link>
-                </p>
-                <p>
-                  <Link
-                    href={"/aide-moncomptepro#Comment-modifier-mes-informations-personnelles-sur-MonComptePro"}
-                    target="_blank"
-                  >
-                    Comment modifier mes informations personnelles sur MonComptePro ?
-                  </Link>
-                </p>
-                <p>
-                  <Link
-                    href={"/aide-moncomptepro#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro"}
-                    target="_blank"
-                  >
-                    Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
-                  </Link>
-                </p>
-                <p>
-                  Pour plus d'informations sur l'obligation de représentation équilibrée, vous pouvez consulter le site
-                  internet du Ministère du Travail, de la Santé et des Solidarités.
-                </p>
-              </>
-            }
-            footer={
-              <Button
-                linkProps={{
-                  href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/",
-                  target: "_blank",
-                }}
-                priority="secondary"
-              >
-                Consulter le site du Ministère du Travail
-              </Button>
-            }
-          />
-        </GridCol>
-      </Grid>
+      <CenteredContainer>
+        <Grid haveGutters mt="5w">
+          <GridCol>
+            <Card
+              title="Déclaration des écarts de représentation"
+              desc="Vous pouvez transmettre aux services du ministre chargé du travail vos écarts éventuels de représentation F/H via le formulaire de déclaration suivant."
+              footer={<Button linkProps={{ href: "/representation-equilibree/assujetti" }}>Déclarer mes écarts</Button>}
+            />
+          </GridCol>
+        </Grid>
+        <Grid haveGutters mt="5w">
+          {/*<GridCol lg={6}>*/}
+          {/*  <Card*/}
+          {/*    title="Êtes-vous assujetti ?"*/}
+          {/*    desc="Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif doivent*/}
+          {/*          publier et déclarer chaque année au plus tard le 1er mars leurs écarts éventuels de représentation*/}
+          {/*          entre les femmes et les hommes parmi, d’une part, leurs cadres dirigeants, et d’autre part, les*/}
+          {/*          membres de leurs instances dirigeantes, en parallèle de la publication et de la déclaration de leur*/}
+          {/*          Index de l’égalité professionnelle."*/}
+          {/*  />*/}
+          {/*</GridCol>*/}
+          <GridCol>
+            <Card
+              title="Besoin d’aide ?"
+              desc={
+                <>
+                  <p>
+                    Pour consulter l'aide du service d'identification MonComptePro (comment s'identifier, comment
+                    rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
+                    <Link href={"/aide-moncomptepro"} target="_blank">
+                      cliquez ici
+                    </Link>
+                  </p>
+
+                  <p>
+                    Pour consulter la FAQ sur le site internet du ministère chargé du travail,{" "}
+                    <Link
+                      href={
+                        "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
+                      }
+                      target="_blank"
+                    >
+                      cliquez ici
+                    </Link>
+                  </p>
+                  <p>
+                    Pour contacter le référent égalité professionnelle au sein de votre DREETS,{" "}
+                    <Link
+                      href={"https://egapro.travail.gouv.fr/apiv2/public/referents_egalite_professionnelle.xlsx"}
+                      target="_blank"
+                    >
+                      cliquez ici
+                    </Link>
+                  </p>
+                </>
+              }
+            />
+          </GridCol>
+        </Grid>
+      </CenteredContainer>
       <Box mt="9w">
         <CallOut>
           {/* callout content wrapper is "p" tag, so we cannot use "ul" tag inside */}

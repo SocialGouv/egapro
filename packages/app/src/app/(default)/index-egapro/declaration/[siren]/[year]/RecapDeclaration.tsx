@@ -1,3 +1,5 @@
+"use client";
+
 import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
@@ -8,7 +10,9 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { BigNote, Box, RecapCard, RecapCardCompany } from "@design-system";
+import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 
+import { saveDeclaration } from "../../actions";
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 import { RecapCardPublication } from "./RecapCardPublication";
@@ -18,6 +22,7 @@ type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boole
 export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
 
+  const { saveFormData } = useDeclarationFormManager();
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
     address: entreprise?.adresse,
@@ -40,6 +45,26 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
   };
 
   const year = déclaration.commencer?.annéeIndicateurs || 2023;
+
+  const onSubmit = async (data: CompanyDTO) => {
+    const newFormData: DeclarationDTO = {
+      ...déclaration,
+      entreprise: {
+        ...déclaration.entreprise,
+        entrepriseDéclarante: {
+          ...déclaration.entreprise?.entrepriseDéclarante,
+          raisonSociale: data.name,
+          codeNaf: data.nafCode,
+          siren: data.siren,
+          commune: data.city,
+          codePostal: data.postalCode,
+          adresse: data.address ?? "",
+        },
+      },
+    };
+    await saveDeclaration(newFormData);
+    //saveFormData(newFormData);
+  };
 
   return (
     <>
@@ -79,8 +104,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         }
       />
 
-      <RecapCardCompany edit={edit} company={company} title="Informations Entreprise / UES" />
-
+      <RecapCardCompany edit={edit} company={company} title="Informations Entreprise / UES" onSubmit={onSubmit} />
       {company.ues?.name && (
         <RecapCard
           title="Informations UES"
