@@ -33,9 +33,11 @@ export const getAdditionalMeta = (company: Entreprise) => {
  * @param year year of indicators
  */
 export const isCompanyClosed = (company: Entreprise, year: number) => {
+  if (!company.dateCessation) return false;
   const limitForClosedCompanies = new Date(year + 1, 2, 1);
-  const closingDate = company.dateCessation;
+  const closingDate = new Date(company.dateCessation);
+  closingDate.setHours(0);
 
   // User can't declare if company is closed before 1st of March of the next year.
-  return closingDate && new Date(closingDate) < limitForClosedCompanies;
+  return closingDate && closingDate <= limitForClosedCompanies;
 };

@@ -100,7 +100,7 @@ export const prepareDataWithExistingDeclaration = async (
     const company = result.data;
 
     const isClosed = isCompanyClosed(company, year);
-
+    console.log("isClosed", isClosed);
     if (isClosed) throw new Error(CLOSED_COMPANY_ERROR);
 
     const countyCode = company.firstMatchingEtablissement?.codeCommuneEtablissement

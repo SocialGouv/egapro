@@ -26,7 +26,11 @@ const EcartsCadres = () => {
             temps, qui sont habilités à prendre des décisions de façon largement autonome et qui perçoivent une
             rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération pratiqués dans leur
             entreprise ou établissement (
-            <a rel="nofollow" href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/">
+            <a
+              rel="nofollow"
+              href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/"
+              target="_blank"
+            >
               Article L3111-2
             </a>
             ).

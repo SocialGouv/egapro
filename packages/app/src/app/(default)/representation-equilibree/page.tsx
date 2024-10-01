@@ -77,15 +77,16 @@ const RepresentationEquilibree = () => (
               desc={
                 <>
                   <p>
-                    Pour consulter l'aide du service d'identification MonComptePro (comment s'identifier, comment
-                    rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
+                    Pour consulter l'aide du service d'identification <strong>MonComptePro</strong> (comment
+                    s'identifier, comment rattacher une nouvelle entreprise à son compte, comment contacter le support,
+                    etc.),{" "}
                     <Link href={"/aide-moncomptepro"} target="_blank">
                       cliquez ici
                     </Link>
                   </p>
 
                   <p>
-                    Pour consulter la FAQ sur le site internet du ministère chargé du travail,{" "}
+                    Pour consulter la <strong>FAQ</strong> sur le site internet du ministère chargé du travail,{" "}
                     <Link
                       href={
                         "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
@@ -96,7 +97,7 @@ const RepresentationEquilibree = () => (
                     </Link>
                   </p>
                   <p>
-                    Pour contacter le référent égalité professionnelle au sein de votre DREETS,{" "}
+                    Pour contacter le <strong>référent égalité professionnelle</strong> au sein de votre DREETS,{" "}
                     <Link
                       href={"https://egapro.travail.gouv.fr/apiv2/public/referents_egalite_professionnelle.xlsx"}
                       target="_blank"
