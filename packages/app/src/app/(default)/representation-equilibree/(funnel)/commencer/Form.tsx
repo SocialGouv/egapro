@@ -162,7 +162,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             />
           ) : (
             <Select
-              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *"
+              label="Numéro Siren de l’entreprise *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
               nativeSelectProps={register("siren")}
