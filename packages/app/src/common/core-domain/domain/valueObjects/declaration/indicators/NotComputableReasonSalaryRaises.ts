@@ -20,8 +20,9 @@ export namespace NotComputableReasonSalaryRaises {
   }
 
   export const Label = {
-    [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
-    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+    [Enum.ABSAUGI]: "Absence d'augmentations individuelles (hors promotions) au cours de la période de référence",
+    [Enum.EGVI40PCET]:
+      "Effectif des CSP retenues inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
   } as const;
 
   export type Label = typeof Label;

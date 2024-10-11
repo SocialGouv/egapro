@@ -56,7 +56,7 @@ export const NumberPairInputs = <FormType extends SimpleObject>({
 
     if (isNaN(valueA)) return;
 
-    const valueB = options.max - valueA;
+    const valueB = Number((options.max - valueA).toFixed(2));
 
     setValue(keyA, valueA, {
       shouldDirty: true,

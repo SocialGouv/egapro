@@ -1,7 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Card from "@codegouvfr/react-dsfr/Card";
-import { Grid, GridCol } from "@design-system";
 
 import { TITLES } from "../titles";
 import { EcartsMembresForm } from "./Form";
@@ -20,30 +18,26 @@ const EcartsMembres = () => {
     <>
       <Alert
         severity="info"
-        title="Motifs de non calculabilité"
-        description="Les écarts de représentation femmes‑hommes parmi les membres des instances dirigeantes sont incalculables
-          lorsqu'il n'y a pas d'instance dirigeante."
+        title="Définition"
+        description={
+          <span>
+            Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
+            ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction générale
+            dans l'exercice de leurs missions (
+            <a
+              rel="nofollow"
+              href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715"
+              target="_blank"
+            >
+              Article L23-12-1
+            </a>
+            ).
+          </span>
+        }
         className={fr.cx("fr-mb-4w")}
       />
 
       <EcartsMembresForm />
-
-      <Grid mt="4w">
-        <GridCol>
-          <Card
-            title="Membres des instances dirigeantes"
-            desc="Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout
-                  acte ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la
-                  direction générale dans l'exercice de leurs missions."
-            detail="Définition"
-            enlargeLink
-            linkProps={{
-              href: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715",
-              target: "_blank",
-            }}
-          />
-        </GridCol>
-      </Grid>
     </>
   );
 };

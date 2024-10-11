@@ -171,34 +171,34 @@ Vous venez de procéder à la transmission aux services du ministre chargé du t
     declaration.year.getValue() + 1
   } au titre des données ${declaration.year.getValue()} conformément aux dispositions de l’article D.1142-5 du code du travail. L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de conformité de votre déclaration.
 
-Vous avez déclaré un index global ${
+Vous avez déclaré un index de l'égalité professionnelle ${
     declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"
   }, décliné par indicateurs comme suit :
 
-- indicateur écart de rémunérations : ${
+- indicateur écart de rémunération : ${
     declaration.remunerations?.score?.getValue() === undefined
       ? "non calculable"
       : declaration.remunerations.score.getValue()
   }
 ${
   declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250
-    ? `- indicateur écart de taux d'augmentations individuelles : ${
+    ? `- indicateur écart de taux d'augmentations : ${
         declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
           ? "non calculable"
           : declaration.salaryRaisesAndPromotions.score.getValue()
       }`
-    : `- indicateur écart de taux d'augmentation : ${
+    : `- indicateur écart de taux d'augmentations : ${
         declaration.salaryRaises?.score?.getValue() === undefined
           ? "non calculable"
           : declaration.salaryRaises.score.getValue()
       }
-- indicateur écart de taux de promotion : ${
+- indicateur écart de taux de promotions : ${
         declaration.promotions?.score?.getValue() === undefined
           ? "non calculable"
           : declaration.promotions.score.getValue()
       }`
 }
-- indicateur retour de congés maternité : ${
+- indicateur retour de congé maternité : ${
     declaration.maternityLeaves?.score?.getValue() === undefined
       ? "non calculable"
       : declaration.maternityLeaves.score.getValue()
@@ -237,14 +237,14 @@ Les services de l’administration du travail.
           </p>
 
           <p>
-            Vous avez déclaré un index global{" "}
+            Vous avez déclaré un index de l'égalité professionnelle{" "}
             {declaration.index?.getValue() ? `de ${declaration.index.getValue()}` : "non calculable"}, décliné par
             indicateurs comme suit :
           </p>
 
           <ul>
             <li>
-              indicateur écart de rémunérations :{" "}
+              indicateur écart de rémunération :{" "}
               {declaration.remunerations?.score?.getValue() === undefined
                 ? "non calculable"
                 : declaration.remunerations.score.getValue()}
@@ -252,7 +252,7 @@ Les services de l’administration du travail.
 
             {declaration.company.range?.getValue() == CompanyWorkforceRange.Enum.FROM_50_TO_250 ? (
               <li>
-                indicateur écart de taux d'augmentations individuelles :{" "}
+                indicateur écart de taux d'augmentations :{" "}
                 {declaration.salaryRaisesAndPromotions?.score?.getValue() === undefined
                   ? "non calculable"
                   : declaration.salaryRaisesAndPromotions.score.getValue()}
@@ -260,13 +260,13 @@ Les services de l’administration du travail.
             ) : (
               <>
                 <li>
-                  indicateur écart de taux d'augmentation :{" "}
+                  indicateur écart de taux d'augmentations :{" "}
                   {declaration.salaryRaises?.score?.getValue() === undefined
                     ? "non calculable"
                     : declaration.salaryRaises.score.getValue()}
                 </li>
                 <li>
-                  indicateur écart de taux de promotion :{" "}
+                  indicateur écart de taux de promotions :{" "}
                   {declaration.promotions?.score?.getValue() === undefined
                     ? "non calculable"
                     : declaration.promotions.score.getValue()}
@@ -274,7 +274,7 @@ Les services de l’administration du travail.
               </>
             )}
             <li>
-              indicateur retour de congés maternité :{" "}
+              indicateur retour de congé maternité :{" "}
               {declaration.maternityLeaves?.score?.getValue() === undefined
                 ? "non calculable"
                 : declaration.maternityLeaves.score.getValue()}
@@ -291,7 +291,11 @@ Les services de l’administration du travail.
             Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :{" "}
             <a href={url}>{url}</a>
           </p>
-
+          <p>
+            Vos déclarations transmises sont disponibles dans votre espace personnel sur le site Egapro, menu "Mes
+            déclarations" :{" "}
+            <a href="https://egapro.travail.gouv.fr/mon-espace/mes-declarations">Accéder à mon espace</a>
+          </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
             sein de votre DREETS en répondant à ce message.
@@ -405,13 +409,19 @@ Les services de l’administration du travail.
           <p>Madame, Monsieur,</p>
           <p>
             Vous venez de procéder à la transmission aux services du ministre chargé du travail de vos écarts éventuels
-            de représentation entre les femmes et les hommes pour l'année {year + 1} au titre des données {year}.
-            L’administration du travail accuse réception par le présent message de votre due transmission. Cet accusé de
-            réception ne vaut pas contrôle de conformité de votre déclaration.
+            de représentation entre les femmes et les hommes pour l'année {year + 1} au titre des données {year}{" "}
+            conformément aux dispositions de l’article D.1142-19 du code du travail. L’administration du travail accuse
+            réception par le présent message de votre due transmission. Cet accusé de réception ne vaut pas contrôle de
+            conformité de votre déclaration.
           </p>
           <p>
             Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :{" "}
             <a href={url}>{url}</a>
+          </p>
+          <p>
+            Vos déclarations transmises sont disponibles dans votre espace personnel sur le site Egapro, menu "Mes
+            déclarations" :{" "}
+            <a href="https://egapro.travail.gouv.fr/mon-espace/mes-declarations">Accéder à mon espace</a>
           </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes‑hommes au

@@ -104,7 +104,7 @@ export const Footer = () => (
     linkList={[
       {
         categoryName: "Liens utiles",
-        links: [contactLink, referenteDownloadLink, statsLink],
+        links: [contactLink, referenteDownloadLink],
       },
       {
         categoryName: " ",
@@ -116,7 +116,7 @@ export const Footer = () => (
       },
       {
         categoryName: " ",
-        links: [githubLink],
+        links: [githubLink, statsLink],
       },
     ]}
   />

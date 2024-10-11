@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Table from "@codegouvfr/react-dsfr/Table";
 
 const Définition = () => (
@@ -6,7 +7,7 @@ const Définition = () => (
       La rémunération de chaque salarié, au sens de l’article L. 3221-3, doit être reconstituée en{" "}
       <strong>équivalent temps plein</strong> sur la période de référence annuelle considérée.
     </p>
-    <p>
+    <p className={fr.cx("fr-mb-0")}>
       <strong>Doivent être pris en compte dans la rémunération :</strong>
     </p>
     <ul>
@@ -22,7 +23,7 @@ const Définition = () => (
       <li>les primes collectives (ex : les primes de transport ou primes de vacances)</li>
       <li>les indemnités de congés payés.</li>
     </ul>
-    <p>
+    <p className={fr.cx("fr-mb-0")}>
       <strong>Ne doivent pas être pris en compte dans la rémunération :</strong>
     </p>
     <ul>
@@ -64,8 +65,10 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
     <ol>
       {!skipRemuDetails && (
         <li>
-          <p>Les salariés sont répartis en groupe, par tranche d’âge et par catégorie de postes équivalents.</p>
-          <p>
+          <p className={fr.cx("fr-mb-0")}>
+            Les salariés sont répartis en groupe, par tranche d’âge et par catégorie de postes équivalents.
+          </p>
+          <p className={fr.cx("fr-m-0")}>
             Les tranches d’âge sont les suivantes :
             <ul>
               <li>Moins de 30 ans</li>
@@ -74,18 +77,18 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
               <li>50 ans et plus</li>
             </ul>
           </p>
-          <p>
+          <p className={fr.cx("fr-m-0")}>
             S’agissant des catégories de postes équivalents, l’employeur peut répartir les salariés, après consultation
             du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification
             de branche ou d’une autre méthode de cotation des postes. La méthode de cotation des postes est adoptée
             après avis du comité social et économique.
           </p>
-          <p>
+          <p className={fr.cx("fr-m-0")}>
             Si l’employeur ne souhaite pas répartir les salariés par niveau ou coefficient hiérarchique , ou si cette
             méthode de répartition ne permet pas de calculer l’indicateur, il répartit les salariés par catégorie
             socio-professionnelle.
           </p>
-          <p>
+          <p className={fr.cx("fr-m-0")}>
             Les catégories socio-professionnelles sont les suivantes :
             <ul>
               <li>ouvriers</li>
@@ -97,7 +100,9 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
         </li>
       )}
       <li>
-        <p>Seuls les groupes comprenant au moins trois femmes et au moins trois hommes sont pris en compte</p>
+        <p className={fr.cx("fr-mb-0")}>
+          Seuls les groupes comprenant au moins trois femmes et au moins trois hommes sont pris en compte.
+        </p>
         <p>
           Si, en application de cette règle, le calcul de l’indicateur par niveau ou coefficient hiérarchique, dans les
           conditions prévues au 1, est rendu impossible, la répartition par niveau ou coefficient hiérarchique n’est pas
@@ -105,39 +110,49 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
         </p>
       </li>
       <li>
-        La rémunération moyenne des femmes et des hommes est calculée pour chacun des groupes ainsi constitués en
-        calculant le salaire en équivalent temps plein pour chaque salarié puis en faisant la moyenne.
+        <p>
+          La rémunération moyenne des femmes et des hommes est calculée pour chacun des groupes ainsi constitués en
+          calculant le salaire en équivalent temps plein pour chaque salarié puis en faisant la moyenne.
+        </p>
       </li>
       <li>
-        L’écart de rémunération est calculé, en pourcentage, pour chacun des groupes, en soustrayant la rémunération
-        moyenne des femmes à la rémunération moyenne des hommes et en rapportant ce résultat à la rémunération moyenne
-        des hommes.
+        <p>
+          L’écart de rémunération est calculé, en pourcentage, pour chacun des groupes, en soustrayant la rémunération
+          moyenne des femmes à la rémunération moyenne des hommes et en rapportant ce résultat à la rémunération moyenne
+          des hommes.
+        </p>
       </li>
       <li>
-        Dans les groupes constitués par catégorie socio-professionnelle, le seuil de pertinence des écarts est de 5%.
-        Dans les groupes constitués par niveau ou coefficient hiérarchique, le seuil de pertinence des écarts est de 2%.
-        Lorsque l’écart de rémunération est positif, le seuil de pertinence est déduit de l’écart, sans toutefois
-        pouvoir l’amener à devenir négatif (plancher à zéro). Lorsque l’écart de rémunération est négatif, le seuil de
-        pertinence est ajouté à l’écart, sans toutefois pouvoir l’amener à devenir positif (plafond à zéro).
+        <p>
+          Dans les groupes constitués par catégorie socio-professionnelle, le seuil de pertinence des écarts est de 5%.
+          Dans les groupes constitués par niveau ou coefficient hiérarchique, le seuil de pertinence des écarts est de
+          2%. Lorsque l’écart de rémunération est positif, le seuil de pertinence est déduit de l’écart, sans toutefois
+          pouvoir l’amener à devenir négatif (plancher à zéro). Lorsque l’écart de rémunération est négatif, le seuil de
+          pertinence est ajouté à l’écart, sans toutefois pouvoir l’amener à devenir positif (plafond à zéro).
+        </p>
       </li>
       <li>
-        Les écarts ainsi ajustés en fonction des seuils pour chacun des groupes, sont multipliés par le ratio de
-        l’effectif du groupe à l’effectif total des groupes pris en compte, puis additionnés pour obtenir l’écart global
-        de rémunération entre les femmes et les hommes.
+        <p>
+          Les écarts ainsi ajustés en fonction des seuils pour chacun des groupes sont multipliés par le ratio de
+          l’effectif du groupe à l’effectif total des groupes pris en compte, puis additionnés pour obtenir l’écart
+          global de rémunération entre les femmes et les hommes.
+        </p>
       </li>
       <li>
-        Le résultat final obtenu est la valeur absolue de l’écart global de rémunération, arrondie à la première
-        décimale.
+        <p>
+          Le résultat final obtenu est la valeur absolue de l’écart global de rémunération, arrondie à la première
+          décimale.
+        </p>
       </li>
     </ol>
-    <p>
+    <p className={fr.cx("fr-m-0")}>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
     </p>
 
     <Table
       noScroll
       fixed
-      headers={["Résultats obtenus", "Nombre de points obtenus (Note sur 40)"]}
+      headers={["Résultat final obtenu", "Nombre de points (Note sur 40)"]}
       data={[
         ["égal à 0%", "40 points"],
         ["supérieur à 0% et inférieur ou égal à 1%", "39 points"],

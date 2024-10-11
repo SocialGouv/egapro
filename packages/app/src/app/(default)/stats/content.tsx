@@ -42,7 +42,36 @@ export const StatsContent = async () => {
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
         Index Egapro {CURRENT_YEAR + 1} au titre des données {CURRENT_YEAR}
       </h2>
-      <p>Index Egapro dans les entreprises et UES de plus de 50 salariés.</p>
+      <p>Entreprises et unités économiques et sociales (UES) d'au moins 50 salariés</p>
+      <Grid haveGutters className={fr.cx("fr-mt-4w")}>
+        <GridCol md={12} lg={4}>
+          <DataCard title={`Déclarant${stats.index.count > 1 ? "s" : ""}`} data={stats.index.count} />
+        </GridCol>
+        <GridCol sm={12} md={6} lg={4}>
+          <StatCard title="Déclarants par tranche d'effectifs assujettis">
+            <BarChart
+              xAxisSuggestedMax={stats.index.count}
+              theme="multicolor"
+              data={[
+                {
+                  legend: "1000 et plus",
+                  value: stats.index.countByWorkforceRange["1000:"],
+                },
+                {
+                  legend: "251 à 999",
+                  value: stats.index.countByWorkforceRange["251:999"],
+                },
+                {
+                  legend: "50 à 250",
+                  value: stats.index.countByWorkforceRange["50:250"],
+                },
+              ]}
+              tooltipLegend="Nombre de déclarants"
+            />
+          </StatCard>
+        </GridCol>
+      </Grid>
+
       <Grid haveGutters className={fr.cx("fr-mt-4w")}>
         <GridCol md={12} lg={4}>
           <DataCard
@@ -91,35 +120,6 @@ export const StatsContent = async () => {
           </StatCard>
         </GridCol>
       </Grid>
-      <Grid haveGutters className={fr.cx("fr-mt-4w")}>
-        <GridCol md={12} lg={4}>
-          <DataCard title={`Déclarant${stats.index.count > 1 ? "s" : ""}`} data={stats.index.count} />
-        </GridCol>
-        <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Déclarants par tranche d'effectifs assujettis">
-            <BarChart
-              xAxisSuggestedMax={stats.index.count}
-              theme="multicolor"
-              data={[
-                {
-                  legend: "1000 et plus",
-                  value: stats.index.countByWorkforceRange["1000:"],
-                },
-                {
-                  legend: "251 à 999",
-                  value: stats.index.countByWorkforceRange["251:999"],
-                },
-                {
-                  legend: "50 à 250",
-                  value: stats.index.countByWorkforceRange["50:250"],
-                },
-              ]}
-              tooltipLegend="Nombre de répondants"
-            />
-          </StatCard>
-        </GridCol>
-      </Grid>
-
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Représentation équilibrée {CURRENT_YEAR}</h2>
       <p>Entreprises de plus de 1000 salariés pendant 3 exercices consécutifs.</p>
       <Grid haveGutters className="fr-mt-2w">

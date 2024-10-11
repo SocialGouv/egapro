@@ -106,8 +106,8 @@ export const ValidationRecapRepEq = () => {
   return (
     <>
       <p>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année {funnel.year + 1} au titre des données{" "}
-        {funnel.year}.
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année <strong>{funnel.year + 1}</strong> au titre
+        des données <strong>{funnel.year}</strong>.
       </p>
       <DetailRepEq edit repEq={repEq} />
       <ButtonsGroup

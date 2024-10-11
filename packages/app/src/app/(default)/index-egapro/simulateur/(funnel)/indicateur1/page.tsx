@@ -25,21 +25,19 @@ const Indicateur1Page = () => {
           description={
             <p>
               La rémunération prend en compte les salaires, bonus, primes collectives, indemnités de congés payés. Elle
-              est reconstituée en équivalent temps plein sur toute la durée de la période de référence. <br />
-              L'indicateur et l'index ne sont pas calculables si le total des effectifs des groupes (comptant au moins 3
-              femmes et 3 hommes) est inférieur à 40% des effectifs totaux. <br />
+              est reconstituée en équivalent temps plein sur la période de référence annuelle considérée. <br />
+              L'indicateur est calculé soit par catégorie socio-professionnelle, soit, après consultation du CSE, par
+              niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode
+              de cotation des postes. <br />
+              L'indicateur n'est pas calculable si l'effectif total retenu est inférieur à 40% de l'effectif total pris
+              en compte pour le calcul des indicateurs. <br />
               Pour en savoir plus sur le calcul de cet indicateur,{" "}
-              <Link target="_blank" href="/aide-simulation#indicateur-ecart-de-remuneration">
+              <Link target="_blank" href="/aide-index#indicateur-ecart-de-remuneration">
                 cliquez ici
               </Link>
             </p>
           }
         />
-        <p>
-          Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes
-          équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de
-          branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge.
-        </p>
       </CenteredContainer>
       <Indic1Form />
     </>

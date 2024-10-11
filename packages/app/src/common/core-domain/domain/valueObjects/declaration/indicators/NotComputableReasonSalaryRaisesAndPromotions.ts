@@ -24,8 +24,9 @@ export namespace NotComputableReasonSalaryRaisesAndPromotions {
   }
 
   export const Label = {
-    [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
-    [Enum.ETSNO5F5H]: "Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes",
+    [Enum.ABSAUGI]: "Absence d'augmentations individuelles au cours de la période de référence",
+    [Enum.ETSNO5F5H]:
+      "Effectif pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes.",
   } as const;
 
   export type Label = typeof Label;

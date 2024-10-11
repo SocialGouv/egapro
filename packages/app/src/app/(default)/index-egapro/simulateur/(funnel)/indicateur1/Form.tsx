@@ -173,7 +173,7 @@ export const Indic1Form = () => {
             render={({ field }) => {
               return (
                 <RadioButtons
-                  legend="Modalité de calcul choisie pour cet indicateur *"
+                  legend="Quelle est la modalité choisie pour le calcul de cet indicateur ? *"
                   options={[
                     ...[
                       RemunerationsMode.Enum.CSP,

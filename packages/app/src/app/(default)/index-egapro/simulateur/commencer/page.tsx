@@ -26,26 +26,23 @@ const CommencerPage = async () => {
         text="Vous allez commencer le calcul des indicateurs et de l'index de l'égalité professionnelle pour votre entreprise ou unité économique et sociale (UES)."
       />
 
-      <Alert
-        severity="info"
-        description={
+      <Text
+        text={
           <p>
-            Pour consulter l'aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes,{" "}
-            <Link href={`/aide-simulation`} target="_blank">
-              cliquez ici
+            Une aide pour le calcul est disponible{" "}
+            <Link href={`/aide-index`} target="_blank">
+              ici
             </Link>
           </p>
         }
-        small
-        className="fr-mb-3w"
       />
 
-      <Text text="Suite au calcul, vous pourrez poursuivre vers la déclaration afin de transmettre les résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations nécessaires à la déclaration." />
+      <Text text="A la suite du calcul, vous pourrez poursuivre vers la déclaration afin de transmettre les résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations nécessaires à la déclaration." />
       <Alert
         className={fr.cx("fr-mb-2w")}
         small
         severity="warning"
-        description="Attention, les données saisies pour les calculs des indicateurs et de l’index ne seront pas sauvegardées si vous quittez le site Egapro."
+        description="Attention, les données saisies pour le calcul des indicateurs et de l’index ne seront pas sauvegardées si vous quittez le site Egapro."
       />
       <BackNextButtonsGroup
         noBack

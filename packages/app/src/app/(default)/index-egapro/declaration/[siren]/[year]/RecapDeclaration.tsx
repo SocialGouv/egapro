@@ -209,7 +209,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
             noBorder
             note={déclaration["resultat-global"]?.index}
             max={100}
-            legend={déclaration["resultat-global"]?.index !== undefined ? "Index de" : ""}
+            legend={déclaration["resultat-global"]?.index !== undefined ? "Index de" : "Index non calculable"}
             text={
               <>
                 <p>

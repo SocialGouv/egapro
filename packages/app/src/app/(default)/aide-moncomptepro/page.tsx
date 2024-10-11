@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Summary from "@codegouvfr/react-dsfr/Summary";
 import { Container, ContentWithChapter, Grid, GridCol } from "@design-system";
 import { AnchorLink } from "@design-system/client";
@@ -33,7 +34,7 @@ const AideMonCompteProPage = () => {
             travail en cas de besoin. L'adresse email associée sera celle sur laquelle sera adressée l'accusé de
             réception en fin de déclaration.
           </p>
-          <p>À noter :</p>
+          <p className={fr.cx("fr-mb-0")}>À noter :</p>
           <ul>
             <li>
               Si vous déclarez votre index de l'égalité professionnelle en tant qu'unité économique et sociale (UES),
@@ -146,6 +147,7 @@ const AideMonCompteProPage = () => {
             </AnchorLink>
             <p>
               À la page "Connexion" du site Egapro, vous cliquez sur "S'identifier avec MonComptePro". <br />
+              <br />
               Vous êtes redirigé sur le site MonComptePro à la page "S'inscrire ou se connecter". Vous saisissez votre
               adresse email professionnelle, celle-ci doit correspondre à la personne à contacter par les services de
               l'inspection du travail en cas de besoin.
@@ -171,7 +173,7 @@ const AideMonCompteProPage = () => {
               siège social de votre entreprise et sur le site Egapro c'est le numéro Siren de votre entreprise qui sera
               disponible pour effectuer votre déclaration.
             </p>
-            <p>Attention :</p>
+            <p className={fr.cx("fr-mb-0")}>Attention :</p>
             <ul>
               <li>
                 Si vous déclarez votre index de l'égalité professionnelle en tant qu'unité économique et sociale (UES),
@@ -184,7 +186,7 @@ const AideMonCompteProPage = () => {
                 point&nbsp;5.
               </li>
             </ul>
-            <p>
+            <p className={fr.cx("fr-mt-2w")}>
               L'équipe MonComptePro procède à des traitements pour vérifier la légitimité du déclarant à représenter
               l'entreprise. Si l'équipe MonComptePro a déjà vérifié la correspondance entre votre entreprise et le nom
               de domaine de votre adresse email, votre compte sera validé automatiquement et vous serez redirigé sur le

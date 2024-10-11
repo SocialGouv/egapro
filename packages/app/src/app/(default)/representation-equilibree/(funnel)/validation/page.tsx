@@ -32,7 +32,7 @@ const Validation = () => {
         Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous recevrez un
         accusé de réception.
       </p>
-      <Heading as="h2" mt="6w" text="Récapitulatif" />
+      <Heading as="h2" mt="6w" text="Récapitulatif des écarts de représentation" />
 
       <ValidationRecapRepEq />
     </>

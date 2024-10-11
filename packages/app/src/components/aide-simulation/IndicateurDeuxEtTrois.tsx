@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Table from "@codegouvfr/react-dsfr/Table";
 
 const Définition = () => (
@@ -19,7 +20,7 @@ const Définition = () => (
       Pour le calcul de l’indicateur, une période de référence pluriannuelle peut être choisie, à partir des données des
       deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans.
     </p>
-    <p>L’indicateur n’est pas calculable :</p>
+    <p className={fr.cx("fr-mb-0")}>L’indicateur n’est pas calculable :</p>
     <ul>
       <li>
         si aucune augmentation individuelle n’est intervenue au cours de la période de référence annuelle considérée
@@ -35,31 +36,40 @@ const Définition = () => (
 const CommentEstCalculéLIndicateur = () => (
   <>
     <p>
-      Le calcul est possible si les effectifs pris en compte pour le calcul des indicateurs comptent au moins 5 femmes
-      et 5 hommes.
+      Le calcul est possible si l’effectif total des salariés pris en compte pour le calcul des indicateurs compte au
+      moins 5 femmes et 5 hommes.
     </p>
     <ol>
       <li>
         <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé. </p>
       </li>
       <li>
-        Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre total de
-        femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est calculé en
-        rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le calcul des indicateurs.
+        <p>
+          Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre total de
+          femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est calculé en
+          rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le calcul des
+          indicateurs.
+        </p>
       </li>
       <li>
-        Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux calculés
-        en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des hommes est de
-        30,00%, l’écart est ainsi de 3,13%.
+        <p>
+          Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux calculés
+          en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des hommes est de
+          30,00%, l’écart est ainsi de 3,13%.
+        </p>
       </li>
       <li>
-        Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est appliqué au
-        plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de salariés qu’il aurait
-        fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par exemple, l’écart est de
-        3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre
-        équivalent de salariés est ainsi de 0,4695.
+        <p>
+          Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est appliqué
+          au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de salariés qu’il
+          aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par exemple, l’écart
+          est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre
+          équivalent de salariés est ainsi de 0,4695.
+        </p>
       </li>
-      <li>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale. </li>
+      <li>
+        <p>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale. </p>
+      </li>
       <li>
         Le barème est appliqué à l’écart en % et à l’écart en nombre équivalent de salariés, et le résultat
         correspondant au nombre de points le plus élevé est retenu. En reprenant l’exemple en 4, c’est le résultat
@@ -71,14 +81,14 @@ const CommentEstCalculéLIndicateur = () => (
       Si l’écart en % joue en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), la note maximale
       de 35 points est attribuée (considérant que l’employeur a mis en place une politique de rattrapage adaptée).
     </p>
-    <p>
+    <p className={fr.cx("fr-m-0")}>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
     </p>
 
     <Table
       noScroll
       fixed
-      headers={["Résultats obtenus", "Nombre de points (Note sur 35)"]}
+      headers={["Résultat final obtenu", "Nombre de points (Note sur 35)"]}
       data={[
         ["inférieur ou égal à 2 points de % Ou à 2 salariés", "35 points"],
         [

@@ -19,7 +19,8 @@ export namespace NotComputableReasonRemunerations {
   }
 
   export const Label = {
-    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+    [Enum.EGVI40PCET]:
+      "Effectif des groupes retenus inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
   } as const;
 
   export type Label = typeof Label;

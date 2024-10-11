@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Summary from "@codegouvfr/react-dsfr/Summary";
 import { AideSimulationIndicateurCinq } from "@components/aide-simulation/IndicateurCinq";
 import { AideSimulationIndicateurDeux } from "@components/aide-simulation/IndicateurDeux";
@@ -79,19 +80,19 @@ const AideSimulation = () => {
                 },
               },
               {
-                text: "Indicateur écart de taux d’augmentation individuelles (50 à 250 salariés)",
+                text: "Indicateur écart de taux d’augmentations individuelles (50 à 250 salariés)",
                 linkProps: {
                   href: "#indicateur-ecart-de-taux-d-augmentation-50-250-salaries",
                 },
               },
               {
-                text: "Indicateur écart de taux d’augmentation individuelles hors promotions (plus de 250 salariés)",
+                text: "Indicateur écart de taux d’augmentations individuelles hors promotions (plus de 250 salariés)",
                 linkProps: {
                   href: "#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries",
                 },
               },
               {
-                text: "Indicateur écart de taux de promotion (plus de 250 salariés)",
+                text: "Indicateur écart de taux de promotions (plus de 250 salariés)",
                 linkProps: {
                   href: "#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries",
                 },
@@ -143,7 +144,7 @@ const AideSimulation = () => {
 
           <ContentWithChapter>
             <AnchorLink as="h2" anchor="champ-d-application-entree-en-vigueur">
-              Champ d'application, entrée en vigueur et période de référence
+              Champ d'application
             </AnchorLink>
             <p>
               Toutes les entreprises (y compris associations et syndicats) et les unités économiques et sociales (UES)
@@ -211,8 +212,8 @@ const AideSimulation = () => {
               L’effectif des salariés à prendre en compte pour le calcul des indicateurs est apprécié en{" "}
               <strong>effectif physique</strong> sur la période de référence annuelle considérée.
             </p>
-            <p>
-              <strong>Ne sont pas pris en compte dans les effectifs&nbsp;:</strong>
+            <p className={fr.cx("fr-mb-0")}>
+              <strong>Ne sont pas pris en compte dans l'effectif&nbsp;:</strong>
             </p>
             <ul>
               <li>les apprentis</li>
@@ -223,11 +224,11 @@ const AideSimulation = () => {
               <li>les expatriés</li>
               <li>les salariés en pré-retraite</li>
               <li>
-                les salariés absents plus de 6 mois sur la période de référence (arrêt maladie, congés sans solde, cdd
-                &lt;6mois etc.).
+                les salariés absents plus de 6 mois sur la période de référence (arrêt maladie, congés sans solde, CDD
+                inférieur à 6 mois etc.).
               </li>
             </ul>
-            <p>
+            <p className={fr.cx("fr-mb-0")}>
               Les <strong>caractéristiques individuelles</strong> des salariés suivantes sont appréciées au dernier jour
               de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans
               l’entreprise:
@@ -289,7 +290,7 @@ const AideSimulation = () => {
             <AnchorLink as="h2" anchor="index-egalite-professionnelle-femmes-hommes">
               Index de l’égalité professionnelle femmes-hommes
             </AnchorLink>
-            <AnchorLink anchor="comment-est-calcul-l-index">Comment est calculé l’indicateur</AnchorLink>
+            <AnchorLink anchor="comment-est-calcul-l-index">Comment est calculé l’index</AnchorLink>
             <p>L’index correspond à la somme des points obtenus pour chacun des indicateurs.</p>
             <p>
               Lorsqu’un ou plusieurs indicateurs ne sont pas calculables, le nombre total de points obtenus aux
@@ -305,16 +306,15 @@ const AideSimulation = () => {
             </AnchorLink>
             <p>
               Les entreprises et unités économiques et sociales (UES) ayant obtenu un{" "}
-              <strong>index inférieur à 75 points</strong>
-              doivent définir des <strong>mesures de correction adéquates et pertinentes</strong> leur permettant
-              d’atteindre au moins 75 points dans un délai de 3 ans, le cas échéant en allouant une enveloppe de
-              rattrapage salariale.{" "}
+              <strong>index inférieur à 75 points</strong> doivent définir des{" "}
+              <strong>mesures de correction adéquates et pertinentes</strong> leur permettant d’atteindre au moins 75
+              points dans un délai de 3 ans, le cas échéant en allouant une enveloppe de rattrapage salariale.{" "}
             </p>
             <p>
               Les entreprises et unités économiques et sociales (UES) ayant obtenu un{" "}
-              <strong>index inférieur à 85 points</strong>
-              doivent fixer des <strong>objectifs de progression</strong> pour chacun des indicateurs calculables de
-              l’index dont la note maximale n’a pas été atteinte, leur permettant d’atteindre au moins 85 points.
+              <strong>index inférieur à 85 points</strong> doivent fixer des <strong>objectifs de progression</strong>{" "}
+              pour chacun des indicateurs calculables de l’index dont la note maximale n’a pas été atteinte, leur
+              permettant d’atteindre au moins 85 points.
             </p>
             <p>
               Les mesures de correction et les objectifs de progression sont définis :
@@ -347,8 +347,7 @@ const AideSimulation = () => {
             <p>
               En <strong>l’absence de site internet</strong> (au niveau de l’entreprise, du groupe ou de l’unité
               économique et sociale), l’index et ses indicateurs doivent être{" "}
-              <strong>communiqués aux salariés par tout moyen</strong>
-              (courrier papier ou électronique, affichage…).
+              <strong>communiqués aux salariés par tout moyen</strong> (courrier papier ou électronique, affichage…).
             </p>
             <p>
               Lorsque l’index n’est pas calculable, l’entreprise n’a pas l’obligation de publication de cet index.
@@ -431,7 +430,8 @@ const AideSimulation = () => {
               <Link href="https://egapro.travail.gouv.fr/index-egapro" target="_blank">
                 site Egapro
               </Link>
-              . Si l’index est calculé au niveau de l’unité économique et sociale (UES), une seule déclaration doit être
+              .<br />
+              Si l’index est calculé au niveau de l’unité économique et sociale (UES), une seule déclaration doit être
               transmise aux services du ministre chargé du travail et l'entreprise déclarant pour le compte de l'UES
               doit être celle ayant effectué la déclaration les années précédentes.
             </p>

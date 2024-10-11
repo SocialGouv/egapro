@@ -106,7 +106,7 @@ const RowProgression = ({
         </GridCol>
       </Grid>
 
-      <Grid>
+      <Grid className={isDisabled && fr.cx("fr-mb-2w")}>
         <GridCol sm={3}>{children}</GridCol>
         <GridCol sm={1}>
           <span className="text-center">{valueOrigin}</span>
@@ -169,7 +169,7 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
         et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises et unités économiques et
         sociales (UES) ayant obtenu <strong>un index compris entre 75 et 84 points inclus</strong> doivent{" "}
         <strong>fixer</strong> par accord ou, à défaut, par décision unilatérale, et{" "}
-        <strong>publier des objectifs de progression</strong>pour chacun des indicateurs calculables de l’index dont la
+        <strong>publier des objectifs de progression</strong> pour chacun des indicateurs calculables de l’index dont la
         note maximale n’a pas été atteinte.
         <br />
         Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de publication

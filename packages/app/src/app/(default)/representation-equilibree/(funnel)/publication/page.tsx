@@ -23,11 +23,13 @@ const Publication = () => {
         className={fr.cx("fr-mb-4w")}
         description={
           <>
-            Les entreprises doivent publier chaque année, <strong>au plus tard le 1er mars</strong>, leurs écarts
-            éventuels de représentation femmes‑hommes pour les cadres dirigeants et au sein des instances dirigeantes de
-            manière visible et lisible sur leur site internet, et les laisser en ligne jusqu’à la publication de leurs
-            écarts l’année suivante. Si l’entreprise ne dispose pas de site internet, elle doit porter ces informations
-            à la connaissance des salariés par tout moyen.
+            Les écarts de représentation, parmi les cadres dirigeants et les membres des instances dirigeantes, doivent
+            être <strong>publiés de manière visible et lisible sur le site internet de l’entreprise</strong>, chaque
+            année au plus tard le 1er mars, et devront rester en ligne au moins jusqu’à la publication des écarts
+            l’année suivante.
+            <br />
+            En l’absence de site internet (au niveau de l’entreprise ou du groupe), les écarts doivent être communiqués
+            aux salariés par tout moyen (courrier papier ou électronique, affichage…).
           </>
         }
       />

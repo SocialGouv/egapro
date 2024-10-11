@@ -39,7 +39,8 @@ const label = {
   [Enum.ABSRCM]: "Absence de retours de congé maternité",
   [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Aucune instance dirigeante",
   [Enum.ABSPROM]: "Absence de promotions",
-  [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+  [Enum.EGVI40PCET]:
+    "Effectif des groupes retenus inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
   [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
   [Enum.ETSNO5F5H]: "Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes",
 };

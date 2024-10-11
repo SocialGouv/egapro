@@ -18,8 +18,9 @@ export namespace NotComputableReasonPromotions {
   }
 
   export const Label = {
-    [Enum.ABSPROM]: "Absence de promotions",
-    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+    [Enum.ABSPROM]: "Absence de promotions au cours de la période de référence",
+    [Enum.EGVI40PCET]:
+      "Effectif des CSP retenues inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
   } as const;
 
   export type Label = typeof Label;

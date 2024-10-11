@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Table from "@codegouvfr/react-dsfr/Table";
 
 const Définition = () => (
@@ -12,7 +13,7 @@ const Définition = () => (
     <p>
       L’indicateur est calculé <strong>par catégorie socio-professionnelle</strong>.
     </p>
-    <p>L’indicateur n’est pas calculable :</p>
+    <p className={fr.cx("fr-mb-0")}>L’indicateur n’est pas calculable :</p>
     <ul>
       <li>Si aucune promotion n’est intervenue au cours de la période de référence annuelle considérée.</li>
       <li>
@@ -31,7 +32,7 @@ const CommentEstCalculéLIndicateur = () => (
     </p>
     <ol>
       <li>
-        <p>Les salariés sont répartis par catégorie socio-professionnelle.</p>
+        <p className={fr.cx("fr-mb-0")}>Les salariés sont répartis par catégorie socio-professionnelle.</p>
         <p>
           Les catégories socio-professionnelles sont les suivantes :
           <ul>
@@ -43,24 +44,35 @@ const CommentEstCalculéLIndicateur = () => (
         </p>
       </li>
       <li>
-        Seules les catégories socio-professionnelles comprenant au moins dix femmes et dix hommes sont prises en compte.
+        <p>
+          Seules les catégories socio-professionnelles comprenant au moins dix femmes et dix hommes sont prises en
+          compte.
+        </p>
       </li>
       <li>
-        Dans chacune des catégories socio-professionnelles, le pourcentage de femmes et d’hommes promus au cours de la
-        période de référence est calculé.
+        <p>
+          Dans chacune des catégories socio-professionnelles, le pourcentage de femmes et d’hommes promus au cours de la
+          période de référence est calculé.
+        </p>
       </li>
       <li>
-        L’écart de taux de promotions est calculé, en %, pour chacune des catégories socio-professionnelles, en
-        soustrayant le pourcentage de femmes promues à celui des hommes promus.
+        <p>
+          L’écart de taux de promotions est calculé, en %, pour chacune des catégories socio-professionnelles, en
+          soustrayant le pourcentage de femmes promues à celui des hommes promus.
+        </p>
       </li>
       <li>
-        Les écarts obtenus sont multipliés par le ratio de l’effectif de la catégorie socio-professionnelle à l’effectif
-        total des catégories socio-professionnelles prises en compte, puis additionnés pour obtenir l’écart global de
-        taux de promotions entre les femmes et les hommes.
+        <p>
+          Les écarts obtenus sont multipliés par le ratio de l’effectif de la catégorie socio-professionnelle à
+          l’effectif total des catégories socio-professionnelles prises en compte, puis additionnés pour obtenir l’écart
+          global de taux de promotions entre les femmes et les hommes.
+        </p>
       </li>
       <li>
-        Le résultat final est la valeur absolue de l’écart global de taux de promotions, arrondie à la première
-        décimale.
+        <p>
+          Le résultat final est la valeur absolue de l’écart global de taux de promotions, arrondie à la première
+          décimale.
+        </p>
       </li>
     </ol>
     <p>
@@ -68,14 +80,14 @@ const CommentEstCalculéLIndicateur = () => (
       maximale de 15 points est attribuée (considérant que l’employeur a mis en place une politique de rattrapage
       adaptée).
     </p>
-    <p>
+    <p className={fr.cx("fr-mb-0")}>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
     </p>
 
     <Table
       noScroll
       fixed
-      headers={["Résultats obtenus", "Nombre de points (Note sur 15)"]}
+      headers={["Résultat final obtenu", "Nombre de points (Note sur 15)"]}
       data={[
         ["inférieur ou égal à 2 points de %", "15 points"],
         ["supérieur à 2 et inférieur ou égal à 5 points de %", "10 points"],

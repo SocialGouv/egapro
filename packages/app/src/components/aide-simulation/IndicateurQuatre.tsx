@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Table from "@codegouvfr/react-dsfr/Table";
 
 const Définition = () => (
@@ -17,7 +18,7 @@ const Définition = () => (
       correspondant à la majoration de leur rémunération liée à l'obligation de rattrapage salarial au retour de congé
       maternité (ou d’adoption).
     </p>
-    <p>L’indicateur n’est pas calculable :</p>
+    <p className={fr.cx("fr-mb-0")}>L’indicateur n’est pas calculable :</p>
     <ul>
       <li>
         Si aucun retour de congé maternité (ou d’adoption) n’est intervenu au cours de la période de référence annuelle
@@ -36,14 +37,14 @@ const CommentEstCalculéLIndicateur = () => (
       ont eu lieu pendant leur congé, d’une part, et, d’autre part, le nombre de salariés revenus, pendant la période de
       référence, de congé maternité ou d’adoption, durant lequel il y a eu des augmentations salariales.
     </p>
-    <p>
+    <p className={fr.cx("fr-mb-0")}>
       <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
     </p>
 
     <Table
       noScroll
       fixed
-      headers={["Résultats obtenus", "Nombre de points (Note sur 15)"]}
+      headers={["Résultat final obtenu", "Nombre de points (Note sur 15)"]}
       data={[
         ["égal à 100%", "15 points"],
         ["inférieur à 100%", "0 point"],
