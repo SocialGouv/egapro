@@ -10,7 +10,7 @@ export interface Organization {
   siret: string;
 }
 
-export interface MonCompteProProfile {
+export interface ProConnectProfile {
   email: string;
   email_verified: boolean;
   family_name: string | null;
@@ -23,7 +23,7 @@ export interface MonCompteProProfile {
 }
 
 const ISSUER = (appTest: boolean) => `https://app${appTest ? "-sandbox" : ""}.moncomptepro.beta.gouv.fr`;
-export function MonCompteProProvider<P extends MonCompteProProfile>(
+export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
   const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
@@ -44,10 +44,10 @@ export function MonCompteProProvider<P extends MonCompteProProfile>(
       async request({ tokens: { access_token }, client }) {
         logger.child({ tokens: { access_token } }).info(`userinfo request`);
         if (!access_token) {
-          throw new Error("MonCompteProProvider - Userinfo request is missing access_token.");
+          throw new Error("ProConnectProvider - Userinfo request is missing access_token.");
         }
 
-        return client.userinfo<MonCompteProProfile>(access_token);
+        return client.userinfo<ProConnectProfile>(access_token);
       },
     },
     profile(profile) {

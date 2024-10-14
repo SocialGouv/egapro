@@ -47,7 +47,7 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
         </GridCol>
       </Grid>
       <div className={fr.cx("fr-pt-3v")}>
-        Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte MonComptePro, cliquez sur ce
+        Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur ce
         bouton : <br />
         <Button
           onClick={e => {
@@ -56,7 +56,7 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
           }}
         >
           <Icon icon="fr-icon-refresh-line" />
-          Rafraichir MCP
+          Rafraichir
         </Button>
       </div>
     </>

@@ -22,7 +22,7 @@ export const UserHeaderItem = () => {
           staff={isStaff}
           session={session}
           isEmailLogin={config.isEmailLogin}
-          isMonCompteProTest={config.isMonCompteProTest}
+          isProConnectTest={config.isProConnectTest}
         />
       );
     case "loading":

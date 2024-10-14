@@ -1,4 +1,4 @@
-import { type MonCompteProProfile, MonCompteProProvider } from "@api/core-domain/infra/auth/MonCompteProProvider";
+import { type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -33,7 +33,7 @@ declare module "next-auth" {
     };
   }
 
-  interface Profile extends MonCompteProProfile {}
+  interface Profile extends ProConnectProfile {}
 }
 
 declare module "next-auth/jwt" {
@@ -47,7 +47,7 @@ const charonMcpUrl = new URL(
   config.api.security.auth.charonUrl,
 );
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
-export const monCompteProProvider = MonCompteProProvider({
+export const monCompteProProvider = ProConnectProvider({
   ...config.api.security.moncomptepro,
   ...(config.env !== "prod"
     ? {

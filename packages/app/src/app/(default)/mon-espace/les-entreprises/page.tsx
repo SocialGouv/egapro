@@ -27,7 +27,7 @@ const MesEntreprisesInfoAlert = () => (
           {" "}
           Si vous souhaitez supprimer une adresse email rattachée à un siren, veuillez{" "}
           <Link target="_blank" href={"mailto:contact@moncomptepro.beta.gouv.fr"}>
-            contacter MonComptePro
+            contacter ProConnect
           </Link>{" "}
           pour envoyer votre demande. Il faut{" "}
           <Link
@@ -36,7 +36,7 @@ const MesEntreprisesInfoAlert = () => (
               config.api.security.moncomptepro.appTest ? "-sandbox" : ""
             }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
           >
-            créer un nouveau compte MonComptePro
+            créer un nouveau compte ProConnect
           </Link>{" "}
           pour rattacher une autre adresse email à un numéro Siren.
         </p>
