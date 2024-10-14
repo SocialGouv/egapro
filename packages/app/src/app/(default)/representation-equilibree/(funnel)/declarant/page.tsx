@@ -32,12 +32,12 @@ const DeclarantPage = async () => {
         className={fr.cx("fr-mb-4w")}
         description={
           <>
-            Les informations déclarant sont préremplies à partir de votre compte MonComptePro mais vous pouvez les
+            Les informations déclarant sont préremplies à partir de votre compte ProConnect mais vous pouvez les
             modifier le cas échéant, à l'exception de l'adresse email.
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
             <Link href={`${monCompteProUrl}/personal-information`} target="_blank">
-              votre profil MonComptePro
+              votre profil ProConnect
             </Link>
             .
           </>

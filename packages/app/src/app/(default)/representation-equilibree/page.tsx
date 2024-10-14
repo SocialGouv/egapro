@@ -77,10 +77,9 @@ const RepresentationEquilibree = () => (
               desc={
                 <>
                   <p>
-                    Pour consulter l'aide du service d'identification <strong>MonComptePro</strong> (comment
-                    s'identifier, comment rattacher une nouvelle entreprise à son compte, comment contacter le support,
-                    etc.),{" "}
-                    <Link href={"/aide-moncomptepro"} target="_blank">
+                    Pour consulter l'aide du service d'identification <strong>ProConnect</strong> (comment s'identifier,
+                    comment rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
+                    <Link href={"/aide-proconnect"} target="_blank">
                       cliquez ici
                     </Link>
                   </p>

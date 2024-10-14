@@ -51,10 +51,10 @@ const CommencerPage = async () => {
             Nous n'avons trouvé aucune entreprise à laquelle votre compte ({session.user.email}) est rattaché. Si vous
             pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement depuis{" "}
             <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
-              votre espace MonComptePro
+              votre espace ProConnect
             </Link>
             .<br />
-            Une fois la demande validée par MonComptePro, vous pourrez continuer votre déclaration.
+            Une fois la demande validée par ProConnect, vous pourrez continuer votre déclaration.
           </>
         }
       />

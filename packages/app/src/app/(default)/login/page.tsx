@@ -8,7 +8,7 @@ import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
-import { MonCompteProLogin } from "./MonCompteProLogin";
+import { ProConnectLogin } from "./ProConnectLogin";
 
 const title = "Connexion";
 
@@ -78,39 +78,39 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               description={
                 <>
                   <p>
-                    Egapro utilise le service d’identification MonComptePro afin de garantir l’appartenance de ses
+                    Egapro utilise le service d’identification ProConnect afin de garantir l’appartenance de ses
                     utilisateurs aux entreprises déclarantes.
                   </p>
                   <br />
                   <p>
-                    Pour s'identifier avec MonComptePro, il convient d'utiliser une <b>adresse email professionnelle</b>
-                    , celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail
-                    en cas de besoin.
+                    Pour s'identifier avec ProConnect, il convient d'utiliser une <b>adresse email professionnelle</b>,
+                    celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
+                    cas de besoin.
                   </p>
                   <br />
                   <p>
                     <strong>
                       Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
-                      entreprise cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur
+                      entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur
                       Egapro.
                     </strong>
                   </p>
                   <br />
                   <p className={"text-dsfr-error"}>
                     Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
-                    service informatique pour qu'il autorise les mails en provenance de MonComptePro.
+                    service informatique pour qu'il autorise les mails en provenance de ProConnect.
                   </p>
                   <br />
                   <p className={"text-dsfr-error"}>
-                    Pour tout problème lié à MonComptePro, vous devez contacter le support dédié à cette adresse email{" "}
+                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié à cette adresse email{" "}
                     <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target={"_blank"}>
                       contact@moncomptepro.beta.gouv.fr
                     </Link>
                   </p>
                   <br />
                   <p>
-                    Pour consulter l'aide MonComptePro,{" "}
-                    <Link href={"/aide-moncomptepro"} target={"_blank"}>
+                    Pour consulter l'aide ProConnect,{" "}
+                    <Link href={"/aide-proconnect"} target={"_blank"}>
                       cliquez ici
                     </Link>
                   </p>
@@ -123,7 +123,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               <EmailLogin callbackUrl={callbackUrl} />
             ) : (
               <>
-                <MonCompteProLogin callbackUrl={callbackUrl} />
+                <ProConnectLogin callbackUrl={callbackUrl} />
               </>
             )}
             <GithubLogin callbackUrl={callbackUrl} />

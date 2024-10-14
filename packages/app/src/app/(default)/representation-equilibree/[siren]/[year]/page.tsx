@@ -80,11 +80,11 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
                 Si vous pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement
                 depuis{" "}
                 <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
-                  votre espace MonComptePro
+                  votre espace ProConnect
                 </Link>
                 .
                 <br />
-                Une fois la demande validée par MonComptePro, vous pourez modifier cette déclaration.
+                Une fois la demande validée par ProConnect, vous pourez modifier cette déclaration.
               </>
             }
             className={fr.cx("fr-mb-4w")}
