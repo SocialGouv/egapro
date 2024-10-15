@@ -23,15 +23,18 @@ const EcartsMembres = () => {
           <span>
             Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
             ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction générale
-            dans l'exercice de leurs missions (
-            <a
-              rel="nofollow"
-              href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715"
-              target="_blank"
-            >
-              Article L23-12-1
-            </a>
-            ).
+            dans l'exercice de leurs missions{" "}
+            <span className="no-break">
+              (
+              <a
+                rel="nofollow"
+                href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715"
+                target="_blank"
+              >
+                Article L23-12-1
+              </a>
+              ).
+            </span>
           </span>
         }
         className={fr.cx("fr-mb-4w")}

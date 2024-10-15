@@ -45,6 +45,10 @@
     overflow-wrap: break-word;
 }
 
+.no-break {
+    white-space: nowrap;
+}
+
 .underline {
     text-decoration: underline;
 }

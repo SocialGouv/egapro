@@ -230,8 +230,8 @@ const AideSimulation = () => {
             </ul>
             <p className={fr.cx("fr-mb-0")}>
               Les <strong>caractéristiques individuelles</strong> des salariés suivantes sont appréciées au dernier jour
-              de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans
-              l’entreprise:
+              de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise
+              :
             </p>
             <ul>
               <li>l'âge</li>

@@ -71,10 +71,10 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
           <p className={fr.cx("fr-m-0")}>
             Les tranches d’âge sont les suivantes :
             <ul>
-              <li>Moins de 30 ans</li>
-              <li>De 30 à 39 ans</li>
-              <li>De 40 à 49 ans</li>
-              <li>50 ans et plus</li>
+              <li>moins de 30 ans</li>
+              <li>de 30 à 39 ans</li>
+              <li>de 40 à 49 ans</li>
+              <li>50 ans et plus.</li>
             </ul>
           </p>
           <p className={fr.cx("fr-m-0")}>
@@ -94,7 +94,7 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
               <li>ouvriers</li>
               <li>employés</li>
               <li>techniciens et agents de maîtrise</li>
-              <li>ingénieurs et cadres</li>
+              <li>ingénieurs et cadres.</li>
             </ul>
           </p>
         </li>

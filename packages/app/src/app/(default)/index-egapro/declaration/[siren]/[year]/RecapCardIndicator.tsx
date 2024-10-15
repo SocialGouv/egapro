@@ -34,6 +34,7 @@ enum Enum {
   ETSNO5F5H = "etsno5f5h",
 }
 
+// TODO: Move this to a shared location
 const label = {
   [Enum.ABSAUGPDTCM]: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
   [Enum.ABSRCM]: "Absence de retours de congé maternité",

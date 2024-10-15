@@ -21,10 +21,10 @@ const Définition = () => (
     <p className={fr.cx("fr-mb-0")}>L’indicateur n’est pas calculable :</p>
     <ul>
       <li>
-        Si aucun retour de congé maternité (ou d’adoption) n’est intervenu au cours de la période de référence annuelle
-        considérée.
+        si aucun retour de congé maternité (ou d’adoption) n’est intervenu au cours de la période de référence annuelle
+        considérée
       </li>
-      <li>Ou si aucune augmentation n’est intervenue durant la durée du ou des congés maternité (ou d’adoption).</li>
+      <li>ou si aucune augmentation n’est intervenue durant la durée du ou des congés maternité (ou d’adoption).</li>
     </ul>
   </>
 );

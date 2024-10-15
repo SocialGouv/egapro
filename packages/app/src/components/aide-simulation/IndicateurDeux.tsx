@@ -18,10 +18,10 @@ const Définition = () => (
     <p className={fr.cx("fr-mb-0")}>L’indicateur n’est pas calculable :</p>
     <ul>
       <li>
-        Si aucune augmentation individuelle n’est intervenue au cours de la période de référence annuelle considérée.
+        si aucune augmentation individuelle n’est intervenue au cours de la période de référence annuelle considérée
       </li>
       <li>
-        Ou si l’effectif total des salariés retenus pour le calcul de l’indicateur est inférieur à 40% à l’effectif
+        ou si l’effectif total des salariés retenus pour le calcul de l’indicateur est inférieur à 40% à l’effectif
         total des salariés pris en compte pour le calcul des indicateurs.
       </li>
     </ul>
@@ -43,7 +43,7 @@ const CommentEstCalculéLIndicateur = () => (
             <li>ouvriers</li>
             <li>employés</li>
             <li>techniciens et agents de maîtrise</li>
-            <li>ingénieurs et cadres</li>
+            <li>ingénieurs et cadres.</li>
           </ul>
         </p>
       </li>

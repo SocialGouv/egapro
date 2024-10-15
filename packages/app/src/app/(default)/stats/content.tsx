@@ -120,35 +120,16 @@ export const StatsContent = async () => {
           </StatCard>
         </GridCol>
       </Grid>
-      <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>Représentation équilibrée {CURRENT_YEAR}</h2>
-      <p>Entreprises de plus de 1000 salariés pendant 3 exercices consécutifs.</p>
+      <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
+        Représentation équilibrée {CURRENT_YEAR + 1} au titre des données {CURRENT_YEAR}
+      </h2>
+      <p>Entreprises d'au moins 1000 salariés pour le troisième exercice consécutif.</p>
       <Grid haveGutters className="fr-mt-2w">
         <GridCol md={12} lg={4}>
           <DataCard
             title={`Déclarant${stats.balancedRepresentation.count > 1 ? "s" : ""}`}
             data={stats.balancedRepresentation.count}
           />
-        </GridCol>
-        <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Répartition des femmes dans les instances dirigeantes">
-            <DoughnutChart
-              data={[
-                {
-                  legend: "Plus de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.gt,
-                },
-                {
-                  legend: "Moins de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.lte,
-                },
-                {
-                  legend: "Non calculable",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.nc,
-                },
-              ]}
-              tooltipLegend="Nombre de femmes"
-            />
-          </StatCard>
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
           <StatCard title="Répartition des femmes parmi les cadres dirigeants">
@@ -163,11 +144,32 @@ export const StatsContent = async () => {
                   value: stats.balancedRepresentation.countWomen30percentMembers.lte,
                 },
                 {
-                  legend: "Non calculable",
+                  legend: "Ecart de représentation non calculable",
                   value: stats.balancedRepresentation.countWomen30percentMembers.nc,
                 },
               ]}
-              tooltipLegend="Nombre de femmes"
+              tooltipLegend="Nombre de déclarants"
+            />
+          </StatCard>
+        </GridCol>
+        <GridCol sm={12} md={6} lg={4}>
+          <StatCard title="Répartition des femmes parmi les membres des instances dirigeantes">
+            <DoughnutChart
+              data={[
+                {
+                  legend: "Plus de 30% de femmes",
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.gt,
+                },
+                {
+                  legend: "Moins de 30% de femmes",
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.lte,
+                },
+                {
+                  legend: "Ecart de représentation non calculable",
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.nc,
+                },
+              ]}
+              tooltipLegend="Nombre de déclarants"
             />
           </StatCard>
         </GridCol>

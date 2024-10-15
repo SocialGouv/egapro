@@ -27,7 +27,7 @@ const Définition = () => (
       </li>
       <li>
         ou si l’effectif total des salariés pris en compte pour le calcul des indicateurs ne compte pas au moins 5
-        femmes et 5 hommes
+        femmes et 5 hommes.
       </li>
     </ul>
   </>
@@ -77,7 +77,7 @@ const CommentEstCalculéLIndicateur = () => (
         l’indicateur est ainsi de 35 points.
       </li>
     </ol>
-    <p>
+    <p className={fr.cx("fr-mt-2w")}>
       Si l’écart en % joue en faveur du sexe le moins bien rémunéré (indicateur écart de rémunération), la note maximale
       de 35 points est attribuée (considérant que l’employeur a mis en place une politique de rattrapage adaptée).
     </p>
