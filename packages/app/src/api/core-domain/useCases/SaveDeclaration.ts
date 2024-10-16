@@ -58,15 +58,24 @@ export class SaveDeclaration implements UseCase<Input, void> {
         phone: dto.declarant?.téléphone,
       },
       company: {
-        address: company.address,
-        city: company.city,
-        countryCode: company.countryCode?.getValue(),
-        county: company.county?.getValue(),
-        nafCode: company.nafCode?.getValue(),
-        name: company.name,
-        postalCode: company.postalCode?.getValue(),
-        region: company.region?.getValue(),
-        siren: company.siren?.getValue(),
+        address: override ? dto.entreprise?.entrepriseDéclarante?.adresse : company.address,
+        city: override ? dto.entreprise?.entrepriseDéclarante?.commune : company.city,
+        countryCode: override ? dto.entreprise?.entrepriseDéclarante?.codePays : company.countryCode?.getValue(),
+        county: override ? dto.entreprise?.entrepriseDéclarante?.département : company.county?.getValue(),
+        nafCode:
+          override && dto.entreprise?.entrepriseDéclarante?.codeNaf
+            ? dto.entreprise?.entrepriseDéclarante?.codeNaf
+            : company.nafCode?.getValue(),
+        name:
+          override && dto?.entreprise?.entrepriseDéclarante?.raisonSociale
+            ? dto.entreprise.entrepriseDéclarante.raisonSociale
+            : company.name,
+        postalCode: override ? dto.entreprise?.entrepriseDéclarante?.codePostal : company.postalCode?.getValue(),
+        region: override ? dto.entreprise?.entrepriseDéclarante?.région : company.region?.getValue(),
+        siren:
+          override && dto.entreprise?.entrepriseDéclarante?.siren
+            ? dto.entreprise?.entrepriseDéclarante?.siren
+            : company.siren?.getValue(),
         range: dto.entreprise?.tranche,
         total:
           dto["periode-reference"]?.périodeSuffisante === "oui" ? dto["periode-reference"].effectifTotal : undefined,

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
@@ -58,13 +59,11 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { isValid, errors },
   } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
   });
-  console.log("RecapCardCompany", isValid, errors, getValues());
 
   const handleOnSummit = async (data: CompanyDTO) => {
     if (onSubmit) onSubmit(data);
@@ -185,7 +184,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
         <RecapCard
           title={fullTitle}
           sideButtonProps={{
-            iconId: "fr-icon-information-fill",
+            iconId: "fr-icon-edit-line",
             title: titleFull,
             priority: "tertiary no outline",
             style: { alignSelf: "center" },

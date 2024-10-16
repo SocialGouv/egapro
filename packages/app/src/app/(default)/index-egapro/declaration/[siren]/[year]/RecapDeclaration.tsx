@@ -10,10 +10,10 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { BigNote, Box, RecapCard, RecapCardCompany } from "@design-system";
-import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { useRouter } from "next/navigation";
 
-import { saveDeclaration } from "../../actions";
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
+import { updateCompanyInfos } from "./actions";
 import { RecapCardIndicator } from "./RecapCardIndicator";
 import { RecapCardPublication } from "./RecapCardPublication";
 
@@ -21,8 +21,7 @@ type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boole
 
 export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
-
-  const { saveFormData } = useDeclarationFormManager();
+  const router = useRouter();
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
     address: entreprise?.adresse,
@@ -62,8 +61,17 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         },
       },
     };
-    await saveDeclaration(newFormData);
-    //saveFormData(newFormData);
+    const isEditingSiren = data.siren != déclaration.entreprise?.entrepriseDéclarante?.siren;
+
+    await updateCompanyInfos(
+      newFormData,
+      isEditingSiren ? déclaration.entreprise?.entrepriseDéclarante?.siren : void 0,
+    );
+
+    if (isEditingSiren) {
+      router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);
+    }
+    router.refresh();
   };
 
   return (
