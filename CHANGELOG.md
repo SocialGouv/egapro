@@ -1,3 +1,24 @@
+# [3.5.0](https://github.com/SocialGouv/egapro/compare/v3.4.9...v3.5.0) (2024-10-21)
+
+
+### Bug Fixes
+
+* hide publication page from 2018 to 2020 NC index ([ea032b8](https://github.com/SocialGouv/egapro/commit/ea032b859192d998100adfd1cc2ac311130e68bd))
+* repeq commencer wording ([a175f70](https://github.com/SocialGouv/egapro/commit/a175f704fcc4905f23be5585584023275aa0342b))
+* reviews ([7ea3e14](https://github.com/SocialGouv/egapro/commit/7ea3e143fef4bdcbce2722db5ea39b77c90c28c0))
+* staff tool for company infos ([b8b58ed](https://github.com/SocialGouv/egapro/commit/b8b58ed0613cf0cb6417cab02f0286d180451ff0))
+* stats ([0750860](https://github.com/SocialGouv/egapro/commit/07508607a05d4c0d9fd0827a678de561b8dcdd08))
+* wording ([b812371](https://github.com/SocialGouv/egapro/commit/b8123712250c8262bd7d35d771c20cd1b07377db))
+* wording ([99b1daa](https://github.com/SocialGouv/egapro/commit/99b1daaaa1bce69adf4d410974f4b4467fb827e1))
+* wording ([69f7d9e](https://github.com/SocialGouv/egapro/commit/69f7d9ebf720169466ab31241d5684f6a8595268))
+* wording ([8ab816a](https://github.com/SocialGouv/egapro/commit/8ab816ae87b629d8c860a995d3be508082c845f9))
+* wording ([23538ce](https://github.com/SocialGouv/egapro/commit/23538ce2fc6f6997f23b7e1f1fa275cd38b29097))
+
+
+### Features
+
+* add staff tool and fix wording ([7865d9f](https://github.com/SocialGouv/egapro/commit/7865d9f6e9e10d8a7980ac785f4b0c6622af3448))
+
 ## [3.4.9](https://github.com/SocialGouv/egapro/compare/v3.4.8...v3.4.9) (2024-08-14)
 
 
