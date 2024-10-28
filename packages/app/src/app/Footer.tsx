@@ -20,7 +20,7 @@ const helpLink = {
 } satisfies DsfrFooterProps.LinkList.Link;
 
 const helpMCP = {
-  text: "Consulter l'aide ProConnect",
+  text: "Consulter l'aide ProConnect (ex MonComptePro)",
   linkProps: {
     href: "/aide-proconnect",
     target: "_blank",

@@ -4,7 +4,7 @@ import { Container, ContentWithChapter, Grid, GridCol } from "@design-system";
 import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
-const title = "Aide pour l'utilisation du service d'identification ProConnect";
+const title = "Aide pour l'utilisation du service d'identification ProConnect (anciennement MonComptePro)";
 
 export const metadata = {
   title,

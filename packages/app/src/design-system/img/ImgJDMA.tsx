@@ -6,8 +6,8 @@ export const ImgJDMA = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 200 85"
-    width="200px"
-    height="85px"
+    width="150px"
+    height="60px"
     className={cx("fr-fluid-img", style["svg-jdma"])}
     focusable="false"
     aria-hidden="true"

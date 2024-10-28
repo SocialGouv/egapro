@@ -58,15 +58,21 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
           commune: data.city,
           codePostal: data.postalCode,
           adresse: data.address ?? "",
+          département: data.county,
+          région: data.region,
         },
       },
     };
     const isEditingSiren = data.siren != déclaration.entreprise?.entrepriseDéclarante?.siren;
 
-    await updateCompanyInfos(
+    const { ok } = await updateCompanyInfos(
       newFormData,
       isEditingSiren ? déclaration.entreprise?.entrepriseDéclarante?.siren : void 0,
     );
+    if (!ok)
+      return alert(
+        "Une erreur est survenue lors de la sauvegarde des informations de l'entreprise, veuillez réessayer.",
+      );
 
     if (isEditingSiren) {
       router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);

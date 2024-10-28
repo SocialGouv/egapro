@@ -78,8 +78,8 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               description={
                 <>
                   <p>
-                    Egapro utilise le service d’identification ProConnect afin de garantir l’appartenance de ses
-                    utilisateurs aux entreprises déclarantes.
+                    Egapro utilise le service d’identification ProConnect (anciennement MonComptePro) afin de garantir
+                    l’appartenance de ses utilisateurs aux entreprises déclarantes.
                   </p>
                   <br />
                   <p>
@@ -102,16 +102,15 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                   </p>
                   <br />
                   <p className={"text-dsfr-error"}>
-                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié à cette adresse email{" "}
+                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié{" "}
                     <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target={"_blank"}>
-                      contact@moncomptepro.beta.gouv.fr
+                      En cliquant ici
                     </Link>
                   </p>
                   <br />
                   <p>
-                    Pour consulter l'aide ProConnect,{" "}
                     <Link href={"/aide-proconnect"} target={"_blank"}>
-                      cliquez ici
+                      Qu'est ce que ProConnect (ex MonComptePro)
                     </Link>
                   </p>
                 </>

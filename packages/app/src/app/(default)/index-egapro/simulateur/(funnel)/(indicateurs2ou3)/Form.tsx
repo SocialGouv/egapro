@@ -232,7 +232,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               className="fr-mb-3w"
               severity="info"
               title="L'indicateur n'est pas calculable"
-              description="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+              description="L’effectif total des CSP retenues pour le calcul de l'indicateur (c’est-à-dire comptant au moins 10 femmes et 10 hommes) représentent moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs."
             />
           ) : (
             <>
@@ -375,8 +375,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     severity="info"
                     title="L'indicateur n'est pas calculable"
                     description={`Il n'y a pas eu ${
-                      indicateur === 2 ? "d'augmentations" : "de promotions"
-                    } durant la période de référence.`}
+                      indicateur === 2 ? "d'augmentations individuelles (hors promotions)" : "de promotions"
+                    } au cours la période de référence.`}
                   />
                 )
               )}
