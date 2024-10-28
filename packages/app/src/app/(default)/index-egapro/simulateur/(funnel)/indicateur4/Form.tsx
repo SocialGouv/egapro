@@ -11,7 +11,6 @@ import { IndicateurQuatreComputer } from "@common/core-domain/computers/Indicate
 import { createSteps } from "@common/core-domain/dtos/CreateSimulationDTO";
 import { percentFormat } from "@common/utils/number";
 import { storePicker } from "@common/utils/zustand";
-import { AideSimulationIndicateurQuatre } from "@components/aide-simulation/IndicateurQuatre";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
@@ -99,7 +98,13 @@ export const Indic4Form = () => {
         <FormLayout>
           <ClientBodyPortal>
             <infoModal.Component title="Information indicateur retour de congé maternité">
-              <AideSimulationIndicateurQuatre.CommentEstCalculéLIndicateur />
+              <p>
+                L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou d’adoption
+                au cours de la période de référence et ayant bénéficié d’une augmentation, avant la fin de celle-ci, si
+                des augmentations ont eu lieu pendant leur congé, d’une part, et, d’autre part, le nombre de salariés
+                revenus, pendant la période de référence, de congé maternité ou d’adoption, durant lequel il y a eu des
+                augmentations salariales.
+              </p>
             </infoModal.Component>
           </ClientBodyPortal>
           <Controller
@@ -108,7 +113,7 @@ export const Indic4Form = () => {
             render={({ field, fieldState }) => (
               <RadioButtons
                 orientation="horizontal"
-                legend="Y a-t-il eu des retours de congé maternité pendant la période de référence? *"
+                legend="Y a-t-il eu des retours de congé maternité (ou d'adoption) au cours de la période de référence annuelle considérée ? *"
                 state={fieldState.error && "error"}
                 stateRelatedMessage={fieldState.error?.message}
                 options={[
@@ -155,7 +160,7 @@ export const Indic4Form = () => {
                   <Grid haveGutters>
                     <GridCol className={style["form-input-card-title"]}>
                       <Text
-                        text="Salariées augmentées à leur retour de congé maternité"
+                        text="Salariées augmentées à leur retour de congé maternité (ou d'adoption)"
                         inline
                         variant={["xl", "bold"]}
                         mb="auto"
@@ -171,8 +176,8 @@ export const Indic4Form = () => {
                     </GridCol>
                     <GridCol sm={12}>
                       <Input
-                        label="Total des salariées de retour de congé maternité *"
-                        hintText="Indiquez le nombre total de salariées revenues de congé maternité pendant la période de référence. Doivent être retenues les salariées qui sont revenues de congé maternité pendant la période de référence, si au moins une augmentation salariale a été faite pendant leur congé."
+                        label="Nombre de salariées de retour de congé maternité (ou d'adoption) *"
+                        hintText="Indiquez le nombre total de salariées qui sont revenues de congé maternité (ou d'adoption) au cours de la période de référence annuelle considérée, si au moins une augmentation salariale a été faite pendant leur congé."
                         state={whenCalculableErrors.count?.total && "error"}
                         stateRelatedMessage={whenCalculableErrors.count?.total?.message}
                         nativeInputProps={{
@@ -199,8 +204,8 @@ export const Indic4Form = () => {
                           hasTotal ? (
                             count.total === 0 ? (
                               <>
-                                Il n'y a pas d'augmentation obligatoire s'il n'y a pas eu de congé maternité pendant
-                                lequel des périodes d'augmentation ont eu lieu.
+                                Il n'y a pas de salariées augmentées à leur retour s'il n’y a pas eu d’augmentations
+                                pendant la durée des congés maternité (ou d'adoption).
                               </>
                             ) : (
                               <>

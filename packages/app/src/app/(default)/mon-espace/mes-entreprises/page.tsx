@@ -19,16 +19,16 @@ const MesEntreprisesInfoAlert = () => (
     description={
       <>
         <p>
-          Dans ce menu, vous pouvez consulter les adresses mails rattachées à une entreprise en sélectionnant au
-          préalable dans la liste déroulante le numéro Siren de l'entreprise concernée si vous gérez plusieurs
-          entreprises.
+          Dans ce menu, vous pouvez consulter les adresses emails rattachées à votre entreprise, en sélectionnant au
+          préalable dans la liste déroulante le numéro Siren de l'entreprise si vous gérez plusieurs entreprises.
         </p>
+        <br />
         <p>
-          Si vous souhaitez supprimer une adresse email rattachée à un siren, veuillez{" "}
+          Pour supprimer une adresse email, vous devez{" "}
           <Link target="_blank" href={"mailto:contact@moncomptepro.beta.gouv.fr"}>
             contacter ProConnect
           </Link>{" "}
-          pour envoyer votre demande. Il faut{" "}
+          Pour rattacher une adresse email, il faut{" "}
           <Link
             target="_blank"
             href={`https://app${
@@ -37,7 +37,7 @@ const MesEntreprisesInfoAlert = () => (
           >
             créer un nouveau compte ProConnect
           </Link>{" "}
-          pour rattacher une autre adresse email à un numéro Siren.
+          avec cette adresse.
         </p>
       </>
     }
@@ -108,7 +108,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           </Box>
           {typeof selectedSiren === "string" && (
             <Box mt="4w">
-              <Heading as="h1" variant="h6" text="Responsables" />
+              <Heading as="h1" variant="h6" text="Adresses emails rattachées" />
               <EmailOwnerList isEmailLogin={isEmailLogin} siren={selectedSiren} emails={emails} />
               {isEmailLogin && <AddOwnershipForm siren={selectedSiren} />}
             </Box>

@@ -57,7 +57,7 @@ export const SelectSiren = ({
       <Grid>
         <GridCol sm={3}>
           <SelectNext
-            label="SIREN"
+            label="Numéro Siren de l'entreprise"
             nativeSelectProps={{
               ...register("siren"),
             }}

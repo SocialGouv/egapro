@@ -30,7 +30,7 @@ export const Indicateur2et3Note = ({ computed, isValid, simple, noBorder, detail
     if (computed.favorablePopulation === "equality" || computed.result === 0)
       advantageText += "Les femmes et les hommes sont à parité";
     else {
-      advantageText += "Un écart d'augmentations ";
+      advantageText += "L'écart d'augmentations ";
       advantageText += `est en faveur des ${computed.favorablePopulation === "women" ? "femmes" : "hommes"}`;
     }
   }

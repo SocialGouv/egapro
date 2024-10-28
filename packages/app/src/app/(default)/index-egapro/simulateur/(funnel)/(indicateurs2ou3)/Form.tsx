@@ -179,20 +179,16 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               description={
                 <p>
                   La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
-                  salarié concerné en excluant celle liée à une promotion. L’indicateur n’est pas calculable:
+                  salarié concerné en excluant celle liée à une promotion.
                   <br />
-                  <ul>
-                    <li>s’il n’a eu aucune augmentation au cours de la période de référence</li>
-                    <li>
-                      si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
-                      des indicateurs
-                    </li>
-                  </ul>
+                  L'indicateur est calculé par catégorie socio-professionnelle.
+                  <br />
+                  L'indicateur n'est pas calculable si aucune augmentation individuelle n'est intervenue au cours de la
+                  période de référence annuelle considérée ou si l'effectif total retenu est inférieur à 40% de
+                  l'effectif total pris en compte pour le calcul des indicateurs.
+                  <br />
                   Pour en savoir plus sur le calcul de cet indicateur,{" "}
-                  <Link
-                    target="_blank"
-                    href="/aide-simulation#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries"
-                  >
+                  <Link target="_blank" href="/aide-index#indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
                     cliquez ici
                   </Link>
                 </p>
@@ -208,18 +204,12 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                   La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.
                   L'indicateur n'est pas calculable:
                   <br />
-                  <ul>
-                    <li>s'il n'a eu aucune promotion au cours de la période de référence</li>
-                    <li>
-                      si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
-                      des indicateurs
-                    </li>
-                  </ul>
+                  L'indicateur n'est pas calculable si aucune promotion n'est intervenue au cours de la période de
+                  référence annuelle considérée ou si l'effectif total retenu est inférieur à 40% de l'effectif total
+                  pris en compte pour le calcul des indicateurs.
+                  <br />
                   Pour en savoir plus sur le calcul de cet indicateur,{" "}
-                  <Link
-                    target="_blank"
-                    href="/aide-simulation#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries"
-                  >
+                  <Link target="_blank" href="/aide-index#indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
                     cliquez ici
                   </Link>
                 </p>
@@ -239,23 +229,19 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               <FormLayout>
                 <RadioOuiNon
                   legend={`Y a-t-il eu des ${
-                    indicateur === 2 ? "augmentations" : "promotions"
-                  } individuelles durant la période de référence ? *`}
+                    indicateur === 2 ? "augmentations individuelles (hors promotions)" : "promotions individuelles"
+                  } au cours de la période de référence annuelle considérée ? *`}
                   name="calculable"
                   triggerValidation={true}
                 />
               </FormLayout>
               {computableCheck === "oui" ? (
                 <>
-                  <p>
-                    Le pourcentage de femmes et d’hommes ayant été {indicateur === 2 ? "augmentés" : "promus"} durant la
-                    période de référence, doit être renseigné par CSP.
-                  </p>
                   <AlternativeTable
                     withTooltip
                     header={[
                       {
-                        label: "Catégories socioprofessionnelles",
+                        label: "Catégorie socio-professionnelle",
                       },
                       {
                         label: `Pourcentage de salariés ${indicateur === 2 ? "augmentés" : "promus"} *`,
@@ -267,10 +253,48 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                             label: "Hommes",
                           },
                         ],
+                        informations:
+                          indicateur === 2 ? (
+                            <>
+                              <p>
+                                Seules les catégories socio-professionnelles comprenant au moins dix femmes et dix
+                                hommes sont prises en compte pour le calcul de l'indicateur.
+                              </p>
+                              <p>
+                                Dans chacune des catégories socio-professionnelles retenues, le pourcentage de femmes et
+                                d’hommes augmentés au cours de la période de référence annuelle considérée est calculé.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p>
+                                Seules les catégories socio-professionnelles comprenant au moins dix femmes et dix
+                                hommes sont prises en compte pour le calcul de l'indicateur.
+                              </p>
+                              <p>
+                                Dans chacune des catégories socio-professionnelles retenues, le pourcentage de femmes et
+                                d’hommes promus au cours de la période de référence annuelle considérée est calculé.
+                              </p>
+                            </>
+                          ),
                       },
                       {
-                        label: "Écarts pondérés",
-                        informations: <AideSimulationIndicateurDeuxOurTrois.CommentEstCalculéLIndicateur />,
+                        label: "Écart pondéré",
+                        informations: (
+                          <>
+                            <p>
+                              L’écart de taux d’augmentations est calculé, en %, pour chacune des catégories
+                              socio-professionnelles, en soustrayant le pourcentage de femmes augmentées à celui des
+                              hommes augmentés.
+                            </p>
+                            <p>
+                              Les écarts obtenus sont multipliés par le ratio de l’effectif de la catégorie
+                              socio-professionnelle à l’effectif total des catégories socio-professionnelles prises en
+                              compte, puis additionnés pour obtenir l’écart global de taux{" "}
+                              {indicateur == 2 ? "d’augmentations" : "de promotions"} entre les femmes et les hommes.
+                            </p>
+                          </>
+                        ),
                       },
                     ]}
                     body={categories.map<AlternativeTableProps.BodyContent>(category => ({
@@ -341,7 +365,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     }))}
                     footer={[
                       {
-                        label: "Écart total",
+                        label: "Écart global",
                         colspan: 3,
                         align: "right",
                       },

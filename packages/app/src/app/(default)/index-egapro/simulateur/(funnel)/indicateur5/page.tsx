@@ -24,21 +24,18 @@ const Indicateur5Page = () => {
         description={
           <p>
             Le nombre de salariés du sexe sous-représenté est calculé en comparant le nombre de femmes et le nombre
-            d’hommes parmi les 10 plus hautes rémunérations.
+            d’hommes parmi les 10 plus hautes rémunérations sur la période de référence annuelle considérée.
             <br />
             Pour en savoir plus sur le calcul de cet indicateur,{" "}
             <Link
               target="_blank"
-              href="/aide-simulation#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations"
+              href="/aide-index#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations"
             >
               cliquez ici
             </Link>
           </p>
         }
       />
-      <p>
-        Renseigner le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations durant la période de référence
-      </p>
       <Indic5Form />
     </CenteredContainer>
   );

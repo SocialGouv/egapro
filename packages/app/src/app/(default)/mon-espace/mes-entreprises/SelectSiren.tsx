@@ -28,7 +28,7 @@ export const SelectSiren = ({ sirenList, loadedSiren }: { loadedSiren?: string; 
       <Grid>
         <GridCol sm={3}>
           <Select
-            label="SIREN"
+            label="Numéro Siren de l'entreprise"
             nativeSelectProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
           >
             <option value="">Sélectionner un siren</option>

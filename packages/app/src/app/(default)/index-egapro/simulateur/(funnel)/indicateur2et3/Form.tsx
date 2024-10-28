@@ -17,7 +17,6 @@ import { setValueAsFloatOrEmptyString } from "@common/utils/form";
 import { percentFormat } from "@common/utils/number";
 import { type ClearObject } from "@common/utils/types";
 import { storePicker } from "@common/utils/zustand";
-import { AideSimulationIndicateurDeuxEtTrois } from "@components/aide-simulation/IndicateurDeuxEtTrois";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -161,8 +160,27 @@ export const Indic2and3Form = () => {
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <FormLayout>
           <ClientBodyPortal>
-            <infoModal.Component title="Information indicateur écart de taux d'augmentation">
-              <AideSimulationIndicateurDeuxEtTrois.CommentEstCalculéLIndicateur />
+            <infoModal.Component title="Information indicateur écart de taux d'augmentations">
+              <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé.</p>
+              <p>
+                Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre
+                total de femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est
+                calculé en rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le
+                calcul des indicateurs.
+              </p>
+              <p>
+                Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux
+                calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation
+                des hommes est de 30,00%, l’écart est ainsi de 3,13%.
+              </p>
+              <p>
+                Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est
+                appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de
+                salariés qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation.
+                Par exemple, l’écart est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique
+                3,13% aux 15 femmes, le nombre équivalent de salariés est ainsi de 0,4695.
+              </p>
+              <p>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale.</p>
             </infoModal.Component>
           </ClientBodyPortal>
 
@@ -177,7 +195,7 @@ export const Indic2and3Form = () => {
             ) : (
               <>
                 <RadioOuiNon
-                  legend="Y a-t-il eu des augmentations individuelles durant la période de référence ? *"
+                  legend="Y a-t-il eu des augmentations individuelles au cours de la période de référence considérée ? *"
                   name="calculable"
                   triggerValidation={true}
                 />

@@ -16,31 +16,26 @@ export const metadata = {
 const Indicateur4Page = () => {
   return (
     <CenteredContainer mb="4w">
-      <p>
-        Renseigner le nombre de salariées en congé maternité durant la période de référence et ayant reçu une
-        augmentation à leur retour.
-      </p>
       <Alert
         className="fr-mb-4w"
         title="Aide au calcul"
         severity="info"
         description={
           <>
-            Est prise en compte une salariée qui est <u>revenue</u> de congé maternité (éventuellement prolongé par un
-            congé parental) pendant la période de référence si au moins une augmentation a été faite pendant son congé.
-            La prise en compte de chaque salariée est donc appréciée individuellement et dépend des éventuelles
-            augmentations ayant eu lieu pendant leur congé maternité.
+            Est prise en compte une salariée qui est revenue de congé maternité (ou d'adoption, et éventuellement
+            prolongé par un congé parental) au cours de la période de référence annuelle considérée si au moins une
+            augmentation a été faite pendant son congé. La prise en compte de chaque salariée est donc appréciée
+            individuellement et dépend des éventuelles augmentations ayant eu lieu pendant leur congé maternité (ou
+            d'adoption).
             <br />
-            L’indicateur n’est pas calculable::
+            L’indicateur n’est pas calculable si aucun retour de congé maternité (ou d'adoption) n’est intervenu au
+            cours de la période de référence ou si aucune augmentation n’est intervenue durant la durée du ou des congés
+            maternité (ou d'adoption).
             <br />
-            <ul>
-              <li>s’il n’y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence</li>
-              <li>s’il n’y a eu aucune augmentation ‘individuelle ou collective) au cours des congés maternité</li>
-            </ul>
             Pour en savoir plus sur le calcul de cet indicateur,{" "}
             <Link
               target="_blank"
-              href="/aide-simulation#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
+              href="/aide-index#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
             >
               cliquez ici
             </Link>
