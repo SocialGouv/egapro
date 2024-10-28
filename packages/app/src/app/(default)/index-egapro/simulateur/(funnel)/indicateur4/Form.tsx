@@ -251,7 +251,7 @@ export const Indic4Form = () => {
                   className="fr-mb-3w"
                   severity="info"
                   title="L'indicateur n'est pas calculable"
-                  description="Il n'y a pas eu de retour de congé maternité durant la période de référence."
+                  description="Il n'y a pas eu de retours de congé maternité (ou d'adoption) au cours de la période de référence."
                 />
               )
             )}

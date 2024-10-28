@@ -295,7 +295,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
             </Link>
           </p>
           <div className={fr.cx("fr-pt-3v")}>
-            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte MonComptePro, cliquez sur
+            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur
             ce bouton : <br />
             <Button
               onClick={e => {
@@ -304,7 +304,7 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
               }}
             >
               <Icon icon="fr-icon-refresh-line" />
-              Rafraichir MCP
+              Rafraichir
             </Button>
           </div>
           <BackNextButtonsGroup

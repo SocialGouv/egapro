@@ -455,7 +455,7 @@
 * compute error on declaration ([#2024](https://github.com/SocialGouv/egapro/issues/2024)) ([a24c4ca](https://github.com/SocialGouv/egapro/commit/a24c4cacdac872e055747307acc05999094fad90))
 * conditional style inject for Icon component ([ea25b16](https://github.com/SocialGouv/egapro/commit/ea25b16bba0618efa4e83233aad336a505c4b43e))
 * constraint validation for declaration having indicator2And3 ([#1812](https://github.com/SocialGouv/egapro/issues/1812)) ([3556271](https://github.com/SocialGouv/egapro/commit/35562716963aaa88b2e5cf5441a8d8958a2fdedb))
-* Content Security Policy et revalidatePath + bug 1842 après authentification sur MonComptePro ([#1843](https://github.com/SocialGouv/egapro/issues/1843)) ([46a4a33](https://github.com/SocialGouv/egapro/commit/46a4a334d8fa039a217736145f16646ed52a7d81)), closes [#1842](https://github.com/SocialGouv/egapro/issues/1842)
+* Content Security Policy et revalidatePath + bug 1842 après authentification sur ProConnect ([#1843](https://github.com/SocialGouv/egapro/issues/1843)) ([46a4a33](https://github.com/SocialGouv/egapro/commit/46a4a334d8fa039a217736145f16646ed52a7d81)), closes [#1842](https://github.com/SocialGouv/egapro/issues/1842)
 * **csp:** forward req original headers in middleware ([69b9df4](https://github.com/SocialGouv/egapro/commit/69b9df42d2c2be7e591657b2d0c12b8e4af9a50e))
 * declaration non calculable motifs mandatories ([#1985](https://github.com/SocialGouv/egapro/issues/1985)) ([1483417](https://github.com/SocialGouv/egapro/commit/1483417f3d723166b0957550284fdc5a6964f0c9))
 * declaration step 11 isValid state ([#1974](https://github.com/SocialGouv/egapro/issues/1974)) ([24e8d89](https://github.com/SocialGouv/egapro/commit/24e8d8974087fbcd5826ea0e9cf2ec618088a18c))

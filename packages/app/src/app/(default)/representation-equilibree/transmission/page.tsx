@@ -1,7 +1,9 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { Box, CenteredContainer, Container, Grid, GridCol, ImgJDMA, ImgSuccessLight, Link } from "@design-system";
 import questionImg from "@public/img/question.svg";
 
+import { DownloadRepeqPdf } from "./DownloadRepeqPdf";
 import { SendReceipt } from "./SendReceipt";
 
 const title = "Transmission";
@@ -23,39 +25,49 @@ const Transmission = () => {
         </Box>
         <p>
           <strong>
-            Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
-            femmes‑hommes conformément aux dispositions de{" "}
-            <a
-              href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000045669617"
-              target="_blank"
-              rel="noreferrer"
-            >
-              l'article D. 1142-19 du code du travail
-            </a>
-            .
+            Vous allez recevoir un accusé de réception de cette transmission sur votre adresse email. Si vous ne recevez
+            pas cet accusé, vérifiez que celui-ci n’est pas dans vos courriers indésirables ou SPAM.
           </strong>
         </p>
-        <p>
-          Vous allez recevoir un accusé de réception de votre transmission sur l’email que vous avez déclaré et validé
-          en début de procédure. Cet accusé de réception contient un lien vous permettant de revenir sur votre
-          déclaration.
-        </p>
-        <p>
-          Si vous ne recevez pas cet accusé, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre dossier
-          de courriers indésirables.
-        </p>
-        <p>Nous vous remercions de votre transmission.</p>
-        <SendReceipt />
-        <Box className="text-center" mt="6w">
-          <Link
-            href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-            target="_blank"
-            rel="noreferrer"
-            className="no-bg"
-          >
-            <ImgJDMA />
-          </Link>
+        <DownloadRepeqPdf />
+        <Box className="text-center bg-dsfr-alt-grey" my="6w">
+          <p>
+            <strong>Aidez-nous à améliorer Egapro</strong>
+          </p>
+          <Box>
+            <Link
+              href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-declaration&key=73366ddb13d498f4c77d01c2983bab48"
+              target="_blank"
+              rel="noreferrer"
+              className="no-bg"
+            >
+              <ImgJDMA />
+            </Link>
+          </Box>
         </Box>
+        <h1>Et après</h1>
+        <Box>
+          <Card
+            title="Mon espace personnel"
+            desc={
+              <span>
+                Vos déclarations transmises sont disponibles dans le menu “Mes déclarations” de votre espace personnel
+                (adresse email en haut à droite).
+              </span>
+            }
+            footer={
+              <Button
+                linkProps={{
+                  href: "/mon-espace/mes-declarations",
+                  target: "_blank",
+                }}
+              >
+                Accéder à mon espace
+              </Button>
+            }
+          />
+        </Box>
+        <SendReceipt />
       </CenteredContainer>
       <Box className="bg-dsfr-alt-grey" py="4w">
         <Container as="section">

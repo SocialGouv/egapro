@@ -4,7 +4,7 @@ import { Container, ContentWithChapter, Grid, GridCol } from "@design-system";
 import { AnchorLink } from "@design-system/client";
 import Link from "next/link";
 
-const title = "Aide pour l'utilisation du service d'identification MonComptePro";
+const title = "Aide pour l'utilisation du service d'identification ProConnect (anciennement MonComptePro)";
 
 export const metadata = {
   title,
@@ -13,19 +13,19 @@ export const metadata = {
   },
 };
 
-const AideMonCompteProPage = () => {
+const AideProConnectPage = () => {
   return (
     <Container py="8w">
       <Grid align="center">
         <GridCol md={10} lg={8}>
           <h1>{title}</h1>
           <p>
-            Egapro utilise le service d'identification MonComptePro afin de garantir l'appartenance de ses utilisateurs
+            Egapro utilise le service d'identification ProConnect afin de garantir l'appartenance de ses utilisateurs
             aux entreprises déclarantes.
           </p>
 
           <p>
-            Vous devez ainsi vous identifier avec un compte MonComptePro pour déclarer votre index de l'égalité
+            Vous devez ainsi vous identifier avec un compte ProConnect pour déclarer votre index de l'égalité
             professionnelle, et le cas échéant vos écarts éventuels de représentation sur le site Egapro.
           </p>
 
@@ -47,40 +47,40 @@ const AideMonCompteProPage = () => {
             </li>
             <li>
               Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur entreprise
-              cliente. Cette dernière doit créer son propre compte MonComptePro pour déclarer sur Egapro.
+              cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur Egapro.
             </li>
           </ul>
           <Summary
             className="fr-my-6w"
             links={[
               {
-                text: "Non réception des mails en provenance de MonComptePro",
+                text: "Non réception des mails en provenance de ProConnect",
                 linkProps: {
                   href: "#non-reception-emails-moncomptepro",
                 },
               },
               {
-                text: "Comment contacter MonComptePro ?",
+                text: "Comment contacter ProConnect ?",
                 linkProps: {
-                  href: "#Comment-contacter-MonComptePro",
+                  href: "#Comment-contacter-ProConnect",
                 },
               },
               {
-                text: "Comment s'identifier avec MonComptePro ?",
+                text: "Comment s'identifier avec ProConnect ?",
                 linkProps: {
-                  href: "#Comment-s-identifier-avec-MonComptePro",
+                  href: "#Comment-s-identifier-avec-ProConnect",
                 },
               },
               {
-                text: "Comment modifier mes informations personnelles sur MonComptePro ?",
+                text: "Comment modifier mes informations personnelles sur ProConnect ?",
                 linkProps: {
-                  href: "#Comment-modifier-mes-informations-personnelles-sur-MonComptePro",
+                  href: "#Comment-modifier-mes-informations-personnelles-sur-ProConnect",
                 },
               },
               {
-                text: "Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?",
+                text: "Comment rattacher une nouvelle entreprise à mon compte ProConnect ?",
                 linkProps: {
-                  href: "#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro",
+                  href: "#Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-ProConnect",
                 },
               },
             ]}
@@ -88,10 +88,10 @@ const AideMonCompteProPage = () => {
 
           <ContentWithChapter>
             <AnchorLink as="h2" anchor="non-reception-emails-moncomptepro">
-              Non réception des mails en provenance de MonComptePro
+              Non réception des mails en provenance de ProConnect
             </AnchorLink>
             <p>
-              Vous ne recevez pas les mails en provenance de MonComptePro, vous êtes peut-être dans l’une de ces
+              Vous ne recevez pas les mails en provenance de ProConnect, vous êtes peut-être dans l’une de ces
               situations :
             </p>
             <ul>
@@ -112,28 +112,28 @@ const AideMonCompteProPage = () => {
                 Votre entreprise utilise une protection contre les spams (comme MailInBlack)
                 <br />
                 💡 Vous devez contacter votre service informatique pour qu'il autorise les mails en provenance de
-                MonComptePro (adresse IP : 172.246.41.163)
+                ProConnect (adresse IP : 172.246.41.163)
               </li>
             </ul>
-            <AnchorLink as="h2" anchor="Comment-contacter-MonComptePro">
-              Comment contacter MonComptePro ?
+            <AnchorLink as="h2" anchor="Comment-contacter-ProConnect">
+              Comment contacter ProConnect ?
             </AnchorLink>
             <p>
-              Pour tout problème lié à MonComptePro, vous devez contacter le support dédié via cette adresse email{" "}
+              Pour tout problème lié à ProConnect, vous devez contacter le support dédié via cette adresse email{" "}
               <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target="_blank" rel="noopener noreferrer">
                 contact@moncomptepro.beta.gouv.fr
               </Link>
             </p>
-            <AnchorLink as="h2" anchor="Comment-s-identifier-avec-MonComptePro">
-              Comment s'identifier avec MonComptePro ?
+            <AnchorLink as="h2" anchor="Comment-s-identifier-avec-ProConnect">
+              Comment s'identifier avec ProConnect ?
             </AnchorLink>
-            <AnchorLink as="h3" anchor="Vous-avez-un-compte-MonComptePro">
-              Vous avez un compte MonComptePro
+            <AnchorLink as="h3" anchor="Vous-avez-un-compte-ProConnect">
+              Vous avez un compte ProConnect
             </AnchorLink>
-            <p>A la page "Connexion" du site Egapro, vous cliquez sur "S'identifier avec MonComptePro".</p>
+            <p>A la page "Connexion" du site Egapro, vous cliquez sur "S'identifier avec ProConnect".</p>
             <p>
-              Vous êtes redirigé sur le site MonComptePro à la page "S'inscrire ou se connecter". Vous saisissez votre
-              adresse email professionnelle utilisée lors de la création du compte MonComptePro.
+              Vous êtes redirigé sur le site ProConnect à la page "S'inscrire ou se connecter". Vous saisissez votre
+              adresse email professionnelle utilisée lors de la création du compte ProConnect.
             </p>
             <p>
               A la page suivante, vous saisissez le mot de passe que vous avez créé (vous allez recevoir un code de
@@ -142,13 +142,13 @@ const AideMonCompteProPage = () => {
               est valable 1 heure).
             </p>
             <p>Vous êtes ensuite redirigé sur le site Egapro.</p>
-            <AnchorLink as="h3" anchor="Vous-n-avez-pas-encore-de-compte-MonComptePro">
-              Vous n'avez pas encore de compte MonComptePro
+            <AnchorLink as="h3" anchor="Vous-n-avez-pas-encore-de-compte-ProConnect">
+              Vous n'avez pas encore de compte ProConnect
             </AnchorLink>
             <p>
-              À la page "Connexion" du site Egapro, vous cliquez sur "S'identifier avec MonComptePro". <br />
+              À la page "Connexion" du site Egapro, vous cliquez sur "S'identifier avec ProConnect". <br />
               <br />
-              Vous êtes redirigé sur le site MonComptePro à la page "S'inscrire ou se connecter". Vous saisissez votre
+              Vous êtes redirigé sur le site ProConnect à la page "S'inscrire ou se connecter". Vous saisissez votre
               adresse email professionnelle, celle-ci doit correspondre à la personne à contacter par les services de
               l'inspection du travail en cas de besoin.
             </p>
@@ -169,7 +169,7 @@ const AideMonCompteProPage = () => {
               liste vous est proposée, soit vous saisissez le numéro Siret du siège social de votre entreprise.
             </p>
             <p>
-              À noter que sur le site MonComptePro le rattachement de votre compte s'effectue avec le numéro Siret du
+              À noter que sur le site ProConnect le rattachement de votre compte s'effectue avec le numéro Siret du
               siège social de votre entreprise et sur le site Egapro c'est le numéro Siren de votre entreprise qui sera
               disponible pour effectuer votre déclaration.
             </p>
@@ -187,20 +187,20 @@ const AideMonCompteProPage = () => {
               </li>
             </ul>
             <p className={fr.cx("fr-mt-2w")}>
-              L'équipe MonComptePro procède à des traitements pour vérifier la légitimité du déclarant à représenter
-              l'entreprise. Si l'équipe MonComptePro a déjà vérifié la correspondance entre votre entreprise et le nom
-              de domaine de votre adresse email, votre compte sera validé automatiquement et vous serez redirigé sur le
+              L'équipe ProConnect procède à des traitements pour vérifier la légitimité du déclarant à représenter
+              l'entreprise. Si l'équipe ProConnect a déjà vérifié la correspondance entre votre entreprise et le nom de
+              domaine de votre adresse email, votre compte sera validé automatiquement et vous serez redirigé sur le
               site Egapro.
-              <br /> Sinon, l'équipe MonComptePro devra vérifier le rattachement de votre entreprise avant de valider
+              <br /> Sinon, l'équipe ProConnect devra vérifier le rattachement de votre entreprise avant de valider
               votre compte, vous recevrez un mail dès que celui-ci sera effectif (un délai de un jour est à prévoir).
-              Vous pourrez ensuite vous identifier avec votre compte MonComptePro sur le site Egapro.
+              Vous pourrez ensuite vous identifier avec votre compte ProConnect sur le site Egapro.
             </p>
-            <AnchorLink as="h2" anchor="Comment-modifier-mes-informations-personnelles-sur-MonComptePro">
-              Comment modifier mes informations personnelles sur MonComptePro ?
+            <AnchorLink as="h2" anchor="Comment-modifier-mes-informations-personnelles-sur-ProConnect">
+              Comment modifier mes informations personnelles sur ProConnect ?
             </AnchorLink>
             <p>
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
-              fonction au sein de votre entreprise) en vous connectant à votre compte sur le site MonComptePro,{" "}
+              fonction au sein de votre entreprise) en vous connectant à votre compte sur le site ProConnect,{" "}
               <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
                 https://moncomptepro.beta.gouv.fr/
               </Link>
@@ -208,13 +208,13 @@ const AideMonCompteProPage = () => {
             </p>
             <p>
               À noter que vous ne pouvez pas modifier l’email associé à votre compte. Si vous souhaitez utiliser un
-              autre email, vous devez créer un nouveau compte MonComptePro.
+              autre email, vous devez créer un nouveau compte ProConnect.
             </p>
-            <AnchorLink as="h2" anchor="Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-MonComptePro">
-              Comment rattacher une nouvelle entreprise à mon compte MonComptePro ?
+            <AnchorLink as="h2" anchor="Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-ProConnect">
+              Comment rattacher une nouvelle entreprise à mon compte ProConnect ?
             </AnchorLink>
             <p>
-              Vous vous connectez à votre compte sur le site MonComptePro,
+              Vous vous connectez à votre compte sur le site ProConnect,
               <br />
               <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
                 https://moncomptepro.beta.gouv.fr/
@@ -226,20 +226,20 @@ const AideMonCompteProPage = () => {
               Vous saisissez ensuite le numéro Siret du siège social de l'entreprise dont vous souhaitez être rattachée.
             </p>
             <p>
-              À noter que sur le site MonComptePro le rattachement d'une entreprise à votre compte s'effectue avec le
+              À noter que sur le site ProConnect le rattachement d'une entreprise à votre compte s'effectue avec le
               numéro Siret du siège social de l'entreprise et sur le site Egapro c'est le numéro Siren de l'entreprise
               qui sera disponible pour effectuer la déclaration.
             </p>
             <p>
-              L'équipe MonComptePro procède à des traitements pour vérifier la légitimité du déclarant à représenter
-              l'entreprise. Si l'équipe MonComptePro a déjà vérifié la correspondance entre l'entreprise et le nom de
+              L'équipe ProConnect procède à des traitements pour vérifier la légitimité du déclarant à représenter
+              l'entreprise. Si l'équipe ProConnect a déjà vérifié la correspondance entre l'entreprise et le nom de
               domaine de votre adresse email, le rattachement sera validé automatiquement.
-              <br /> Sinon, l'équipe MonComptePro procédera à une vérification avant de valider le rattachement, vous
+              <br /> Sinon, l'équipe ProConnect procédera à une vérification avant de valider le rattachement, vous
               recevrez un mail dès que celui-ci sera effectif (un délai de un jour est à prévoir).
             </p>
             <p>
               <b>
-                Si le rattachement a été validé par l'équipe MonComptePro et que sur le site Egapro vous n'avez pas le
+                Si le rattachement a été validé par l'équipe ProConnect et que sur le site Egapro vous n'avez pas le
                 numéro Siren de l'entreprise dans la liste déroulante de la page "Commencer" de la déclaration, il
                 convient de vous déconnecter du site Egapro en haut à droite de la page et de vous reconnecter.
               </b>
@@ -251,4 +251,4 @@ const AideMonCompteProPage = () => {
   );
 };
 
-export default AideMonCompteProPage;
+export default AideProConnectPage;

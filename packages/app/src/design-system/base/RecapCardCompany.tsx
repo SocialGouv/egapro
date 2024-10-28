@@ -2,6 +2,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { Select } from "@codegouvfr/react-dsfr/Select";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
@@ -35,6 +36,131 @@ const companyFormModal = createModal({
   isOpenedByDefault: false,
 });
 
+const countiesCodes = [
+  "01",
+  "02",
+  "2A",
+  "2B",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "32",
+  "33",
+  "34",
+  "35",
+  "36",
+  "37",
+  "38",
+  "39",
+  "40",
+  "41",
+  "42",
+  "43",
+  "44",
+  "45",
+  "46",
+  "47",
+  "48",
+  "49",
+  "50",
+  "51",
+  "52",
+  "53",
+  "54",
+  "55",
+  "56",
+  "57",
+  "58",
+  "59",
+  "60",
+  "61",
+  "62",
+  "63",
+  "64",
+  "65",
+  "66",
+  "67",
+  "68",
+  "69",
+  "70",
+  "71",
+  "72",
+  "73",
+  "74",
+  "75",
+  "76",
+  "77",
+  "78",
+  "79",
+  "80",
+  "81",
+  "82",
+  "83",
+  "84",
+  "85",
+  "86",
+  "87",
+  "88",
+  "89",
+  "90",
+  "91",
+  "92",
+  "93",
+  "94",
+  "95",
+  "971",
+  "972",
+  "973",
+  "974",
+  "976",
+] as const;
+
+const regionCodes = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "06",
+  "11",
+  "24",
+  "27",
+  "28",
+  "32",
+  "44",
+  "52",
+  "53",
+  "75",
+  "76",
+  "84",
+  "93",
+  "94",
+] as const;
+
 const companySchema = zodFr.object({
   name: zodFr.string(),
   city: zodFr.string(),
@@ -42,12 +168,14 @@ const companySchema = zodFr.object({
   nafCode: zodFr.string(),
   postalCode: zodFr.string(),
   siren: zodFr.string(),
+  county: zodFr.enum(countiesCodes).optional(),
+  region: zodFr.enum(regionCodes).optional(),
 });
 
 export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props) => {
   const session = useSession();
   const isStaff = session.data?.user.staff;
-  const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues } = company;
+  const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
 
   const titleFull = title ?? "Informations de l'entreprise déclarante";
 
@@ -109,6 +237,9 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
       {postalCodeCity}
       {countryLib}
       <br />
+      {county && `Département : ${county}`}
+      {region && `Région : ${region}`}
+      {(county || region) && <br />}
       Siren : <strong>{siren}</strong>
       <br />
       Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode] ? NAF[nafCode].description : ""}
@@ -171,6 +302,26 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
                 }}
                 label="Code Naf *"
               />
+              <Select label="Département *" nativeSelectProps={register("county")}>
+                <option value="" disabled>
+                  Sélectionnez un département
+                </option>
+                {countiesCodes.map(code => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </Select>
+              <Select label="Région *" nativeSelectProps={register("region")}>
+                <option value="" disabled>
+                  Sélectionnez une région
+                </option>
+                {regionCodes.map(code => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </Select>
               <Button type="submit" disabled={!isValid}>
                 Valider les modifications
               </Button>

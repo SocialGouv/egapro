@@ -22,7 +22,7 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
       <IndicatorNote
         noBorder={noBorder}
         note="NC"
-        legend="Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
+        legend="Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité (ou d'adoption),"
         text="L'indicateur n'est pas calculable"
       />
     );

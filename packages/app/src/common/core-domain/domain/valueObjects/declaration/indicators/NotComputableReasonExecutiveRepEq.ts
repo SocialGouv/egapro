@@ -19,7 +19,7 @@ export namespace NotComputableReasonExecutiveRepEq {
 
   export const Label = {
     [Enum.AUCUN_CADRE_DIRIGEANT]: "Aucun cadre dirigeant",
-    [Enum.UN_SEUL_CADRE_DIRIGEANT]: "Un seul cadre dirigeant",
+    [Enum.UN_SEUL_CADRE_DIRIGEANT]: "Il y a aucun cadre dirigeant",
   } as const;
 
   export type Label = typeof Label;

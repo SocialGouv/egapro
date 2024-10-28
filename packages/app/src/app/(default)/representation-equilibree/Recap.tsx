@@ -1,4 +1,6 @@
 "use client";
+import { fr } from "@codegouvfr/react-dsfr";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
@@ -74,8 +76,14 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
                 {
                   text: (
                     <>
-                      Motif de non calculabilité :<br />
-                      <strong>{NotComputableReasonExecutiveRepEq.Label[repEq.notComputableReasonExecutives]}</strong>
+                      Les écarts ne sont pas calculables :<br />
+                      <p className={cx(fr.cx("fr-text--sm"))}>
+                        <i>
+                          <strong>
+                            {NotComputableReasonExecutiveRepEq.Label[repEq.notComputableReasonExecutives]}
+                          </strong>
+                        </i>
+                      </p>
                     </>
                   ),
                   value: "NC",
@@ -102,8 +110,12 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
                 {
                   text: (
                     <>
-                      Motif de non calculabilité :<br />
-                      <strong>{NotComputableReasonMemberRepEq.Label[repEq.notComputableReasonMembers]}</strong>
+                      Les écarts ne sont pas calculables :<br />
+                      <p className={cx(fr.cx("fr-text--sm"))}>
+                        <i>
+                          <strong>{NotComputableReasonMemberRepEq.Label[repEq.notComputableReasonMembers]}</strong>
+                        </i>
+                      </p>
                     </>
                   ),
                   value: "NC",
