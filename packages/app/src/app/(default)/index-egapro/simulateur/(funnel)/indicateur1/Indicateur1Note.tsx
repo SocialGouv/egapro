@@ -40,7 +40,7 @@ export const Indicateur1Note = ({ computer, isValid, simple, noBorder, isRecap =
     if (computed.favorablePopulation === "equality") {
       advantageText = "Les femmes et les hommes sont à parité";
     } else {
-      advantageText = "Un écart de rémunération est ";
+      advantageText = "L'écart de rémunération est ";
       // if (computed.note === 40) {
       //   advantageText += "est ";
       // }

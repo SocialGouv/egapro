@@ -74,7 +74,11 @@ export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTa
       <AlternativeTable
         withTooltip
         classeName={fr.cx("fr-mb-1w")}
-        header={getCommonHeader({ firstColumnLabel: "Niveau ou coefficient hiérarchique *" })}
+        header={getCommonHeader({
+          firstColumnLabel: "Niveau ou coefficient hiérarchique *",
+          firstColumnInformations:
+            "Les caractéristiques individuelles (niveau ou coefficient hiérarchique, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
+        })}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
           (remunerationsField, remunerationsFieldIndex) => {
             return {
