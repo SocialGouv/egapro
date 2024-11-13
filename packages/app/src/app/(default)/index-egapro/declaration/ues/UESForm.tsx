@@ -11,7 +11,7 @@ import { zodFr } from "@common/utils/zod";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { AlertMessage } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
-import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
+import { CLOSED_COMPANY_ERROR, CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { countBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { INVALID_SIREN, MANDATORY_SIREN } from "../../../messages";
+import { INVALID_SIREN, MANDATORY_SIREN, NOT_FOUND_SIREN } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 import style from "./UESForm.module.scss";
@@ -157,6 +157,7 @@ export const UESForm = () => {
         return { ok: true, data: company.simpleLabel };
       }
     } else {
+      if (result.error === CompanyErrorCodes.NOT_FOUND) return { ok: false, error: NOT_FOUND_SIREN };
       return { ok: false, error: "Impossible de récupérer les informations de l'entreprise" };
     }
   };

@@ -18,6 +18,7 @@ export async function getCompany(siren: string): Promise<ServerActionResponse<En
       ok: true,
     };
   } catch (error: unknown) {
+    console.log("Error in getCompany", error);
     return {
       ok: false,
       error: error instanceof EntrepriseServiceNotFoundError ? CompanyErrorCodes.NOT_FOUND : CompanyErrorCodes.UNKNOWN,

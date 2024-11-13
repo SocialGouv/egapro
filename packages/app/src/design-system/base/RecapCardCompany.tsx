@@ -180,7 +180,6 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
   const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
 
-  console.log("company", company);
   const titleFull = title ?? "Informations de l'entreprise déclarante";
 
   // postalCode and city may be undefined for foreign companies.

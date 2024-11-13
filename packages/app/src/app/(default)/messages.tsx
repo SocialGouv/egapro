@@ -9,3 +9,4 @@ export const NOT_HIGHER_THAN_N_RESULT = (n: number) => `Le résultat ne peut pas
 export const NOT_ALL_EMPTY_CATEGORIES = "Au moins une catégorie doit avoir un écart renseigné";
 export const MANDATORY_SIREN = "Le Siren est requis";
 export const INVALID_SIREN = "Le Siren n'est pas valide";
+export const NOT_FOUND_SIREN = "Le siren n'existe pas, veuillez vérifier votre saisie";

@@ -9,6 +9,7 @@ import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { PUBLIC_YEARS, REPEQ_ADMIN_YEARS } from "@common/dict";
 import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
+import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { NOT_FOUND_SIREN } from "../../../messages";
 import { getRepresentationEquilibree } from "../../actions";
 import { useRepeqFunnelStore } from "../useRepeqFunnelStore";
 
@@ -70,6 +72,11 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
       const company = await getCompany(siren);
 
       if (!company.ok) {
+        if (company.error === CompanyErrorCodes.NOT_FOUND)
+          return setError("siren", {
+            type: "manual",
+            message: NOT_FOUND_SIREN,
+          });
         return setError("siren", {
           type: "manual",
           message: "Erreur lors de la récupération des données de l'entreprise, veuillez vérifier votre saisie",

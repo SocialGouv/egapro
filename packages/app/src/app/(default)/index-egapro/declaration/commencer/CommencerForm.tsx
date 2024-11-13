@@ -20,7 +20,7 @@ import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
-import { CLOSED_COMPANY_ERROR } from "@globalActions/companyErrorCodes";
+import { CLOSED_COMPANY_ERROR, CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { sortBy } from "lodash";
@@ -30,7 +30,7 @@ import { signIn, useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { API_ERROR, OWNER_ERROR } from "../../../messages";
+import { API_ERROR, NOT_FOUND_SIREN, OWNER_ERROR } from "../../../messages";
 import { getDeclaration } from "../actions";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
 
@@ -100,7 +100,6 @@ export const prepareDataWithExistingDeclaration = async (
     const company = result.data;
 
     const isClosed = isCompanyClosed(company, year);
-    console.log("isClosed", isClosed);
     if (isClosed) throw new Error(CLOSED_COMPANY_ERROR);
 
     const countyCode = company.firstMatchingEtablissement?.codeCommuneEtablissement
@@ -137,6 +136,7 @@ export const prepareDataWithExistingDeclaration = async (
       },
     };
   } else {
+    if (result.error === CompanyErrorCodes.NOT_FOUND) throw new Error(NOT_FOUND_SIREN);
     throw new Error(API_ERROR);
   }
 };
