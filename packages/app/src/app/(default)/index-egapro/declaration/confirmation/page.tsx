@@ -119,7 +119,7 @@ const ConfirmationPage = () => {
         </Box>
       </Box>
       <h1>Et après</h1>
-      {index !== undefined && (
+      {index !== undefined && year >= 2021 && (
         <>
           {inRange(index, 75, 85) ? (
             <Box>
