@@ -61,6 +61,7 @@ export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void>
         },
         url,
         year,
+        config.host,
       );
 
       if (rejected.length) {

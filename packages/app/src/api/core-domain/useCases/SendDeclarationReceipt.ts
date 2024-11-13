@@ -57,6 +57,7 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
         },
         url,
         declaration,
+        config.host,
       );
 
       if (rejected.length) {

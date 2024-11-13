@@ -119,7 +119,23 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
       )}
       <AlternativeTable
         withTooltip
-        header={getCommonHeader({ firstColumnLabel: "Catégorie socio-professionnelle" })}
+        header={[
+          ...getCommonHeader({ firstColumnLabel: "Catégorie socio-professionnelle" }),
+          {
+            label: "Tranche d’âge",
+          },
+          {
+            label: "Nombre de salariés (en effectif physique)*",
+            subCols: [
+              {
+                label: "Femmes",
+              },
+              {
+                label: "Hommes",
+              },
+            ],
+          },
+        ]}
         body={categories.map((categoryName, categoryIndex) => {
           register(`remunerations.${categoryIndex}.name`, { value: categoryName });
 

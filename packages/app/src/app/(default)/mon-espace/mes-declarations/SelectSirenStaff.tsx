@@ -60,7 +60,7 @@ export const SelectSirenStaff = ({ currentSiren }: { currentSiren?: string }) =>
       <Grid>
         <GridCol sm={3}>
           <Input
-            label="Siren"
+            label="Numéro Siren de l'entreprise"
             state={errors.siren && "error"}
             stateRelatedMessage={errors.siren?.message}
             nativeInputProps={{

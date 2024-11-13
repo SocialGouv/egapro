@@ -11,7 +11,7 @@ const { renderToStaticMarkup } = require("react-dom/server");
 const MailHeader = () => (
   <header style={{ display: "flex", alignItems: "center", marginBottom: "20px", fontFamily: "arial, sans-serif" }}>
     <img
-      src={"https://egapro.travail.gouv.fr/logo.png"}
+      src={`${config.host}/logo-ministere.png`}
       alt="Egapro Logo"
       style={{ maxWidth: "150px", marginRight: "20px" }}
     />
@@ -163,7 +163,7 @@ ${config.api.mailer.signature}`,
     ),
 });
 
-export const declaration_receipt = (url: string, { declaration }: DeclarationOpmc): MailTemplate => ({
+export const declaration_receipt = (url: string, { declaration }: DeclarationOpmc, host: string): MailTemplate => ({
   subject: "Egapro - Déclaration de l’index égalité professionnelle femmes-hommes",
   text: `Madame, Monsieur,
 
@@ -293,8 +293,7 @@ Les services de l’administration du travail.
           </p>
           <p>
             Vos déclarations transmises sont disponibles dans votre espace personnel sur le site Egapro, menu "Mes
-            déclarations" :{" "}
-            <a href="https://egapro.travail.gouv.fr/mon-espace/mes-declarations">Accéder à mon espace</a>
+            déclarations" : <a href={`${host}/mon-espace/mes-declarations`}>Accéder à mon espace</a>
           </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au
@@ -382,7 +381,7 @@ Les services de l’administration du travail.
     ),
 });
 
-export const balancedRepresentation_receipt = (url: string, year: number): MailTemplate => ({
+export const balancedRepresentation_receipt = (url: string, year: number, host: string): MailTemplate => ({
   subject: "Egapro - Déclaration des écarts éventuels de représentation femmes‑hommes dans les postes de direction",
   text: `Madame, Monsieur,
 
@@ -420,8 +419,7 @@ Les services de l’administration du travail.
           </p>
           <p>
             Vos déclarations transmises sont disponibles dans votre espace personnel sur le site Egapro, menu "Mes
-            déclarations" :{" "}
-            <a href="https://egapro.travail.gouv.fr/mon-espace/mes-declarations">Accéder à mon espace</a>
+            déclarations" : <a href={`${host}/mon-espace/mes-declarations`}>Accéder à mon espace</a>
           </p>
           <p>
             Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes‑hommes au

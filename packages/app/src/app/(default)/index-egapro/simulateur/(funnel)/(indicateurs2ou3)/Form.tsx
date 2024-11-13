@@ -202,7 +202,8 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               description={
                 <p>
                   La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.
-                  L'indicateur n'est pas calculable:
+                  <br />
+                  L'indicateur est calculé par catégorie socio-professionnelle.
                   <br />
                   L'indicateur n'est pas calculable si aucune promotion n'est intervenue au cours de la période de
                   référence annuelle considérée ou si l'effectif total retenu est inférieur à 40% de l'effectif total
@@ -229,7 +230,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               <FormLayout>
                 <RadioOuiNon
                   legend={`Y a-t-il eu des ${
-                    indicateur === 2 ? "augmentations individuelles (hors promotions)" : "promotions individuelles"
+                    indicateur === 2 ? "augmentations individuelles (hors promotions)" : "promotions"
                   } au cours de la période de référence annuelle considérée ? *`}
                   name="calculable"
                   triggerValidation={true}
@@ -283,9 +284,10 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                         informations: (
                           <>
                             <p>
-                              L’écart de taux d’augmentations est calculé, en %, pour chacune des catégories
-                              socio-professionnelles, en soustrayant le pourcentage de femmes augmentées à celui des
-                              hommes augmentés.
+                              L’écart de taux {indicateur == 2 ? "d’augmentations" : "de promotions"} est calculé, en %,
+                              pour chacune des catégories socio-professionnelles, en soustrayant le pourcentage de
+                              femmes {indicateur == 2 ? "augmentées" : "promues"} à celui des hommes{" "}
+                              {indicateur == 2 ? "augmentés" : "promus"}.
                             </p>
                             <p>
                               Les écarts obtenus sont multipliés par le ratio de l’effectif de la catégorie

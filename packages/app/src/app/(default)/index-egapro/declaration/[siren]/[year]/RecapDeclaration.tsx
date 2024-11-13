@@ -28,6 +28,8 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
     postalCode: entreprise?.codePostal,
     city: entreprise?.commune,
     countryIsoCode: entreprise?.codePays,
+    county: entreprise?.département,
+    region: entreprise?.région,
     siren: entreprise?.siren || "",
     nafCode: entreprise?.codeNaf as CodeNaf,
     workforce: {

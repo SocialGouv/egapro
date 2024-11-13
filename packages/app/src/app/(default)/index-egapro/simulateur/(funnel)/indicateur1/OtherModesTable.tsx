@@ -74,11 +74,52 @@ export const OtherModesTable = ({ computer, defaultRemunerations }: OtherModesTa
       <AlternativeTable
         withTooltip
         classeName={fr.cx("fr-mb-1w")}
-        header={getCommonHeader({
-          firstColumnLabel: "Niveau ou coefficient hiérarchique *",
-          firstColumnInformations:
-            "Les caractéristiques individuelles (niveau ou coefficient hiérarchique, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
-        })}
+        header={[
+          ...getCommonHeader({
+            firstColumnLabel: "Niveau ou coefficient hiérarchique *",
+            firstColumnInformations:
+              "Les caractéristiques individuelles (niveau ou coefficient hiérarchique, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
+          }),
+          {
+            label: "Tranche d’âge",
+            informations:
+              "Les caractéristiques individuelles (niveau ou coefficient hiérarchique, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
+          },
+          {
+            label: "Nombre de salariés (en effectif physique)*",
+            subCols: [
+              {
+                label: "Femmes",
+              },
+              {
+                label: "Hommes",
+              },
+            ],
+            informations: (
+              <>
+                <p>
+                  Il s'agit de l’effectif des salariés à prendre en compte pour le calcul des indicateurs, qui est
+                  apprécié en effectif physique sur la période de référence annuelle considérée.
+                </p>
+                <p>Ne sont pas pris en compte dans l’effectif :</p>
+                <ul>
+                  <li>les apprentis,</li>
+                  <li>les titulaires d’un contrat de professionnalisation,</li>
+                  <li>
+                    les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les
+                    intérimaires),
+                  </li>
+                  <li>les expatriés,</li>
+                  <li>les salariés en pré-retraite,</li>
+                  <li>
+                    les salariés absents plus de 6 mois sur la période de référence annuelle considérée (arrêt maladie,
+                    congés sans solde, CDD inférieur à 6 mois etc.).
+                  </li>
+                </ul>
+              </>
+            ),
+          },
+        ]}
         body={remunerationsFields.map<AlternativeTableProps.BodyContent>(
           (remunerationsField, remunerationsFieldIndex) => {
             return {

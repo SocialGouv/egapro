@@ -35,7 +35,7 @@ export const SirenInput = ({ loadedSiren }: { loadedSiren?: string }) => {
     <Grid>
       <GridCol sm={3}>
         <Input
-          label="SIREN"
+          label="Numéro Siren de l'entreprise"
           disabled={disabled}
           nativeInputProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
         />

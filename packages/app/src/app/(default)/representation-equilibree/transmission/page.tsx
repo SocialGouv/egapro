@@ -83,8 +83,9 @@ const Transmission = () => {
                 title="Avez-vous déclaré l’index égalité professionnelle F/H ?"
                 desc={
                   <>
-                    Toutes les entreprises d’au moins 50 salariés doivent calculer et publier leur Index de l’égalité
-                    professionnelle entre les femmes et les hommes, chaque année au plus tard le 1er mars.
+                    Toutes les entreprises et unités économiques et sociales (UES) d’au moins 50 salariés doivent
+                    calculer et publier leur Index de l’égalité professionnelle entre les femmes et les hommes, chaque
+                    année au plus tard le 1er mars.
                   </>
                 }
                 imageUrl={questionImg.src}
