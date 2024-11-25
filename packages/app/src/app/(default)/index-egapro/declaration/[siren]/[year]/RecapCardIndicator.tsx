@@ -41,7 +41,7 @@ const label = {
   [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Aucune instance dirigeante",
   [Enum.ABSPROM]: "Absence de promotions au cours de la période de référence",
   [Enum.EGVI40PCET]:
-    "Effectif des groupes retenus inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
+    "Effectif des CSP retenues inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
   [Enum.ABSAUGI]: "Absence d'augmentations individuelles au cours de la période de référence",
   [Enum.ETSNO5F5H]:
     "Effectif pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes",

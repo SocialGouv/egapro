@@ -29,8 +29,9 @@ export namespace NotComputableReason {
     [Enum.ABSAUGI]: "Absence d'augmentations individuelles",
     [Enum.ABSAUGPDTCM]: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
     [Enum.ABSPROM]: "Absence de promotions",
-    [Enum.ABSRCM]: "Absence de retours de congé maternité",
-    [Enum.EGVI40PCET]: "Effectif des groupes valides inférieur à 40% de l'effectif total",
+    [Enum.ABSRCM]: "Absence de retours de congé maternité (ou d'adoption) au cours de la période de référence",
+    [Enum.EGVI40PCET]:
+      "Effectif des CSP retenues inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
     [Enum.ETSNO5F5H]: "Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes",
   } as const;
 
