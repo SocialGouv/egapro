@@ -180,6 +180,9 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
   const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
 
+  const countyName = county && counties.find(c => c.value === county)?.label;
+  const regionName = region && regions.find(r => r.value === region)?.label;
+
   const titleFull = title ?? "Informations de l'entreprise déclarante";
 
   // postalCode and city may be undefined for foreign companies.
@@ -240,8 +243,9 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
       {postalCodeCity}
       {countryLib}
       <br />
-      {county && `Département : ${county}`}
-      {region && `Région : ${region}`}
+      {countyName && `Département : ${countyName}`}
+      <br />
+      {regionName && `Région : ${regionName}`}
       {(county || region) && <br />}
       Siren : <strong>{siren}</strong>
       <br />
@@ -285,7 +289,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
                 nativeInputProps={{
                   ...register("postalCode"),
                 }}
-                label="Code postale *"
+                label="Code postal *"
               />
               <Input
                 nativeInputProps={{

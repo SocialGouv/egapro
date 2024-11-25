@@ -102,15 +102,16 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                   </p>
                   <br />
                   <p className={"text-dsfr-error"}>
-                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié{" "}
-                    <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target={"_blank"}>
-                      En cliquant ici
+                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le centre d'aide{" "}
+                    <Link href="https://agentconnect.crisp.help/fr/" target={"_blank"}>
+                      https://agentconnect.crisp.help/fr/
                     </Link>
                   </p>
                   <br />
                   <p>
+                    Pour consulter l'aide,{" "}
                     <Link href={"/aide-proconnect"} target={"_blank"}>
-                      Qu'est ce que ProConnect (ex MonComptePro)
+                      cliquez ici
                     </Link>
                   </p>
                 </>

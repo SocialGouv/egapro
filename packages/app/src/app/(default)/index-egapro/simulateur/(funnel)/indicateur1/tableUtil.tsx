@@ -10,6 +10,7 @@ import { type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { type z } from "zod";
 
 interface CommonHeaderProps {
+  extraColumn: AlternativeTableProps.Columns[];
   firstColumnInformations?: React.ReactNode;
   firstColumnLabel: string;
 }
@@ -17,11 +18,13 @@ interface CommonHeaderProps {
 export const getCommonHeader = ({
   firstColumnLabel,
   firstColumnInformations = undefined,
+  extraColumn,
 }: CommonHeaderProps): AlternativeTableProps["header"] => [
   {
     label: firstColumnLabel,
     informations: firstColumnInformations,
   },
+  ...extraColumn,
   {
     label: "Effectifs valides",
     informations:

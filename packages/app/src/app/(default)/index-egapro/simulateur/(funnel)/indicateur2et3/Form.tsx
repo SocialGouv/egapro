@@ -20,7 +20,7 @@ import { storePicker } from "@common/utils/zustand";
 import { RadioOuiNon } from "@components/RHF/RadioOuiNon";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup, CenteredContainer, Container, FormLayout, Grid, GridCol, Text } from "@design-system";
+import { BackNextButtonsGroup, CenteredContainer, Container, Grid, GridCol, Text } from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -158,193 +158,192 @@ export const Indic2and3Form = () => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
-        <FormLayout>
-          <ClientBodyPortal>
-            <infoModal.Component title="Information indicateur écart de taux d'augmentations">
-              <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé.</p>
-              <p>
-                Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre
-                total de femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est
-                calculé en rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le
-                calcul des indicateurs.
-              </p>
-              <p>
-                Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux
-                calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation
-                des hommes est de 30,00%, l’écart est ainsi de 3,13%.
-              </p>
-              <p>
-                Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est
-                appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de
-                salariés qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation.
-                Par exemple, l’écart est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique
-                3,13% aux 15 femmes, le nombre équivalent de salariés est ainsi de 0,4695.
-              </p>
-              <p>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale.</p>
-            </infoModal.Component>
-          </ClientBodyPortal>
 
-          <ClientAnimate>
-            {!canCompute ? (
-              <Alert
-                className="fr-mb-3w"
-                severity="info"
-                title="L'indicateur n'est pas calculable"
-                description="L' effectif total pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes."
+        <ClientBodyPortal>
+          <infoModal.Component title="Information indicateur écart de taux d'augmentations">
+            <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé.</p>
+            <p>
+              Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre total
+              de femmes pris en compte pour le calcul des indicateurs. Le taux d’augmentation des hommes est calculé en
+              rapportant le nombre d’hommes augmentés au nombre total d’hommes pris en compte pour le calcul des
+              indicateurs.
+            </p>
+            <p>
+              Un premier résultat est "l’écart en %", il s’agit de la valeur absolue de l’écart entre les deux taux
+              calculés en 2. Par exemple, le taux d’augmentation des femmes est de 33,13% et le taux d’augmentation des
+              hommes est de 30,00%, l’écart est ainsi de 3,13%.
+            </p>
+            <p>
+              Un second résultat est "l’écart en nombre équivalent de salariés", l’écart de taux calculé en 3 est
+              appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au plus petit nombre de
+              salariés qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité des taux d’augmentation. Par
+              exemple, l’écart est de 3,13% dans une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux
+              15 femmes, le nombre équivalent de salariés est ainsi de 0,4695.
+            </p>
+            <p>L’écart en % et le nombre équivalent de salariés sont arrondis à la première décimale.</p>
+          </infoModal.Component>
+        </ClientBodyPortal>
+
+        <ClientAnimate>
+          {!canCompute ? (
+            <Alert
+              className="fr-mb-3w"
+              severity="info"
+              title="L'indicateur n'est pas calculable"
+              description="L' effectif total pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes."
+            />
+          ) : (
+            <>
+              <RadioOuiNon
+                legend="Y a-t-il eu des augmentations individuelles au cours de la période de référence considérée ? *"
+                name="calculable"
+                triggerValidation={true}
               />
-            ) : (
-              <>
-                <RadioOuiNon
-                  legend="Y a-t-il eu des augmentations individuelles au cours de la période de référence considérée ? *"
-                  name="calculable"
-                  triggerValidation={true}
-                />
-                {computableCheck === "oui" ? (
-                  <>
-                    <Container className={cx(fr.cx("fr-px-md-3v", "fr-px-2v", "fr-mb-6w"), style["form-input-card"])}>
-                      <Grid haveGutters>
-                        <GridCol className={style["form-input-card-title"]}>
-                          <Text text="Nombre de salariés augmentés *" inline variant={["xl", "bold"]} mb="auto" />
-                          <Button
-                            title="Information indicateur écart de taux d'augmentation"
-                            iconId="fr-icon-information-fill"
-                            type="button"
-                            size="small"
-                            priority="tertiary no outline"
-                            nativeButtonProps={infoModal.buttonProps}
-                          />
-                        </GridCol>
-                        <GridCol sm={6}>
-                          {(() => {
-                            const field = register("raisedCount.women", {
-                              setValueAs: setValueAsFloatOrEmptyString,
-                            });
+              {computableCheck === "oui" ? (
+                <>
+                  <Container className={cx(fr.cx("fr-px-md-3v", "fr-px-2v", "fr-mb-6w"), style["form-input-card"])}>
+                    <Grid haveGutters>
+                      <GridCol className={style["form-input-card-title"]}>
+                        <Text text="Nombre de salariés augmentés *" inline variant={["xl", "bold"]} mb="auto" />
+                        <Button
+                          title="Information indicateur écart de taux d'augmentation"
+                          iconId="fr-icon-information-fill"
+                          type="button"
+                          size="small"
+                          priority="tertiary no outline"
+                          nativeButtonProps={infoModal.buttonProps}
+                        />
+                      </GridCol>
+                      <GridCol sm={6}>
+                        {(() => {
+                          const field = register("raisedCount.women", {
+                            setValueAs: setValueAsFloatOrEmptyString,
+                          });
 
-                            return (
-                              <Input
-                                label="Femmes"
-                                hintText={`(max ${totalCspWomen})`}
-                                state={whenCalculableErrors.raisedCount?.women && "error"}
-                                stateRelatedMessage={whenCalculableErrors.raisedCount?.women?.message}
-                                nativeInputProps={{
-                                  type: "number",
-                                  min: raisedCount && raisedCount.men > 0 ? 0 : 1,
-                                  max: totalCspWomen,
-                                  ...field,
-                                  onChange: e => {
-                                    field.onChange(e);
-                                    trigger();
-                                  },
-                                }}
-                              />
-                            );
-                          })()}
-                        </GridCol>
-                        <GridCol sm={6}>
-                          {(() => {
-                            const field = register("raisedCount.men", {
-                              setValueAs: setValueAsFloatOrEmptyString,
-                            });
+                          return (
+                            <Input
+                              label="Femmes"
+                              hintText={`(max ${totalCspWomen})`}
+                              state={whenCalculableErrors.raisedCount?.women && "error"}
+                              stateRelatedMessage={whenCalculableErrors.raisedCount?.women?.message}
+                              nativeInputProps={{
+                                type: "number",
+                                min: raisedCount && raisedCount.men > 0 ? 0 : 1,
+                                max: totalCspWomen,
+                                ...field,
+                                onChange: e => {
+                                  field.onChange(e);
+                                  trigger();
+                                },
+                              }}
+                            />
+                          );
+                        })()}
+                      </GridCol>
+                      <GridCol sm={6}>
+                        {(() => {
+                          const field = register("raisedCount.men", {
+                            setValueAs: setValueAsFloatOrEmptyString,
+                          });
 
-                            return (
-                              <Input
-                                label="Hommes"
-                                hintText={`(max ${totalCspMen})`}
-                                state={whenCalculableErrors.raisedCount?.men && "error"}
-                                stateRelatedMessage={whenCalculableErrors.raisedCount?.men?.message}
-                                nativeInputProps={{
-                                  type: "number",
-                                  min: raisedCount && raisedCount.women > 0 ? 0 : 1,
-                                  max: totalCspMen,
-                                  ...field,
-                                  onChange: e => {
-                                    field.onChange(e);
-                                    trigger();
-                                  },
-                                }}
-                              />
-                            );
-                          })()}
-                        </GridCol>
-                        <GridCol sm={12}>
-                          <Text
-                            mb="1w"
-                            text={
-                              <>
-                                Écart en valeur absolue, arrondi à la première décimale :{" "}
+                          return (
+                            <Input
+                              label="Hommes"
+                              hintText={`(max ${totalCspMen})`}
+                              state={whenCalculableErrors.raisedCount?.men && "error"}
+                              stateRelatedMessage={whenCalculableErrors.raisedCount?.men?.message}
+                              nativeInputProps={{
+                                type: "number",
+                                min: raisedCount && raisedCount.women > 0 ? 0 : 1,
+                                max: totalCspMen,
+                                ...field,
+                                onChange: e => {
+                                  field.onChange(e);
+                                  trigger();
+                                },
+                              }}
+                            />
+                          );
+                        })()}
+                      </GridCol>
+                      <GridCol sm={12}>
+                        <Text
+                          mb="1w"
+                          text={
+                            <>
+                              Écart en valeur absolue, arrondi à la première décimale :{" "}
+                              <strong>
+                                {computed?.result !== undefined ? percentFormat.format(computed.result / 100) : ""}
+                              </strong>
+                            </>
+                          }
+                        />
+                        <Text
+                          mb="1w"
+                          text={
+                            <>
+                              Écart en nombre équivalent de salariés, arrondi à la première décimale
+                              {(raisedCount?.men || raisedCount?.women) && (
                                 <strong>
-                                  {computed?.result !== undefined ? percentFormat.format(computed.result / 100) : ""}
+                                  <sup>*</sup>
                                 </strong>
-                              </>
-                            }
-                          />
-                          <Text
-                            mb="1w"
-                            text={
-                              <>
-                                Écart en nombre équivalent de salariés, arrondi à la première décimale
-                                {(raisedCount?.men || raisedCount?.women) && (
-                                  <strong>
-                                    <sup>*</sup>
-                                  </strong>
-                                )}{" "}
-                                : <strong>{computed?.equivalentEmployeeCountGap}</strong>
-                              </>
-                            }
-                          />
-                          {(raisedCount?.men || raisedCount?.women) && (
-                            <i>
-                              <Text
-                                mb="1w"
-                                variant={["sm"]}
-                                text={
-                                  <>
-                                    <strong>*</strong>
-                                    {computed?.ifadvantage ? ifAdvantageText[computed.ifadvantage] : ""}
-                                  </>
-                                }
-                              />
-                            </i>
-                          )}
-                        </GridCol>
-                      </Grid>
-                    </Container>
+                              )}{" "}
+                              : <strong>{computed?.equivalentEmployeeCountGap}</strong>
+                            </>
+                          }
+                        />
+                        {(raisedCount?.men || raisedCount?.women) && (
+                          <i>
+                            <Text
+                              mb="1w"
+                              variant={["sm"]}
+                              text={
+                                <>
+                                  <strong>*</strong>
+                                  {computed?.ifadvantage ? ifAdvantageText[computed.ifadvantage] : ""}
+                                </>
+                              }
+                            />
+                          </i>
+                        )}
+                      </GridCol>
+                    </Grid>
+                  </Container>
 
-                    {whenCalculableErrors.raisedCount && whenCalculableErrors.raisedCount.root && (
-                      <Alert
-                        className="fr-mb-3w"
-                        severity="error"
-                        title=""
-                        description={whenCalculableErrors.raisedCount.root?.message || ""}
-                      />
-                    )}
-
-                    {computed && <Indicateur2et3Note computed={computed} isValid={isValid} />}
-                  </>
-                ) : (
-                  computableCheck === "non" && (
+                  {whenCalculableErrors.raisedCount && whenCalculableErrors.raisedCount.root && (
                     <Alert
                       className="fr-mb-3w"
-                      severity="info"
-                      title="L'indicateur n'est pas calculable"
-                      description="Il n'y a pas eu d'augmentations individuelles au cours de la période de référence."
+                      severity="error"
+                      title=""
+                      description={whenCalculableErrors.raisedCount.root?.message || ""}
                     />
-                  )
-                )}
-              </>
-            )}
-          </ClientAnimate>
+                  )}
 
-          <BackNextButtonsGroup
-            className={fr.cx("fr-mt-4w")}
-            backProps={{
-              linkProps: {
-                href: simulateurPath(indicateur2and3Nav.prev()),
-              },
-            }}
-            nextDisabled={!isValid}
-          />
-        </FormLayout>
+                  {computed && <Indicateur2et3Note computed={computed} isValid={isValid} />}
+                </>
+              ) : (
+                computableCheck === "non" && (
+                  <Alert
+                    className="fr-mb-3w"
+                    severity="info"
+                    title="L'indicateur n'est pas calculable"
+                    description="Il n'y a pas eu d'augmentations individuelles au cours de la période de référence."
+                  />
+                )
+              )}
+            </>
+          )}
+        </ClientAnimate>
+
+        <BackNextButtonsGroup
+          className={fr.cx("fr-mt-4w")}
+          backProps={{
+            linkProps: {
+              href: simulateurPath(indicateur2and3Nav.prev()),
+            },
+          }}
+          nextDisabled={!isValid}
+        />
       </form>
     </FormProvider>
   );

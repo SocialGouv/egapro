@@ -17,7 +17,7 @@ const ResultatGlobalPage = () => {
         dispositions de l’article D.1142-5 du code du travail.
         <br />
         <br />
-        Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous aprecevrez un
+        Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous recevrez un
         accusé de réception.
       </p>
 
