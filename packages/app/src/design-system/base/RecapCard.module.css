@@ -38,14 +38,12 @@
     padding: 1rem;
 }
 
-/* stat value */
 .fr-recap-card__content--stat > *:first-child {
     font-size: 1.5rem;
     margin: .5rem .75rem .5rem 0;
     align-self: center;
 }
 
-/* stat text */
 .fr-recap-card__content--stat > *:last-child {
     margin: auto 0;
 }
