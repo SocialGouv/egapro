@@ -24,7 +24,7 @@ const Indicateur2et3Page = () => {
         description={
           <p>
             La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
-            salarié concerné y compris celle liée à une promotion. L’indicateur n’est pas calculable:
+            salarié concerné y compris celle liée à une promotion.
             <br />
             La période de référence choisie pour le calcul de cet indicateur peut correspondre à la période de référence
             annuelle, ou inclure la ou les deux années précédentes. Si une période pluriannuelle est choisie, elle peut
@@ -39,12 +39,6 @@ const Indicateur2et3Page = () => {
             </Link>
           </p>
         }
-      />
-      <Alert
-        className="fr-mb-3w"
-        small
-        severity="info"
-        description="La période choisie pour le calcul de cet indicateur peut correspondre à la période de référence annuelle, ou inclure la ou les deux années précédentes. Si une période pluriannuelle est choisie, elle peut être révisée tous les trois ans."
       />
       <Indic2and3Form />
     </CenteredContainer>
