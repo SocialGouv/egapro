@@ -28,10 +28,7 @@ const Validation = () => {
         </Link>
         .
       </p>
-      <p>
-        Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous recevrez un
-        accusé de réception.
-      </p>
+      <p>Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous.</p>
       <Heading as="h2" mt="6w" text="Récapitulatif des écarts de représentation" />
 
       <ValidationRecapRepEq />
