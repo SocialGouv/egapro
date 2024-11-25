@@ -402,7 +402,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
                     title="L'indicateur n'est pas calculable"
                     description={`Il n'y a pas eu ${
                       indicateur === 2 ? "d'augmentations individuelles (hors promotions)" : "de promotions"
-                    } au cours la période de référence.`}
+                    } au cours de la période de référence.`}
                   />
                 )
               )}

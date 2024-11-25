@@ -14,6 +14,8 @@ ENV EGAPRO_ENV $EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL $NEXTAUTH_URL
 
+RUN ls -liah
+
 WORKDIR /app
 
 COPY yarn.lock .yarnrc.yml ./

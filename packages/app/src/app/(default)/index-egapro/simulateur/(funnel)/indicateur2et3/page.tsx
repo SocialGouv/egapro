@@ -18,7 +18,7 @@ const Indicateur2et3Page = () => {
   return (
     <CenteredContainer pb="4w">
       <Alert
-        className={fr.cx("fr-mb-2w")}
+        className={fr.cx("fr-mb-4w")}
         severity="info"
         title="Aide au calcul"
         description={
