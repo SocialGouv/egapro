@@ -45,6 +45,8 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
     },
   };
 
+  console.log("entreprise", entreprise);
+
   const year = déclaration.commencer?.annéeIndicateurs || 2023;
 
   const onSubmit = async (data: CompanyDTO) => {
@@ -62,6 +64,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
           adresse: data.address ?? "",
           département: data.county,
           région: data.region,
+          codePays: data.countryIsoCode,
         },
       },
     };

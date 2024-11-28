@@ -2,6 +2,7 @@ import {
   type IndicateurQuatreComputer,
   type MaternityLeaves,
 } from "@common/core-domain/computers/IndicateurQuatreComputer";
+import { NotComputableReasonMaternityLeaves } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
 import { IndicatorNote } from "@design-system";
 import { last } from "lodash";
 
@@ -22,7 +23,7 @@ export const Indicateur4Note = ({ computer, isValid, count, noBorder }: Props) =
       <IndicatorNote
         noBorder={noBorder}
         note="NC"
-        legend="Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité (ou d'adoption),"
+        legend={NotComputableReasonMaternityLeaves.Label.absaugpdtcm}
         text="L'indicateur n'est pas calculable"
       />
     );

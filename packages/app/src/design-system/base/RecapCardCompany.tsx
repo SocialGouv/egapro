@@ -173,7 +173,16 @@ const companySchema = zodFr.object({
   siren: zodFr.string(),
   county: zodFr.enum(countiesCodes).optional(),
   region: zodFr.enum(regionCodes).optional(),
+  countryIsoCode: zodFr.string(),
 });
+
+const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
+  let newAdress = address;
+  if (city) newAdress = newAdress.replace(city, "");
+  if (postalCode) newAdress = newAdress.replace(postalCode, "");
+
+  return newAdress;
+};
 
 export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props) => {
   const session = useSession();
@@ -187,8 +196,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
 
   // postalCode and city may be undefined for foreign companies.
   const postalCodeCity = `${postalCode ?? ""} ${city ?? ""}`.trim();
-  const countryLib =
-    countryIsoCode && countryIsoCode !== "FR" && `${postalCodeCity && ", "}${COUNTRIES_ISO_TO_LIB[countryIsoCode]}`;
+  const countryLib = countryIsoCode && countryIsoCode !== "FR" && COUNTRIES_ISO_TO_LIB[countryIsoCode];
 
   const {
     register,
@@ -227,7 +235,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
         <GridCol sm={12}>
           <strong>Adresse</strong>
           <br />
-          {address}
+          {cleanAddress(city, postalCode, address as string)}
           {postalCodeCity ? `, ${postalCodeCity}` : " "}
           <br />
           {countryLib}
@@ -238,15 +246,16 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
     <>
       Entreprise déclarante : <strong>{name}</strong>
       <br />
-      {address}
+      {cleanAddress(city, postalCode, address as string)}
       {(postalCodeCity || countryLib) && <br />}
       {postalCodeCity}
-      {countryLib}
       <br />
       {countyName && `Département : ${countyName}`}
       <br />
       {regionName && `Région : ${regionName}`}
       {(county || region) && <br />}
+      {countryIsoCode && countryIsoCode !== "FR" && `Pays : ${countryLib}`}
+      {countryIsoCode && countryIsoCode !== "FR" && <br />}
       Siren : <strong>{siren}</strong>
       <br />
       Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode] ? NAF[nafCode].description : ""}
@@ -309,6 +318,21 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
                 }}
                 label="Code Naf *"
               />
+              <Select label="Pays *" nativeSelectProps={register("countryIsoCode")}>
+                <option value="" disabled>
+                  Sélectionnez un pays
+                </option>
+                {Object.keys(COUNTRIES_ISO_TO_LIB)
+                  .sort((a, b) => {
+                    if (COUNTRIES_ISO_TO_LIB[a] < COUNTRIES_ISO_TO_LIB[b]) return -1;
+                    return 1;
+                  })
+                  .map(countryCode => (
+                    <option key={countryCode} value={countryCode}>
+                      {COUNTRIES_ISO_TO_LIB[countryCode]}
+                    </option>
+                  ))}
+              </Select>
               <Select label="Département *" nativeSelectProps={register("county")}>
                 <option value="" disabled>
                   Sélectionnez un département
@@ -329,6 +353,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
                   </option>
                 ))}
               </Select>
+
               <Button type="submit" disabled={!isValid}>
                 Valider les modifications
               </Button>

@@ -78,7 +78,7 @@ export const StatsContent = async () => {
             title="Index moyen"
             data={
               <>
-                {Math.round(stats.index.average)}&nbsp;<small>/&nbsp;100</small>
+                {Math.floor(stats.index.average)}&nbsp;<small>/&nbsp;100</small>
               </>
             }
           />
@@ -108,11 +108,11 @@ export const StatsContent = async () => {
           </StatCard>
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Index moyen par année">
+          <StatCard title="Index moyen par année de déclaration">
             <BarChart
               showValue
               data={Object.entries(stats.index.lastThreeYearsAverage)
-                .map(entry => ({ legend: Number(entry[0]), value: Math.round(Number(entry[1])) }))
+                .map(entry => ({ legend: Number(entry[0]), value: Math.floor(Number(entry[1])) }))
                 .sort((a, b) => b.legend - a.legend)}
               tooltipLegend="Index"
               yAxisMin={indexLastThreeYearsAverageYAxisMin}

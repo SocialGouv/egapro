@@ -32,6 +32,14 @@ const pushRow = (
   });
 };
 
+const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
+  let newAdress = address;
+  if (city) newAdress = newAdress.replace(city, "");
+  if (postalCode) newAdress = newAdress.replace(postalCode, "");
+
+  return newAdress;
+};
+
 export const DeclarationReceipt = (input: DeclarationOpmc) => {
   const declaration = input.declaration;
 
@@ -44,7 +52,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
     !(postalCode?.getValue()?.includes("[ND]") || postalCode?.getValue() === undefined) &&
     !(city?.includes("[ND]") || city === undefined)
   ) {
-    addressValue = `${address} ${postalCode?.getValue()} ${city}`;
+    addressValue = `${cleanAddress(city, postalCode.getValue(), address)} ${postalCode?.getValue()} ${city}`;
   }
 
   const table: BaseReceiptTemplateProps["table"] = [

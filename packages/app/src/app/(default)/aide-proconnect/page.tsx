@@ -119,9 +119,9 @@ const AideProConnectPage = () => {
               Comment contacter ProConnect ?
             </AnchorLink>
             <p>
-              Pour tout problème lié à ProConnect, vous devez contacter le support dédié via cette adresse email{" "}
-              <Link href={"mailto:contact@moncomptepro.beta.gouv.fr"} target="_blank" rel="noopener noreferrer">
-                contact@moncomptepro.beta.gouv.fr
+              Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le{" "}
+              <Link href={"https://agentconnect.crisp.help/fr/"} target="_blank" rel="noopener noreferrer">
+                centre d'aide
               </Link>
             </p>
             <AnchorLink as="h2" anchor="Comment-s-identifier-avec-ProConnect">
@@ -202,13 +202,13 @@ const AideProConnectPage = () => {
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
               fonction au sein de votre entreprise) en vous connectant à votre compte sur le site ProConnect,{" "}
               <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
-                https://moncomptepro.beta.gouv.fr/
+                ProConnect
               </Link>
-              , puis en cliquant dans le menu sur "Informations personnelles".
+              , puis en cliquant dans le menu sur "Info personnelles".
             </p>
             <p>
-              À noter que vous ne pouvez pas modifier l’email associé à votre compte. Si vous souhaitez utiliser un
-              autre email, vous devez créer un nouveau compte ProConnect.
+              À noter que vous ne pouvez pas modifier l'adresse email associée à votre compte. Si vous souhaitez
+              utiliser un autre email, vous devez créer un nouveau compte ProConnect.
             </p>
             <AnchorLink as="h2" anchor="Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-ProConnect">
               Comment rattacher une nouvelle entreprise à mon compte ProConnect ?
@@ -217,7 +217,7 @@ const AideProConnectPage = () => {
               Vous vous connectez à votre compte sur le site ProConnect,
               <br />
               <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
-                https://moncomptepro.beta.gouv.fr/
+                ProConnect
               </Link>
               .
             </p>

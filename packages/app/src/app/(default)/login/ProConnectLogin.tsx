@@ -10,9 +10,10 @@ export const ProConnectLogin = ({ callbackUrl }: ProConnectLoginProps) => (
     <button
       onClick={e => {
         e.preventDefault();
-        signIn("moncomptepro", { redirect: false });
+        signIn("moncomptepro", { callbackUrl });
       }}
       className="fr-connect"
+      role="link"
     >
       <span className="fr-connect__login">S’identifier avec</span> <span className="fr-connect__brand">ProConnect</span>
     </button>
