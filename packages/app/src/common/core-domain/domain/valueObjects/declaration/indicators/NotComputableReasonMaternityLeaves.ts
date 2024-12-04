@@ -22,8 +22,8 @@ export namespace NotComputableReasonMaternityLeaves {
 
   export const Label = {
     [Enum.ABSAUGPDTCM]:
-      "Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité (ou d'adoption).",
-    [Enum.ABSRCM]: "Il n'y a pas eu de retours de congé maternité (ou d'adoption) au cours de la période de référence.",
+      "Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité (ou d'adoption)",
+    [Enum.ABSRCM]: "Il n'y a pas eu de retours de congé maternité (ou d'adoption) au cours de la période de référence",
   } as const;
 
   export type Label = typeof Label;

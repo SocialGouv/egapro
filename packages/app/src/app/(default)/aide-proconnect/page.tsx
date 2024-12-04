@@ -201,14 +201,18 @@ const AideProConnectPage = () => {
             <p>
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
               fonction au sein de votre entreprise) en vous connectant à votre compte sur le site ProConnect,{" "}
-              <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 ProConnect
               </Link>
               , puis en cliquant dans le menu sur "Info personnelles".
             </p>
             <p>
               À noter que vous ne pouvez pas modifier l'adresse email associée à votre compte. Si vous souhaitez
-              utiliser un autre email, vous devez créer un nouveau compte ProConnect.
+              utiliser une autre adresse email, vous devez créer un nouveau compte ProConnect.
             </p>
             <AnchorLink as="h2" anchor="Comment-rattacher-une-nouvelle-entreprise-à-mon-compte-ProConnect">
               Comment rattacher une nouvelle entreprise à mon compte ProConnect ?
@@ -216,7 +220,11 @@ const AideProConnectPage = () => {
             <p>
               Vous vous connectez à votre compte sur le site ProConnect,
               <br />
-              <Link href={"https://moncomptepro.beta.gouv.fr/"} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 ProConnect
               </Link>
               .

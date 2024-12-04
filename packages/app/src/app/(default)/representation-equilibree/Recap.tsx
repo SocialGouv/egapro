@@ -79,11 +79,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
                       Les écarts ne sont pas calculables
                       <br />
                       <p className={cx(fr.cx("fr-text--sm"))}>
-                        <i>
-                          <strong>
-                            {NotComputableReasonExecutiveRepEq.Label[repEq.notComputableReasonExecutives]}
-                          </strong>
-                        </i>
+                        <i>{NotComputableReasonExecutiveRepEq.Label[repEq.notComputableReasonExecutives]}</i>
                       </p>
                     </>
                   ),
@@ -114,9 +110,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
                       Les écarts ne sont pas calculables
                       <br />
                       <p className={cx(fr.cx("fr-text--sm"))}>
-                        <i>
-                          <strong>{NotComputableReasonMemberRepEq.Label[repEq.notComputableReasonMembers]}</strong>
-                        </i>
+                        <i>{NotComputableReasonMemberRepEq.Label[repEq.notComputableReasonMembers]}</i>
                       </p>
                     </>
                   ),

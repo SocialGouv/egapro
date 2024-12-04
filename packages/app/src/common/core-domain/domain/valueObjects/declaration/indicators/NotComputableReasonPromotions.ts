@@ -18,9 +18,9 @@ export namespace NotComputableReasonPromotions {
   }
 
   export const Label = {
-    [Enum.ABSPROM]: "Absence de promotions au cours de la période de référence",
+    [Enum.ABSPROM]: "Il n'y a pas eu de promotions au cours de la période de référence",
     [Enum.EGVI40PCET]:
-      "Effectif des CSP retenues inférieur à 40% de l'effectif pris en compte pour le calcul des indicateurs",
+      "L’effectif total des CSP retenues pour le calcul de l'indicateur (c’est-à-dire comptant au moins 10 femmes et 10 hommes) représentent moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs",
   } as const;
 
   export type Label = typeof Label;

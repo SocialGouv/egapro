@@ -2,6 +2,10 @@
 
 import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationComputer";
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
+import { NotComputableReasonMaternityLeaves } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
+import { NotComputableReasonPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonPromotions";
+import { NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
+import { NotComputableReasonSalaryRaisesAndPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 import { type DeclarationDTO, type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
 import { IndicatorNote, RecapCard } from "@design-system";
 import { capitalize } from "lodash";
@@ -34,6 +38,20 @@ enum Enum {
   ETSNO5F5H = "etsno5f5h",
 }
 
+const getMotifNcLabel = (motifNc: string, name: string) => {
+  if (name === "conges-maternite") {
+    return NotComputableReasonMaternityLeaves.Label[motifNc as NotComputableReasonMaternityLeaves.Enum];
+  } else if (name === "remunerations") {
+    return NotComputableReasonSalaryRaises.Label[motifNc as NotComputableReasonSalaryRaises.Enum];
+  } else if (name === "promotions") {
+    return NotComputableReasonPromotions.Label[motifNc as NotComputableReasonPromotions.Enum];
+  } else if (name === "augmentations") {
+    return NotComputableReasonSalaryRaises.Label[motifNc as NotComputableReasonSalaryRaises.Enum];
+  } else
+    return NotComputableReasonSalaryRaisesAndPromotions.Label[
+      motifNc as NotComputableReasonSalaryRaisesAndPromotions.Enum
+    ];
+};
 // TODO: Move this to a shared location
 const label = {
   [Enum.ABSAUGPDTCM]: "Absence d'augmentations salariales pendant la durée du ou des congés maternité",
@@ -57,6 +75,9 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
       ? déclaration["remunerations-resultat"]?.populationFavorable
       : indicateur?.populationFavorable;
   const motifNc = indicateur?.estCalculable === "non" ? indicateur.motifNonCalculabilité : undefined;
+
+  console.log(name);
+  console.log(motifNc);
 
   const getLegend = () => {
     if (name === "conges-maternite") {
@@ -95,7 +116,7 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
           {customContent}
 
           {motifNc && (
-            <IndicatorNote noBorder note="NC" size="small" text={getNxText()} legend={label[motifNc as Enum]} />
+            <IndicatorNote noBorder note="NC" size="small" text={getNxText()} legend={getMotifNcLabel(motifNc, name)} />
           )}
 
           {note !== undefined && !motifNc && (
