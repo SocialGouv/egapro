@@ -23,12 +23,12 @@ export class PostgresPublicStatsRepo implements IPublicStatsRepo {
             SUM(CASE WHEN year = ${CURRENT_YEAR} THEN 1 ELSE 0 END) AS count,
             SUM(CASE
               WHEN jsonb_typeof(data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres') = 'number'
-              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres')::text::float > 30 THEN 1
+              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres')::text::float >= 30 THEN 1
               ELSE 0
             END) AS countWomen30percentExecutives_gt,
             SUM(CASE
               WHEN jsonb_typeof(data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres') = 'number' 
-              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres')::text::float <= 30 THEN 1
+              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres')::text::float < 30 THEN 1
               ELSE 0
             END) AS countWomen30percentExecutives_lte,
             SUM(CASE
@@ -37,12 +37,12 @@ export class PostgresPublicStatsRepo implements IPublicStatsRepo {
             END) AS countWomen30percentExecutives_nc,
             SUM(CASE
               WHEN jsonb_typeof(data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres') = 'number' 
-              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres')::text::float > 30 THEN 1
+              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres')::text::float >= 30 THEN 1
               ELSE 0
             END) AS countWomen30percentMembers_gt,
             SUM(CASE
               WHEN jsonb_typeof(data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres') = 'number' 
-              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres')::text::float <= 30 THEN 1
+              AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_membres')::text::float < 30 THEN 1
               ELSE 0
             END) AS countWomen30percentMembers_lte,
             SUM(CASE

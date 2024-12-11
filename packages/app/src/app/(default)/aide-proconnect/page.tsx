@@ -200,7 +200,7 @@ const AideProConnectPage = () => {
             </AnchorLink>
             <p>
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
-              fonction au sein de votre entreprise) en vous connectant à votre compte sur le site ProConnect,{" "}
+              fonction au sein de votre entreprise) en vous connectant à votre compte sur le site{" "}
               <Link
                 href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
                 target="_blank"
@@ -218,8 +218,7 @@ const AideProConnectPage = () => {
               Comment rattacher une nouvelle entreprise à mon compte ProConnect ?
             </AnchorLink>
             <p>
-              Vous vous connectez à votre compte sur le site ProConnect,
-              <br />
+              Vous vous connectez à votre compte sur le site{" "}
               <Link
                 href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
                 target="_blank"

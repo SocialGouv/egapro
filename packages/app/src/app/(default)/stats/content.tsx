@@ -137,15 +137,15 @@ export const StatsContent = async () => {
               data={[
                 {
                   legend: "Plus de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentMembers.gt,
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.gt,
                 },
                 {
                   legend: "Moins de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentMembers.lte,
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.lte,
                 },
                 {
                   legend: "Ecart de représentation non calculable",
-                  value: stats.balancedRepresentation.countWomen30percentMembers.nc,
+                  value: stats.balancedRepresentation.countWomen30percentExecutives.nc,
                 },
               ]}
               tooltipLegend="Nombre de déclarants"
@@ -158,15 +158,15 @@ export const StatsContent = async () => {
               data={[
                 {
                   legend: "Plus de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.gt,
+                  value: stats.balancedRepresentation.countWomen30percentMembers.gt,
                 },
                 {
                   legend: "Moins de 30% de femmes",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.lte,
+                  value: stats.balancedRepresentation.countWomen30percentMembers.lte,
                 },
                 {
                   legend: "Ecart de représentation non calculable",
-                  value: stats.balancedRepresentation.countWomen30percentExecutives.nc,
+                  value: stats.balancedRepresentation.countWomen30percentMembers.nc,
                 },
               ]}
               tooltipLegend="Nombre de déclarants"

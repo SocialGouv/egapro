@@ -46,11 +46,12 @@ const MesEntreprisesInfoAlert = () => (
 
 const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);
+  const isImpersonating = session?.staff.impersonating;
   if (!session) redirect("/login");
-  if (!session.user.staff) redirect("/mon-espace/mon-profil");
+  if (!session.user.staff && !isImpersonating) redirect("/mon-espace/mon-profil");
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  if (typeof searchParams.siren !== "string")
+  if (typeof searchParams.siren !== "string" && !isImpersonating)
     return (
       <MessageProvider>
         <Box mb="10w">
@@ -75,18 +76,17 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       </MessageProvider>
     );
 
-  const selectedSiren = searchParams.siren;
+  const selectedSiren = isImpersonating ? session.user.companies[0].siren : (searchParams.siren as string);
 
   try {
     const emails = await getAllEmailsBySiren(selectedSiren);
-
     return (
       <MessageProvider>
         <Box mb="10w">
           <Heading as="h1" text="Les entreprises" />
           <MesEntreprisesInfoAlert />
           <Box mt="2w">
-            <SirenInput loadedSiren={selectedSiren} />
+            <SirenInput isImpersonating={isImpersonating} loadedSiren={selectedSiren} />
           </Box>
           <p>
             <br />

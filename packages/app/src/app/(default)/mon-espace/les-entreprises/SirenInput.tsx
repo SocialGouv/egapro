@@ -8,18 +8,18 @@ import { getCompany } from "@globalActions/company";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const SirenInput = ({ loadedSiren }: { loadedSiren?: string }) => {
+export const SirenInput = ({ loadedSiren, isImpersonating }: { isImpersonating?: boolean; loadedSiren?: string }) => {
   const router = useRouter();
   const [currentSiren, setCurrentSiren] = useState<string>(loadedSiren ? loadedSiren : "");
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
-  const [disabled, setDisabled] = useState<boolean>(false);
+  const [disabled, setDisabled] = useState<boolean>(isImpersonating ?? false);
 
   useEffect(() => {
     try {
       const sirenVO = new Siren(currentSiren);
       setDisabled(true);
       getCompany(sirenVO.getValue()).then(company => {
-        setDisabled(false);
+        if (!isImpersonating) setDisabled(false);
         if (company.ok) setSelectedCompanyName(company?.data?.simpleLabel ?? "");
       });
 
@@ -34,11 +34,15 @@ export const SirenInput = ({ loadedSiren }: { loadedSiren?: string }) => {
   return (
     <Grid>
       <GridCol sm={3}>
-        <Input
-          label="Numéro Siren de l'entreprise"
-          disabled={disabled}
-          nativeInputProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
-        />
+        {isImpersonating ? (
+          <Input label="Numéro Siren de l'entreprise" disabled={disabled} nativeInputProps={{ value: currentSiren }} />
+        ) : (
+          <Input
+            label="Numéro Siren de l'entreprise"
+            disabled={disabled}
+            nativeInputProps={{ onChange: event => setCurrentSiren(event.target.value), value: currentSiren }}
+          />
+        )}
       </GridCol>
       <GridCol sm={9}>
         <div className={fr.cx("fr-pt-10v", "fr-pl-2v")}>
