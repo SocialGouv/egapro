@@ -4,6 +4,7 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { FavorablePopulation } from "@common/core-domain/domain/valueObjects/declaration/indicators/FavorablePopulation";
 import { NotComputableReasonMaternityLeaves } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMaternityLeaves";
 import { NotComputableReasonPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonPromotions";
+import { NotComputableReasonRemunerations } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonRemunerations";
 import { NotComputableReasonSalaryRaises } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaises";
 import { NotComputableReasonSalaryRaisesAndPromotions } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonSalaryRaisesAndPromotions";
 import { type DeclarationDTO, type IndicatorKey } from "@common/core-domain/dtos/DeclarationDTO";
@@ -42,7 +43,7 @@ const getMotifNcLabel = (motifNc: string, name: string) => {
   if (name === "conges-maternite") {
     return NotComputableReasonMaternityLeaves.Label[motifNc as NotComputableReasonMaternityLeaves.Enum];
   } else if (name === "remunerations") {
-    return NotComputableReasonSalaryRaises.Label[motifNc as NotComputableReasonSalaryRaises.Enum];
+    return NotComputableReasonRemunerations.Label[motifNc as NotComputableReasonRemunerations.Enum];
   } else if (name === "promotions") {
     return NotComputableReasonPromotions.Label[motifNc as NotComputableReasonPromotions.Enum];
   } else if (name === "augmentations") {

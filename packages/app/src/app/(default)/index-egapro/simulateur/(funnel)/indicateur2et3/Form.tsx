@@ -190,7 +190,7 @@ export const Indic2and3Form = () => {
               className="fr-mb-3w"
               severity="info"
               title="L'indicateur n'est pas calculable"
-              description="L' effectif total pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes."
+              description="L' effectif total pris en compte pour le calcul des indicateurs ne compte pas au moins 5 femmes et 5 hommes"
             />
           ) : (
             <>
