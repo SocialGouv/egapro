@@ -1,3 +1,27 @@
+## [3.5.1](https://github.com/SocialGouv/egapro/compare/v3.5.0...v3.5.1) (2024-12-17)
+
+
+### Bug Fixes
+
+* add ministry's logo ([58cb91c](https://github.com/SocialGouv/egapro/commit/58cb91c63d1322f0cfabf67442fa9d2792990c2d))
+* button pro connect ([6d76ae5](https://github.com/SocialGouv/egapro/commit/6d76ae59a74d6ec966ea44c0b6f4a0b549ff44aa))
+* css ([3edbebf](https://github.com/SocialGouv/egapro/commit/3edbebf5b4be083a9b4a5b2092055f6bd604e6e1))
+* delete comment ([3fff215](https://github.com/SocialGouv/egapro/commit/3fff2159ea613f917e1c101a4a2afebf5359f4fd))
+* indicator 2 and 3 wording ([5e9962f](https://github.com/SocialGouv/egapro/commit/5e9962f11fd4c9b9e43494b10ec2cd008e09277c))
+* last wordings ([1b1e950](https://github.com/SocialGouv/egapro/commit/1b1e9509fa17434e638fb852a0a5c3adaa322da7))
+* NC reasons ([77795a9](https://github.com/SocialGouv/egapro/commit/77795a9dfa90836038b246f97d261ed0af0b49ad))
+* Not computable reasons ([fe8635f](https://github.com/SocialGouv/egapro/commit/fe8635fa50f44cffe754ec51e9f5cebf8e811d1a))
+* remove unused code ([#2356](https://github.com/SocialGouv/egapro/issues/2356)) ([8a4b290](https://github.com/SocialGouv/egapro/commit/8a4b290f8a9e0ee1b1c42aac20f2927417d4583c))
+* siren not found error message ([341758a](https://github.com/SocialGouv/egapro/commit/341758abf08062c403467de11c71a1f71992cca1))
+* stats - NC reasons - mimoquage ([ac1b6a1](https://github.com/SocialGouv/egapro/commit/ac1b6a134e321d7d0375cd8876e1ee06b2f4466d))
+* wording ([ba94849](https://github.com/SocialGouv/egapro/commit/ba9484969efe801cfa8116e803b15126acb902b3))
+* wording ([5aad1f9](https://github.com/SocialGouv/egapro/commit/5aad1f938bc8ab91fc8b4ff738810882ff6ce8a3))
+* wording ([2d74f3e](https://github.com/SocialGouv/egapro/commit/2d74f3ef2b1a8a8a64fb95cc34e59106caf1c541))
+* wording for 2018,2019,2020 ([0a588d6](https://github.com/SocialGouv/egapro/commit/0a588d64f295120f0980ed08655632d8d7e8fe38))
+* wording recap NC ([cb8fde9](https://github.com/SocialGouv/egapro/commit/cb8fde99ab37e1aaeaf5f506668dc9d42ae9020c))
+* wording recap repeq ([d2e431f](https://github.com/SocialGouv/egapro/commit/d2e431f189affc36378df2f0ae3cf51c923f60ad))
+* wording simu indic1 ([ae7005b](https://github.com/SocialGouv/egapro/commit/ae7005b600eee86632707e198da8a8cc9170086b))
+
 # [3.5.0](https://github.com/SocialGouv/egapro/compare/v3.4.9...v3.5.0) (2024-10-21)
 
 
