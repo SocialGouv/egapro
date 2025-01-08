@@ -1,3 +1,5 @@
+"use client";
+
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";

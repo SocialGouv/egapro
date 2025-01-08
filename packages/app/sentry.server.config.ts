@@ -3,14 +3,32 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { commonConfig } from "./sentry.config.common";
 
 Sentry.init({
-  dsn: "https://28b6186c058a49fc94ee665667e44612@sentry.fabrique.social.gouv.fr/99",
-  environment: process.env.EGAPRO_ENV || "dev",
+  ...commonConfig,
 
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 0.1,
+  // Server-specific settings
+  integrations: [
+    Sentry.httpIntegration(),
+    Sentry.expressIntegration(),
+    Sentry.onUncaughtExceptionIntegration(),
+    Sentry.onUnhandledRejectionIntegration()
+  ],
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  // Additional server configuration
+  autoSessionTracking: true,
+  serverName: process.env.HOSTNAME,
+  
+  // Specific sampling for server-side
+  tracesSampler: (samplingContext) => {
+    // Adjust sampling based on the operation
+    if (samplingContext.transactionContext?.name?.includes("healthcheck")) {
+      return 0.0; // Don't sample healthchecks
+    }
+    if (samplingContext.transactionContext?.name?.includes("/api/")) {
+      return 0.5; // Sample 50% of API calls
+    }
+    return 0.1; // Default sample rate
+  },
 });

@@ -3,29 +3,38 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { browserTracingIntegration, browserProfilingIntegration, replayIntegration } from "@sentry/nextjs";
+import { commonConfig } from "./sentry.config.common";
 
 Sentry.init({
-  dsn: "https://28b6186c058a49fc94ee665667e44612@sentry.fabrique.social.gouv.fr/99",
-  environment: process.env.EGAPRO_ENV || "dev",
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 0.1,
+  ...commonConfig,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  // Session Replay configuration
+  replaysOnErrorSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  replaysSessionSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-  replaysOnErrorSampleRate: 1.0,
-
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // You can remove this option if you're not planning to use the Sentry Session Replay feature:
   integrations: [
-    // eslint-disable-next-line import/namespace
-    new Sentry.Replay({
-      // Additional Replay configuration goes in here, for example:
+    replayIntegration({
+      // Privacy settings
       maskAllText: true,
       blockAllMedia: true,
+      maskAllInputs: true,
+      
+      // Network
+      networkDetailAllowUrls: [
+        // Add allowed URLs for network capturing
+        "https://api.egapro.fabrique.social.gouv.fr",
+      ],
+      networkRequestHeaders: ["method", "referrer"],
+      networkResponseHeaders: ["content-type", "content-length"],
     }),
+    browserTracingIntegration(),
+    browserProfilingIntegration(),
   ],
+    tracePropagationTargets: [
+      "localhost",
+      "egapro.fabrique.social.gouv.fr",
+    ],
+  // Enable profiling
+  profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 });
