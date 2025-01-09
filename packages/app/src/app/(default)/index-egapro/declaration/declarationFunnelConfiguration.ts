@@ -41,7 +41,7 @@ export const funnelStaticConfig: StaticConfig = {
   declarant: new StaticConfigItem("declarant", "Informations déclarant"),
   augmentations: new StaticConfigItem(
     "augmentations",
-    "Écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les hommes",
+    "Écart de taux d'augmentations individuelles (hors promotions) entre les femmes et les hommes",
   ),
   confirmation: new StaticConfigItem("confirmation", "Confirmation"),
   "conges-maternite": new StaticConfigItem(

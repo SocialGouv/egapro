@@ -163,7 +163,7 @@ export const AugmentationsForm = () => {
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <RadioOuiNon
-            legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotion) est-il calculable ? *"
+            legend="L'indicateur sur l'écart de taux d'augmentations individuelles (hors promotions) est-il calculable ? *"
             name="estCalculable"
           />
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
