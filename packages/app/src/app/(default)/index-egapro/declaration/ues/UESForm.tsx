@@ -4,10 +4,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { sirenSchema } from "@common/core-domain/dtos/helpers/common";
 import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { zodFr } from "@common/utils/zod";
+import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { ClientOnly } from "@components/utils/ClientOnly";
 import { AlertMessage } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
@@ -19,6 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import styles from "../../../../../design-system/base/AlternativeTable.module.css";
 import { INVALID_SIREN, MANDATORY_SIREN, NOT_FOUND_SIREN } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
@@ -194,19 +197,20 @@ export const UESForm = () => {
     router.push(funnelConfig(formData)[stepName].next().url);
   };
 
+  const modal = createModal({
+    id: `modal-ues`,
+    isOpenedByDefault: false,
+  });
+
   return (
     <FormProvider {...methods}>
       <AlertMessage title="Erreur" message={errors.entreprises?.message} />
 
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
-        <p className={fr.cx("fr-mt-4w")}>
-          La raison sociale des entreprises composant l'UES est renseignée automatiquement et n'est pas modifiable
-          (source : Répertoire Sirene de l'INSEE).
-        </p>
-
         <ClientOnly>
+          <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
           <Input
-            label="Nom de l'UES"
+            label="Nom de l'UES *"
             hintText="Le nom doit être identique à celui de vos déclarations précédentes"
             className={fr.cx("fr-mb-8w")}
             nativeInputProps={{
@@ -216,7 +220,29 @@ export const UESForm = () => {
             stateRelatedMessage={errors.nom?.message}
           />
 
-          <span className={fr.cx("fr-label", "fr-mb-1w")}>Entreprises composant l'UES</span>
+          <span className={fr.cx("fr-label", "fr-mb-1w")}>
+            Entreprises composant l'UES{" "}
+            <>
+              <Button
+                nativeButtonProps={{
+                  ...modal?.buttonProps,
+                  type: "button",
+                }}
+                size="small"
+                iconId="fr-icon-information-fill"
+                priority="tertiary"
+                title="Plus d'informations"
+                className={styles["modal-button"]}
+              />
+
+              <ClientBodyPortal>
+                <modal.Component title="" className={styles.modal}>
+                  La raison sociale des entreprises composant l'UES est renseignée automatiquement et n'est pas
+                  modifiable (source : Répertoire Sirene de l'INSEE).
+                </modal.Component>
+              </ClientBodyPortal>
+            </>
+          </span>
           <div className={fr.cx("fr-table", "fr-table--layout-fixed", "fr-table--no-caption")}>
             <table>
               <caption>Liste des entreprises de l'UES</caption>

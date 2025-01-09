@@ -112,7 +112,7 @@ export const StatsContent = async () => {
             <BarChart
               showValue
               data={Object.entries(stats.index.lastThreeYearsAverage)
-                .map(entry => ({ legend: Number(entry[0]), value: Math.floor(Number(entry[1])) }))
+                .map(entry => ({ legend: Number(entry[0]) + 1, value: Math.floor(Number(entry[1])) }))
                 .sort((a, b) => b.legend - a.legend)}
               tooltipLegend="Index"
               yAxisMin={indexLastThreeYearsAverageYAxisMin}

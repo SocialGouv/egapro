@@ -366,6 +366,7 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
       ) : (
         <RecapCard
           title={fullTitle}
+          isStaff={isStaff}
           sideButtonProps={{
             iconId: "fr-icon-edit-line",
             title: titleFull,

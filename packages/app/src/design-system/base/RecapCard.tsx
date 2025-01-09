@@ -6,6 +6,8 @@ import { type ReactNode } from "react";
 import { Text } from "./Typography";
 
 type RecapCardProps = {
+  informations?: string;
+  isStaff?: boolean;
   title: ReactNode;
 } & (RecapCardProps.WithEditLink | RecapCardProps.WithSideButton) &
   (RecapCardProps.WithStats | RecapCardProps.WithTextContent);
@@ -32,7 +34,14 @@ export namespace RecapCardProps {
   }
 }
 
-export const RecapCard = ({ content: textContent, title, editLink, sideButtonProps, stats }: RecapCardProps) => (
+export const RecapCard = ({
+  content: textContent,
+  title,
+  editLink,
+  sideButtonProps,
+  stats,
+  isStaff,
+}: RecapCardProps) => (
   <div className="fr-recap-card">
     <div className={"fr-recap-card--title"}>
       <Text text={title} variant={["md", "bold"]} />
@@ -47,8 +56,11 @@ export const RecapCard = ({ content: textContent, title, editLink, sideButtonPro
           }}
         />
       )}
-      {sideButtonProps && (
+      {sideButtonProps && isStaff && (
         <Button {...sideButtonProps} className={cx("fr-recap-card--edit-link", sideButtonProps.className)} />
+      )}
+      {sideButtonProps && !isStaff && (
+        <Button {...sideButtonProps} className={cx("fr-icon-information-fill", sideButtonProps.className)} />
       )}
     </div>
     <hr />
