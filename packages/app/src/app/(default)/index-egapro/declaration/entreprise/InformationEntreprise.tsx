@@ -33,7 +33,7 @@ export const InformationEntreprise = () => {
   return (
     <ClientOnly>
       <FormLayout>
-        <RecapCardCompany full company={company} />
+        <RecapCardCompany mode="view" full company={company} />
       </FormLayout>
     </ClientOnly>
   );

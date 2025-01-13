@@ -221,7 +221,7 @@ export const UESForm = () => {
           />
 
           <span className={fr.cx("fr-label", "fr-mb-1w")}>
-            Entreprises composant l'UES{" "}
+            Entreprises composant l'UES *{" "}
             <>
               <Button
                 nativeButtonProps={{
@@ -230,9 +230,8 @@ export const UESForm = () => {
                 }}
                 size="small"
                 iconId="fr-icon-information-fill"
-                priority="tertiary"
+                priority="tertiary no outline"
                 title="Plus d'informations"
-                className={styles["modal-button"]}
               />
 
               <ClientBodyPortal>

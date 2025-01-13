@@ -181,6 +181,7 @@ export const ImpersonateForm = () => {
                     )}
                     <RecapCardCompany
                       full
+                      mode="view"
                       title="Informations de l'entreprise à mimoquer"
                       company={{
                         address,

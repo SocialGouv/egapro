@@ -19,13 +19,12 @@ import { Text } from "./Typography";
 
 type Props = {
   company: CompanyDTO;
-  edit?: boolean;
   full?: boolean;
+  mode: "edit" | "redirect" | "view";
   onSubmit?: (data: CompanyDTO) => void;
   title?: string;
 };
 
-// TODO: replace with tooltip when available in DSFR
 const infoModale = createModal({
   id: "entreprise-info",
   isOpenedByDefault: false,
@@ -184,7 +183,7 @@ const cleanAddress = (city: string | undefined, postalCode: string | undefined, 
   return newAdress;
 };
 
-export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props) => {
+export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props) => {
   const session = useSession();
   const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
@@ -274,12 +273,12 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
 
   return (
     <>
-      {onSubmit && (
-        <ClientBodyPortal>
-          <infoModale.Component title="">
-            Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
-            l'INSEE)
-          </infoModale.Component>
+      <ClientBodyPortal>
+        <infoModale.Component title="">
+          Ces informations sont renseignées automatiquement et ne sont pas modifiables (source : Répertoire Sirene de
+          l'INSEE)
+        </infoModale.Component>
+        {onSubmit && (
           <companyFormModal.Component title="Modifier les informations entreprise/UES">
             <form onSubmit={handleSubmit(handleOnSummit)}>
               <Input
@@ -359,11 +358,13 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
               </Button>
             </form>
           </companyFormModal.Component>
-        </ClientBodyPortal>
-      )}
-      {edit ? (
+        )}
+      </ClientBodyPortal>
+
+      {mode === "redirect" && (
         <RecapCard title={fullTitle} editLink={funnelStaticConfig["entreprise"].url} content={content} />
-      ) : (
+      )}
+      {mode === "edit" && (
         <RecapCard
           title={fullTitle}
           isStaff={isStaff}
@@ -374,6 +375,21 @@ export const RecapCardCompany = ({ company, full, title, edit, onSubmit }: Props
             style: { alignSelf: "center" },
             size: "small",
             nativeButtonProps: isStaff ? companyFormModal.buttonProps : infoModale.buttonProps,
+          }}
+          content={content}
+        />
+      )}
+      {mode === "view" && (
+        <RecapCard
+          title={fullTitle}
+          isStaff={isStaff}
+          sideButtonProps={{
+            iconId: "fr-icon-edit-line",
+            title: titleFull,
+            priority: "tertiary no outline",
+            style: { alignSelf: "center" },
+            size: "small",
+            nativeButtonProps: infoModale.buttonProps,
           }}
           content={content}
         />

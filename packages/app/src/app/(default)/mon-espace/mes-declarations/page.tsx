@@ -36,6 +36,18 @@ const InfoText = () => (
       avez accès à la déclaration des mesures de correction lorsque l’index est inférieur à 75 points et des objectifs
       de progression lorsque l’index est inférieur à 85 points.
     </p>
+    <p>
+      <br />
+      Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
+      <Link
+        target="_blank"
+        href={`https://app${
+          config.api.security.moncomptepro.appTest ? "-sandbox" : ""
+        }.moncomptepro.beta.gouv.fr/manage-organizations`}
+      >
+        cliquez ici
+      </Link>
+    </p>
   </>
 );
 
@@ -69,18 +81,6 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
         <Alert severity="info" small description={<InfoText />} />
         <Box mt="2w" mb="8w">
           <SelectSirenStaff currentSiren={selectedSiren} />
-          <p>
-            <br />
-            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link
-              target="_blank"
-              href={`https://app${
-                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-              }.moncomptepro.beta.gouv.fr/manage-organizations`}
-            >
-              cliquez ici
-            </Link>
-          </p>
         </Box>
       </MessageProvider>
     );
@@ -119,18 +119,6 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
           (sirenWithCompanyName.length > 0 && (
             <SelectSiren sirenListWithCompanyName={sirenWithCompanyName} currentSiren={selectedSiren} />
           ))}
-        <p>
-          <br />
-          Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link
-            target="_blank"
-            href={`https://app${
-              config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-            }.moncomptepro.beta.gouv.fr/manage-organizations`}
-          >
-            cliquez ici
-          </Link>
-        </p>
       </Box>
       <Box mt="10w">
         <IndexList declarations={declarations} declarationOpmcList={declarationOpmcList} />

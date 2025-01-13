@@ -121,7 +121,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         }
       />
 
-      <RecapCardCompany edit={edit} company={company} title="Informations Entreprise / UES" onSubmit={onSubmit} />
+      <RecapCardCompany mode="edit" company={company} title="Informations Entreprise / UES" onSubmit={onSubmit} />
       {company.ues?.name && (
         <RecapCard
           title="Informations UES"

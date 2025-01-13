@@ -162,8 +162,41 @@ export const EffectifsForm = () => {
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
+
+        <h3>Effectifs assujettis</h3>
+        <Alert
+          small
+          className={fr.cx("fr-mb-4w")}
+          severity="info"
+          title="Aide"
+          description={
+            <>
+              L’entreprise ou l’unité économique et sociale (UES) doit définir son assujettissement chaque année à la
+              date de l’obligation de publication de l’index, soit le 1er mars. Le calcul des effectifs assujettis est
+              celui prévu aux articles{" "}
+              <Link
+                href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900783/2008-05-01#:~:text=2%C2%B0%20Les%20salari%C3%A9s%20titulaires,l'entreprise%20%C3%A0%20due%20proportion"
+                target="_blank"
+              >
+                L.1111-2
+              </Link>{" "}
+              et{" "}
+              <Link
+                href="https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000006177833/#:~:text=3%C2%B0%20Les%20salari%C3%A9s%20%C3%A0,la%20dur%C3%A9e%20conventionnelle%20du%20travail"
+                target="_blank"
+              >
+                L.1111-3
+              </Link>{" "}
+              du code du travail. <br />
+              Pour en savoir plus,{" "}
+              <Link href="/aide-index#champ-d-application-entree-en-vigueur" target="_blank">
+                cliquez ici
+              </Link>
+            </>
+          }
+        />
         <RadioButtons
-          legend="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES) *"
+          legend="Quelle est la tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES) ? *"
           state={errors.workforceRange && "error"}
           stateRelatedMessage={errors.workforceRange?.message}
           options={[
@@ -183,42 +216,28 @@ export const EffectifsForm = () => {
             },
           }))}
         />
+
+        <h3>Effectifs pris en compte</h3>
         <Alert
           small
+          title="Aide"
           severity="info"
           description={
             <>
-              Pour la tranche d'effectifs assujettis, l’entreprise ou l’unité économique et sociale (UES) doit définir
-              son assujettissement chaque année à la date de l’obligation de publication de l’index, soit le 1er mars.
-              Le calcul des effectifs assujettis de l’entreprise ou de l’unité économique et sociale (UES) est celui
-              prévu aux articles{" "}
-              <Link
-                href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900783/2008-05-01#:~:text=2%C2%B0%20Les%20salari%C3%A9s%20titulaires,l'entreprise%20%C3%A0%20due%20proportion"
-                target="_blank"
-              >
-                L.1111-2
-              </Link>{" "}
-              et{" "}
-              <Link
-                href="https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000006177833/#:~:text=3%C2%B0%20Les%20salari%C3%A9s%20%C3%A0,la%20dur%C3%A9e%20conventionnelle%20du%20travail."
-                target="_blank"
-              >
-                L.1111-3
-              </Link>{" "}
-              du code du travail.
+              L'effectif des salariés à prendre en compte pour le calcul des indicateurs est apprécié en effectif
+              physique sur la période de référence annuelle considérée.
+              <br />
+              Ne sont pas pris en compte dans l'effectif : les apprentis et les contrats de professionnalisation, les
+              salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les intérimaires), les
+              expatriés, les salariés en pré-retraite, les salariés absents plus de 6 mois sur la période de référence.
+              <br />
+              Pour en savoir plus,{" "}
+              <Link href="/aide-index#effectifs-pris-en-compte" target="_blank">
+                cliquez ici
+              </Link>
             </>
           }
         />
-        <p className={fr.cx("fr-mt-4w")}>
-          L'effectif des salariés à prendre en compte pour le calcul des indicateurs et de l'index est apprécié en
-          effectif physique sur la période de référence annuelle choisie par l’employeur.
-        </p>
-        <p>
-          Sont obligatoirement exclus de ce périmètre : les apprentis, les titulaires d’un contrat de
-          professionnalisation, les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont
-          les intérimaires), les salariés expatriés, ainsi que les salariés absents plus de la moitié de la période de
-          référence annuelle considérée (sauf pour le calcul de l’indicateur relatif au retour de congé maternité).
-        </p>
 
         <ClientAnimate>
           {session?.user.staff && (
@@ -258,14 +277,14 @@ export const EffectifsForm = () => {
             withTooltip
             header={[
               {
-                label: "Catégorie socioprofessionnelle",
+                label: "Catégorie socio-professionnelle",
                 informations:
-                  "Les caractéristiques individuelles (CSP, âge) sont appréciées au dernier jour de la période de référence ou au dernier jour de présence du salarié dans l’entreprise.",
+                  "Les caractéristiques individuelles (catégorie socio-professionnelle, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
               },
               {
                 label: "Tranche d’âge",
                 informations:
-                  "Les caractéristiques individuelles (CSP, âge) sont appréciées au dernier jour de la période de référence ou au dernier jour de présence du salarié dans l’entreprise.",
+                  "Les caractéristiques individuelles (catégorie socio-professionnelle, âge) sont appréciées au dernier jour de la période de référence annuelle considérée ou au dernier jour de présence du salarié dans l’entreprise.",
               },
               {
                 label: "Nombre de salariés (en effectif physique)*",
@@ -277,6 +296,31 @@ export const EffectifsForm = () => {
                     label: "Hommes",
                   },
                 ],
+                informations: (
+                  <>
+                    <p>
+                      L’effectif des salariés à prendre en compte pour le calcul des indicateurs est apprécié en{" "}
+                      <strong>effectif physique</strong> sur la période de référence annuelle considérée.
+                    </p>
+                    <p className={fr.cx("fr-mb-0")}>
+                      <strong>Ne sont pas pris en compte dans l'effectif&nbsp;:</strong>
+                    </p>
+                    <ul>
+                      <li>les apprentis</li>
+                      <li>les titulaires d'un contrat de professionnalisation</li>
+                      <li>
+                        les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les
+                        intérimaires)
+                      </li>
+                      <li>les expatriés</li>
+                      <li>les salariés en pré-retraite</li>
+                      <li>
+                        les salariés absents plus de 6 mois sur la période de référence (arrêt maladie, congés sans
+                        solde, CDD inférieur à 6 mois etc.).
+                      </li>
+                    </ul>
+                  </>
+                ),
               },
             ]}
             body={categories.map(category => ({
@@ -322,25 +366,16 @@ export const EffectifsForm = () => {
                 colspan: 2,
               },
               {
-                label: `Femme`,
+                label: `Femmes`,
                 data: totalWomen,
               },
               {
-                label: `Homme`,
+                label: `Hommes`,
                 data: totalMen,
               },
             ]}
           />
         </ClientAnimate>
-
-        {total === 0 && (
-          <Alert
-            small
-            severity="warning"
-            description="Vous devez renseigner le nombre de salariés pour pouvoir continuer."
-            className={fr.cx("fr-mb-4w")}
-          />
-        )}
 
         <BackNextButtonsGroup
           backProps={{

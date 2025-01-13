@@ -1,11 +1,13 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
-import { Grid, GridCol } from "@design-system";
+import { Grid, GridCol, Icon } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { first } from "lodash";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -75,6 +77,19 @@ export const SelectSiren = ({
           </div>
         </GridCol>
       </Grid>
+      <div className={fr.cx("fr-pt-3v")}>
+        Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur ce
+        bouton : <br />
+        <Button
+          onClick={e => {
+            e.preventDefault();
+            signIn("moncomptepro", { redirect: false });
+          }}
+        >
+          <Icon icon="fr-icon-refresh-line" />
+          Rafraichir
+        </Button>
+      </div>
     </form>
   );
 };

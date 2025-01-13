@@ -58,7 +58,7 @@ export const EntrepriseForm = () => {
 
   return (
     <FormLayout>
-      <RecapCardCompany full company={companyDto} />
+      <RecapCardCompany mode="view" full company={companyDto} />
 
       <BackNextButtonsGroup
         backProps={{

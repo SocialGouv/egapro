@@ -79,7 +79,10 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   const { token } = req.nextauth;
   if (!token?.email) {
     if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+      const origin = new URL(href).origin;
+      return NextResponse.redirect(
+        `${_config.host}/login?callbackUrl=${encodeURIComponent(href.replace(origin, _config.host))}`,
+      );
     }
   }
 
