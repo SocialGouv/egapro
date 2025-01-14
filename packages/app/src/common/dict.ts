@@ -18,7 +18,7 @@ export const FIRST_YEAR_REPEQ = 2021 as const;
 export const OPMC_OPEN_DURATION_AFTER_EDIT = 2;
 
 /** Need to be set manually because declaration are not opened on Jan 1rst */
-export const CURRENT_YEAR = 2023 as const;
+export const CURRENT_YEAR = 2024 as const;
 /** Need to be set */
 export const PUBLIC_CURRENT_YEAR = 2023;
 
