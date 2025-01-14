@@ -2,7 +2,7 @@ import { type PublicStatsRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { type PublicStats } from "@common/core-domain/domain/PublicStats";
 import { publicStatsMap } from "@common/core-domain/mappers/publicStatsMap";
-import { CURRENT_YEAR } from "@common/dict";
+import { PUBLIC_CURRENT_YEAR } from "@common/dict";
 
 import { type IPublicStatsRepo } from "../IPublicStatsRepo";
 
@@ -20,7 +20,7 @@ export class PostgresPublicStatsRepo implements IPublicStatsRepo {
         WITH ${cteRepEq} AS (
           SELECT
             year,
-            SUM(CASE WHEN year = ${CURRENT_YEAR} THEN 1 ELSE 0 END) AS count,
+            SUM(CASE WHEN year = ${PUBLIC_CURRENT_YEAR} THEN 1 ELSE 0 END) AS count,
             SUM(CASE
               WHEN jsonb_typeof(data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres') = 'number'
               AND (data->'indicateurs'->'représentation_équilibrée'->'pourcentage_femmes_cadres')::text::float >= 30 THEN 1
@@ -111,7 +111,7 @@ export class PostgresPublicStatsRepo implements IPublicStatsRepo {
           t1.year = t2.year
         CROSS JOIN
           ${cteIndexLast3Yavg} t3
-        WHERE t1.year = ${CURRENT_YEAR};`;
+        WHERE t1.year = ${PUBLIC_CURRENT_YEAR};`;
 
     return publicStatsMap.toDomain(raw);
   }
