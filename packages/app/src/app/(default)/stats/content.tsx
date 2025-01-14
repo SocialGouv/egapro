@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { CURRENT_YEAR } from "@common/dict";
+import { PUBLIC_CURRENT_YEAR } from "@common/dict";
 import { CenteredContainer, Grid, GridCol } from "@design-system";
 
 import { getPublicStats } from "./actions";
@@ -40,7 +40,7 @@ export const StatsContent = async () => {
   return (
     <>
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
-        Index Egapro {CURRENT_YEAR + 1} au titre des données {CURRENT_YEAR}
+        Index Egapro {PUBLIC_CURRENT_YEAR + 1} au titre des données {PUBLIC_CURRENT_YEAR}
       </h2>
       <p>Entreprises et unités économiques et sociales (UES) d'au moins 50 salariés</p>
       <Grid haveGutters className={fr.cx("fr-mt-4w")}>
@@ -121,7 +121,7 @@ export const StatsContent = async () => {
         </GridCol>
       </Grid>
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
-        Représentation équilibrée {CURRENT_YEAR + 1} au titre des données {CURRENT_YEAR}
+        Représentation équilibrée {PUBLIC_CURRENT_YEAR + 1} au titre des données {PUBLIC_CURRENT_YEAR}
       </h2>
       <p>Entreprises d'au moins 1000 salariés pour le troisième exercice consécutif.</p>
       <Grid haveGutters className="fr-mt-2w">

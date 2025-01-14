@@ -14,7 +14,7 @@ import {
   COUNTRIES_COG_TO_ISO,
   COUNTY_TO_REGION,
   inseeCodeToCounty,
-  PUBLIC_YEARS,
+  YEARS,
 } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
@@ -219,8 +219,8 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
   const confirmReset = () => {
     if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
       setValue("siren", "");
-      if (PUBLIC_YEARS[0]) {
-        setValue("annéeIndicateurs", PUBLIC_YEARS[0]);
+      if (YEARS[0]) {
+        setValue("annéeIndicateurs", YEARS[0]);
       }
 
       resetFormData();
@@ -251,11 +251,11 @@ export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }
                     {year}
                   </option>
                 )).reverse()
-              : PUBLIC_YEARS.map(year => (
+              : YEARS.map(year => (
                   <option value={year} key={`year-select-${year}`}>
                     {year}
                   </option>
-                ))}
+                )).reverse()}
           </Select>
 
           {user.staff ? (

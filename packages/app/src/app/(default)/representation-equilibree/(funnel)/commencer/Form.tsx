@@ -6,7 +6,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
-import { PUBLIC_YEARS, REPEQ_ADMIN_YEARS } from "@common/dict";
+import { REPEQ_ADMIN_YEARS, YEARS } from "@common/dict";
 import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
@@ -150,11 +150,11 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
                     {year}
                   </option>
                 )).reverse()
-              : PUBLIC_YEARS.map(year => (
+              : YEARS.map(year => (
                   <option value={year} key={`year-select-${year}`}>
                     {year}
                   </option>
-                ))}
+                )).reverse()}
           </Select>
           {session.user.staff ? (
             <Input

@@ -6,6 +6,8 @@ import { type SimpleObject, type UnknownMapping } from "./utils/types";
 // this is first year of egapro existance from where we can search declarations
 export const FIRST_YEAR = 2018 as const;
 
+export const FIRST_DECLARATION_YEAR = 2021 as const;
+
 // this is oldest year of possible index declaration
 export const FIRST_PUBLIC_YEAR = 2021 as const;
 export const FIRST_YEAR_REPEQ = 2021 as const;
@@ -22,7 +24,7 @@ export const CURRENT_YEAR = 2024 as const;
 /** Need to be set */
 export const PUBLIC_CURRENT_YEAR = 2023;
 
-export const YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
+export const YEARS = times(CURRENT_YEAR - FIRST_DECLARATION_YEAR + 1, idx => FIRST_DECLARATION_YEAR + idx);
 export const ADMIN_YEARS = times(CURRENT_YEAR - FIRST_YEAR + 1, idx => FIRST_YEAR + idx);
 export const REPEQ_ADMIN_YEARS = times(CURRENT_YEAR - FIRST_YEAR_REPEQ + 1, idx => FIRST_YEAR_REPEQ + idx);
 export const PUBLIC_YEARS = new Array(PUBLIC_CURRENT_YEAR - FIRST_PUBLIC_YEAR + 1)
