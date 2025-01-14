@@ -39,6 +39,7 @@ export class GetPublicStats extends AbstractCachedUseCase<never, PublicStatsDTO>
       if (countRepEq === 0) return emptyPublicStats as PublicStatsDTO;
 
       const stats = await this.publicStatsRepo.getAll();
+      console.log("stats", stats.index.lastThreeYearsAverage);
       return publicStatsMap.toDTO(stats);
     } catch (error: unknown) {
       console.error(error);

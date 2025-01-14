@@ -69,18 +69,6 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <Box mt="2w">
             <SirenInput />
           </Box>
-          <p>
-            <br />
-            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link
-              target="_blank"
-              href={`https://app${
-                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-              }.moncomptepro.beta.gouv.fr/manage-organizations`}
-            >
-              cliquez ici
-            </Link>
-          </p>
         </Box>
       </MessageProvider>
     );
@@ -97,18 +85,6 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           <Box mt="2w">
             <SirenInput isImpersonating={isImpersonating} loadedSiren={selectedSiren} />
           </Box>
-          <p>
-            <br />
-            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link
-              target="_blank"
-              href={`https://app${
-                config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-              }.moncomptepro.beta.gouv.fr/manage-organizations`}
-            >
-              cliquez ici
-            </Link>
-          </p>
           <Box mt="4w">
             <Heading as="h1" variant="h6" text="Adresses emails rattachées" />
             <EmailOwnerList isEmailLogin={isEmailLogin} siren={selectedSiren} emails={emails} />
@@ -127,18 +103,6 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
             <Box mt="2w">
               <SirenInput />
             </Box>
-            <p>
-              <br />
-              Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-              <Link
-                target="_blank"
-                href={`https://app${
-                  config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-                }.moncomptepro.beta.gouv.fr/manage-organizations`}
-              >
-                cliquez ici
-              </Link>
-            </p>
             <Box mt="4w">Pas d'utilisateur pour ce Siren ou Url invalide</Box>
           </Box>
         </MessageProvider>

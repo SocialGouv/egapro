@@ -171,7 +171,7 @@ const AideSimulation = () => {
                 L.1111-2
               </Link>{" "}
               et{" "}
-              <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000019353569" target="_blank">
+              <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000031565369" target="_blank">
                 L.1111-3
               </Link>{" "}
               du code du travail.
