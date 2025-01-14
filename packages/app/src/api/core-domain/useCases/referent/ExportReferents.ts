@@ -255,7 +255,7 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
       sheet[`B${line}`] = emptyBorderCell;
       sheet[`C${line}`] = {
         t: "s",
-        v: "Coordination régionnale",
+        v: "Coordination régionale",
         s: {
           ...fontBoldStyle,
           ...borderStyle,
