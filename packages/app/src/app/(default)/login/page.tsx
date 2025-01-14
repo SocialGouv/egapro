@@ -39,6 +39,7 @@ function getUriFromUrl(urlString: string): string {
   try {
     const url = new URL(urlString);
     const uri = `${url.pathname}${url.search}${url.hash}`;
+    console.log("URI:", uri);
     return uri;
   } catch (error) {
     console.error("Invalid URL:", error);
