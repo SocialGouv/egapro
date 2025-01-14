@@ -31,7 +31,7 @@ const ReferentListPage = async () => {
         {referents.length ? (
           <ReferentList referents={referents} />
         ) : (
-          <Alert severity="info" small description="Aucun référent Egapro d'enregistré." />
+          <Alert severity="info" small description="Aucun référent Egapro enregistré." />
         )}
       </Container>
     </>
