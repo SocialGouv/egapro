@@ -1,3 +1,19 @@
+## [3.5.2](https://github.com/SocialGouv/egapro/compare/v3.5.1...v3.5.2) (2025-01-15)
+
+
+### Bug Fixes
+
+* constants used for stats ([f562b42](https://github.com/SocialGouv/egapro/commit/f562b42a27118f4497d0f6bb53a5471cf79fe461))
+* import on login page ([53734d0](https://github.com/SocialGouv/egapro/commit/53734d0c085f9e461ed101ace079faf05c9a8431))
+* proconnect redirection ([4f8122c](https://github.com/SocialGouv/egapro/commit/4f8122c0319746f0cb0606437bfa87b130474f00))
+* redirect ([fd63393](https://github.com/SocialGouv/egapro/commit/fd63393628b43e634ef445df8003246ea401d143))
+* redirect ([8c55ff7](https://github.com/SocialGouv/egapro/commit/8c55ff7a035c8341d0c490e079012620e5878ff2))
+* remove console logs ([210a6bc](https://github.com/SocialGouv/egapro/commit/210a6bccb94eefdd64d20f11814a01b700ae50e3))
+* resize minister's logo ([7bae407](https://github.com/SocialGouv/egapro/commit/7bae4071a83f067be1243880511eb20bd71a6e20))
+* stats ([76cac0c](https://github.com/SocialGouv/egapro/commit/76cac0cf6340b58d72533912da0d7195b7a9334b))
+* stats ([123967f](https://github.com/SocialGouv/egapro/commit/123967fb749a42574f3c1f13b2ca8dbcd3f4bace))
+* wording referentListPage ([13a975b](https://github.com/SocialGouv/egapro/commit/13a975bf7a531299947ff5c0f5960799c585c8dc))
+
 ## [3.5.1](https://github.com/SocialGouv/egapro/compare/v3.5.0...v3.5.1) (2024-12-17)
 
 
