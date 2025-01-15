@@ -202,8 +202,7 @@ export const authConfig: AuthOptions = {
     },
     redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${config.host}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      else if (baseUrl != config.host) return `${config.host}/${new URL(url).pathname}`;
+      else if (new URL(url).origin !== baseUrl) return `${config.host}/${new URL(url).pathname}`;
       return config.host;
     },
   },
