@@ -74,15 +74,12 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   const { pathname, href } = req.nextUrl;
-
+  console.log("DEBUG middleware", req.nextUrl);
   // handling authorization by ourselves (and not with authorize callback)
   const { token } = req.nextauth;
   if (!token?.email) {
     if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-      const origin = new URL(href).origin;
-      return NextResponse.redirect(
-        `${_config.host}/login?callbackUrl=${encodeURIComponent(href.replace(origin, _config.host))}`,
-      );
+      return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
     }
   }
 
