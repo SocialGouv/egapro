@@ -66,7 +66,8 @@ export class PostgresPublicStatsRepo implements IPublicStatsRepo {
           FROM 
             ${this.declarationTable}
           WHERE 
-            year >= EXTRACT(YEAR FROM CURRENT_DATE) - 4
+            year > ${PUBLIC_CURRENT_YEAR} - 3
+            AND year <= ${PUBLIC_CURRENT_YEAR}
             AND (data->'entreprise'->'effectif'->'tranche')::text IS NOT NULL
           GROUP BY 
             year, workforce_range
