@@ -77,9 +77,6 @@ export const RecapCardIndicator = ({ name, customContent, edit, déclaration }: 
       : indicateur?.populationFavorable;
   const motifNc = indicateur?.estCalculable === "non" ? indicateur.motifNonCalculabilité : undefined;
 
-  console.log(name);
-  console.log(motifNc);
-
   const getLegend = () => {
     if (name === "conges-maternite") {
       return "";
