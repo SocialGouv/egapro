@@ -20,6 +20,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
+    NODE_ENV: production
 #    EMAIL_LOGIN: "True"
   resources:
     requests:
