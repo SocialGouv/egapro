@@ -1,3 +1,10 @@
+## [3.5.3](https://github.com/SocialGouv/egapro/compare/v3.5.2...v3.5.3) (2025-01-15)
+
+
+### Bug Fixes
+
+* years indicator ([13094f5](https://github.com/SocialGouv/egapro/commit/13094f5c353248118a3f3206e0f75c62583a4abc))
+
 ## [3.5.2](https://github.com/SocialGouv/egapro/compare/v3.5.1...v3.5.2) (2025-01-15)
 
 
