@@ -7,8 +7,8 @@ import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
-import { ProConnectLogin } from "./ProConnectLogin";
 import { LoginRedirect } from "./LoginRedirect";
+import { ProConnectLogin } from "./ProConnectLogin";
 
 const title = "Connexion";
 
