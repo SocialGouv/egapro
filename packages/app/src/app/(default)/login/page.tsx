@@ -3,12 +3,12 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer, Link } from "@design-system";
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
 import { ProConnectLogin } from "./ProConnectLogin";
+import { LoginRedirect } from "./LoginRedirect";
 
 const title = "Connexion";
 
@@ -35,28 +35,15 @@ const signinErrors: Record<string, string> = {
   default: "Impossible de se connecter.",
 };
 
-function getUriFromUrl(urlString: string): string {
-  try {
-    const url = new URL(urlString);
-    const uri = `${url.pathname}${url.search}${url.hash}`;
-    console.log("URI:", uri);
-    return uri;
-  } catch (error) {
-    console.error("Invalid URL:", error);
-    return "";
-  }
-}
-
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
   const session = await getServerSession(authConfig);
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  if (session?.user) redirect(getUriFromUrl(callbackUrl) || "/");
-
   return (
     <CenteredContainer py="6w">
+      <LoginRedirect session={session} callbackUrl={callbackUrl} />
       <h1>{title}</h1>
       {session?.user ? (
         <Alert severity="success" title={session?.user.email} description="Vous êtes déjà connecté·e." />
