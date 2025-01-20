@@ -18,8 +18,8 @@ export function LoginRedirect({ session }: LoginRedirectProps) {
     if (session?.user && savedCallbackUrl) {
       localStorage.removeItem("egapro_callback_url");
       router.push(savedCallbackUrl);
-    }
-  }, [session, router]);
+    } else return router.push("/");
+  }, []);
 
   return null;
 }
