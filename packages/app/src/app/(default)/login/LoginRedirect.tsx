@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { useEffect } from "react";
 
@@ -15,25 +16,32 @@ function getUriFromUrl(urlString: string): string {
 }
 
 interface LoginRedirectProps {
-  callbackUrl: string;
+  callbackUrl?: string;
   session: Session | null;
 }
 
 export function LoginRedirect({ session, callbackUrl }: LoginRedirectProps) {
+  const router = useRouter();
+
   useEffect(() => {
     if (callbackUrl) {
-      localStorage.setItem("egapro_callback_url", callbackUrl);
+      const callbackUrlObj = new URL(callbackUrl);
+      const currentOrigin = window.location.origin;
+      if (callbackUrlObj.origin !== currentOrigin) {
+        console.log("Invalid callback URL:", callbackUrl);
+        localStorage.setItem("egapro_callback_url", callbackUrl);
+      }
     }
   }, [callbackUrl]);
 
   useEffect(() => {
-    if (session?.user) {
-      const savedCallbackUrl = localStorage.getItem("egapro_callback_url");
+    const savedCallbackUrl = localStorage.getItem("egapro_callback_url");
+    if (session?.user && savedCallbackUrl) {
       const redirectUrl = savedCallbackUrl ? getUriFromUrl(savedCallbackUrl) : "/";
       localStorage.removeItem("egapro_callback_url");
-      window.location.href = redirectUrl;
+      router.push(redirectUrl);
     }
-  }, [session?.user]);
+  }, [session?.user, router]);
 
   return null;
 }
