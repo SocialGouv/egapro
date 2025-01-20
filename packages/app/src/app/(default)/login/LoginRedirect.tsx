@@ -19,7 +19,7 @@ export function LoginRedirect({ session }: LoginRedirectProps) {
       localStorage.removeItem("egapro_callback_url");
       router.push(savedCallbackUrl);
     } else return router.push("/");
-  }, []);
+  }, [session, router]);
 
   return null;
 }
