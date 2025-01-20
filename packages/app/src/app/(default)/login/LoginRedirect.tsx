@@ -36,6 +36,8 @@ export function LoginRedirect({ session, callbackUrl }: LoginRedirectProps) {
 
   useEffect(() => {
     const savedCallbackUrl = localStorage.getItem("egapro_callback_url");
+    console.log("savedCallbackUrl", savedCallbackUrl);
+    console.log("session", session);
     if (session?.user && savedCallbackUrl) {
       const redirectUrl = savedCallbackUrl ? getUriFromUrl(savedCallbackUrl) : "/";
       localStorage.removeItem("egapro_callback_url");
