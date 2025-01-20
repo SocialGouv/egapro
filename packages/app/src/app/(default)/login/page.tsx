@@ -7,8 +7,8 @@ import { getServerSession } from "next-auth";
 
 import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
-import { LoginRedirect } from "./LoginRedirect";
 import { ProConnectLogin } from "./ProConnectLogin";
+import { RegisterRedirect } from "./RegisterRedirect";
 
 const title = "Connexion";
 
@@ -43,7 +43,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
 
   return (
     <CenteredContainer py="6w">
-      <LoginRedirect session={session} callbackUrl={callbackUrl} />
+      <RegisterRedirect callbackUrl={callbackUrl} />
       <h1>{title}</h1>
       {session?.user ? (
         <Alert severity="success" title={session?.user.email} description="Vous êtes déjà connecté·e." />
