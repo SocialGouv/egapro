@@ -56,10 +56,10 @@ export const RecapCard = ({
           }}
         />
       )}
-      {sideButtonProps && isStaff && (
+      {sideButtonProps && isStaff && sideButtonProps.iconId === "fr-icon-edit-line" && (
         <Button {...sideButtonProps} className={cx("fr-recap-card--edit-link", sideButtonProps.className)} />
       )}
-      {sideButtonProps && !isStaff && (
+      {sideButtonProps && sideButtonProps.iconId === "fr-icon-info-fill" && (
         <Button {...sideButtonProps} className={cx("fr-icon-information-fill", sideButtonProps.className)} />
       )}
     </div>

@@ -55,7 +55,7 @@ export const CSPModeTable = ({ computer, staff }: CSPModeTableProps) => {
           className="fr-mb-3w"
           severity="info"
           title="L'indicateur n'est pas calculable par CSP"
-          description="L’effectif total des groupes retenus pour le calcul de l'indicateur (c’est-à-dire comptant au moins 3 femmes et 3 hommes) représentent moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs"
+          description="L’effectif total des groupes retenus pour le calcul de l'indicateur (c’est-à-dire comptant au moins 3 femmes et 3 hommes) représente moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs"
         />
       </CenteredContainer>
     );

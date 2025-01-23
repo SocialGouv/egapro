@@ -20,7 +20,7 @@ import { Text } from "./Typography";
 type Props = {
   company: CompanyDTO;
   full?: boolean;
-  mode: "edit" | "redirect" | "view";
+  mode: "admin" | "edit" | "view";
   onSubmit?: (data: CompanyDTO) => void;
   title?: string;
 };
@@ -361,10 +361,10 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
         )}
       </ClientBodyPortal>
 
-      {mode === "redirect" && (
+      {mode === "edit" && (
         <RecapCard title={fullTitle} editLink={funnelStaticConfig["entreprise"].url} content={content} />
       )}
-      {mode === "edit" && (
+      {mode === "admin" && (
         <RecapCard
           title={fullTitle}
           isStaff={isStaff}
@@ -384,7 +384,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
           title={fullTitle}
           isStaff={isStaff}
           sideButtonProps={{
-            iconId: "fr-icon-edit-line",
+            iconId: "fr-icon-info-fill",
             title: titleFull,
             priority: "tertiary no outline",
             style: { alignSelf: "center" },

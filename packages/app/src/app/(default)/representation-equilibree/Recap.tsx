@@ -51,7 +51,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         />
       )}
 
-      <RecapCardCompany mode="view" company={buildCompanyFromRepeq(repEq)} />
+      <RecapCardCompany mode="admin" company={buildCompanyFromRepeq(repEq)} />
 
       {!publicMode && (
         <RecapCard

@@ -61,7 +61,7 @@ export const Indicateur2ou3Note = ({ computer, indicateur, isValid, simple, noBo
           note="NC"
           size="small"
           text={texts.ncText}
-          legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs"
+          legend="L’ensemble des groupes valides (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représente moins de 40% des effectifs"
         />
       ) : (
         <>

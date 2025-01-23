@@ -93,6 +93,7 @@ export const PeriodeReferenceForm = () => {
         draft["remunerations-coefficient-branche"] = undefined;
         draft["remunerations-csp"] = undefined;
         draft["remunerations-resultat"] = undefined;
+        draft["resultat-global"] = undefined;
         draft["augmentations-et-promotions"] = undefined;
         draft["augmentations"] = undefined;
         draft["promotions"] = undefined;

@@ -21,7 +21,9 @@ type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boole
 
 export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
+  console.log(déclaration);
   const router = useRouter();
+  console.log(entreprise);
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
     address: entreprise?.adresse,
@@ -121,7 +123,12 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         }
       />
 
-      <RecapCardCompany mode="edit" company={company} title="Informations Entreprise / UES" onSubmit={onSubmit} />
+      <RecapCardCompany
+        mode={edit ? "edit" : "admin"}
+        company={company}
+        title="Informations Entreprise / UES"
+        onSubmit={onSubmit}
+      />
       {company.ues?.name && (
         <RecapCard
           title="Informations UES"

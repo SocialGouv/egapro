@@ -223,7 +223,7 @@ export const Indic2or3Form = ({ indicateur }: Indic2or3FormProps) => {
               className="fr-mb-3w"
               severity="info"
               title="L'indicateur n'est pas calculable"
-              description="L’effectif total des CSP retenues pour le calcul de l'indicateur (c’est-à-dire comptant au moins 10 femmes et 10 hommes) représentent moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs."
+              description="L’effectif total des CSP retenues pour le calcul de l'indicateur (c’est-à-dire comptant au moins 10 femmes et 10 hommes) représente moins de 40% de l'effectif total pris en compte pour le calcul des indicateurs."
             />
           ) : (
             <>
