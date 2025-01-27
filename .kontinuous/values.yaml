@@ -229,6 +229,7 @@ jobs:
           SENTRY_ORG: incubateur
           SENTRY_PROJECT: egapro-next
           SENTRY_URL: https://sentry.fabrique.social.gouv.fr
+          SENTRY_RELEASE: "{{ .Values.global.isProd | ternary .Values.global.imageTag (.Values.global.isPreProd | ternary .Values.global.shortSha .Values.global.branchSlug32) }}"
         secrets:
           sentry_auth_token:
             secretName: sentry

@@ -90,6 +90,9 @@ module.exports = withSentryConfig(
     project: process.env.SENTRY_PROJECT,
     url: process.env.SENTRY_URL,
     authToken: process.env.SENTRY_AUTH_TOKEN,
+    release: {
+      name: process.env.SENTRY_RELEASE,
+    },
   },
   {
     // For all available options, see:
