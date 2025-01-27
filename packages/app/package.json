@@ -25,7 +25,7 @@
     "@json2csv/node": "^7.0.1",
     "@octokit/rest": "^20.0.2",
     "@react-pdf/renderer": "^3.1.12",
-    "@sentry/nextjs": "^7.92.0",
+    "@sentry/nextjs": "^7.106.0",
     "@socialgouv/matomo-next": "^1.8.0",
     "chart.js": "^4.3.0",
     "chartjs-plugin-datalabels": "^2.2.0",

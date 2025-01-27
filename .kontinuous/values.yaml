@@ -226,6 +226,13 @@ jobs:
           NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
           NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
           EGAPRO_ENV: "{{ .Values.global.env }}"
+          SENTRY_ORG: incubateur
+          SENTRY_PROJECT: egapro-next
+          SENTRY_URL: https://sentry.fabrique.social.gouv.fr
+        secrets:
+          sentry_auth_token:
+            secretName: sentry
+            secretKey: SENTRY_AUTH_TOKEN
 
     build-api:
       use: build

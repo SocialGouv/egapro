@@ -84,10 +84,12 @@ module.exports = withSentryConfig(
     // https://github.com/getsentry/sentry-webpack-plugin#options
 
     // Suppresses source map uploading logs during build
-    silent: true,
-    org: "incubateur",
-    project: "egapro-next",
-    url: "https://sentry.fabrique.social.gouv.fr/",
+    // silent: true,
+
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    url: process.env.SENTRY_URL,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
   },
   {
     // For all available options, see:
