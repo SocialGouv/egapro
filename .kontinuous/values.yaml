@@ -247,7 +247,7 @@ jobs:
           NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
           NEXT_PUBLIC_SENTRY_DSN: "$NEXT_PUBLIC_SENTRY_DSN"
           SENTRY_ORG: incubateur
-          SENTRY_PROJECT: egapro-next
+          SENTRY_PROJECT: egapro-app
           SENTRY_URL: https://sentry2.fabrique.social.gouv.fr
           SENTRY_RELEASE: "{{ .Values.global.isProd | ternary .Values.global.imageTag (.Values.global.isPreProd | ternary .Values.global.shortSha .Values.global.branchSlug32) }}"
         secrets:
