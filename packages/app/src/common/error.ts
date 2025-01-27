@@ -24,7 +24,7 @@ export function captureError(error: unknown, context: ErrorContext): Error {
       stack: errorObject.stack,
     },
     runtime: {
-      environment: process.env.EGAPRO_ENV || "development",
+      environment: process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev",
       type: context.type,
     },
   };

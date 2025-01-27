@@ -13,7 +13,7 @@ documentation:
 # List all the tools used by the team
 tools:
   ticketing: https://github.com/SocialGouv/egapro/issues
-  sentry: https://sentry.fabrique.social.gouv.fr/incubateur/egapro
+  sentry: https://sentry2.fabrique.social.gouv.fr/organizations/incubateur/projects/egapro-app/
   matomo: https://matomo.fabrique.social.gouv.fr
   smtp: tipimail
 

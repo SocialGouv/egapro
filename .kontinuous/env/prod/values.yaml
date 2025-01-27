@@ -1,6 +1,5 @@
 global:
   host: egapro.travail.gouv.fr
-  sentryFront: "https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
 
 api:
   autoscale:
@@ -13,7 +12,13 @@ api:
       cpu: 2
       memory: 2G
   vars:
-    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+    EGAPRO_SENTRY_DSN: "{{ .Values.global.sentry.apiDSN }}"
+  env:
+    - name: EGAPRO_SENTRY_DSN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: API_SENTRY_DSN
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
@@ -55,9 +60,3 @@ nginx:
   autoscale:
     enabled: true
 
-jobs:
-  runs:
-    build-app:
-      with:
-        buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"

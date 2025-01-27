@@ -5,11 +5,11 @@
 import * as Sentry from "@sentry/nextjs";
 import { Replay } from "@sentry/replay";
 
-const ENVIRONMENT = process.env.EGAPRO_ENV || "development";
+const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
 Sentry.init({
-  dsn: "https://28b6186c058a49fc94ee665667e44612@sentry.fabrique.social.gouv.fr/99",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
 
   // Optimal sample rates based on environment
