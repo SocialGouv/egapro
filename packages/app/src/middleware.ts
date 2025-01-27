@@ -73,7 +73,8 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
 };
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
-  const { pathname, href } = req.nextUrl;
+  const { pathname } = req.nextUrl;
+  const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
   // handling authorization by ourselves (and not with authorize callback)
   const { token } = req.nextauth;
