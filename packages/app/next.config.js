@@ -76,12 +76,16 @@ module.exports = nextConfig;
 // Injected content via Sentry wizard below
 
 const { withSentryConfig } = require("@sentry/nextjs");
+const Sentry = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
   module.exports,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
+
+    // Clean output before source map upload
+    cleanArtifacts: true,
 
     // Enable debug IDs
     injectDebugIds: true,
@@ -90,16 +94,13 @@ module.exports = withSentryConfig(
     sourcemaps: {
       assets: "./**/*.{js,map}",
       ignore: ["node_modules/**/*"],
+      deleteSourcemapsAfterUpload: true,
     },
 
     org: process.env.SENTRY_ORG,
     project: process.env.SENTRY_PROJECT,
     url: process.env.SENTRY_URL,
     authToken: process.env.SENTRY_AUTH_TOKEN,
-    release: process.env.SENTRY_RELEASE,
-    setCommits: {
-      auto: true,
-    },
 
     // Enable debug mode for more verbose output
     debug: true,
@@ -125,6 +126,14 @@ module.exports = withSentryConfig(
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
+
+    // Enable release injection and component names
+    release: {
+      inject: true,
+      name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    },
+    includeNames: true,
+    autoInstrumentServerFunctions: false,
 
     // Enables automatic instrumentation of Vercel Cron Monitors.
     // See the following for more information:
