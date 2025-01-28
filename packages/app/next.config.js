@@ -83,8 +83,14 @@ module.exports = withSentryConfig(
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
 
-    // Suppresses source map uploading logs during build
-    // silent: true,
+    // Enable debug IDs
+    injectDebugIds: true,
+
+    // Enable source map uploading
+    sourcemaps: {
+      assets: "./**/*.{js,map}",
+      ignore: ["node_modules/**/*"],
+    },
 
     org: process.env.SENTRY_ORG,
     project: process.env.SENTRY_PROJECT,
@@ -94,6 +100,12 @@ module.exports = withSentryConfig(
     setCommits: {
       auto: true,
     },
+
+    // Enable debug mode for more verbose output
+    debug: true,
+
+    // Suppresses source map uploading logs during build
+    // silent: true,
   },
   {
     // For all available options, see:
