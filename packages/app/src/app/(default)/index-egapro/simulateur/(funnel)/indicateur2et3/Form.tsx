@@ -288,7 +288,7 @@ export const Indic2and3Form = () => {
                                   <sup>*</sup>
                                 </strong>
                               )}{" "}
-                              : <strong>{computed?.equivalentEmployeeCountGap}</strong>
+                              : <strong>{computed?.equivalentEmployeeCountGap?.toString().replace(".", ",")}</strong>
                             </>
                           }
                         />
