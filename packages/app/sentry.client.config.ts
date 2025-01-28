@@ -3,27 +3,55 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { replayIntegration } from "@sentry/nextjs";
+
+const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
+const IS_PRODUCTION = ENVIRONMENT === "production";
 
 Sentry.init({
-  dsn: "https://28b6186c058a49fc94ee665667e44612@sentry.fabrique.social.gouv.fr/99",
-  environment: process.env.EGAPRO_ENV || "dev",
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 0.1,
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: ENVIRONMENT,
+  tunnel: "/monitoring",
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
-
+  // Optimal sample rates based on environment
+  tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
   replaysOnErrorSampleRate: 1.0,
+  replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0.5,
 
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+  debug: !IS_PRODUCTION,
 
-  // You can remove this option if you're not planning to use the Sentry Session Replay feature:
+  // Enable performance monitoring through traces
+  enableTracing: true,
+
+  beforeSend(event) {
+    // Filter out non-error events in production
+    if (IS_PRODUCTION && !event.exception) return null;
+
+    // Filter out known unnecessary errors
+    const ignoreErrors = [
+      "ResizeObserver loop limit exceeded",
+      "Network request failed",
+      /^Loading chunk .* failed/,
+      /^Loading CSS chunk .* failed/,
+    ];
+
+    if (
+      event.exception &&
+      ignoreErrors.some(pattern => {
+        if (typeof pattern === "string") {
+          return event.exception?.values?.[0]?.value?.includes(pattern);
+        }
+        return pattern.test(event.exception?.values?.[0]?.value || "");
+      })
+    ) {
+      return null;
+    }
+
+    return event;
+  },
+
   integrations: [
-    // eslint-disable-next-line import/namespace
-    new Sentry.Replay({
-      // Additional Replay configuration goes in here, for example:
+    replayIntegration({
       maskAllText: true,
       blockAllMedia: true,
     }),

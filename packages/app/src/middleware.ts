@@ -1,4 +1,5 @@
 import { config as _config } from "@common/config";
+import { captureError } from "@common/error";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
@@ -73,27 +74,42 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
 };
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
-  const { pathname } = req.nextUrl;
-  const href = `${_config.host}${pathname}${req.nextUrl.search}`;
+  try {
+    const { pathname } = req.nextUrl;
+    const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
-  // handling authorization by ourselves (and not with authorize callback)
-  const { token } = req.nextauth;
-  if (!token?.email) {
-    if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+    // handling authorization by ourselves (and not with authorize callback)
+    const { token } = req.nextauth;
+    if (!token?.email) {
+      if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
+        return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+      }
     }
-  }
 
-  const isStaff = token?.user?.staff || token?.staff.impersonating || false;
-  if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
-    return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
-  }
+    const isStaff = token?.user?.staff || token?.staff.impersonating || false;
+    if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
+      return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
+    }
 
-  return cspMiddleware(req, event);
+    return cspMiddleware(req, event);
+  } catch (error) {
+    captureError(error, {
+      type: "middleware",
+      url: req.url,
+      method: req.method,
+      path: req.nextUrl.pathname,
+      headers: Object.fromEntries(req.headers),
+    });
+
+    // Return a generic error response
+    return new NextResponse(null, {
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
+  }
 };
 
-// export const middleware = nextMiddleware;
-export const middleware = withAuth(
+// Create the wrapped middleware with error handling
+const wrappedMiddleware = withAuth(
   // Next Middleware
   nextMiddleware,
   // Next auth config - will run **before** middleware
@@ -105,5 +121,7 @@ export const middleware = withAuth(
   },
 );
 
-// eslint-disable-next-line import/no-default-export -- don't know why since 13.4.4 next need a default import in addition to named one
-export default middleware;
+// Next.js requires both named and default exports for middleware
+// eslint-disable-next-line import/no-default-export
+export default wrappedMiddleware;
+export const middleware = wrappedMiddleware;

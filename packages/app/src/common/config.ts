@@ -29,7 +29,7 @@ export const config = {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),
   },
-  env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
+  env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.NEXT_PUBLIC_EGAPRO_ENV, "dev"),
   get ff() {
     return {
       // apiV2: {

@@ -1,3 +1,5 @@
+import { config } from "@common/config";
+import { SentryTest } from "@components/utils/SentryTest";
 import { type PropsWithChildren } from "react";
 
 import { Footer } from "../Footer";
@@ -15,6 +17,7 @@ const DefaultLayout = async ({ children }: PropsWithChildren) => {
         {children}
       </main>
       <Footer />
+      {config.env === "dev" && <SentryTest />}
     </div>
   );
 };

@@ -76,6 +76,7 @@ module.exports = nextConfig;
 // Injected content via Sentry wizard below
 
 const { withSentryConfig } = require("@sentry/nextjs");
+const Sentry = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
   module.exports,
@@ -83,11 +84,29 @@ module.exports = withSentryConfig(
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
 
+    // Clean output before source map upload
+    cleanArtifacts: true,
+
+    // Enable debug IDs
+    injectDebugIds: true,
+
+    // Enable source map uploading
+    sourcemaps: {
+      assets: "./**/*.{js,map}",
+      ignore: ["node_modules/**/*"],
+      deleteSourcemapsAfterUpload: true,
+    },
+
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    url: process.env.SENTRY_URL,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+
+    // Enable debug mode for more verbose output
+    debug: true,
+
     // Suppresses source map uploading logs during build
-    silent: true,
-    org: "incubateur",
-    project: "egapro-next",
-    url: "https://sentry.fabrique.social.gouv.fr/",
+    // silent: true,
   },
   {
     // For all available options, see:
@@ -99,14 +118,22 @@ module.exports = withSentryConfig(
     // Transpiles SDK to be compatible with IE11 (increases bundle size)
     transpileClientSDK: true,
 
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
+    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers and CORS issues
     tunnelRoute: "/monitoring",
 
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
+    // Don't hide source maps from generated client bundles
+    hideSourceMaps: false,
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
+
+    // Enable release injection and component names
+    release: {
+      inject: true,
+      name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    },
+    includeNames: true,
+    autoInstrumentServerFunctions: false,
 
     // Enables automatic instrumentation of Vercel Cron Monitors.
     // See the following for more information:
