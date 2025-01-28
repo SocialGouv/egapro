@@ -22,12 +22,6 @@ x-secure-headers: &headers >-
 
   more_set_headers "Cross-Origin-Opener-Policy: same-origin";
 
-  location /api/monitoring {
-    more_set_headers "Access-Control-Allow-Origin: *";
-    more_set_headers "Access-Control-Allow-Methods: POST, OPTIONS";
-    more_set_headers "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, sentry-trace";
-  }
-
 global:
   pgSecretName: pg-app
 
