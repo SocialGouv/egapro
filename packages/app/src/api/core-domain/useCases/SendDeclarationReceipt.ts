@@ -34,7 +34,7 @@ export class SendDeclarationReceipt implements UseCase<Input, void> {
         throw new SendDeclarationReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
-      const referent = await this.referentRepo.getOneByRegion(declaration.declaration?.company?.region);
+      const referent = await this.referentRepo.getOneByCounty(declaration.declaration?.company?.county);
       const buffer = await this.jsxPdfService.buffer(DeclarationReceipt(declaration));
 
       const url = `${config.host}/index-egapro/declaration/${siren}/${year}`;
