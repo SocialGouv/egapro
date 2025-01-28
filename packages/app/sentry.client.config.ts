@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { Replay } from "@sentry/replay";
+import { replayIntegration } from "@sentry/nextjs";
 
 const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";
@@ -23,7 +23,7 @@ Sentry.init({
   enableTracing: true,
 
   // Track releases for better error monitoring
-  release: process.env.NEXT_PUBLIC_GITHUB_SHA || "development",
+  release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || ENVIRONMENT,
 
   beforeSend(event) {
     // Filter out non-error events in production
@@ -53,7 +53,7 @@ Sentry.init({
   },
 
   integrations: [
-    new Replay({
+    replayIntegration({
       maskAllText: true,
       blockAllMedia: true,
     }),

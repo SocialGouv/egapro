@@ -90,8 +90,9 @@ module.exports = withSentryConfig(
     project: process.env.SENTRY_PROJECT,
     url: process.env.SENTRY_URL,
     authToken: process.env.SENTRY_AUTH_TOKEN,
-    release: {
-      name: process.env.SENTRY_RELEASE,
+    release: process.env.SENTRY_RELEASE,
+    setCommits: {
+      auto: true,
     },
   },
   {
@@ -107,8 +108,8 @@ module.exports = withSentryConfig(
     // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
     tunnelRoute: "/monitoring",
 
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
+    // Don't hide source maps from generated client bundles
+    hideSourceMaps: false,
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,

@@ -22,7 +22,7 @@ Sentry.init({
   enableTracing: true,
 
   // Track releases for better error monitoring
-  release: process.env.NEXT_PUBLIC_GITHUB_SHA || ENVIRONMENT,
+  release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || ENVIRONMENT,
 
   beforeSend(event) {
     // Filter out non-error events in production
