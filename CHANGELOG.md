@@ -1,3 +1,26 @@
+## [3.5.4](https://github.com/SocialGouv/egapro/compare/v3.5.3...v3.5.4) (2025-01-29)
+
+
+### Bug Fixes
+
+* [#2337](https://github.com/SocialGouv/egapro/issues/2337) ([#2408](https://github.com/SocialGouv/egapro/issues/2408)) ([7a3f527](https://github.com/SocialGouv/egapro/commit/7a3f5273b41342118cb77c7fa2c133f0c087b73a))
+* [#2398](https://github.com/SocialGouv/egapro/issues/2398) ([#2410](https://github.com/SocialGouv/egapro/issues/2410)) ([3cff22e](https://github.com/SocialGouv/egapro/commit/3cff22e049e023fbee7b4ef443fdcaff359280eb))
+* [#2407](https://github.com/SocialGouv/egapro/issues/2407) ([#2409](https://github.com/SocialGouv/egapro/issues/2409)) ([eb66f7d](https://github.com/SocialGouv/egapro/commit/eb66f7d524a96d0166eff54b5fc4a5298b570998))
+* **ci-cd:** use token-bureau ([#2393](https://github.com/SocialGouv/egapro/issues/2393)) ([45526c9](https://github.com/SocialGouv/egapro/commit/45526c94d9e5d7b91f169b0c3c7721735f44a044))
+* next middleware private route redirection href issue ([#2402](https://github.com/SocialGouv/egapro/issues/2402)) ([e2c4f1c](https://github.com/SocialGouv/egapro/commit/e2c4f1c0226f1620273a5b138ca850e31ae8a125))
+* redirection ([30d76c7](https://github.com/SocialGouv/egapro/commit/30d76c7e8e7e5d590bac4d8c8edb8fb39ce25223))
+* redirection login ([964ff16](https://github.com/SocialGouv/egapro/commit/964ff1663a83ca6d3db08ec93473ede91e705f52))
+* redirection login ([0dcf4be](https://github.com/SocialGouv/egapro/commit/0dcf4be2dca064c3eea0a9400a3886c9f5a3f0a7))
+* redirection login ([e27873d](https://github.com/SocialGouv/egapro/commit/e27873da38c14d606e4f56f9647317fb9ac78a0a))
+* redirection login ([cd0d76e](https://github.com/SocialGouv/egapro/commit/cd0d76e65da03aa818855373b40aef211960b6ae))
+* redirection login ([47192e9](https://github.com/SocialGouv/egapro/commit/47192e91f1e88be9eff79bd03bf7e77f7b05b6cf))
+* redirection login ([412914f](https://github.com/SocialGouv/egapro/commit/412914f1c23f0aac45452c78a5572abcbbe4e1a7))
+* redirection login ([bf0c606](https://github.com/SocialGouv/egapro/commit/bf0c606805ea338df92bad98f281fcde10dfbf39))
+* redirection login ([025bb7a](https://github.com/SocialGouv/egapro/commit/025bb7aaf9f8eb40088d87a76054b168c0e53f6d))
+* redirection login ([afe095f](https://github.com/SocialGouv/egapro/commit/afe095f82a12148076264685a4e4f8cb744f0dff))
+* remove old redirection fix ([fa42346](https://github.com/SocialGouv/egapro/commit/fa423465cb94dbd48997d4a9e572d0211d222232))
+* wording and edit reference period ([b3b0745](https://github.com/SocialGouv/egapro/commit/b3b0745db6c1bdf766eac2ba4edd5a295e4c10ea))
+
 ## [3.5.3](https://github.com/SocialGouv/egapro/compare/v3.5.2...v3.5.3) (2025-01-15)
 
 
