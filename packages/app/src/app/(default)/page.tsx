@@ -1,17 +1,14 @@
-import { authConfig } from "@api/core-domain/infra/auth/config";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system";
-import { getServerSession } from "next-auth";
 
 import styles from "./index.module.css";
-import { LoginRedirect } from "./login/LoginRedirect";
+
+export const dynamic = "force-static";
 
 const Home = async () => {
-  const session = await getServerSession(authConfig);
   return (
     <>
-      <LoginRedirect session={session} />
       <Box pt="9w" pb="4w" className={styles.hero}>
         <Container>
           <Grid haveGutters>
