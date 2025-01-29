@@ -33,7 +33,7 @@ export class SendOpmcReceipt implements UseCase<Input, void> {
         throw new SendOpmcReceiptNotFoundError(`No declaration found with siren ${siren} and year ${year}`);
       }
 
-      const referent = await this.referentRepo.getOneByRegion(declarationOpmc.declaration?.company?.region);
+      const referent = await this.referentRepo.getOneByCounty(declarationOpmc.declaration?.company?.county);
       const buffer = await this.jsxPdfService.buffer(DeclarationReceipt(declarationOpmc));
 
       await this.globalMailerService.init();

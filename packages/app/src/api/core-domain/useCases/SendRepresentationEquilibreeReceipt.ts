@@ -36,7 +36,7 @@ export class SendRepresentationEquilibreeReceipt implements UseCase<Input, void>
         );
       }
 
-      const referent = await this.referentRepo.getOneByRegion(representationEquilibree.company?.region);
+      const referent = await this.referentRepo.getOneByCounty(representationEquilibree.company?.county);
       const buffer = await this.jsxPdfService.buffer(
         RepresentationEquilibreeReceipt({ repEq: representationEquilibree }),
       );
