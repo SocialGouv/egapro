@@ -8,7 +8,6 @@ export const SentryTest = () => {
     // Log configuration for debugging
     console.log("Sentry Configuration:", {
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-      url: process.env.SENTRY_URL,
     });
 
     // Create and throw an error to be automatically captured by Sentry

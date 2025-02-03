@@ -11,8 +11,7 @@ const IS_PRODUCTION = ENVIRONMENT === "production";
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
-  tunnel: "/api/monitoring/tunnel",
-
+  tunnel: "/api/monitoring/envelope",
   // Optimal sample rates based on environment
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
   replaysOnErrorSampleRate: 1.0,
@@ -24,6 +23,9 @@ Sentry.init({
   enableTracing: true,
 
   beforeSend(event) {
+    // Log the event being sent
+    console.log("Sentry event:", event);
+
     // Filter out non-error events in production
     if (IS_PRODUCTION && !event.exception) return null;
 

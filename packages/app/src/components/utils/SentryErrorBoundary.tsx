@@ -19,12 +19,21 @@ export class SentryErrorBoundary extends Component<PropsWithChildren, State> {
 
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.log("Error caught by Sentry boundary:", error, errorInfo);
-    Sentry.captureException(error, {
-      contexts: {
-        react: {
-          componentStack: errorInfo.componentStack,
-        },
-      },
+
+    // Add more context to the error
+    const errorWithContext = new Error(error.message);
+    errorWithContext.name = "ReactError: " + error.name;
+    errorWithContext.stack = error.stack;
+
+    // Capture with full context
+    Sentry.withScope(scope => {
+      scope.setTag("mechanism", "react-error-boundary");
+      scope.setContext("react", {
+        componentStack: errorInfo.componentStack,
+      });
+      scope.setLevel("error");
+      console.log("Sending error to Sentry...");
+      Sentry.captureException(errorWithContext);
     });
   }
 
