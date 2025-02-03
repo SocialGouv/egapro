@@ -11,6 +11,7 @@ const IS_PRODUCTION = ENVIRONMENT === "production";
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
+  tunnel: "/api/monitoring/tunnel",
 
   // Optimal sample rates based on environment
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,

@@ -45,10 +45,6 @@ const nextConfig = {
         source: "/api/public/referents_egalite_professionnelle",
         destination: "/api/public/referents_egalite_professionnelle/json",
       },
-      {
-        source: "/_sentry/:path*",
-        destination: `${process.env.SENTRY_URL}/api/:path*`,
-      },
     ];
   },
   async headers() {
@@ -59,19 +55,6 @@ const nextConfig = {
           {
             key: "Content-type",
             value: "application/json; charset=utf-8",
-          },
-        ],
-      },
-      {
-        source: "/_sentry/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-          {
-            key: "Access-Control-Allow-Headers",
-            value:
-              "X-Sentry-Auth,X-CSRF-Token,X-Requested-With,Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Date,X-Api-Version",
           },
         ],
       },
@@ -136,7 +119,7 @@ module.exports = withSentryConfig(
     transpileClientSDK: true,
 
     // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers and CORS issues
-    tunnelRoute: "/_sentry",
+    // tunnelRoute: "/_sentry", // Using custom tunnel endpoint instead
 
     // Don't hide source maps from generated client bundles
     hideSourceMaps: false,
