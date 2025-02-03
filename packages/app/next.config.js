@@ -45,6 +45,10 @@ const nextConfig = {
         source: "/api/public/referents_egalite_professionnelle",
         destination: "/api/public/referents_egalite_professionnelle/json",
       },
+      {
+        source: "/api/monitoring/:path*",
+        destination: `${process.env.SENTRY_URL}/api/:path*`,
+      },
     ];
   },
   async headers() {
@@ -55,6 +59,23 @@ const nextConfig = {
           {
             key: "Content-type",
             value: "application/json; charset=utf-8",
+          },
+        ],
+      },
+      {
+        source: "/api/monitoring/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "X-Sentry-Auth, Content-Type",
           },
         ],
       },
