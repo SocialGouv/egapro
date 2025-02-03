@@ -10,9 +10,14 @@ export const SentryTest = () => {
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     });
 
-    // Create and throw an error to be automatically captured by Sentry
+    // Create and throw an error that will be caught by the error boundary
     const error = new Error("Test error for Sentry integration");
     error.name = "SentryTestError";
+    error.cause = "Manual test trigger";
+
+    // Add a stack trace starting from this point
+    Error.captureStackTrace(error, triggerError);
+
     throw error;
   }, []);
 
