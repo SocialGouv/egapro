@@ -18,7 +18,7 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
   replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0.5,
 
-  debug: !IS_PRODUCTION,
+  debug: true, // Temporarily enable debug mode to troubleshoot
 
   // Enable performance monitoring through traces
   enableTracing: true,
