@@ -5914,17 +5914,17 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-typescript-sort-keys@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "eslint-plugin-typescript-sort-keys@npm:3.1.0"
+  version: 3.3.0
+  resolution: "eslint-plugin-typescript-sort-keys@npm:3.3.0"
   dependencies:
     "@typescript-eslint/experimental-utils": "npm:^5.0.0"
     json-schema: "npm:^0.4.0"
     natural-compare-lite: "npm:^1.4.0"
   peerDependencies:
-    "@typescript-eslint/parser": ^6
+    "@typescript-eslint/parser": ">=6"
     eslint: ^7 || ^8
     typescript: ^3 || ^4 || ^5
-  checksum: 746ab5b1ab5f33102a603347b42c28cf51bc05d7d81f606a990e11d8ed39b93066c6c9575bb1031e64ca796ab44e97fec48389bd232fd659944920eee42f5223
+  checksum: d374611e9d3b2972d6cb4fefd88890773520918e9c8e7efef406dc2b02cc9f153c4ff78d64aa1e636896ce0708a7512a4b1c629185de869211f86937920e834d
   languageName: node
   linkType: hard
 
