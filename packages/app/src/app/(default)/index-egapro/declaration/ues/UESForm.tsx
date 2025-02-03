@@ -11,6 +11,7 @@ import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { ClientOnly } from "@components/utils/ClientOnly";
+import { alternativeTableStyles as styles } from "@design-system";
 import { AlertMessage } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR, CompanyErrorCodes } from "@globalActions/companyErrorCodes";
@@ -21,7 +22,6 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import styles from "../../../../../design-system/base/AlternativeTable.module.css";
 import { INVALID_SIREN, MANDATORY_SIREN, NOT_FOUND_SIREN } from "../../../messages";
 import { BackNextButtons } from "../BackNextButtons";
 import { funnelConfig, type FunnelKey } from "../declarationFunnelConfiguration";
