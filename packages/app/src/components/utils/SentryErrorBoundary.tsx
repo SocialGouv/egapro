@@ -48,8 +48,18 @@ export class SentryErrorBoundary extends Component<PropsWithChildren, State> {
       scope.setLevel("error");
 
       console.log("Sending error to Sentry...");
-      const eventId = Sentry.captureException(errorWithContext);
-      console.log("Error sent to Sentry with event ID:", eventId);
+      try {
+        const eventId = Sentry.captureException(errorWithContext);
+        console.log("Error sent to Sentry with event ID:", eventId);
+
+        // Flush events to ensure they are sent immediately
+        Sentry.flush().then(
+          () => console.log("Successfully flushed Sentry events"),
+          error => console.error("Failed to flush Sentry events:", error),
+        );
+      } catch (e) {
+        console.error("Failed to send error to Sentry:", e);
+      }
     });
   }
 

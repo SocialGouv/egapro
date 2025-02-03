@@ -5,20 +5,24 @@ import { useCallback } from "react";
 
 export const SentryTest = () => {
   const triggerError = useCallback(() => {
-    // Log configuration for debugging
-    console.log("Sentry Configuration:", {
+    // Log configuration and start of error test
+    console.log("Starting Sentry test with config:", {
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+      environment: process.env.NEXT_PUBLIC_EGAPRO_ENV,
     });
 
+    console.log("Triggering test error - this should be caught by the error boundary...");
+
     // Create and throw an error that will be caught by the error boundary
-    const error = new Error("Test error for Sentry integration");
-    error.name = "SentryTestError";
-    error.cause = "Manual test trigger";
-
-    // Add a stack trace starting from this point
-    Error.captureStackTrace(error, triggerError);
-
-    throw error;
+    try {
+      // Create an error with a stack trace by actually throwing it
+      throw new Error("Test error for Sentry integration");
+    } catch (e) {
+      const error = e as Error;
+      error.name = "SentryTestError";
+      error.cause = "Manual test trigger";
+      throw error;
+    }
   }, []);
 
   return (

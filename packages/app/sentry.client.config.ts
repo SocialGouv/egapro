@@ -19,15 +19,28 @@ Sentry.init({
 
   debug: true, // Temporarily enable debug mode to troubleshoot
 
+  // Development-specific settings
+  maxBreadcrumbs: 10,
+  autoSessionTracking: false,
+  sendClientReports: true, // Enable immediate client reports
+  sampleRate: 1.0, // Capture all errors in development
+
   // Enable performance monitoring through traces
   enableTracing: true,
 
   beforeSend(event) {
-    // Log the event being sent
-    console.log("Sentry event:", event);
+    console.log("Sentry beforeSend called with event:", {
+      eventId: event.event_id,
+      type: event.type,
+      exception: event.exception?.values?.[0],
+      environment: event.environment,
+    });
 
     // Filter out non-error events in production
-    if (IS_PRODUCTION && !event.exception) return null;
+    if (IS_PRODUCTION && !event.exception) {
+      console.log("Filtering out non-error event in production");
+      return null;
+    }
 
     // Filter out known unnecessary errors
     const ignoreErrors = [
