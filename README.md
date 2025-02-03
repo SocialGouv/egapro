@@ -6,52 +6,156 @@ Prod : <https://egapro.travail.gouv.fr/>
 
 Préprod : <https://egapro-preprod.ovh.fabrique.social.gouv.fr/>
 
-## Installer
+## Installation
+
+### Prérequis
+
+- Node.js >= 18
+- Yarn
+- Python (pour les scripts optionnels)
+
+### Installation des dépendances
 
 ```bash
-yarn
-```
+# Installation des dépendances Node.js
+yarn install
 
-Si developpement Python en local :
-
-```bash
+# Si développement Python en local (optionnel)
 yarn setup-python
 ```
 
-## Lancer
+### Variables d'environnement
 
-Un composant à la fois :
+Créer un fichier `.env` à la racine du projet :
+```bash
+# Configuration de la base de données
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/egapro
+
+# Configuration de l'API
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+### Lancer l'application
+
+1. **Mode développement par composant**
 
 ```bash
+# API
 yarn dev:api
+
+# Application Next.js
 yarn dev:app
+
+# Serveur de mail de développement
 yarn dev:maildev
 ```
 
-- [api         -> http://localhost:2626](http://localhost:2626)
-    - la configuration vers la DB se fait dans le fichier .env de la racine du monorepo
-- [app         -> http://localhost:3000](http://localhost:3000)
-- [maildev     -> http://localhost:1080](http://localhost:1080)
+Accès aux services :
+- Application : [http://localhost:3000](http://localhost:3000)
+- API : [http://localhost:2626](http://localhost:2626)
+- MailDev : [http://localhost:1080](http://localhost:1080)
 
-Tout en un :
+2. **Mode développement complet**
 
 ```bash
+# Lance tous les services en parallèle
 yarn dev
 ```
 
-## Pour tout arrêter
+3. **Arrêter l'application**
 
-Faire `Ctl-C` sur tous les terminaux
+- Utiliser `Ctrl+C` dans chaque terminal
+- Pour l'API et maildev : `docker-compose down`
 
-Remarque : pour arrêter l'API, la déclaration ou maildev, on peut faire `docker-compose down`.
-
-## Tests
+### Tests et vérifications
 
 ```bash
+# Lancer tous les tests
+yarn test
+
+# Vérifier le code
 yarn check-all
 ```
 
-Cette commande lance le linter, la compilation des types TS et les tests.
+## Configuration
+
+### Variables annuelles importantes
+
+- `CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
+  - Année de déclaration courante ouverte 
+  - Détermine les années disponibles pour les déclarations
+
+- `PUBLIC_CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
+  - Année de référence pour les calculs de statistiques publiques
+  - Utilisée pour l'affichage des données publiques et des indicateurs
+
+## Architecture
+
+### Structure des fichiers
+
+```
+packages/app/src/
+├── app/                            # Routes et UI Next.js
+│   ├── (default)/                  # Layout principal
+│   │   ├── index-egapro/
+│   │   │   ├── declaration/
+│   │   │   │   └── actions.ts      # Server actions
+├── api/
+│   └── core-domain/               # Logique métier
+│       ├── useCases/              # Cas d'utilisation
+│       │   └── SaveDeclaration.ts
+│       └── infra/                 # Infrastructure
+├── common/
+    └── core-domain/              # Domain partagé
+        └── computers/            # Calculs d'index
+```
+
+### Concepts clés
+
+1. **Forms et Validation** :
+   - React Hook Form pour la gestion des formulaires
+   - Zod pour la validation des données côté client
+   - Exemple :
+   ```tsx
+   const schema = z.object({
+     email: z.string().email(),
+     password: z.string().min(8)
+   });
+   ```
+
+2. **Server Actions** :
+   - Actions serveur dans `app/(default)/*/actions.ts`
+   - Utilisation des use cases du domaine
+   - Exemple :
+   ```ts
+   // app/(default)/index-egapro/declaration/actions.ts
+   export async function saveDeclaration(declaration: CreateDeclarationDTO) {
+     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
+     return useCase.execute(declaration);
+   }
+   ```
+
+3. **Use Cases** :
+   - Implémentation des cas d'utilisation métier
+   - Validation des règles de gestion
+   - Exemple :
+   ```ts
+   // api/core-domain/useCases/SaveDeclaration.ts
+   export class SaveDeclaration implements UseCase {
+     constructor(
+       private readonly declarationRepo: IDeclarationRepo,
+       private readonly entrepriseService: IEntrepriseService
+     ) {}
+   }
+   ```
+
+4. **Domain et Calculs** :
+   - Logique métier dans `core-domain`
+   - Calculs d'index dans `computers/`
+   - Indicateurs spécifiques :
+     - IndicateurUnComputer : Calcul écart rémunération
+     - IndicateurDeuxComputer : Calcul écart augmentations
+     - IndicateurTroisComputer : Calcul écart promotions
 
 ## FAQ
 
