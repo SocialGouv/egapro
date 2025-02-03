@@ -46,7 +46,7 @@ const nextConfig = {
         destination: "/api/public/referents_egalite_professionnelle/json",
       },
       {
-        source: "/api/monitoring/:path*",
+        source: "/_sentry/:path*",
         destination: `${process.env.SENTRY_URL}/api/:path*`,
       },
     ];
@@ -63,19 +63,15 @@ const nextConfig = {
         ],
       },
       {
-        source: "/api/monitoring/:path*",
+        source: "/_sentry/:path*",
         headers: [
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "*",
-          },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, OPTIONS",
-          },
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
           {
             key: "Access-Control-Allow-Headers",
-            value: "X-Sentry-Auth, Content-Type",
+            value:
+              "X-Sentry-Auth,X-CSRF-Token,X-Requested-With,Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Date,X-Api-Version",
           },
         ],
       },
@@ -140,7 +136,7 @@ module.exports = withSentryConfig(
     transpileClientSDK: true,
 
     // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers and CORS issues
-    // tunnelRoute: "/monitoring",
+    tunnelRoute: "/_sentry",
 
     // Don't hide source maps from generated client bundles
     hideSourceMaps: false,
