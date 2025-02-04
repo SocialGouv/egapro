@@ -36,8 +36,13 @@ ENV SENTRY_PROJECT=$SENTRY_PROJECT
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
+# Enable source map generation during build
+ENV GENERATE_SOURCEMAP=true \
+    NODE_ENV=production
+
 RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token); \
-  yarn workspace app build
+    export NODE_OPTIONS="--max-old-space-size=8192"; \
+    yarn workspace app build
 
 RUN yarn workspaces focus app --production && yarn cache clean
 RUN mkdir -p ./packages/app/node_modules

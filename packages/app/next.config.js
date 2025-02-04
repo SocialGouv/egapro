@@ -107,20 +107,23 @@ module.exports = withSentryConfig(
     // Source maps configuration for better debugging
     sourcemaps: {
       // Include all source files and source maps
-      assets: "./**/*.{js,ts,jsx,tsx,map}",
-      // Ignore node_modules and cache
-      ignore: ["node_modules/**/*", ".next/cache/**/*"],
-      // Delete source maps after upload for security
-      deleteSourcemapsAfterUpload: true,
+      assets: ".next/**/*.{js,ts,jsx,tsx,map}",
+      // Ignore node_modules
+      ignore: ["node_modules/**/*"],
+      // Keep source maps for debugging
+      deleteSourcemapsAfterUpload: false,
     },
 
-    // Enable debug IDs for better error tracking
+    // Debug ID configuration
     cleanArtifacts: true,
     injectDebugIds: true,
+    stripPrefix: ["webpack://_N_E/"],
+    rewrite: true,
     silent: false,
 
-    // Enable source map validation
+    // Enable source map validation and debug info
     validateSourcemaps: true,
+    debug: true,
   },
   {
     // Sentry Next.js SDK options
