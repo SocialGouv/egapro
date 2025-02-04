@@ -14,6 +14,9 @@ Sentry.init({
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
 
+  // Enable tunneling to avoid ad-blockers
+  tunnel: "/monitoring-tunnel",
+
   // Performance monitoring
   enableTracing: true,
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev

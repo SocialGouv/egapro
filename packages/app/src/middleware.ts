@@ -5,16 +5,6 @@ import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
-  // Parse Sentry URL to get domain for CSP
-  let sentryDomain = "";
-  try {
-    if (process.env.SENTRY_URL) {
-      const url = new URL(process.env.SENTRY_URL);
-      sentryDomain = url.hostname;
-    }
-  } catch (e) {
-    console.warn("Failed to parse SENTRY_URL:", e);
-  }
   //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   // In dev environment, Next injects scripts for HMR, so we need to desactivate script-src.
@@ -46,8 +36,8 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
   // }
 
   const cspHeader = `
-    default-src 'self' https://*.gouv.fr${sentryDomain ? ` https://${sentryDomain}` : ""};
-    connect-src 'self' https://*.gouv.fr${sentryDomain ? ` https://${sentryDomain}` : ""};
+    default-src 'self' https://*.gouv.fr;
+    connect-src 'self' https://*.gouv.fr;
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
