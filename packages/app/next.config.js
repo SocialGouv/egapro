@@ -22,7 +22,13 @@ const nextConfig = {
 
     // Configure source maps for production
     if (!isServer && !dev) {
-      config.devtool = "hidden-source-map";
+      config.devtool = "source-map";
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        moduleIds: "deterministic",
+        chunkIds: "deterministic",
+      };
     }
 
     return config;
@@ -93,13 +99,25 @@ module.exports = withSentryConfig(
 
     // Source maps configuration
     sourcemaps: {
-      assets: "./**/*.{js,ts,jsx,tsx,map}",
+      assets: ".next/**/*.{js,map}",
       ignore: ["node_modules/**/*"],
+      rewrite: true,
+      stripPrefix: ["webpack://_N_E/", "webpack://"],
+      urlPrefix: "~/_next",
     },
 
-    // Basic configuration
+    // Debug and release configuration
     silent: false,
     debug: true,
+    release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    setCommits: {
+      auto: true,
+      ignoreMissing: true,
+    },
+    deploy: {
+      env: process.env.NEXT_PUBLIC_EGAPRO_ENV || "development",
+    },
+    injectBuildInformation: true,
   },
   {
     // Sentry Next.js SDK options
