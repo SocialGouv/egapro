@@ -75,6 +75,7 @@ Sentry.init({
     replayIntegration({
       maskAllText: true,
       blockAllMedia: true,
+      useCompression: false, // https://github.com/nuxt-community/sentry-module/issues/562#issuecomment-1516338000 , see also https://github.com/getsentry/sentry-javascript/issues/7302 (but not evocated the problem of selfhost instance on this issue)
     }),
   ],
 });
