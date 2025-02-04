@@ -45,6 +45,11 @@ app:
     - secretRef:
         name: github-oauth
   env:
+    - name: SENTRY_AUTH_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: SENTRY_AUTH_TOKEN
     - name: NEXT_PUBLIC_SENTRY_DSN
       valueFrom:
         secretKeyRef:
