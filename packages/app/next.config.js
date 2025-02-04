@@ -98,7 +98,7 @@ module.exports = withSentryConfig(
   },
   {
     // Sentry Next.js SDK options
-    tunnelRoute: "/monitoring-tunnel",
+    tunnelRoute: "/_sentry",
     widenClientFileUpload: true,
     hideSourceMaps: false,
     disableLogger: true,

@@ -15,7 +15,7 @@ Sentry.init({
   debug: true, // Temporarily enable debug mode to troubleshoot
 
   // Enable tunneling to avoid ad-blockers
-  tunnel: "/monitoring-tunnel",
+  tunnel: "/_sentry",
 
   // Performance monitoring
   enableTracing: true,

@@ -128,5 +128,5 @@ export const middleware = wrappedMiddleware;
 
 // Config to exclude Sentry tunnel route from middleware
 export const config = {
-  matcher: ["/((?!monitoring-tunnel).*)"],
+  matcher: ["/((?!_sentry).*)"],
 };
