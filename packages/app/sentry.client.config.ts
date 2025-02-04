@@ -14,8 +14,8 @@ Sentry.init({
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
 
-  // Enable tunneling to avoid ad-blockers
-  tunnel: "/_sentry",
+  // Enable tunneling to avoid ad-blockers (using custom implementation for self-hosted instance)
+  tunnel: "/api/monitoring/envelope",
 
   // Performance monitoring
   enableTracing: true,

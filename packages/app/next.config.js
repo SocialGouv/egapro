@@ -98,7 +98,9 @@ module.exports = withSentryConfig(
   },
   {
     // Sentry Next.js SDK options
-    tunnelRoute: "/_sentry",
+    // Note: tunnelRoute option doesn't work with self-hosted instances
+    // Using custom tunnel implementation instead
+    tunnelRoute: false,
     widenClientFileUpload: true,
     hideSourceMaps: false,
     disableLogger: true,
