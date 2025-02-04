@@ -10,33 +10,38 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Get and parse the request body first to extract DSN
+    // Get the raw body
     const body = await request.text();
     console.log("Received envelope body:", body.slice(0, 500) + (body.length > 500 ? "..." : ""));
+    // Split envelope into parts (header and items) preserving newlines
+    const [headerRaw, ...items] = body.split("\n");
+    if (!headerRaw || items.length === 0) {
+      console.error("Invalid envelope format: missing header or items");
+      return new Response("Invalid envelope format", { status: 400 });
+    }
 
     // Parse envelope format (newline-delimited JSON)
     let projectId: string | undefined;
     let publicKey: string | undefined;
-    let envelopeDsn: string | undefined;
+
+    // Reconstruct envelope with proper newlines
+    const envelope = [headerRaw, ...items].join("\n") + "\n"; // Add final newline
+    console.log("Reconstructed envelope:", envelope.slice(0, 500) + (envelope.length > 500 ? "..." : ""));
 
     try {
-      const [header] = body.split("\n").filter(Boolean);
-      const envelopeHeader = JSON.parse(header);
+      // Parse header
+      const header = JSON.parse(headerRaw);
 
-      // Try to get DSN from envelope first
-      envelopeDsn = envelopeHeader.dsn;
-      if (envelopeDsn) {
-        try {
-          const dsnUrl = new URL(envelopeDsn);
-          projectId = dsnUrl.pathname.split("/")[1];
-          publicKey = dsnUrl.username;
-          console.log("Parsed DSN from envelope:", { projectId, publicKey });
-        } catch (e) {
-          console.warn("Could not parse envelope DSN:", e);
-        }
+      // Try to get DSN from envelope header
+      if (header.dsn) {
+        const dsnUrl = new URL(header.dsn);
+        projectId = dsnUrl.pathname.split("/")[1];
+        publicKey = dsnUrl.username;
+        console.log("Parsed DSN from envelope:", { projectId, publicKey });
       }
     } catch (e) {
-      console.warn("Could not parse envelope:", e);
+      console.error("Failed to parse envelope header:", e);
+      return new Response("Invalid envelope header", { status: 400 });
     }
 
     // Fallback to environment DSN if needed
@@ -75,8 +80,8 @@ export async function POST(request: NextRequest) {
           request.headers.get("X-Sentry-Auth") ||
           `Sentry sentry_key=${publicKey},sentry_version=7,sentry_client=sentry.javascript.nextjs/8.0.0`,
       },
-      // Use the original request body without modifications
-      body,
+      // Use reconstructed envelope with proper newlines
+      body: envelope,
     });
 
     if (sentryResponse.status === 403) {
