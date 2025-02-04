@@ -9,24 +9,23 @@ const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
 Sentry.init({
+  // Basic configuration
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
-  tunnel: "/api/monitoring/envelope",
-  // Optimal sample rates based on environment
-  tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-  replaysOnErrorSampleRate: 1.0,
-  replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0.5,
-
   debug: true, // Temporarily enable debug mode to troubleshoot
 
-  // Development-specific settings
-  maxBreadcrumbs: 10,
-  autoSessionTracking: false,
-  sendClientReports: true, // Enable immediate client reports
-  sampleRate: 1.0, // Capture all errors in development
-
-  // Enable performance monitoring through traces
+  // Performance monitoring
   enableTracing: true,
+  tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev
+
+  // Session replay configuration
+  replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0.5, // Sample 10% of sessions in prod, 50% in dev
+  replaysOnErrorSampleRate: 1.0, // Always capture sessions with errors
+
+  // Error tracking configuration
+  sampleRate: 1.0, // Capture all errors
+  autoSessionTracking: true, // Enable automatic session tracking
+  sendClientReports: true, // Enable immediate client reports
 
   beforeSend(event) {
     console.log("Sentry beforeSend called with event:", {

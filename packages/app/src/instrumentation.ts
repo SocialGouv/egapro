@@ -1,29 +1,55 @@
+import * as Sentry from "@sentry/nextjs";
+
+// Hook to capture errors from nested React Server Components
+export const onRequestError = (
+  error: Error,
+  requestInfo: { method: string; route: string; url: string },
+  request: Request,
+) => {
+  Sentry.captureException(error, {
+    extra: {
+      ...requestInfo,
+      requestHeaders: Object.fromEntries(request.headers),
+    },
+  });
+};
+
+// Helper for wrapping server actions with Sentry instrumentation
+export const withServerAction = <T>(
+  name: string,
+  action: () => Promise<T>,
+  options?: {
+    formData?: FormData;
+    headers?: Headers;
+    recordResponse?: boolean;
+  },
+) => {
+  return Sentry.withServerActionInstrumentation(
+    name,
+    {
+      formData: options?.formData,
+      headers: options?.headers,
+      recordResponse: options?.recordResponse ?? false,
+    },
+    action,
+  );
+};
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    // Initialize Sentry for server-side
-    const Sentry = await import("@sentry/nextjs");
-
     const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
     const IS_PRODUCTION = ENVIRONMENT === "production";
 
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       environment: ENVIRONMENT,
-
-      // Optimal sample rates based on environment
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-
-      // Setting this option to true will print useful information to the console while you're setting up Sentry.
       debug: false,
-
-      // Enable performance monitoring through traces
       enableTracing: true,
 
       beforeSend(event) {
-        // Filter out non-error events in production
         if (IS_PRODUCTION && !event.exception) return null;
 
-        // Filter out known unnecessary errors
         const ignoreErrors = [
           "ResizeObserver loop limit exceeded",
           "Network request failed",
@@ -53,30 +79,19 @@ export async function register() {
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {
-    // Initialize Sentry for edge runtime
-    const Sentry = await import("@sentry/nextjs");
-
     const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
     const IS_PRODUCTION = ENVIRONMENT === "production";
 
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       environment: ENVIRONMENT,
-
-      // Optimal sample rates based on environment
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-
-      // Setting this option to true will print useful information to the console while you're setting up Sentry.
       debug: false,
-
-      // Enable performance monitoring through traces
       enableTracing: true,
 
       beforeSend(event) {
-        // Filter out non-error events in production
         if (IS_PRODUCTION && !event.exception) return null;
 
-        // Filter out known unnecessary errors
         const ignoreErrors = [
           "ResizeObserver loop limit exceeded",
           "Network request failed",

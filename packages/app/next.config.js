@@ -73,72 +73,46 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
-// Injected content via Sentry wizard below
-
 const { withSentryConfig } = require("@sentry/nextjs");
-const Sentry = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
-  module.exports,
+  nextConfig,
   {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
+    // Sentry webpack plugin options
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    url: process.env.SENTRY_URL,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
 
-    // Clean output before source map upload
-    cleanArtifacts: true,
-
-    // Enable debug IDs
-    injectDebugIds: true,
-
-    // Enable source map uploading
+    // Source maps configuration
     sourcemaps: {
       assets: "./**/*.{js,map}",
       ignore: ["node_modules/**/*"],
       deleteSourcemapsAfterUpload: true,
     },
 
-    org: process.env.SENTRY_ORG,
-    project: process.env.SENTRY_PROJECT,
-    url: process.env.SENTRY_URL,
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-
-    // Enable debug mode for more verbose output
-    debug: true,
-
-    // Suppresses source map uploading logs during build
-    // silent: true,
+    // Clean output and inject debug IDs
+    cleanArtifacts: true,
+    injectDebugIds: true,
+    silent: false,
   },
   {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    // Sentry Next.js SDK options
+    tunnelRoute: "/monitoring-tunnel",
     widenClientFileUpload: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: true,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers and CORS issues
-    // tunnelRoute: "/_sentry", // Using custom tunnel endpoint instead
-
-    // Don't hide source maps from generated client bundles
     hideSourceMaps: false,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
 
-    // Enable release injection and component names
+    // Enable component names and release injection
+    includeNames: true,
     release: {
       inject: true,
       name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     },
-    includeNames: true,
-    autoInstrumentServerFunctions: false,
 
-    // Enables automatic instrumentation of Vercel Cron Monitors.
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
+    // Server instrumentation options
+    autoInstrumentServerFunctions: true,
+    autoInstrumentMiddleware: true,
     automaticVercelMonitors: true,
   },
 );

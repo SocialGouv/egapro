@@ -125,3 +125,8 @@ const wrappedMiddleware = withAuth(
 // eslint-disable-next-line import/no-default-export
 export default wrappedMiddleware;
 export const middleware = wrappedMiddleware;
+
+// Config to exclude Sentry tunnel route from middleware
+export const config = {
+  matcher: ["/((?!monitoring-tunnel).*)"],
+};
