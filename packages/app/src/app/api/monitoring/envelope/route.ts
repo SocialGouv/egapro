@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest): Promise<Response> => {
   const sentryUrl = process.env.SENTRY_URL;
   if (!sentryUrl) {
     console.error("Sentry URL not configured");
@@ -215,10 +215,10 @@ export async function POST(request: NextRequest) {
     console.error("Error forwarding to Sentry:", error);
     return new Response("Error forwarding to Sentry", { status: 500 });
   }
-}
+};
 
 // Handle OPTIONS requests for CORS
-export async function OPTIONS(request: NextRequest) {
+export const OPTIONS = async (request: NextRequest): Promise<Response> => {
   // Get the request origin or default to *
   const requestOrigin = request.headers.get("origin") || "*";
 
@@ -240,4 +240,4 @@ export async function OPTIONS(request: NextRequest) {
     status: 200,
     headers,
   });
-}
+};

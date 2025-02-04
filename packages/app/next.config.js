@@ -20,9 +20,9 @@ const nextConfig = {
       type: "asset/resource",
     });
 
-    // Configure source maps
+    // Configure source maps for better debugging
     if (!isServer) {
-      config.devtool = dev ? "eval-source-map" : "source-map";
+      config.devtool = "hidden-source-map";
     }
 
     // Ensure source maps are generated for all files
@@ -37,6 +37,17 @@ const nextConfig = {
         },
       },
     });
+
+    // Enable source map generation
+    if (config.optimization) {
+      config.optimization.minimize = true;
+      config.optimization.minimizer = config.optimization.minimizer || [];
+    } else {
+      config.optimization = {
+        minimize: true,
+        minimizer: [],
+      };
+    }
 
     return config;
   },
