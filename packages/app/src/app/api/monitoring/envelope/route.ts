@@ -89,19 +89,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log parsed items
+    // Log parsed items with detailed structure
     items.forEach((item, index) => {
-      console.log(`Item ${index}:`, item);
+      console.log(`Item ${index} structure:`, {
+        content: item,
+        length: item.length,
+        newlines: (item.match(/\n/g) || []).length,
+        endsWithNewline: item.endsWith("\n"),
+      });
     });
 
     // Reconstruct envelope with proper format:
-    // header + \n\n + item1 + \n\n + item2 + \n\n + ...
-    const envelope = [headerRaw, ...items].join("\n\n") + "\n";
-    console.log(
-      "Final envelope structure:",
-      envelope.split("\n").map(line => line.slice(0, 100)),
-    );
-    console.log("Reconstructed envelope:", envelope.slice(0, 500) + (envelope.length > 500 ? "..." : ""));
+    // header + \n\n + item1 + \n\n + item2 + \n\n
+    const envelope = headerRaw + "\n\n" + items.join("\n");
+
+    // Log detailed envelope structure
+    console.log("Envelope structure:", {
+      headerLength: headerRaw.length,
+      itemsCount: items.length,
+      totalLength: envelope.length,
+      newlines: (envelope.match(/\n/g) || []).length,
+      firstNewlineAt: envelope.indexOf("\n"),
+      headerAndFirstItem: envelope.split("\n").slice(0, 3),
+    });
 
     try {
       // Parse header
