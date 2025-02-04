@@ -17,9 +17,12 @@ Sentry.init({
   // Enable tunneling to avoid ad-blockers (using custom implementation for self-hosted instance)
   tunnel: "/api/monitoring/envelope",
 
-  // Performance monitoring
+  // Performance monitoring and source maps
   enableTracing: true,
+  attachStacktrace: true, // Attach stack traces to all messages
+  normalizeDepth: 10, // Increase stack trace depth for better context
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev
+  maxBreadcrumbs: 100, // Increase from default 100 to capture more context
 
   // Session replay configuration
   replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0.5, // Sample 10% of sessions in prod, 50% in dev

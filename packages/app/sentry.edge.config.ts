@@ -12,9 +12,12 @@ Sentry.init({
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
 
-  // Performance monitoring
+  // Performance monitoring and source maps
   enableTracing: true,
+  attachStacktrace: true, // Attach stack traces to all messages
+  normalizeDepth: 10, // Increase stack trace depth for better context
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev
+  maxBreadcrumbs: 100, // Increase from default 100 to capture more context
 
   // Error tracking configuration
   sampleRate: 1.0, // Capture all errors

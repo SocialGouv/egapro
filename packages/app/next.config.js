@@ -13,11 +13,31 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: config => {
+  webpack: (config, { dev, isServer }) => {
+    // Handle font files
     config.module.rules.push({
       test: /\.woff2?$/,
       type: "asset/resource",
     });
+
+    // Configure source maps
+    if (!isServer) {
+      config.devtool = dev ? "eval-source-map" : "source-map";
+    }
+
+    // Ensure source maps are generated for all files
+    config.module.rules.push({
+      test: /\.(js|jsx|ts|tsx)$/,
+      exclude: /node_modules/,
+      use: {
+        loader: "babel-loader",
+        options: {
+          sourceMaps: true,
+          inputSourceMap: true,
+        },
+      },
+    });
+
     return config;
   },
   //This option requires Next 13.1 or newer, if you can't update you can use this plugin instead: https://github.com/martpie/next-transpile-modules
@@ -84,17 +104,23 @@ module.exports = withSentryConfig(
     url: process.env.SENTRY_URL,
     authToken: process.env.SENTRY_AUTH_TOKEN,
 
-    // Source maps configuration
+    // Source maps configuration for better debugging
     sourcemaps: {
-      assets: "./**/*.{js,map}",
-      ignore: ["node_modules/**/*"],
+      // Include all source files and source maps
+      assets: "./**/*.{js,ts,jsx,tsx,map}",
+      // Ignore node_modules and cache
+      ignore: ["node_modules/**/*", ".next/cache/**/*"],
+      // Delete source maps after upload for security
       deleteSourcemapsAfterUpload: true,
     },
 
-    // Clean output and inject debug IDs
+    // Enable debug IDs for better error tracking
     cleanArtifacts: true,
     injectDebugIds: true,
     silent: false,
+
+    // Enable source map validation
+    validateSourcemaps: true,
   },
   {
     // Sentry Next.js SDK options

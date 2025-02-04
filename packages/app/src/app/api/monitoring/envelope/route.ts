@@ -12,20 +12,95 @@ export async function POST(request: NextRequest) {
   try {
     // Get the raw body
     const body = await request.text();
-    console.log("Received envelope body:", body.slice(0, 500) + (body.length > 500 ? "..." : ""));
-    // Split envelope into parts (header and items) preserving newlines
-    const [headerRaw, ...items] = body.split("\n");
-    if (!headerRaw || items.length === 0) {
-      console.error("Invalid envelope format: missing header or items");
-      return new Response("Invalid envelope format", { status: 400 });
-    }
-
+    console.log("Received envelope body:", body);
+    console.log("Envelope body length:", body.length);
+    console.log("Envelope newlines count:", (body.match(/\n/g) || []).length);
     // Parse envelope format (newline-delimited JSON)
     let projectId: string | undefined;
     let publicKey: string | undefined;
 
-    // Reconstruct envelope with proper newlines
-    const envelope = [headerRaw, ...items].join("\n") + "\n"; // Add final newline
+    // Split into lines
+    const lines = body.split("\n");
+    if (lines.length < 2) {
+      console.error("Invalid envelope format: missing parts");
+      return new Response("Invalid envelope format", { status: 400 });
+    }
+
+    const headerRaw = lines[0];
+    const items: string[] = [];
+
+    // Process lines after header to build items with proper newlines
+    let i = 1;
+    while (i < lines.length) {
+      const itemHeaderLine = lines[i];
+      if (!itemHeaderLine || itemHeaderLine.trim() === "") {
+        i++;
+        continue;
+      }
+
+      try {
+        // Try to parse item header
+        const itemHeader = JSON.parse(itemHeaderLine);
+        if (!itemHeader.type) {
+          i++;
+          continue;
+        }
+
+        // Found an item header, collect payload until next item header or end
+        const itemPayloadLines = [];
+        i++;
+        while (i < lines.length) {
+          const payloadLine = lines[i];
+          // Stop if we hit an empty line or another item header
+          if (payloadLine.trim() === "") {
+            i++;
+            continue;
+          }
+          try {
+            const parsed = JSON.parse(payloadLine);
+            if (parsed.type) {
+              break;
+            }
+          } catch (e) {
+            // Not a header, add to payload
+          }
+          itemPayloadLines.push(payloadLine);
+          i++;
+        }
+
+        // Add item with its payload, ensuring proper newlines
+        if (itemPayloadLines.length > 0) {
+          // For items with payload: header + \n + payload
+          items.push(itemHeaderLine + "\n" + itemPayloadLines.join("\n"));
+        } else {
+          // For header-only items: just the header
+          items.push(itemHeaderLine);
+        }
+
+        // Log item structure for debugging
+        console.log("Added item:", {
+          type: itemHeader.type,
+          hasPayload: itemPayloadLines.length > 0,
+          payloadLines: itemPayloadLines.length,
+        });
+      } catch (e) {
+        // Not a valid item header, skip
+        i++;
+      }
+    }
+
+    // Log parsed items
+    items.forEach((item, index) => {
+      console.log(`Item ${index}:`, item);
+    });
+
+    // Reconstruct envelope with proper format:
+    // header + \n\n + item1 + \n\n + item2 + \n\n + ...
+    const envelope = [headerRaw, ...items].join("\n\n") + "\n";
+    console.log(
+      "Final envelope structure:",
+      envelope.split("\n").map(line => line.slice(0, 100)),
+    );
     console.log("Reconstructed envelope:", envelope.slice(0, 500) + (envelope.length > 500 ? "..." : ""));
 
     try {
