@@ -13,6 +13,7 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
+  dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
 
   // Enable tunneling to avoid ad-blockers (using custom implementation for self-hosted instance)
   tunnel: "/api/monitoring/envelope",

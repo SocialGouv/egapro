@@ -11,6 +11,7 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
+  dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
 
   // Performance monitoring and source maps
   enableTracing: true,

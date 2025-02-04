@@ -102,20 +102,22 @@ module.exports = withSentryConfig(
       assets: ".next/**/*.{js,map}",
       ignore: ["node_modules/**/*"],
       rewrite: true,
-      stripPrefix: ["webpack://_N_E/", "webpack://"],
-      urlPrefix: "~/_next",
+      stripPrefix: ["webpack://_N_E/", "webpack://", "app://"],
+      urlPrefix: "app:///_next",
     },
 
     // Debug and release configuration
     silent: false,
     debug: true,
     release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     setCommits: {
       auto: true,
       ignoreMissing: true,
     },
     deploy: {
       env: process.env.NEXT_PUBLIC_EGAPRO_ENV || "development",
+      dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     },
     injectBuildInformation: true,
   },
