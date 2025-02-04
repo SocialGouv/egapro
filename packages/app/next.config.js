@@ -20,33 +20,9 @@ const nextConfig = {
       type: "asset/resource",
     });
 
-    // Configure source maps for better debugging
-    if (!isServer) {
+    // Configure source maps for production
+    if (!isServer && !dev) {
       config.devtool = "hidden-source-map";
-    }
-
-    // Ensure source maps are generated for all files
-    config.module.rules.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      exclude: /node_modules/,
-      use: {
-        loader: "babel-loader",
-        options: {
-          sourceMaps: true,
-          inputSourceMap: true,
-        },
-      },
-    });
-
-    // Enable source map generation
-    if (config.optimization) {
-      config.optimization.minimize = true;
-      config.optimization.minimizer = config.optimization.minimizer || [];
-    } else {
-      config.optimization = {
-        minimize: true,
-        minimizer: [],
-      };
     }
 
     return config;
@@ -115,25 +91,14 @@ module.exports = withSentryConfig(
     url: process.env.SENTRY_URL,
     authToken: process.env.SENTRY_AUTH_TOKEN,
 
-    // Source maps configuration for better debugging
+    // Source maps configuration
     sourcemaps: {
-      // Include all source files and source maps
-      assets: ".next/**/*.{js,ts,jsx,tsx,map}",
-      // Ignore node_modules
+      assets: "./**/*.{js,ts,jsx,tsx,map}",
       ignore: ["node_modules/**/*"],
-      // Keep source maps for debugging
-      deleteSourcemapsAfterUpload: false,
     },
 
-    // Debug ID configuration
-    cleanArtifacts: true,
-    injectDebugIds: true,
-    stripPrefix: ["webpack://_N_E/"],
-    rewrite: true,
+    // Basic configuration
     silent: false,
-
-    // Enable source map validation and debug info
-    validateSourcemaps: true,
     debug: true,
   },
   {
