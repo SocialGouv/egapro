@@ -14,7 +14,7 @@ const config = {
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
   testTimeout: 20000,
   moduleNameMapper: {
-    "../../../../../../design-system/@design-system": "<rootDir>/src/design-system/server.ts",
+    "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
   },
 };
 
