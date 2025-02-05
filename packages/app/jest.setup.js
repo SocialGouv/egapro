@@ -19,6 +19,7 @@ jest.mock("next/navigation", () => ({
     return new URLSearchParams(path);
   },
   usePathname: jest.fn(),
+  redirect: jest.fn(),
 }));
 
 jest.mock("@formkit/auto-animate/react", () => ({
