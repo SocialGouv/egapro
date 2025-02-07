@@ -2,16 +2,27 @@ import { fireEvent, render, type RenderResult } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 
 import { Indic1Form } from "../Form";
+import { effectifs } from "./mock";
 
 jest.mock("next-auth/react", () => ({
   useSession: jest.fn(() => ({ data: undefined })),
 }));
 
-jest.mock("../../../../../../../common/utils/zustand");
+jest.mock("../../../../../../../common/utils/zustand", () => ({
+  storePicker: () => () => [
+    {
+      effectifs,
+    },
+    () => {},
+  ],
+}));
 
-jest.mock("../../useSimuFunnelStore");
+jest.mock("../../useSimuFunnelStore", () => ({
+  useSimuFunnelStore: () => ({ effectifs }),
+  useSimuFunnelStoreHasHydrated: () => true,
+}));
 
-describe("when rendering EffectifsForm", () => {
+describe("when rendering", () => {
   let r: RenderResult;
   beforeEach(() => {
     r = render(<Indic1Form />);
