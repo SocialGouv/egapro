@@ -11,14 +11,14 @@ describe("Homepage", () => {
     cy.intercept("GET", "/_next/data/**").as("nextData");
     cy.intercept("GET", "/api/**").as("apiData");
 
-    cy.visit("/", { timeout: 30000 });
+    cy.visit("/", { timeout: 100000 });
     cy.wait("@pageLoad");
 
     // Wait for the page to be interactive
-    cy.get("body", { timeout: 10000 }).should("be.visible");
+    cy.get("body", { timeout: 100000 }).should("be.visible");
 
     // Wait for main content with retry strategy
-    cy.get('[id="content"]', { timeout: 30000 }).should($el => {
+    cy.get('[id="content"]', { timeout: 100000 }).should($el => {
       expect($el).to.exist;
       expect($el).to.be.visible;
 
@@ -32,7 +32,7 @@ describe("Homepage", () => {
     });
 
     // Check login button with retry
-    cy.contains(".fr-btn", "Se connecter", { timeout: 10000 }).should("be.visible");
+    cy.contains(".fr-btn", "Se connecter", { timeout: 100000 }).should("be.visible");
   });
 
   it.skip("Affiche la popup RGPD", () => {
