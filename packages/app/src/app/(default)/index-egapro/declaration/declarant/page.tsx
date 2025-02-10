@@ -15,9 +15,9 @@ const stepName: FunnelKey = "declarant";
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProUrl = `https://app${
+  const monCompteProUrl = `https://identite${
     config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.moncomptepro.beta.gouv.fr`;
+  }.proconnect.gouv.fr`;
 
   return (
     <>

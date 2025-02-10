@@ -22,7 +22,7 @@ export interface ProConnectProfile {
   updated_at: Date;
 }
 
-const ISSUER = (appTest: boolean) => `https://app${appTest ? "-sandbox" : ""}.moncomptepro.beta.gouv.fr`;
+const ISSUER = (appTest: boolean) => `https://identite${appTest ? "-sandbox" : ""}.proconnect.gouv.fr`;
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
