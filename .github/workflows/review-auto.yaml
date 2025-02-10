@@ -40,6 +40,8 @@ jobs:
           echo "$SITE_URL"
       - name: Cypress run
         uses: cypress-io/github-action@v5
+        env:
+          CYPRESS: "true"
         with:
           install: false
           working-directory: ./packages/app

@@ -7,9 +7,12 @@ import * as Sentry from "@sentry/nextjs";
 const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
+// Check for Cypress test environment
+const isCypressTest = process.env.CYPRESS === "true";
+
 Sentry.init({
   // Basic configuration
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: isCypressTest ? undefined : process.env.NEXT_PUBLIC_SENTRY_DSN, // Disable Sentry in Cypress
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
   dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
