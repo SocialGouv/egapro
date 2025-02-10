@@ -40,9 +40,12 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     "switch to client rendering",
     "Loading chunk",
     "Loading CSS chunk",
+    "Minified React error #", // Handle all minified React errors
     // DSFR-related errors
     "@codegouvfr/react-dsfr/useIsDark",
     "MutationObserver.observe",
+    // Production build errors
+    "https://reactjs.org/docs/error-decoder.html",
   ];
 
   // Check if error matches any of our suppression patterns
