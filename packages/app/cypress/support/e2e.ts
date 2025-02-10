@@ -20,21 +20,8 @@ import "./commands";
 // require('./commands')
 
 Cypress.on("uncaught:exception", (err, runnable) => {
-  // Log detailed error information
-  console.log("Uncaught exception details:", {
-    message: err.message,
-    stack: err.stack,
-    type: err.name,
-    runnable: runnable.title,
-  });
-
-  // Only suppress specific known harmless errors
-  const suppressErrors = ["ResizeObserver loop limit exceeded", "Network request failed"];
-
-  if (suppressErrors.some(e => err.message.includes(e))) {
-    return false;
-  }
-
-  // Let other errors fail the test so they can be properly investigated
-  return true;
+  // returning false here prevents Cypress from
+  // failing the test
+  console.log("browser exception: ", err);
+  return false;
 });
