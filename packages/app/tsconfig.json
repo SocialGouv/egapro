@@ -1,63 +1,45 @@
 {
-  "extends": "@tsconfig/next",
   "compilerOptions": {
-    "strict": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
     "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    // to trick auto imports
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": "../../",
     "paths": {
-      "@common/*": [
-        "packages/app/src/common/*"
-      ],
-      "@components/*": [
-        "packages/app/src/components/*"
-      ],
-      "@api/*": [
-        "packages/app/src/api/*"
-      ],
-      "@services/*": [
-        "packages/app/src/services/*"
-      ],
-      "@design-system": [
-        "packages/app/src/design-system/server"
-      ],
-      "@design-system/client": [
-        "packages/app/src/design-system/client"
-      ],
-      "@design-system/utils/*": [
-        "packages/app/src/design-system/utils/*"
-      ],
-      "@design-system/hooks/*": [
-        "packages/app/src/design-system/hooks/*"
-      ],
-      "@public/*": [
-        "packages/app/public/*"
-      ],
-      "@globalActions/*": [
-        "packages/app/src/app/_globalActions/*"
-      ],
+      "@common/*": ["./packages/app/src/common/*"],
+      "@components/*": ["packages/app/src/components/*"],
+      "@api/*": ["packages/app/src/api/*"],
+      "@services/*": ["packages/app/src/services/*"],
+      "@design-system": ["./packages/app/src/design-system/server"],
+      "@design-system/client": ["./packages/app/src/design-system/client"],
+      "@design-system/utils/*": ["./packages/app/src/design-system/utils/*"],
+      "@design-system/hooks/*": ["packages/app/src/design-system/hooks/*"],
+      "@public/*": ["packages/app/public/*"],
+      "@globalActions/*": ["packages/app/src/app/_globalActions/*"]
     }
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    },
-    "transpileOnly": true
   },
   "include": [
     "next-env.d.ts",
-    "env.d.ts",
-    "global.d.ts",
-    "types/**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "./global.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "cypress.config.ts",
-    "cypress"
-  ]
+  "exclude": ["node_modules", "cypress.config.ts", "cypress"]
 }

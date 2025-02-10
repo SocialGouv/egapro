@@ -1,9 +1,9 @@
 "use client";
 
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import { Box } from "@design-system";
 import { useSession } from "next-auth/react";
 
-import { Box } from "../design-system/base/Box";
 import style from "./root.module.scss";
 
 export const ImpersonateNotice = () => {
