@@ -1,3 +1,11 @@
+## [3.5.5](https://github.com/SocialGouv/egapro/compare/v3.5.4...v3.5.5) (2025-02-10)
+
+
+### Bug Fixes
+
+* proconnect url update ([#2425](https://github.com/SocialGouv/egapro/issues/2425)) ([0b6e868](https://github.com/SocialGouv/egapro/commit/0b6e868be1c2ac7c6a32bcd966cf319ea98c6a9c))
+* select the county referent in replyTo ([a6a8170](https://github.com/SocialGouv/egapro/commit/a6a817062ac1df2e8faad6ed7be163aa5547c262))
+
 ## [3.5.4](https://github.com/SocialGouv/egapro/compare/v3.5.3...v3.5.4) (2025-01-29)
 
 
