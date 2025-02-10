@@ -41,9 +41,9 @@ const InfoText = () => (
       Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
       <Link
         target="_blank"
-        href={`https://app${
+        href={`https://identite${
           config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-        }.moncomptepro.beta.gouv.fr/manage-organizations`}
+        }.proconnect.gouv.fr/manage-organizations`}
       >
         cliquez ici
       </Link>

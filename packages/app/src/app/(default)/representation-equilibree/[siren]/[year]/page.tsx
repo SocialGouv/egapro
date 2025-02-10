@@ -59,9 +59,9 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const olderThanOneYear = session?.data?.user.staff
     ? false
     : repEq.declaredAt === undefined || isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
-  const monCompteProHost = `https://app${
+  const monCompteProHost = `https://identite${
     config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.moncomptepro.beta.gouv.fr`;
+  }.proconnect.gouv.fr`;
 
   return (
     <CenteredContainer pb="6w">

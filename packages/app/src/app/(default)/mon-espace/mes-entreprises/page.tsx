@@ -28,9 +28,9 @@ const MesEntreprisesInfoAlert = () => (
           Pour rattacher une adresse email, il faut{" "}
           <Link
             target="_blank"
-            href={`https://app${
+            href={`https://identite${
               config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-            }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
+            }.proconnect.gouv.fr/users/start-sign-in`}
           >
             créer un nouveau compte ProConnect
           </Link>{" "}
@@ -41,9 +41,9 @@ const MesEntreprisesInfoAlert = () => (
           Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
           <Link
             target="_blank"
-            href={`https://app${
+            href={`https://identite${
               config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-            }.moncomptepro.beta.gouv.fr/manage-organizations`}
+            }.proconnect.gouv.fr/manage-organizations`}
           >
             cliquez ici
           </Link>
@@ -78,9 +78,9 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <br />
               <a
                 target="_blank"
-                href={`https://app${
+                href={`https://identite${
                   config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-                }.moncomptepro.beta.gouv.fr/users/start-sign-in`}
+                }.proconnect.gouv.fr/users/start-sign-in`}
               >
                 Connectez-vous sur Mon Compte Pro
               </a>{" "}
