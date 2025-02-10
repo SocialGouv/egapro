@@ -7,7 +7,7 @@ export const SentryTest = () => {
   const triggerServerError = useCallback(async () => {
     try {
       // Make a request to our test endpoint that will throw a server error
-      const response = await fetch("/api/test-sentry-error");
+      const response = await fetch("/api/test-sentry-error?trigger=true");
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
