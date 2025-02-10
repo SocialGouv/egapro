@@ -99,7 +99,7 @@ const AideProConnectPage = () => {
                 Vous avez fait une erreur de saisie dans votre adresse email
                 <br />
                 💡{" "}
-                <Link href="https://app.moncomptepro.beta.gouv.fr/users/start-sign-in" target="_blank">
+                <Link href="https://identite.proconnect.gouv.fr/users/start-sign-in" target="_blank">
                   Recréez un compte avec la bonne adresse
                 </Link>
               </li>
@@ -202,7 +202,7 @@ const AideProConnectPage = () => {
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
               fonction au sein de votre entreprise) en vous connectant à votre compte sur le site{" "}
               <Link
-                href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
+                href={"https://identite.proconnect.gouv.fr/users/start-sign-in"}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -220,7 +220,7 @@ const AideProConnectPage = () => {
             <p>
               Vous vous connectez à votre compte sur le site{" "}
               <Link
-                href={"https://app.moncomptepro.beta.gouv.fr/users/start-sign-in"}
+                href={"https://identite.proconnect.gouv.fr/users/start-sign-in"}
                 target="_blank"
                 rel="noopener noreferrer"
               >

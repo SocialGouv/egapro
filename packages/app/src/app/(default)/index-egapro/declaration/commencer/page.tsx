@@ -25,9 +25,9 @@ const CommencerPage = async () => {
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  const monCompteProHost = `https://app${
+  const monCompteProHost = `https://identite${
     config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.moncomptepro.beta.gouv.fr`;
+  }.proconnect.gouv.fr`;
 
   if (!session.user.companies.length && !session.user.staff) {
     return isEmailLogin ? (

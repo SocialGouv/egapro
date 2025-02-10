@@ -55,7 +55,7 @@ export const HeaderAccountMenu = (props: {
                 ) : (
                   <a
                     className="fr-nav__link"
-                    href={`https://app${props.isProConnectTest ? "-sandbox" : ""}.moncomptepro.beta.gouv.fr`}
+                    href={`https://identite${props.isProConnectTest ? "-sandbox" : ""}.proconnect.gouv.fr`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -20,9 +20,9 @@ export const metadata = {
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProHost = `https://app${
+  const monCompteProHost = `https://identite${
     config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.moncomptepro.beta.gouv.fr`;
+  }.proconnect.gouv.fr`;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   if (!(session.user.companies.length || session.user.staff)) {
