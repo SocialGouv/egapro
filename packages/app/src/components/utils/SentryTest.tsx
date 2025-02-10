@@ -4,6 +4,19 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useCallback } from "react";
 
 export const SentryTest = () => {
+  const triggerServerError = useCallback(async () => {
+    try {
+      // Make a request to our test endpoint that will throw a server error
+      const response = await fetch("/api/test-sentry-error");
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Server-side error test:", error);
+      throw error;
+    }
+  }, []);
+
   const triggerError = useCallback(() => {
     // Log configuration and start of error test
     console.log("Starting Sentry test with config:", {
@@ -27,7 +40,14 @@ export const SentryTest = () => {
 
   return (
     <div className="fr-container fr-py-3w">
-      <Button onClick={triggerError}>Trigger Sentry test error</Button>
+      <div className="fr-grid-row fr-grid-row--gutters">
+        <div className="fr-col-12 fr-col-md-6">
+          <Button onClick={triggerError}>Trigger client-side error</Button>
+        </div>
+        <div className="fr-col-12 fr-col-md-6">
+          <Button onClick={triggerServerError}>Trigger server-side error</Button>
+        </div>
+      </div>
     </div>
   );
 };
