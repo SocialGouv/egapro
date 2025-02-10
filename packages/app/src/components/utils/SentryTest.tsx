@@ -6,10 +6,19 @@ import { useCallback } from "react";
 export const SentryTest = () => {
   const triggerServerError = useCallback(async () => {
     try {
+      console.log("Making request to test endpoint...");
       // Make a request to our test endpoint that will throw a server error
       const response = await fetch("/api/test-sentry-error?trigger=true");
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        const errorText = await response.text().catch(() => "No error text available");
+        console.error("Server error details:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorText,
+        });
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
     } catch (error) {
       console.error("Server-side error test:", error);
