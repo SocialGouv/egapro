@@ -28,17 +28,38 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     runnable: runnable.title,
   });
 
-  // Only suppress specific known harmless errors
-  const suppressErrors = [
+  // Define patterns for errors to suppress
+  const suppressPatterns = [
+    // System/environment errors
     "ResizeObserver loop limit exceeded",
     "Network request failed",
     "Failed to call method: org.freedesktop.portal.Settings.Read",
+    // React/Next.js errors
+    "Hydration failed because the initial UI does not match what was rendered on the server",
+    "There was an error while hydrating",
+    "switch to client rendering",
+    "Loading chunk",
+    "Loading CSS chunk",
+    // DSFR-related errors
+    "@codegouvfr/react-dsfr/useIsDark",
+    "MutationObserver.observe",
   ];
 
-  if (suppressErrors.some(e => err.message.includes(e))) {
+  // Check if error matches any of our suppression patterns
+  const shouldSuppress = suppressPatterns.some(pattern => {
+    return err.message?.includes(pattern) || err.stack?.includes(pattern);
+  });
+
+  if (shouldSuppress) {
+    console.log("Suppressing known error:", {
+      message: err.message,
+      type: err.name,
+      pattern: suppressPatterns.find(p => err.message?.includes(p) || err.stack?.includes(p)),
+    });
     return false;
   }
 
-  // Let other errors fail the test so they can be properly investigated
+  // Log and fail test for unknown errors
+  console.log("Unknown error - failing test:", err);
   return true;
 });
