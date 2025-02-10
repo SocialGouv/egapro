@@ -29,7 +29,11 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   });
 
   // Only suppress specific known harmless errors
-  const suppressErrors = ["ResizeObserver loop limit exceeded", "Network request failed"];
+  const suppressErrors = [
+    "ResizeObserver loop limit exceeded",
+    "Network request failed",
+    "Failed to call method: org.freedesktop.portal.Settings.Read",
+  ];
 
   if (suppressErrors.some(e => err.message.includes(e))) {
     return false;
