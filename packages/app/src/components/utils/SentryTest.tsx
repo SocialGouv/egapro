@@ -8,7 +8,7 @@ export const SentryTest = () => {
     try {
       console.log("Making request to test endpoint...");
       // Make a request to our test endpoint that will throw a server error
-      const response = await fetch("/api/test-sentry-error?trigger=true");
+      const response = await fetch("/apiv2/test-sentry-error?trigger=true");
       console.log("Response status:", response.status);
 
       if (!response.ok) {
