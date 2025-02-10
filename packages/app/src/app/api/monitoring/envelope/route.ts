@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
   try {
     // Get the raw body
     const body = await request.text();
-    console.log("Received envelope body:", body);
-    console.log("Envelope body length:", body.length);
-    console.log("Envelope newlines count:", (body.match(/\n/g) || []).length);
+    // console.log("Received envelope body:", body);
+    // console.log("Envelope body length:", body.length);
+    // console.log("Envelope newlines count:", (body.match(/\n/g) || []).length);
     // Parse envelope format (newline-delimited JSON)
     let projectId: string | undefined;
     let publicKey: string | undefined;
@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
         }
 
         // Log item structure for debugging
-        console.log("Added item:", {
-          type: itemHeader.type,
-          hasPayload: itemPayloadLines.length > 0,
-          payloadLines: itemPayloadLines.length,
-        });
+        // console.log("Added item:", {
+        //   type: itemHeader.type,
+        //   hasPayload: itemPayloadLines.length > 0,
+        //   payloadLines: itemPayloadLines.length,
+        // });
       } catch (e) {
         // Not a valid item header, skip
         i++;
@@ -90,28 +90,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Log parsed items with detailed structure
-    items.forEach((item, index) => {
-      console.log(`Item ${index} structure:`, {
-        content: item,
-        length: item.length,
-        newlines: (item.match(/\n/g) || []).length,
-        endsWithNewline: item.endsWith("\n"),
-      });
-    });
+    // items.forEach((item, index) => {
+    //   console.log(`Item ${index} structure:`, {
+    //     content: item,
+    //     length: item.length,
+    //     newlines: (item.match(/\n/g) || []).length,
+    //     endsWithNewline: item.endsWith("\n"),
+    //   });
+    // });
 
     // Reconstruct envelope with proper format:
     // header + \n\n + item1 + \n\n + item2 + \n\n
     const envelope = headerRaw + "\n\n" + items.join("\n");
 
     // Log detailed envelope structure
-    console.log("Envelope structure:", {
-      headerLength: headerRaw.length,
-      itemsCount: items.length,
-      totalLength: envelope.length,
-      newlines: (envelope.match(/\n/g) || []).length,
-      firstNewlineAt: envelope.indexOf("\n"),
-      headerAndFirstItem: envelope.split("\n").slice(0, 3),
-    });
+    // console.log("Envelope structure:", {
+    //   headerLength: headerRaw.length,
+    //   itemsCount: items.length,
+    //   totalLength: envelope.length,
+    //   newlines: (envelope.match(/\n/g) || []).length,
+    //   firstNewlineAt: envelope.indexOf("\n"),
+    //   headerAndFirstItem: envelope.split("\n").slice(0, 3),
+    // });
 
     try {
       // Parse header
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         const dsnUrl = new URL(header.dsn);
         projectId = dsnUrl.pathname.split("/")[1];
         publicKey = dsnUrl.username;
-        console.log("Parsed DSN from envelope:", { projectId, publicKey });
+        // console.log("Parsed DSN from envelope:", { projectId, publicKey });
       }
     } catch (e) {
       console.error("Failed to parse envelope header:", e);
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
           const dsnUrl = new URL(dsn);
           projectId = dsnUrl.pathname.split("/")[1];
           publicKey = dsnUrl.username;
-          console.log("Parsed DSN from environment:", { projectId, publicKey });
+          // console.log("Parsed DSN from environment:", { projectId, publicKey });
         } catch (e) {
           console.warn("Could not parse environment DSN:", e);
         }
@@ -186,11 +186,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log("Sentry response:", {
-      status: sentryResponse.status,
-      statusText: sentryResponse.statusText,
-      error: sentryResponse.headers.get("X-Sentry-Error"),
-    });
+    // console.log("Sentry response:", {
+    //   status: sentryResponse.status,
+    //   statusText: sentryResponse.statusText,
+    //   error: sentryResponse.headers.get("X-Sentry-Error"),
+    // });
 
     // Get Sentry response headers we want to forward
     const sentryHeaders = ["X-Sentry-Error", "X-Sentry-Rate-Limits", "Retry-After"];
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
       const value = sentryResponse.headers.get(header);
       if (value) {
         responseHeaders[header] = value;
-        console.log(`Forwarding header ${header}:`, value);
+        // console.log(`Forwarding header ${header}:`, value);
       }
     }
 
