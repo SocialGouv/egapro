@@ -1,9 +1,27 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const SentryTest = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [typedText, setTypedText] = useState("");
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const newText = typedText + event.key.toLowerCase();
+      setTypedText(newText.slice(-6)); // Keep only last 6 characters
+
+      if (newText.endsWith("sentry")) {
+        setIsVisible(true);
+        console.log("Sentry test activated!");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [typedText]);
+
   const triggerServerError = useCallback(async () => {
     try {
       console.log("Making request to test endpoint...");
@@ -46,6 +64,8 @@ export const SentryTest = () => {
       throw error;
     }
   }, []);
+
+  if (!isVisible) return null;
 
   return (
     <div className="fr-container fr-py-3w">
