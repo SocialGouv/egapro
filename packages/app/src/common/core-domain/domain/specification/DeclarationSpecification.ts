@@ -63,10 +63,10 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
           declaration.endReferencePeriod === undefined,
           "La fin de période de référence doit être absente quand la période n'est pas suffisante.",
         );
-        console.log(
-          "!declaration.publication && declaration.company.hasRecoveryPlan === undefined",
-          declaration.publication,
-        );
+        // console.log(
+        //   "!declaration.publication && declaration.company.hasRecoveryPlan === undefined",
+        //   declaration.publication,
+        // );
         assert(
           !declaration.publication && declaration.company.hasRecoveryPlan === undefined,
           "La publication et la question du plan de relance ne doivent pas être renseignées quand la période n'est pas suffisante.",
