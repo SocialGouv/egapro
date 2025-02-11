@@ -1,3 +1,10 @@
+## [3.5.6](https://github.com/SocialGouv/egapro/compare/v3.5.5...v3.5.6) (2025-02-11)
+
+
+### Bug Fixes
+
+* deeper sentry next integration ([#2406](https://github.com/SocialGouv/egapro/issues/2406)) ([76a4331](https://github.com/SocialGouv/egapro/commit/76a4331939e2bf6590f7f3b2855dac602045b502))
+
 ## [3.5.5](https://github.com/SocialGouv/egapro/compare/v3.5.4...v3.5.5) (2025-02-10)
 
 
