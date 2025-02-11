@@ -1,3 +1,10 @@
+## [3.5.7](https://github.com/SocialGouv/egapro/compare/v3.5.6...v3.5.7) (2025-02-11)
+
+
+### Bug Fixes
+
+* **sentry:** clean prod ci ([b43e8f0](https://github.com/SocialGouv/egapro/commit/b43e8f014ecce4df5d574399f17cf8fd72e27027))
+
 ## [3.5.6](https://github.com/SocialGouv/egapro/compare/v3.5.5...v3.5.6) (2025-02-11)
 
 
