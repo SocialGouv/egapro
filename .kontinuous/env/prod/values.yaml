@@ -11,8 +11,6 @@ api:
     limits:
       cpu: 2
       memory: 2G
-  vars:
-    EGAPRO_SENTRY_DSN: "{{ .Values.global.sentry.apiDSN }}"
   env:
     - name: EGAPRO_SENTRY_DSN
       valueFrom:
