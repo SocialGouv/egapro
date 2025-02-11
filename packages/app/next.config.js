@@ -13,11 +13,24 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: config => {
+  webpack: (config, { dev, isServer }) => {
+    // Handle font files
     config.module.rules.push({
       test: /\.woff2?$/,
       type: "asset/resource",
     });
+
+    // Configure source maps for production
+    if (!isServer && !dev) {
+      config.devtool = "source-map";
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        moduleIds: "deterministic",
+        chunkIds: "deterministic",
+      };
+    }
+
     return config;
   },
   //This option requires Next 13.1 or newer, if you can't update you can use this plugin instead: https://github.com/martpie/next-transpile-modules
@@ -73,45 +86,60 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
-// Injected content via Sentry wizard below
-
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
-  module.exports,
+  nextConfig,
   {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
+    // Sentry webpack plugin options
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    url: process.env.SENTRY_URL,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
 
-    // Suppresses source map uploading logs during build
-    silent: true,
-    org: "incubateur",
-    project: "egapro-next",
-    url: "https://sentry.fabrique.social.gouv.fr/",
+    // Source maps configuration
+    sourcemaps: {
+      assets: ".next/**/*.{js,map}",
+      ignore: ["node_modules/**/*"],
+      rewrite: true,
+      stripPrefix: ["webpack://_N_E/", "webpack://", "app://"],
+      urlPrefix: "app:///_next",
+    },
+
+    // Debug and release configuration
+    silent: false,
+    debug: true,
+    release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    setCommits: {
+      auto: true,
+      ignoreMissing: true,
+    },
+    deploy: {
+      env: process.env.NEXT_PUBLIC_EGAPRO_ENV || "development",
+      dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    },
+    injectBuildInformation: true,
   },
   {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    // Sentry Next.js SDK options
+    // Note: tunnelRoute option doesn't work with self-hosted instances
+    // Using custom tunnel implementation instead
+    tunnelRoute: false,
     widenClientFileUpload: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: true,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
-    tunnelRoute: "/monitoring",
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
+    hideSourceMaps: false,
     disableLogger: true,
 
-    // Enables automatic instrumentation of Vercel Cron Monitors.
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
+    // Enable component names and release injection
+    includeNames: true,
+    release: {
+      inject: true,
+      name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+    },
+
+    // Server instrumentation options
+    autoInstrumentServerFunctions: true,
+    autoInstrumentMiddleware: true,
     automaticVercelMonitors: true,
   },
 );
