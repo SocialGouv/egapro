@@ -1,3 +1,10 @@
+## [3.5.8](https://github.com/SocialGouv/egapro/compare/v3.5.7...v3.5.8) (2025-02-11)
+
+
+### Bug Fixes
+
+* **logs:** disable data logs ([6528c9f](https://github.com/SocialGouv/egapro/commit/6528c9f3dea0e671cc00982e66e7145e9a0c5ef7))
+
 ## [3.5.7](https://github.com/SocialGouv/egapro/compare/v3.5.6...v3.5.7) (2025-02-11)
 
 
