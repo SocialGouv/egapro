@@ -21,9 +21,9 @@ type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boole
 
 export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
-  console.log(déclaration);
+  // console.log(déclaration);
   const router = useRouter();
-  console.log(entreprise);
+  // console.log(entreprise);
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
     address: entreprise?.adresse,
