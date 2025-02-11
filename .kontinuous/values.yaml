@@ -44,6 +44,17 @@ app:
         name: "moncomptepro"
     - secretRef:
         name: github-oauth
+  env:
+    - name: SENTRY_AUTH_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: SENTRY_AUTH_TOKEN
+    - name: NEXT_PUBLIC_SENTRY_DSN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: APP_SENTRY_DSN
   vars:
     POSTGRES_HOST: "$(PGHOST)"
     POSTGRES_DB: "$(PGDATABASE)"
@@ -52,8 +63,7 @@ app:
     POSTGRES_PASSWORD: "$(PGPASSWORD)"
     POSTGRES_SSLMODE: "$(PGSSLMODE)"
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
-    SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
-    EGAPRO_ENV: "{{ .Values.global.env }}"
+    NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
 
 nginx:
@@ -65,6 +75,7 @@ nginx:
     paths:
       - /
       - /api/auth(/|$)(.*)
+      - /api/monitoring(/|$)(.*)
       - /index-egapro/recherche(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: *headers
@@ -108,6 +119,12 @@ api:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
+  env:
+    - name: EGAPRO_SENTRY_DSN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: API_SENTRY_DSN
   vars:
     EGAPRO_DBHOST: "$(PGHOST)"
     EGAPRO_DBNAME: "$(PGDATABASE)"
@@ -115,7 +132,6 @@ api:
     EGAPRO_DBUSER: "$(PGUSER)"
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
-    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
 
 pg:
   ~chart: pg
@@ -181,7 +197,10 @@ files:
         - name: EGAPRO_DBSSL
           value: "$(PGSSLMODE)"
         - name: EGAPRO_SENTRY_DSN
-          value: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+          valueFrom:
+            secretKeyRef:
+              name: sentry
+              key: API_SENTRY_DSN
         - name: SCHEDULER
           value: "True"
         volumeMounts:
@@ -217,6 +236,12 @@ jobs:
       use: build
       memoryLimit: 14Gi
       memoryRequest: 2Gi
+      env:
+        - name: NEXT_PUBLIC_SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: sentry
+              key: APP_SENTRY_DSN
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
@@ -225,7 +250,16 @@ jobs:
           NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
           NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
           NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
-          EGAPRO_ENV: "{{ .Values.global.env }}"
+          NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
+          NEXT_PUBLIC_SENTRY_DSN: "$NEXT_PUBLIC_SENTRY_DSN"
+          SENTRY_ORG: incubateur
+          SENTRY_PROJECT: egapro-app
+          SENTRY_URL: https://sentry2.fabrique.social.gouv.fr
+          SENTRY_RELEASE: "{{ .Values.global.isProd | ternary .Values.global.imageTag (.Values.global.isPreProd | ternary .Values.global.shortSha .Values.global.branchSlug32) }}"
+        secrets:
+          sentry_auth_token:
+            secretName: sentry
+            secretKey: SENTRY_AUTH_TOKEN
 
     build-api:
       use: build

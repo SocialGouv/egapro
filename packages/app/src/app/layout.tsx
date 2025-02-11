@@ -10,6 +10,7 @@ import { config } from "@common/config";
 import { ConfigProvider } from "@components/utils/ConfigProvider";
 import { FeatureStatusProvider } from "@components/utils/FeatureStatusProvider";
 import { Matomo } from "@components/utils/Matomo";
+import { SentryErrorBoundary } from "@components/utils/SentryErrorBoundary";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { SkeletonTheme } from "@design-system/utils/client/skeleton";
 import { headers } from "next/headers";
@@ -101,7 +102,9 @@ const RootLayout = ({ children }: PropsWithChildren) => {
                   ]}
                 />
                 <ConsentBannerAndConsentManagement />
-                <ConfigProvider config={mcpconfig}>{children}</ConfigProvider>
+                <ConfigProvider config={mcpconfig}>
+                  <SentryErrorBoundary>{children}</SentryErrorBoundary>
+                </ConfigProvider>
               </SkeletonTheme>
             </DsfrProvider>
           </SessionProvider>

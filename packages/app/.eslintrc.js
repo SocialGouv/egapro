@@ -22,8 +22,8 @@ const config = {
   extends: [
     "eslint:recommended",
     "next/core-web-vitals",
-    // default rules for import
     "plugin:import/recommended",
+    "plugin:import/typescript",
     // include prettier config which avoid conflict
     "prettier",
     // disable conflicting rules with plugin (not config!)
