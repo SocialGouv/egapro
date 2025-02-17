@@ -15,6 +15,8 @@ const config = {
   testTimeout: 20000,
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
+    "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
+    "@common/(.*)$": "<rootDir>/src/common/$1",
   },
 };
 
