@@ -49,7 +49,7 @@ jobs:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }},viewportWidth=1600,viewportHeight=1400"
           wait-on: "${{ env.SITE_URL }}"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
