@@ -120,7 +120,7 @@ const AideProConnectPage = () => {
             </AnchorLink>
             <p>
               Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le{" "}
-              <Link href={"https://agentconnect.crisp.help/fr/"} target="_blank" rel="noopener noreferrer">
+              <Link href={"https://proconnect.crisp.help/fr/"} target="_blank" rel="noopener noreferrer">
                 centre d'aide
               </Link>
             </p>
