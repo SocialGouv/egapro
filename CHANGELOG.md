@@ -1,3 +1,15 @@
+# [3.6.0](https://github.com/SocialGouv/egapro/compare/v3.5.8...v3.6.0) (2025-02-18)
+
+
+### Bug Fixes
+
+* update staff secret ([#2433](https://github.com/SocialGouv/egapro/issues/2433)) ([719b82e](https://github.com/SocialGouv/egapro/commit/719b82e859f0e0f8c0b3e6f98a638c5fceddb472))
+
+
+### Features
+
+* update urls support ProConnect ([#2432](https://github.com/SocialGouv/egapro/issues/2432)) ([aae56ac](https://github.com/SocialGouv/egapro/commit/aae56acea7709f3f9df41dcc20b84433c80d3c23)), closes [#2433](https://github.com/SocialGouv/egapro/issues/2433) [#2435](https://github.com/SocialGouv/egapro/issues/2435)
+
 ## [3.5.8](https://github.com/SocialGouv/egapro/compare/v3.5.7...v3.5.8) (2025-02-11)
 
 
