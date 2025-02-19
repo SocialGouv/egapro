@@ -17,6 +17,12 @@ const config = {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
     "@common/(.*)$": "<rootDir>/src/common/$1",
+    "@api/(.*)$": "<rootDir>/src/api/$1",
+    "@services/(.*)$": "<rootDir>/src/services/$1",
+    "@design-system/utils/(.*)$": "<rootDir>/src/design-system/utils/$1",
+    "@design-system/hooks/(.*)$": "<rootDir>/src/design-system/hooks/$1",
+    "@public/(.*)$": "<rootDir>/src/public/$1",
+    "@globalActions/(.*)$": "<rootDir>/src/globalActions/$1",
   },
 };
 
