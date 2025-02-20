@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 import { useRouter } from "next/navigation";
 
-import AugmentationEtPromotionsPage from "../page";
+import HautesRemunerationsPage from "../page";
 
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -15,12 +14,6 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@services/apiClient/useDeclarationFormManager", () => ({
   useDeclarationFormManager: jest.fn(),
-}));
-
-// Mock ClientOnly to render children directly
-jest.mock("@components/utils/ClientOnly", () => ({
-  ClientOnly: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useHasMounted: jest.fn(() => true),
 }));
 
 // Mock external components
@@ -36,16 +29,19 @@ type FormData = {
   commencer?: {
     annéeIndicateurs: number;
   };
-  "hautes-remunerations"?: DeclarationDTO["hautes-remunerations"];
+  "hautes-remunerations"?: {
+    note?: number;
+    populationFavorable?: "femmes" | "hommes";
+    résultat?: number;
+  };
 };
 
 interface FormManagerType {
   formData: FormData;
   saveFormData: (data: FormData) => void;
-  savePageData: (page: keyof DeclarationDTO, data: DeclarationDTO[keyof DeclarationDTO] | undefined) => void;
 }
 
-describe("AugmentationEtPromotionsPage", () => {
+describe("HautesRemunerationsPage", () => {
   const mockRouter = {
     push: jest.fn(),
   };
@@ -57,7 +53,6 @@ describe("AugmentationEtPromotionsPage", () => {
       },
     },
     saveFormData: jest.fn(),
-    savePageData: jest.fn(),
   };
 
   beforeEach(() => {
@@ -67,22 +62,34 @@ describe("AugmentationEtPromotionsPage", () => {
     (useDeclarationFormManager as jest.Mock).mockReturnValue(mockFormManager);
   });
 
-  describe("Form Display", () => {
-    it("should show population favorable field when result is not 5", async () => {
-      render(<AugmentationEtPromotionsPage />);
+  describe("Page Display", () => {
+    it("should show result field", () => {
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "4" } });
+      expect(
+        screen.getByLabelText(/Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/),
+      ).toBeInTheDocument();
+    });
+
+    it("should show population favorable when result is not 5", async () => {
+      render(<HautesRemunerationsPage />);
+
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
+      fireEvent.change(resultatInput, { target: { value: "3" } });
 
       await waitFor(() => {
         expect(screen.getByText(/Sexe des salariés sur-représentés/)).toBeInTheDocument();
       });
     });
 
-    it("should not show population favorable field when result is 5", async () => {
-      render(<AugmentationEtPromotionsPage />);
+    it("should not show population favorable when result is 5", async () => {
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
       fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await waitFor(() => {
@@ -90,42 +97,76 @@ describe("AugmentationEtPromotionsPage", () => {
       });
     });
 
-    it("should show note when valid result is entered", async () => {
-      render(<AugmentationEtPromotionsPage />);
+    it("should show note when result is entered", async () => {
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
       fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await waitFor(() => {
-        expect(screen.getByText(/Nombre de points obtenus/)).toBeInTheDocument();
+        expect(screen.getByText(/Nombre de points obtenus à l'indicateur/)).toBeInTheDocument();
       });
     });
   });
 
   describe("Form Validation", () => {
-    it("should require population favorable when result is not 5", async () => {
-      render(<AugmentationEtPromotionsPage />);
+    it("should validate result range", async () => {
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "4" } });
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
+      fireEvent.change(resultatInput, { target: { value: "6" } });
 
       await waitFor(() => {
-        expect(screen.getByText("Suivant")).toBeDisabled();
+        expect(screen.getByText(/ne peut pas être supérieur à 5/)).toBeInTheDocument();
+      });
+
+      fireEvent.change(resultatInput, { target: { value: "-1" } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/ne peut pas être inférieur à 0/)).toBeInTheDocument();
+      });
+
+      fireEvent.change(resultatInput, { target: { value: "2.5" } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/La valeur doit être un nombre entier/)).toBeInTheDocument();
+      });
+    });
+
+    it("should require population favorable when result is not 5", async () => {
+      render(<HautesRemunerationsPage />);
+
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
+      fireEvent.change(resultatInput, { target: { value: "3" } });
+
+      const submitButton = screen.getByText("Suivant");
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("La population favorable est obligatoire")).toBeInTheDocument();
       });
     });
   });
 
   describe("Form Submission", () => {
     it("should handle form submission with result 5", async () => {
-      render(<AugmentationEtPromotionsPage />);
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
       fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await wait();
-      const suivantButton = screen.getByText("Suivant");
-      expect(suivantButton).toBeEnabled();
-      fireEvent.click(suivantButton);
+      const submitButton = screen.getByText("Suivant");
+      expect(submitButton).toBeEnabled();
+      fireEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
@@ -140,25 +181,27 @@ describe("AugmentationEtPromotionsPage", () => {
     });
 
     it("should handle form submission with result not 5", async () => {
-      render(<AugmentationEtPromotionsPage />);
+      render(<HautesRemunerationsPage />);
 
-      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "4" } });
+      const resultatInput = screen.getByLabelText(
+        /Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté/,
+      );
+      fireEvent.change(resultatInput, { target: { value: "3" } });
 
-      const populationFavorableRadio = screen.getByLabelText(/Femmes/);
-      fireEvent.click(populationFavorableRadio);
+      const hommesRadio = screen.getByLabelText(/Hommes/);
+      fireEvent.click(hommesRadio);
 
       await wait();
-      const suivantButton = screen.getByText("Suivant");
-      expect(suivantButton).toBeEnabled();
-      fireEvent.click(suivantButton);
+      const submitButton = screen.getByText("Suivant");
+      expect(submitButton).toBeEnabled();
+      fireEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
           "hautes-remunerations": {
-            résultat: 4,
-            populationFavorable: "femmes",
+            résultat: 3,
+            populationFavorable: "hommes",
             note: expect.any(Number),
           },
         });

@@ -5,7 +5,6 @@ import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFor
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 import { useRouter } from "next/navigation";
-import { isValid } from "@common/utils/luhn";
 
 import UESPage from "../page";
 

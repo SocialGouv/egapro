@@ -204,7 +204,8 @@ describe("PublicationPage", () => {
       const modalitesInput = screen.getByLabelText(/Préciser les modalités/);
       fireEvent.change(modalitesInput, { target: { value: "Affichage dans les locaux" } });
 
-      const planRelanceRadio = screen.getByLabelText(/Non/i, { selector: 'input[name="planRelance"]' });      fireEvent.click(planRelanceRadio);
+      const planRelanceRadio = screen.getByLabelText(/Non/i, { selector: 'input[name="planRelance"]' });
+      fireEvent.click(planRelanceRadio);
 
       await wait();
       const suivantButton = screen.getByText("Suivant");
