@@ -16,6 +16,7 @@ const config = {
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
+    "@components/RHF/(.*)$": "<rootDir>/src/components/RHF/$1",
     "@common/(.*)$": "<rootDir>/src/common/$1",
     "@api/(.*)$": "<rootDir>/src/api/$1",
     "@services/(.*)$": "<rootDir>/src/services/$1",

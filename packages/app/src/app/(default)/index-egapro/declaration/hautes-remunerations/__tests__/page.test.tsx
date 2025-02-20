@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 import { useRouter } from "next/navigation";
 
-import CongesMaterniteForm from "../page";
+import AugmentationEtPromotionsPage from "../page";
 
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -36,7 +36,7 @@ type FormData = {
   commencer?: {
     annéeIndicateurs: number;
   };
-  "conges-maternite"?: DeclarationDTO["conges-maternite"];
+  "hautes-remunerations"?: DeclarationDTO["hautes-remunerations"];
 };
 
 interface FormManagerType {
@@ -45,7 +45,7 @@ interface FormManagerType {
   savePageData: (page: keyof DeclarationDTO, data: DeclarationDTO[keyof DeclarationDTO] | undefined) => void;
 }
 
-describe("CongesMaterniteForm", () => {
+describe("AugmentationEtPromotionsPage", () => {
   const mockRouter = {
     push: jest.fn(),
   };
@@ -68,36 +68,33 @@ describe("CongesMaterniteForm", () => {
   });
 
   describe("Form Display", () => {
-    it("should show non calculable fields when Non is selected", async () => {
-      render(<CongesMaterniteForm />);
+    it("should show population favorable field when result is not 5", async () => {
+      render(<AugmentationEtPromotionsPage />);
 
-      const nonRadio = screen.getByLabelText(/Non/i);
-      fireEvent.click(nonRadio);
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "4" } });
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Motif de non calculabilité/)).toBeInTheDocument();
+        expect(screen.getByText(/Sexe des salariés sur-représentés/)).toBeInTheDocument();
       });
     });
 
-    it("should show calculable fields when Oui is selected", async () => {
-      render(<CongesMaterniteForm />);
+    it("should not show population favorable field when result is 5", async () => {
+      render(<AugmentationEtPromotionsPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
-      fireEvent.click(ouiRadio);
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Résultat final obtenu/)).toBeInTheDocument();
+        expect(screen.queryByText(/Sexe des salariés sur-représentés/)).not.toBeInTheDocument();
       });
     });
 
     it("should show note when valid result is entered", async () => {
-      render(<CongesMaterniteForm />);
+      render(<AugmentationEtPromotionsPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
-      fireEvent.click(ouiRadio);
-
-      const resultatInput = screen.getByLabelText(/Résultat final obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await waitFor(() => {
         expect(screen.getByText(/Nombre de points obtenus/)).toBeInTheDocument();
@@ -106,11 +103,11 @@ describe("CongesMaterniteForm", () => {
   });
 
   describe("Form Validation", () => {
-    it("should require motif when non calculable", async () => {
-      render(<CongesMaterniteForm />);
+    it("should require population favorable when result is not 5", async () => {
+      render(<AugmentationEtPromotionsPage />);
 
-      const nonRadio = screen.getByLabelText(/Non/i);
-      fireEvent.click(nonRadio);
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "4" } });
 
       await waitFor(() => {
         expect(screen.getByText("Suivant")).toBeDisabled();
@@ -119,14 +116,11 @@ describe("CongesMaterniteForm", () => {
   });
 
   describe("Form Submission", () => {
-    it("should handle non calculable form submission", async () => {
-      render(<CongesMaterniteForm />);
+    it("should handle form submission with result 5", async () => {
+      render(<AugmentationEtPromotionsPage />);
 
-      const nonRadio = screen.getByLabelText(/Non/i);
-      fireEvent.click(nonRadio);
-
-      const motifSelect = screen.getByLabelText(/Motif de non calculabilité/);
-      fireEvent.change(motifSelect, { target: { value: "absrcm" } });
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "5" } });
 
       await wait();
       const suivantButton = screen.getByText("Suivant");
@@ -136,23 +130,23 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
-            estCalculable: "non",
-            motifNonCalculabilité: "absrcm",
+          "hautes-remunerations": {
+            résultat: 5,
+            note: expect.any(Number),
           },
         });
         expect(mockRouter.push).toHaveBeenCalled();
       });
     });
 
-    it("should handle calculable form submission", async () => {
-      render(<CongesMaterniteForm />);
+    it("should handle form submission with result not 5", async () => {
+      render(<AugmentationEtPromotionsPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
-      fireEvent.click(ouiRadio);
+      const resultatInput = screen.getByLabelText(/Résultat obtenu/);
+      fireEvent.change(resultatInput, { target: { value: "4" } });
 
-      const resultatInput = screen.getByLabelText(/Résultat final obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      const populationFavorableRadio = screen.getByLabelText(/Femmes/);
+      fireEvent.click(populationFavorableRadio);
 
       await wait();
       const suivantButton = screen.getByText("Suivant");
@@ -162,9 +156,9 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
-            estCalculable: "oui",
-            résultat: 80,
+          "hautes-remunerations": {
+            résultat: 4,
+            populationFavorable: "femmes",
             note: expect.any(Number),
           },
         });

@@ -1,7 +1,7 @@
 import { fireEvent, render, type RenderResult } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 
-import { Indic1Form } from "../Form";
+import Indicateur1Page from "../page";
 import { effectifs } from "./mock";
 
 jest.mock("next-auth/react", () => ({
@@ -25,7 +25,7 @@ jest.mock("../../useSimuFunnelStore", () => ({
 describe("when rendering", () => {
   let r: RenderResult;
   beforeEach(() => {
-    r = render(<Indic1Form />);
+    r = render(<Indicateur1Page />);
   });
   describe("when clicking on radio 'Par catégorie socio-professionnelle'", () => {
     beforeEach(async () => {

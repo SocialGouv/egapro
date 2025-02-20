@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 import { useRouter } from "next/navigation";
 
-import CongesMaterniteForm from "../page";
+import RemunerationPage from "../page";
 
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -36,7 +36,7 @@ type FormData = {
   commencer?: {
     annéeIndicateurs: number;
   };
-  "conges-maternite"?: DeclarationDTO["conges-maternite"];
+  remunerations?: DeclarationDTO["remunerations"];
 };
 
 interface FormManagerType {
@@ -45,7 +45,7 @@ interface FormManagerType {
   savePageData: (page: keyof DeclarationDTO, data: DeclarationDTO[keyof DeclarationDTO] | undefined) => void;
 }
 
-describe("CongesMaterniteForm", () => {
+describe("RemunerationPage", () => {
   const mockRouter = {
     push: jest.fn(),
   };
@@ -69,64 +69,54 @@ describe("CongesMaterniteForm", () => {
 
   describe("Form Display", () => {
     it("should show non calculable fields when Non is selected", async () => {
-      render(<CongesMaterniteForm />);
+      render(<RemunerationPage />);
 
-      const nonRadio = screen.getByLabelText(/Non/i);
+      const nonRadio = screen.getByLabelText(/non/i);
       fireEvent.click(nonRadio);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Motif de non calculabilité/)).toBeInTheDocument();
+        expect(screen.getByText(/Je déclare avoir procédé au calcul/)).toBeInTheDocument();
       });
     });
 
     it("should show calculable fields when Oui is selected", async () => {
-      render(<CongesMaterniteForm />);
+      render(<RemunerationPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
+      const ouiRadio = screen.getByLabelText(/oui/i);
       fireEvent.click(ouiRadio);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Résultat final obtenu/)).toBeInTheDocument();
+        expect(screen.getByText(/Modalité choisie pour le calcul/)).toBeInTheDocument();
       });
     });
 
-    it("should show note when valid result is entered", async () => {
-      render(<CongesMaterniteForm />);
+    it("should show CSE fields when niveau_branche is selected", async () => {
+      render(<RemunerationPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
+      const ouiRadio = screen.getByLabelText(/oui/i);
       fireEvent.click(ouiRadio);
 
-      const resultatInput = screen.getByLabelText(/Résultat final obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      const niveauBrancheRadio = screen.getByLabelText(/classification de branche/i);
+      fireEvent.click(niveauBrancheRadio);
 
       await waitFor(() => {
-        expect(screen.getByText(/Nombre de points obtenus/)).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe("Form Validation", () => {
-    it("should require motif when non calculable", async () => {
-      render(<CongesMaterniteForm />);
-
-      const nonRadio = screen.getByLabelText(/Non/i);
-      fireEvent.click(nonRadio);
-
-      await waitFor(() => {
-        expect(screen.getByText("Suivant")).toBeDisabled();
+        expect(screen.getByText(/Un CSE a-t-il été mis en place/)).toBeInTheDocument();
       });
     });
   });
 
   describe("Form Submission", () => {
     it("should handle non calculable form submission", async () => {
-      render(<CongesMaterniteForm />);
+      render(<RemunerationPage />);
 
       const nonRadio = screen.getByLabelText(/Non/i);
       fireEvent.click(nonRadio);
 
-      const motifSelect = screen.getByLabelText(/Motif de non calculabilité/);
-      fireEvent.change(motifSelect, { target: { value: "absrcm" } });
+      const declarationCheckbox = screen.getByLabelText(/Je déclare avoir procédé au calcul/);
+      fireEvent.click(declarationCheckbox);
+
+      const motifSelect = screen.getByLabelText(/Motif de non calculabilité de l'indicateur/);
+      fireEvent.change(motifSelect, { target: { value: "egvi40pcet" } });
 
       await wait();
       const suivantButton = screen.getByText("Suivant");
@@ -136,23 +126,24 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
+          remunerations: {
             estCalculable: "non",
-            motifNonCalculabilité: "absrcm",
+            déclarationCalculCSP: true,
+            motifNonCalculabilité: "egvi40pcet",
           },
         });
         expect(mockRouter.push).toHaveBeenCalled();
       });
     });
 
-    it("should handle calculable form submission", async () => {
-      render(<CongesMaterniteForm />);
+    it("should handle calculable form submission with CSP", async () => {
+      render(<RemunerationPage />);
 
-      const ouiRadio = screen.getByLabelText(/Oui/i);
+      const ouiRadio = screen.getByLabelText(/oui/i);
       fireEvent.click(ouiRadio);
 
-      const resultatInput = screen.getByLabelText(/Résultat final obtenu/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      const cspRadio = screen.getByLabelText(/Par catégorie socio-professionnelle/);
+      fireEvent.click(cspRadio);
 
       await wait();
       const suivantButton = screen.getByText("Suivant");
@@ -162,10 +153,43 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
+          remunerations: {
             estCalculable: "oui",
-            résultat: 80,
-            note: expect.any(Number),
+            mode: "csp",
+          },
+        });
+        expect(mockRouter.push).toHaveBeenCalled();
+      });
+    });
+
+    it("should handle calculable form submission with niveau_branche and CSE", async () => {
+      render(<RemunerationPage />);
+
+      const ouiRadio = screen.getAllByLabelText(/oui/i)[0];
+      fireEvent.click(ouiRadio);
+
+      const niveauBrancheRadio = screen.getByLabelText(/classification de branche/);
+      fireEvent.click(niveauBrancheRadio);
+
+      const cseOuiRadio = screen.getAllByLabelText(/Oui/i)[1];
+      fireEvent.click(cseOuiRadio);
+
+      const dateInput = screen.getByLabelText(/Date de consultation/);
+      fireEvent.change(dateInput, { target: { value: "2024-01-01" } });
+
+      await wait();
+      const suivantButton = screen.getByText("Suivant");
+      expect(suivantButton).toBeEnabled();
+      fireEvent.click(suivantButton);
+
+      await waitFor(() => {
+        expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
+          ...mockFormManager.formData,
+          remunerations: {
+            estCalculable: "oui",
+            mode: "niveau_branche",
+            cse: "oui",
+            dateConsultationCSE: "2024-01-01",
           },
         });
         expect(mockRouter.push).toHaveBeenCalled();

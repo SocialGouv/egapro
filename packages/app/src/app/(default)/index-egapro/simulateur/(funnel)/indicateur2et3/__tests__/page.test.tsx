@@ -2,7 +2,7 @@ import { fireEvent, render, type RenderResult } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 
 import { effectifs } from "../../indicateur1/__tests__/mock";
-import { Indic2and3Form } from "../Form";
+import Indicateur2et3Page from "../page";
 import { indicateur1 } from "./mock";
 
 jest.mock("next-auth/react", () => ({
@@ -27,7 +27,7 @@ jest.mock("../../useSimuFunnelStore", () => ({
 describe("when rendering", () => {
   let r: RenderResult;
   beforeEach(() => {
-    r = render(<Indic2and3Form />);
+    r = render(<Indicateur2et3Page />);
   });
   it("should forbid next step", async () => {
     await wait();

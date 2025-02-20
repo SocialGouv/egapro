@@ -69,7 +69,7 @@ describe("CommencerPage", () => {
     expect(screen.getByText(/votre espace ProConnect/)).toBeInTheDocument();
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "https://app.moncomptepro.beta.gouv.fr/manage-organizations",
+      "https://identite.proconnect.gouv.fr/manage-organizations",
     );
   });
 

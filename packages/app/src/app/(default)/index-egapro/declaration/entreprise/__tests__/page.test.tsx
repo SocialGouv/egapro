@@ -1,62 +1,167 @@
-import { render, screen } from "@testing-library/react";
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { wait } from "@testing-library/user-event/dist/utils";
+import { useRouter } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
 
 import InformationsEntreprisePage from "../page";
 
-// Mock the AlertExistingDeclaration component
+// Mock next/navigation
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  redirect: jest.fn(),
+}));
+
+jest.mock("@services/apiClient/useDeclarationFormManager", () => ({
+  useDeclarationFormManager: jest.fn(),
+}));
+
+// Mock ClientOnly to render children directly
+jest.mock("@components/utils/ClientOnly", () => ({
+  ClientOnly: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHasMounted: jest.fn(() => true),
+}));
+
+// Mock external components
 jest.mock("../../AlertExistingDeclaration", () => ({
   AlertExistingDeclaration: () => <div data-testid="alert-existing">Alert Existing</div>,
 }));
 
-// Mock the DeclarationStepper component
 jest.mock("../../DeclarationStepper", () => ({
   DeclarationStepper: ({ stepName }: { stepName: string }) => <div data-testid="stepper">{stepName}</div>,
 }));
 
-// Mock the Alert component from react-dsfr
-jest.mock("@codegouvfr/react-dsfr/Alert", () => ({
-  __esModule: true,
-  default: ({ description }: { description: React.ReactNode }) => (
-    <div data-testid="alert-info" role="alert">
-      {description}
-    </div>
-  ),
-}));
+type FormData = {
+  commencer?: {
+    annéeIndicateurs: number;
+  };
+  entreprise?: DeclarationDTO["entreprise"] & {
+    entrepriseDéclarante?: {
+      adresse: string;
+      codeNaf: string;
+      codePays: string;
+      codePostal: string;
+      commune: string;
+      raisonSociale: string;
+      siren: string;
+    };
+  };
+  ues?: DeclarationDTO["ues"];
+};
+
+interface FormManagerType {
+  formData: FormData;
+  saveFormData: (data: FormData) => void;
+  savePageData: (page: keyof DeclarationDTO, data: DeclarationDTO[keyof DeclarationDTO] | undefined) => void;
+}
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  // @ts-ignore
+  return render(<SessionProvider session={{ user: { email: "test@test.com" }, expires: "1" }}>{ui}</SessionProvider>);
+};
 
 describe("InformationsEntreprisePage", () => {
-  it("should render the existing declaration alert", () => {
-    render(<InformationsEntreprisePage />);
+  const mockRouter = {
+    push: jest.fn(),
+  };
 
-    expect(screen.getByTestId("alert-existing")).toBeInTheDocument();
+  const mockFormManager: FormManagerType = {
+    formData: {
+      commencer: {
+        annéeIndicateurs: 2024,
+      },
+      entreprise: {
+        entrepriseDéclarante: {
+          raisonSociale: "Test Company",
+          siren: "123456789",
+          codeNaf: "12.00Z",
+          codePays: "FR",
+          adresse: "1 rue du Test",
+          commune: "Paris",
+          codePostal: "75001",
+        },
+      },
+    },
+    saveFormData: jest.fn(),
+    savePageData: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    // @ts-ignore
+    (useDeclarationFormManager as jest.Mock).mockReturnValue(mockFormManager);
   });
 
-  it("should render the stepper with correct step name", () => {
-    render(<InformationsEntreprisePage />);
+  describe("Page Display", () => {
+    it("should show company information", () => {
+      renderWithProviders(<InformationsEntreprisePage />);
+      expect(screen.getByText("Test Company")).toBeInTheDocument();
+    });
 
-    const stepper = screen.getByTestId("stepper");
-    expect(stepper).toHaveTextContent("entreprise");
+    it("should show info alert about workforce", () => {
+      renderWithProviders(<InformationsEntreprisePage />);
+
+      expect(screen.getByText(/Concernant la tranche d'effectifs assujettis/)).toBeInTheDocument();
+    });
   });
 
-  it("should render the information alert with correct text", () => {
-    render(<InformationsEntreprisePage />);
+  describe("Form Submission", () => {
+    it("should handle entreprise form submission", async () => {
+      renderWithProviders(<InformationsEntreprisePage />);
 
-    const alert = screen.getByTestId("alert-info");
-    expect(alert).toHaveTextContent(/Concernant la tranche d'effectifs assujettis/);
-    expect(alert).toHaveTextContent(/articles L.1111-2 et L.1111-3 du code du travail/);
-  });
+      const entrepriseRadio = screen.getByLabelText(/Entreprise/);
+      fireEvent.click(entrepriseRadio);
 
-  it("should render all components in the correct order", () => {
-    render(<InformationsEntreprisePage />);
+      const trancheRadio = screen.getByLabelText(/50 à 250/);
+      fireEvent.click(trancheRadio);
 
-    const alertExisting = screen.getByTestId("alert-existing");
-    const stepper = screen.getByTestId("stepper");
-    const alertInfo = screen.getByTestId("alert-info");
+      await wait();
+      const suivantButton = screen.getByText("Suivant");
+      expect(suivantButton).toBeEnabled();
+      fireEvent.click(suivantButton);
 
-    expect(alertExisting).toBeInTheDocument();
-    expect(stepper).toBeInTheDocument();
-    expect(alertInfo).toBeInTheDocument();
+      await waitFor(() => {
+        expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
+          ...mockFormManager.formData,
+          entreprise: {
+            ...mockFormManager.formData.entreprise,
+            type: "entreprise",
+            tranche: "50:250",
+          },
+          ues: undefined,
+        });
+        expect(mockRouter.push).toHaveBeenCalled();
+      });
+    });
 
-    // Verify the order in the DOM
-    expect(alertExisting.compareDocumentPosition(stepper)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(stepper.compareDocumentPosition(alertInfo)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    it("should handle UES form submission", async () => {
+      renderWithProviders(<InformationsEntreprisePage />);
+
+      const uesRadio = screen.getByLabelText(/Unité Économique et Sociale/);
+      fireEvent.click(uesRadio);
+
+      const trancheRadio = screen.getByLabelText(/50 à 250/);
+      fireEvent.click(trancheRadio);
+
+      await wait();
+      const suivantButton = screen.getByText("Suivant");
+      expect(suivantButton).toBeEnabled();
+      fireEvent.click(suivantButton);
+
+      await waitFor(() => {
+        expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
+          ...mockFormManager.formData,
+          entreprise: {
+            ...mockFormManager.formData.entreprise,
+            type: "ues",
+            tranche: "50:250",
+          },
+        });
+        expect(mockRouter.push).toHaveBeenCalled();
+      });
+    });
   });
 });
