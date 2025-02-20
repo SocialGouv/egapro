@@ -137,7 +137,6 @@ export const UESForm = () => {
 
   const validateOneSiren = async (childSiren: string): Promise<ValidateResult> => {
     const parsedSiren = sirenSchema.safeParse(childSiren);
-
     if (!parsedSiren) {
       return { ok: false, error: MANDATORY_SIREN };
     }

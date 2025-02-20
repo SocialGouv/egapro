@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { CSP } from "@common/core-domain/domain/valueObjects/CSP";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 import { useRouter } from "next/navigation";
 
-import CongesMaterniteForm from "../page";
+import PromotionsPage from "../page";
 
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -29,11 +30,21 @@ type FormData = {
   commencer?: {
     annéeIndicateurs: number;
   };
-  "conges-maternite"?: {
+  promotions?: {
+    catégories?: {
+      [CSP.Enum.OUVRIERS]: number | string;
+      [CSP.Enum.EMPLOYES]: number | string;
+      [CSP.Enum.TECHNICIENS_AGENTS_MAITRISES]: number | string;
+      [CSP.Enum.INGENIEURS_CADRES]: number | string;
+    };
     estCalculable: "non" | "oui";
     motifNonCalculabilité?: string;
     note?: number;
+    populationFavorable?: "femmes" | "hommes";
     résultat?: number | string;
+  };
+  "remunerations-resultat"?: {
+    populationFavorable?: "femmes" | "hommes";
   };
 };
 
@@ -42,7 +53,7 @@ interface FormManagerType {
   saveFormData: (data: FormData) => void;
 }
 
-describe("CongesMaterniteForm", () => {
+describe("PromotionsPage", () => {
   const mockRouter = {
     push: jest.fn(),
   };
@@ -65,7 +76,7 @@ describe("CongesMaterniteForm", () => {
 
   describe("Page Display", () => {
     it("should show motif field when not calculable", async () => {
-      render(<CongesMaterniteForm />);
+      render(<PromotionsPage />);
 
       const nonRadio = screen.getByLabelText(/Non/i);
       fireEvent.click(nonRadio);
@@ -75,35 +86,72 @@ describe("CongesMaterniteForm", () => {
       });
     });
 
-    it("should show result field when calculable", async () => {
-      render(<CongesMaterniteForm />);
+    it("should show CSP fields when calculable", async () => {
+      render(<PromotionsPage />);
 
       const ouiRadio = screen.getByLabelText(/Oui/i);
       fireEvent.click(ouiRadio);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Résultat final obtenu à l'indicateur en %/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Ouvriers/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Employés/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Techniciens et agents de maîtrise/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Ingénieurs et cadres/)).toBeInTheDocument();
       });
     });
 
-    it("should show note when result is entered", async () => {
-      render(<CongesMaterniteForm />);
+    it("should show population favorable when result is not 0", async () => {
+      render(<PromotionsPage />);
 
       const ouiRadio = screen.getByLabelText(/Oui/i);
       fireEvent.click(ouiRadio);
 
+      const ouvriersInput = screen.getByLabelText(/Ouvriers/);
+      fireEvent.change(ouvriersInput, { target: { value: "1.5" } });
+
       const resultatInput = screen.getByLabelText(/Résultat final/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      fireEvent.change(resultatInput, { target: { value: "1.5" } });
 
       await waitFor(() => {
-        expect(screen.getByText(/Nombre de points obtenus à l'indicateur/)).toBeInTheDocument();
+        expect(screen.getByText(/Population envers laquelle l'écart est favorable/)).toBeInTheDocument();
+      });
+    });
+
+    it("should show rattrapage message when population favorable changes", async () => {
+      // @ts-ignore
+      (useDeclarationFormManager as jest.Mock).mockReturnValue({
+        ...mockFormManager,
+        formData: {
+          ...mockFormManager.formData,
+          "remunerations-resultat": {
+            populationFavorable: "femmes",
+          },
+        },
+      });
+
+      render(<PromotionsPage />);
+
+      const ouiRadio = screen.getByLabelText(/Oui/i);
+      fireEvent.click(ouiRadio);
+
+      const ouvriersInput = screen.getByLabelText(/Ouvriers/);
+      fireEvent.change(ouvriersInput, { target: { value: "1.5" } });
+
+      const resultatInput = screen.getByLabelText(/Résultat final/);
+      fireEvent.change(resultatInput, { target: { value: "1.5" } });
+
+      const hommesRadio = screen.getByLabelText(/Hommes/);
+      fireEvent.click(hommesRadio);
+
+      await waitFor(() => {
+        expect(screen.getByText(/L’écart constaté étant en faveur du sexe le moins bien rémunéré/)).toBeInTheDocument();
       });
     });
   });
 
   describe("Form Validation", () => {
     it("should require motif when not calculable", async () => {
-      render(<CongesMaterniteForm />);
+      render(<PromotionsPage />);
 
       const nonRadio = screen.getByLabelText(/Non/i);
       fireEvent.click(nonRadio);
@@ -112,33 +160,42 @@ describe("CongesMaterniteForm", () => {
       expect(submitButton).toBeDisabled();
     });
 
-    it("should validate result range when calculable", async () => {
-      render(<CongesMaterniteForm />);
+    it("should require at least one CSP when calculable", async () => {
+      render(<PromotionsPage />);
 
       const ouiRadio = screen.getByLabelText(/Oui/i);
       fireEvent.click(ouiRadio);
 
-      const resultatInput = screen.getByLabelText(/Résultat final/);
-      fireEvent.change(resultatInput, { target: { value: "150" } });
-
       const submitButton = screen.getByText("Suivant");
       expect(submitButton).toBeDisabled();
+    });
 
-      fireEvent.change(resultatInput, { target: { value: "-10" } });
+    it("should require population favorable when result is not 0", async () => {
+      render(<PromotionsPage />);
 
+      const ouiRadio = screen.getByLabelText(/Oui/i);
+      fireEvent.click(ouiRadio);
+
+      const ouvriersInput = screen.getByLabelText(/Ouvriers/);
+      fireEvent.change(ouvriersInput, { target: { value: "1.5" } });
+
+      const resultatInput = screen.getByLabelText(/Résultat final/);
+      fireEvent.change(resultatInput, { target: { value: "1.5" } });
+
+      const submitButton = screen.getByText("Suivant");
       expect(submitButton).toBeDisabled();
     });
   });
 
   describe("Form Submission", () => {
     it("should handle form submission with non calculable", async () => {
-      render(<CongesMaterniteForm />);
+      render(<PromotionsPage />);
 
       const nonRadio = screen.getByLabelText(/Non/i);
       fireEvent.click(nonRadio);
 
       const motifInput = screen.getByLabelText(/Motif de non calculabilité de l'indicateur/);
-      fireEvent.change(motifInput, { target: { value: "absrcm" } });
+      fireEvent.change(motifInput, { target: { value: "absprom" } });
 
       await wait();
       const submitButton = screen.getByText("Suivant");
@@ -148,9 +205,9 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
+          promotions: {
             estCalculable: "non",
-            motifNonCalculabilité: "absrcm",
+            motifNonCalculabilité: "absprom",
           },
         });
         expect(mockRouter.push).toHaveBeenCalled();
@@ -158,13 +215,19 @@ describe("CongesMaterniteForm", () => {
     });
 
     it("should handle form submission with calculable", async () => {
-      render(<CongesMaterniteForm />);
+      render(<PromotionsPage />);
 
       const ouiRadio = screen.getByLabelText(/Oui/i);
       fireEvent.click(ouiRadio);
 
+      const ouvriersInput = screen.getByLabelText(/Ouvriers/);
+      fireEvent.change(ouvriersInput, { target: { value: "1.5" } });
+
       const resultatInput = screen.getByLabelText(/Résultat final/);
-      fireEvent.change(resultatInput, { target: { value: "80" } });
+      fireEvent.change(resultatInput, { target: { value: "1.5" } });
+
+      const hommesRadio = screen.getByLabelText(/Hommes/);
+      fireEvent.click(hommesRadio);
 
       await wait();
       const submitButton = screen.getByText("Suivant");
@@ -174,9 +237,13 @@ describe("CongesMaterniteForm", () => {
       await waitFor(() => {
         expect(mockFormManager.saveFormData).toHaveBeenCalledWith({
           ...mockFormManager.formData,
-          "conges-maternite": {
+          promotions: {
             estCalculable: "oui",
-            résultat: 80,
+            catégories: {
+              [CSP.Enum.OUVRIERS]: 1.5,
+            },
+            résultat: 1.5,
+            populationFavorable: "hommes",
             note: expect.any(Number),
           },
         });

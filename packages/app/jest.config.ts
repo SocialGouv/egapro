@@ -23,7 +23,7 @@ const config = {
     "@design-system/utils/(.*)$": "<rootDir>/src/design-system/utils/$1",
     "@design-system/hooks/(.*)$": "<rootDir>/src/design-system/hooks/$1",
     "@public/(.*)$": "<rootDir>/src/public/$1",
-    "@globalActions/(.*)$": "<rootDir>/src/globalActions/$1",
+    "@globalActions/(.*)$": "<rootDir>/src/app/_globalActions/$1",
   },
 };
 
