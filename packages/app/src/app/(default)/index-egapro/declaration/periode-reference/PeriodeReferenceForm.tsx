@@ -132,7 +132,7 @@ export const PeriodeReferenceForm = () => {
         </u>{" "}
         est l'année au titre de laquelle les indicateurs sont calculés.
       </Highlight>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate name="periodeReferenceForm">
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <RadioOuiNon

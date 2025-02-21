@@ -1,3 +1,5 @@
+import { type DeclarationRaw } from "@api/core-domain/infra/db/DeclarationRaw";
+
 import { getAllDeclarations } from "../actions";
 
 function validateSIREN(siren: string): boolean {
@@ -27,10 +29,14 @@ function validateSIREN(siren: string): boolean {
   return sum % 10 === 0;
 }
 
+type DeclaractionRawInvalid = Partial<DeclarationRaw> & {
+  invalidSiren?: string;
+};
+
 const CleanInvalidsSirenPage = async () => {
   try {
     const declarations = await getAllDeclarations();
-    const invalidDeclarations = [];
+    const invalidDeclarations: DeclaractionRawInvalid[] = [];
     for (const declaration of declarations) {
       if (!declaration.data?.entreprise.siren) {
         //console.log("No siren", declaration.siren);
