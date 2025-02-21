@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Found an item header, collect payload until next item header or end
-        const itemPayloadLines = [];
+        const itemPayloadLines: string[] = [];
         i++;
         while (i < lines.length) {
           const payloadLine = lines[i];

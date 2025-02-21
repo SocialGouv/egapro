@@ -1,5 +1,5 @@
 import { logger } from "@api/utils/pino";
-import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers";
+import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers/oauth";
 
 export interface Organization {
   id: number;
