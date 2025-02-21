@@ -1,4 +1,5 @@
 export * from "./base/AlternativeTable";
+export { default as alternativeTableStyles } from "./base/AlternativeTable.module.css";
 export * from "./base/BackNextButtonsGroup";
 export * from "./base/BigNote";
 export * from "./base/Box";
