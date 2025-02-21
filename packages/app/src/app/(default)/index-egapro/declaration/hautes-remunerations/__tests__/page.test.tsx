@@ -146,11 +146,7 @@ describe("HautesRemunerationsPage", () => {
       fireEvent.change(resultatInput, { target: { value: "3" } });
 
       const submitButton = screen.getByText("Suivant");
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByText("La population favorable est obligatoire")).toBeInTheDocument();
-      });
+      expect(submitButton).toBeDisabled();
     });
   });
 

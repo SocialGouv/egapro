@@ -90,7 +90,7 @@ describe("PublicationPage", () => {
     it("should show explanation text", () => {
       render(<PublicationPage />);
 
-      expect(screen.getByText(/La note obtenue à l’index/)).toBeInTheDocument();
+      expect(screen.getByText(/La note obtenue à l'index/)).toBeInTheDocument();
       expect(screen.getByText(/publiés de manière visible et lisible/)).toBeInTheDocument();
     });
 
