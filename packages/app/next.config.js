@@ -8,7 +8,14 @@ const nextConfig = {
   experimental: {
     // typedRoutes: true, // TODO activate <3
     // outputFileTracingRoot: path.join(__dirname, "../../"),
-    serverComponentsExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node"],
+    serverComponentsExternalPackages: [
+      "@react-pdf/renderer",
+      "xlsx",
+      "xlsx",
+      "js-xlsx",
+      "@json2csv/node",
+      "require-in-the-middle",
+    ],
   },
   eslint: {
     ignoreDuringBuilds: true,
