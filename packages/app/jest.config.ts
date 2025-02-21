@@ -8,10 +8,23 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 /** @type {import('jest').Config} */
 const config = {
-  // Add more setup options before each test is run
-  // setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-
   testEnvironment: "jest-environment-jsdom",
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  testMatch: ["**/__tests__/**/*?(*.)+(test|spec).[jt]s?(x)"],
+  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
+  testTimeout: 20000,
+  moduleNameMapper: {
+    "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
+    "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
+    "@components/RHF/(.*)$": "<rootDir>/src/components/RHF/$1",
+    "@common/(.*)$": "<rootDir>/src/common/$1",
+    "@api/(.*)$": "<rootDir>/src/api/$1",
+    "@services/(.*)$": "<rootDir>/src/services/$1",
+    "@design-system/utils/(.*)$": "<rootDir>/src/design-system/utils/$1",
+    "@design-system/hooks/(.*)$": "<rootDir>/src/design-system/hooks/$1",
+    "@public/(.*)$": "<rootDir>/src/public/$1",
+    "@globalActions/(.*)$": "<rootDir>/src/app/_globalActions/$1",
+  },
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
