@@ -144,7 +144,7 @@ describe("PromotionsPage", () => {
       fireEvent.click(hommesRadio);
 
       await waitFor(() => {
-        expect(screen.getByText(/L'écart constaté étant en faveur du sexe le moins bien rémunéré/)).toBeInTheDocument();
+        expect(screen.getByText(/L’écart constaté étant en faveur du sexe le moins bien rémunéré/)).toBeInTheDocument();
       });
     });
   });

@@ -16,7 +16,7 @@ describe("AssujettiPage", () => {
     expect(
       screen.getByText(/Toutes les entreprises et unités économiques et sociales \(UES\) d'au moins 50 salariés/),
     ).toBeInTheDocument();
-    expect(screen.getByText(/L'assujettissement est défini à la date de l'obligation/)).toBeInTheDocument();
+    expect(screen.getByText(/L'assujettissement est défini à la date de l’obligation/)).toBeInTheDocument();
   });
 
   it("should show Suivant button when Oui is selected", async () => {
