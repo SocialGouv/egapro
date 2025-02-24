@@ -2,7 +2,9 @@ name: Tests Unitaires
 
 on:
   push:
-    branches: ["**"]
+    branches:
+      - master
+  pull_request:
 
 concurrency:
   cancel-in-progress: true
