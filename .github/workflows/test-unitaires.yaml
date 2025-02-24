@@ -13,7 +13,7 @@ concurrency:
 env:
   NODE_ENV: test
 
-name: Tests
+name: Tests Unitaires
 jobs:
   build:
     name: Build
