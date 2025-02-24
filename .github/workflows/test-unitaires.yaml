@@ -30,7 +30,7 @@ jobs:
           yarn install --immutable
       - name: Build code
         run: |
-          yarn build
+          yarn build:app
       - name: Cache build
         uses: actions/cache@v4
         with:
