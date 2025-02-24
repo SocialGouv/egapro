@@ -13,7 +13,6 @@ concurrency:
 env:
   NODE_ENV: test
 
-name: TU
 jobs:
   build:
     name: Build
