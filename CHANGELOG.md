@@ -1,3 +1,10 @@
+## [3.6.1](https://github.com/SocialGouv/egapro/compare/v3.6.0...v3.6.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* unhandled error ([#2446](https://github.com/SocialGouv/egapro/issues/2446)) ([284e233](https://github.com/SocialGouv/egapro/commit/284e2330c12fd9e8e363b531647c60a6bf8a50bb))
+
 # [3.6.0](https://github.com/SocialGouv/egapro/compare/v3.5.8...v3.6.0) (2025-02-18)
 
 
