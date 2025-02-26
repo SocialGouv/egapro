@@ -29,7 +29,8 @@ Sentry.init({
   tunnel: "/api/monitoring/envelope",
 
   // Performance monitoring and source maps
-  enableTracing: true,
+  // enableTracing: true,
+  enableTracing: false, // temp disable trying to reduce race condition error bubbling up
   attachStacktrace: true, // Attach stack traces to all messages
   normalizeDepth: 10, // Increase stack trace depth for better context
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev

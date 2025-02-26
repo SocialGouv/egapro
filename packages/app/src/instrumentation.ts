@@ -45,7 +45,8 @@ export async function register() {
       environment: ENVIRONMENT,
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
       debug: false,
-      enableTracing: true,
+      // enableTracing: true,
+      enableTracing: false, // temp disable trying to reduce race condition error bubbling up
 
       beforeSend(event) {
         if (IS_PRODUCTION && !event.exception) return null;
