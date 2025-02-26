@@ -1,3 +1,10 @@
+## [3.6.3](https://github.com/SocialGouv/egapro/compare/v3.6.2...v3.6.3) (2025-02-26)
+
+
+### Bug Fixes
+
+* up resources for prod ([6f3dc57](https://github.com/SocialGouv/egapro/commit/6f3dc575077bb8149310c8877a31eca4f7f5a933))
+
 ## [3.6.2](https://github.com/SocialGouv/egapro/compare/v3.6.1...v3.6.2) (2025-02-26)
 
 
