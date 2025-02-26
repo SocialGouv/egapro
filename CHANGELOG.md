@@ -1,3 +1,11 @@
+## [3.6.4](https://github.com/SocialGouv/egapro/compare/v3.6.3...v3.6.4) (2025-02-26)
+
+
+### Bug Fixes
+
+* cannot read properties of undefined (reading 'ranges') ([3c3c91d](https://github.com/SocialGouv/egapro/commit/3c3c91d43038699974451725b49684d077945b06))
+* typo ([9fdea26](https://github.com/SocialGouv/egapro/commit/9fdea26d14ea60f972db7f4d943685b6d49a4395))
+
 ## [3.6.3](https://github.com/SocialGouv/egapro/compare/v3.6.2...v3.6.3) (2025-02-26)
 
 
