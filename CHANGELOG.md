@@ -1,3 +1,10 @@
+## [3.6.5](https://github.com/SocialGouv/egapro/compare/v3.6.4...v3.6.5) (2025-02-26)
+
+
+### Bug Fixes
+
+* temp disable tracing ([d2f114b](https://github.com/SocialGouv/egapro/commit/d2f114b40c241b05329352f555583fe30b942626))
+
 ## [3.6.4](https://github.com/SocialGouv/egapro/compare/v3.6.3...v3.6.4) (2025-02-26)
 
 
