@@ -1,3 +1,10 @@
+## [3.6.2](https://github.com/SocialGouv/egapro/compare/v3.6.1...v3.6.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* undefined on libelleCommuneEtablissement ([d4efe66](https://github.com/SocialGouv/egapro/commit/d4efe6649fa55d6458dfd852693b6fe3d49cb054))
+
 ## [3.6.1](https://github.com/SocialGouv/egapro/compare/v3.6.0...v3.6.1) (2025-02-25)
 
 
