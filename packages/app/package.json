@@ -13,6 +13,8 @@
     "lint:fix": "next lint --fix",
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
     "test": "jest --watch",
+    "test:e2e": "cypress run",
+    "test:e2e:ui": "cypress open",
     "type-check": "tsc",
     "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts",
     "generateModelsFromSchema": "ts-node --project scripts/tsconfig.json scripts/generateModelsFromSchema.ts",
