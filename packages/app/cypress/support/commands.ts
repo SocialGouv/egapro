@@ -35,3 +35,11 @@
 //     }
 //   }
 // }
+
+Cypress.Commands.add("selectByLabel", labelText => {
+  cy.contains("label", labelText)
+    .invoke("attr", "for")
+    .then(id => {
+      return id && cy.get(`#${CSS.escape(id)}`);
+    });
+});
