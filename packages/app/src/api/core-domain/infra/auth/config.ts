@@ -138,7 +138,10 @@ export const authConfig: AuthOptions = {
           token.staff.lastImpersonated = [
             // keep only unique companies
             ...new Map(
-              (token.staff.lastImpersonated ?? []).concat(token.user.companies).map(c => [c.siren, c.label]),
+              (token.staff.lastImpersonated ?? [])
+                .concat(token.user.companies)
+                .filter(c => !!c)
+                .map(c => [c.siren, c.label]),
             ).entries(),
           ].map(([siren, label]) => ({ siren, label }));
         } else if (session.staff.impersonating === false) {
