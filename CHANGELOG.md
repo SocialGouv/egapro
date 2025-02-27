@@ -1,3 +1,10 @@
+## [3.6.8](https://github.com/SocialGouv/egapro/compare/v3.6.7...v3.6.8) (2025-02-27)
+
+
+### Bug Fixes
+
+* SENTRY_ALLOW_FAILURE=true ([3f4f221](https://github.com/SocialGouv/egapro/commit/3f4f221a7018227045db4660d16f852ad42ce75a))
+
 ## [3.6.7](https://github.com/SocialGouv/egapro/compare/v3.6.6...v3.6.7) (2025-02-27)
 
 
