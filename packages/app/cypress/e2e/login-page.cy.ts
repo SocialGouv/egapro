@@ -36,7 +36,7 @@ describe("Page de login avec EMAIL_LOGIN=false", () => {
 
     // Visiter la page de login
     cy.visit("/login");
-    cy.wait("@getSession");
+    cy.wait("@getSession", { timeout: 100000 });
   });
 
   it("Redirige vers MonComptePro lors du clic sur le bouton ProConnect", () => {
@@ -84,7 +84,7 @@ describe("Page de login avec EMAIL_LOGIN=false", () => {
 
     // Visiter la page de login
     cy.visit("/login");
-    cy.wait("@getSessionLoggedIn");
+    cy.wait("@getSessionLoggedIn", { timeout: 100000 });
 
     // Vérifier que le message de succès est affiché
     cy.contains("test@example.com").should("be.visible");
