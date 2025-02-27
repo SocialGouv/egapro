@@ -1,3 +1,10 @@
+## [3.6.7](https://github.com/SocialGouv/egapro/compare/v3.6.6...v3.6.7) (2025-02-27)
+
+
+### Bug Fixes
+
+* **TypeError:** undefined company ([8be22dd](https://github.com/SocialGouv/egapro/commit/8be22dd0e0c8e8b8c51f37826fc1d227b474a674))
+
 ## [3.6.6](https://github.com/SocialGouv/egapro/compare/v3.6.5...v3.6.6) (2025-02-27)
 
 
