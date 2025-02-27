@@ -46,6 +46,8 @@ app:
         name: smtp-app
   autoscale:
     enabled: true
+    minReplicas: 4
+    maxReplicas: 20
   resources:
     requests:
       cpu: 2
@@ -57,4 +59,13 @@ app:
 nginx:
   autoscale:
     enabled: true
+    minReplicas: 4
+    maxReplicas: 20
+  resources:
+    requests:
+      cpu: 1
+      memory: 2G
+    limits:
+      cpu: 2
+      memory: 2G
 
