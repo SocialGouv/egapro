@@ -4,6 +4,8 @@ import { defineConfig } from "cypress";
 export default defineConfig({
   defaultCommandTimeout: 30000,
   experimentalStudio: true,
+  video: false,
+  screenshotOnRunFailure: false,
   e2e: {
     baseUrl: "http://localhost:3000",
     setupNodeEvents(_on, _config) {
