@@ -44,6 +44,7 @@ Sentry.init({
       /^ECONNRESET/,
       /^ETIMEDOUT/,
       "Database connection timeout",
+      "Hydration failed",
     ];
 
     if (
