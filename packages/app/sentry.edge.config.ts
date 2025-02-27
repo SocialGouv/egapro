@@ -22,7 +22,7 @@ Sentry.init({
   maxBreadcrumbs: 100, // Increase from default 100 to capture more context
 
   // Error tracking configuration
-  sampleRate: 1.0, // Capture all errors
+  sampleRate: 0.1,
 
   beforeSend(event) {
     // Filter out non-error events in production

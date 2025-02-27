@@ -41,7 +41,7 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0, // Always capture sessions with errors
 
   // Error tracking configuration
-  sampleRate: 1.0, // Capture all errors
+  sampleRate: 0.1,
   autoSessionTracking: true, // Enable automatic session tracking
   sendClientReports: true, // Enable immediate client reports
 
