@@ -19,6 +19,10 @@ jobs:
     secrets: inherit
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Divise en 3 jobs parallèles
+        containers: [1, 2, 3]
     needs: [socialgouv]
     name: "Test e2e"
     steps:
