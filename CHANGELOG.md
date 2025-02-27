@@ -1,3 +1,13 @@
+## [3.6.6](https://github.com/SocialGouv/egapro/compare/v3.6.5...v3.6.6) (2025-02-27)
+
+
+### Bug Fixes
+
+* disable api sentry dsn ([1ef3b05](https://github.com/SocialGouv/egapro/commit/1ef3b05da38d812486efa4defe6380fd8ecc6582))
+* ngninx rollout after app ([0586ed6](https://github.com/SocialGouv/egapro/commit/0586ed6b19fe545ad3f2c7dd05f4245ae25dd243))
+* reduce error tracking rate ([b3c1675](https://github.com/SocialGouv/egapro/commit/b3c16754e5d96b686a3790334e99233200fda324))
+* resources ([4451d25](https://github.com/SocialGouv/egapro/commit/4451d2549d7cfc658ebc15c1a4c663e0bcbdf852))
+
 ## [3.6.5](https://github.com/SocialGouv/egapro/compare/v3.6.4...v3.6.5) (2025-02-26)
 
 
