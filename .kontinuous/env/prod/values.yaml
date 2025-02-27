@@ -11,12 +11,12 @@ api:
     limits:
       cpu: 2
       memory: 2G
-  env:
-    - name: EGAPRO_SENTRY_DSN
-      valueFrom:
-        secretKeyRef:
-          name: sentry
-          key: API_SENTRY_DSN
+  # env:
+  #   - name: EGAPRO_SENTRY_DSN
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: sentry
+  #         key: API_SENTRY_DSN
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
