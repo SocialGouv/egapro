@@ -46,9 +46,9 @@ export const EntrepriseForm = () => {
 
   const companyDto: CompanyDTO = {
     address: address.includes("[ND]") ? "Information non diffusible" : address,
-    city: company.firstMatchingEtablissement.libelleCommuneEtablissement.includes("[ND]")
+    city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
       ? ""
-      : company.firstMatchingEtablissement.libelleCommuneEtablissement,
+      : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",
     countryIsoCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
     nafCode: company.activitePrincipaleUniteLegale,
     name: company.simpleLabel,
