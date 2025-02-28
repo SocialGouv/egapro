@@ -57,6 +57,16 @@ jobs:
       - name: Test App
         run: |
           cd packages/app && yarn test
+
+      # Prepare coverage for SonarCloud
+      - name: Prepare SonarCloud analysis
+        run: |
+          # Ensure root coverage directory exists
+          mkdir -p coverage
+
+          # Copy the coverage report to the location expected by SonarCloud
+          cp packages/app/coverage/lcov.info coverage/
+
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
