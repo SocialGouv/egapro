@@ -23,6 +23,7 @@ const config = {
     "!src/pages/_app.tsx",
     "!src/pages/_document.tsx",
   ],
+  coverageDirectory: "coverage",
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
