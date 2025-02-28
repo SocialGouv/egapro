@@ -44,6 +44,8 @@ app:
         name: "moncomptepro"
     - secretRef:
         name: github-oauth
+    - configMapRef:
+        name: egapro
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
