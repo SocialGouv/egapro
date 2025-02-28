@@ -174,7 +174,7 @@ export const authConfig: AuthOptions = {
             const useCase = new SyncOwnership(ownershipRepo);
             await useCase.execute({ sirens: sirenList, email: profile.email });
           } catch (error: unknown) {
-            logger.error("Error while syncing ownerships", error);
+            logger.error({ error }, "Error while syncing ownerships");
           }
         }
         token.user.companies =
