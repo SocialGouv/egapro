@@ -14,7 +14,7 @@ const config = {
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
   testTimeout: 20000,
   // Coverage configuration
-  collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}", "!src/*.{js,ts}", "!**/node_modules/**", "!**/vendor/**"],
+  collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}", "!*.{js,ts}", "!**/node_modules/**", "!**/vendor/**"],
   coverageDirectory: "coverage",
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
