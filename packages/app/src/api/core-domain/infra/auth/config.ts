@@ -191,6 +191,14 @@ export const authConfig: AuthOptions = {
       // Token legacy for usage with API v1.
       token.user.tokenApiV1 = createTokenApiV1(token.email);
 
+      try {
+        logger.info("Companies in token", token.user.companies);
+        logger.info("Number of companies in token", token.user.companies.length);
+        logger.info("Total token size", JSON.stringify(token).length);
+      } catch (error) {
+        logger.error("Error while logging token", error);
+      }
+
       return token;
     },
     // expose data from jwt to front
