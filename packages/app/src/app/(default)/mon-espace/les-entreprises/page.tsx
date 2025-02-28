@@ -13,7 +13,7 @@ import { EmailOwnerList } from "../EmailOwnerList";
 import { SirenInput } from "./SirenInput";
 
 const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL;
-const proconnectManageOrganisationUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATION_URL;
+const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
 const MesEntreprisesInfoAlert = () => (
   <Alert
@@ -37,7 +37,7 @@ const MesEntreprisesInfoAlert = () => (
         <p>
           <br />
           Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link target="_blank" href={`${proconnectManageOrganisationUrl}`}>
+          <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
             cliquez ici
           </Link>
         </p>

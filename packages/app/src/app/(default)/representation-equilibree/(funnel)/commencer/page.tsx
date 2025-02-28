@@ -17,7 +17,7 @@ export const metadata = {
   },
 };
 
-const proconnectManageOrganisationUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATION_URL;
+const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
@@ -49,7 +49,7 @@ const CommencerPage = async () => {
           <>
             Nous n'avons trouvé aucune entreprise à laquelle votre compte ({session.user.email}) est rattaché. Si vous
             pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement depuis{" "}
-            <Link href={`${proconnectManageOrganisationUrl}`} target="_blank">
+            <Link href={`${proconnectManageOrganisationsUrl}`} target="_blank">
               votre espace ProConnect
             </Link>
             .<br />
