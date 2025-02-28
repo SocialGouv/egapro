@@ -4,7 +4,7 @@ import { type Session } from "next-auth";
 
 import style from "./root.module.scss";
 
-const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
+const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
 export const HeaderAccountMenu = (props: {
   isEmailLogin: boolean;
@@ -55,7 +55,7 @@ export const HeaderAccountMenu = (props: {
                     Demande de rattachement
                   </a>
                 ) : (
-                  <a className="fr-nav__link" href={proconnectUrl} target="_blank" rel="noopener noreferrer">
+                  <a className="fr-nav__link" href={proconnectDiscoveryUrl} target="_blank" rel="noopener noreferrer">
                     Accès à mon compte ProConnect
                   </a>
                 )}

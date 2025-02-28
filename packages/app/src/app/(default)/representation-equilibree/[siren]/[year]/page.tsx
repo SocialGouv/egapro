@@ -24,7 +24,7 @@ import { EditButton } from "./EditButton";
 // export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
 
-const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
+const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
 const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = +strYear;
@@ -77,7 +77,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
                 <br />
                 Si vous pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement
                 depuis{" "}
-                <Link href={`${proconnectUrl}/manage-organizations`} target="_blank">
+                <Link href={`${proconnectDiscoveryUrl}/manage-organizations`} target="_blank">
                   votre espace ProConnect
                 </Link>
                 .

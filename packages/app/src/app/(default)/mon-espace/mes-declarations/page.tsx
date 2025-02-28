@@ -20,7 +20,7 @@ import { RepeqList } from "./RepeqList";
 import { SelectSiren } from "./SelectSiren";
 import { SelectSirenStaff } from "./SelectSirenStaff";
 
-const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
+const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
 const InfoText = () => (
   <>
@@ -40,7 +40,7 @@ const InfoText = () => (
     <p>
       <br />
       Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-      <Link target="_blank" href={`${proconnectUrl}/manage-organizations`}>
+      <Link target="_blank" href={`${proconnectDiscoveryUrl}/manage-organizations`}>
         cliquez ici
       </Link>
     </p>

@@ -24,7 +24,7 @@ const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
-  const monCompteProHost = process.env.EGAPRO_PROCONNECT_URL;
+  const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
 
   if (!session.user.companies.length && !session.user.staff) {
     return isEmailLogin ? (
@@ -51,7 +51,7 @@ const CommencerPage = async () => {
           <>
             Nous n'avons trouvé aucune entreprise à laquelle votre compte ({session.user.email}) est rattaché. Si vous
             pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement depuis{" "}
-            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+            <Link href={`${proconnectUrl}/manage-organizations`} target="_blank">
               votre espace ProConnect
             </Link>
             .<br />
@@ -81,7 +81,7 @@ const CommencerPage = async () => {
         }
         className={fr.cx("fr-mb-4w")}
       />
-      <CommencerForm monCompteProHost={monCompteProHost ?? ""} />
+      <CommencerForm monCompteProHost={proconnectUrl ?? ""} />
     </>
   );
 };

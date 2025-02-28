@@ -12,7 +12,8 @@ import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
 import { SelectSiren } from "./SelectSiren";
 
-const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
+const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL;
+const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
 const MesEntreprisesInfoAlert = () => (
   <Alert
@@ -28,7 +29,7 @@ const MesEntreprisesInfoAlert = () => (
         <br />
         <p>
           Pour rattacher une adresse email, il faut{" "}
-          <Link target="_blank" href={`${proconnectUrl}/users/start-sign-in`}>
+          <Link target="_blank" href={`${proconnectSignInUrl}/users/start-sign-in`}>
             créer un nouveau compte ProConnect
           </Link>{" "}
           avec cette adresse.
@@ -36,7 +37,7 @@ const MesEntreprisesInfoAlert = () => (
         <p>
           <br />
           Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link target="_blank" href={`${proconnectUrl}/manage-organizations`}>
+          <Link target="_blank" href={`${proconnectDiscoveryUrl}/manage-organizations`}>
             cliquez ici
           </Link>
         </p>
@@ -68,7 +69,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
               <MesEntreprisesInfoAlert />
               Vous n'avez pas encore d'entreprises rattachés.
               <br />
-              <a target="_blank" href={`${proconnectUrl}/users/start-sign-in`}>
+              <a target="_blank" href={`${proconnectSignInUrl}/users/start-sign-in`}>
                 Connectez-vous sur Mon Compte Pro
               </a>{" "}
               et ajoutez votre entreprise.

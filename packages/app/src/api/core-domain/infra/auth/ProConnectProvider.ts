@@ -25,18 +25,18 @@ export interface ProConnectProfile {
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
-  const issuer = process.env.EGAPRO_PROCONNECT_URL;
+  const scope = process.env.EGAPRO_PROCONNECT_SCOPE;
+  const clientId = process.env.EGAPRO_PROCONNECT_CLIENT_ID ?? "";
+  const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
   return {
-    id: "moncomptepro",
-    name: "Mon Compte Pro",
+    id: clientId,
     type: "oauth",
-    wellKnown: `${issuer}/.well-known/openid-configuration`,
+    name: "Mon Compte Pro",
     allowDangerousEmailAccountLinking: true,
+    wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      params: {
-        scope: "openid email profile organizations phone",
-      },
+      params: { scope },
     },
     checks: ["pkce", "state"],
     userinfo: {
