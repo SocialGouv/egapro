@@ -64,11 +64,12 @@ jobs:
           # Ensure root coverage directory exists
           mkdir -p coverage
 
-          # Copy the coverage report to the location expected by SonarCloud
-          cp packages/app/coverage/lcov.info coverage/
+          # Copy and fix the coverage report paths for SonarCloud
+          # Replace 'SF:src/' with 'SF:packages/app/src/' in the lcov.info file
+          sed 's|SF:src/|SF:packages/app/src/|g' packages/app/coverage/lcov.info > coverage/lcov.info
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
