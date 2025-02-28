@@ -56,18 +56,10 @@ jobs:
           cache: yarn
       - name: Test App
         run: |
-          cd packages/app && yarn test
-
-      # Prepare coverage for SonarCloud
-      - name: Prepare SonarCloud analysis
-        run: |
-          # Ensure root coverage directory exists
-          mkdir -p coverage
-
-          # Copy and fix the coverage report paths for SonarCloud
-          # Replace 'SF:src/' with 'SF:packages/app/src/' in the lcov.info file
-          sed 's|SF:src/|SF:packages/app/src/|g' packages/app/coverage/lcov.info > coverage/lcov.info
-
+          yarn test:app
+          # Debug - check if coverage file exists
+          ls -la packages/app/coverage/
+          cat packages/app/coverage/lcov.info | head -n 20
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
