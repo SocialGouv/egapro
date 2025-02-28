@@ -12,7 +12,7 @@ import { DeclarantForm } from "./DeclarantForm";
 
 const stepName: FunnelKey = "declarant";
 
-const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
+const proconnectPersonalInformationUrl = process.env.EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL;
 
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
@@ -33,7 +33,7 @@ const DeclarantPage = async () => {
             modifier le cas échéant, à l'exception de l'adresse email.
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
-            <Link href={`${proconnectDiscoveryUrl}/personal-information`} target="_blank">
+            <Link href={`${proconnectPersonalInformationUrl}`} target="_blank">
               votre profil ProConnect
             </Link>
             .

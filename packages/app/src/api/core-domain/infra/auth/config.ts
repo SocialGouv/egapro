@@ -192,19 +192,31 @@ export const authConfig: AuthOptions = {
       token.user.tokenApiV1 = createTokenApiV1(token.email);
 
       try {
-        logger.info({
-          companies: token.user.companies
-        },"Companies in token");
-        logger.info({
-          companiesLength: token.user.companies.length
-        }, "Number of companies in token");
-        logger.info({
-          tokenSize: JSON.stringify(token).length
-        }, "Total token size");
+        logger.info(
+          {
+            companies: token.user.companies,
+          },
+          "Companies in token",
+        );
+        logger.info(
+          {
+            companiesLength: token.user.companies.length,
+          },
+          "Number of companies in token",
+        );
+        logger.info(
+          {
+            tokenSize: JSON.stringify(token).length,
+          },
+          "Total token size",
+        );
       } catch (error) {
-        logger.error({
-          err: error
-        }, "Error while logging token");
+        logger.error(
+          {
+            err: error,
+          },
+          "Error while logging token",
+        );
       }
 
       return token;
