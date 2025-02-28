@@ -1,3 +1,10 @@
+## [3.6.10](https://github.com/SocialGouv/egapro/compare/v3.6.9...v3.6.10) (2025-02-28)
+
+
+### Bug Fixes
+
+* **too large header:** fix investigation logs ([cf91176](https://github.com/SocialGouv/egapro/commit/cf91176deea9eb54e94b84b7d59f8516e068d43d))
+
 ## [3.6.9](https://github.com/SocialGouv/egapro/compare/v3.6.8...v3.6.9) (2025-02-28)
 
 
