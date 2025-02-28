@@ -26,11 +26,10 @@ export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
   const scope = process.env.EGAPRO_PROCONNECT_SCOPE;
-  const clientId = process.env.EGAPRO_PROCONNECT_CLIENT_ID ?? "";
   const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
   return {
-    id: clientId,
+    id: "moncomptepro",
     type: "oauth",
     name: "Mon Compte Pro",
     allowDangerousEmailAccountLinking: true,
