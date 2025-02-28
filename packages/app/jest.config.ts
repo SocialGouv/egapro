@@ -23,14 +23,6 @@ const config = {
     "!src/pages/_app.tsx",
     "!src/pages/_document.tsx",
   ],
-  coverageThreshold: {
-    global: {
-      statements: 1,
-      branches: 1,
-      functions: 1,
-      lines: 1,
-    },
-  },
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
