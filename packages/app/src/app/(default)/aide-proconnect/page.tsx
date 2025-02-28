@@ -13,7 +13,7 @@ export const metadata = {
   },
 };
 
-const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL;
+const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL ?? "";
 
 const AideProConnectPage = () => {
   return (
@@ -101,7 +101,7 @@ const AideProConnectPage = () => {
                 Vous avez fait une erreur de saisie dans votre adresse email
                 <br />
                 💡{" "}
-                <Link href={`${proconnectSignInUrl}/users/start-sign-in`} target="_blank">
+                <Link href={proconnectSignInUrl} target="_blank">
                   Recréez un compte avec la bonne adresse
                 </Link>
               </li>
@@ -203,7 +203,7 @@ const AideProConnectPage = () => {
             <p>
               Vous pouvez modifier vos informations personnelles (nom, prénom, numéro de téléphone professionnel et
               fonction au sein de votre entreprise) en vous connectant à votre compte sur le site{" "}
-              <Link target="_blank" rel="noopener noreferrer" href={`${proconnectSignInUrl}/users/start-sign-in`}>
+              <Link target="_blank" rel="noopener noreferrer" href={`${proconnectSignInUrl}`}>
                 ProConnect
               </Link>
               , puis en cliquant dans le menu sur "Info personnelles".
@@ -217,7 +217,7 @@ const AideProConnectPage = () => {
             </AnchorLink>
             <p>
               Vous vous connectez à votre compte sur le site{" "}
-              <Link href={`${proconnectSignInUrl}/users/start-sign-in`} target="_blank" rel="noopener noreferrer">
+              <Link href={`${proconnectSignInUrl}`} target="_blank" rel="noopener noreferrer">
                 ProConnect
               </Link>
               .

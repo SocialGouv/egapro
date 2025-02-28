@@ -7,4 +7,4 @@ data:
   EGAPRO_PROCONNECT_SCOPE: "openid email profile organizations phone"
   EGAPRO_PROCONNECT_DISCOVERY_URL: "https://identite.proconnect.gouv.fr"
   EGAPRO_PROCONNECT_SIGN_IN_URL: "https://identite.proconnect.gouv.fr/users/start-sign-in"
-
+  EGAPRO_PROCONNECT_MANAGE_ORGANISATION_URL: "https://identite.proconnect.gouv.fr/manage-organizations"
