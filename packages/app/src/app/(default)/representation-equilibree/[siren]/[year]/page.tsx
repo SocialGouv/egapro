@@ -49,7 +49,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   }
 
   if (repEq === null) {
-    notFound();
+    return notFound();
   }
 
   const session = await getServerSession(authConfig);

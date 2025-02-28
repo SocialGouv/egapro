@@ -22,7 +22,9 @@
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
     "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
-    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
+    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
+    "test:app": "yarn --cwd packages/app/ test",
+    "build:app": "yarn --cwd packages/app/ build"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",

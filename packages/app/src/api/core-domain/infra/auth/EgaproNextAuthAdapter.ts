@@ -61,8 +61,14 @@ export const egaproNextAuthAdapter: Adapter = {
   },
 
   async createVerificationToken(verificationToken: VerificationToken): Promise<VerificationToken | null | undefined> {
-    tokenCache.set(verificationToken.identifier, verificationToken);
-    return verificationToken;
+    const cleanIdentifier = verificationToken.identifier.trim();
+    const cleanToken = {
+      ...verificationToken,
+      identifier: cleanIdentifier,
+    };
+
+    tokenCache.set(cleanIdentifier, cleanToken);
+    return cleanToken;
   },
 
   /**
@@ -70,12 +76,13 @@ export const egaproNextAuthAdapter: Adapter = {
    * and delete it so it cannot be used again.
    */
   async useVerificationToken({ identifier, token }: SentVerificationToken): Promise<VerificationToken | null> {
-    const foundToken = tokenCache.get(identifier);
+    const cleanIdentifier = identifier.trim();
+
+    const foundToken = tokenCache.get(cleanIdentifier);
     if (foundToken?.token === token) {
-      tokenCache.delete(identifier);
+      tokenCache.delete(cleanIdentifier);
       return foundToken;
     }
-
     return null;
   },
 };
