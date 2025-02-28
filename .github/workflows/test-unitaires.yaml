@@ -57,9 +57,26 @@ jobs:
       - name: Test App
         run: |
           yarn test:app
-          # Debug - check if coverage file exists
+          # Debug - check if coverage file exists and its content
           ls -la packages/app/coverage/
-          cat packages/app/coverage/lcov.info | head -n 20
+          echo "LCOV file size:"
+          wc -l packages/app/coverage/lcov.info
+          echo "LCOV file first 20 lines:"
+          head -n 20 packages/app/coverage/lcov.info
+          echo "LCOV file structure:"
+          grep -c "SF:" packages/app/coverage/lcov.info
+          echo "Number of files covered:"
+
+      # Ensure coverage report is available for SonarCloud
+      - name: Prepare SonarCloud analysis
+        run: |
+          # Make sure the coverage directory exists at the root level
+          mkdir -p coverage
+          # Copy the coverage report to the root level
+          cp packages/app/coverage/lcov.info coverage/
+          # Debug - verify the copy
+          ls -la coverage/
+
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
