@@ -8,7 +8,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
-import { config } from "@common/config";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { type NextServerPageProps } from "@common/utils/next";
@@ -24,6 +23,8 @@ import { EditButton } from "./EditButton";
 // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
 // export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
+
+const proconnectUrl = process.env.EGAPRO_PROCONNECT_URL;
 
 const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = +strYear;
@@ -59,9 +60,6 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   const olderThanOneYear = session?.data?.user.staff
     ? false
     : repEq.declaredAt === undefined || isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
-  const monCompteProHost = `https://identite${
-    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.proconnect.gouv.fr`;
 
   return (
     <CenteredContainer pb="6w">
@@ -79,7 +77,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
                 <br />
                 Si vous pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement
                 depuis{" "}
-                <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+                <Link href={`${proconnectUrl}/manage-organizations`} target="_blank">
                   votre espace ProConnect
                 </Link>
                 .

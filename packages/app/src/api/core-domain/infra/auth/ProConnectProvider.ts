@@ -22,11 +22,10 @@ export interface ProConnectProfile {
   updated_at: Date;
 }
 
-const ISSUER = (appTest: boolean) => `https://identite${appTest ? "-sandbox" : ""}.proconnect.gouv.fr`;
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
-  const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
+  const issuer = process.env.EGAPRO_PROCONNECT_URL;
 
   return {
     id: "moncomptepro",

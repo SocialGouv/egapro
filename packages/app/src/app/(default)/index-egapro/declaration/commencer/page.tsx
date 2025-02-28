@@ -24,10 +24,7 @@ const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
-
-  const monCompteProHost = `https://identite${
-    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.proconnect.gouv.fr`;
+  const monCompteProHost = process.env.EGAPRO_PROCONNECT_URL;
 
   if (!session.user.companies.length && !session.user.staff) {
     return isEmailLogin ? (
