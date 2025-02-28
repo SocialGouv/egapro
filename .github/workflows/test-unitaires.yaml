@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -38,6 +40,10 @@ jobs:
     needs:
       - build
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
       - name: Restore build
         uses: actions/cache@v4
         with:
@@ -51,3 +57,13 @@ jobs:
       - name: Test App
         run: |
           yarn test:app
+          # Debug - check if coverage file exists
+          ls -la packages/app/coverage/
+          cat packages/app/coverage/lcov.info | head -n 20
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .
