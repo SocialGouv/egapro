@@ -24,8 +24,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: master
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -43,6 +41,6 @@ jobs:
           echo "Site URL: https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr"
       - name: Run test e2e
         run: |
-          yarn test:e2e
+          yarn test:e2e:app
         env:
           SITE_URL: ${{ env.SITE_URL }}
