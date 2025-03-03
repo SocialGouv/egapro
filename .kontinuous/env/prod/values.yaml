@@ -69,3 +69,6 @@ nginx:
       cpu: 2
       memory: 2G
 
+redis:
+  sentinel:
+    enabled: true
