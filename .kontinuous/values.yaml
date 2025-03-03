@@ -138,6 +138,10 @@ api:
 pg:
   ~chart: pg
 
+redis:
+  auth:
+    existingSecret: redis-auth
+
 files:
   ~chart: app
   ~needs: [build-api,build-files] # sidecar image

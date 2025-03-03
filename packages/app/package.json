@@ -27,7 +27,6 @@
     "@react-pdf/renderer": "^3.1.12",
     "@sentry/nextjs": "^8.51.0",
     "@socialgouv/matomo-next": "^1.8.0",
-    "argon2": "^0.41.1",
     "chart.js": "^4.3.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "clsx": "^2.0.0",
