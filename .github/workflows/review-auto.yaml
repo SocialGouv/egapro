@@ -40,4 +40,4 @@ jobs:
           echo "$SITE_URL"
       - name: Run test e2e
         run: |
-          CYPRESS_BASE_URL=$SITE_URL yarn test:e2e
+          CYPRESS_BASE_URL=$SITE_URL yarn test:e2e:app
