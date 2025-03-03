@@ -22,28 +22,22 @@ jobs:
     needs: [socialgouv]
     name: "Test e2e"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "yarn"
       - name: Install dependencies
-        uses: cypress-io/github-action@v5
-        with:
-          # just perform install
-          runTests: false
-      - name: Env
-        id: env
-        uses: socialgouv/kontinuous/.github/actions/env@v1
+        run: |
+          yarn install --immutable
       - name: Set env
         run: |
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
           echo "$SITE_URL"
-      - name: Cypress run
-        uses: cypress-io/github-action@v5
-        env:
-          CYPRESS: "true"
-        with:
-          install: false
-          working-directory: ./packages/app
-          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
-          wait-on: "${{ env.SITE_URL }}"
+      - name: Run test e2e
+        run: |
+          CYPRESS_BASE_URL=$SITE_URL yarn test:e2e
