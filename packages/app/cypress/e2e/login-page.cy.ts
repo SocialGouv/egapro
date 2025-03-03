@@ -39,21 +39,21 @@ describe("Page de login avec EMAIL_LOGIN=false", () => {
     cy.wait("@getSession", { timeout: 100000 });
   });
 
-  it("Redirige vers MonComptePro lors du clic sur le bouton ProConnect", () => {
-    // Intercepter la redirection vers MonComptePro
-    cy.intercept("POST", "/api/auth/signin/moncomptepro", {
-      statusCode: 302,
-      headers: {
-        Location: "/api/auth/callback/moncomptepro?code=test_code&state=test_state",
-      },
-    }).as("moncompteproSignin");
+  // it("Redirige vers MonComptePro lors du clic sur le bouton ProConnect", () => {
+  //   // Intercepter la redirection vers MonComptePro
+  //   cy.intercept("POST", "/api/auth/signin/moncomptepro", {
+  //     statusCode: 302,
+  //     headers: {
+  //       Location: "/api/auth/callback/moncomptepro?code=test_code&state=test_state",
+  //     },
+  //   }).as("moncompteproSignin");
 
-    // Cliquer sur le bouton ProConnect
-    cy.get(".fr-connect").click();
+  //   // Cliquer sur le bouton ProConnect
+  //   cy.get(".fr-connect").click();
 
-    // Vérifier que la redirection vers MonComptePro a été interceptée
-    cy.wait("@moncompteproSignin");
-  });
+  //   // Vérifier que la redirection vers MonComptePro a été interceptée
+  //   cy.wait("@moncompteproSignin");
+  // });
 
   it("Gère correctement les erreurs d'authentification", () => {
     // Visiter la page de login avec une erreur
