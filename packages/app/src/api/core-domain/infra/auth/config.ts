@@ -56,6 +56,11 @@ export const monCompteProProvider = ProConnectProvider({
     : {}),
 });
 export const authConfig: AuthOptions = {
+  logger: {
+    error:(code: any, ...message: any[]) => logger.error({ code }, ...message),
+    warn:(code: any, ...message: any[]) => logger.warn({ code }, ...message),
+    info:(code: any, ...message: any[]) => logger.info({ code }, ...message),
+  },
   secret: config.api.security.auth.secret,
   pages: {
     signIn: "/login",
