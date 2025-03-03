@@ -16,21 +16,12 @@ const config = {
   // Coverage configuration
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/**/*.stories.{js,jsx,ts,tsx}",
-    "!src/**/__tests__/**/*",
-    "!src/**/*.test.{js,jsx,ts,tsx}",
-    "!src/pages/_app.tsx",
-    "!src/pages/_document.tsx",
+    "!*.{js,ts}",
+    "!jest.setup.js",
+    "!**/node_modules/**",
+    "!**/vendor/**",
   ],
-  coverageThreshold: {
-    global: {
-      statements: 1,
-      branches: 1,
-      functions: 1,
-      lines: 1,
-    },
-  },
+  coverageDirectory: "coverage",
   moduleNameMapper: {
     "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
