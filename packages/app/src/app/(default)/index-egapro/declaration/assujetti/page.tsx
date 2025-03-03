@@ -9,7 +9,7 @@ export const metadata = {
   },
 };
 
-const AssujettiPage = async () => {
+const AssujettiPage = () => {
   return (
     <>
       <h1>{title}</h1>
