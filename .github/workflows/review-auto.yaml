@@ -43,6 +43,6 @@ jobs:
           echo "Site URL: https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr"
       - name: Run test e2e
         run: |
-          yarn test:e2e:app
+          yarn test:e2e
         env:
           SITE_URL: ${{ env.SITE_URL }}
