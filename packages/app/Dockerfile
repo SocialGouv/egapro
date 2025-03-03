@@ -70,7 +70,7 @@ COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 
 USER 1000
 
-CMD ["node_modules/.bin/next", "start"]
+CMD ["node --use-system-ca node_modules/.bin/next", "start"]
 
 ARG SENTRY_URL
 ARG SENTRY_ORG
