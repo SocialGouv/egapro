@@ -60,7 +60,13 @@ export const authConfig: AuthOptions = {
     error:(code: any, ...message: any[]) => logger.error({ code }, ...message),
     warn:(code: any, ...message: any[]) => logger.warn({ code }, ...message),
     info:(code: any, ...message: any[]) => logger.info({ code }, ...message),
-    debug:(code: any, ...message: any[]) => logger.debug({ code }, ...message),
+    debug:(code: any, ...message: any[]) => {
+      if (config.env === "dev") {
+        logger.info({code}, ...message);
+      } else {
+        logger.debug({ code }, ...message);
+      }
+    },
   },
   secret: config.api.security.auth.secret,
   pages: {
