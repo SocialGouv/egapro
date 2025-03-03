@@ -1,0 +1,69 @@
+name: Tests Unitaires
+"on":
+  push:
+    branches:
+      - master
+  pull_request: null
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}"
+env:
+  NODE_ENV: test
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Install dependencies
+        run: |
+          yarn install --immutable
+      - name: Build code
+        run: |
+          yarn build:app
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: "${{ github.sha }}"
+  test:
+    name: Execution Tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: "${{ github.sha }}"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Test App
+        run: |
+          yarn test:app
+          # Debug - check if coverage file exists
+          ls -la packages/app/coverage/
+          cat packages/app/coverage/lcov.info | head -n 20
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .
