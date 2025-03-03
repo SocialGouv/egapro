@@ -34,10 +34,15 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install --immutable
-      - name: Set env
+      - name: Get review URL
+        id: env
         run: |
-          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-          echo "$SITE_URL"
+          SUBDOMAIN=$(echo ${{ github.ref_name }} | sed 's/\//-/g')
+          echo "subdomain=$SUBDOMAIN" >> $GITHUB_OUTPUT
+          echo "SITE_URL=https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
+          echo "Site URL: https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr"
       - name: Run test e2e
         run: |
-          CYPRESS_BASE_URL=$SITE_URL yarn test:e2e:app
+          yarn test:e2e:app
+        env:
+          SITE_URL: ${{ env.SITE_URL }}
