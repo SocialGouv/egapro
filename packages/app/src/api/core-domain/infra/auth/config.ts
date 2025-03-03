@@ -1,4 +1,5 @@
 import { type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
+import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -20,12 +21,15 @@ declare module "next-auth" {
   interface Session {
     staff: {
       impersonating?: boolean;
-      lastImpersonated?: Array<{ label: string | null; siren: string }>;
+      lastImpersonatedHash?: string;
     };
     user: {
-      companies: Array<{ label: string | null; siren: string }>;
+      companies?: Array<{ label: string | null; siren: string }>;
+      companiesHash: string;
+      // For backward compatibility
       email: string;
       firstname?: string;
+      lastImpersonated?: Array<{ label: string | null; siren: string }>;
       lastname?: string;
       phoneNumber?: string;
       staff: boolean;
@@ -42,10 +46,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-const charonMcpUrl = new URL(
-  `fabriqueKeycloak/`,
-  config.api.security.auth.charonUrl,
-);
+const charonMcpUrl = new URL(`fabriqueKeycloak/`, config.api.security.auth.charonUrl);
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const monCompteProProvider = ProConnectProvider({
   ...config.api.security.moncomptepro,
@@ -57,12 +58,12 @@ export const monCompteProProvider = ProConnectProvider({
 });
 export const authConfig: AuthOptions = {
   logger: {
-    error:(code: any, ...message: any[]) => logger.error({ code }, ...message),
-    warn:(code: any, ...message: any[]) => logger.warn({ code }, ...message),
-    info:(code: any, ...message: any[]) => logger.info({ code }, ...message),
-    debug:(code: any, ...message: any[]) => {
+    error: (code: any, ...message: any[]) => logger.error({ code }, ...message),
+    warn: (code: any, ...message: any[]) => logger.warn({ code }, ...message),
+    info: (code: any, ...message: any[]) => logger.info({ code }, ...message),
+    debug: (code: any, ...message: any[]) => {
       if (config.env === "dev") {
-        logger.info({code}, ...message);
+        logger.info({ code }, ...message);
       } else {
         logger.debug({ code }, ...message);
       }
@@ -145,31 +146,46 @@ export const authConfig: AuthOptions = {
           // staff starts impersonating
           assertImpersonatedSession(session);
           token.user.staff = session.user.staff;
-          token.user.companies = session.user.companies;
+
+          // Store companies in Redis if available
+          if (session.user.companies) {
+            // Create hash and store companies in Redis
+            token.user.companiesHash = await companiesUtils.hashCompanies(session.user.companies);
+          } else if ("companiesHash" in session.user && session.user.companiesHash) {
+            // Use existing hash
+            token.user.companiesHash = session.user.companiesHash as string;
+          }
+
           token.staff.impersonating = true;
-          token.staff.lastImpersonated = [
-            // keep only unique companies
-            ...new Map(
-              (token.staff.lastImpersonated ?? [])
-                .concat(token.user.companies)
-                .filter(c => !!c)
-                .map(c => [c.siren, c.label]),
-            ).entries(),
-          ].map(([siren, label]) => ({ siren, label }));
+
+          // If impersonating, store the current companies for later
+          if (session.user.companies) {
+            // Create last impersonated hash and store in Redis
+            const companiesList = session.user.companies as Company[];
+            token.staff.lastImpersonatedHash = await companiesUtils.hashCompanies(companiesList);
+          }
         } else if (session.staff.impersonating === false) {
           // staff stops impersonating
           token.user.staff = true;
-          token.user.companies = [];
+          token.user.companiesHash = ""; // Empty hash for no companies
           token.staff.impersonating = false;
         }
       }
       if (trigger !== "signUp") return token;
-      token.user = {} as Session["user"];
-      token.staff = {} as Session["staff"];
+      token.user = {
+        companiesHash: "",
+        email: token.email,
+        staff: false,
+        tokenApiV1: "",
+      } as Session["user"];
+      token.staff = {
+        impersonating: false,
+        lastImpersonatedHash: "",
+      } as Session["staff"];
       if (account?.provider === "github") {
         const githubProfile = profile as unknown as GithubProfile;
         token.user.staff = true;
-        token.user.companies = [];
+        token.user.companiesHash = ""; // Empty hash for no companies
         const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
         token.user.firstname = firstname;
         token.user.lastname = lastname;
@@ -177,7 +193,12 @@ export const authConfig: AuthOptions = {
         token.user.staff = config.api.staff.includes(profile?.email ?? "");
         if (token.email && !token.user.staff) {
           const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email));
-          token.user.companies = companies.map(siren => ({ label: "", siren }));
+          const companiesList = companies.map(siren => ({ label: "", siren }));
+
+          // Create hash and store companies in Redis
+          token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
+        } else {
+          token.user.companiesHash = ""; // Empty hash for no companies
         }
       } else {
         const sirenList = profile?.organizations.map(orga => orga.siret.substring(0, 9));
@@ -189,11 +210,16 @@ export const authConfig: AuthOptions = {
             logger.error({ error }, "Error while syncing ownerships");
           }
         }
-        token.user.companies =
+
+        const companiesList =
           profile?.organizations.map(orga => ({
             siren: orga.siret.substring(0, 9),
             label: orga.label,
           })) ?? [];
+
+        // Create hash and store companies in Redis
+        token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
+
         token.user.staff = config.api.staff.includes(profile?.email ?? "");
         token.user.firstname = profile?.given_name ?? void 0;
         token.user.lastname = profile?.family_name ?? void 0;
@@ -204,18 +230,15 @@ export const authConfig: AuthOptions = {
       token.user.tokenApiV1 = createTokenApiV1(token.email);
 
       try {
+        const companiesHash = token.user.companiesHash || "";
+
         logger.info(
           {
-            companies: token.user.companies,
+            companiesHash,
           },
-          "Companies in token",
+          "Companies hash in token",
         );
-        logger.info(
-          {
-            companiesLength: token.user.companies.length,
-          },
-          "Number of companies in token",
-        );
+
         logger.info(
           {
             tokenSize: JSON.stringify(token).length,
@@ -233,14 +256,40 @@ export const authConfig: AuthOptions = {
 
       return token;
     },
-    // expose data from jwt to front
-    session({ session, token }) {
+    async session({ session, token }) {
       session.user = token.user;
       session.user.email = token.email;
       session.staff = {};
+
+      // Load companies from Redis using the hash if it exists
+      if (token.user.companiesHash) {
+        try {
+          const companies = await companiesUtils.getCompaniesFromRedis(token.user.companiesHash);
+          if (companies.length > 0) {
+            session.user.companies = companies;
+          }
+        } catch (error) {
+          logger.error("Error loading companies from Redis", error);
+        }
+      }
+
       if (token.user.staff || token.staff.impersonating) {
         session.staff = token.staff;
+
+        // Load last impersonated companies if hash exists
+        if (token.staff.lastImpersonatedHash) {
+          try {
+            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(token.staff.lastImpersonatedHash);
+            if (lastImpersonated.length > 0) {
+              // For backward compatibility, include the actual companies in the session
+              session.user.lastImpersonated = lastImpersonated;
+            }
+          } catch (error) {
+            logger.error("Error loading last impersonated companies from Redis", error);
+          }
+        }
       }
+
       return session;
     },
   },
