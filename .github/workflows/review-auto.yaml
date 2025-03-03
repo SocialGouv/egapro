@@ -35,10 +35,8 @@ jobs:
       - name: Get review URL
         id: env
         run: |
-          SUBDOMAIN=$(echo ${{ github.ref_name }} | sed 's/\//-/g')
-          echo "subdomain=$SUBDOMAIN" >> $GITHUB_OUTPUT
-          echo "SITE_URL=https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-          echo "Site URL: https://$SUBDOMAIN.ovh.fabrique.social.gouv.fr"
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}" >> $GITHUB_ENV
+          echo "$SITE_URL"
       - name: Run test e2e
         run: |
           yarn test:e2e:app
