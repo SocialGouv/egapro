@@ -43,7 +43,7 @@ declare module "next-auth/jwt" {
 }
 
 const charonMcpUrl = new URL(
-  `moncomptepro${config.api.security.moncomptepro.appTest ? "test" : ""}/`,
+  `fabriqueKeycloak/`,
   config.api.security.auth.charonUrl,
 );
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
