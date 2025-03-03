@@ -68,7 +68,7 @@ app:
 
 nginx:
   ~chart: app
-  ~needs: [build-nginx]
+  ~needs: [build-nginx, app]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
@@ -119,12 +119,12 @@ api:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
-  env:
-    - name: EGAPRO_SENTRY_DSN
-      valueFrom:
-        secretKeyRef:
-          name: sentry
-          key: API_SENTRY_DSN
+  # env:
+  #   - name: EGAPRO_SENTRY_DSN
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: sentry
+  #         key: API_SENTRY_DSN
   vars:
     EGAPRO_DBHOST: "$(PGHOST)"
     EGAPRO_DBNAME: "$(PGDATABASE)"
@@ -196,11 +196,11 @@ files:
           value: "$(PGPASSWORD)"
         - name: EGAPRO_DBSSL
           value: "$(PGSSLMODE)"
-        - name: EGAPRO_SENTRY_DSN
-          valueFrom:
-            secretKeyRef:
-              name: sentry
-              key: API_SENTRY_DSN
+        # - name: EGAPRO_SENTRY_DSN
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: sentry
+        #       key: API_SENTRY_DSN
         - name: SCHEDULER
           value: "True"
         volumeMounts:

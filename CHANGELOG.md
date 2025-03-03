@@ -1,3 +1,49 @@
+## [3.6.6](https://github.com/SocialGouv/egapro/compare/v3.6.5...v3.6.6) (2025-02-27)
+
+
+### Bug Fixes
+
+* disable api sentry dsn ([1ef3b05](https://github.com/SocialGouv/egapro/commit/1ef3b05da38d812486efa4defe6380fd8ecc6582))
+* ngninx rollout after app ([0586ed6](https://github.com/SocialGouv/egapro/commit/0586ed6b19fe545ad3f2c7dd05f4245ae25dd243))
+* reduce error tracking rate ([b3c1675](https://github.com/SocialGouv/egapro/commit/b3c16754e5d96b686a3790334e99233200fda324))
+* resources ([4451d25](https://github.com/SocialGouv/egapro/commit/4451d2549d7cfc658ebc15c1a4c663e0bcbdf852))
+
+## [3.6.5](https://github.com/SocialGouv/egapro/compare/v3.6.4...v3.6.5) (2025-02-26)
+
+
+### Bug Fixes
+
+* temp disable tracing ([d2f114b](https://github.com/SocialGouv/egapro/commit/d2f114b40c241b05329352f555583fe30b942626))
+
+## [3.6.4](https://github.com/SocialGouv/egapro/compare/v3.6.3...v3.6.4) (2025-02-26)
+
+
+### Bug Fixes
+
+* cannot read properties of undefined (reading 'ranges') ([3c3c91d](https://github.com/SocialGouv/egapro/commit/3c3c91d43038699974451725b49684d077945b06))
+* typo ([9fdea26](https://github.com/SocialGouv/egapro/commit/9fdea26d14ea60f972db7f4d943685b6d49a4395))
+
+## [3.6.3](https://github.com/SocialGouv/egapro/compare/v3.6.2...v3.6.3) (2025-02-26)
+
+
+### Bug Fixes
+
+* up resources for prod ([6f3dc57](https://github.com/SocialGouv/egapro/commit/6f3dc575077bb8149310c8877a31eca4f7f5a933))
+
+## [3.6.2](https://github.com/SocialGouv/egapro/compare/v3.6.1...v3.6.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* undefined on libelleCommuneEtablissement ([d4efe66](https://github.com/SocialGouv/egapro/commit/d4efe6649fa55d6458dfd852693b6fe3d49cb054))
+
+## [3.6.1](https://github.com/SocialGouv/egapro/compare/v3.6.0...v3.6.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* unhandled error ([#2446](https://github.com/SocialGouv/egapro/issues/2446)) ([284e233](https://github.com/SocialGouv/egapro/commit/284e2330c12fd9e8e363b531647c60a6bf8a50bb))
+
 # [3.6.0](https://github.com/SocialGouv/egapro/compare/v3.5.8...v3.6.0) (2025-02-18)
 
 

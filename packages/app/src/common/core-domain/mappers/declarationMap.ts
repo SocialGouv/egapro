@@ -364,10 +364,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() ?? "",
+            [AgeRange.Enum.LESS_THAN_30]: category?.ranges?.[":29"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_30_TO_39]: category?.ranges?.["30:39"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_40_TO_49]: category?.ranges?.["40:49"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category?.ranges?.["50:"]?.getValue() ?? "",
           },
         })),
       };
@@ -378,10 +378,10 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category.ranges?.[":29"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_30_TO_39]: category.ranges?.["30:39"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_40_TO_49]: category.ranges?.["40:49"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_50_TO_MORE]: category.ranges?.["50:"]?.getValue() ?? "",
+            [AgeRange.Enum.LESS_THAN_30]: category?.ranges?.[":29"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_30_TO_39]: category?.ranges?.["30:39"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_40_TO_49]: category?.ranges?.["40:49"]?.getValue() ?? "",
+            [AgeRange.Enum.FROM_50_TO_MORE]: category?.ranges?.["50:"]?.getValue() ?? "",
           },
         })),
       };
@@ -393,37 +393,37 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
           {
             nom: "ouv",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0].ranges?.[":29"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0].ranges?.["30:39"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0].ranges?.["40:49"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0].ranges?.["50:"]?.getValue() ?? "",
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[0]?.ranges?.[":29"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[0]?.ranges?.["30:39"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[0]?.ranges?.["40:49"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[0]?.ranges?.["50:"]?.getValue() ?? "",
             },
           },
           {
             nom: "emp",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1].ranges?.[":29"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1].ranges?.["30:39"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1].ranges?.["40:49"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1].ranges?.["50:"]?.getValue() ?? "",
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[1]?.ranges?.[":29"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[1]?.ranges?.["30:39"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[1]?.ranges?.["40:49"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[1]?.ranges?.["50:"]?.getValue() ?? "",
             },
           },
           {
             nom: "tam",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2].ranges?.[":29"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2].ranges?.["30:39"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2].ranges?.["40:49"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2].ranges?.["50:"]?.getValue() ?? "",
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[2]?.ranges?.[":29"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[2]?.ranges?.["30:39"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[2]?.ranges?.["40:49"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[2]?.ranges?.["50:"]?.getValue() ?? "",
             },
           },
           {
             nom: "ic",
             tranches: {
-              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3].ranges?.[":29"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3].ranges?.["30:39"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3].ranges?.["40:49"]?.getValue() ?? "",
-              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3].ranges?.["50:"]?.getValue() ?? "",
+              [AgeRange.Enum.LESS_THAN_30]: remunerations.categories[3]?.ranges?.[":29"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_30_TO_39]: remunerations.categories[3]?.ranges?.["30:39"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_40_TO_49]: remunerations.categories[3]?.ranges?.["40:49"]?.getValue() ?? "",
+              [AgeRange.Enum.FROM_50_TO_MORE]: remunerations.categories[3]?.ranges?.["50:"]?.getValue() ?? "",
             },
           },
         ],
@@ -603,10 +603,10 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
       catégories: data.remunerations.categories.map<Categories>(cat => ({
         nom: cat.name,
         tranches: {
-          "30:39": cat.ranges?.["30:39"]?.getValue(),
-          "40:49": cat.ranges?.["40:49"]?.getValue(),
-          "50:": cat.ranges?.["50:"]?.getValue(),
-          ":29": cat.ranges?.[":29"]?.getValue(),
+          "30:39": cat?.ranges?.["30:39"]?.getValue(),
+          "40:49": cat?.ranges?.["40:49"]?.getValue(),
+          "50:": cat?.ranges?.["50:"]?.getValue(),
+          ":29": cat?.ranges?.[":29"]?.getValue(),
         },
       })),
       date_consultation_cse: data.remunerations.cseConsultationDate

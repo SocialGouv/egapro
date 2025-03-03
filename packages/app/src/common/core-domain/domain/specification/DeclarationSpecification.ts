@@ -30,7 +30,7 @@ export class DeclarationSpecification extends AbstractSpecification<Declaration>
 
       // Règle 2 - Assertion champs obligatoiresx
       // siren, year are present by definition but we check them anyway.
-      assert(declaration.siren && declaration.year, "Les informations Sirent et année sont obligatoires.");
+      assert(declaration.siren && declaration.year, "Les informations Siren et année sont obligatoires.");
 
       assert(
         declaration.declarant.phone &&

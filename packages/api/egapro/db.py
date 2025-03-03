@@ -88,33 +88,49 @@ class table:
 
     @classmethod
     async def fetch(cls, sql: str, *params):
-        conn: asyncpg.connection.Connection
-        async with cls.pool.acquire() as conn:
-            return await conn.fetch(sql, *params, record_class=cls.record_class)
+        try:
+            conn: asyncpg.connection.Connection
+            async with cls.pool.acquire() as conn:
+                return await conn.fetch(sql, *params, record_class=cls.record_class)
+        except AttributeError:
+            logger.warning("Database connection not initialized")
+            return []
 
     @classmethod
     async def fetchrow(cls, sql: str, *params):
-        conn: asyncpg.connection.Connection
-        async with cls.pool.acquire() as conn:
-            row = await conn.fetchrow(sql, *params, record_class=cls.record_class)
-        if not row:
+        try:
+            conn: asyncpg.connection.Connection
+            async with cls.pool.acquire() as conn:
+                row = await conn.fetchrow(sql, *params, record_class=cls.record_class)
+            if not row:
+                raise NoData
+            return row
+        except AttributeError:
+            logger.warning("Database connection not initialized")
             raise NoData
-        return row
 
     @classmethod
     async def fetchval(cls, sql: str, *params):
-        conn: asyncpg.connection.Connection
-        async with cls.pool.acquire() as conn:
-            row = await conn.fetchval(sql, *params)
-        if row is None:
+        try:
+            conn: asyncpg.connection.Connection
+            async with cls.pool.acquire() as conn:
+                row = await conn.fetchval(sql, *params)
+            if row is None:
+                raise NoData
+            return row
+        except AttributeError:
+            logger.warning("Database connection not initialized")
             raise NoData
-        return row
 
     @classmethod
     async def execute(cls, sql: str, *params):
-        conn: asyncpg.connection.Connection
-        async with cls.pool.acquire() as conn:
-            return await conn.execute(sql, *params)
+        try:
+            conn: asyncpg.connection.Connection
+            async with cls.pool.acquire() as conn:
+                return await conn.execute(sql, *params)
+        except AttributeError:
+            logger.warning("Database connection not initialized")
+            return None
 
 class referent(table):
     record_class = ReferentRecord
@@ -719,7 +735,9 @@ async def create():
 
 async def terminate():
     try:
-        await table.pool.close()
-        print("Closing DB pool.")
+        if table.pool is not None:
+            await table.pool.close()
+            table.pool = None
+            logger.info("Database connection pool closed")
     except AttributeError:
-        print("DB not initialized, nothing to do.")
+        logger.warning("Database connection was not initialized")
