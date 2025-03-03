@@ -3,8 +3,8 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { type NextErrorPageProps } from "@common/utils/next";
 import { DebugButton } from "@components/utils/debug/DebugButton";
+import { CenteredContainer } from "@design-system";
 
-import { CenteredContainer } from "../design-system/layout/CenteredContainer";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import style from "./root.module.scss";
