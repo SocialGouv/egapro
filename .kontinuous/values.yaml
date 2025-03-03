@@ -138,10 +138,6 @@ api:
 pg:
   ~chart: pg
 
-redis-cluster:
-  ~chart: redis-cluster
-  enabled: true
-
 files:
   ~chart: app
   ~needs: [build-api,build-files] # sidecar image
