@@ -35,7 +35,7 @@ jobs:
       - name: Get review URL
         id: env
         run: |
-          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}" >> $GITHUB_ENV
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
           echo "$SITE_URL"
       - name: Run test e2e
         run: |
