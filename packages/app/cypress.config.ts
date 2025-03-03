@@ -7,7 +7,7 @@ export default defineConfig({
   video: false,
   screenshotOnRunFailure: false,
   e2e: {
-    baseUrl: "http://localhost:3000",
+    baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     setupNodeEvents(_on, _config) {
       // implement node event listeners here
     },

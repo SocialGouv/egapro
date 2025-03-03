@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install --immutable
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
       - name: Get review URL
         id: env
         run: |
@@ -41,4 +44,6 @@ jobs:
         run: |
           yarn test:e2e:app
         env:
-          SITE_URL: ${{ env.SITE_URL }}
+          working-directory: ./packages/app
+          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          TEST_BASEURL: ${{ env.SITE_URL }}
