@@ -21,6 +21,7 @@ declare module "next-auth" {
   interface Session {
     staff: {
       impersonating?: boolean;
+      lastImpersonated?: Array<{ label: string | null; siren: string }>;
       lastImpersonatedHash?: string;
     };
     user: {
