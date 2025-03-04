@@ -18,7 +18,7 @@ jobs:
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto.yaml@v1
     secrets: inherit
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: node:18-alpine
     needs: [socialgouv]
     name: "Test e2e"
     steps:
