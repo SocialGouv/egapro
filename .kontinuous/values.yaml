@@ -27,7 +27,7 @@ global:
 
 app:
   ~chart: app
-  ~needs: [build-app]
+  ~needs: [build-app, redis]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
