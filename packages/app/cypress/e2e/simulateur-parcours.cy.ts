@@ -6,8 +6,13 @@ describe("Parcours du simulateur Index Egapro", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
+    cy.intercept("GET", "/").as("pageLoad");
+    cy.intercept("GET", "/_next/data/**").as("nextData");
+    cy.intercept("GET", "/api/**").as("apiData");
+
     // Visiter la page de démarrage du simulateur
     cy.visit("/index-egapro/simulateur/commencer");
+    cy.wait("@pageLoad");
 
     // Vérifier que nous sommes sur la bonne page
     cy.url().should("include", "/index-egapro/simulateur/commencer");
