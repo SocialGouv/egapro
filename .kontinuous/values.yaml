@@ -147,6 +147,7 @@ redis:
   auth:
     existingSecret: redis-auth
     existingSecretPasswordKey: REDIS_PASSWORD
+    usePasswordFiles: false
 
 files:
   ~chart: app
