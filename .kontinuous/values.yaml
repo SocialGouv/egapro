@@ -144,9 +144,6 @@ pg:
 redis:
   fullnameOverride: redis
   ~tpl~namespaceOverride: "{{ .Values.global.namespace }}"
-  sentinel:
-    annotations:
-      kontinuous/plugin.forceRestart: "false"
   auth:
     existingSecret: redis-auth
     existingSecretPasswordKey: REDIS_PASSWORD
