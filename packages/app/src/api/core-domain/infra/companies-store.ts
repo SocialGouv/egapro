@@ -10,10 +10,9 @@ const redisOptions = {
   port: parseInt(process.env.REDIS_PORT || "6379", 10),
   password: process.env.REDIS_PASSWORD,
   keyPrefix: "egapro:",
-  // Default TTL for keys (24 hours)
-  // This ensures we don't keep unused data permanently
-  maxTtl: 60 * 60 * 24,
 };
+
+const maxTtl = 60 * 60 * 48;
 
 // Create Redis client
 const redisClient = new Redis(redisOptions);
@@ -61,7 +60,7 @@ export const companiesUtils = {
       if (!companies.length || !hash) return;
 
       const companiesString = JSON.stringify(companies);
-      await redisClient.set(`companies:${hash}`, companiesString, "EX", redisOptions.maxTtl);
+      await redisClient.set(`companies:${hash}`, companiesString, "EX", maxTtl);
 
       logger.info({ hash }, "Companies data stored in Redis");
     } catch (error) {
