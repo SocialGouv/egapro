@@ -222,7 +222,7 @@ export const authConfig: AuthOptions = {
           }
         } else {
           process.stderr.write("\nQ\n");
-          const sirenList = profile?.organizations.map(orga => orga.siret.substring(0, 9));
+          const sirenList = profile?.organizations.filter(orga => !!orga).map(orga => orga.siret.substring(0, 9));
           process.stderr.write("\nR\n");
           if (profile?.email && sirenList) {
             process.stderr.write("\nS\n");
@@ -239,10 +239,12 @@ export const authConfig: AuthOptions = {
           }
           process.stderr.write("\nX\n");
           const companiesList =
-            profile?.organizations.map(orga => ({
-              siren: orga.siret.substring(0, 9),
-              label: orga.label,
-            })) ?? [];
+            profile?.organizations
+              .filter(orga => !!orga)
+              .map(orga => ({
+                siren: orga.siret.substring(0, 9),
+                label: orga.label,
+              })) ?? [];
           process.stderr.write("\nY\n");
 
           // Create hash and store companies in Redis
