@@ -142,6 +142,7 @@ export const authConfig: AuthOptions = {
     // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger, account, session }) {
       const isStaff = token.user?.staff || token.staff?.impersonating || false;
+      logger.error({ trigger }, "Trigger");
       if (trigger === "update" && session && isStaff) {
         if (session.staff.impersonating === true) {
           // staff starts impersonating
