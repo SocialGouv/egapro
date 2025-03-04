@@ -270,7 +270,12 @@ export const authConfig: AuthOptions = {
             session.user.companies = companies;
           }
         } catch (error) {
-          logger.error("Error loading companies from Redis", error);
+          logger.error(
+            {
+              error,
+            },
+            "Error loading companies from Redis",
+          );
         }
       }
 
@@ -286,7 +291,12 @@ export const authConfig: AuthOptions = {
               session.user.lastImpersonated = lastImpersonated;
             }
           } catch (error) {
-            logger.error("Error loading last impersonated companies from Redis", error);
+            logger.error(
+              {
+                error,
+              },
+              "Error loading last impersonated companies from Redis",
+            );
           }
         }
       }

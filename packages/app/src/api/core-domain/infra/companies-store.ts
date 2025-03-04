@@ -51,7 +51,12 @@ export const companiesUtils = {
 
       return hash;
     } catch (error) {
-      logger.error("Failed to hash companies", error);
+      logger.error(
+        {
+          error,
+        },
+        "Failed to hash companies",
+      );
       return "";
     }
   },
@@ -108,7 +113,7 @@ export const companiesUtils = {
       const computedHash = crypto.createHash("sha256").update(companiesString).digest("hex");
       return computedHash === hash;
     } catch (error) {
-      logger.error("Failed to verify companies data", error);
+      logger.error({ error }, "Failed to verify companies data");
       return false;
     }
   },
