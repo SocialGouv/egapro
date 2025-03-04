@@ -1,5 +1,5 @@
 import { logger } from "@api/utils/pino";
-import * as argon2 from "argon2";
+import * as crypto from "crypto";
 import Redis from "ioredis";
 
 export type Company = { label: string | null; siren: string };
@@ -40,12 +40,8 @@ export const companiesUtils = {
       const sortedCompanies = [...companies].sort((a, b) => a.siren.localeCompare(b.siren));
       const companiesString = JSON.stringify(sortedCompanies);
 
-      const hash = await argon2.hash(companiesString, {
-        type: argon2.argon2id,
-        memoryCost: 2048, // minimize memory usage for this simple hash
-        timeCost: 3, // minimize time cost for this simple hash
-        parallelism: 1, // minimize parallelism for this simple hash
-      });
+      // Create SHA-256 hash
+      const hash = crypto.createHash("sha256").update(companiesString).digest("hex");
 
       // Store the actual companies data in Redis using the hash as key
       await this.storeCompaniesInRedis(hash, companies);
@@ -105,7 +101,9 @@ export const companiesUtils = {
       const sortedCompanies = [...companies].sort((a, b) => a.siren.localeCompare(b.siren));
       const companiesString = JSON.stringify(sortedCompanies);
 
-      return await argon2.verify(hash, companiesString);
+      // Generate SHA-256 hash and compare with the provided hash
+      const computedHash = crypto.createHash("sha256").update(companiesString).digest("hex");
+      return computedHash === hash;
     } catch (error) {
       logger.error("Failed to verify companies data", error);
       return false;
