@@ -1,6 +1,5 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { config } from "@common/config";
 import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
@@ -21,6 +20,8 @@ import { RepeqList } from "./RepeqList";
 import { SelectSiren } from "./SelectSiren";
 import { SelectSirenStaff } from "./SelectSirenStaff";
 
+const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+
 const InfoText = () => (
   <>
     <p>
@@ -39,12 +40,7 @@ const InfoText = () => (
     <p>
       <br />
       Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-      <Link
-        target="_blank"
-        href={`https://identite${
-          config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-        }.proconnect.gouv.fr/manage-organizations`}
-      >
+      <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
         cliquez ici
       </Link>
     </p>

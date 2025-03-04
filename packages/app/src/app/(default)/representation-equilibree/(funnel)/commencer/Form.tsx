@@ -187,7 +187,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
           )}
           <p>
             Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+            <Link href={`${monCompteProHost}`} target="_blank">
               cliquez ici
             </Link>
           </p>

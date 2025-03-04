@@ -7,6 +7,7 @@ export interface Organization {
   is_external: boolean;
   is_service_public: boolean;
   label: string | null;
+  siren: string;
   siret: string;
 }
 
@@ -22,22 +23,20 @@ export interface ProConnectProfile {
   updated_at: Date;
 }
 
-const ISSUER = (appTest: boolean) => `https://identite${appTest ? "-sandbox" : ""}.proconnect.gouv.fr`;
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
-  const issuer = options.issuer ?? ISSUER(options.appTest ?? false);
+  const scope = process.env.EGAPRO_PROCONNECT_SCOPE;
+  const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
   return {
     id: "moncomptepro",
-    name: "Mon Compte Pro",
     type: "oauth",
-    wellKnown: `${issuer}/.well-known/openid-configuration`,
+    name: "Mon Compte Pro",
     allowDangerousEmailAccountLinking: true,
+    wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      params: {
-        scope: "openid email profile organizations phone",
-      },
+      params: { scope },
     },
     checks: ["pkce", "state"],
     userinfo: {
