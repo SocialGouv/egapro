@@ -7,6 +7,7 @@ export interface Organization {
   is_external: boolean;
   is_service_public: boolean;
   label: string | null;
+  siren: string;
   siret: string;
 }
 
