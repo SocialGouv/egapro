@@ -18,7 +18,12 @@ const redisClient = new Redis(redisOptions);
 
 // Log Redis connection errors but don't crash the application
 redisClient.on("error", err => {
-  logger.error("Redis client error", err);
+  logger.error(
+    {
+      err,
+    },
+    "Redis client error",
+  );
 });
 
 /**
