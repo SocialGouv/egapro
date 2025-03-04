@@ -258,6 +258,7 @@ jobs:
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
+        target: builder
         buildArgs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
           NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"

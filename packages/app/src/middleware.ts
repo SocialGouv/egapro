@@ -78,18 +78,23 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
     const { pathname } = req.nextUrl;
     const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
-    // handling authorization by ourselves (and not with authorize callback)
-    const { token } = req.nextauth;
-    if (!token?.email) {
-      if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-        return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
-      }
-    }
+    // fixme
+    // // handling authorization by ourselves (and not with authorize callback)
+    // const token = await getToken({
+    //   req,
+    //   secret: _config.api.security.auth.secret,
+    // });
+    // logger.info({ token }, "Token in middleware");
+    // if (!token?.email) {
+    //   if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
+    //     return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+    //   }
+    // }
 
-    const isStaff = token?.user?.staff || token?.staff.impersonating || false;
-    if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
-      return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
-    }
+    // const isStaff = token?.user?.staff || token?.staff.impersonating || false;
+    // if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
+    //   return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
+    // }
 
     return cspMiddleware(req, event);
   } catch (error) {

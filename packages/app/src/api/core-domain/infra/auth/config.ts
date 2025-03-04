@@ -9,9 +9,9 @@ import { assertImpersonatedSession } from "@common/core-domain/helpers/impersona
 import { UnexpectedError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
-import jwt from "jsonwebtoken";
+import jwt, { sign, verify } from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
-import { type DefaultJWT } from "next-auth/jwt";
+import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
@@ -58,6 +58,32 @@ export const monCompteProProvider = ProConnectProvider({
     : {}),
 });
 export const authConfig: AuthOptions = {
+  // fixme
+  jwt: {
+    async encode({ token, secret, maxAge }): Promise<string> {
+      // Sign the token using HS256 without encrypting the payload.
+      try {
+        logger.info({ token, secret, maxAge }, "Token");
+        if (token) token.user.companies = [];
+        return sign(token as JWT, secret, {
+          algorithm: "HS256",
+        });
+      } catch (error) {
+        logger.error({ error }, "Error while encoding token");
+        throw new Error("Error while encoding token");
+      }
+    },
+    async decode({ token, secret }): Promise<JWT | null> {
+      try {
+        logger.info({ token }, "Token received"); // TODO: remove
+        // Verify and decode the token using HS256.
+        return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
+      } catch (error) {
+        logger.error({ error }, "Error while decoding token");
+        return null;
+      }
+    },
+  },
   logger: {
     error: (code: any, ...message: any[]) => logger.error({ ...message, code }, "Error"),
     warn: (code: any, ...message: any[]) => logger.warn({ ...message, code }, "Warning"),
@@ -144,7 +170,7 @@ export const authConfig: AuthOptions = {
       try {
         process.stderr.write("\nA\n");
         const isStaff = token.user?.staff || token.staff?.impersonating || false;
-        logger.info({ trigger, account, profile }, "Infos"); // TODO: remove
+        logger.info({ token, session, trigger, account, profile }, "Infos"); // TODO: remove
         process.stderr.write("\nB\n");
 
         if (trigger === "update" && session && isStaff) {
@@ -347,7 +373,7 @@ export const authConfig: AuthOptions = {
           }
         }
       }
-
+      logger.info({ session }, "Session created"); // TODO: remove
       return session;
     },
   },
