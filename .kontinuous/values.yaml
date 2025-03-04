@@ -46,6 +46,8 @@ app:
         name: github-oauth
     - configMapRef:
         name: egapro
+    - secretRef:
+        name: redis-auth
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
@@ -141,6 +143,7 @@ pg:
 redis:
   auth:
     existingSecret: redis-auth
+    existingSecretPasswordKey: REDIS_PASSWORD
 
 files:
   ~chart: app
