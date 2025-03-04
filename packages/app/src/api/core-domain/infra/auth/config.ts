@@ -24,7 +24,7 @@ declare module "next-auth" {
       lastImpersonatedHash?: string;
     };
     user: {
-      companies?: Array<{ label: string | null; siren: string }>;
+      companies: Array<{ label: string | null; siren: string }>;
       companiesHash: string;
       // For backward compatibility
       email: string;
