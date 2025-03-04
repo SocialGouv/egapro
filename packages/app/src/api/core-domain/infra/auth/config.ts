@@ -59,14 +59,14 @@ export const monCompteProProvider = ProConnectProvider({
 });
 export const authConfig: AuthOptions = {
   logger: {
-    error: (code: any, ...message: any[]) => logger.error({ code }, ...message),
-    warn: (code: any, ...message: any[]) => logger.warn({ code }, ...message),
-    info: (code: any, ...message: any[]) => logger.info({ code }, ...message),
+    error: (code: any, ...message: any[]) => logger.error({ ...message, code }, "Error"),
+    warn: (code: any, ...message: any[]) => logger.warn({ ...message, code }, "Warning"),
+    info: (code: any, ...message: any[]) => logger.info({ ...message, code }, "Info"),
     debug: (code: any, ...message: any[]) => {
       if (config.env === "dev") {
-        logger.info({ code }, ...message);
+        logger.info({ ...message, code }, "Debug");
       } else {
-        logger.debug({ code }, ...message);
+        logger.debug({ ...message, code }, "Debug");
       }
     },
   },
