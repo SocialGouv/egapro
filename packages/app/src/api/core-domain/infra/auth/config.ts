@@ -142,7 +142,8 @@ export const authConfig: AuthOptions = {
     // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger, account, session }) {
       const isStaff = token.user?.staff || token.staff?.impersonating || false;
-      logger.info({ trigger }, "Trigger");
+      logger.info({ trigger, account, profile }, "Infos"); // TODO: remove
+
       if (trigger === "update" && session && isStaff) {
         if (session.staff.impersonating === true) {
           // staff starts impersonating
@@ -173,6 +174,7 @@ export const authConfig: AuthOptions = {
           token.staff.impersonating = false;
         }
       }
+
       if (trigger !== "signUp") return token;
       token.user = {
         companiesHash: "",
@@ -230,6 +232,8 @@ export const authConfig: AuthOptions = {
 
       // Token legacy for usage with API v1.
       token.user.tokenApiV1 = createTokenApiV1(token.email);
+
+      logger.info(token, "Token created"); // TODO: remove
 
       try {
         const companiesHash = token.user.companiesHash || "";
