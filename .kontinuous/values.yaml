@@ -143,6 +143,7 @@ pg:
 
 redis:
   fullnameOverride: redis
+  ~tpl~namespaceOverride: "{{ .Values.global.namespace }}"
   auth:
     existingSecret: redis-auth
     existingSecretPasswordKey: REDIS_PASSWORD
