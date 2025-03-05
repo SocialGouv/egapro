@@ -1,3 +1,10 @@
+## [3.6.14](https://github.com/SocialGouv/egapro/compare/v3.6.13...v3.6.14) (2025-03-05)
+
+
+### Bug Fixes
+
+* redis sentinels ([ad6b289](https://github.com/SocialGouv/egapro/commit/ad6b289c41a76e92e3785b02144ed88aea085f07))
+
 ## [3.6.13](https://github.com/SocialGouv/egapro/compare/v3.6.12...v3.6.13) (2025-03-05)
 
 
