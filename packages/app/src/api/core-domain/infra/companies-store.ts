@@ -10,6 +10,7 @@ const redisOptions: RedisOptions = {
 };
 
 if (process.env.REDIS_SENTINEL_HOSTS) {
+  redisOptions.sentinelPassword = process.env.REDIS_PASSWORD;
   try {
     redisOptions.sentinels = JSON.parse(process.env.REDIS_SENTINEL_HOSTS);
   } catch (error) {
