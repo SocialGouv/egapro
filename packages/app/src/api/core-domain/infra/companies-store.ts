@@ -1,15 +1,24 @@
 import { logger } from "@api/utils/pino";
 import * as crypto from "crypto";
-import Redis from "ioredis";
+import Redis, { type RedisOptions } from "ioredis";
 
 export type Company = { label: string | null; siren: string };
 
 // Configure Redis connection based on environment variables or defaults
-const redisOptions = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: parseInt(process.env.REDIS_PORT || "6379", 10),
+const redisOptions: RedisOptions = {
   password: process.env.REDIS_PASSWORD,
 };
+
+if (process.env.REDIS_SENTINEL_HOSTS) {
+  try {
+    redisOptions.sentinels = JSON.parse(process.env.REDIS_SENTINEL_HOSTS);
+  } catch (error) {
+    logger.error({ error }, "Failed to parse REDIS_SENTINEL_HOSTS, falling back to direct connection");
+  }
+} else {
+  redisOptions.host = process.env.REDIS_HOST || "localhost";
+  redisOptions.port = parseInt(process.env.REDIS_PORT || "6379", 10);
+}
 
 const maxTtl = 60 * 60 * 48;
 
