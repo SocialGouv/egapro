@@ -1,3 +1,10 @@
+## [3.6.12](https://github.com/SocialGouv/egapro/compare/v3.6.11...v3.6.12) (2025-03-05)
+
+
+### Bug Fixes
+
+* redis host service name for preprod and prod ([7814042](https://github.com/SocialGouv/egapro/commit/7814042d9794a7ed3dc8dddb4f517cf43f647e27))
+
 ## [3.6.11](https://github.com/SocialGouv/egapro/compare/v3.6.10...v3.6.11) (2025-03-05)
 
 
