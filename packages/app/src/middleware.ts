@@ -1,7 +1,10 @@
+import { logger } from "@api/utils/pino";
 import { config as _config } from "@common/config";
 import { captureError } from "@common/error";
 import { StatusCodes } from "http-status-codes";
+import * as jose from "jose";
 import { NextResponse } from "next/server";
+import { type JWT } from "next-auth/jwt";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
@@ -78,23 +81,18 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
     const { pathname } = req.nextUrl;
     const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
-    // fixme
-    // // handling authorization by ourselves (and not with authorize callback)
-    // const token = await getToken({
-    //   req,
-    //   secret: _config.api.security.auth.secret,
-    // });
-    // logger.info({ token }, "Token in middleware");
-    // if (!token?.email) {
-    //   if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-    //     return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
-    //   }
-    // }
+    // handling authorization by ourselves (and not with authorize callback)
+    const { token } = req.nextauth;
+    if (!token?.email) {
+      if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
+        return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+      }
+    }
 
-    // const isStaff = token?.user?.staff || token?.staff.impersonating || false;
-    // if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
-    //   return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
-    // }
+    const isStaff = token?.user?.staff || token?.staff.impersonating || false;
+    if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
+      return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
+    }
 
     return cspMiddleware(req, event);
   } catch (error) {
@@ -120,6 +118,17 @@ const wrappedMiddleware = withAuth(
   // Next auth config - will run **before** middleware
   {
     secret: _config.api.security.auth.secret,
+    jwt: {
+      async decode({ token, secret }): Promise<JWT | null> {
+        try {
+          const secretAsKey = new TextEncoder().encode(secret as string);
+          return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
+        } catch (error) {
+          logger.error({ error }, "Error while decoding token");
+          return null;
+        }
+      },
+    },
     callbacks: {
       authorized: () => true,
     },

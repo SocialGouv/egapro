@@ -60,11 +60,9 @@ export const monCompteProProvider = ProConnectProvider({
 export const authConfig: AuthOptions = {
   // fixme
   jwt: {
-    async encode({ token, secret, maxAge }): Promise<string> {
+    async encode({ token, secret }): Promise<string> {
       // Sign the token using HS256 without encrypting the payload.
       try {
-        logger.info({ token, secret, maxAge }, "Token");
-        if (token) token.user.companies = [];
         return sign(token as JWT, secret, {
           algorithm: "HS256",
         });
@@ -75,7 +73,6 @@ export const authConfig: AuthOptions = {
     },
     async decode({ token, secret }): Promise<JWT | null> {
       try {
-        logger.info({ token }, "Token received"); // TODO: remove
         // Verify and decode the token using HS256.
         return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
       } catch (error) {
@@ -170,7 +167,6 @@ export const authConfig: AuthOptions = {
       try {
         process.stderr.write("\nA\n");
         const isStaff = token.user?.staff || token.staff?.impersonating || false;
-        logger.info({ token, session, trigger, account, profile }, "Infos"); // TODO: remove
         process.stderr.write("\nB\n");
 
         if (trigger === "update" && session && isStaff) {
@@ -290,7 +286,6 @@ export const authConfig: AuthOptions = {
         token.user.tokenApiV1 = createTokenApiV1(token.email);
         process.stderr.write("\n2B\n");
 
-        logger.info(token, "Token created"); // TODO: remove
         process.stderr.write("\n2C\n");
 
         try {
@@ -331,7 +326,7 @@ export const authConfig: AuthOptions = {
       }
     },
     async session({ session, token }) {
-      session.user = token.user;
+      session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
       session.staff = {};
 
@@ -373,7 +368,6 @@ export const authConfig: AuthOptions = {
           }
         }
       }
-      logger.info({ session }, "Session created"); // TODO: remove
       return session;
     },
   },
