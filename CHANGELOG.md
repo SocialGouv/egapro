@@ -1,3 +1,10 @@
+## [3.6.17](https://github.com/SocialGouv/egapro/compare/v3.6.16...v3.6.17) (2025-03-05)
+
+
+### Bug Fixes
+
+* use egapro configmap ([1ec8a1b](https://github.com/SocialGouv/egapro/commit/1ec8a1b4101f8285c16fe13455d18d61f912dce0))
+
 ## [3.6.16](https://github.com/SocialGouv/egapro/compare/v3.6.15...v3.6.16) (2025-03-05)
 
 
