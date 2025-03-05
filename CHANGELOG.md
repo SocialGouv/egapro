@@ -1,3 +1,10 @@
+## [3.6.16](https://github.com/SocialGouv/egapro/compare/v3.6.15...v3.6.16) (2025-03-05)
+
+
+### Bug Fixes
+
+* use redis password in production ([bd34362](https://github.com/SocialGouv/egapro/commit/bd34362d0e7d06f9616e90c3abc7833597f0b507))
+
 ## [3.6.15](https://github.com/SocialGouv/egapro/compare/v3.6.14...v3.6.15) (2025-03-05)
 
 
