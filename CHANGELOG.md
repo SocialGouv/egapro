@@ -1,3 +1,15 @@
+## [3.6.15](https://github.com/SocialGouv/egapro/compare/v3.6.14...v3.6.15) (2025-03-05)
+
+
+### Bug Fixes
+
+* clean logs ([88c56ec](https://github.com/SocialGouv/egapro/commit/88c56ec8f4eebace7a9416b9e6e4bd2fc185b541))
+* dummy commit ([c4e474f](https://github.com/SocialGouv/egapro/commit/c4e474f742c0be3b257103fd1174c0fdc01fff05))
+* json typo ([3e362f6](https://github.com/SocialGouv/egapro/commit/3e362f6f6352a51c03d312e7a0590295256c6131))
+* redis restart ([dd9b19a](https://github.com/SocialGouv/egapro/commit/dd9b19a525060fb7b045fae25aedfd132b9038ca))
+* redis sentinel password ([c15b2f9](https://github.com/SocialGouv/egapro/commit/c15b2f940517799a13cf42c2824f2324a7603b1b))
+* sentinel master name ([05be37b](https://github.com/SocialGouv/egapro/commit/05be37b60929cd82136733717fdaf2955d70c580))
+
 ## [3.6.14](https://github.com/SocialGouv/egapro/compare/v3.6.13...v3.6.14) (2025-03-05)
 
 
