@@ -4,6 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
+import { authConfig } from "./api/core-domain/infra/auth/config";
+
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
@@ -78,23 +80,18 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
     const { pathname } = req.nextUrl;
     const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
-    // fixme
-    // // handling authorization by ourselves (and not with authorize callback)
-    // const token = await getToken({
-    //   req,
-    //   secret: _config.api.security.auth.secret,
-    // });
-    // logger.info({ token }, "Token in middleware");
-    // if (!token?.email) {
-    //   if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
-    //     return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
-    //   }
-    // }
+    // handling authorization by ourselves (and not with authorize callback)
+    const { token } = req.nextauth;
+    if (!token?.email) {
+      if (_config.api.security.auth.privateRoutes.some(route => pathname.startsWith(route))) {
+        return NextResponse.redirect(`${_config.host}/login?callbackUrl=${encodeURIComponent(href)}`);
+      }
+    }
 
-    // const isStaff = token?.user?.staff || token?.staff.impersonating || false;
-    // if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
-    //   return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
-    // }
+    const isStaff = token?.user?.staff || token?.staff.impersonating || false;
+    if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
+      return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
+    }
 
     return cspMiddleware(req, event);
   } catch (error) {
@@ -120,6 +117,7 @@ const wrappedMiddleware = withAuth(
   // Next auth config - will run **before** middleware
   {
     secret: _config.api.security.auth.secret,
+    jwt: { decode: authConfig.jwt?.decode },
     callbacks: {
       authorized: () => true,
     },
