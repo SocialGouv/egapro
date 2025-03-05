@@ -331,7 +331,7 @@ export const authConfig: AuthOptions = {
       }
     },
     async session({ session, token }) {
-      session.user = token.user;
+      session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
       session.staff = {};
 
