@@ -32,9 +32,9 @@ app:
     MAILER_ENABLE: "True"
     REDIS_SENTINEL_HOSTS: |
       [
-        { host: "redis-node-0.redis-headless", port: 26379 },
-        { host: "redis-node-1.redis-headless", port: 26379 },
-        { host: "redis-node-2.redis-headless", port: 26379 }
+        { "host": "redis-node-0.redis-headless", "port": 26379 },
+        { "host": "redis-node-1.redis-headless", "port": 26379 },
+        { "host": "redis-node-2.redis-headless", "port": 26379 }
       ]
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
