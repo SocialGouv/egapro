@@ -40,20 +40,16 @@ ENV SENTRY_RELEASE=$SENTRY_RELEASE
 ENV GENERATE_SOURCEMAP=true \
     NODE_ENV=production
 
-# TODO: uncomment this block
-## Clean output directory and build with source maps
-#RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token); \
-#    export NODE_OPTIONS="--max-old-space-size=8192"; \
-#    export GENERATE_SOURCEMAP=true; \
-#    export SENTRY_ALLOW_FAILURE=true; \
-#    yarn workspace app build
-#
-#RUN yarn workspaces focus app --production && yarn cache clean
-#RUN mkdir -p ./packages/app/node_modules
+# Clean output directory and build with source maps
+RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token); \
+    export NODE_OPTIONS="--max-old-space-size=8192"; \
+    export GENERATE_SOURCEMAP=true; \
+    export SENTRY_ALLOW_FAILURE=true; \
+    yarn workspace app build
 
-# TODO: remove next 2 lines
-ENV NODE_ENV=staging
-ENTRYPOINT ["yarn", "workspace", "app", "dev"]
+RUN yarn workspaces focus app --production && yarn cache clean
+RUN mkdir -p ./packages/app/node_modules
+
 
 # Runner
 FROM node:$NODE_VERSION AS runner
