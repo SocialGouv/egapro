@@ -1,3 +1,10 @@
+## [3.6.11](https://github.com/SocialGouv/egapro/compare/v3.6.10...v3.6.11) (2025-03-05)
+
+
+### Bug Fixes
+
+* jwt oversized + undefined errors + many things ([#2455](https://github.com/SocialGouv/egapro/issues/2455)) ([2d9f79c](https://github.com/SocialGouv/egapro/commit/2d9f79c6b2bc1255004f2523165450cbcfcb8093))
+
 ## [3.6.10](https://github.com/SocialGouv/egapro/compare/v3.6.9...v3.6.10) (2025-02-28)
 
 
