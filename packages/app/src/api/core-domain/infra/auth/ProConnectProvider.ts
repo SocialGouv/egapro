@@ -41,7 +41,8 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     checks: ["pkce", "state"],
     userinfo: {
       async request({ tokens: { access_token }, client }) {
-        logger.child({ tokens: { access_token } }).info(`userinfo request`);
+        // logger.child({ tokens: { access_token } }).info(`userinfo request`);
+        logger.info(`userinfo request`);
         if (!access_token) {
           throw new Error("ProConnectProvider - Userinfo request is missing access_token.");
         }
