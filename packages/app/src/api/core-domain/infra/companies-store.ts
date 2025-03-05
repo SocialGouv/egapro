@@ -96,25 +96,4 @@ export const companiesUtils = {
       return [];
     }
   },
-
-  /**
-   * Verify that provided companies data matches the hash from JWT
-   * This is used to verify client-submitted companies data
-   */
-  async verifyCompaniesData(companies: Company[], hash: string): Promise<boolean> {
-    try {
-      if (!companies.length || !hash) return false;
-
-      // Sort to ensure consistent verification regardless of array order
-      const sortedCompanies = [...companies].sort((a, b) => a.siren.localeCompare(b.siren));
-      const companiesString = JSON.stringify(sortedCompanies);
-
-      // Generate SHA-256 hash and compare with the provided hash
-      const computedHash = crypto.createHash("sha256").update(companiesString).digest("hex");
-      return computedHash === hash;
-    } catch (error) {
-      logger.error({ error }, "Failed to verify companies data");
-      return false;
-    }
-  },
 };

@@ -58,7 +58,6 @@ export const monCompteProProvider = ProConnectProvider({
     : {}),
 });
 export const authConfig: AuthOptions = {
-  // fixme
   jwt: {
     async encode({ token, secret }): Promise<string> {
       // Sign the token using HS256 without encrypting the payload.
@@ -165,53 +164,39 @@ export const authConfig: AuthOptions = {
     // by design user always "signup" from our pov because we don't save user accounts
     async jwt({ token, profile, trigger, account, session }) {
       try {
-        process.stderr.write("\nA\n");
         const isStaff = token.user?.staff || token.staff?.impersonating || false;
-        process.stderr.write("\nB\n");
 
         if (trigger === "update" && session && isStaff) {
-          process.stderr.write("\nC\n");
           if (session.staff.impersonating === true) {
-            process.stderr.write("\nD\n");
             // staff starts impersonating
             assertImpersonatedSession(session);
-            process.stderr.write("\nE\n");
             token.user.staff = session.user.staff;
 
             // Store companies in Redis if available
             if (session.user.companies) {
-              process.stderr.write("\nF\n");
               // Create hash and store companies in Redis
               token.user.companiesHash = await companiesUtils.hashCompanies(session.user.companies);
             } else if ("companiesHash" in session.user && session.user.companiesHash) {
               // Use existing hash
-              process.stderr.write("\nG\n");
               token.user.companiesHash = session.user.companiesHash as string;
             }
-            process.stderr.write("\nH\n");
 
             token.staff.impersonating = true;
 
             // If impersonating, store the current companies for later
-            process.stderr.write("\nI\n");
             if (session.user.companies) {
               // Create last impersonated hash and store in Redis
               const companiesList = session.user.companies as Company[];
-              process.stderr.write("\nJ\n");
               token.staff.lastImpersonatedHash = await companiesUtils.hashCompanies(companiesList);
             }
-            process.stderr.write("\nK\n");
           } else if (session.staff.impersonating === false) {
-            process.stderr.write("\nL\n");
             // staff stops impersonating
             token.user.staff = true;
             token.user.companiesHash = ""; // Empty hash for no companies
             token.staff.impersonating = false;
           }
         }
-        process.stderr.write("\nM\n");
         if (trigger !== "signUp") return token;
-        process.stderr.write("\nN\n");
         token.user = {
           companiesHash: "",
           email: token.email,
@@ -223,7 +208,6 @@ export const authConfig: AuthOptions = {
           lastImpersonatedHash: "",
         } as Session["staff"];
         if (account?.provider === "github") {
-          process.stderr.write("\nO\n");
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
           token.user.companiesHash = ""; // Empty hash for no companies
@@ -231,7 +215,6 @@ export const authConfig: AuthOptions = {
           token.user.firstname = firstname;
           token.user.lastname = lastname;
         } else if (account?.provider === "email") {
-          process.stderr.write("\nP\n");
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
             const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email));
@@ -243,25 +226,17 @@ export const authConfig: AuthOptions = {
             token.user.companiesHash = ""; // Empty hash for no companies
           }
         } else {
-          process.stderr.write("\nQ\n");
           const sirenList = profile?.organizations
             .filter(orga => !!orga)
             .map(orga => orga.siren || orga.siret.substring(0, 9));
-          process.stderr.write("\nR\n");
           if (profile?.email && sirenList) {
-            process.stderr.write("\nS\n");
             try {
-              process.stderr.write("\nT\n");
               const useCase = new SyncOwnership(ownershipRepo);
-              process.stderr.write("\nU\n");
               await useCase.execute({ sirens: sirenList, email: profile.email });
-              process.stderr.write("\nV\n");
             } catch (error: unknown) {
               logger.error({ error }, "Error while syncing ownerships");
-              process.stderr.write("\nW\n");
             }
           }
-          process.stderr.write("\nX\n");
           const companiesList =
             profile?.organizations
               .filter(orga => !!orga)
@@ -269,11 +244,9 @@ export const authConfig: AuthOptions = {
                 siren: orga.siren || orga.siret.substring(0, 9),
                 label: orga.label,
               })) ?? [];
-          process.stderr.write("\nY\n");
 
           // Create hash and store companies in Redis
           token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
-          process.stderr.write("\nZ\n");
 
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           token.user.firstname = profile?.given_name ?? void 0;
@@ -281,15 +254,10 @@ export const authConfig: AuthOptions = {
           token.user.phoneNumber = profile?.phone_number ?? void 0;
         }
 
-        process.stderr.write("\n2A\n");
         // Token legacy for usage with API v1.
         token.user.tokenApiV1 = createTokenApiV1(token.email);
-        process.stderr.write("\n2B\n");
-
-        process.stderr.write("\n2C\n");
 
         try {
-          process.stderr.write("\n2D\n");
           const companiesHash = token.user.companiesHash || "";
 
           logger.info(
@@ -306,7 +274,6 @@ export const authConfig: AuthOptions = {
             "Total token size",
           );
         } catch (error) {
-          process.stderr.write("\n2E\n");
           logger.error(
             {
               err: error,
@@ -326,7 +293,7 @@ export const authConfig: AuthOptions = {
       }
     },
     async session({ session, token }) {
-      session.user = JSON.parse(JSON.stringify(token.user));
+      session.user = JSON.parse(JSON.stringify(token.user)); // very important ! to avoid token mutation. Else the companies are added to the token and the headers will too big & rejected by nginx
       session.user.email = token.email;
       session.staff = {};
 
