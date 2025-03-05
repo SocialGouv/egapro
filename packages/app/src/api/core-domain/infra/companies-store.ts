@@ -13,7 +13,7 @@ if (process.env.REDIS_SENTINEL_HOSTS) {
   try {
     redisOptions.sentinels = JSON.parse(process.env.REDIS_SENTINEL_HOSTS);
   } catch (error) {
-    logger.error({ error }, "Failed to parse REDIS_SENTINEL_HOSTS, falling back to direct connection");
+    logger.error({ error }, "Failed to parse REDIS_SENTINEL_HOSTS");
   }
 } else {
   redisOptions.host = process.env.REDIS_HOST || "localhost";
