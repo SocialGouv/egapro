@@ -36,6 +36,7 @@ app:
         { "host": "redis-node-1.redis-headless", "port": 26379 },
         { "host": "redis-node-2.redis-headless", "port": 26379 }
       ]
+    REDIS_SENTINEL_MASTER_NAME: "mymaster"
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"

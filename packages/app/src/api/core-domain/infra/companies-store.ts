@@ -15,6 +15,7 @@ if (process.env.REDIS_SENTINEL_HOSTS) {
   } catch (error) {
     logger.error({ error }, "Failed to parse REDIS_SENTINEL_HOSTS");
   }
+  redisOptions.name = process.env.REDIS_SENTINEL_MASTER_NAME || "mymaster";
 } else {
   redisOptions.host = process.env.REDIS_HOST || "localhost";
   redisOptions.port = parseInt(process.env.REDIS_PORT || "6379", 10);
