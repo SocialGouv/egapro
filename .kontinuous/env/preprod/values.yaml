@@ -22,6 +22,7 @@ app:
     MAILER_SMTP_SSL: "False"
     NODE_ENV: production
 #    EMAIL_LOGIN: "True"
+    REDIS_HOST: "redis"
   resources:
     requests:
       cpu: 20m

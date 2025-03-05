@@ -30,6 +30,7 @@ api:
 app:
   vars:
     MAILER_ENABLE: "True"
+    REDIS_HOST: "redis"
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"
