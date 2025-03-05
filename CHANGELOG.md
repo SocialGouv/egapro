@@ -1,3 +1,10 @@
+## [3.6.13](https://github.com/SocialGouv/egapro/compare/v3.6.12...v3.6.13) (2025-03-05)
+
+
+### Bug Fixes
+
+* must explicit redis port to avoid kube auto env provision collision on sentinel mode ([ed6eeba](https://github.com/SocialGouv/egapro/commit/ed6eeba591629dcdc484e0d2b4b226626fb11227))
+
 ## [3.6.12](https://github.com/SocialGouv/egapro/compare/v3.6.11...v3.6.12) (2025-03-05)
 
 
