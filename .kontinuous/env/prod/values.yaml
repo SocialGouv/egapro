@@ -51,6 +51,8 @@ app:
         name: "egapro-secret"
     - secretRef:
         name: smtp-app
+    - secretRef:
+        name: redis-auth
   autoscale:
     enabled: true
     minReplicas: 4
