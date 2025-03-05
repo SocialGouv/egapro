@@ -70,6 +70,7 @@ app:
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     REDIS_HOST: "redis-master"
+    REDIS_PORT: "6379"
 
 nginx:
   ~chart: app
