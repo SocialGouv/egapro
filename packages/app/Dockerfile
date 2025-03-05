@@ -50,6 +50,7 @@ RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run
 RUN yarn workspaces focus app --production && yarn cache clean
 RUN mkdir -p ./packages/app/node_modules
 
+
 # Runner
 FROM node:$NODE_VERSION AS runner
 

@@ -32,3 +32,7 @@ app:
 
 maildev: {}
 pgweb: {}
+
+redis:
+  sentinel:
+    enabled: true
