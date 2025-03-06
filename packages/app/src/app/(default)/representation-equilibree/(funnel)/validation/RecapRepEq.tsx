@@ -92,9 +92,9 @@ export const ValidationRecapRepEq = () => {
     modifiedAt: "",
     company: {
       address: address.includes("[ND]") ? "Information non diffusible" : address,
-      city: company.firstMatchingEtablissement.libelleCommuneEtablissement.includes("[ND]")
+      city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
         ? ""
-        : company.firstMatchingEtablissement.libelleCommuneEtablissement,
+        : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",
       countryCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
       county: countyCode ?? void 0,
       nafCode: company.activitePrincipaleUniteLegale,

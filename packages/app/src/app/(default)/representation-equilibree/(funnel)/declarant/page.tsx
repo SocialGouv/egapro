@@ -1,7 +1,6 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { config } from "@common/config";
 import { Link } from "@design-system";
 import { getServerSession } from "next-auth";
 
@@ -17,12 +16,11 @@ export const metadata = {
   },
 };
 
+const proconnectPersonalInformationUrl = process.env.EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL;
+
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProUrl = `https://identite${
-    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.proconnect.gouv.fr`;
 
   return (
     <>
@@ -36,7 +34,7 @@ const DeclarantPage = async () => {
             modifier le cas échéant, à l'exception de l'adresse email.
             <br />
             Vous pouvez aussi modifier ces informations directement sur{" "}
-            <Link href={`${monCompteProUrl}/personal-information`} target="_blank">
+            <Link href={`${proconnectPersonalInformationUrl}`} target="_blank">
               votre profil ProConnect
             </Link>
             .
