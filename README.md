@@ -237,9 +237,9 @@ La campage de déclaration se déroule entre Février et Mars et pendant cette p
 
 ![alt text](assets/image.png)
 
-Nous constatons également que lors de la dernière semaine de la campage, la féquentation double en comparaison de la semaine précédente.
+Nous constatons également que lors de la dernière semaine de la campage, la fréquentation double en comparaison de la semaine précédente.
 
-Il est donc recommandé d'augmenter les ressources allouées à l'application Egapro en production avant le pic de la dernière semaine de la campagne de déclaration.
+Il est donc recommandé d'augmenter les ressources allouées à l'application Egapro en production avant le pic de la dernière semaine de la campagne de déclaration de l'index.
 
 | Période           | Nombre de réplicas Min | Nombre de réplicas Max |
 | :---------------- | :--------------------: | :--------------------: |
@@ -247,4 +247,4 @@ Il est donc recommandé d'augmenter les ressources allouées à l'application Eg
 | début de campagne | 4 | 8 |
 | fin de campagne   | 6 | 12 |
 
-> ⚠️ Il est bon de tester avant le commencement de la campagne le mécanisme de scale-up de l'application en production. Il faut s'assurer qu'au moment du scale-up l'application pourra continuer à répondre aux requêtes des clients le temps que les nouveaux pods soient disponibles.
+> ⚠️ Il est préférable de tester le mécanisme de scale-up de l'application en production avant le commencement de la campagne. Il faut s'assurer qu'au moment du scale-up l'application pourra continuer à répondre aux requêtes des clients le temps que les nouveaux pods soient disponibles.
