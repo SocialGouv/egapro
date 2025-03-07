@@ -1,3 +1,10 @@
+## [3.6.19](https://github.com/SocialGouv/egapro/compare/v3.6.18...v3.6.19) (2025-03-07)
+
+
+### Bug Fixes
+
+* current year to 2024 ([e1f4b62](https://github.com/SocialGouv/egapro/commit/e1f4b62993c6be331e0f2f6608e7e77f148e7162))
+
 ## [3.6.18](https://github.com/SocialGouv/egapro/compare/v3.6.17...v3.6.18) (2025-03-07)
 
 
