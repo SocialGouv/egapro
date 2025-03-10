@@ -81,10 +81,10 @@ export const authConfig: AuthOptions = {
     },
   },
   logger: {
-    error: (code: any, ...message: any[]) => logger.error({ ...message, code }, "Error"),
-    warn: (code: any, ...message: any[]) => logger.warn({ ...message, code }, "Warning"),
-    info: (code: any, ...message: any[]) => logger.info({ ...message, code }, "Info"),
-    debug: (code: any, ...message: any[]) => {
+    error: (code, ...message) => logger.error({ ...message, code }, "Error"),
+    warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
+    info: (code: string, ...message: string[]) => logger.info({ ...message, code }, "Info"),
+    debug: (code, ...message) => {
       if (config.env === "dev") {
         logger.info({ ...message, code }, "Debug");
       } else {
