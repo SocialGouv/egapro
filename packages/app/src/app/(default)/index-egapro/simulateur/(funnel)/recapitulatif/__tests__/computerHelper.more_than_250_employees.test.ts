@@ -6,7 +6,7 @@ import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/decla
 
 import { computerHelper } from "../computerHelper";
 
-describe("Test calculation", () => {
+describe("Test des calculs avec plus de 250 employés dans l'entreprise", () => {
   it.each([
     // Ex 1
     {
