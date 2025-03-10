@@ -25,5 +25,9 @@ app:
 maildev: {}
 pgweb: {}
 
+nginx:
+  annotations:
+    oblik.socialgouv.io/min-limit-cpu: 2
+
 redis:
   architecture: standalone
