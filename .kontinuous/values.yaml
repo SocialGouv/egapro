@@ -115,8 +115,10 @@ api:
   probesPath: /healthz
   containerPort: 2626
   host: "{{ .Values.global.host }}"
-  .ingress.path: /api(/|$)(.*)
-  .ingress.rewriteTarget: /$2
+  ingress:
+    path: /api(/|$)(.*)
+    rewriteTarget: /$2
+    pathType: ImplementationSpecific
   certSecretName: api-crt
   envFrom:
     - secretRef:
