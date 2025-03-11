@@ -7,7 +7,6 @@ describe("Parcours du simulateur Index Egapro", () => {
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // Load cache
-    cy.visit("/index-egapro/simulateur/commencer");
     cy.visit("/index-egapro/simulateur/effectifs");
 
     cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
