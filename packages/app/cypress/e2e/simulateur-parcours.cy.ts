@@ -7,27 +7,23 @@ describe("Parcours du simulateur Index Egapro", () => {
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // Load cache
-    cy.visit("/index-egapro/simulateur/commencer");
-    cy.visit("/index-egapro/simulateur/effectifs");
-    // cy.visit("/index-egapro/simulateur/indicateur1");
-    // cy.visit("/index-egapro/simulateur/indicateur2");
-    // cy.visit("/index-egapro/simulateur/indicateur3");
-    // cy.visit("/index-egapro/simulateur/indicateur4");
-    // cy.visit("/index-egapro/simulateur/indicateur5");
-    // cy.visit("/index-egapro/simulateur/recapitulatif");
+    // cy.visit("/index-egapro/simulateur/commencer");
+    // cy.visit("/index-egapro/simulateur/effectifs");
 
-    cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
+    cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoadCommencer");
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/index-egapro/simulateur/commencer");
-    cy.wait("@pageLoad");
+    cy.wait("@pageLoadCommencer");
 
     // Vérifier que nous sommes sur la bonne page
     cy.url().should("include", "/index-egapro/simulateur/commencer");
     cy.contains("h1", "Commencer une simulation de calcul").should("be.visible");
 
     // Commencer le simulateur
+    cy.intercept("GET", "/index-egapro/simulateur/effectifs").as("pageLoadEffectifs");
     cy.contains("a", "Suivant").click();
+    cy.wait("@pageLoadEffectifs");
 
     // Étape 2: Informations sur l'effectif
     cy.url().should("include", "/effectifs", { timeout: 120000 });
