@@ -1,33 +1,9 @@
-x-secure-headers: &headers >-
-  more_set_headers "X-Frame-Options: deny";
-
-  more_set_headers "X-XSS-Protection: 1; mode=block";
-
-  more_set_headers "X-Content-Type-Options: nosniff";
-
-  more_set_headers "Referrer-Policy: no-referrer, strict-origin-when-cross-origin";
-
-  more_set_headers
-  "Permissions-Policy:
-  fullscreen=(),
-  display-capture=(),
-  camera=(),
-  microphone=(),
-  web-share=(),
-  geolocation=()"
-
-  more_set_headers "Cross-Origin-Embedder-Policy: credentialless";
-
-  more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
-
-  more_set_headers "Cross-Origin-Opener-Policy: same-origin";
-
 global:
   pgSecretName: pg-app
 
 app:
   ~chart: app
-  ~needs: [build-app]
+  ~needs: [build-app, redis]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
@@ -44,6 +20,10 @@ app:
         name: "moncomptepro"
     - secretRef:
         name: github-oauth
+    - configMapRef:
+        name: egapro
+    - secretRef:
+        name: redis-auth
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
@@ -65,20 +45,30 @@ app:
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+    REDIS_HOST: "redis-master"
+    REDIS_PORT: "6379"
 
 nginx:
   ~chart: app
-  ~needs: [build-nginx]
+  ~needs: [build-nginx, app]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
+    customHeaders:
+      "X-Frame-Options": "deny"
+      "X-XSS-Protection": "1; mode=block"
+      "X-Content-Type-Options": "nosniff"
+      "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin"
+      "Permissions-Policy": "fullscreen=(), display-capture=(), camera=(), microphone=(), web-share=(), geolocation=()"
+      "Cross-Origin-Embedder-Policy": "credentialless"
+      "Cross-Origin-Resource-Policy": "cross-origin"
+      "Cross-Origin-Opener-Policy": "same-origin"
     paths:
       - /
       - /api/auth(/|$)(.*)
       - /api/monitoring(/|$)(.*)
       - /index-egapro/recherche(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: *headers
+    pathType: ImplementationSpecific
   certSecretName: api-crt
   containerPort: 8080
   probesPath: /live
@@ -109,8 +99,10 @@ api:
   probesPath: /healthz
   containerPort: 2626
   host: "{{ .Values.global.host }}"
-  .ingress.path: /api(/|$)(.*)
-  .ingress.rewriteTarget: /$2
+  ingress:
+    path: /api(/|$)(.*)
+    rewriteTarget: /$2
+    pathType: ImplementationSpecific
   certSecretName: api-crt
   envFrom:
     - secretRef:
@@ -119,12 +111,12 @@ api:
         name: "staff"
     - secretRef:
         name: "egapro-secret"
-  env:
-    - name: EGAPRO_SENTRY_DSN
-      valueFrom:
-        secretKeyRef:
-          name: sentry
-          key: API_SENTRY_DSN
+  # env:
+  #   - name: EGAPRO_SENTRY_DSN
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: sentry
+  #         key: API_SENTRY_DSN
   vars:
     EGAPRO_DBHOST: "$(PGHOST)"
     EGAPRO_DBNAME: "$(PGDATABASE)"
@@ -135,6 +127,15 @@ api:
 
 pg:
   ~chart: pg
+
+redis:
+  fullnameOverride: redis
+  ~tpl~namespaceOverride: "{{ .Values.global.namespace }}"
+  ~forceRestart: false
+  auth:
+    existingSecret: redis-auth
+    existingSecretPasswordKey: REDIS_PASSWORD
+    usePasswordFiles: false  #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
 
 files:
   ~chart: app
@@ -196,11 +197,11 @@ files:
           value: "$(PGPASSWORD)"
         - name: EGAPRO_DBSSL
           value: "$(PGSSLMODE)"
-        - name: EGAPRO_SENTRY_DSN
-          valueFrom:
-            secretKeyRef:
-              name: sentry
-              key: API_SENTRY_DSN
+        # - name: EGAPRO_SENTRY_DSN
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: sentry
+        #       key: API_SENTRY_DSN
         - name: SCHEDULER
           value: "True"
         volumeMounts:
