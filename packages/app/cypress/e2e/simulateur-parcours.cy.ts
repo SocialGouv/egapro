@@ -7,23 +7,21 @@ describe("Parcours du simulateur Index Egapro", () => {
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // Load cache
-    // cy.visit("/index-egapro/simulateur/commencer");
-    // cy.visit("/index-egapro/simulateur/effectifs");
+    cy.visit("/index-egapro/simulateur/commencer");
+    cy.visit("/index-egapro/simulateur/effectifs");
 
-    cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoadCommencer");
+    cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/index-egapro/simulateur/commencer");
-    cy.wait("@pageLoadCommencer");
+    cy.wait("@pageLoad");
 
     // Vérifier que nous sommes sur la bonne page
     cy.url().should("include", "/index-egapro/simulateur/commencer");
     cy.contains("h1", "Commencer une simulation de calcul").should("be.visible");
 
     // Commencer le simulateur
-    cy.intercept("GET", "/index-egapro/simulateur/effectifs").as("pageLoadEffectifs");
     cy.contains("a", "Suivant").click();
-    cy.wait("@pageLoadEffectifs");
 
     // Étape 2: Informations sur l'effectif
     cy.url().should("include", "/effectifs", { timeout: 120000 });
