@@ -77,7 +77,7 @@
     "@next/eslint-plugin-next": "14.0.0",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^12.1.2",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@tsconfig/next": "^2.0.0",
     "@tsconfig/node16": "^16.1.0",
