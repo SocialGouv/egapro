@@ -13,6 +13,7 @@
     "lint:fix": "next lint --fix",
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
     "test": "jest --silent --coverage --ci --coverageReporters=\"lcov\"",
+    "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "type-check": "tsc",
     "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts",
