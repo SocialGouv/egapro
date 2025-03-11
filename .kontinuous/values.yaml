@@ -1,27 +1,3 @@
-x-secure-headers: &headers >-
-  more_set_headers "X-Frame-Options: deny";
-
-  more_set_headers "X-XSS-Protection: 1; mode=block";
-
-  more_set_headers "X-Content-Type-Options: nosniff";
-
-  more_set_headers "Referrer-Policy: no-referrer, strict-origin-when-cross-origin";
-
-  more_set_headers
-  "Permissions-Policy:
-  fullscreen=(),
-  display-capture=(),
-  camera=(),
-  microphone=(),
-  web-share=(),
-  geolocation=()"
-
-  more_set_headers "Cross-Origin-Embedder-Policy: credentialless";
-
-  more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
-
-  more_set_headers "Cross-Origin-Opener-Policy: same-origin";
-
 global:
   pgSecretName: pg-app
 
@@ -78,13 +54,21 @@ nginx:
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
+    customHeaders:
+      "X-Frame-Options": "deny"
+      "X-XSS-Protection": "1; mode=block"
+      "X-Content-Type-Options": "nosniff"
+      "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin"
+      "Permissions-Policy": "fullscreen=(), display-capture=(), camera=(), microphone=(), web-share=(), geolocation=()"
+      "Cross-Origin-Embedder-Policy": "credentialless"
+      "Cross-Origin-Resource-Policy": "cross-origin"
+      "Cross-Origin-Opener-Policy": "same-origin"
     paths:
       - /
       - /api/auth(/|$)(.*)
       - /api/monitoring(/|$)(.*)
       - /index-egapro/recherche(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: *headers
+    pathType: ImplementationSpecific
   certSecretName: api-crt
   containerPort: 8080
   probesPath: /live
@@ -115,8 +99,10 @@ api:
   probesPath: /healthz
   containerPort: 2626
   host: "{{ .Values.global.host }}"
-  .ingress.path: /api(/|$)(.*)
-  .ingress.rewriteTarget: /$2
+  ingress:
+    path: /api(/|$)(.*)
+    rewriteTarget: /$2
+    pathType: ImplementationSpecific
   certSecretName: api-crt
   envFrom:
     - secretRef:

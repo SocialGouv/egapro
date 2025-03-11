@@ -1,3 +1,18 @@
+## [3.6.19](https://github.com/SocialGouv/egapro/compare/v3.6.18...v3.6.19) (2025-03-07)
+
+
+### Bug Fixes
+
+* current year to 2024 ([e1f4b62](https://github.com/SocialGouv/egapro/commit/e1f4b62993c6be331e0f2f6608e7e77f148e7162))
+
+## [3.6.18](https://github.com/SocialGouv/egapro/compare/v3.6.17...v3.6.18) (2025-03-07)
+
+
+### Bug Fixes
+
+* limit exports to 2024 ([8ab17a0](https://github.com/SocialGouv/egapro/commit/8ab17a0fc133a99e36f00cf8b1b62330088d72d9))
+* update current year ([#2461](https://github.com/SocialGouv/egapro/issues/2461)) ([be98801](https://github.com/SocialGouv/egapro/commit/be988015dfe41997b6d5508c8c9516ed94138399))
+
 ## [3.6.17](https://github.com/SocialGouv/egapro/compare/v3.6.16...v3.6.17) (2025-03-05)
 
 

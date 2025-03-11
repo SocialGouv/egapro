@@ -1,5 +1,4 @@
 api:
-  ~needs: [build-api]
   vars:
     EGAPRO_SEND_EMAILS: "True"
     EGAPRO_SMTP_HOST: maildev
@@ -9,7 +8,12 @@ api:
     EGAPRO_SMTP_SSL: ""
 
 app:
-  ~needs: [build-app]
+  annotations:
+    oblik.socialgouv.io/min-limit-cpu: 2
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
