@@ -2441,6 +2441,2014 @@ describe("Test des calculs avec moins de 250 employés dans l'entreprise", () =>
         note: 84,
       },
     },
+    // Ex 11
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 27,
+                men: 44,
+              },
+              "30:39": {
+                women: 32,
+                men: 12,
+              },
+              "40:49": {
+                women: 32,
+                men: 15,
+              },
+              "50:": {
+                women: 56,
+                men: 28,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 1,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 1,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 1,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+          },
+          {
+            name: "emp",
+            category: {
+              ":29": {
+                womenSalary: 20468.93,
+                menSalary: 20400.4,
+              },
+              "30:39": {
+                womenSalary: 20665.53,
+                menSalary: 20511.6,
+              },
+              "40:49": {
+                womenSalary: 21495.3,
+                menSalary: 20625,
+              },
+              "50:": {
+                womenSalary: 20688.85,
+                menSalary: 20700.8,
+              },
+            },
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 6,
+          men: 1,
+        },
+      },
+      indicateur4: {
+        calculable: false,
+      },
+      indicateur5: {
+        women: 8,
+        men: 2,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "equality",
+        note: 40,
+        result: 0,
+        resultRaw: 0,
+      },
+      resultIndicateur2and3: {
+        resultRaw: -0.03063955044153064,
+        result: 3.1,
+        equivalentEmployeeCountGap: 3.1,
+        equivalentEmployeeCountGapRaw: -3.0945945945945947,
+        note: 25,
+        favorablePopulation: "women",
+        noteEquivalentEmployeeCountGap: 25,
+        notePercent: 25,
+        ifadvantage: "women-men",
+        remunerationsCompensated: false,
+      },
+      resultIndicateur4: false,
+      resultIndicateur5: {
+        favorablePopulation: "women",
+        note: 5,
+        result: 2,
+        resultRaw: 2,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 70,
+        result: 82.3529411764706,
+        note: 82,
+      },
+    },
+    // Ex 12
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 0,
+                men: 1,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 9,
+                men: 17,
+              },
+              "30:39": {
+                women: 4,
+                men: 3,
+              },
+              "40:49": {
+                women: 3,
+                men: 4,
+              },
+              "50:": {
+                women: 6,
+                men: 4,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 1,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 1,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 1,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 0,
+                men: 1,
+              },
+              "50:": {
+                women: 1,
+                men: 1,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+          },
+          {
+            name: "emp",
+            category: {
+              ":29": {
+                womenSalary: 21093,
+                menSalary: 20757,
+              },
+              "30:39": {
+                womenSalary: 22379,
+                menSalary: 22564,
+              },
+              "40:49": {
+                womenSalary: 21221,
+                menSalary: 22238,
+              },
+              "50:": {
+                womenSalary: 21263,
+                menSalary: 21008,
+              },
+            },
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 24,
+          men: 36,
+        },
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 1,
+          raised: 0,
+        },
+      },
+      indicateur5: {
+        women: 2,
+        men: 8,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "equality",
+        note: 40,
+        result: 0,
+        resultRaw: 0,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0,
+        result: 0,
+        equivalentEmployeeCountGap: 0,
+        equivalentEmployeeCountGapRaw: 0,
+        note: 35,
+        favorablePopulation: "equality",
+        noteEquivalentEmployeeCountGap: 35,
+        notePercent: 35,
+        ifadvantage: "equality",
+        remunerationsCompensated: false,
+      },
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 0,
+        result: 0,
+        resultRaw: 0,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 2,
+        resultRaw: 2,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 80,
+        result: 80,
+        note: 80,
+      },
+    },
+    // Ex 13
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 1,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 3,
+                men: 3,
+              },
+              "50:": {
+                women: 8,
+                men: 5,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 11,
+                men: 0,
+              },
+              "30:39": {
+                women: 11,
+                men: 3,
+              },
+              "40:49": {
+                women: 14,
+                men: 7,
+              },
+              "50:": {
+                women: 24,
+                men: 9,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 1,
+                men: 0,
+              },
+              "40:49": {
+                women: 1,
+                men: 0,
+              },
+              "50:": {
+                women: 6,
+                men: 5,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+            category: {
+              "40:49": {
+                womenSalary: 14917,
+                menSalary: 16458,
+              },
+              "50:": {
+                womenSalary: 16341,
+                menSalary: 16973,
+              },
+            },
+          },
+          {
+            name: "emp",
+            category: {
+              "30:39": {
+                womenSalary: 21215,
+                menSalary: 14612,
+              },
+              "40:49": {
+                womenSalary: 21440,
+                menSalary: 19374,
+              },
+              "50:": {
+                womenSalary: 23139,
+                menSalary: 19265,
+              },
+            },
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+            category: {
+              "50:": {
+                womenSalary: 36096,
+                menSalary: 33329,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 4,
+          men: 4,
+        },
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 1,
+          raised: 0,
+        },
+      },
+      indicateur5: {
+        women: 6,
+        men: 4,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "women",
+        note: 21,
+        result: 12.1,
+        resultRaw: -12.14616740060274,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0.075,
+        result: 7.5,
+        equivalentEmployeeCountGap: 2.4,
+        equivalentEmployeeCountGapRaw: 2.4,
+        note: 25,
+        favorablePopulation: "men",
+        noteEquivalentEmployeeCountGap: 25,
+        notePercent: 15,
+        ifadvantage: "men-men",
+        remunerationsCompensated: true,
+      },
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 0,
+        result: 0,
+        resultRaw: 0,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "women",
+        note: 10,
+        result: 4,
+        resultRaw: 4,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 66,
+        result: 66,
+        note: 66,
+      },
+    },
+    // Ex 14
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 1,
+              },
+              "30:39": {
+                women: 3,
+                men: 3,
+              },
+              "40:49": {
+                women: 10,
+                men: 7,
+              },
+              "50:": {
+                women: 13,
+                men: 23,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 1,
+                men: 0,
+              },
+              "30:39": {
+                women: 1,
+                men: 0,
+              },
+              "40:49": {
+                women: 2,
+                men: 0,
+              },
+              "50:": {
+                women: 2,
+                men: 0,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 2,
+                men: 1,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 2,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "niveau_branche",
+        remunerations: [
+          {
+            name: "COEFFICIENT 131 V",
+            category: {
+              ":29": {
+                womenCount: 1,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 1,
+              },
+              "40:49": {
+                womenCount: 2,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 6,
+                menCount: 4,
+                womenSalary: 22840,
+                menSalary: 21978,
+              },
+            },
+          },
+          {
+            name: "COEFFICIENT 137 V",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 1,
+                menCount: 1,
+              },
+              "40:49": {
+                womenCount: 3,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 4,
+                menCount: 6,
+                womenSalary: 32560,
+                menSalary: 34578,
+              },
+            },
+          },
+          {
+            name: "COEFFICIENT 140V",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 1,
+              },
+              "30:39": {
+                womenCount: 2,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 6,
+                menCount: 4,
+                womenSalary: 42230,
+                menSalary: 28300,
+              },
+              "50:": {
+                womenCount: 5,
+                menCount: 10,
+                womenSalary: 51370,
+                menSalary: 37968,
+              },
+            },
+          },
+          {
+            name: "COEFFICIENT 145 V",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 1,
+                menCount: 1,
+              },
+              "40:49": {
+                womenCount: 2,
+                menCount: 3,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 4,
+              },
+            },
+          },
+          {
+            name: "COEFFICIENT 150V",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 1,
+                menCount: 1,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 1,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 34,
+          men: 37,
+        },
+      },
+      indicateur4: {
+        calculable: false,
+      },
+      indicateur5: {
+        women: 2,
+        men: 8,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "women",
+        note: 0,
+        result: 21.2,
+        resultRaw: -21.167968161912,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0,
+        result: 0,
+        equivalentEmployeeCountGap: 0,
+        equivalentEmployeeCountGapRaw: 0,
+        note: 35,
+        favorablePopulation: "equality",
+        noteEquivalentEmployeeCountGap: 35,
+        notePercent: 35,
+        ifadvantage: "equality",
+        remunerationsCompensated: true,
+      },
+      resultIndicateur4: false,
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 2,
+        resultRaw: 2,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 40,
+        result: 47.05882352941177,
+        note: 47,
+      },
+    },
+    // Ex 15
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 6,
+              },
+              "30:39": {
+                women: 1,
+                men: 7,
+              },
+              "40:49": {
+                women: 2,
+                men: 14,
+              },
+              "50:": {
+                women: 3,
+                men: 26,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 1,
+              },
+              "30:39": {
+                women: 1,
+                men: 3,
+              },
+              "40:49": {
+                women: 1,
+                men: 2,
+              },
+              "50:": {
+                women: 5,
+                men: 1,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 0,
+                men: 4,
+              },
+              "50:": {
+                women: 0,
+                men: 14,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 1,
+              },
+              "30:39": {
+                women: 4,
+                men: 6,
+              },
+              "40:49": {
+                women: 5,
+                men: 12,
+              },
+              "50:": {
+                women: 9,
+                men: 13,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+            category: {
+              "50:": {
+                womenSalary: 29613,
+                menSalary: 37113,
+              },
+            },
+          },
+          {
+            name: "emp",
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+            category: {
+              "30:39": {
+                womenSalary: 60534,
+                menSalary: 61270,
+              },
+              "40:49": {
+                womenSalary: 78768,
+                menSalary: 81290,
+              },
+              "50:": {
+                womenSalary: 58621,
+                menSalary: 78809,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 5,
+          men: 6,
+        },
+      },
+      indicateur4: {
+        calculable: false,
+      },
+      indicateur5: {
+        women: 2,
+        men: 8,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "men",
+        note: 23,
+        result: 11.5,
+        resultRaw: 11.469333525802718,
+      },
+      resultIndicateur2and3: {
+        resultRaw: -0.1072362685265911,
+        result: 10.7,
+        equivalentEmployeeCountGap: 3.3,
+        equivalentEmployeeCountGapRaw: -3.324324324324324,
+        note: 25,
+        favorablePopulation: "women",
+        noteEquivalentEmployeeCountGap: 25,
+        notePercent: 0,
+        ifadvantage: "women-women",
+        remunerationsCompensated: true,
+      },
+      resultIndicateur4: false,
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 2,
+        resultRaw: 2,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 63,
+        result: 74.11764705882354,
+        note: 74,
+      },
+    },
+    // Ex 16
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 3,
+                men: 0,
+              },
+              "30:39": {
+                women: 2,
+                men: 0,
+              },
+              "40:49": {
+                women: 4,
+                men: 2,
+              },
+              "50:": {
+                women: 2,
+                men: 1,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 9,
+                men: 4,
+              },
+              "30:39": {
+                women: 28,
+                men: 20,
+              },
+              "40:49": {
+                women: 26,
+                men: 27,
+              },
+              "50:": {
+                women: 11,
+                men: 25,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "niveau_branche",
+        remunerations: [
+          {
+            name: "G4N1",
+            category: {
+              ":29": {
+                womenCount: 3,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 2,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 4,
+                menCount: 2,
+              },
+              "50:": {
+                womenCount: 1,
+                menCount: 1,
+              },
+            },
+          },
+          {
+            name: "G4N2",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 0,
+              },
+            },
+          },
+          {
+            name: "G4N3",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 1,
+                menCount: 0,
+              },
+            },
+          },
+          {
+            name: "G6N1",
+            category: {
+              ":29": {
+                womenCount: 9,
+                menCount: 4,
+                womenSalary: 40979,
+                menSalary: 46037,
+              },
+              "30:39": {
+                womenCount: 24,
+                menCount: 19,
+                womenSalary: 53247,
+                menSalary: 57160,
+              },
+              "40:49": {
+                womenCount: 22,
+                menCount: 21,
+                womenSalary: 52936,
+                menSalary: 63903,
+              },
+              "50:": {
+                womenCount: 9,
+                menCount: 11,
+                womenSalary: 52811,
+                menSalary: 54870,
+              },
+            },
+          },
+          {
+            name: "G6N2",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 1,
+                menCount: 0,
+              },
+            },
+          },
+          {
+            name: "G6N3",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 1,
+                menCount: 1,
+              },
+            },
+          },
+          {
+            name: "G7N1",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 4,
+                menCount: 1,
+              },
+              "40:49": {
+                womenCount: 2,
+                menCount: 5,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 4,
+              },
+            },
+          },
+          {
+            name: "G7N2",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 0,
+              },
+            },
+          },
+          {
+            name: "G8N1",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 2,
+                menCount: 1,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 6,
+              },
+            },
+          },
+          {
+            name: "G8N2",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 3,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 47,
+          men: 48,
+        },
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 4,
+          raised: 4,
+        },
+      },
+      indicateur5: {
+        women: 2,
+        men: 8,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "men",
+        note: 29,
+        result: 8.5,
+        resultRaw: 8.505944892761626,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0.05465376023827251,
+        result: 5.5,
+        equivalentEmployeeCountGap: 4.3,
+        equivalentEmployeeCountGapRaw: 4.317647058823528,
+        note: 25,
+        favorablePopulation: "men",
+        noteEquivalentEmployeeCountGap: 25,
+        notePercent: 15,
+        ifadvantage: "men-men",
+        remunerationsCompensated: false,
+      },
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 15,
+        result: 1,
+        resultRaw: 1,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 2,
+        resultRaw: 2,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 74,
+        result: 74,
+        note: 74,
+      },
+    },
+    // Ex 17
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 1,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 1,
+                men: 2,
+              },
+              "30:39": {
+                women: 1,
+                men: 9,
+              },
+              "40:49": {
+                women: 5,
+                men: 4,
+              },
+              "50:": {
+                women: 1,
+                men: 4,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 2,
+              },
+              "30:39": {
+                women: 1,
+                men: 9,
+              },
+              "40:49": {
+                women: 3,
+                men: 12,
+              },
+              "50:": {
+                women: 0,
+                men: 4,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+          },
+          {
+            name: "emp",
+          },
+          {
+            name: "tam",
+            category: {
+              "40:49": {
+                womenSalary: 24916,
+                menSalary: 33801,
+              },
+            },
+          },
+          {
+            name: "ic",
+            category: {
+              "40:49": {
+                womenSalary: 34763,
+                menSalary: 49562,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 12,
+          men: 47,
+        },
+      },
+      indicateur4: {
+        calculable: false,
+      },
+      indicateur5: {
+        women: 0,
+        men: 10,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "men",
+        note: 0,
+        result: 23.5,
+        resultRaw: 23.51955785113916,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0,
+        result: 0,
+        equivalentEmployeeCountGap: 0,
+        equivalentEmployeeCountGapRaw: 0,
+        note: 35,
+        favorablePopulation: "equality",
+        noteEquivalentEmployeeCountGap: 35,
+        notePercent: 35,
+        ifadvantage: "equality",
+        remunerationsCompensated: true,
+      },
+      resultIndicateur4: false,
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 0,
+        result: 0,
+        resultRaw: 0,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 35,
+        result: 41.1764705882353,
+        note: 41,
+      },
+    },
+    // Ex 18
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 1,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 4,
+                men: 12,
+              },
+              "30:39": {
+                women: 11,
+                men: 33,
+              },
+              "40:49": {
+                women: 1,
+                men: 9,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+          },
+          {
+            name: "emp",
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+            category: {
+              ":29": {
+                womenSalary: 49817,
+                menSalary: 48884,
+              },
+              "30:39": {
+                womenSalary: 72109,
+                menSalary: 69050,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "oui",
+        raisedCount: {
+          women: 7,
+          men: 30,
+        },
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 2,
+          raised: 1,
+        },
+      },
+      indicateur5: {
+        women: 3,
+        men: 7,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "equality",
+        note: 40,
+        result: 0,
+        resultRaw: 0,
+      },
+      resultIndicateur2and3: {
+        resultRaw: 0.14379084967320266,
+        result: 14.4,
+        equivalentEmployeeCountGap: 2.4,
+        equivalentEmployeeCountGapRaw: 2.444444444444445,
+        note: 25,
+        favorablePopulation: "men",
+        noteEquivalentEmployeeCountGap: 25,
+        notePercent: 0,
+        ifadvantage: "men-women",
+        remunerationsCompensated: false,
+      },
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 0,
+        result: 0.5,
+        resultRaw: 0.5,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 3,
+        resultRaw: 3,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 70,
+        result: 70,
+        note: 70,
+      },
+    },
+    // Ex 19
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 2,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 2,
+              },
+              "40:49": {
+                women: 0,
+                men: 1,
+              },
+              "50:": {
+                women: 0,
+                men: 1,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 19,
+                men: 10,
+              },
+              "30:39": {
+                women: 13,
+                men: 4,
+              },
+              "40:49": {
+                women: 18,
+                men: 4,
+              },
+              "50:": {
+                women: 20,
+                men: 2,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 3,
+                men: 0,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 1,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 2,
+                men: 4,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "csp",
+        remunerations: [
+          {
+            name: "ouv",
+          },
+          {
+            name: "emp",
+            category: {
+              ":29": {
+                womenSalary: 20130,
+                menSalary: 19669,
+              },
+              "30:39": {
+                womenSalary: 20148,
+                menSalary: 17779,
+              },
+              "40:49": {
+                womenSalary: 20316,
+                menSalary: 21526,
+              },
+            },
+          },
+          {
+            name: "tam",
+          },
+          {
+            name: "ic",
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "non",
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 2,
+          raised: 2,
+        },
+      },
+      indicateur5: {
+        women: 3,
+        men: 7,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "women",
+        note: 38,
+        result: 1.9,
+        resultRaw: -1.880230086935853,
+      },
+      resultIndicateur2and3: false,
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 15,
+        result: 1,
+        resultRaw: 1,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "men",
+        note: 5,
+        result: 3,
+        resultRaw: 3,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 58,
+        result: 89.23076923076923,
+        note: 89,
+      },
+    },
+    // Ex 20
+    {
+      effectifs: {
+        workforceRange: "50:250",
+        csp: {
+          ouv: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 0,
+              },
+            },
+          },
+          emp: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 1,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 1,
+                men: 0,
+              },
+            },
+          },
+          tam: {
+            ageRanges: {
+              ":29": {
+                women: 9,
+                men: 4,
+              },
+              "30:39": {
+                women: 12,
+                men: 5,
+              },
+              "40:49": {
+                women: 10,
+                men: 1,
+              },
+              "50:": {
+                women: 15,
+                men: 1,
+              },
+            },
+          },
+          ic: {
+            ageRanges: {
+              ":29": {
+                women: 0,
+                men: 0,
+              },
+              "30:39": {
+                women: 0,
+                men: 0,
+              },
+              "40:49": {
+                women: 0,
+                men: 0,
+              },
+              "50:": {
+                women: 0,
+                men: 1,
+              },
+            },
+          },
+        },
+      },
+      indicateur1: {
+        mode: "niveau_branche",
+        remunerations: [
+          {
+            name: "MEDICO-TECHNIQUE",
+            category: {
+              ":29": {
+                womenCount: 9,
+                menCount: 4,
+                womenSalary: 27859,
+                menSalary: 28858,
+              },
+              "30:39": {
+                womenCount: 12,
+                menCount: 5,
+                womenSalary: 26407,
+                menSalary: 30646,
+              },
+              "40:49": {
+                womenCount: 10,
+                menCount: 1,
+              },
+              "50:": {
+                womenCount: 15,
+                menCount: 1,
+              },
+            },
+          },
+          {
+            name: "TRANSVERSALE",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 1,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 1,
+                menCount: 0,
+              },
+            },
+          },
+          {
+            name: "MANAGEMENT",
+            category: {
+              ":29": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "30:39": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "40:49": {
+                womenCount: 0,
+                menCount: 0,
+              },
+              "50:": {
+                womenCount: 0,
+                menCount: 1,
+              },
+            },
+          },
+        ],
+      },
+      indicateur2and3: {
+        calculable: "non",
+      },
+      indicateur4: {
+        calculable: true,
+        count: {
+          total: 2,
+          raised: 2,
+        },
+      },
+      indicateur5: {
+        women: 5,
+        men: 5,
+      },
+      resultIndicateur1: {
+        favorablePopulation: "men",
+        note: 31,
+        result: 7.3,
+        resultRaw: 7.338321016630784,
+      },
+      resultIndicateur2and3: false,
+      resultIndicateur4: {
+        favorablePopulation: "women",
+        note: 15,
+        result: 1,
+        resultRaw: 1,
+      },
+      resultIndicateur5: {
+        favorablePopulation: "equality",
+        note: 10,
+        result: 5,
+        resultRaw: 5,
+      },
+      result: {
+        favorablePopulation: "equality",
+        resultRaw: 56,
+        result: 86.15384615384616,
+        note: 86,
+      },
+    },
   ])(
     "%#) Vérifier le calcul sur computerHelper",
     ({
