@@ -6,7 +6,7 @@ describe("Parcours du simulateur Index Egapro", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
-    // cy.wait(30000);
+    cy.wait(30000);
     cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
 
     // Visiter la page de démarrage du simulateur
@@ -18,8 +18,7 @@ describe("Parcours du simulateur Index Egapro", () => {
     cy.contains("h1", "Commencer une simulation de calcul").should("be.visible");
 
     // Commencer le simulateur
-    // cy.contains("a", "Suivant").click();
-    cy.get("#begin-button").click();
+    cy.contains("a", "Suivant").click();
 
     // Étape 2: Informations sur l'effectif
     cy.url().should("include", "/effectifs", { timeout: 120000 });
