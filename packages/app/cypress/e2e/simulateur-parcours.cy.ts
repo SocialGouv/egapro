@@ -6,7 +6,16 @@ describe("Parcours du simulateur Index Egapro", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
-    cy.wait(30000);
+    // Load cache
+    cy.visit("/index-egapro/simulateur/commencer");
+    cy.visit("/index-egapro/simulateur/effectifs");
+    // cy.visit("/index-egapro/simulateur/indicateur1");
+    // cy.visit("/index-egapro/simulateur/indicateur2");
+    // cy.visit("/index-egapro/simulateur/indicateur3");
+    // cy.visit("/index-egapro/simulateur/indicateur4");
+    // cy.visit("/index-egapro/simulateur/indicateur5");
+    // cy.visit("/index-egapro/simulateur/recapitulatif");
+
     cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
 
     // Visiter la page de démarrage du simulateur
