@@ -53,16 +53,16 @@ nginx:
   ~needs: [build-nginx, app]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
-  customHeaders:
-    "X-Frame-Options": "deny"
-    "X-XSS-Protection": "1; mode=block"
-    "X-Content-Type-Options": "nosniff"
-    "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin"
-    "Permissions-Policy": "fullscreen=(), display-capture=(), camera=(), microphone=(), web-share=(), geolocation=()"
-    "Cross-Origin-Embedder-Policy": "credentialless"
-    "Cross-Origin-Resource-Policy": "cross-origin"
-    "Cross-Origin-Opener-Policy": "same-origin"
   ingress:
+    customHeaders:
+      "X-Frame-Options": "deny"
+      "X-XSS-Protection": "1; mode=block"
+      "X-Content-Type-Options": "nosniff"
+      "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin"
+      "Permissions-Policy": "fullscreen=(), display-capture=(), camera=(), microphone=(), web-share=(), geolocation=()"
+      "Cross-Origin-Embedder-Policy": "credentialless"
+      "Cross-Origin-Resource-Policy": "cross-origin"
+      "Cross-Origin-Opener-Policy": "same-origin"
     paths:
       - /
       - /api/auth(/|$)(.*)
