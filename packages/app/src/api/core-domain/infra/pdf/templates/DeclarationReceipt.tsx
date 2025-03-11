@@ -10,7 +10,7 @@ import { isEqual } from "date-fns";
 import { BaseReceiptTemplate, type BaseReceiptTemplateProps } from "./BaseReceiptTemplate";
 
 const insertSoftHyphens = (url: string, everyNChars: number) => {
-  const parts = [];
+  const parts: string[] = [];
   for (let i = 0; i < url.length; i += everyNChars) {
     parts.push(url.substring(i, i + everyNChars));
   }
