@@ -66,8 +66,7 @@ describe("CommencerPage", () => {
     render((await CommencerPage()) as ReactElement);
 
     expect(screen.getByText(/Aucune entreprise rattachée/)).toBeInTheDocument();
-    expect(screen.getByText(/votre espace ProConnect/)).toBeInTheDocument();
-    expect(screen.getByRole("link")).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "votre espace ProConnect" })).toHaveAttribute(
       "href",
       "https://identite.proconnect.gouv.fr/manage-organizations",
     );
