@@ -20,7 +20,7 @@ describe("Parcours du simulateur Index Egapro", () => {
     cy.contains("a", "Suivant").click();
 
     // Étape 2: Informations sur l'effectif
-    cy.url().should("include", "/effectifs", { timeout: 120000 });
+    cy.url().should("include", "/effectifs");
     cy.contains("Étape 2").should("be.visible");
 
     // Sélectionner la tranche d'effectifs (250 à 999 salariés)
