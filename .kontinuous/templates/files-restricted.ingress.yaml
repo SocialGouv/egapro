@@ -20,7 +20,7 @@ spec:
     http:
       paths:
       - path: /{{ $fileName }}
-        pathType: Exact
+        pathType: ImplementationSpecific
         backend:
           service:
             name: files
