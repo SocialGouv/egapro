@@ -2,8 +2,8 @@ import { fireEvent, render, type RenderResult } from "@testing-library/react";
 import { wait } from "@testing-library/user-event/dist/utils";
 
 import { effectifs } from "../../indicateur1/__tests__/mock";
+import { indicateur1 } from "../../indicateur2et3/__tests__/mock";
 import Indicateur4Page from "../page";
-import { indicateur1 } from "./mock";
 
 jest.mock("next-auth/react", () => ({
   useSession: jest.fn(() => ({ data: undefined })),
