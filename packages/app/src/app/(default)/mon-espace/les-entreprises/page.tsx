@@ -12,6 +12,9 @@ import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
 import { SirenInput } from "./SirenInput";
 
+const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL;
+const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+
 const MesEntreprisesInfoAlert = () => (
   <Alert
     severity="info"
@@ -26,12 +29,7 @@ const MesEntreprisesInfoAlert = () => (
         <br />
         <p>
           Pour rattacher une adresse email, il faut{" "}
-          <Link
-            target="_blank"
-            href={`https://identite${
-              config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-            }.proconnect.gouv.fr/users/start-sign-in`}
-          >
+          <Link target="_blank" href={`${proconnectSignInUrl}`}>
             créer un nouveau compte ProConnect
           </Link>{" "}
           avec cette adresse.
@@ -39,12 +37,7 @@ const MesEntreprisesInfoAlert = () => (
         <p>
           <br />
           Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link
-            target="_blank"
-            href={`https://identite${
-              config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-            }.proconnect.gouv.fr/manage-organizations`}
-          >
+          <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
             cliquez ici
           </Link>
         </p>

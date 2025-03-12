@@ -1,3 +1,114 @@
+## [3.6.20](https://github.com/SocialGouv/egapro/compare/v3.6.19...v3.6.20) (2025-03-12)
+
+
+### Bug Fixes
+
+* dummy commit ([b6397b2](https://github.com/SocialGouv/egapro/commit/b6397b2bbb734f02e94371453e87f480a2b32065))
+* Exact to ImplementationSpecific ([aced270](https://github.com/SocialGouv/egapro/commit/aced270b4a3d8d2c80ce1d2aaab6cc50fab8f0f2))
+* move customHeaders ([95c4453](https://github.com/SocialGouv/egapro/commit/95c445396fd662ffd57b81cc1efc8a2804e585c2))
+* needs ([aebe061](https://github.com/SocialGouv/egapro/commit/aebe061f5d4deb3d39a16eea858131314e47b513))
+* pathType ImplementationSpecific for regex ([c125f24](https://github.com/SocialGouv/egapro/commit/c125f24cd256e2522a3e4f64b9b401260e58e482))
+* pathType: ImplementationSpecific ([4ff02ae](https://github.com/SocialGouv/egapro/commit/4ff02ae7a93ddc16d856e408a43ee2ceacd068c7))
+* up nginx image ([3874888](https://github.com/SocialGouv/egapro/commit/38748880cb8c9eb404716ff5e4bcbb508cf749a9))
+* use customHeaders ([a70a96a](https://github.com/SocialGouv/egapro/commit/a70a96a2e2016e123a90e6ae6b57ceb7e676a42c))
+
+## [3.6.19](https://github.com/SocialGouv/egapro/compare/v3.6.18...v3.6.19) (2025-03-07)
+
+
+### Bug Fixes
+
+* current year to 2024 ([e1f4b62](https://github.com/SocialGouv/egapro/commit/e1f4b62993c6be331e0f2f6608e7e77f148e7162))
+
+## [3.6.18](https://github.com/SocialGouv/egapro/compare/v3.6.17...v3.6.18) (2025-03-07)
+
+
+### Bug Fixes
+
+* limit exports to 2024 ([8ab17a0](https://github.com/SocialGouv/egapro/commit/8ab17a0fc133a99e36f00cf8b1b62330088d72d9))
+* update current year ([#2461](https://github.com/SocialGouv/egapro/issues/2461)) ([be98801](https://github.com/SocialGouv/egapro/commit/be988015dfe41997b6d5508c8c9516ed94138399))
+
+## [3.6.17](https://github.com/SocialGouv/egapro/compare/v3.6.16...v3.6.17) (2025-03-05)
+
+
+### Bug Fixes
+
+* use egapro configmap ([1ec8a1b](https://github.com/SocialGouv/egapro/commit/1ec8a1b4101f8285c16fe13455d18d61f912dce0))
+
+## [3.6.16](https://github.com/SocialGouv/egapro/compare/v3.6.15...v3.6.16) (2025-03-05)
+
+
+### Bug Fixes
+
+* use redis password in production ([bd34362](https://github.com/SocialGouv/egapro/commit/bd34362d0e7d06f9616e90c3abc7833597f0b507))
+
+## [3.6.15](https://github.com/SocialGouv/egapro/compare/v3.6.14...v3.6.15) (2025-03-05)
+
+
+### Bug Fixes
+
+* clean logs ([88c56ec](https://github.com/SocialGouv/egapro/commit/88c56ec8f4eebace7a9416b9e6e4bd2fc185b541))
+* dummy commit ([c4e474f](https://github.com/SocialGouv/egapro/commit/c4e474f742c0be3b257103fd1174c0fdc01fff05))
+* json typo ([3e362f6](https://github.com/SocialGouv/egapro/commit/3e362f6f6352a51c03d312e7a0590295256c6131))
+* redis restart ([dd9b19a](https://github.com/SocialGouv/egapro/commit/dd9b19a525060fb7b045fae25aedfd132b9038ca))
+* redis sentinel password ([c15b2f9](https://github.com/SocialGouv/egapro/commit/c15b2f940517799a13cf42c2824f2324a7603b1b))
+* sentinel master name ([05be37b](https://github.com/SocialGouv/egapro/commit/05be37b60929cd82136733717fdaf2955d70c580))
+
+## [3.6.14](https://github.com/SocialGouv/egapro/compare/v3.6.13...v3.6.14) (2025-03-05)
+
+
+### Bug Fixes
+
+* redis sentinels ([ad6b289](https://github.com/SocialGouv/egapro/commit/ad6b289c41a76e92e3785b02144ed88aea085f07))
+
+## [3.6.13](https://github.com/SocialGouv/egapro/compare/v3.6.12...v3.6.13) (2025-03-05)
+
+
+### Bug Fixes
+
+* must explicit redis port to avoid kube auto env provision collision on sentinel mode ([ed6eeba](https://github.com/SocialGouv/egapro/commit/ed6eeba591629dcdc484e0d2b4b226626fb11227))
+
+## [3.6.12](https://github.com/SocialGouv/egapro/compare/v3.6.11...v3.6.12) (2025-03-05)
+
+
+### Bug Fixes
+
+* redis host service name for preprod and prod ([7814042](https://github.com/SocialGouv/egapro/commit/7814042d9794a7ed3dc8dddb4f517cf43f647e27))
+
+## [3.6.11](https://github.com/SocialGouv/egapro/compare/v3.6.10...v3.6.11) (2025-03-05)
+
+
+### Bug Fixes
+
+* jwt oversized + undefined errors + many things ([#2455](https://github.com/SocialGouv/egapro/issues/2455)) ([2d9f79c](https://github.com/SocialGouv/egapro/commit/2d9f79c6b2bc1255004f2523165450cbcfcb8093))
+
+## [3.6.10](https://github.com/SocialGouv/egapro/compare/v3.6.9...v3.6.10) (2025-02-28)
+
+
+### Bug Fixes
+
+* **too large header:** fix investigation logs ([cf91176](https://github.com/SocialGouv/egapro/commit/cf91176deea9eb54e94b84b7d59f8516e068d43d))
+
+## [3.6.9](https://github.com/SocialGouv/egapro/compare/v3.6.8...v3.6.9) (2025-02-28)
+
+
+### Bug Fixes
+
+* **too large header:** add log to investigate ([d9cac46](https://github.com/SocialGouv/egapro/commit/d9cac46ebfc125bfbce8540c84b2a7115027fbaf))
+
+## [3.6.8](https://github.com/SocialGouv/egapro/compare/v3.6.7...v3.6.8) (2025-02-27)
+
+
+### Bug Fixes
+
+* SENTRY_ALLOW_FAILURE=true ([3f4f221](https://github.com/SocialGouv/egapro/commit/3f4f221a7018227045db4660d16f852ad42ce75a))
+
+## [3.6.7](https://github.com/SocialGouv/egapro/compare/v3.6.6...v3.6.7) (2025-02-27)
+
+
+### Bug Fixes
+
+* **TypeError:** undefined company ([8be22dd](https://github.com/SocialGouv/egapro/commit/8be22dd0e0c8e8b8c51f37826fc1d227b474a674))
+
 ## [3.6.6](https://github.com/SocialGouv/egapro/compare/v3.6.5...v3.6.6) (2025-02-27)
 
 

@@ -30,6 +30,13 @@ api:
 app:
   vars:
     MAILER_ENABLE: "True"
+    REDIS_SENTINEL_HOSTS: |
+      [
+        { "host": "redis-node-0.redis-headless", "port": 26379 },
+        { "host": "redis-node-1.redis-headless", "port": 26379 },
+        { "host": "redis-node-2.redis-headless", "port": 26379 }
+      ]
+    REDIS_SENTINEL_MASTER_NAME: "mymaster"
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"
@@ -44,6 +51,10 @@ app:
         name: "egapro-secret"
     - secretRef:
         name: smtp-app
+    - secretRef:
+        name: redis-auth
+    - configMapRef:
+        name: egapro
   autoscale:
     enabled: true
     minReplicas: 4
@@ -69,3 +80,6 @@ nginx:
       cpu: 2
       memory: 2G
 
+redis:
+  sentinel:
+    enabled: true
