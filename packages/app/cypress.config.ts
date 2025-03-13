@@ -17,8 +17,10 @@ export default defineConfig({
           try {
             await _sql`delete from declaration`;
             await _sql`delete from ownership`;
+            cy.log("CLEAN DONE");
             return true;
           } catch (e) {
+            cy.log(JSON.stringify(e));
             return e;
           }
         },
