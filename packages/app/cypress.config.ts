@@ -14,8 +14,13 @@ export default defineConfig({
       // implement node event listeners here
       _on("task", {
         async cleanDB() {
-          await _sql`delete from declaration`;
-          await _sql`delete from ownership`;
+          try {
+            await _sql`delete from declaration`;
+            await _sql`delete from ownership`;
+            return true;
+          } catch (e) {
+            return e;
+          }
         },
       });
     },
