@@ -6,6 +6,9 @@ describe("Parcours du simulateur Index Egapro", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
+    cy.visit("/index-egapro/simulateur/commencer");
+    cy.url().should("include", "/effectifs");
+
     cy.intercept("GET", "/index-egapro/simulateur/commencer").as("pageLoad");
 
     // Visiter la page de démarrage du simulateur
