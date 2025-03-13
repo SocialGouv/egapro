@@ -45,3 +45,11 @@ jobs:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
           TEST_BASEURL: ${{ env.SITE_URL }}
+          POSTGRES_HOST: ${{ env.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+          POSTGRES_SSLMODE: ${{ env.POSTGRES_SSLMODE }}
+          POSTGRES_POOL_MIN_SIZE: ${{ env.POSTGRES_POOL_MIN_SIZE }}
+          POSTGRES_POOL_MAX_SIZE: ${{ env.POSTGRES_POOL_MAX_SIZE }}
