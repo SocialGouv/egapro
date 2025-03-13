@@ -16,16 +16,13 @@ export default defineConfig({
         async cleanDB() {
           try {
             console.log("CLEAN START");
-            cy.log("CLEAN START");
             await _sql`delete from declaration`;
             await _sql`delete from ownership`;
             console.log("CLEAN DONE");
-            cy.log("CLEAN DONE");
             return true;
           } catch (e) {
             const m = JSON.stringify(e);
             console.log(m);
-            cy.log(m);
             return m;
           }
         },
