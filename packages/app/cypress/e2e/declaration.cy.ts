@@ -3,6 +3,7 @@ describe("Declaration", () => {
     // Réinitialiser l'état entre les tests
     cy.clearLocalStorage();
     cy.clearCookies();
+    cy.task("cleanDB");
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {

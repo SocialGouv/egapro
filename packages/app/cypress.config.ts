@@ -1,5 +1,7 @@
 import { defineConfig } from "cypress";
 
+import { sql as _sql } from "./src/api/shared-domain/infra/db/postgres";
+
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
   defaultCommandTimeout: 30000,
@@ -10,6 +12,12 @@ export default defineConfig({
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     setupNodeEvents(_on, _config) {
       // implement node event listeners here
+      _on("task", {
+        async cleanDB() {
+          await _sql`delete from declaration`;
+          await _sql`delete from ownership`;
+        },
+      });
     },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
