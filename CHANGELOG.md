@@ -1,3 +1,17 @@
+## [3.6.20](https://github.com/SocialGouv/egapro/compare/v3.6.19...v3.6.20) (2025-03-12)
+
+
+### Bug Fixes
+
+* dummy commit ([b6397b2](https://github.com/SocialGouv/egapro/commit/b6397b2bbb734f02e94371453e87f480a2b32065))
+* Exact to ImplementationSpecific ([aced270](https://github.com/SocialGouv/egapro/commit/aced270b4a3d8d2c80ce1d2aaab6cc50fab8f0f2))
+* move customHeaders ([95c4453](https://github.com/SocialGouv/egapro/commit/95c445396fd662ffd57b81cc1efc8a2804e585c2))
+* needs ([aebe061](https://github.com/SocialGouv/egapro/commit/aebe061f5d4deb3d39a16eea858131314e47b513))
+* pathType ImplementationSpecific for regex ([c125f24](https://github.com/SocialGouv/egapro/commit/c125f24cd256e2522a3e4f64b9b401260e58e482))
+* pathType: ImplementationSpecific ([4ff02ae](https://github.com/SocialGouv/egapro/commit/4ff02ae7a93ddc16d856e408a43ee2ceacd068c7))
+* up nginx image ([3874888](https://github.com/SocialGouv/egapro/commit/38748880cb8c9eb404716ff5e4bcbb508cf749a9))
+* use customHeaders ([a70a96a](https://github.com/SocialGouv/egapro/commit/a70a96a2e2016e123a90e6ae6b57ceb7e676a42c))
+
 ## [3.6.19](https://github.com/SocialGouv/egapro/compare/v3.6.18...v3.6.19) (2025-03-07)
 
 
