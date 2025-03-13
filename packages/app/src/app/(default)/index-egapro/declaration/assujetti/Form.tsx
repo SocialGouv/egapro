@@ -20,7 +20,7 @@ export const AssujettiForm = ({ title }: { title: string }) => {
 
   return (
     <div className={fr.cx("fr-mb-4w")}>
-      <form noValidate>
+      <form noValidate name="declaration-assujetti-form">
         <RadioButtons
           legend={title}
           classes={{
