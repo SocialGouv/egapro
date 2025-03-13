@@ -17,12 +17,11 @@ export const metadata = {
   },
 };
 
+const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
   if (!session) return null;
-  const monCompteProHost = `https://identite${
-    config.api.security.moncomptepro.appTest ? "-sandbox" : ""
-  }.proconnect.gouv.fr`;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   if (!(session.user.companies.length || session.user.staff)) {
@@ -50,7 +49,7 @@ const CommencerPage = async () => {
           <>
             Nous n'avons trouvé aucune entreprise à laquelle votre compte ({session.user.email}) est rattaché. Si vous
             pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement depuis{" "}
-            <Link href={`${monCompteProHost}/manage-organizations`} target="_blank">
+            <Link href={`${proconnectManageOrganisationsUrl}`} target="_blank">
               votre espace ProConnect
             </Link>
             .<br />
@@ -70,7 +69,7 @@ const CommencerPage = async () => {
         description="Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
           correspondantes à la déclaration."
       />
-      <CommencerForm session={session} monCompteProHost={monCompteProHost ?? ""} />
+      <CommencerForm session={session} monCompteProHost={proconnectManageOrganisationsUrl ?? ""} />
     </>
   );
 };

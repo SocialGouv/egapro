@@ -187,12 +187,12 @@ const AideSimulation = () => {
               Les indicateurs sont calculés à partir des données de la <strong>période de référence annuelle</strong>{" "}
               choisie par l’entreprise ou l’unité économique et sociale (UES). Cette période doit être de{" "}
               <strong>12 mois consécutifs et précéder l’année de publication</strong>. Par exemple, elle doit donc
-              nécessairement s’achever au plus tard le 31 décembre 2023 pour un index publié en 2024.
+              nécessairement s’achever au plus tard le 31 décembre 2024 pour un index publié en 2025.
               <br />
               Ainsi, si l’année civile est choisie comme période de référence, les données seront celles du 1er janvier
-              2023 au 31 décembre 2023, pour une publication au 1er mars 2024. La période de référence peut également
-              aller du 1er juin 2022 au 31 mai 2023, mais pas du 1er janvier 2022 au 31 décembre 2022 pour une
-              publication en 2024.
+              2024 au 31 décembre 2024, pour une publication au 1er mars 2025. La période de référence peut également
+              aller du 1er juin 2022 au 31 mai 2024, mais pas du 1er janvier 2022 au 31 décembre 2022 pour une
+              publication en 2025.
               <br />
               Uniquement pour l’indicateur « écart de taux d’augmentations », et uniquement pour les entreprises et
               unités économiques et sociales (UES) de 50 à 250 salariés assujettis, une période de référence de 3 ans
