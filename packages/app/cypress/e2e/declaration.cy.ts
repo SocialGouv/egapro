@@ -6,6 +6,10 @@ describe("Declaration", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
+    // load cache
+    cy.visit("/");
+    cy.visit("/index-egapro");
+    cy.visit("/index-egapro/declaration/commencer");
     cy.intercept("GET", "/").as("pageLoad");
 
     // Visiter la page de démarrage du simulateur
