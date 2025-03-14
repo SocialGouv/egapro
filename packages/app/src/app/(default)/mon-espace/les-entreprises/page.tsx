@@ -12,8 +12,8 @@ import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
 import { SirenInput } from "./SirenInput";
 
-const proconnectSignInUrl = process.env.EGAPRO_PROCONNECT_SIGN_IN_URL;
-const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+const proconnectSignInUrl = config.proconnect.signinUrl;
+const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
 
 const MesEntreprisesInfoAlert = () => (
   <Alert

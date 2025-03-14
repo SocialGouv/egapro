@@ -20,7 +20,7 @@ export const metadata = {
   },
 };
 
-const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
 
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);

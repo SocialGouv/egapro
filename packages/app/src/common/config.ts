@@ -38,6 +38,10 @@ export const config = {
       // },
     };
   },
+  proconnect: {
+    signinUrl: ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_SIGN_IN_URL, ""),
+    manageOrganisationUrl: ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL, ""),
+  },
   api: {
     staff: ensureApiEnvVar(process.env.EGAPRO_STAFF, envVar => envVar.split(",").filter(v => v), []),
     mailer: {
