@@ -29,6 +29,7 @@ export default defineConfig({
             database: process.env.POSTGRES_DB ?? "",
             username: process.env.POSTGRES_USER ?? "",
             password: process.env.POSTGRES_PASSWORD ?? "",
+            ssl: "prefer",
           });
           return _sql`delete from declaration`;
         },
