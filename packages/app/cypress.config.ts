@@ -21,6 +21,7 @@ export default defineConfig({
       // implement node event listeners here
       _on("task", {
         cleanDB() {
+          console.log(process.env.POSTGRES_HOST);
           const _sql = postgres({
             debug: true,
             host: process.env.POSTGRES_HOST ?? "",
