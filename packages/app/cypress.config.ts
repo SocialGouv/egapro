@@ -16,8 +16,15 @@ export default defineConfig({
         async cleanDB() {
           try {
             console.log("CLEAN START");
-            await _sql`delete from declaration`;
-            await _sql`delete from ownership`;
+            console.log("resultDeclaration start");
+            const listDeclaration = await _sql`select * from declaration`;
+            console.log("resultDeclaration end", JSON.stringify(listDeclaration));
+            console.log("resultDeclaration start");
+            const resultDeclaration = await _sql`delete from declaration`;
+            console.log("resultDeclaration end", JSON.stringify(resultDeclaration));
+            console.log("resultOwnership start");
+            const resultOwnership = await _sql`delete from ownership`;
+            console.log("resultOwnership end", JSON.stringify(resultOwnership));
             console.log("CLEAN DONE");
             return true;
           } catch (e) {
