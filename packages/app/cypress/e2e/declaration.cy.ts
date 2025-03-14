@@ -1,9 +1,13 @@
+import { sql as _sql } from "../../src/api/shared-domain/infra/db/postgres";
+
 describe("Declaration", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // Réinitialiser l'état entre les tests
     cy.clearLocalStorage();
     cy.clearCookies();
-    cy.task("cleanDB").then(cy.log);
+    // cy.task("cleanDB").then(cy.log);
+    await _sql`delete from declaration`;
+    await _sql`delete from ownership`;
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
