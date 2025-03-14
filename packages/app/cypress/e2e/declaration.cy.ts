@@ -1,5 +1,5 @@
 describe("Declaration", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // Réinitialiser l'état entre les tests
     cy.clearLocalStorage();
     cy.clearCookies();
