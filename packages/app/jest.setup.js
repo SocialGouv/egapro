@@ -9,6 +9,8 @@ global.screen = screen;
 global.TextEncoder = require("util").TextEncoder;
 global.TextDecoder = require("util").TextDecoder;
 
+process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL = "https://identite.proconnect.gouv.fr/manage-organizations";
+
 import * as mockRouter from "next-router-mock";
 
 const useRouter = mockRouter.useRouter;

@@ -280,7 +280,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
         </infoModale.Component>
         {onSubmit && (
           <companyFormModal.Component title="Modifier les informations entreprise/UES">
-            <form onSubmit={handleSubmit(handleOnSummit)}>
+            <form onSubmit={handleSubmit(handleOnSummit)} name="representation-equilibree-entreprise">
               <Input
                 nativeInputProps={{
                   ...register("name"),

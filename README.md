@@ -229,3 +229,22 @@ yarn egapro --help
 Les commandes vont se lancer dans l'environnement local.
 
 Si l'on veut lancer ces commandes dans un container (ex: en prod, en préprod ou dans un environnement lié à une PR), il faut se connecter au container et lancer la commande egapro.
+
+## Période de Campagne
+
+Chaque année une campagne de déclaration a lieu durant laquelle les entreprises de France de plus de 50 employés doivent effectuer une déclaration permettant de calculer leur index d'égalité femme-homme.
+La campage de déclaration se déroule entre Février et Mars et pendant cette période la fréquentation du site Egapro augmente fortement.
+
+![alt text](assets/image.png)
+
+Nous constatons également que lors de la dernière semaine de la campage, la fréquentation double en comparaison de la semaine précédente.
+
+Il est donc recommandé d'augmenter les ressources allouées à l'application Egapro en production avant le pic de la dernière semaine de la campagne de déclaration de l'index.
+
+| Période           | Nombre de réplicas Min | Nombre de réplicas Max |
+| :---------------- | :--------------------: | :--------------------: |
+| hors campagne     | 2 | 6 |
+| début de campagne | 4 | 8 |
+| fin de campagne   | 6 | 12 |
+
+> ⚠️ Il est préférable de tester le mécanisme de scale-up de l'application en production avant le commencement de la campagne. Il faut s'assurer qu'au moment du scale-up l'application pourra continuer à répondre aux requêtes des clients le temps que les nouveaux pods soient disponibles.
