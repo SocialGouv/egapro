@@ -10,6 +10,16 @@ export default defineConfig({
   screenshotOnRunFailure: false,
   e2e: {
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
+    env: {
+      POSTGRES_HOST: process.env.POSTGRES_HOST,
+      POSTGRES_USER: process.env.POSTGRES_USER,
+      POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
+      POSTGRES_DB: process.env.POSTGRES_DB,
+      POSTGRES_PORT: process.env.POSTGRES_PORT,
+      POSTGRES_SSLMODE: process.env.POSTGRES_SSLMODE,
+      POSTGRES_POOL_MIN_SIZE: process.env.POSTGRES_POOL_MIN_SIZE,
+      POSTGRES_POOL_MAX_SIZE: process.env.POSTGRES_POOL_MAX_SIZE,
+    },
     setupNodeEvents(_on, _config) {
       // implement node event listeners here
       _on("task", {
