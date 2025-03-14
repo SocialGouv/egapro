@@ -22,8 +22,8 @@ export default defineConfig({
             return true;
           } catch (e) {
             const m = JSON.stringify(e);
-            console.log(m);
-            return m;
+            console.log("CLEAN FAILED", m);
+            return false;
           }
         },
       });
