@@ -14,7 +14,7 @@ export const resultWithSign = (result: ComputedResult): number =>
 export abstract class AbstractComputer<Input = Any, AdditionalOutput extends object = object> {
   public abstract NOTE_TABLE: readonly number[];
   protected input?: Input;
-  protected computed?: ComputedResult<AdditionalOutput>;
+  public computed?: ComputedResult<AdditionalOutput>;
 
   public setInput(input: Input) {
     this.input = input;
