@@ -99,7 +99,7 @@ export const RemunerationResultatForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate name="declaration-remuneration-resultat">
         <p className="fr-text--xs">Les champs suivis d'une * sont obligatoires</p>
         <ClientAnimate>
           <ClientOnly fallback={<SkeletonForm fields={2} />}>
