@@ -4,6 +4,9 @@ describe("Declaration", () => {
     cy.clearLocalStorage();
     cy.clearCookies();
   });
+  afterEach(() => {
+    cy.request("POST", "/apiv2/clean-test-user/declaration");
+  });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
@@ -119,9 +122,12 @@ describe("Declaration", () => {
     cy.get("#content").within(() => {
       cy.contains("span", "NC").should("exist");
     });
-    // cy.contains("button", "Valider et transmettre les résultats").click();
-    // cy.get("#content").within(() => {
-    //   cy.contains("span", "Votre déclaration a été transmise").should("exist");
-    // });
+    cy.contains("button", "Valider et transmettre les résultats").click();
+    cy.contains("Votre déclaration a été transmise");
+    cy.contains("button", "egapro-e2e@fabrique.social.gouv.fr").click();
+    cy.contains("a", "Mes déclarations").click();
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
+    cy.contains("a", "384964508");
+    cy.contains("De 251 à 999 inclus");
   });
 });
