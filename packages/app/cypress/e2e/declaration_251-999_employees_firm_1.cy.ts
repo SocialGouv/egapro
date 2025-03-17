@@ -151,9 +151,7 @@ describe("Declaration", () => {
       cy.contains("span", "78").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.get("#content").within(() => {
-      cy.contains("span", "Votre déclaration a été transmise").should("exist");
-    });
+    cy.contains("h1", "Votre déclaration a été transmise").should("exist");
     cy.request("POST", "/clean-test-user/declaration");
   });
 });
