@@ -5383,5 +5383,125 @@
       "result": 0,
       "note": 0
     }
+  },
+  {
+    "effectifs": {
+      "workforceRange": "50:250",
+      "csp": {
+        "ouv": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 23
+            },
+            "30:39": {
+              "women": 0,
+              "men": 4
+            },
+            "40:49": {
+              "women": 0,
+              "men": 8
+            },
+            "50:": {
+              "women": 0,
+              "men": 19
+            }
+          }
+        },
+        "emp": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 0
+            },
+            "30:39": {
+              "women": 2,
+              "men": 0
+            },
+            "40:49": {
+              "women": 0,
+              "men": 0
+            },
+            "50:": {
+              "women": 0,
+              "men": 0
+            }
+          }
+        },
+        "tam": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 2
+            },
+            "30:39": {
+              "women": 0,
+              "men": 3
+            },
+            "40:49": {
+              "women": 0,
+              "men": 2
+            },
+            "50:": {
+              "women": 0,
+              "men": 4
+            }
+          }
+        },
+        "ic": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 0
+            },
+            "30:39": {
+              "women": 0,
+              "men": 0
+            },
+            "40:49": {
+              "women": 0,
+              "men": 1
+            },
+            "50:": {
+              "women": 1,
+              "men": 2
+            }
+          }
+        }
+      }
+    },
+    "indicateur1": {
+      "mode": "csp"
+    },
+    "indicateur2and3": {
+      "calculable": "non"
+    },
+    "indicateur4": {
+      "calculable": false
+    },
+    "indicateur5": {
+      "women": 1,
+      "men": 9
+    },
+    "resultIndicateur1": {
+      "favorablePopulation": "equality",
+      "note": 40,
+      "result": 0,
+      "resultRaw": 0
+    },
+    "resultIndicateur2and3": false,
+    "resultIndicateur4": false,
+    "resultIndicateur5": {
+      "favorablePopulation": "men",
+      "note": 0,
+      "result": 1,
+      "resultRaw": 1
+    },
+    "result": {
+      "favorablePopulation": "equality",
+      "resultRaw": 0,
+      "result": 0,
+      "note": 0
+    }
   }
 ]
