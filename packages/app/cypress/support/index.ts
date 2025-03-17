@@ -24,8 +24,9 @@ import "./commands";
 declare global {
   namespace Cypress {
     interface Chainable {
-
-      selectByLabel(label: string, index?: number): Chainable<Element>;
+      selectByLabel(labelText: string): Chainable<Element>;
+      clickRadio(legendText: string, radioLabel: string): Chainable<Element>;
+      checkUrl(url: string): void;
     }
   }
 }
