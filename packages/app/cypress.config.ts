@@ -8,6 +8,10 @@ export default defineConfig({
   screenshotOnRunFailure: false,
   e2e: {
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
+    env: {
+      E2E_USERNAME: process.env.E2E_USERNAME,
+      E2E_PASSWORD: process.env.E2E_PASSWORD,
+    },
     setupNodeEvents(_on, _config) {
       // implement node event listeners here
     },

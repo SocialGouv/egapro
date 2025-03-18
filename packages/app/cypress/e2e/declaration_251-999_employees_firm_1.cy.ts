@@ -31,8 +31,8 @@ describe("Declaration", () => {
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
 
-    cy.selectByLabel("Username").clear().type("egapro-e2e@fabrique.social.gouv.fr");
-    cy.selectByLabel("Password").clear().type("DxLd8iyWamus95F4N2Vh");
+    cy.selectByLabel("Username").clear().type(Cypress.env("E2E_USERNAME"));
+    cy.selectByLabel("Password").clear().type(Cypress.env("E2E_PASSWORD"));
     cy.get("form").submit();
 
     cy.checkUrl("/index-egapro/declaration/commencer");
