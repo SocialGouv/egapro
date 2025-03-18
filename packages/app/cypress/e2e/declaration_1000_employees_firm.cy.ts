@@ -155,7 +155,9 @@ describe("Declaration", () => {
     cy.contains("Votre déclaration a été transmise");
     cy.contains("button", "egapro-e2e@fabrique.social.gouv.fr").click();
     cy.contains("a", "Mes déclarations").click();
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508", { force: true });
+
+    cy.checkUrl("/mon-espace/mes-declarations");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
     cy.contains("a", "384964508");
     cy.contains("De 1000 à plus");
   });
