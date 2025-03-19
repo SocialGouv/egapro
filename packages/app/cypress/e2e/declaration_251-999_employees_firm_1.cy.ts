@@ -155,7 +155,7 @@ describe("Declaration", () => {
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
     cy.contains("Votre déclaration a été transmise");
-    cy.contains("button", "egapro-e2e@fabrique.social.gouv.fr").click();
+    cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
