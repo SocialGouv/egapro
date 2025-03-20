@@ -48,11 +48,11 @@ function getClientIp(req) {
 }
 
 
-function basicAuthentication(req, res, next) {
+async function basicAuthentication(req, res, next) {
   const user = basicAuth(req);   
   if(user && users[user.name]){
     const hash = users[user.name]
-    if(verifyPassword(user.pass, hash)){
+    if(await verifyPassword(user.pass, hash)){
       next();
       return;
     }
