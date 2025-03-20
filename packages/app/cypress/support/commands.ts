@@ -35,3 +35,24 @@
 //     }
 //   }
 // }
+
+Cypress.Commands.add("selectByLabel", labelText => {
+  cy.contains("label", labelText)
+    .invoke("attr", "for")
+    .then(id => {
+      return id && cy.get(`#${CSS.escape(id)}`);
+    });
+});
+
+Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
+  cy.contains("legend", legendText)
+    .closest("fieldset")
+    .within(() => {
+      cy.contains("label", radioLabel).click();
+    });
+});
+
+Cypress.Commands.add("checkUrl", url => {
+  cy.url().should("include", url);
+  cy.get("#content").click();
+});
