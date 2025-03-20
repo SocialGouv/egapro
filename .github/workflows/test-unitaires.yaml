@@ -1,14 +1,15 @@
-name: Tests Unitaires
-"on":
+name: Application Unit Tests
+
+on:
   push:
-    branches:
-      - master
-  pull_request: null
+
 concurrency:
   cancel-in-progress: true
   group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}"
+
 env:
   NODE_ENV: test
+
 jobs:
   build:
     name: Build

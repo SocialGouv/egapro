@@ -19,8 +19,8 @@ jobs:
           yarn install --immutable
       - name: Set env
         run: |
-          echo "SITE_URL=${{ github.event.deployment_status.environment_url }}" >> $GITHUB_ENV
-          echo "${{ github.event.deployment_status.environment_url }}"
+          echo "SITE_URL=${{ github.event.deployment_status.env_url }}" >> $GITHUB_ENV
+          echo "${{ github.event.deployment_status.env_url }}"
       - name: Run test e2e
         run: |
           yarn test:e2e:app

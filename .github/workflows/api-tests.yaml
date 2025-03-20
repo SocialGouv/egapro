@@ -1,3 +1,5 @@
+name: Python API Tests
+
 on:
   push:
     branches: ["**"]
@@ -9,7 +11,6 @@ concurrency:
 env:
   NODE_ENV: test
 
-name: Tests
 jobs:
   check-all:
     runs-on: ubuntu-latest
