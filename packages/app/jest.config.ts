@@ -20,6 +20,8 @@ const config = {
     "!jest.setup.js",
     "!**/node_modules/**",
     "!**/vendor/**",
+    "!**/__tests__/**",
+    "!**/cypress/**",
   ],
   coverageDirectory: "coverage",
   moduleNameMapper: {

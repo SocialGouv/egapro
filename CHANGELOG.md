@@ -1,3 +1,20 @@
+# [3.7.0](https://github.com/SocialGouv/egapro/compare/v3.6.20...v3.7.0) (2025-03-20)
+
+
+### Bug Fixes
+
+* htaccess ([#2476](https://github.com/SocialGouv/egapro/issues/2476)) ([d30391d](https://github.com/SocialGouv/egapro/commit/d30391d729397ba26bb6ba631c2306055e49e54f))
+* sonarcloud duplication on proconnect env var ([#2469](https://github.com/SocialGouv/egapro/issues/2469)) ([dfc9bbe](https://github.com/SocialGouv/egapro/commit/dfc9bbe6a988a572b0bf993cf0063202d69d0d20))
+
+
+### Features
+
+* ajout des tests pour les dernières pages egapro ([#2448](https://github.com/SocialGouv/egapro/issues/2448)) ([d840c31](https://github.com/SocialGouv/egapro/commit/d840c315c142d7006329b34b5a84ccb16b6f1ed3))
+* implement e2e tests ([#2449](https://github.com/SocialGouv/egapro/issues/2449)) ([e05312d](https://github.com/SocialGouv/egapro/commit/e05312d19e7dd3239177c4dcbc39b79e55db78af))
+* implementation des tests unitaire pour index egapro partie simulateur ([#2443](https://github.com/SocialGouv/egapro/issues/2443)) ([930af20](https://github.com/SocialGouv/egapro/commit/930af2006f1a1e6aead91bfdad8d59c969fb5622))
+* implementation des tests unitaire pour les calculs ([#2466](https://github.com/SocialGouv/egapro/issues/2466)) ([54bf144](https://github.com/SocialGouv/egapro/commit/54bf144de0b1549d3745d6cba7021ad64b98294c))
+* implementation des tests unitaires representation equilibree ([#2445](https://github.com/SocialGouv/egapro/issues/2445)) ([f05547d](https://github.com/SocialGouv/egapro/commit/f05547de1dd848f119098811582d6a689c224bde))
+
 ## [3.6.20](https://github.com/SocialGouv/egapro/compare/v3.6.19...v3.6.20) (2025-03-12)
 
 
