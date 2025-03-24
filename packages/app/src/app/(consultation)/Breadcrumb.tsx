@@ -43,7 +43,7 @@ const defaultSegments: Segments = [
 export const ConsultationBreadcrumb = () => {
   const pathSegments = useSelectedLayoutSegments();
   const segments = defaultSegments.concat(
-    pathSegments.reduce(
+    (pathSegments || []).reduce(
       ({ currentSegmentMap, segments }, path, currentIndex) => {
         return {
           currentSegmentMap: currentSegmentMap[path]?.segments ?? {},
@@ -52,7 +52,7 @@ export const ConsultationBreadcrumb = () => {
             {
               label: currentSegmentMap[path]?.label ?? "Page Actuelle",
               linkProps: {
-                href: `/${pathSegments.slice(0, currentIndex + 1).join("/")}`,
+                href: `/${(pathSegments || []).slice(0, currentIndex + 1).join("/")}`,
               },
             },
           ],
