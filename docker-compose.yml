@@ -48,6 +48,22 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: egapro
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "log_destination=csvlog"
+      - "-c"
+      - "logging_collector=on"
+      - "-c"
+      - "log_directory=pg_log"
+      - "-c"
+      - "log_filename=postgresql-%Y-%m-%d_%H%M%S.log"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "log_line_prefix=%t,%u,%d,%p,"
     ports:
       - 5438:5432
     volumes:

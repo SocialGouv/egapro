@@ -128,9 +128,12 @@ api:
 pg:
   cnpg:
     postgresqlParameters:
-      shared_preload_libraries: "pg_stat_statements"
-      pg_stat_statements.track: all
-      pg_stat_statements.max: 10000
+      log_destination: "csvlog"
+      logging_collector: on
+      log_directory: "pg_log"
+      log_filename: "postgresql-%Y-%m-%d_%H%M%S.log"
+      log_statement: "all"
+      log_line_prefix: "%t,%u,%d,%p,"
 
 redis:
   fullnameOverride: redis
