@@ -62,7 +62,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const raws = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
     // Log the SELECT query to the audit table since it contains email information
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "SELECT",
       "ownership_request",
       `select * from ownership_request`,
@@ -83,7 +83,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       const [raw] = await this.sql`select * from ${this.table} where id = ${idValue} limit 1`;
 
       // Log the SELECT query to the audit table since it contains email information
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "SELECT",
         "ownership_request",
         `select * from ownership_request where id = $1 limit 1`,
@@ -113,7 +113,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const [rawReturn] = await this.sql`insert into ${this.table} ${insert} returning *`;
 
     // Log the INSERT query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "INSERT",
       "ownership_request",
       `INSERT INTO ownership_request (siren, email, asker_email, status, error_detail) VALUES ($1, $2, $3, $4, $5)`,
@@ -134,7 +134,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${idValue}`;
 
     // Log the UPDATE query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "UPDATE",
       "ownership_request",
       `UPDATE ownership_request SET status = $1, error_detail = $2 WHERE id = $3`,
@@ -192,7 +192,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const raws = await this.sql`select * from ${this.table} where id in ${sql(idValues)}`;
 
     // Log the SELECT query to the audit table since it contains email information
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "SELECT",
       "ownership_request",
       `select * from ownership_request where id in ($1)`,
@@ -227,7 +227,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     `;
 
     // Log the UPDATE query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "UPDATE",
       "ownership_request",
       `UPDATE ownership_request SET status = update_data.status, error_detail = update_data.error_detail
@@ -273,7 +273,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     } ${limit ? `limit ${limit}` : ""} ${offset ? `offset ${offset}` : ""}`;
 
     // Log the SELECT query to the audit table since it contains email information
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "SELECT",
       "ownership_request",
       queryString,
@@ -301,7 +301,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     )} ilike '%${query}%') ${status ? `and status='${status}'` : ""}`;
 
     // Log the SELECT query to the audit table since it contains email information
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "SELECT",
       "ownership_request",
       queryString,

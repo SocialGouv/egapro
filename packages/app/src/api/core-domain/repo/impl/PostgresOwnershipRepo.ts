@@ -24,7 +24,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
       const raws = await this.sql`select * from ${this.table} where siren=${sirenValue}`;
 
       // Log the SELECT query to the audit table
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "SELECT",
         "ownership",
         `select * from ownership where siren=$1`,
@@ -53,7 +53,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
       const raws = await this.sql`select * from ${this.table} where email=${emailValue}`;
 
       // Log the SELECT query to the audit table
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "SELECT",
         "ownership",
         `select * from ownership where email=$1`,
@@ -83,7 +83,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
       await this.sql`INSERT INTO ${this.table} ${_sql(values)} ON CONFLICT DO NOTHING`;
 
       // Log the INSERT query to the audit table
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "INSERT",
         "ownership",
         `INSERT INTO ownership VALUES (${sirensToAdd
@@ -108,7 +108,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
       await this.sql`DELETE FROM ${this.table} WHERE email = ${emailValue} AND siren = ANY(${sirensToRemove})`;
 
       // Log the DELETE query to the audit table
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "DELETE",
         "ownership",
         `DELETE FROM ownership WHERE email = $1 AND siren = ANY($2)`,
@@ -128,7 +128,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
       const raws = await this.sql`select * from ${this.table}`;
 
       // Log the SELECT query to the audit table
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "SELECT",
         "ownership",
         `select * from ownership`,
@@ -181,7 +181,7 @@ select siren, email, exists (
     await this.sql`insert into ${this.table} ${_sql(raws)} on conflict do nothing returning true`;
 
     // Log the INSERT query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "INSERT",
       "ownership",
       `INSERT INTO ownership VALUES ${items
@@ -221,7 +221,7 @@ select siren, email, exists (
     await this.sql`insert into ${this.table} ${_sql(raw)} on conflict do nothing returning true`;
 
     // Log the INSERT query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "INSERT",
       "ownership",
       `INSERT INTO ownership VALUES ('${sirenValue}', '${emailValue}') ON CONFLICT DO NOTHING`,

@@ -35,7 +35,7 @@ export class PostgresReferentRepo implements IReferentRepo {
     await sql`truncate table ${this.table}`;
 
     // Log the DELETE query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "DELETE",
       "referent",
       `TRUNCATE TABLE referent`,
@@ -53,7 +53,7 @@ export class PostgresReferentRepo implements IReferentRepo {
     await this.sql`delete from ${this.table} where id = ${idValue}`;
 
     // Log the DELETE query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "DELETE",
       "referent",
       `DELETE FROM referent WHERE id = $1`,
@@ -118,7 +118,7 @@ export class PostgresReferentRepo implements IReferentRepo {
 
     // Log the INSERT or UPDATE query to the audit table
     if (isInsert) {
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "INSERT",
         "referent",
         `INSERT INTO referent (county, name, principal, region, substitute_email, substitute_name, type, value) 
@@ -137,7 +137,7 @@ export class PostgresReferentRepo implements IReferentRepo {
         undefined, // Will be filled by the calling context if available
       );
     } else {
-      await auditRepo.logQuery(
+      auditRepo.logQuery(
         "UPDATE",
         "referent",
         `UPDATE referent SET county = $1, name = $2, principal = $3, region = $4, 
@@ -186,7 +186,7 @@ export class PostgresReferentRepo implements IReferentRepo {
     const rawReturn = await this.sql`insert into ${this.table} ${sql(raws)} returning *`;
 
     // Log the INSERT query to the audit table
-    await auditRepo.logQuery(
+    auditRepo.logQuery(
       "INSERT",
       "referent",
       `INSERT INTO referent (county, name, principal, region, substitute_email, substitute_name, type, value) 
