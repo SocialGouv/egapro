@@ -472,6 +472,8 @@ def prepare_augmentations_et_promotions(data):
     data["non_calculable_bool"] = calculable
     if not calculable:
         data["note"] = "nc"
+        data["note_en_pourcentage"] = "nc"
+        data["note_nombre_salariés"] = "nc"
 
 
 def prepare_conges_maternite(data):
