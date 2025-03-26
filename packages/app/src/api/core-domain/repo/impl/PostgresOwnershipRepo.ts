@@ -15,7 +15,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   constructor(private sql = _sql<OwnershipRaw[]>) {}
 
-  public async getAllEmailsBySiren(siren: Siren): Promise<string[]> {
+  public async getAllEmailsBySiren(siren: Siren, username?: string): Promise<string[]> {
     try {
       // Paramètres de la requête
       const sirenValue = siren.getValue();
@@ -30,7 +30,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
         `select * from ownership where siren=$1`,
         [sirenValue],
         raws.length,
-        undefined, // Will be filled by the calling context if available
+        username,
       );
 
       return raws.map(owner => owner.email);
@@ -44,7 +44,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async getAllSirenByEmail(email: Email): Promise<string[]> {
+  public async getAllSirenByEmail(email: Email, username?: string): Promise<string[]> {
     try {
       // Paramètres de la requête
       const emailValue = email.getValue();
@@ -59,7 +59,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
         `select * from ownership where email=$1`,
         [emailValue],
         raws.length,
-        undefined, // Will be filled by the calling context if available
+        username,
       );
 
       return raws.map(owner => owner.siren);
@@ -73,7 +73,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async addSirens(email: Email, sirensToAdd: string[]): Promise<void> {
+  public async addSirens(email: Email, sirensToAdd: string[], username?: string): Promise<void> {
     try {
       // Paramètres de la requête
       const emailValue = email.getValue();
@@ -91,7 +91,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
           .join(", ")}) ON CONFLICT DO NOTHING`,
         [emailValue, sirensToAdd],
         undefined,
-        undefined, // Will be filled by the calling context if available
+        username,
       );
     } catch (error: unknown) {
       console.error(error);
@@ -99,7 +99,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async removeSirens(email: Email, sirensToRemove: string[]): Promise<void> {
+  public async removeSirens(email: Email, sirensToRemove: string[], username?: string): Promise<void> {
     try {
       // Paramètres de la requête
       const emailValue = email.getValue();
@@ -114,7 +114,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
         `DELETE FROM ownership WHERE email = $1 AND siren = ANY($2)`,
         [emailValue, sirensToRemove],
         undefined,
-        undefined, // Will be filled by the calling context if available
+        username,
       );
     } catch (error: unknown) {
       console.error(error);
@@ -122,20 +122,13 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async getAll(): Promise<Ownership[]> {
+  public async getAll(username?: string): Promise<Ownership[]> {
     try {
       // Exécuter la requête
       const raws = await this.sql`select * from ${this.table}`;
 
       // Log the SELECT query to the audit table
-      auditRepo.logQuery(
-        "SELECT",
-        "ownership",
-        `select * from ownership`,
-        [],
-        raws.length,
-        undefined, // Will be filled by the calling context if available
-      );
+      auditRepo.logQuery("SELECT", "ownership", `select * from ownership`, [], raws.length, username);
 
       return raws.map(ownershipMap.toDomain);
     } catch (error: unknown) {

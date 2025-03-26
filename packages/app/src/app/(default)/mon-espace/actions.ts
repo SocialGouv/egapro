@@ -59,7 +59,7 @@ export async function getAllDeclarationOpmcSirenAndYear(siren: string, year: num
 }
 
 export async function getAllEmailsBySiren(siren: string) {
-  await assertServerSession({
+  const session = await assertServerSession({
     owner: {
       check: siren,
       message: "Not authorized to fetch owners for this siren.",
@@ -67,7 +67,7 @@ export async function getAllEmailsBySiren(siren: string) {
     staff: true,
   });
 
-  return await ownershipRepo.getAllEmailsBySiren(new Siren(siren));
+  return await ownershipRepo.getAllEmailsBySiren(new Siren(siren), session.user.email);
 }
 
 export async function removeSirens(email: string, sirens: string[]) {
