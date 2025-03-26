@@ -5503,5 +5503,280 @@
       "result": 0,
       "note": 0
     }
+  },
+  {
+    "effectifs": {
+      "workforceRange": "50:250",
+      "csp": {
+        "ouv": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 0
+            },
+            "30:39": {
+              "women": 0,
+              "men": 0
+            },
+            "40:49": {
+              "women": 0,
+              "men": 0
+            },
+            "50:": {
+              "women": 0,
+              "men": 0
+            }
+          }
+        },
+        "emp": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 0
+            },
+            "30:39": {
+              "women": 0,
+              "men": 0
+            },
+            "40:49": {
+              "women": 0,
+              "men": 0
+            },
+            "50:": {
+              "women": 0,
+              "men": 0
+            }
+          }
+        },
+        "tam": {
+          "ageRanges": {
+            ":29": {
+              "women": 0,
+              "men": 0
+            },
+            "30:39": {
+              "women": 0,
+              "men": 0
+            },
+            "40:49": {
+              "women": 0,
+              "men": 0
+            },
+            "50:": {
+              "women": 0,
+              "men": 0
+            }
+          }
+        },
+        "ic": {
+          "ageRanges": {
+            ":29": {
+              "women": 8,
+              "men": 29
+            },
+            "30:39": {
+              "women": 10,
+              "men": 33
+            },
+            "40:49": {
+              "women": 1,
+              "men": 6
+            },
+            "50:": {
+              "women": 0,
+              "men": 0
+            }
+          }
+        }
+      }
+    },
+    "indicateur1": {
+      "mode": "niveau_branche",
+      "remunerations": [
+        {
+          "name": "CADRE 1.2",
+          "category": {
+            ":29": {
+              "womenCount": 1,
+              "menCount": 4
+            },
+            "30:39": {
+              "womenCount": 0,
+              "menCount": 1
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 2.1",
+          "category": {
+            ":29": {
+              "womenCount": 8,
+              "menCount": 15,
+              "womenSalary": 80000,
+              "menSalary": 80000
+            },
+            "30:39": {
+              "womenCount": 2,
+              "menCount": 5
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 1
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 2.3",
+          "category": {
+            ":29": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "30:39": {
+              "womenCount": 3,
+              "menCount": 7,
+              "womenSalary": 80000,
+              "menSalary": 80000
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 2
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 3.1",
+          "category": {
+            ":29": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "30:39": {
+              "womenCount": 1,
+              "menCount": 3,
+              "womenSalary": "",
+              "menSalary": ""
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 3.2",
+          "category": {
+            ":29": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "30:39": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "40:49": {
+              "womenCount": 1,
+              "menCount": 1
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 3.3",
+          "category": {
+            ":29": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "30:39": {
+              "womenCount": 0,
+              "menCount": 1
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 0
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 0
+            }
+          }
+        },
+        {
+          "name": "CADRE 2.2",
+          "category": {
+            ":29": {
+              "womenCount": 1,
+              "menCount": 7
+            },
+            "30:39": {
+              "womenCount": 2,
+              "menCount": 19
+            },
+            "40:49": {
+              "womenCount": 0,
+              "menCount": 1
+            },
+            "50:": {
+              "womenCount": 0,
+              "menCount": 1
+            }
+          }
+        }
+      ]
+    },
+    "indicateur2and3": {
+      "calculable": "non"
+    },
+    "indicateur4": {
+      "calculable": false
+    },
+    "indicateur5": {
+      "women": 1,
+      "men": 9
+    },
+    "resultIndicateur1": {
+      "favorablePopulation": "equality",
+      "note": 40,
+      "result": 0,
+      "resultRaw": 0
+    },
+    "resultIndicateur2and3": false,
+    "resultIndicateur4": false,
+    "resultIndicateur5": {
+      "favorablePopulation": "men",
+      "note": 0,
+      "result": 1,
+      "resultRaw": 1
+    },
+    "result": {
+      "favorablePopulation": "equality",
+      "resultRaw": 0,
+      "result": 0,
+      "note": 0
+    }
   }
 ]
