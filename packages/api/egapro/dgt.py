@@ -474,6 +474,12 @@ def prepare_augmentations_et_promotions(data):
         data["note"] = "nc"
         data["note_en_pourcentage"] = "nc"
         data["note_nombre_salariés"] = "nc"
+    else:
+        if "note" in data and data["note"] != "nc" and isinstance(data["note"], (int, float)):
+            if "note_en_pourcentage" not in data or data["note_en_pourcentage"] is None:
+                data["note_en_pourcentage"] = data["note"]
+            if "note_nombre_salariés" not in data or data["note_nombre_salariés"] is None:
+                data["note_nombre_salariés"] = data["note"]
 
 
 def prepare_conges_maternite(data):

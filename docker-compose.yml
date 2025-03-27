@@ -17,7 +17,7 @@ services:
       FILES_PUBLIC: "dgt.xlsx,dgt-representation.xlsx,index-egalite-fh.xlsx,indexes.csv,full.ndjson,dgt-export-representation.xlsx"
       FILES_RESTRICTED: ""
     ports:
-      - 3000:8080
+      - 8080:8080
     restart: always
 
   maildev:
@@ -41,6 +41,7 @@ services:
       - api_egginfos:/app/egapro.egg-info
       - ./mnt:/mnt
     environment:
+      SCHEDULER: "True"
       EGAPRO_SEND_EMAILS: "True"
       EGAPRO_SMTP_HOST: maildev
       EGAPRO_SMTP_PORT: ${MAILDEV_SMTP_PORT}
