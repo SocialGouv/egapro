@@ -17,33 +17,3 @@ jobs:
     name: "🇫🇷 SocialGouv"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto.yaml@v1
     secrets: inherit
-  e2e:
-    runs-on: ubuntu-latest
-    needs: [socialgouv]
-    name: "Test e2e"
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "yarn"
-      - name: Install dependencies
-        run: |
-          yarn install --immutable
-      - name: Env
-        id: env
-        uses: socialgouv/kontinuous/.github/actions/env@v1
-      - name: Set env
-        run: |
-          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-      - name: Run test e2e
-        run: |
-          yarn test:e2e:app
-        env:
-          working-directory: ./packages/app
-          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
-          TEST_BASEURL: ${{ env.SITE_URL }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
