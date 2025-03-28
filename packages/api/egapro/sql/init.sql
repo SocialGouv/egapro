@@ -82,3 +82,24 @@ create table if not exists referent
     substitute_name     text,
     substitute_email    text
 );
+
+-- Create audit schema if it doesn't exist
+CREATE SCHEMA IF NOT EXISTS audit;
+-- Create the query_log table if it doesn't exist
+CREATE TABLE IF NOT EXISTS audit.query_log(
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    username text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    operation text,
+    table_name text,
+    query text,
+    result_count integer,
+    params jsonb
+);
+-- Comment on table
+COMMENT ON TABLE audit.query_log IS 'Logs database queries for auditing purposes';
+COMMENT ON COLUMN audit.query_log.operation IS 'SQL operation type (SELECT, INSERT, UPDATE, DELETE)';
+COMMENT ON COLUMN audit.query_log.table_name IS 'Name of the table being queried or modified';
+COMMENT ON COLUMN audit.query_log.query IS 'SQL query being executed';
+COMMENT ON COLUMN audit.query_log.params IS 'Parameters used in the query';
+COMMENT ON COLUMN audit.query_log.result_count IS 'Number of results returned by the query (only for SELECT operations)';

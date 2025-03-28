@@ -217,7 +217,7 @@ export const authConfig: AuthOptions = {
         } else if (account?.provider === "email") {
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
-            const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email));
+            const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email), token.email);
             const companiesList = companies.map(siren => ({ label: "", siren }));
 
             // Create hash and store companies in Redis
@@ -232,7 +232,7 @@ export const authConfig: AuthOptions = {
           if (profile?.email && sirenList) {
             try {
               const useCase = new SyncOwnership(ownershipRepo);
-              await useCase.execute({ sirens: sirenList, email: profile.email });
+              await useCase.execute({ sirens: sirenList, email: profile.email, username: profile.email });
             } catch (error: unknown) {
               logger.error({ error }, "Error while syncing ownerships");
             }

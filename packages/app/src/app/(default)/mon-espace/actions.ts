@@ -59,7 +59,7 @@ export async function getAllDeclarationOpmcSirenAndYear(siren: string, year: num
 }
 
 export async function getAllEmailsBySiren(siren: string) {
-  await assertServerSession({
+  const session = await assertServerSession({
     owner: {
       check: siren,
       message: "Not authorized to fetch owners for this siren.",
@@ -67,10 +67,10 @@ export async function getAllEmailsBySiren(siren: string) {
     staff: true,
   });
 
-  return await ownershipRepo.getAllEmailsBySiren(new Siren(siren));
+  return await ownershipRepo.getAllEmailsBySiren(new Siren(siren), session.user.email);
 }
 
-export async function removeSirens(email: string, sirens: string[]) {
+export async function removeSirens(email: string, sirens: string[], username?: string) {
   // await assertServerSession({
   //   owner: {
   //     check: email,
@@ -79,10 +79,10 @@ export async function removeSirens(email: string, sirens: string[]) {
   //   staff: true,
   // });
 
-  return await ownershipRepo.removeSirens(new Email(email), sirens);
+  return await ownershipRepo.removeSirens(new Email(email), sirens, username || email);
 }
 
-export async function addSirens(email: string, sirens: string[]) {
+export async function addSirens(email: string, sirens: string[], username?: string) {
   // await assertServerSession({
   //   owner: {
   //     check: email,
@@ -91,5 +91,5 @@ export async function addSirens(email: string, sirens: string[]) {
   //   staff: true,
   // });
 
-  return await ownershipRepo.addSirens(new Email(email), sirens);
+  return await ownershipRepo.addSirens(new Email(email), sirens, username || email);
 }
