@@ -41,9 +41,9 @@ const formSchema = zodFr
       populationFavorable: z.string().optional(),
       résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
       résultatEquivalentSalarié: zodNumberOrEmptyString,
-      note: z.number().optional(),
-      notePourcentage: z.number().optional(),
-      noteNombreSalaries: z.number().optional(),
+      note: z.number(),
+      notePourcentage: z.number(),
+      noteNombreSalaries: z.number(),
     }),
   ])
   .superRefine((value, ctx) => {
@@ -138,34 +138,24 @@ export const AugmentationEtPromotionsForm = () => {
 
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
-    let notePourcentage, noteNombreSalaries;
+    let calculatedNotePourcentage, calculatedNoteNombreSalaries;
     if (résultat !== undefined && résultat !== "") {
-      notePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-      setValue("notePourcentage", notePourcentage, { shouldValidate: true });
+      calculatedNotePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
+      setValue("notePourcentage", calculatedNotePourcentage, { shouldValidate: true });
     }
     if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== "") {
-      noteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
+      calculatedNoteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
         résultatEquivalentSalarié,
       );
-      setValue("noteNombreSalaries", noteNombreSalaries, { shouldValidate: true });
+      setValue("noteNombreSalaries", calculatedNoteNombreSalaries, { shouldValidate: true });
     }
-    if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
-      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true, shouldDirty: true });
+    if (calculatedNotePourcentage !== undefined && calculatedNoteNombreSalaries !== undefined) {
+      setValue("note", Math.max(calculatedNotePourcentage, calculatedNoteNombreSalaries), { shouldValidate: true });
     }
 
     // If it is a compensation, we set the note to the max value.
     if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true, shouldDirty: true });
-  }, [
-    estCalculable,
-    estUnRattrapage,
-    noteNombreSalaries,
-    notePourcentage,
-    résultat,
-    résultatEquivalentSalarié,
-    register,
-    setValue,
-    unregister,
-  ]);
+  }, [estCalculable, estUnRattrapage, résultat, résultatEquivalentSalarié, register, setValue, unregister]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {

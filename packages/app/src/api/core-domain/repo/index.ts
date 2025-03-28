@@ -1,9 +1,11 @@
 import { services } from "@common/config";
 
 import { type IAdminDeclarationRepo } from "./IAdminDeclarationRepo";
+import { type IAuditRepo } from "./IAuditRepo";
 import { type IDeclarationRepo } from "./IDeclarationRepo";
 import { type IDeclarationSearchRepo } from "./IDeclarationSearchRepo";
 import { PostgresAdminDeclarationRepo } from "./impl/PostgresAdminDeclarationRepo";
+import { PostgresAuditRepo } from "./impl/PostgresAuditRepo";
 import { PostgresDeclarationRepo } from "./impl/PostgresDeclarationRepo";
 import { PostgresDeclarationSearchRepo } from "./impl/PostgresDeclarationSearchRepo";
 import { PostgresOwnershipRepo } from "./impl/PostgresOwnershipRepo";
@@ -28,6 +30,7 @@ export let representationEquilibreeSearchRepo: IRepresentationEquilibreeSearchRe
 export let declarationSearchRepo: IDeclarationSearchRepo;
 export let publicStatsRepo: IPublicStatsRepo;
 export let adminDeclarationRepo: IAdminDeclarationRepo;
+export let auditRepo: IAuditRepo;
 
 if (services.db === "postgres") {
   declarationRepo = new PostgresDeclarationRepo();
@@ -39,4 +42,5 @@ if (services.db === "postgres") {
   declarationSearchRepo = new PostgresDeclarationSearchRepo();
   publicStatsRepo = new PostgresPublicStatsRepo();
   adminDeclarationRepo = new PostgresAdminDeclarationRepo();
+  auditRepo = new PostgresAuditRepo();
 }

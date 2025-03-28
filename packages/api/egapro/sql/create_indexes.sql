@@ -29,3 +29,8 @@ CREATE INDEX IF NOT EXISTS idx_representation_equilibree_naf ON search_represent
 CREATE INDEX IF NOT EXISTS idx_representation_equilibree_declared_at ON search_representation_equilibree (declared_at);
 CREATE INDEX IF NOT EXISTS idx_search_representation_equilibree_siren ON search_representation_equilibree (siren);
 CREATE INDEX IF NOT EXISTS idx_search_representation_equilibree_year ON search_representation_equilibree (year);
+-- audit.query_log
+CREATE INDEX IF NOT EXISTS query_log_username_idx ON audit.query_log(username);
+CREATE INDEX IF NOT EXISTS query_log_created_at_idx ON audit.query_log(created_at);
+CREATE INDEX IF NOT EXISTS query_log_operation_idx ON audit.query_log(operation);
+CREATE INDEX IF NOT EXISTS query_log_table_name_idx ON audit.query_log(table_name);
