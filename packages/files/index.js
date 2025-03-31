@@ -78,6 +78,7 @@ app.use((req, res, next) => {
     return
   }
 });
+
 app.use((req, res) => {
   const filePath = req.path
   res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(filePath));
