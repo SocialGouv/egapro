@@ -502,13 +502,15 @@ def prepare_augmentations_et_promotions(data):
     data["non_calculable_bool"] = calculable
     resultat_pourcent = data.get("résultat")
     resultat_nb_sal = data.get("résultat_nombre_salariés")
+    note_en_pourcentage = data.get("note_en_pourcentage")
+    note_nombre_salariés = data.get("note_nombre_salariés")
     if not calculable:
         data["note"] = "nc"
         data["note_en_pourcentage"] = "nc"
         data["note_nombre_salariés"] = "nc"
     if resultat_pourcent is not None and resultat_nb_sal is not None:
-        data["note_en_pourcentage"] = resultat_pourcent
-        data["note_nombre_salariés"] = resultat_nb_sal
+        data["note_en_pourcentage"] = note_en_pourcentage
+        data["note_nombre_salariés"] = note_nombre_salariés
     else:
         # Calculer les notes en utilisant la fonction compute_note_indicateur_2et3
         note_en_pourcentage = compute_note_indicateur_2et3(resultat_pourcent)
