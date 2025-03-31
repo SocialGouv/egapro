@@ -508,13 +508,13 @@ def prepare_augmentations_et_promotions(data):
         data["note"] = "nc"
         data["note_en_pourcentage"] = "nc"
         data["note_nombre_salariés"] = "nc"
-    if resultat_pourcent is not None and resultat_nb_sal is not None:
+    if note_en_pourcentage is not None and note_nombre_salariés is not None:
         data["note_en_pourcentage"] = note_en_pourcentage
         data["note_nombre_salariés"] = note_nombre_salariés
     else:
         # Calculer les notes en utilisant la fonction compute_note_indicateur_2et3
-        note_en_pourcentage = compute_note_indicateur_2et3(resultat_pourcent)
-        note_nombre_salaries = compute_note_indicateur_2et3(resultat_nb_sal)
+        data["note_en_pourcentage"] = compute_note_indicateur_2et3(resultat_pourcent)
+        data["note_nombre_salariés"] = compute_note_indicateur_2et3(resultat_nb_sal)
 
 
 def prepare_conges_maternite(data):
