@@ -467,6 +467,36 @@ def prepare_augmentations(data):
         data["note"] = "nc"
 
 
+def compute_note_indicateur_2et3(result):
+    """Implémentation Python de la fonction computeNote de IndicateurDeuxTroisComputer.ts
+    
+    Cette fonction prend un résultat (pourcentage ou nombre de salariés) et retourne
+    la note correspondante selon la table de notes définie pour l'indicateur 2et3.
+    """
+    # Table de notes pour l'indicateur 2et3, identique à celle dans IndicateurDeuxTroisComputer.ts
+    NOTE_TABLE = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0]
+    
+    # Si le résultat est None, on ne peut pas calculer la note
+    if result is None:
+        return None
+    
+    # Conversion en nombre si c'est une chaîne
+    if isinstance(result, str) and result.replace('.', '', 1).isdigit():
+        result = float(result)
+    
+    # Si ce n'est pas un nombre, on ne peut pas calculer la note
+    if not isinstance(result, (int, float)):
+        return None
+    
+    # Arrondir au supérieur comme dans la fonction TypeScript
+    index = int(result) if result == int(result) else int(result) + 1
+    
+    # Vérifier que l'index est dans les limites de la table
+    if index < 0 or index >= len(NOTE_TABLE):
+        return 0
+    
+    return NOTE_TABLE[index]
+
 def prepare_augmentations_et_promotions(data):
     calculable = not data.get("non_calculable")
     data["non_calculable_bool"] = calculable
@@ -474,12 +504,17 @@ def prepare_augmentations_et_promotions(data):
         data["note"] = "nc"
         data["note_en_pourcentage"] = "nc"
         data["note_nombre_salariés"] = "nc"
+    if note_en_pourcentage is not None and note_nombre_salaries is not None:
+        data["note_en_pourcentage"] = note_en_pourcentage
+        data["note_nombre_salariés"] = note_nombre_salaries
     else:
-        if "note" in data and data["note"] != "nc" and isinstance(data["note"], (int, float)):
-            if "note_en_pourcentage" not in data or data["note_en_pourcentage"] is None:
-                data["note_en_pourcentage"] = data["note"]
-            if "note_nombre_salariés" not in data or data["note_nombre_salariés"] is None:
-                data["note_nombre_salariés"] = data["note"]
+        # Récupérer les résultats pour calculer les notes
+        resultat_pourcent = data.get("résultat")
+        resultat_nb_sal = data.get("résultat_nombre_salariés")
+        
+        # Calculer les notes en utilisant la fonction compute_note_indicateur_2et3
+        note_en_pourcentage = compute_note_indicateur_2et3(resultat_pourcent)
+        note_nombre_salaries = compute_note_indicateur_2et3(resultat_nb_sal)
 
 
 def prepare_conges_maternite(data):
