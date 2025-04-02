@@ -110,8 +110,8 @@ export class Company extends JsonEntity<CompanyProps, never> {
       props.county = new County(json.county);
     }
 
-    if (json.postalCode) {
-      props.postalCode = new FrenchPostalCode(json.postalCode);
+    if (json.postalCode && json.countryCode) {
+      props.postalCode = new FrenchPostalCode(json.postalCode, json.countryCode);
     }
 
     if (json.region) {
