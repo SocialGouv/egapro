@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS audit.query_log(
 );
 -- Comment on table
 COMMENT ON TABLE audit.query_log IS 'Logs database queries for auditing purposes';
-COMMENT ON COLUMN audit.query_log.operation IS 'SQL operation type (SELECT, INSERT, UPDATE, DELETE)';
+COMMENT ON COLUMN audit.query_log.operation IS 'operation name';
 COMMENT ON COLUMN audit.query_log.table_name IS 'Name of the table being queried or modified';
 COMMENT ON COLUMN audit.query_log.query IS 'SQL query being executed';
 COMMENT ON COLUMN audit.query_log.params IS 'Parameters used in the query';
