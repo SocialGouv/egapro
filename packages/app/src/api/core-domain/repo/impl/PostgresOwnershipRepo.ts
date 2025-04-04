@@ -1,4 +1,5 @@
 import { type OwnershipRaw } from "@api/core-domain/infra/db/raw";
+import { auditRepo } from "@api/core-domain/repo";
 import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
 import { type Ownership, type OwnershipPK } from "@common/core-domain/domain/Ownership";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
@@ -14,9 +15,20 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   constructor(private sql = _sql<OwnershipRaw[]>) {}
 
-  public async getAllEmailsBySiren(siren: Siren): Promise<string[]> {
+  public async getAllEmailsBySiren(siren: Siren, username?: string): Promise<string[]> {
     try {
-      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()}`;
+      const sirenValue = siren.getValue();
+
+      const raws = await this.sql`select * from ${this.table} where siren=${sirenValue}`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRepo.getAllEmailsBySiren",
+        "ownership",
+        `select * from ownership where siren=$1`,
+        [sirenValue],
+        raws.length,
+        username,
+      );
 
       return raws.map(owner => owner.email);
     } catch (error: unknown) {
@@ -29,9 +41,20 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async getAllSirenByEmail(email: Email): Promise<string[]> {
+  public async getAllSirenByEmail(email: Email, username?: string): Promise<string[]> {
     try {
-      const raws = await this.sql`select * from ${this.table} where email=${email.getValue()}`;
+      const emailValue = email.getValue();
+
+      const raws = await this.sql`select * from ${this.table} where email=${emailValue}`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRepo.getAllSirenByEmail",
+        "ownership",
+        `select * from ownership where email=$1`,
+        [emailValue],
+        raws.length,
+        username,
+      );
 
       return raws.map(owner => owner.siren);
     } catch (error: unknown) {
@@ -44,28 +67,61 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async addSirens(email: Email, sirensToAdd: string[]): Promise<void> {
+  public async addSirens(email: Email, sirensToAdd: string[], username?: string): Promise<void> {
     try {
-      const values = sirensToAdd.map(siren => ({ siren, email: email.getValue() }));
+      const emailValue = email.getValue();
+      const values = sirensToAdd.map(siren => ({ siren, email: emailValue }));
+
       await this.sql`INSERT INTO ${this.table} ${_sql(values)} ON CONFLICT DO NOTHING`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRepo.addSirens",
+        "ownership",
+        `INSERT INTO ownership VALUES (${sirensToAdd
+          .map(siren => `('${siren}', '${emailValue}')`)
+          .join(", ")}) ON CONFLICT DO NOTHING`,
+        [emailValue, sirensToAdd],
+        undefined,
+        username,
+      );
     } catch (error: unknown) {
       console.error(error);
       throw error;
     }
   }
 
-  public async removeSirens(email: Email, sirensToRemove: string[]): Promise<void> {
+  public async removeSirens(email: Email, sirensToRemove: string[], username?: string): Promise<void> {
     try {
-      await this.sql`DELETE FROM ${this.table} WHERE email = ${email.getValue()} AND siren = ANY(${sirensToRemove})`;
+      const emailValue = email.getValue();
+
+      await this.sql`DELETE FROM ${this.table} WHERE email = ${emailValue} AND siren = ANY(${sirensToRemove})`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRepo.removeSirens",
+        "ownership",
+        `DELETE FROM ownership WHERE email = $1 AND siren = ANY($2)`,
+        [emailValue, sirensToRemove],
+        undefined,
+        username,
+      );
     } catch (error: unknown) {
       console.error(error);
       throw error;
     }
   }
 
-  public async getAll(): Promise<Ownership[]> {
+  public async getAll(username?: string): Promise<Ownership[]> {
     try {
       const raws = await this.sql`select * from ${this.table}`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRepo.getAll",
+        "ownership",
+        `select * from ownership`,
+        [],
+        raws.length,
+        username,
+      );
 
       return raws.map(ownershipMap.toDomain);
     } catch (error: unknown) {
@@ -108,6 +164,17 @@ select siren, email, exists (
 
     await this.sql`insert into ${this.table} ${_sql(raws)} on conflict do nothing returning true`;
 
+    auditRepo.logQuery(
+      "PostgresOwnershipRepo.saveBulk",
+      "ownership",
+      `INSERT INTO ownership VALUES ${items
+        .map(item => `('${item.siren.getValue()}', '${item.email.getValue()}')`)
+        .join(", ")} ON CONFLICT DO NOTHING`,
+      items.map(item => ({ siren: item.siren.getValue(), email: item.email.getValue() })),
+      undefined,
+      undefined,
+    );
+
     return items.map(item => [item.siren, item.email]);
   }
 
@@ -129,8 +196,19 @@ select siren, email, exists (
 
   public async save(item: Ownership): Promise<OwnershipPK> {
     const raw = ownershipMap.toPersistence(item);
+    const sirenValue = item.siren.getValue();
+    const emailValue = item.email.getValue();
 
     await this.sql`insert into ${this.table} ${_sql(raw)} on conflict do nothing returning true`;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRepo.save",
+      "ownership",
+      `INSERT INTO ownership VALUES ('${sirenValue}', '${emailValue}') ON CONFLICT DO NOTHING`,
+      [sirenValue, emailValue],
+      undefined,
+      undefined,
+    );
 
     return [item.siren, item.email];
   }

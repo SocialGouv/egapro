@@ -1,4 +1,5 @@
 import { type OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
+import { auditRepo } from "@api/core-domain/repo";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import { type OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
@@ -59,12 +60,32 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async getAll(): Promise<OwnershipRequest[]> {
     const raws = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.getAll",
+      "ownership_request",
+      `select * from ownership_request`,
+      [],
+      raws.length,
+      undefined,
+    );
+
     return raws.map(ownershipRequestMap.toDomain);
   }
 
   public async getOne(id: UniqueID): Promise<OwnershipRequest | null> {
     try {
-      const [raw] = await this.sql`select * from ${this.table} where id = ${id.getValue()} limit 1`;
+      const idValue = id.getValue();
+
+      const [raw] = await this.sql`select * from ${this.table} where id = ${idValue} limit 1`;
+
+      auditRepo.logQuery(
+        "PostgresOwnershipRequestRepo.getOne",
+        "ownership_request",
+        `select * from ownership_request where id = $1 limit 1`,
+        [idValue],
+        raw ? 1 : 0,
+        undefined,
+      );
 
       if (!raw) return null;
       return ownershipRequestMap.toDomain(raw);
@@ -84,15 +105,32 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const insert = sql(raw, "siren", "email", "asker_email", "status", "error_detail");
     const [rawReturn] = await this.sql`insert into ${this.table} ${insert} returning *`;
 
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.save",
+      "ownership_request",
+      `INSERT INTO ownership_request (siren, email, asker_email, status, error_detail) VALUES ($1, $2, $3, $4, $5)`,
+      [raw.siren, raw.email, raw.asker_email, raw.status, raw.error_detail],
+      undefined,
+      undefined,
+    );
+
     return new UniqueID(rawReturn.id);
   }
 
   public async update(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
+    const idValue = ensureRequired(item).id.getValue();
 
-    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${ensureRequired(
-      item,
-    ).id.getValue()}`;
+    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${idValue}`;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.update",
+      "ownership_request",
+      `UPDATE ownership_request SET status = $1, error_detail = $2 WHERE id = $3`,
+      [raw.status, raw.error_detail, idValue],
+      undefined,
+      undefined,
+    );
   }
 
   public async updateWithOwnership(item: OwnershipRequest): Promise<void> {
@@ -136,7 +174,18 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
+    const idValues = ids.map(id => id.getValue());
+
+    const raws = await this.sql`select * from ${this.table} where id in ${sql(idValues)}`;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.getMultiple",
+      "ownership_request",
+      `select * from ownership_request where id in ($1)`,
+      [idValues],
+      raws.length,
+      undefined,
+    );
 
     return raws.map(ownershipRequestMap.toDomain);
   }
@@ -160,6 +209,18 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       from (values ${sql(values)}) as update_data (id, status, error_detail)
       where ${this.table}.id = cast(update_data.id as uuid)
     `;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.updateBulk",
+      "ownership_request",
+      `UPDATE ownership_request SET status = update_data.status, error_detail = update_data.error_detail
+       FROM (VALUES ${items.map((_, idx) => `($${idx * 3 + 1}, $${idx * 3 + 2}, $${idx * 3 + 3})`).join(", ")}) 
+       AS update_data (id, status, error_detail)
+       WHERE ownership_request.id = update_data.id`,
+      values.flat(),
+      undefined,
+      undefined,
+    );
   }
 
   public async search({
@@ -182,12 +243,47 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
     const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
 
+    const queryString = `select * from ownership_request where (${QUERYABLE_COLS.join(
+      " ilike '%" + query + "%' or ",
+    )} ilike '%${query}%') ${status ? `and status='${status}'` : ""} ${
+      orderBy && orderDirection ? `order by ${OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy]} ${orderDirection}` : ""
+    } ${limit ? `limit ${limit}` : ""} ${offset ? `offset ${offset}` : ""}`;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.search",
+      "ownership_request",
+      queryString,
+      [query, status, limit, offset, orderBy, orderDirection],
+      rows.length,
+      undefined,
+    );
+
     return rows.map(ownershipRequestMap.toDomain);
   }
 
   public async countSearch({ query, status }: OwnershipSearchCriteria): Promise<number> {
-    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
+    // Paramètres de la requête
+    const searchParams = { query, status };
+
+    // Construire la clause WHERE
+    const sqlWhereClause = this.buildSearchWhereClause(searchParams);
+
+    // Exécuter la requête
     const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
+
+    // Construct the query string for audit logging
+    const queryString = `select count(*) from ownership_request where (${QUERYABLE_COLS.join(
+      " ilike '%" + query + "%' or ",
+    )} ilike '%${query}%') ${status ? `and status='${status}'` : ""}`;
+
+    auditRepo.logQuery(
+      "PostgresOwnershipRequestRepo.countSearch",
+      "ownership_request",
+      queryString,
+      [query, status],
+      1,
+      undefined,
+    );
 
     return Number(count);
   }
