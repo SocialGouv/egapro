@@ -8,7 +8,7 @@ import { adminMenuItems } from "../admin/Navigation";
 
 export const Navigation = () => {
   const segment = useSelectedLayoutSegment();
-  const segments = useSelectedLayoutSegments();
+  const segments = useSelectedLayoutSegments() || [];
 
   const { data: session } = useSession();
 

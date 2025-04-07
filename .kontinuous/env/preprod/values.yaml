@@ -29,13 +29,8 @@ app:
         { "host": "redis-node-1.redis-headless", "port": 26379 },
         { "host": "redis-node-2.redis-headless", "port": 26379 }
       ]
-  resources:
-    requests:
-      cpu: 20m
-      memory: 256M
-    limits:
-      cpu: 500m
-      memory: 1G
+  annotations:
+    oblik.socialgouv.io/min-request-cpu: 500m
 
 maildev: {}
 pgweb: {}

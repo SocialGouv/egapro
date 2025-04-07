@@ -15,7 +15,7 @@ export namespace NotComputableReasonMemberRepEq {
   }
 
   export const Label = {
-    [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Il y a aucune instance dirigeante",
+    [Enum.AUCUNE_INSTANCE_DIRIGEANTE]: "Il n'y a aucune instance dirigeante",
   } as const;
 
   export type Label = typeof Label;
