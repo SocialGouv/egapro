@@ -1,0 +1,546 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<AccessibilityStatement /> devrait correspondre au snapshot 1`] = `
+<div>
+  <section>
+    <div
+      class="fr-py-8w fr-container"
+    >
+      <div
+        class="fr-grid-row fr-grid-row--center"
+      >
+        <div
+          class="fr-col-12 fr-col-md-10 fr-col-lg-8"
+        >
+          <h1>
+            <span>
+              Déclaration d'accessibilité
+            </span>
+          </h1>
+          <p>
+            <span>
+              La DNUM s’engage à rendre son site web accessible conformément à l’article 47 de la loi n° 2005-102 du 11 février 2005.
+            </span>
+          </p>
+          <p>
+            <span>
+              À cette fin, elle met en œuvre la stratégie et les actions suivantes
+            </span>
+            <span>
+              : https://beta.gouv.fr/accessibilite/schema-pluriannuel
+            </span>
+          </p>
+          <p>
+            <span>
+              Cette déclaration d’accessibilité s’applique au site web :
+            </span>
+            <br />
+            <span>
+              https://egapro.travail.gouv.fr/
+            </span>
+          </p>
+          <h2>
+            <span>
+              ÉTAT DE CONFORMITÉ
+            </span>
+          </h2>
+          <p>
+            <span>
+              Egapro est en conformité partielle avec le référentiel général d’amélioration de l’accessibilité en raison des non-conformités énumérées ci-dessous.
+            </span>
+          </p>
+          <h2>
+            <span>
+              RÉSULTATS DES TESTS
+            </span>
+          </h2>
+          <p>
+            <span>
+              L’audit de conformité au RGAA 4.1.2 réalisé en interne révèle que :
+            </span>
+          </p>
+          <ul>
+            <li>
+              <span>
+                55,93% des critères RGAA sont respectés.
+              </span>
+            </li>
+          </ul>
+          <h2>
+            <span>
+              Dans le détail :
+            </span>
+          </h2>
+          <ul>
+            <li>
+              <span>
+                Nombre de critères conformes :
+              </span>
+              <strong>
+                <span>
+                  33
+                </span>
+              </strong>
+            </li>
+            <li>
+              <span>
+                Nombre de critères non conformes : 
+                <strong>
+                  26
+                </strong>
+              </span>
+            </li>
+            <li>
+              <span>
+                Nombre de critères non applicables : 
+                <strong>
+                  47
+                </strong>
+              </span>
+            </li>
+          </ul>
+          <h2>
+            <span>
+              CONTENUS NON ACCESSIBLES
+            </span>
+          </h2>
+          <p>
+            <span>
+              Les contenus listés ci-dessous ne sont pas accessibles pour les raisons suivantes :
+            </span>
+          </p>
+          <h3>
+            <span>
+              Non conformité
+            </span>
+          </h3>
+          <p>
+            Liste des critères non conformes :
+          </p>
+          <ul>
+            <li>
+              <span>
+                1.1 Chaque image porteuse d’information a-t-elle une alternative textuelle ?
+              </span>
+            </li>
+            <li>
+              <span>
+                1.3 Pour chaque image porteuse d'information ayant une alternative textuelle, cette alternative est-elle pertinente (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                1.6 Chaque image porteuse d’information a-t-elle, si nécessaire, une description détaillée ?
+              </span>
+            </li>
+            <li>
+              <span>
+                3.1 Dans chaque page web, l’information ne doit pas être donnée uniquement par la couleur. Cette règle est-elle respectée ?
+              </span>
+            </li>
+            <li>
+              <span>
+                3.2 Dans chaque page web, le contraste entre la couleur du texte et la couleur de son arrière-plan est-il suffisamment élevé (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                5.1 Chaque tableau de données complexe a-t-il un résumé ?
+              </span>
+            </li>
+            <li>
+              <span>
+                5.4 Pour chaque tableau de données ayant un titre, le titre est-il correctement associé au tableau de données ?
+              </span>
+            </li>
+            <li>
+              <span>
+                5.7 Pour chaque tableau de données, la technique appropriée permettant d’associer chaque cellule avec ses en-têtes est-elle utilisée (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                6.1 Chaque lien est-il explicite (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                7.1 Chaque script est-il, si nécessaire, compatible avec les technologies d’assistance ?
+              </span>
+            </li>
+            <li>
+              <span>
+                7.3 Chaque script est-il contrôlable par le clavier et par tout dispositif de pointage (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                7.5 Dans chaque page web, les messages de statut sont-ils correctement restitués par les technologies d’assistance ?
+              </span>
+            </li>
+            <li>
+              <span>
+                8.3 Dans chaque page web, la langue par défaut est-elle présente ?
+              </span>
+            </li>
+            <li>
+              <span>
+                8.6 Pour chaque page web ayant un titre de page, ce titre est-il pertinent ?
+              </span>
+            </li>
+            <li>
+              <span>
+                8.9 Dans chaque page web, les balises ne doivent pas être utilisées uniquement à des fins de présentation. Cette règle est-elle respectée ?
+              </span>
+            </li>
+            <li>
+              <span>
+                9.1 Dans chaque page web, l’information est-elle structurée par l’utilisation appropriée de titres ?
+              </span>
+            </li>
+            <li>
+              <span>
+                9.3 Dans chaque page web, chaque liste est-elle correctement structurée ?
+              </span>
+            </li>
+            <li>
+              <span>
+                10.2 Dans chaque page web, le contenu visible porteur d’information reste-t-il présent lorsque les feuilles de styles sont désactivées ?
+              </span>
+            </li>
+            <li>
+              <span>
+                10.7 Dans chaque page web, pour chaque élément recevant le focus, la prise de focus est-elle visible ?
+              </span>
+            </li>
+            <li>
+              <span>
+                10.9 Dans chaque page web, l’information ne doit pas être donnée uniquement par la forme, taille ou position. Cette règle est-elle respectée ?
+              </span>
+            </li>
+            <li>
+              <span>
+                10.13 Dans chaque page web, les contenus additionnels apparaissant à la prise de focus ou au survol d’un composant d’interface sont-ils contrôlables par l’utilisateur (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                11.1 Chaque champ de formulaire a-t-il une étiquette ?
+              </span>
+            </li>
+            <li>
+              <span>
+                11.2 Chaque étiquette associée à un champ de formulaire est-elle pertinente (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                11.10 Dans chaque formulaire, le contrôle de saisie est-il utilisé de manière pertinente (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                12.1 Chaque ensemble de pages dispose-t-il de deux systèmes de navigation différents, au moins (hors cas particuliers) ?
+              </span>
+            </li>
+            <li>
+              <span>
+                12.8 Dans chaque page web, l’ordre de tabulation est-il cohérent ?
+              </span>
+            </li>
+          </ul>
+          <h2>
+            <span>
+              ÉTABLISSEMENT DE CETTE DÉCLARATION D’ACCESSIBILITÉ
+            </span>
+          </h2>
+          <p>
+            <span>
+              Cette déclaration a été établie le 12 décembre 2024.
+            </span>
+          </p>
+          <h3>
+            <span>
+              Technologies utilisées pour la réalisation du site web
+            </span>
+          </h3>
+          <ul>
+            <li>
+              <span>
+                HTML
+              </span>
+            </li>
+            <li>
+              <span>
+                CSS
+              </span>
+            </li>
+            <li>
+              <span>
+                JavaScript
+              </span>
+            </li>
+          </ul>
+          <h3>
+            <span>
+              Environnement de test
+            </span>
+          </h3>
+          <p>
+            Les tests des pages web ont été effectués avec les combinaisons de navigateurs web et lecteurs d’écran suivants :
+          </p>
+          <ul>
+            <li>
+              <span>
+                Windows, NVDA 2024.4.1, Firefox 132
+              </span>
+            </li>
+            <li>
+              <span>
+                Windows, Jaws 2025, Firefox 132
+              </span>
+            </li>
+            <li>
+              <span>
+                macOS, VoiceOver, Safari
+              </span>
+            </li>
+            <li>
+              <span>
+                Android natif, TalkBack 15.1, Chrome
+              </span>
+            </li>
+            <li>
+              <span>
+                iOS, VoiceOver, Safari
+              </span>
+            </li>
+          </ul>
+          <h3>
+            <span>
+              Les outils suivants ont été utilisés lors de l’évaluation :
+            </span>
+          </h3>
+          <ul>
+            <li>
+              <span>
+                WCAG contrast checker
+              </span>
+            </li>
+            <li>
+              <span>
+                HeadingsMap
+              </span>
+            </li>
+            <li>
+              <span>
+                Web developer
+              </span>
+            </li>
+            <li>
+              <span>
+                ARC Toolkit
+              </span>
+            </li>
+          </ul>
+          <h3>
+            <span>
+              Pages du site ayant fait l’objet de la vérification de conformité
+            </span>
+          </h3>
+          <ol>
+            <li>
+              <span>
+                Accueil:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/"
+              >
+                https://egapro.travail.gouv.fr/
+              </a>
+            </li>
+            <li>
+              <span>
+                Authentification:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/login"
+              >
+                https://egapro.travail.gouv.fr/login
+              </a>
+            </li>
+            <li>
+              <span>
+                Aide:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/aide-index"
+              >
+                https://egapro.travail.gouv.fr/aide-index
+              </a>
+            </li>
+            <li>
+              <span>
+                Accessibilité:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/declaration-accessibilite"
+              >
+                https://egapro.travail.gouv.fr/declaration-accessibilite
+              </a>
+            </li>
+            <li>
+              <span>
+                Mentions légales:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/mentions-legales"
+              >
+                https://egapro.travail.gouv.fr/mentions-legales
+              </a>
+            </li>
+            <li>
+              <span>
+                Index de l'égalité professionnelle:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/index-egapro"
+              >
+                https://egapro.travail.gouv.fr/index-egapro
+              </a>
+            </li>
+            <li>
+              <span>
+                Recherche sur l'index:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/index-egapro/recherche"
+              >
+                https://egapro.travail.gouv.fr/index-egapro/recherche
+              </a>
+            </li>
+            <li>
+              <span>
+                Simulation de calcul (8 pages):
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/index-egapro/simulateur/commencer"
+              >
+                https://egapro.travail.gouv.fr/index-egapro/simulateur/commencer
+              </a>
+            </li>
+            <li>
+              <span>
+                Représentation équilibrée:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/representation-equilibree"
+              >
+                https://egapro.travail.gouv.fr/representation-equilibree
+              </a>
+            </li>
+            <li>
+              <span>
+                Déclarer les écarts:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/representation-equilibree/assujetti"
+              >
+                https://egapro.travail.gouv.fr/representation-equilibree/assujetti
+              </a>
+            </li>
+            <li>
+              <span>
+                Statistiques:
+              </span>
+              <a
+                href="https://egapro.travail.gouv.fr/stats"
+              >
+                https://egapro.travail.gouv.fr/stats
+              </a>
+            </li>
+          </ol>
+          <h2>
+            <span>
+              RETOUR D’INFORMATION ET CONTACT
+            </span>
+          </h2>
+          <p>
+            <span>
+              Si vous n’arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du site web pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme, en envoyant un message à l’adresse suivante:
+            </span>
+            <a
+              href="mailto:index@travail.gouv.fr"
+            >
+              index@travail.gouv.fr
+            </a>
+            <span>
+              .
+            </span>
+          </p>
+          <h2>
+            <span>
+              VOIES DE RECOURS
+            </span>
+          </h2>
+          <p>
+            <span>
+              Cette procédure est à utiliser dans le cas suivant.
+            </span>
+          </p>
+          <p>
+            <span>
+              Vous avez signalé au responsable du site web un défaut d’accessibilité qui vous empêche d’accéder à un contenu ou à un des services et vous n’avez pas obtenu de réponse satisfaisante.
+            </span>
+          </p>
+          <ul>
+            <li>
+              <span>
+                Écrire un message au Défenseur des droits (
+              </span>
+              <a
+                href="https://formulaire.defenseurdesdroits.fr/"
+              >
+                https://formulaire.defenseurdesdroits.fr/
+              </a>
+              <span>
+                )
+              </span>
+            </li>
+            <li>
+              <span>
+                Contacter le délégué du Défenseur des droits dans votre région (
+              </span>
+              <a
+                href="https://www.defenseurdesdroits.fr/saisir/delegues"
+              >
+                https://www.defenseurdesdroits.fr/saisir/delegues
+              </a>
+              <span>
+                )
+              </span>
+            </li>
+            <li>
+              <span>
+                Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre)
+              </span>
+              <br />
+              <span>
+                Défenseur des droits
+              </span>
+              <br />
+              <span>
+                Libre réponse 71120
+              </span>
+              <br />
+              <span>
+                75342 Paris CEDEX 07
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;
