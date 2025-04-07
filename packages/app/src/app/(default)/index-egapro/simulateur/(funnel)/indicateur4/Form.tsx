@@ -73,12 +73,10 @@ export const Indic4Form = () => {
   const computableCheck = watch("calculable");
   const count = watch("count");
 
-  indicateur4Computer.setInput(
-    {
-      total: count?.total || 0,
-      raised: count?.raised || 0,
-    } ?? { total: 0, raised: 0 },
-  );
+  indicateur4Computer.setInput({
+    total: count?.total || 0,
+    raised: count?.raised || 0,
+  });
 
   const canCompute = indicateur4Computer.canCompute();
   const computed = indicateur4Computer.compute();
