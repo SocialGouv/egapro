@@ -31,7 +31,6 @@ import {
 } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useRouter } from "next/navigation";
-// import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -71,21 +70,10 @@ export const OwnershipRequestList = ({ fetchedItems }: { fetchedItems: GetOwners
 
   const { orderDirection, orderBy, checkedItems, globalCheck } = formState;
 
-  // if (error) {
-  //   return (
-  //     // <Alert size="sm" type="error" mt="3w">
-  //     <p>Il y a eu une erreur lors de la récupération des données.</p>
-  //     // </Alert>
-  //   );
-  // }
   if (!fetchedItems) return null;
 
   if (fetchedItems.totalCount === 0) {
-    return (
-      // <Alert type="info" mt="3w">
-      <p>Aucune demande d'ajout de déclarants.</p>
-      // </Alert>
-    );
+    return <p>Aucune demande d'ajout de déclarants.</p>;
   }
   return (
     <>
@@ -107,9 +95,6 @@ export const OwnershipRequestList = ({ fetchedItems }: { fetchedItems: GetOwners
                 },
               ]}
             />
-            {/*<FormCheckboxGroup singleCheckbox size="sm" isDisabled={!hasToProcessRequests}>*/}
-            {/*  <FormCheckbox id="global-checkbox" onChange={() => toggleAll(fetchedItems)} checked={globalCheck} />*/}
-            {/*</FormCheckboxGroup>*/}
           </TableAdminHeadCol>
           {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
             <TableAdminHeadCol
@@ -182,8 +167,6 @@ const ActionButtons = () => {
         message: `Les demandes ont bien été ${action === "accept" ? "acceptées" : "refusées"}.`,
       });
       router.refresh();
-      // if (fetchedItems)
-      //   mutate({ ...fetchedItems, data: fetchedItems.data.filter(request => !checkedItems.includes(request.id)) });
     } catch (error: unknown) {
       console.error("Error in liste-declarants", error);
       setFeatureStatus({
@@ -224,7 +207,6 @@ export const OwnershipRequestPage = ({ fetchedItems }: { fetchedItems: GetOwners
   const formState = useOwnershipRequestListStore(state => state.formState);
   const submit = useOwnershipRequestListStore(state => state.submit);
   const reset = useOwnershipRequestListStore(state => state.reset);
-  // const { isLoading } = useListeDeclarants(formState);
   const { query, status } = formState;
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
   const [firstLoaded, setFirstLoaded] = useState<boolean>(true);
