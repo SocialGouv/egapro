@@ -85,7 +85,7 @@ const AccessibilityStatement = () => {
             </p> */}
 
             <h1>
-              <span>D&Eacute;CLARATION D&rsquo;ACCESSIBILIT&Eacute;</span>
+              <span>{title}</span>
             </h1>
             <p>
               <span>
