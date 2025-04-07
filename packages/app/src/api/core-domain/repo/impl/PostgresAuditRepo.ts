@@ -25,9 +25,7 @@ export class PostgresAuditRepo implements IAuditRepo {
     resultCount?: number,
     username?: string,
   ): Promise<void> {
-    try {
-      // Prepare the SQL query with the new column structure
-      await this.sql`
+    await this.sql`
         INSERT INTO audit.query_log (
           username, 
           operation, 
@@ -45,14 +43,7 @@ export class PostgresAuditRepo implements IAuditRepo {
           ${operation === "SELECT" && resultCount !== undefined ? resultCount : null}
         )
       `;
-    } catch (error) {
-      console.error("Error logging to audit table:", error);
-      // We don't want to throw an error if logging fails
-      // as it shouldn't affect the main functionality
-    }
   }
-
-  // Backward compatibility methods
 
   public async logSelectQuery(
     tableName: string,

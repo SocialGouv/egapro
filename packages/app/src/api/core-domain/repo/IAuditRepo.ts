@@ -1,9 +1,4 @@
 /**
- * Type for SQL operation
- */
-export type SqlOperation = "DELETE" | "INSERT" | "SELECT" | "UPDATE";
-
-/**
  * Interface for the audit repository
  * This repository is responsible for logging database queries to the audit.query_log table
  */
@@ -18,7 +13,7 @@ export interface IAuditRepo {
    * @param username The username of the authenticated user
    */
   logQuery(
-    operation: SqlOperation,
+    operation: string,
     tableName: string,
     query: string,
     params: unknown[],
