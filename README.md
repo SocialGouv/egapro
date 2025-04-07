@@ -10,9 +10,9 @@ Préprod : <https://egapro-preprod.ovh.fabrique.social.gouv.fr/>
 
 ### Prérequis
 
-- Node.js >= 18
-- Yarn
-- Python (pour les scripts optionnels)
+-   Node.js >= 18
+-   Yarn
+-   Python (pour les scripts optionnels)
 
 ### Installation des dépendances
 
@@ -27,6 +27,7 @@ yarn setup-python
 ### Variables d'environnement
 
 Créer un fichier `.env` à la racine du projet :
+
 ```bash
 # Configuration de la base de données
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/egapro
@@ -51,9 +52,10 @@ yarn dev:maildev
 ```
 
 Accès aux services :
-- Application : [http://localhost:3000](http://localhost:3000)
-- API : [http://localhost:2626](http://localhost:2626)
-- MailDev : [http://localhost:1080](http://localhost:1080)
+
+-   Application : [http://localhost:3000](http://localhost:3000)
+-   API : [http://localhost:2626](http://localhost:2626)
+-   MailDev : [http://localhost:1080](http://localhost:1080)
 
 2. **Mode développement complet**
 
@@ -64,8 +66,8 @@ yarn dev
 
 3. **Arrêter l'application**
 
-- Utiliser `Ctrl+C` dans chaque terminal
-- Pour l'API et maildev : `docker-compose down`
+-   Utiliser `Ctrl+C` dans chaque terminal
+-   Pour l'API et maildev : `docker-compose down`
 
 ### Tests et vérifications
 
@@ -81,13 +83,14 @@ yarn check-all
 
 ### Variables annuelles importantes
 
-- `CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
-  - Année de déclaration courante ouverte 
-  - Détermine les années disponibles pour les déclarations
+-   `CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
 
-- `PUBLIC_CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
-  - Année de référence pour les calculs de statistiques publiques
-  - Utilisée pour l'affichage des données publiques et des indicateurs
+    -   Année de déclaration courante ouverte
+    -   Détermine les années disponibles pour les déclarations
+
+-   `PUBLIC_CURRENT_YEAR` (définie dans `packages/app/src/common/dict.ts`) :
+    -   Année de référence pour les calculs de statistiques publiques
+    -   Utilisée pour l'affichage des données publiques et des indicateurs
 
 ## Architecture
 
@@ -113,49 +116,55 @@ packages/app/src/
 ### Concepts clés
 
 1. **Forms et Validation** :
-   - React Hook Form pour la gestion des formulaires
-   - Zod pour la validation des données côté client
-   - Exemple :
-   ```tsx
-   const schema = z.object({
-     email: z.string().email(),
-     password: z.string().min(8)
-   });
-   ```
+
+    - React Hook Form pour la gestion des formulaires
+    - Zod pour la validation des données côté client
+    - Exemple :
+
+    ```tsx
+    const schema = z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+    });
+    ```
 
 2. **Server Actions** :
-   - Actions serveur dans `app/(default)/*/actions.ts`
-   - Utilisation des use cases du domaine
-   - Exemple :
-   ```ts
-   // app/(default)/index-egapro/declaration/actions.ts
-   export async function saveDeclaration(declaration: CreateDeclarationDTO) {
-     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
-     return useCase.execute(declaration);
-   }
-   ```
+
+    - Actions serveur dans `app/(default)/*/actions.ts`
+    - Utilisation des use cases du domaine
+    - Exemple :
+
+    ```ts
+    // app/(default)/index-egapro/declaration/actions.ts
+    export async function saveDeclaration(declaration: CreateDeclarationDTO) {
+        const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
+        return useCase.execute(declaration);
+    }
+    ```
 
 3. **Use Cases** :
-   - Implémentation des cas d'utilisation métier
-   - Validation des règles de gestion
-   - Exemple :
-   ```ts
-   // api/core-domain/useCases/SaveDeclaration.ts
-   export class SaveDeclaration implements UseCase {
-     constructor(
-       private readonly declarationRepo: IDeclarationRepo,
-       private readonly entrepriseService: IEntrepriseService
-     ) {}
-   }
-   ```
+
+    - Implémentation des cas d'utilisation métier
+    - Validation des règles de gestion
+    - Exemple :
+
+    ```ts
+    // api/core-domain/useCases/SaveDeclaration.ts
+    export class SaveDeclaration implements UseCase {
+        constructor(
+            private readonly declarationRepo: IDeclarationRepo,
+            private readonly entrepriseService: IEntrepriseService,
+        ) {}
+    }
+    ```
 
 4. **Domain et Calculs** :
-   - Logique métier dans `core-domain`
-   - Calculs d'index dans `computers/`
-   - Indicateurs spécifiques :
-     - IndicateurUnComputer : Calcul écart rémunération
-     - IndicateurDeuxComputer : Calcul écart augmentations
-     - IndicateurTroisComputer : Calcul écart promotions
+    - Logique métier dans `core-domain`
+    - Calculs d'index dans `computers/`
+    - Indicateurs spécifiques :
+        - IndicateurUnComputer : Calcul écart rémunération
+        - IndicateurDeuxComputer : Calcul écart augmentations
+        - IndicateurTroisComputer : Calcul écart promotions
 
 ## FAQ
 
@@ -168,21 +177,21 @@ yarn workspace app run tsc
 
 ### Comment ajouter une librairie dans un workspace ?
 
-````bash
+```bash
 yarn workspace app add moment
-````
+```
 
 ### Comment lancer un script dans un package ?
 
-````bash
+```bash
 yarn workspace app run test
-````
+```
 
 ### Comment lancer un script dans tous les workspaces ?
 
-````bash
+```bash
 yarn workspaces run lint
-````
+```
 
 ### Quel est le maildev pour un environnement de recette ?
 
@@ -200,10 +209,10 @@ Le fichier index-egalite-fh.csv est généré tous les jours et accessible sans 
 
 Les fichiers suivants, sont accessibles uniquement si authentifié ou pour certaines adresses IP (voir la liste blanche dans `.kontinuous/values.yaml`).
 
-- dgt.xlsx
-- dgt-representation.xlsx
-- full.ndjson
-- indexes.csv
+-   dgt.xlsx
+-   dgt-representation.xlsx
+-   full.ndjson
+-   indexes.csv
 
 ### Commandes pour générer les fichiers manuellement
 
@@ -243,8 +252,10 @@ Il est donc recommandé d'augmenter les ressources allouées à l'application Eg
 
 | Période           | Nombre de réplicas Min | Nombre de réplicas Max |
 | :---------------- | :--------------------: | :--------------------: |
-| hors campagne     | 2 | 6 |
-| début de campagne | 4 | 8 |
-| fin de campagne   | 6 | 12 |
+| hors campagne     |           2            |           6            |
+| début de campagne |           4            |           8            |
+| fin de campagne   |           6            |           12           |
 
 > ⚠️ Il est préférable de tester le mécanisme de scale-up de l'application en production avant le commencement de la campagne. Il faut s'assurer qu'au moment du scale-up l'application pourra continuer à répondre aux requêtes des clients le temps que les nouveaux pods soient disponibles.
+
+:)

@@ -25,7 +25,8 @@
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
     "test:app": "yarn --cwd packages/app/ test",
     "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} yarn --cwd packages/app/ test:e2e",
-    "build:app": "yarn --cwd packages/app/ build"
+    "build:app": "yarn --cwd packages/app/ build",
+    "generate-file:dgt": "docker-compose exec api egapro dump-dgt /mnt/dgt.xlsx"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",

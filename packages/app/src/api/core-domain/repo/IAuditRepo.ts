@@ -21,3 +21,5 @@ export interface IAuditRepo {
     username?: string,
   ): Promise<void>;
 }
+
+export type SqlOperation = "DELETE" | "INSERT" | "SELECT" | "UPDATE";

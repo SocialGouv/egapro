@@ -59,3 +59,4 @@ venv/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+mnt/dgt.xlsx
