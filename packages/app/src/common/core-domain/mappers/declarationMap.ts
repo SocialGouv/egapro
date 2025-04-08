@@ -359,22 +359,11 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       }
     }
 
-    if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.OTHER_LEVEL) {
+    if (
+      remunerations?.mode?.getValue() === RemunerationsMode.Enum.OTHER_LEVEL ||
+      remunerations?.mode?.getValue() === RemunerationsMode.Enum.BRANCH_LEVEL
+    ) {
       dto["remunerations-coefficient-autre"] = {
-        catégories: remunerations?.categories.map(category => ({
-          nom: category.name || "",
-          tranches: {
-            [AgeRange.Enum.LESS_THAN_30]: category?.ranges?.[":29"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_30_TO_39]: category?.ranges?.["30:39"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_40_TO_49]: category?.ranges?.["40:49"]?.getValue() ?? "",
-            [AgeRange.Enum.FROM_50_TO_MORE]: category?.ranges?.["50:"]?.getValue() ?? "",
-          },
-        })),
-      };
-    }
-
-    if (remunerations?.mode?.getValue() === RemunerationsMode.Enum.BRANCH_LEVEL) {
-      dto["remunerations-coefficient-branche"] = {
         catégories: remunerations?.categories.map(category => ({
           nom: category.name || "",
           tranches: {

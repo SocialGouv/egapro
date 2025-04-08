@@ -1,8 +1,7 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Heading, Link } from "@design-system";
+import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -10,41 +9,8 @@ import { getServerSession } from "next-auth";
 import { getAllEmailsBySiren } from "../actions";
 import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
+import { MesEntreprisesInfoAlert } from "../mes-entreprises/page";
 import { SirenInput } from "./SirenInput";
-
-const proconnectSignInUrl = config.proconnect.signinUrl;
-const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
-
-const MesEntreprisesInfoAlert = () => (
-  <Alert
-    severity="info"
-    small
-    description={
-      <>
-        <p>
-          Dans ce menu, vous pouvez consulter les adresses emails qui ont été rattachées à votre entreprise, en
-          sélectionnant au préalable dans la liste déroulante le numéro Siren de l'entreprise si vous gérez plusieurs
-          entreprises.
-        </p>
-        <br />
-        <p>
-          Pour rattacher une adresse email, il faut{" "}
-          <Link target="_blank" href={`${proconnectSignInUrl}`}>
-            créer un nouveau compte ProConnect
-          </Link>{" "}
-          avec cette adresse.
-        </p>
-        <p>
-          <br />
-          Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
-            cliquez ici
-          </Link>
-        </p>
-      </>
-    }
-  />
-);
 
 const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
   const session = await getServerSession(authConfig);

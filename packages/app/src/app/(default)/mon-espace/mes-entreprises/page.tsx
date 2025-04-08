@@ -15,7 +15,7 @@ import { SelectSiren } from "./SelectSiren";
 const proconnectSignInUrl = config.proconnect.signinUrl;
 const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
 
-const MesEntreprisesInfoAlert = () => (
+export const MesEntreprisesInfoAlert = () => (
   <Alert
     severity="info"
     small
