@@ -57,27 +57,27 @@ app:
         name: egapro
   autoscale:
     enabled: true
-    minReplicas: 4
-    maxReplicas: 20
+    minReplicas: 2
+    maxReplicas: 6
   resources:
     requests:
-      cpu: 2
-      memory: 4G
+      cpu: 500m
+      memory: 1G
     limits:
-      cpu: 4
-      memory: 8G
+      cpu: 1
+      memory: 2G
 
 nginx:
   autoscale:
     enabled: true
-    minReplicas: 4
-    maxReplicas: 20
+    minReplicas: 2
+    maxReplicas: 6
   resources:
     requests:
-      cpu: 1
-      memory: 2G
+      cpu: 500m
+      memory: 1G
     limits:
-      cpu: 2
+      cpu: 1
       memory: 2G
 
 redis:
