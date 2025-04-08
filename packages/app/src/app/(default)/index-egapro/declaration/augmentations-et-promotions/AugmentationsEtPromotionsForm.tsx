@@ -41,9 +41,9 @@ const formSchema = zodFr
       populationFavorable: z.string().optional(),
       résultat: zodNumberOrEmptyString, // Infered as number | string for usage in this React Component (see below).
       résultatEquivalentSalarié: zodNumberOrEmptyString,
-      note: z.number().optional(),
-      notePourcentage: z.number().optional(),
-      noteNombreSalaries: z.number().optional(),
+      note: z.number(),
+      notePourcentage: z.number(),
+      noteNombreSalaries: z.number(),
     }),
   ])
   .superRefine((value, ctx) => {
