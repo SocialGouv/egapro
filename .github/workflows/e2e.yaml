@@ -18,7 +18,7 @@ jobs:
         run: |
           yarn install --immutable
 
-      - name: Env
+      - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
 
