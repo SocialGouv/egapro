@@ -26,6 +26,11 @@ jobs:
         run: |
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
+      - name: Override subdomain for master branch
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
+
       - name: Run test e2e
         run: |
           yarn test:e2e:app
