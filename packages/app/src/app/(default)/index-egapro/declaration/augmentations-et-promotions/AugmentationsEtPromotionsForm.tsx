@@ -138,24 +138,34 @@ export const AugmentationEtPromotionsForm = () => {
 
   // Sync notes and populationFavorable with result fields.
   useEffect(() => {
-    let calculatedNotePourcentage, calculatedNoteNombreSalaries;
+    let notePourcentage, noteNombreSalaries;
     if (résultat !== undefined && résultat !== "") {
-      calculatedNotePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
-      setValue("notePourcentage", calculatedNotePourcentage, { shouldValidate: true });
+      notePourcentage = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(résultat);
+      setValue("notePourcentage", notePourcentage, { shouldValidate: true });
     }
     if (résultatEquivalentSalarié !== undefined && résultatEquivalentSalarié !== "") {
-      calculatedNoteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
+      noteNombreSalaries = new IndicateurDeuxTroisComputer(new IndicateurUnComputer()).computeNote(
         résultatEquivalentSalarié,
       );
-      setValue("noteNombreSalaries", calculatedNoteNombreSalaries, { shouldValidate: true });
+      setValue("noteNombreSalaries", noteNombreSalaries, { shouldValidate: true });
     }
-    if (calculatedNotePourcentage !== undefined && calculatedNoteNombreSalaries !== undefined) {
-      setValue("note", Math.max(calculatedNotePourcentage, calculatedNoteNombreSalaries), { shouldValidate: true });
+    if (notePourcentage !== undefined && noteNombreSalaries !== undefined) {
+      setValue("note", Math.max(notePourcentage, noteNombreSalaries), { shouldValidate: true });
     }
 
     // If it is a compensation, we set the note to the max value.
     if (estUnRattrapage) setValue("note", indicatorNoteMax[stepName], { shouldValidate: true, shouldDirty: true });
-  }, [estCalculable, estUnRattrapage, résultat, résultatEquivalentSalarié, register, setValue, unregister]);
+  }, [
+    estCalculable,
+    estUnRattrapage,
+    noteNombreSalaries,
+    notePourcentage,
+    résultat,
+    résultatEquivalentSalarié,
+    register,
+    setValue,
+    unregister,
+  ]);
 
   const onSubmit = async (data: FormType) => {
     const newFormData = produce(formData, draft => {
