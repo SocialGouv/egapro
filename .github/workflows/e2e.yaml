@@ -1,0 +1,37 @@
+name: 🧪 E2E Tests
+
+on:
+  deployment_status:
+
+jobs:
+  e2e:
+    if: ${{ github.event.deployment_status.state == 'success' }}
+    runs-on: ubuntu-latest
+    name: "Test e2e"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+      - name: Install dependencies
+        run: |
+          yarn install --immutable
+
+      - name: Load SocialGouv variables
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+
+      - name: Set env
+        run: |
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
+
+      - name: Run test e2e
+        run: |
+          yarn test:e2e:app
+        env:
+          working-directory: ./packages/app
+          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          TEST_BASEURL: ${{ env.SITE_URL }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
