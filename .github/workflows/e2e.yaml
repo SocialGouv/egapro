@@ -17,10 +17,21 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install --immutable
+
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+
       - name: Set env
         run: |
-          echo "SITE_URL=${{ github.event.deployment_status.env_url }}" >> $GITHUB_ENV
-          echo "${{ github.event.deployment_status.env_url }}"
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
+          echo SITE_URL ==> ${{ env.SITE_URL }}"
+          echo SUBDOMAIN ==> ${{ steps.env.outputs.subdomain }}
+
+      # - name: Set env
+      #   run: |
+      #     echo "SITE_URL=${{ github.event.deployment_status.env_url }}" >> $GITHUB_ENV
+      #     echo "${{ github.event.deployment_status.env_url }}"
       - name: Run test e2e
         run: |
           yarn test:e2e:app
