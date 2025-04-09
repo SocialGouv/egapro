@@ -31,7 +31,7 @@ export async function POST() {
     // Supprimer chaque déclaration
     let deletedCount = 0;
     for (const declaration of declarations) {
-      if (declaration.declarant.email.getValue() === userEmail) {
+      if (declaration?.declarant?.email?.getValue() === userEmail) {
         await declarationRepo.delete([declaration.siren, declaration.year]);
       }
       deletedCount++;
