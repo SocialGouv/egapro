@@ -51,7 +51,7 @@ declare namespace NodeJS {
          * Dist: `1025`  
          * {@link [Local Env Dist](.env.development)}
          */
-        MAILER_SMTP_PORT?: string;
+        MAILER_SMTP_PORT?: number;
         /**
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
