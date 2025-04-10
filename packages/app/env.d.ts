@@ -126,7 +126,7 @@ declare namespace NodeJS {
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRO_READONLY?: string;
+        EGAPRO_READONLY?: boolean;
         /**
          * Dist: `https://index-egapro.travail.gouv.fr`  
          * {@link [Local Env Dist](.env.development)}
