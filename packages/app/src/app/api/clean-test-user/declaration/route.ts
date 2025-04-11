@@ -1,5 +1,6 @@
 import { declarationRepo } from "@api/core-domain/repo";
 import { assertServerSession } from "@api/utils/auth";
+import { Email } from "@common/shared-domain/domain/valueObjects";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,8 +26,10 @@ export async function POST() {
       return NextResponse.json({ error: "Vous n'êtes pas autorisé à effectuer cette action" }, { status: 403 });
     }
 
-    // Récupérer toutes les déclarations
-    const declarations = await declarationRepo.getAllByEmail(AUTHORIZED_EMAILS[0]);
+    // Récupérer toutes les déclarations des emails autorisés
+    // Convertir les chaînes de caractères en objets Email
+    const emailObjects = AUTHORIZED_EMAILS.map(email => new Email(email));
+    const declarations = await declarationRepo.getAllByEmail(emailObjects);
 
     // Supprimer chaque déclaration
     let deletedCount = 0;

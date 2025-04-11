@@ -6,6 +6,7 @@ import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
 import { declarationOpmcMap } from "@common/core-domain/mappers/declarationOpmcMap";
 import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
+import { type Email } from "@common/shared-domain/domain/valueObjects";
 import { type Any } from "@common/utils/types";
 
 import { type IDeclarationRepo } from "../IDeclarationRepo";
@@ -71,10 +72,22 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     return this;
   }
 
-  public async getAllByEmail(email: string): Promise<Declaration[]> {
+  public async getAllByEmail(emails: Email | Email[]): Promise<Declaration[]> {
     try {
-      const raws = await this
-        .sql`select * from ${this.table} where declarant=${email} and data notnull ${this.postgresLimit}`;
+      // Convertir en tableau si c'est un seul email
+      const emailArray = Array.isArray(emails) ? emails : [emails];
+
+      // Convertir les objets Email en chaînes de caractères
+      const emailStrings = emailArray.map(email => email.getValue());
+
+      // Construire la requête SQL avec une clause IN
+      const raws = await this.sql`
+        select * from ${this.table} 
+        where declarant = ANY(${emailStrings}) 
+        and data notnull 
+        order by year desc
+        ${this.postgresLimit}
+      `;
 
       return raws.map(declarationMap.toDomain);
     } catch (error: unknown) {
