@@ -1,5 +1,6 @@
 import { declarationRepo } from "@api/core-domain/repo";
 import { assertServerSession } from "@api/utils/auth";
+import { Email } from "@common/shared-domain/domain/valueObjects";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,22 +26,16 @@ export async function POST() {
       return NextResponse.json({ error: "Vous n'êtes pas autorisé à effectuer cette action" }, { status: 403 });
     }
 
-    // Récupérer toutes les déclarations
-    const declarations = await declarationRepo.getAll();
+    // Récupérer toutes les déclarations des emails autorisés
+    // Convertir les chaînes de caractères en objets Email
+    const emailObjects = AUTHORIZED_EMAILS.map(email => new Email(email));
+    const declarations = await declarationRepo.getAllByEmail(emailObjects);
 
     // Supprimer chaque déclaration
     let deletedCount = 0;
     for (const declaration of declarations) {
-      // Vérifier que declaration et declarant existent avant d'accéder à email
-      if (
-        declaration &&
-        declaration.declarant &&
-        declaration.declarant.email &&
-        declaration.declarant.email.getValue() === userEmail
-      ) {
-        await declarationRepo.delete([declaration.siren, declaration.year]);
-        deletedCount++;
-      }
+      await declarationRepo.delete([declaration.siren, declaration.year]);
+      deletedCount++;
     }
 
     // Renvoyer une réponse de succès
