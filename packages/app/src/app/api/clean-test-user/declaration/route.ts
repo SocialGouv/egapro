@@ -26,21 +26,13 @@ export async function POST() {
     }
 
     // Récupérer toutes les déclarations
-    const declarations = await declarationRepo.getAll();
+    const declarations = await declarationRepo.getAllByEmail(AUTHORIZED_EMAILS[0]);
 
     // Supprimer chaque déclaration
     let deletedCount = 0;
     for (const declaration of declarations) {
-      // Vérifier que declaration et declarant existent avant d'accéder à email
-      if (
-        declaration &&
-        declaration.declarant &&
-        declaration.declarant.email &&
-        declaration.declarant.email.getValue() === userEmail
-      ) {
-        await declarationRepo.delete([declaration.siren, declaration.year]);
-        deletedCount++;
-      }
+      await declarationRepo.delete([declaration.siren, declaration.year]);
+      deletedCount++;
     }
 
     // Renvoyer une réponse de succès

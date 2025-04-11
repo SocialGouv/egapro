@@ -71,6 +71,21 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     return this;
   }
 
+  public async getAllByEmail(email: string): Promise<Declaration[]> {
+    try {
+      const raws = await this
+        .sql`select * from ${this.table} where declarant=${email} and data notnull ${this.postgresLimit}`;
+
+      return raws.map(declarationMap.toDomain);
+    } catch (error: unknown) {
+      console.error(error);
+      if ((error as Any).code === "ECONNREFUSED") {
+        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      }
+      throw error;
+    }
+  }
+
   public async getAllBySiren(siren: Siren): Promise<Declaration[]> {
     try {
       const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} and data notnull ${

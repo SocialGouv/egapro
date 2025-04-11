@@ -6,6 +6,7 @@ import { type Repo } from "@common/shared-domain";
 
 export interface IDeclarationRepo extends Repo<Declaration> {
   count(): Promise<number>;
+  getAllByEmail(email: string): Promise<Declaration[]>;
   getAllBySiren(siren: Siren): Promise<Declaration[]>;
   getAllSirenAndYear(): Promise<Array<Partial<DeclarationRaw>>>;
   getOneDeclarationOpmc(id: DeclarationPK): Promise<DeclarationOpmc | null>;
