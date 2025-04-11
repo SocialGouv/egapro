@@ -30,6 +30,10 @@ describe("Declaration", () => {
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
 
+    cy.url().should(
+      "include",
+      "https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth",
+    );
     cy.selectByLabel("Username").clear().type(Cypress.env("E2E_USERNAME"));
     cy.selectByLabel("Password").clear().type(Cypress.env("E2E_PASSWORD"));
     cy.get("form").submit();

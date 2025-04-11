@@ -82,8 +82,9 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
       // Construire la requête SQL avec une clause IN
       const raws = await this.sql`
-        select * from ${this.table} 
-        where declarant = ANY(${emailStrings}) 
+        select * from ${this.table} d
+        inner join ownership o on o.siren = d.siren
+        where o.email = ANY(${emailStrings}) 
         and data notnull 
         order by year desc
         ${this.postgresLimit}
