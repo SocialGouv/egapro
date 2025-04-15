@@ -5,7 +5,7 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/apiv2/clean-test-user/declaration");
+    cy.request("POST", "/api/clean-test-user/declaration");
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
@@ -31,15 +31,23 @@ describe("Declaration", () => {
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
 
-    cy.url().should(
-      "include",
-      "https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth",
-    );
-    cy.selectByLabel("Username").clear().type(Cypress.env("E2E_USERNAME"));
-    cy.selectByLabel("Password").clear().type(Cypress.env("E2E_PASSWORD"));
-    cy.get("form").submit();
+    // Use cy.origin() to handle cross-origin commands
+    cy.origin("https://keycloak.undercloud.fabrique.social.gouv.fr", () => {
+      // We need to re-import Cypress environment variables in the origin context
+      const username = Cypress.env("E2E_USERNAME");
+      const password = Cypress.env("E2E_PASSWORD");
 
-    cy.checkUrl("/index-egapro/declaration/commencer");
+      // Wait for the form to be visible
+      cy.get("form", { timeout: 10000 }).should("be.visible");
+
+      // Use more reliable selectors for the username and password fields
+      cy.get('input[id="username"]').clear().type(username);
+      cy.get('input[id="password"]').clear().type(password);
+      cy.get("form").submit();
+    });
+
+    // Check if we're on the expected page
+    cy.url().should("include", "/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
     ).should("have.value", "384964508");
