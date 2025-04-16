@@ -5,7 +5,7 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/api/clean-test-user/declaration");
+    cy.request("POST", "/apiv2/clean-test-user/declaration");
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
