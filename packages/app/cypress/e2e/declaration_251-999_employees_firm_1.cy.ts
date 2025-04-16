@@ -11,9 +11,28 @@ describe("Declaration", () => {
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
     cy.visit("/");
-    cy.visit("/index-egapro");
-    cy.visit("/index-egapro/declaration/commencer");
+    cy.visit("/login");
+    cy.checkUrl("/login");
+    cy.get(".fr-connect").click();
+
+    // Use cy.origin() to handle cross-origin commands
+    cy.origin("https://keycloak.undercloud.fabrique.social.gouv.fr", () => {
+      // We need to re-import Cypress environment variables in the origin context
+      const username = Cypress.env("E2E_USERNAME");
+      const password = Cypress.env("E2E_PASSWORD");
+
+      // Wait for the form to be visible
+      cy.get("form", { timeout: 10000 }).should("be.visible");
+
+      // Use more reliable selectors for the username and password fields
+      cy.get('input[id="username"]').clear().type(username);
+      cy.get('input[id="password"]').clear().type(password);
+      cy.get("form").submit();
+    });
+
     cy.intercept("GET", "/").as("pageLoad");
+    cy.get(".fr-connect").click();
+    cy.contains(Cypress.env("E2E_USERNAME"));
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
@@ -27,17 +46,6 @@ describe("Declaration", () => {
 
     cy.checkUrl("/index-egapro/declaration/assujetti");
     cy.contains("a", "Suivant").click();
-
-    cy.checkUrl("/login");
-    cy.get(".fr-connect").click();
-
-    cy.url().should(
-      "include",
-      "https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth",
-    );
-    cy.selectByLabel("Username").clear().type(Cypress.env("E2E_USERNAME"));
-    cy.selectByLabel("Password").clear().type(Cypress.env("E2E_PASSWORD"));
-    cy.get("form").submit();
 
     cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(

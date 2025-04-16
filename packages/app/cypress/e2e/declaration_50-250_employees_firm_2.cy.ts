@@ -43,13 +43,14 @@ describe("Declaration", () => {
     cy.get("#content").within(() => {
       cy.contains("a", "Déclarer mon index").click();
     });
+
     cy.checkUrl("/index-egapro/declaration/assujetti");
     cy.contains("a", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).should("have.value", "384964508");
+    ).select("817989791");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/declarant");
@@ -59,80 +60,99 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/entreprise");
-    cy.contains("label", "De 251 à 999 inclus").click();
-    cy.contains("label", "Unité Économique et Sociale (UES)").click();
-    cy.contains("button", "Suivant").click();
-
-    cy.checkUrl("/index-egapro/declaration/ues");
-    cy.selectByLabel("Nom de l'UES *").type("ARTUS");
-    cy.contains("button", "Ajouter une entreprise").click();
-    cy.get('input[name="entreprises.0.siren"]').type("442424560");
-    cy.contains("button", "Ajouter une entreprise").click();
-    cy.get('input[name="entreprises.1.siren"]').type("821832219");
+    cy.clickRadio("Vous déclarez votre index en tant que *", "Entreprise");
+    cy.clickRadio("Tranche d'effectifs assujettis de l'entreprise *", "De 50 à 250 inclus");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/periode-reference");
-    cy.contains("label", "Oui").click();
+    cy.clickRadio(
+      "Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ? *",
+      "Oui",
+    );
     cy.selectByLabel("Date de fin de la période de référence choisie pour le calcul des indicateurs *").type(
-      "2024-11-30",
+      "2024-12-31",
     );
     cy.selectByLabel(
       "Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *",
-    ).type("398");
+    ).type("107");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/remunerations");
-    cy.contains("label", "Non").click();
-    cy.contains(
-      "label",
-      "Je déclare avoir procédé au calcul de cet indicateur par catégorie socio-professionnelle, et confirme que l'indicateur n'est pas calculable. *",
-    ).click();
-    cy.selectByLabel("Motif de non calculabilité de l'indicateur *").select("egvi40pcet");
+    cy.clickRadio("L’indicateur sur l’écart de rémunération est-il calculable ? *", "Oui");
+    cy.clickRadio(
+      "Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération *",
+      "Par catégorie socio-professionnelle",
+    );
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/augmentations");
-    cy.contains("label", "Non").click();
-    cy.selectByLabel("Motif de non calculabilité de l'indicateur *").select("egvi40pcet");
+    cy.checkUrl("/index-egapro/declaration/remunerations-csp");
+    cy.get('input[name="catégories.0.tranches.:29"]').clear();
+    cy.get('input[name="catégories.0.tranches.30:39"]').clear();
+    cy.get('input[name="catégories.0.tranches.40:49"]').clear();
+    cy.get('input[name="catégories.0.tranches.50:"]').clear();
+
+    cy.get('input[name="catégories.1.tranches.:29"]').clear();
+    cy.get('input[name="catégories.1.tranches.30:39"]').clear();
+    cy.get('input[name="catégories.1.tranches.40:49"]').clear();
+    cy.get('input[name="catégories.1.tranches.50:"]').clear();
+
+    cy.get('input[name="catégories.2.tranches.:29"]').clear();
+    cy.get('input[name="catégories.2.tranches.30:39"]').clear().type("-0.31");
+    cy.get('input[name="catégories.2.tranches.40:49"]').clear().type("0.29");
+    cy.get('input[name="catégories.2.tranches.50:"]').clear().type("0.55");
+
+    cy.get('input[name="catégories.3.tranches.:29"]').clear();
+    cy.get('input[name="catégories.3.tranches.30:39"]').clear();
+    cy.get('input[name="catégories.3.tranches.40:49"]').clear().type("5.27");
+    cy.get('input[name="catégories.3.tranches.50:"]').clear().type("5.04");
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/promotions");
-    cy.contains("label", "Non").click();
-    cy.selectByLabel("Motif de non calculabilité de l'indicateur *").select("egvi40pcet");
+    cy.checkUrl("/index-egapro/declaration/remunerations-resultat");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("10.8");
+    cy.clickRadio("Population envers laquelle l'écart est favorable *", "Hommes");
+    cy.contains("button", "Suivant").click();
+
+    cy.checkUrl("/index-egapro/declaration/augmentations-et-promotions");
+    cy.clickRadio("L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ? *", "Oui");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("8.2");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en nombre équivalent de salariés *").clear().type("2.9");
+    cy.clickRadio("Population envers laquelle l'écart est favorable *", "Femmes");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/conges-maternite");
-    cy.contains("label", "Non").click();
-    cy.selectByLabel("Motif de non calculabilité de l'indicateur *").select("absrcm");
+    cy.clickRadio("L'indicateur est-il calculable ? *", "Oui");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("100");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/hautes-remunerations");
     cy.selectByLabel("Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté *")
       .clear()
       .type("0");
-    cy.contains("label", "Hommes").click();
+    cy.clickRadio("Sexe des salariés sur-représentés *", "Hommes");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/resultat-global");
     cy.get("#content").within(() => {
-      cy.contains("span", "NC").should("exist");
+      cy.contains("span", "75").should("exist");
     });
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-02-27");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-03-03");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Non");
     cy.selectByLabel("Préciser les modalités de communication des résultats obtenus auprès de vos salariés *")
       .clear()
       .type("Affichage au sein de l'entreprise");
     cy.clickRadio(
-      "Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *",
+      "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *",
       "Non",
     );
+    cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
     cy.url().should("include", "/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
-      cy.contains("span", "NC").should("exist");
+      cy.contains("span", "75").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
     cy.contains("Votre déclaration a été transmise");
@@ -140,8 +160,8 @@ describe("Declaration", () => {
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
-    cy.contains("a", "384964508");
-    cy.contains("De 251 à 999 inclus");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("817989791");
+    cy.contains("a", "817989791");
+    cy.contains("De 50 à 250 inclus");
   });
 });

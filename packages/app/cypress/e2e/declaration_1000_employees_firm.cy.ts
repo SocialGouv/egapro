@@ -11,23 +11,7 @@ describe("Declaration", () => {
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
     cy.visit("/");
-    cy.visit("/index-egapro");
-    cy.visit("/index-egapro/declaration/commencer");
-    cy.intercept("GET", "/").as("pageLoad");
-
-    // Visiter la page de démarrage du simulateur
-    cy.visit("/");
-    cy.wait("@pageLoad");
-    cy.contains("a", "Calculer - Déclarer mon Index").click();
-
-    cy.checkUrl("/index-egapro");
-    cy.get("#content").within(() => {
-      cy.contains("a", "Déclarer mon index").click();
-    });
-
-    cy.checkUrl("/index-egapro/declaration/assujetti");
-    cy.contains("a", "Suivant").click();
-
+    cy.visit("/login");
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
 
@@ -45,6 +29,23 @@ describe("Declaration", () => {
       cy.get('input[id="password"]').clear().type(password);
       cy.get("form").submit();
     });
+
+    cy.intercept("GET", "/").as("pageLoad");
+    cy.get(".fr-connect").click();
+    cy.contains(Cypress.env("E2E_USERNAME"));
+
+    // Visiter la page de démarrage du simulateur
+    cy.visit("/");
+    cy.wait("@pageLoad");
+    cy.contains("a", "Calculer - Déclarer mon Index").click();
+
+    cy.checkUrl("/index-egapro");
+    cy.get("#content").within(() => {
+      cy.contains("a", "Déclarer mon index").click();
+    });
+
+    cy.checkUrl("/index-egapro/declaration/assujetti");
+    cy.contains("a", "Suivant").click();
 
     // Check if we're on the expected page
     cy.url().should("include", "/index-egapro/declaration/commencer");
