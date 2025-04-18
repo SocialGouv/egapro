@@ -1,4 +1,9 @@
 import { defineConfig } from "cypress";
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+// Load environment variables from .env.test
+dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
@@ -13,14 +18,14 @@ export default defineConfig({
       E2E_PASSWORD: process.env.E2E_PASSWORD,
     },
     setupNodeEvents(_on, _config) {
-      // implement node event listeners here
+      return _config;
     },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
-    defaultCommandTimeout: 60000,
+    defaultCommandTimeout: 30000,
     pageLoadTimeout: 60000,
-    responseTimeout: 60000,
-    requestTimeout: 60000,
+    responseTimeout: 30000,
+    requestTimeout: 30000,
     viewportWidth: 1600,
     viewportHeight: 1400,
   },
