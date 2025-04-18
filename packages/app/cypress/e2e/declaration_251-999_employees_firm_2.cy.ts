@@ -1,3 +1,4 @@
+// Egapro - Déclaration index - Test 3
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests

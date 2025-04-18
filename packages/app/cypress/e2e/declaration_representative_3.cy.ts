@@ -1,4 +1,4 @@
-// Egapro - Déclaration index - Test 9
+// Egapro - Déclaration index - Test 1
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests
@@ -38,53 +38,60 @@ describe("Declaration", () => {
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
     cy.wait("@pageLoad");
-    cy.contains("a", "Calculer - Déclarer mon Index").click();
+    cy.contains("a", "Déclarer mes Écarts").click();
 
-    cy.checkUrl("/index-egapro");
+    cy.checkUrl("/representation-equilibree");
     cy.get("#content").within(() => {
-      cy.contains("a", "Déclarer mon index").click();
+      cy.contains("a", "Déclarer mes écarts").click();
     });
 
-    cy.checkUrl("/index-egapro/declaration/assujetti");
+    cy.checkUrl("/representation-equilibree/assujetti");
+    cy.contains(
+      "label",
+      "Oui, mon entreprise emploie au moins 1000 salariés pour le troisième exercice consécutif",
+    ).click();
     cy.contains("a", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/commencer");
-    cy.selectByLabel(
-      "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).select("834547168");
+    // Check if we're on the expected page
+    cy.url().should("include", "/representation-equilibree/commencer");
+    cy.selectByLabel("Numéro Siren de l’entreprise *").select("804450377");
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/declarant");
+    cy.checkUrl("/representation-equilibree/declarant");
     cy.selectByLabel("Nom du déclarant *").should("have.value", "Egapro");
     cy.selectByLabel("Prénom du déclarant *").should("have.value", "Test");
     cy.selectByLabel("Téléphone du déclarant *").clear().type("0123456789");
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/entreprise");
-    cy.clickRadio("Vous déclarez votre index en tant que *", "Entreprise");
-    cy.clickRadio("Tranche d'effectifs assujettis de l'entreprise *", "De 50 à 250 inclus");
+    cy.checkUrl("/representation-equilibree/entreprise");
+    cy.should("contain.text", "804450377");
+    cy.contains("a", "Suivant").click();
+
+    cy.checkUrl("/representation-equilibree/periode-reference");
+    cy.selectByLabel(
+      "Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts *",
+    ).type("2024-10-30");
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/periode-reference");
-    cy.clickRadio(
-      "Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ? *",
-      "Non",
-    );
+    cy.checkUrl("/representation-equilibree/ecarts-cadres");
+    cy.clickRadio("L’écart de représentation est-il calculable ? *", "Non");
+    cy.selectByLabel("Motif de non calculabilité *").select("aucun_cadre_dirigeant");
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
-    cy.get("#content").within(() => {
-      cy.contains("span", "NC").should("exist");
-    });
+    cy.checkUrl("/representation-equilibree/ecarts-membres");
+    cy.clickRadio("L’écart de représentation est-il calculable ? *", "Non");
+    cy.selectByLabel("Motif de non calculabilité *").select("aucune_instance_dirigeante");
+    cy.contains("button", "Suivant").click();
+
+    cy.url().should("include", "/representation-equilibree/validation");
     cy.contains("button", "Valider et transmettre les résultats").click();
-
     cy.contains("Votre déclaration a été transmise");
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("834547168");
-    cy.contains("a", "834547168");
-    cy.contains("De 50 à 250 inclus");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("804450377");
+    cy.contains("a", "804450377");
+    cy.contains("NC");
   });
 });

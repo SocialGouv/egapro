@@ -1,3 +1,4 @@
+// Egapro - Déclaration index - Test 6
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests
@@ -163,5 +164,33 @@ describe("Declaration", () => {
     cy.selectByLabel("Numéro Siren de l'entreprise").select("817989791");
     cy.contains("a", "817989791");
     cy.contains("De 50 à 250 inclus");
+
+    // Déclaration progression
+    cy.contains("a", "À renseigner").click();
+
+    cy.checkUrl("/index-egapro/objectifs-mesures/817989791/2024");
+    cy.get("#objectifIndicateurUn").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type("Objectif 30/40 en réduisant l'écart de rémunération entre les hommes et les femmes à moins de 5%");
+    });
+    cy.get("#objectifIndicateurCinq").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type("Objectif 10/10 en réduisant l'écart de rémunération entre les hommes et les femmes à moins de 5%");
+    });
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-04-10");
+    cy.selectByLabel("Préciser les modalités de communication des objectifs de progression auprès de vos salariés.")
+      .clear()
+      .type("Affichage au sein de l'entreprise");
+    cy.contains("button", "Valider et transmettre les informations").click();
+    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("button", "Retour").click();
+
+    cy.checkUrl("/mon-espace/mes-declarations");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("817989791");
+    cy.contains("a", "Renseignés");
   });
 });

@@ -1,3 +1,4 @@
+// Egapro - Déclaration index - Test 7
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests
@@ -189,5 +190,38 @@ describe("Declaration", () => {
     cy.selectByLabel("Numéro Siren de l'entreprise").select("983923384");
     cy.contains("a", "983923384");
     cy.contains("De 50 à 250 inclus");
+
+    // Déclaration progression
+    cy.contains("a", "À renseigner").click();
+
+    cy.checkUrl("/index-egapro/objectifs-mesures/983923384/2024");
+    cy.get("#objectifIndicateurUn").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type(
+          "Poursuivre les efforts faits en 2024 pour réduire les écarts de rémunération constatés en faveur des hommes pour des emplois comparables (à compétences, performances et expériences égales) et se rapprocher plus étroitement des 40 points.",
+        );
+    });
+    cy.get("#objectifIndicateurDeuxTrois").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type(
+          "Etudier les situations individuelles et réajuster la politique salariale si nécessaire pour résorber les inégalités salariales le cas échéant",
+        );
+    });
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-06-01");
+    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2025-06-01");
+    cy.selectByLabel(
+      "Préciser les modalités de communication des objectifs de progression et des mesures de correction auprès de vos salariés.",
+    ).type("Note de service envoyé aux salariés");
+    cy.contains("button", "Valider et transmettre les informations").click();
+    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("button", "Retour").click();
+
+    cy.checkUrl("/mon-espace/mes-declarations");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("983923384");
+    cy.contains("a", "Renseignés");
   });
 });

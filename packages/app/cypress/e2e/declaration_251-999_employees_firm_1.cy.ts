@@ -1,3 +1,4 @@
+// Egapro - Déclaration index - Test 2
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests
@@ -174,5 +175,38 @@ describe("Declaration", () => {
     cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
     cy.contains("a", "384964508");
     cy.contains("De 251 à 999 inclus");
+
+    // Déclaration progression
+    cy.contains("a", "À renseigner").click();
+
+    cy.checkUrl("/index-egapro/objectifs-mesures/384964508/2024");
+    cy.get("#objectifIndicateurUn").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type("L'objectif est de ramener les écarts de rémunération à 0,1 voire à 0.");
+    });
+    cy.get("#objectifIndicateurTrois").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type("A compétence égale prioriser la promotion des femmes.");
+    });
+    cy.get("#objectifIndicateurCinq").within(() => {
+      cy.get("textarea")
+        .should("be.visible")
+        .should("not.be.disabled")
+        .type(
+          "L’objectif de progression est d’avoir au moins deux femmes dans cette catégorie et obtenir une note de 5/10 sur cet indicateur.",
+        );
+    });
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-07-01");
+    cy.contains("button", "Valider et transmettre les informations").click();
+    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("button", "Retour").click();
+
+    cy.checkUrl("/mon-espace/mes-declarations");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
+    cy.contains("a", "Renseignés");
   });
 });
