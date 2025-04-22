@@ -1,9 +1,4 @@
 import { defineConfig } from "cypress";
-import * as dotenv from "dotenv";
-import * as path from "path";
-
-// Load environment variables from .env.test
-dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
