@@ -10,7 +10,7 @@ import { storePicker } from "@common/utils/zustand";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isBefore, isEqual, parseISO } from "date-fns";
+import { isBefore, isEqual, isValid, parseISO } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,13 @@ import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeq
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
   .superRefine(({ endOfPeriod, publishDate }, ctx) => {
+    if (publishDate && !isValid(parseISO(publishDate))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Le format de la date est invalide`,
+        path: ["publishDate"],
+      });
+    }
     if (
       isBefore(parseISO(publishDate), parseISO(endOfPeriod)) ||
       isEqual(parseISO(publishDate), parseISO(endOfPeriod))
