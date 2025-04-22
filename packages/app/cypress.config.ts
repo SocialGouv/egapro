@@ -12,9 +12,6 @@ export default defineConfig({
       E2E_USERNAME: process.env.E2E_USERNAME,
       E2E_PASSWORD: process.env.E2E_PASSWORD,
     },
-    setupNodeEvents(_on, _config) {
-      return _config;
-    },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
     defaultCommandTimeout: 30000,
