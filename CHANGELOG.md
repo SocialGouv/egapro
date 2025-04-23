@@ -1,3 +1,26 @@
+# [3.8.0](https://github.com/SocialGouv/egapro/compare/v3.7.0...v3.8.0) (2025-04-16)
+
+
+### Bug Fixes
+
+* 2482 erreur lors de la création dune déclaration suisse ([#2492](https://github.com/SocialGouv/egapro/issues/2492)) ([871d6fa](https://github.com/SocialGouv/egapro/commit/871d6fad54a3a231f8230c736f1adcf634a5951b))
+* api test e2e declarant null ([#2499](https://github.com/SocialGouv/egapro/issues/2499)) ([c0ae9b8](https://github.com/SocialGouv/egapro/commit/c0ae9b85fa44cfe9e4a9d94532d365568889972e))
+* api test e2e declarant null ([#2500](https://github.com/SocialGouv/egapro/issues/2500)) ([4af2095](https://github.com/SocialGouv/egapro/commit/4af20952225d15032b84744d0d4147bbc1b58eff))
+* api test e2e declarant null ([#2508](https://github.com/SocialGouv/egapro/issues/2508)) ([3d97920](https://github.com/SocialGouv/egapro/commit/3d979201d5c938a3b090deaeb91122c6a3a9601b))
+* api test e2e declarant null ([#2509](https://github.com/SocialGouv/egapro/issues/2509)) ([6eba61c](https://github.com/SocialGouv/egapro/commit/6eba61c6424e8203e3249c8114f27d9f22b07119))
+* downgrade resources ([148e2c0](https://github.com/SocialGouv/egapro/commit/148e2c09ec64ea98176d2404a23dfaa5ab194638))
+* typo ([#2497](https://github.com/SocialGouv/egapro/issues/2497)) ([303461b](https://github.com/SocialGouv/egapro/commit/303461b457cd81f7a9fef577fe2ac92872ded5c0))
+* up next (fix CVE) ([2cfa298](https://github.com/SocialGouv/egapro/commit/2cfa2983c572cf956b1b50eeb5f5ec2770de3c13))
+* **up-next:** type ([2fc770f](https://github.com/SocialGouv/egapro/commit/2fc770fa6c627b10b067b923884ffef25f80e799))
+
+
+### Features
+
+* 2430 log des événements dutilisation de lapplication ([#2486](https://github.com/SocialGouv/egapro/issues/2486)) ([f4a229c](https://github.com/SocialGouv/egapro/commit/f4a229cae563b306d14f183930a183bb59df6527)), closes [#2484](https://github.com/SocialGouv/egapro/issues/2484)
+* ajout du test ex25 moins de 250 employees ([#2481](https://github.com/SocialGouv/egapro/issues/2481)) ([8954a12](https://github.com/SocialGouv/egapro/commit/8954a127a4aa671e170457413d6f70ae619e6b0f))
+* prevent e2e on prod ([fb3cc27](https://github.com/SocialGouv/egapro/commit/fb3cc27623496a965240ada22b66c005fa808d1e))
+* update declaration accessibilite ([#2496](https://github.com/SocialGouv/egapro/issues/2496)) ([d827eb1](https://github.com/SocialGouv/egapro/commit/d827eb14f78992c8ec074d63f5bca2788d872551))
+
 # [3.7.0](https://github.com/SocialGouv/egapro/compare/v3.6.20...v3.7.0) (2025-03-20)
 
 
