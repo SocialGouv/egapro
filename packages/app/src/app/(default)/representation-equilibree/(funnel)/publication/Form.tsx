@@ -24,7 +24,7 @@ const formSchema = createSteps.publication
     const isoPublishDate = parseISO(publishDate);
     const isPublishDateValid = publishDate && isValid(isoPublishDate);
     const isoEndOfPeriod = parseISO(endOfPeriod);
-    const isEndOfPeriodValid = endOfPeriod && isValid(isoPublishDate);
+    const isEndOfPeriodValid = endOfPeriod && isValid(isoEndOfPeriod);
 
     if (!isPublishDateValid) {
       ctx.addIssue({
