@@ -21,16 +21,29 @@ import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeq
 const formSchema = createSteps.publication
   .and(createSteps.periodeReference)
   .superRefine(({ endOfPeriod, publishDate }, ctx) => {
-    if (publishDate && !isValid(parseISO(publishDate))) {
+    const isoPublishDate = parseISO(publishDate);
+    const isPublishDateValid = publishDate && isValid(isoPublishDate);
+    const isoEndOfPeriod = parseISO(endOfPeriod);
+    const isEndOfPeriodValid = endOfPeriod && isValid(isoPublishDate);
+
+    if (!isPublishDateValid) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Le format de la date est invalide`,
         path: ["publishDate"],
       });
     }
+    if (!isEndOfPeriodValid) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Le format de la date est invalide`,
+        path: ["endOfPeriod"],
+      });
+    }
     if (
-      isBefore(parseISO(publishDate), parseISO(endOfPeriod)) ||
-      isEqual(parseISO(publishDate), parseISO(endOfPeriod))
+      isPublishDateValid &&
+      isEndOfPeriodValid &&
+      (isBefore(isoPublishDate, isoEndOfPeriod) || isEqual(isoPublishDate, isoEndOfPeriod))
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
