@@ -153,7 +153,7 @@ describe("Declaration", () => {
       "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus *",
     )
       .clear()
-      .type("https://share.novartis.net/sites/wenovartis741/SitePages/We-Novartis.aspx");
+      .type("http://www.test.com");
     cy.clickRadio(
       "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *",
       "Non",
