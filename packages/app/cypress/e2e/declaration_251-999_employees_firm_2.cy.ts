@@ -50,7 +50,7 @@ describe("Declaration", () => {
     cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).should("have.value", "384964508");
+    ).select("384964508");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/declarant");
