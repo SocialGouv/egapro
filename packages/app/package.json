@@ -13,6 +13,7 @@
     "lint:fix": "next lint --fix",
     "tsc": "node_modules/.bin/tsc --pretty --noEmit",
     "test": "jest --silent --coverage --ci --coverageReporters=\"lcov\"",
+    "jest": "jest",
     "test:coverage": "jest --silent --coverage",
     "test:watch": "jest --watch",
     "test:e2e": "cypress run --headed",

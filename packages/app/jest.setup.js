@@ -29,3 +29,7 @@ jest.mock("next/navigation", () => ({
 jest.mock("@formkit/auto-animate/react", () => ({
   useAutoAnimate: jest.fn(() => []),
 }));
+
+console.error = (...args) => {
+  return;
+};

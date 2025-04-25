@@ -53,7 +53,6 @@ export const ValidationRecapRepEq = () => {
   if (hydrated && !funnel?.siren) {
     return redirect("/representation-equilibree/commencer");
   }
-
   if (!hydrated || !company) {
     return (
       <>
@@ -71,6 +70,7 @@ export const ValidationRecapRepEq = () => {
   try {
     assertRepEq(funnel);
   } catch (e: unknown) {
+    console.debug("error", JSON.stringify(e));
     return <Alert severity="error" title="Données invalides" description={(e as ZodError).message} />;
   }
 
@@ -86,12 +86,13 @@ export const ValidationRecapRepEq = () => {
       : "/representation-equilibree/publication";
 
   const { address, countryCodeCOG, countyCode, postalCode, regionCode } = getAdditionalMeta(company);
+  console.debug("address", address);
   const repEq: RepresentationEquilibreeDTO = {
     ...funnel,
     declaredAt: "",
     modifiedAt: "",
     company: {
-      address: address?.includes("[ND]") ? "Information non diffusible" : address,
+      address: address.includes("[ND]") ? "Information non diffusible" : address,
       city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
         ? ""
         : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",
