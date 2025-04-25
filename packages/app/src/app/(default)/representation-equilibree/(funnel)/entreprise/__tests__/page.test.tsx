@@ -10,7 +10,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { setupCompanyMock, setupFunnelStoreMock } from "../../__test-utils__/repeq-mocks";
 import Entreprise from "../page";
 
-describe("Validation", () => {
+describe("Entreprise Page", () => {
   const useRepeqFunnelStoreMock = jest.requireMock("../../useRepeqFunnelStore").useRepeqFunnelStore;
   beforeEach(() => {
     jest.clearAllMocks();
