@@ -61,9 +61,9 @@ jest.mock("../../useRepeqFunnelStore", () => ({
 import { type ServerActionResponse } from "@common/utils/next";
 import { getCompany } from "@globalActions/company";
 import { type CompanyErrorCodes } from "@globalActions/companyErrorCodes";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
-import Validation from "../page";
+import Entreprise from "../page";
 
 describe("Validation", () => {
   const useRepeqFunnelStoreMock = jest.requireMock("../../useRepeqFunnelStore").useRepeqFunnelStore;
@@ -142,9 +142,10 @@ describe("Validation", () => {
         siren: "384964508",
       },
     }));
-    render(<Validation />);
-
-    expect(screen.getByText(/Récapitulatif des écarts de représentation/, { exact: false })).toBeInTheDocument();
+    render(<Entreprise />);
+    waitFor(() => {
+      expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
+    });
   });
 
   it("should render correctly when company is foreign", () => {
@@ -208,8 +209,10 @@ describe("Validation", () => {
         siren: "820709046",
       },
     }));
-    render(<Validation />);
+    render(<Entreprise />);
 
-    expect(screen.getByText(/Récapitulatif des écarts de représentation/, { exact: false })).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
+    });
   });
 });
