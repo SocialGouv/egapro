@@ -16,6 +16,7 @@ export const getAdditionalMeta = (company: Entreprise) => {
     ? company.firstMatchingEtablissement.address.split(postalCode)[0].trim()
     : company.firstMatchingEtablissement.address;
   const countryCodeCOG = company.firstMatchingEtablissement.codePaysEtrangerEtablissement ?? DEFAULT_COUNTRY_COG;
+
   return {
     countyCode,
     regionCode,
