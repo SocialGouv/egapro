@@ -1,5 +1,24 @@
 // Mock dependencies before importing them
 jest.mock("@globalActions/company");
+
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(() => ({
+    data: {
+      user: {
+        staff: false,
+        companies: [
+          {
+            label: "test",
+            siren: "123456789",
+          },
+        ],
+        email: "test@test.com",
+      },
+      expires: "",
+    },
+    status: "authenticated",
+  })),
+}));
 jest.mock("next-auth", () => ({
   getServerSession: jest.fn(async () => ({
     expires: "",
@@ -55,8 +74,16 @@ describe("Validation", () => {
     useRepeqFunnelStoreMock.mockImplementation(selector => {
       const state = {
         funnel: {
-          siren: "384964508",
-          year: 2022,
+          year: 2024,
+          siren: "351630371",
+          lastname: "Egapro",
+          firstname: "Test",
+          phoneNumber: "0666666666",
+          gdpr: true,
+          email: "egapro-e2e@fabrique.social.gouv.fr",
+          endOfPeriod: "2024-12-31",
+          notComputableReasonExecutives: "aucun_cadre_dirigeant",
+          notComputableReasonMembers: "aucune_instance_dirigeante",
         },
         isEdit: false,
         _hasHydrated: true,
@@ -126,6 +153,14 @@ describe("Validation", () => {
         funnel: {
           siren: "820709046",
           year: 2022,
+          lastname: "Egapro",
+          firstname: "Test",
+          phoneNumber: "0666666666",
+          gdpr: true,
+          email: "egapro-e2e@fabrique.social.gouv.fr",
+          endOfPeriod: "2024-12-31",
+          notComputableReasonExecutives: "aucun_cadre_dirigeant",
+          notComputableReasonMembers: "aucune_instance_dirigeante",
         },
         isEdit: false,
         _hasHydrated: true,
@@ -174,6 +209,7 @@ describe("Validation", () => {
       },
     }));
     render(<Validation />);
+    screen.debug();
 
     expect(screen.getByText(/Récapitulatif des écarts de représentation/, { exact: false })).toBeInTheDocument();
   });
