@@ -7,7 +7,12 @@ import { getCompany } from "@globalActions/company";
 import { type CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { render, screen, waitFor } from "@testing-library/react";
 
-import { setupCompanyMock, setupFunnelStoreMock } from "../../__test-utils__/repeq-mocks";
+import {
+  foreignCompanyFunnelState,
+  frenchCompanyFunnelState,
+  setupCompanyMock,
+  setupFunnelStoreMock,
+} from "../../__test-utils__/repeq-mocks";
 import Entreprise from "../page";
 
 describe("Entreprise Page", () => {
@@ -25,6 +30,7 @@ describe("Entreprise Page", () => {
     render(<Entreprise />);
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
+      expect(screen.getByText(frenchCompanyFunnelState.funnel.siren)).toBeInTheDocument();
     });
   });
 
@@ -39,6 +45,7 @@ describe("Entreprise Page", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
+      expect(screen.getByText(foreignCompanyFunnelState.funnel.siren)).toBeInTheDocument();
     });
   });
 });
