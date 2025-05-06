@@ -1,7 +1,5 @@
 FROM python:3.9.7
-
 WORKDIR /app
-
 RUN useradd -m myapp
 RUN chown myapp:myapp /app
 USER myapp
@@ -17,7 +15,5 @@ RUN	pip install -e .[dev,test,prod]
 RUN cp -r egapro.egg-info /tmp/egapro.egg-info
 
 EXPOSE 2626
-
 ENTRYPOINT ["./entrypoint.sh"]
-
 CMD ["./dev.sh"]

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 
 import Publication from "../page";
@@ -10,16 +11,25 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock the zustand store
+const mockEndOfPeriod = "2023-12-31";
 jest.mock("../../useRepeqFunnelStore", () => ({
   useRepeqFunnelStore: jest.fn(() => ({
     funnel: {
       year: 2023,
-      endOfPeriod: "2023-12-31",
+      endOfPeriod: mockEndOfPeriod,
     },
     saveFunnel: jest.fn(),
     resetFunnel: jest.fn(),
   })),
   useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+}));
+
+// Mock formatIsoToFr to ensure consistent output in tests
+jest.mock("@common/utils/date", () => ({
+  formatIsoToFr: jest.fn(date => {
+    if (date === mockEndOfPeriod) return "31/12/2023";
+    return "Date formatée";
+  }),
 }));
 
 describe("Publication", () => {
@@ -46,10 +56,20 @@ describe("Publication", () => {
   it("should have a date input field", () => {
     render(<Publication />);
 
-    // Check that the date input is rendered
     const dateInput = screen.getByLabelText(/Date de publication des écarts calculables/, { exact: false });
     expect(dateInput).toBeInTheDocument();
     expect(dateInput).toHaveAttribute("type", "date");
+  });
+
+  it("should disable submit button with invalid date", async () => {
+    render(<Publication />);
+
+    const dateInput = screen.getByLabelText(/Date de publication des écarts calculables/, { exact: false });
+    await userEvent.type(dateInput, "01/01/20225");
+    await userEvent.tab();
+
+    const submitButton = screen.getByRole("button", { name: "Suivant" });
+    expect(submitButton).toBeDisabled();
   });
 
   it("should have radio buttons for website selection", () => {
