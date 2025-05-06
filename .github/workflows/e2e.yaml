@@ -33,6 +33,7 @@ jobs:
 
       - name: Run test e2e
         run: |
+          echo "Longueur du secret : ${#E2E_USERNAME}" |
           yarn test:e2e:app
         env:
           working-directory: ./packages/app
