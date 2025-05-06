@@ -3,6 +3,9 @@ name: 🧪 E2E Tests
 on:
   deployment_status:
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     if: ${{ github.event.deployment_status.state == 'success' && !contains(github.event.deployment.environment, 'prod') }}
@@ -33,7 +36,20 @@ jobs:
 
       - name: Run test e2e
         run: |
-          echo "Longueur du secret : ${#E2E_USERNAME}" |
+          if [ -z "$E2E_USERNAME" ]; then
+            echo "Erreur : E2E_USERNAME n'est pas défini"
+            exit 1
+          else
+            echo "E2E_USERNAME est défini"
+            echo "Longueur de E2E_USERNAME : ${#E2E_USERNAME}"
+          fi
+          if [ -z "$E2E_PASSWORD" ]; then
+            echo "Erreur : E2E_PASSWORD n'est pas défini"
+            exit 1
+          else
+            echo "E2E_PASSWORD est défini"
+            echo "Longueur de E2E_PASSWORD : ${#E2E_PASSWORD}"
+          fi
           yarn test:e2e:app
         env:
           working-directory: ./packages/app
