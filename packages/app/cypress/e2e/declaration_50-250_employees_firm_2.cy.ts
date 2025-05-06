@@ -17,22 +17,20 @@ describe("Declaration", () => {
     cy.get(".fr-connect").click();
 
     // Use cy.origin() to handle cross-origin commands
-    cy.origin("https://keycloak.undercloud.fabrique.social.gouv.fr", () => {
-      // We need to re-import Cypress environment variables in the origin context
-      const username = Cypress.env("E2E_USERNAME");
-      const password = Cypress.env("E2E_PASSWORD");
+    cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
+    // We need to re-import Cypress environment variables in the origin context
+    const username = Cypress.env("E2E_USERNAME");
+    const password = Cypress.env("E2E_PASSWORD");
 
-      // Wait for the form to be visible
-      cy.get("form", { timeout: 10000 }).should("be.visible");
+    // Wait for the form to be visible
+    cy.get("form", { timeout: 10000 }).should("be.visible");
 
-      // Use more reliable selectors for the username and password fields
-      cy.get('input[id="username"]').clear().type(username);
-      cy.get('input[id="password"]').clear().type(password);
-      cy.get("form").submit();
-    });
+    // Use more reliable selectors for the username and password fields
+    cy.get('input[id="username"]').clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
 
     cy.intercept("GET", "/").as("pageLoad");
-    cy.get(".fr-connect").click();
     cy.contains(Cypress.env("E2E_USERNAME"));
 
     // Visiter la page de démarrage du simulateur
