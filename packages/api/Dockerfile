@@ -8,11 +8,9 @@ USER 1001
 ENV PATH $PATH:/home/myapp/.local/bin
 
 RUN pip3 install pipenv --user
-RUN pip install --upgrade pip
 
 COPY setup.py .
 COPY setup.cfg .
-COPY egapro/ ./egapro/
 RUN	pip install -e .[dev,test,prod]
 RUN cp -r egapro.egg-info /tmp/egapro.egg-info
 
