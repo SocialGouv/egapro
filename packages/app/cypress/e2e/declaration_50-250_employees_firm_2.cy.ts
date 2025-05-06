@@ -1,4 +1,4 @@
-// Egapro - Déclaration index - Test 2
+// Egapro - Déclaration index - Test 6
 describe("Declaration", () => {
   beforeEach(() => {
     // Réinitialiser l'état entre les tests
@@ -51,7 +51,7 @@ describe("Declaration", () => {
     cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).select("384964508");
+    ).select("817989791");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/declarant");
@@ -61,110 +61,99 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/entreprise");
-    cy.contains("label", "De 251 à 999 inclus").click();
-    cy.contains("label", "Entreprise").click();
+    cy.clickRadio("Vous déclarez votre index en tant que *", "Entreprise");
+    cy.clickRadio("Tranche d'effectifs assujettis de l'entreprise *", "De 50 à 250 inclus");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/periode-reference");
-    cy.contains("label", "Oui").click();
+    cy.clickRadio(
+      "Disposez-vous d'une période de référence de 12 mois consécutifs pour le calcul de vos indicateurs ? *",
+      "Oui",
+    );
     cy.selectByLabel("Date de fin de la période de référence choisie pour le calcul des indicateurs *").type(
       "2024-12-31",
     );
     cy.selectByLabel(
       "Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *",
-    ).type("288");
+    ).type("107");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/remunerations");
-    cy.contains("label", "Oui").click();
-    cy.contains(
-      "label",
-      "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-    ).click();
-    cy.clickRadio("Un CSE a-t-il été mis en place ? *", "Oui");
-    cy.selectByLabel("Date de consultation du CSE pour le choix de cette modalité de calcul *")
-      .clear()
-      .type("2025-02-14");
+    cy.clickRadio("L’indicateur sur l’écart de rémunération est-il calculable ? *", "Oui");
+    cy.clickRadio(
+      "Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération *",
+      "Par catégorie socio-professionnelle",
+    );
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/remunerations-coefficient-branche");
+    cy.checkUrl("/index-egapro/declaration/remunerations-csp");
     cy.get('input[name="catégories.0.tranches.:29"]').clear();
     cy.get('input[name="catégories.0.tranches.30:39"]').clear();
     cy.get('input[name="catégories.0.tranches.40:49"]').clear();
     cy.get('input[name="catégories.0.tranches.50:"]').clear();
-    cy.contains("button", "Ajouter un niveau ou coefficient").click();
-    cy.get('input[name="catégories.1.tranches.:29"]').clear().type("0.79");
-    cy.get('input[name="catégories.1.tranches.30:39"]').clear().type("5.19");
-    cy.get('input[name="catégories.1.tranches.40:49"]').clear().type("1.9");
-    cy.get('input[name="catégories.1.tranches.50:"]').clear().type("-0.02");
-    cy.contains("button", "Ajouter un niveau ou coefficient").click();
-    cy.get('input[name="catégories.2.tranches.:29"]').clear().type("0");
-    cy.get('input[name="catégories.2.tranches.30:39"]').clear().type("-2.19");
-    cy.get('input[name="catégories.2.tranches.40:49"]').clear().type("-9.72");
-    cy.get('input[name="catégories.2.tranches.50:"]').clear().type("5.17");
+
+    cy.get('input[name="catégories.1.tranches.:29"]').clear();
+    cy.get('input[name="catégories.1.tranches.30:39"]').clear();
+    cy.get('input[name="catégories.1.tranches.40:49"]').clear();
+    cy.get('input[name="catégories.1.tranches.50:"]').clear();
+
+    cy.get('input[name="catégories.2.tranches.:29"]').clear();
+    cy.get('input[name="catégories.2.tranches.30:39"]').clear().type("-0.31");
+    cy.get('input[name="catégories.2.tranches.40:49"]').clear().type("0.29");
+    cy.get('input[name="catégories.2.tranches.50:"]').clear().type("0.55");
+
+    cy.get('input[name="catégories.3.tranches.:29"]').clear();
+    cy.get('input[name="catégories.3.tranches.30:39"]').clear();
+    cy.get('input[name="catégories.3.tranches.40:49"]').clear().type("5.27");
+    cy.get('input[name="catégories.3.tranches.50:"]').clear().type("5.04");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/remunerations-resultat");
-    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("1.1");
-    cy.contains("label", "Hommes").click();
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("10.8");
+    cy.clickRadio("Population envers laquelle l'écart est favorable *", "Hommes");
     cy.contains("button", "Suivant").click();
 
-    cy.checkUrl("/index-egapro/declaration/augmentations");
-    cy.contains("label", "Oui").click();
-    cy.selectByLabel("Ouvriers").clear();
-    cy.selectByLabel("Employés").clear();
-    cy.selectByLabel("Techniciens et agents de maîtrise").clear();
-    cy.selectByLabel("Ingénieurs et cadres").clear().type("0.6");
-    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("0.6");
-    cy.contains("label", "Hommes").click();
-    cy.contains("button", "Suivant").click();
-
-    cy.checkUrl("/index-egapro/declaration/promotions");
-    cy.contains("label", "Oui").click();
-    cy.selectByLabel("Ouvriers").clear();
-    cy.selectByLabel("Employés").clear();
-    cy.selectByLabel("Techniciens et agents de maîtrise").clear();
-    cy.selectByLabel("Ingénieurs et cadres").clear().type("9.74");
-    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("9.7");
-    cy.contains("label", "Hommes").click();
+    cy.checkUrl("/index-egapro/declaration/augmentations-et-promotions");
+    cy.clickRadio("L'indicateur sur l'écart de taux d'augmentations individuelles est-il calculable ? *", "Oui");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("8.2");
+    cy.selectByLabel("Résultat final obtenu à l'indicateur en nombre équivalent de salariés *").clear().type("2.9");
+    cy.clickRadio("Population envers laquelle l'écart est favorable *", "Femmes");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/conges-maternite");
-    cy.contains("label", "Oui").click();
+    cy.clickRadio("L'indicateur est-il calculable ? *", "Oui");
     cy.selectByLabel("Résultat final obtenu à l'indicateur en % *").clear().type("100");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/hautes-remunerations");
     cy.selectByLabel("Résultat obtenu à l'indicateur en nombre de salariés du sexe sous-représenté *")
       .clear()
-      .type("1");
-    cy.contains("label", "Hommes").click();
+      .type("0");
+    cy.clickRadio("Sexe des salariés sur-représentés *", "Hommes");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/resultat-global");
     cy.get("#content").within(() => {
-      cy.contains("span", "78").should("exist");
+      cy.contains("span", "75").should("exist");
     });
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-02-18");
-    cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Oui");
-    cy.selectByLabel(
-      "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus *",
-    )
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-03-03");
+    cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Non");
+    cy.selectByLabel("Préciser les modalités de communication des résultats obtenus auprès de vos salariés *")
       .clear()
-      .type("http://www.test.com");
+      .type("Affichage au sein de l'entreprise");
     cy.clickRadio(
       "Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance » ? *",
-      "Oui",
+      "Non",
     );
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
     cy.url().should("include", "/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
-      cy.contains("span", "78").should("exist");
+      cy.contains("span", "75").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
     cy.contains("Votre déclaration a été transmise");
@@ -172,41 +161,36 @@ describe("Declaration", () => {
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
-    cy.contains("a", "384964508");
-    cy.contains("De 251 à 999 inclus");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("817989791");
+    cy.contains("a", "817989791");
+    cy.contains("De 50 à 250 inclus");
 
     // Déclaration progression
     cy.contains("a", "À renseigner").click();
 
-    cy.checkUrl("/index-egapro/objectifs-mesures/384964508/2024");
+    cy.checkUrl("/index-egapro/objectifs-mesures/817989791/2024");
     cy.get("#objectifIndicateurUn").within(() => {
       cy.get("textarea")
         .should("be.visible")
         .should("not.be.disabled")
-        .type("L'objectif est de ramener les écarts de rémunération à 0,1 voire à 0.");
-    });
-    cy.get("#objectifIndicateurTrois").within(() => {
-      cy.get("textarea")
-        .should("be.visible")
-        .should("not.be.disabled")
-        .type("A compétence égale prioriser la promotion des femmes.");
+        .type("Objectif 30/40 en réduisant l'écart de rémunération entre les hommes et les femmes à moins de 5%");
     });
     cy.get("#objectifIndicateurCinq").within(() => {
       cy.get("textarea")
         .should("be.visible")
         .should("not.be.disabled")
-        .type(
-          "L’objectif de progression est d’avoir au moins deux femmes dans cette catégorie et obtenir une note de 5/10 sur cet indicateur.",
-        );
+        .type("Objectif 10/10 en réduisant l'écart de rémunération entre les hommes et les femmes à moins de 5%");
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-07-01");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-04-10");
+    cy.selectByLabel("Préciser les modalités de communication des objectifs de progression auprès de vos salariés.")
+      .clear()
+      .type("Affichage au sein de l'entreprise");
     cy.contains("button", "Valider et transmettre les informations").click();
     cy.contains("Votre déclaration a été validée et transmise");
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
+    cy.selectByLabel("Numéro Siren de l'entreprise").select("817989791");
     cy.contains("a", "Renseignés");
   });
 });

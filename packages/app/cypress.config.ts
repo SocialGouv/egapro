@@ -12,15 +12,12 @@ export default defineConfig({
       E2E_USERNAME: process.env.E2E_USERNAME,
       E2E_PASSWORD: process.env.E2E_PASSWORD,
     },
-    setupNodeEvents(_on, _config) {
-      // implement node event listeners here
-    },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
-    defaultCommandTimeout: 60000,
+    defaultCommandTimeout: 30000,
     pageLoadTimeout: 60000,
-    responseTimeout: 60000,
-    requestTimeout: 60000,
+    responseTimeout: 30000,
+    requestTimeout: 30000,
     viewportWidth: 1600,
     viewportHeight: 1400,
   },
