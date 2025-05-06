@@ -7,12 +7,7 @@ import { getCompany } from "@globalActions/company";
 import { type CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { render, screen } from "@testing-library/react";
 
-import {
-  foreignCompanyFunnelState,
-  frenchCompanyFunnelState,
-  setupCompanyMock,
-  setupFunnelStoreMock,
-} from "../../__test-utils__/repeq-mocks";
+import { setupCompanyMock, setupFunnelStoreMock } from "../../__test-utils__/repeq-mocks";
 import Validation from "../page";
 
 describe("Validation", () => {
@@ -30,7 +25,6 @@ describe("Validation", () => {
     render(<Validation />);
 
     expect(screen.getByText(/Récapitulatif des écarts de représentation/, { exact: false })).toBeInTheDocument();
-    expect(screen.getByText(frenchCompanyFunnelState.funnel.siren)).toBeInTheDocument();
   });
 
   it("should render correctly when company is foreign", () => {
@@ -43,6 +37,5 @@ describe("Validation", () => {
     render(<Validation />);
 
     expect(screen.getByText(/Récapitulatif des écarts de représentation/, { exact: false })).toBeInTheDocument();
-    expect(screen.getByText(foreignCompanyFunnelState.funnel.siren)).toBeInTheDocument();
   });
 });

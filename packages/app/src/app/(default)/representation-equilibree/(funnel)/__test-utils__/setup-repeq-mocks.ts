@@ -3,7 +3,9 @@ import { nextAuthMock, nextAuthReactMock, repeqFunnelStoreMock } from "./repeq-m
 
 // Configure all common mocks directly
 // Mock company action
-jest.mock("@globalActions/company");
+jest.mock("@globalActions/company", () => ({
+  getCompany: jest.fn(),
+}));
 
 // Mock next-auth/react
 jest.mock("next-auth/react", () => nextAuthReactMock);

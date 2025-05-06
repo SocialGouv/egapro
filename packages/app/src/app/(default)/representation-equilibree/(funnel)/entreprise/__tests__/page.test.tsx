@@ -8,8 +8,8 @@ import { type CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { render, screen, waitFor } from "@testing-library/react";
 
 import {
-  foreignCompanyFunnelState,
-  frenchCompanyFunnelState,
+  foreignCompanyMockData,
+  frenchCompanyMockData,
   setupCompanyMock,
   setupFunnelStoreMock,
 } from "../../__test-utils__/repeq-mocks";
@@ -30,7 +30,7 @@ describe("Entreprise Page", () => {
     render(<Entreprise />);
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
-      expect(screen.getByText(frenchCompanyFunnelState.funnel.siren)).toBeInTheDocument();
+      expect(screen.getByText(frenchCompanyMockData.siren)).toBeInTheDocument();
     });
   });
 
@@ -45,7 +45,7 @@ describe("Entreprise Page", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
-      expect(screen.getByText(foreignCompanyFunnelState.funnel.siren)).toBeInTheDocument();
+      expect(screen.getByText(foreignCompanyMockData.siren)).toBeInTheDocument();
     });
   });
 });
