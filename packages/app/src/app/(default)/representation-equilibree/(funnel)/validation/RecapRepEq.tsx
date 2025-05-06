@@ -53,7 +53,6 @@ export const ValidationRecapRepEq = () => {
   if (hydrated && !funnel?.siren) {
     return redirect("/representation-equilibree/commencer");
   }
-
   if (!hydrated || !company) {
     return (
       <>
@@ -91,7 +90,7 @@ export const ValidationRecapRepEq = () => {
     declaredAt: "",
     modifiedAt: "",
     company: {
-      address: address.includes("[ND]") ? "Information non diffusible" : address,
+      address: address?.includes("[ND]") ? "Information non diffusible" : address,
       city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
         ? ""
         : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",

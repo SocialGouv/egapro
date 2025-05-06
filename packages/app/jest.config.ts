@@ -13,6 +13,10 @@ const config = {
   testMatch: ["**/__tests__/**/*?(*.)+(test|spec).[jt]s?(x)"],
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
   testTimeout: 20000,
+  // Add transformIgnorePatterns to handle ESM modules in node_modules
+  transformIgnorePatterns: [
+    "/node_modules/(?!(.pnpm/)?(next|next-auth|@next|jose|openid-client|uuid|@panva|preact|@babel|@swc|@codegouvfr|react-dsfr)/)",
+  ],
   // Coverage configuration
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",

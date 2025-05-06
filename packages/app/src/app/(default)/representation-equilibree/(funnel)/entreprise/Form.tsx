@@ -45,7 +45,7 @@ export const EntrepriseForm = () => {
   const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
 
   const companyDto: CompanyDTO = {
-    address: address.includes("[ND]") ? "Information non diffusible" : address,
+    address: address?.includes("[ND]") ? "Information non diffusible" : address,
     city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
       ? ""
       : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",
