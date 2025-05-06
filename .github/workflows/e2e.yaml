@@ -5,7 +5,7 @@ on:
 
 jobs:
   e2e:
-    if: ${{ github.event.deployment_status.state == 'success' && !contains(github.event.deployment.environment, 'prod') }}
+    if: ${{ github.event.deployment_status.state == 'success'}}
     runs-on: ubuntu-latest
     name: "Test e2e"
     steps:
