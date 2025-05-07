@@ -53,17 +53,6 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
 });
 
 Cypress.Commands.add("checkUrl", url => {
-  // Vérifier si l'URL contient le chemin attendu
-  cy.url().then(currentUrl => {
-    if (!currentUrl.includes(url)) {
-      cy.log(`URL actuelle ${currentUrl} ne contient pas ${url}, tentative de navigation directe`);
-      cy.visit(url);
-    }
-  });
-
-  // Confirmer que l'URL contient maintenant le chemin attendu
   cy.url().should("include", url);
-
-  // Cliquer sur le contenu pour s'assurer que la page est active
   cy.get("#content").click();
 });
