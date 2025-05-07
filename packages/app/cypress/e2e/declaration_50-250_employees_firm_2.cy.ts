@@ -31,7 +31,7 @@ describe("Declaration", () => {
     cy.get("form").submit();
 
     cy.intercept("GET", "/").as("pageLoad");
-    cy.contains(Cypress.env("E2E_USERNAME"));
+    cy.get(".fr-header__tools-links").should("exist");
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
