@@ -12,7 +12,7 @@ describe("Declaration", () => {
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
     cy.visit("/");
-
+    cy.visit("/index-egapro");
     cy.visit("/login");
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
@@ -39,7 +39,7 @@ describe("Declaration", () => {
     cy.wait("@pageLoad");
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
-    cy.visit("/index-egapro");
+    cy.checkUrl("/index-egapro");
     cy.get("#content").within(() => {
       cy.contains("a", "Déclarer mon index").click();
     });
