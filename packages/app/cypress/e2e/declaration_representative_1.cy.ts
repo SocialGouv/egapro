@@ -10,33 +10,11 @@ describe("Declaration", () => {
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
-    // load cache
-    cy.visit("/");
-
-    cy.visit("/login");
-    cy.checkUrl("/login");
-    cy.get(".fr-connect").click();
-
-    // Use cy.origin() to handle cross-origin commands
-    cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
-    // We need to re-import Cypress environment variables in the origin context
-    const username = Cypress.env("E2E_USERNAME");
-    const password = Cypress.env("E2E_PASSWORD");
-
-    // Wait for the form to be visible
-    cy.get("form", { timeout: 10000 }).should("be.visible");
-
-    // Use more reliable selectors for the username and password fields
-    cy.get('input[id="username"]').clear().type(username);
-    cy.get('input[id="password"]').clear().type(password);
-    cy.get("form").submit();
-
-    cy.intercept("GET", "/").as("pageLoad");
-    cy.get(".fr-header__tools-links").should("exist");
+    cy.loginWithKeycloak();
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
-    cy.wait("@pageLoad");
+
     cy.contains("a", "Déclarer mes Écarts").click();
 
     cy.checkUrl("/representation-equilibree");
