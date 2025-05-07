@@ -56,3 +56,20 @@ Cypress.Commands.add("checkUrl", url => {
   cy.url().should("include", url);
   cy.get("#content").click();
 });
+
+Cypress.Commands.add("loginWithKeycloak", () => {
+  cy.visit("/login");
+  cy.checkUrl("/login");
+  cy.get(".fr-connect").click();
+
+  cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
+  const username = Cypress.env("E2E_USERNAME");
+  const password = Cypress.env("E2E_PASSWORD");
+
+  cy.get("form", { timeout: 10000 }).should("be.visible");
+  cy.get('input[id="username"]').clear().type(username);
+  cy.get('input[id="password"]').clear().type(password);
+  cy.get("form").submit();
+
+  cy.get(".fr-header__tools-links").should("exist");
+});

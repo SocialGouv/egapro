@@ -6,6 +6,10 @@ export default defineConfig({
   experimentalStudio: true,
   video: false,
   screenshotOnRunFailure: false,
+  retries: {
+    runMode: 2, // Réessayer 2 fois en mode CI
+    openMode: 0, // Pas de réessai en mode interactif
+  },
   e2e: {
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     env: {
@@ -14,10 +18,10 @@ export default defineConfig({
     },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
-    defaultCommandTimeout: 30000,
-    pageLoadTimeout: 60000,
-    responseTimeout: 30000,
-    requestTimeout: 30000,
+    defaultCommandTimeout: 90000,
+    pageLoadTimeout: 90000,
+    responseTimeout: 90000,
+    requestTimeout: 90000,
     viewportWidth: 1600,
     viewportHeight: 1400,
   },

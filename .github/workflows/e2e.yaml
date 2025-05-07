@@ -3,6 +3,9 @@ name: 🧪 E2E Tests
 on:
   deployment_status:
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     if: ${{ github.event.deployment_status.state == 'success'}}
