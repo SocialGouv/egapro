@@ -6,6 +6,10 @@ export default defineConfig({
   experimentalStudio: true,
   video: false,
   screenshotOnRunFailure: false,
+  retries: {
+    runMode: 2, // Réessayer 2 fois en mode CI
+    openMode: 0, // Pas de réessai en mode interactif
+  },
   e2e: {
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     env: {
