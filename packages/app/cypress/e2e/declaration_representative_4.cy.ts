@@ -12,6 +12,7 @@ describe("Declaration", () => {
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
     cy.visit("/");
+    cy.visit("/representation-equilibree");
     cy.visit("/login");
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();
