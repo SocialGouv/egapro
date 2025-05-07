@@ -36,12 +36,6 @@
 //   }
 // }
 
-Cypress.Commands.add("preloadPages", () => {
-  cy.visit("/");
-  cy.visit("/index-egapro");
-  cy.visit("/representation-equilibree");
-});
-
 Cypress.Commands.add("selectByLabel", labelText => {
   cy.contains("label", labelText)
     .invoke("attr", "for")

@@ -11,7 +11,8 @@ describe("Declaration", () => {
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     // load cache
-    cy.preloadPages();
+    cy.visit("/");
+    cy.visit("/index-egapro");
     cy.visit("/login");
     cy.checkUrl("/login");
     cy.get(".fr-connect").click();

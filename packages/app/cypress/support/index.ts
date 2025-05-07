@@ -27,7 +27,6 @@ declare global {
       selectByLabel(labelText: string): Chainable<Element>;
       clickRadio(legendText: string, radioLabel: string): Chainable<Element>;
       checkUrl(url: string): void;
-      preloadPages(): void;
     }
   }
 }
