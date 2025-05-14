@@ -1,3 +1,17 @@
+# [3.9.0](https://github.com/SocialGouv/egapro/compare/v3.8.0...v3.9.0) (2025-05-14)
+
+
+### Bug Fixes
+
+* ajout des fichiers env manquant pour CI ([#2515](https://github.com/SocialGouv/egapro/issues/2515)) ([914ccee](https://github.com/SocialGouv/egapro/commit/914ccee1a42204bcfc9b6dbc4ee5f5491379c866))
+* error pour adresse etrangere ([#2514](https://github.com/SocialGouv/egapro/issues/2514)) ([06dd8a2](https://github.com/SocialGouv/egapro/commit/06dd8a21f9f1cd43b31a79dc78e9d4c136e3b0d3))
+
+
+### Features
+
+* 2471 tests e2e declaration index suite declaration representation declaration objectif progression ([#2511](https://github.com/SocialGouv/egapro/issues/2511)) ([348ef05](https://github.com/SocialGouv/egapro/commit/348ef05bce1bf715599c1cff9daed471d93a7df5))
+* ajout de la validation de date ([#2513](https://github.com/SocialGouv/egapro/issues/2513)) ([af6ba61](https://github.com/SocialGouv/egapro/commit/af6ba61a833f7db2b9799fa7e1d8f554451265fb))
+
 # [3.8.0](https://github.com/SocialGouv/egapro/compare/v3.7.0...v3.8.0) (2025-04-16)
 
 
