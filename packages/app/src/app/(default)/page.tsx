@@ -44,6 +44,7 @@ const Home = async () => {
                 rel: "noreferrer",
                 title: "Pour plus d'informations sur l'index Egapro",
               }}
+              titleAs="h2"
               footer={
                 <ButtonsGroup
                   isReverseOrder
@@ -79,6 +80,7 @@ const Home = async () => {
                 rel: "noreferrer",
                 title: "Pour plus d'informations sur la représentation équilibrée",
               }}
+              titleAs="h2"
               footer={
                 <ButtonsGroup
                   isReverseOrder
