@@ -10,7 +10,13 @@ export const Footer = () => (
             <p className="fr-footer__top-cat">Liens utiles</p>
             <ul className="fr-footer__top-list">
               <li>
-                <a className="fr-footer__top-link" href="mailto:index@travail.gouv.fr" target="_blank" rel="noreferrer">
+                <a
+                  className="fr-footer__top-link"
+                  href="mailto:index@travail.gouv.fr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="envoyer un email à index@travail.gouv.fr - ouvre une nouvelle fenêtre"
+                >
                   Contact support technique : index@travail.gouv.fr
                 </a>
               </li>
@@ -19,7 +25,8 @@ export const Footer = () => (
                   className="fr-footer__top-link"
                   href={`${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`}
                   target="_blank"
-                  title="Télécharger la liste des référents au format xlsx"
+                  rel="noopener noreferrer"
+                  title="Télécharger la liste des référents au format xlsx - ouvre une nouvelle fenêtre"
                 >
                   Télécharger la liste des référents Egapro - Dreets
                 </a>
@@ -29,12 +36,24 @@ export const Footer = () => (
           <div className={fr.cx("fr-col-12", "fr-col-sm-3", "fr-col-md-2", "fr-py-md-11v")}>
             <ul className="fr-footer__top-list">
               <li>
-                <a className="fr-footer__top-link" href="/aide-index" target="_blank">
+                <a
+                  className="fr-footer__top-link"
+                  href="/aide-index"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Consulter l'aide concernant l'index - ouvre une nouvelle fenêtre"
+                >
                   Consulter l'aide concernant l'index
                 </a>
               </li>
               <li>
-                <a className="fr-footer__top-link" href="/aide-proconnect" target="_blank">
+                <a
+                  className="fr-footer__top-link"
+                  href="/aide-proconnect"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Consulter l'aide ProConnect (ex MonComptePro) - ouvre une nouvelle fenêtre"
+                >
                   Consulter l'aide ProConnect (ex MonComptePro)
                 </a>
               </li>
@@ -47,7 +66,8 @@ export const Footer = () => (
                   className="fr-footer__top-link"
                   href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  title="Consulter le site du Ministère du Travail - Index - ouvre une nouvelle fenêtre"
                 >
                   Consulter le site du Ministère du Travail - Index
                 </a>
@@ -57,7 +77,8 @@ export const Footer = () => (
                   className="fr-footer__top-link"
                   href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  title="Consulter le site du Ministère du Travail - Représentation équilibrée - ouvre une nouvelle fenêtre"
                 >
                   Consulter le site du Ministère du Travail - Représentation équilibrée
                 </a>
@@ -71,13 +92,20 @@ export const Footer = () => (
                   className="fr-footer__top-link"
                   href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  title="Contribuer sur Github - ouvre une nouvelle fenêtre"
                 >
                   Contribuer sur Github
                 </a>
               </li>
               <li>
-                <a className="fr-footer__top-link" href="/stats" target="_blank">
+                <a
+                  className="fr-footer__top-link"
+                  href="/stats"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Statistiques - ouvre une nouvelle fenêtre"
+                >
                   Statistiques
                 </a>
               </li>
@@ -109,6 +137,7 @@ export const Footer = () => (
                 href="https://info.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="info.gouv.fr - ouvre une nouvelle fenêtre"
               >
                 info.gouv.fr
               </a>
@@ -119,6 +148,7 @@ export const Footer = () => (
                 href="https://service-public.fr"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="service-public.fr - ouvre une nouvelle fenêtre"
               >
                 service-public.fr
               </a>
@@ -129,6 +159,7 @@ export const Footer = () => (
                 href="https://legifrance.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="legifrance.gouv.fr - ouvre une nouvelle fenêtre"
               >
                 legifrance.gouv.fr
               </a>
@@ -139,6 +170,7 @@ export const Footer = () => (
                 href="https://data.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="data.gouv.fr - ouvre une nouvelle fenêtre"
               >
                 data.gouv.fr
               </a>
@@ -181,7 +213,12 @@ export const Footer = () => (
         <div className="fr-footer__bottom-copy">
           <p>
             Sauf mention contraire, tous les contenus de ce site sont sous{" "}
-            <a href="https://github.com/SocialGouv/egapro/blob/master/LICENSE" target="_blank" rel="noreferrer">
+            <a
+              href="https://github.com/SocialGouv/egapro/blob/master/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="licence egapro - ouvre une nouvelle fenêtre"
+            >
               licence Apache 2.0
             </a>
           </p>
