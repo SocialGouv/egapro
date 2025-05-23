@@ -1,4 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import { config } from "@common/config";
 
 export const Footer = () => (
@@ -33,7 +32,7 @@ export const Footer = () => (
               </li>
             </ul>
           </div>
-          <div className={fr.cx("fr-col-12", "fr-col-sm-3", "fr-col-md-2", "fr-py-md-11v")}>
+          <div className="fr-col-12 fr-col-sm-3 fr-col-md-2 fr-py-md-11v">
             <ul className="fr-footer__top-list">
               <li>
                 <a
@@ -59,7 +58,7 @@ export const Footer = () => (
               </li>
             </ul>
           </div>
-          <div className={fr.cx("fr-col-12", "fr-col-sm-3", "fr-col-md-2", "fr-py-md-11v")}>
+          <div className="fr-col-12 fr-col-sm-3 fr-col-md-2 fr-py-md-11v">
             <ul className="fr-footer__top-list">
               <li>
                 <a
@@ -85,7 +84,7 @@ export const Footer = () => (
               </li>
             </ul>
           </div>
-          <div className={fr.cx("fr-col-12", "fr-col-sm-3", "fr-col-md-2", "fr-py-md-11v")}>
+          <div className="fr-col-12 fr-col-sm-3 fr-col-md-2 fr-py-md-11v">
             <ul className="fr-footer__top-list">
               <li>
                 <a
