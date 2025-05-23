@@ -106,22 +106,42 @@ export const Footer = () => (
           </p>
           <ul className="fr-footer__content-list">
             <li className="fr-footer__content-item">
-              <a className="fr-footer__content-link" href="https://info.gouv.fr" target="_blank" rel="noopener">
+              <a
+                className="fr-footer__content-link"
+                href="https://info.gouv.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 info.gouv.fr
               </a>
             </li>
             <li className="fr-footer__content-item">
-              <a className="fr-footer__content-link" href="https://service-public.fr" target="_blank" rel="noopener">
+              <a
+                className="fr-footer__content-link"
+                href="https://service-public.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 service-public.fr
               </a>
             </li>
             <li className="fr-footer__content-item">
-              <a className="fr-footer__content-link" href="https://legifrance.gouv.fr" target="_blank" rel="noopener">
+              <a
+                className="fr-footer__content-link"
+                href="https://legifrance.gouv.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 legifrance.gouv.fr
               </a>
             </li>
             <li className="fr-footer__content-item">
-              <a className="fr-footer__content-link" href="https://data.gouv.fr" target="_blank" rel="noopener">
+              <a
+                className="fr-footer__content-link"
+                href="https://data.gouv.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 data.gouv.fr
               </a>
             </li>
