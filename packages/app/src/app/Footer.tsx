@@ -1,4 +1,8 @@
 import { config } from "@common/config";
+import { getExternalLinkTitle } from "@common/utils/accessibility";
+
+// Accessibility status - centralized for easy updates
+const accessibilityStatus = "partiellement conforme";
 
 export const Footer = () => (
   <footer className="fr-footer" role="contentinfo" id="footer">
@@ -14,7 +18,7 @@ export const Footer = () => (
                   href="mailto:index@travail.gouv.fr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="envoyer un email à index@travail.gouv.fr - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("envoyer un email à index@travail.gouv.fr")}
                 >
                   Contact support technique : index@travail.gouv.fr
                 </a>
@@ -25,7 +29,7 @@ export const Footer = () => (
                   href={`${config.apiv2_url}/public/referents_egalite_professionnelle.xlsx`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Télécharger la liste des référents au format xlsx - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Télécharger la liste des référents au format xlsx")}
                 >
                   Télécharger la liste des référents Egapro - Dreets
                 </a>
@@ -40,7 +44,7 @@ export const Footer = () => (
                   href="/aide-index"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Consulter l'aide concernant l'index - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Consulter l'aide concernant l'index")}
                 >
                   Consulter l'aide concernant l'index
                 </a>
@@ -51,7 +55,7 @@ export const Footer = () => (
                   href="/aide-proconnect"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Consulter l'aide ProConnect (ex MonComptePro) - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Consulter l'aide ProConnect (ex MonComptePro)")}
                 >
                   Consulter l'aide ProConnect (ex MonComptePro)
                 </a>
@@ -66,7 +70,7 @@ export const Footer = () => (
                   href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Consulter le site du Ministère du Travail - Index - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Consulter le site du Ministère du Travail - Index")}
                 >
                   Consulter le site du Ministère du Travail - Index
                 </a>
@@ -77,7 +81,7 @@ export const Footer = () => (
                   href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Consulter le site du Ministère du Travail - Représentation équilibrée - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Consulter le site du Ministère du Travail - Représentation équilibrée")}
                 >
                   Consulter le site du Ministère du Travail - Représentation équilibrée
                 </a>
@@ -92,7 +96,7 @@ export const Footer = () => (
                   href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Contribuer sur Github - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Contribuer sur Github")}
                 >
                   Contribuer sur Github
                 </a>
@@ -103,7 +107,7 @@ export const Footer = () => (
                   href="/stats"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Statistiques - ouvre une nouvelle fenêtre"
+                  title={getExternalLinkTitle("Statistiques")}
                 >
                   Statistiques
                 </a>
@@ -119,7 +123,7 @@ export const Footer = () => (
           <a href="/" title="Accueil - Egapro - Ministère du Travail, de l'Emploi et de l'Insertion">
             <p className="fr-logo">
               Ministère <br />
-              du Travail,
+              du Travail
               <br /> et de l'emploi
             </p>
           </a>
@@ -136,7 +140,7 @@ export const Footer = () => (
                 href="https://info.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="info.gouv.fr - ouvre une nouvelle fenêtre"
+                title={getExternalLinkTitle("info.gouv.fr")}
               >
                 info.gouv.fr
               </a>
@@ -147,7 +151,7 @@ export const Footer = () => (
                 href="https://service-public.fr"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="service-public.fr - ouvre une nouvelle fenêtre"
+                title={getExternalLinkTitle("service-public.fr")}
               >
                 service-public.fr
               </a>
@@ -158,7 +162,7 @@ export const Footer = () => (
                 href="https://legifrance.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="legifrance.gouv.fr - ouvre une nouvelle fenêtre"
+                title={getExternalLinkTitle("legifrance.gouv.fr")}
               >
                 legifrance.gouv.fr
               </a>
@@ -169,7 +173,7 @@ export const Footer = () => (
                 href="https://data.gouv.fr"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="data.gouv.fr - ouvre une nouvelle fenêtre"
+                title={getExternalLinkTitle("data.gouv.fr")}
               >
                 data.gouv.fr
               </a>
@@ -181,7 +185,7 @@ export const Footer = () => (
         <ul className="fr-footer__bottom-list">
           <li className="fr-footer__bottom-item">
             <a className="fr-footer__bottom-link" href="/declaration-accessibilite">
-              Accessibilité : partiellement conforme
+              Accessibilité : {accessibilityStatus}
             </a>
           </li>
           <li className="fr-footer__bottom-item">
@@ -216,7 +220,7 @@ export const Footer = () => (
               href="https://github.com/SocialGouv/egapro/blob/master/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
-              title="licence egapro - ouvre une nouvelle fenêtre"
+              title={getExternalLinkTitle("licence egapro")}
             >
               licence Apache 2.0
             </a>
