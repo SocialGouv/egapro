@@ -173,6 +173,15 @@ const companySchema = zodFr.object({
   county: zodFr.enum(countiesCodes).optional(),
   region: zodFr.enum(regionCodes).optional(),
   countryIsoCode: zodFr.string(),
+  workforce: zodFr
+    .object({
+      range: zodFr.enum([
+        CompanyWorkforceRange.Enum.FROM_50_TO_250,
+        CompanyWorkforceRange.Enum.FROM_251_TO_999,
+        CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
+      ]),
+    })
+    .optional(),
 });
 
 const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
@@ -351,6 +360,24 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                     {region.label}
                   </option>
                 ))}
+              </Select>
+
+              <Select
+                label="Tranche d'effectifs assujettis de l'entreprise *"
+                nativeSelectProps={register("workforce.range")}
+              >
+                <option value="" disabled>
+                  Sélectionnez une tranche d'effectifs
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_50_TO_250}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_50_TO_250]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_251_TO_999}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_251_TO_999]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_1000_TO_MORE}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_1000_TO_MORE]}
+                </option>
               </Select>
 
               <Button type="submit" disabled={!isValid}>
