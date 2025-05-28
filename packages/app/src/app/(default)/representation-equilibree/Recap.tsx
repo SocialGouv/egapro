@@ -1,5 +1,6 @@
 "use client";
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
@@ -7,6 +8,10 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard, RecapCardCompany } from "@design-system";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { updateCompanyInfos } from "./actions";
 
 export interface DetailRepEqProps {
   edit?: boolean;
@@ -56,6 +61,60 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
 };
 
 export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
+
+  // Fonction pour mettre à jour les informations de l'entreprise
+  const handleUpdateCompany = async (updatedCompanyData: CompanyDTO) => {
+    try {
+      setIsSaving(true);
+      setSaveStatus(null);
+
+      // Vérifier si le SIREN a été modifié
+      const isEditingSiren = updatedCompanyData.siren !== repEq.siren;
+
+      // Appeler l'action serveur updateCompanyInfos
+      const result = await updateCompanyInfos(
+        updatedCompanyData.siren,
+        repEq.year,
+        updatedCompanyData,
+        isEditingSiren ? repEq.siren : undefined,
+      );
+
+      if (!result.ok) {
+        throw new Error(result.error);
+      }
+
+      // Afficher un message de succès
+      setSaveStatus({
+        success: true,
+        message: "Les modifications ont été enregistrées avec succès.",
+      });
+
+      // Si le SIREN a été modifié, rediriger vers la nouvelle page
+      if (isEditingSiren) {
+        router.push(`/representation-equilibree/${updatedCompanyData.siren}/${repEq.year}`);
+      } else {
+        // Sinon, rafraîchir la page pour afficher les nouvelles informations
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des informations de l'entreprise:", error);
+
+      // Afficher un message d'erreur
+      setSaveStatus({
+        success: false,
+        message:
+          typeof error === "object" && error !== null && "message" in error
+            ? String(error.message)
+            : "Une erreur est survenue lors de l'enregistrement des modifications.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <>
       {!publicMode && (
@@ -76,17 +135,15 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         />
       )}
 
-      {/* Afficher l'objet company pour déboguer */}
-      {console.log("Company object passed to RecapCardCompany:", buildCompanyFromRepeq(repEq))}
-      <RecapCardCompany
-        mode="admin"
-        company={buildCompanyFromRepeq(repEq)}
-        onSubmit={data => {
-          console.log("Form submitted with data:", data);
-          // Afficher une alerte pour indiquer que les modifications ont été enregistrées
-          alert("Les modifications ont été enregistrées (simulation)");
-        }}
-      />
+      <RecapCardCompany mode="admin" company={buildCompanyFromRepeq(repEq)} onSubmit={handleUpdateCompany} />
+      {saveStatus && (
+        <Alert
+          severity={saveStatus.success ? "success" : "error"}
+          className={fr.cx("fr-mb-2w")}
+          description={saveStatus.message}
+          small
+        />
+      )}
 
       {!publicMode && (
         <RecapCard

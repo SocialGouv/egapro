@@ -11,7 +11,11 @@ import {
 } from "@api/core-domain/useCases/SendRepresentationEquilibreeReceipt";
 import { jsxPdfService } from "@api/shared-domain/infra/pdf";
 import { assertServerSession } from "@api/utils/auth";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { type ServerActionResponse } from "@common/utils/next";
 
 export async function getRepresentationEquilibree(siren: string, year: number) {
   await assertServerSession({
@@ -79,5 +83,86 @@ export async function sendRepresentationEquilibreeReceipt(siren: string, year: n
       if (e.previousError) throw e.previousError;
     }
     throw e;
+  }
+}
+
+/**
+ * Action serveur pour mettre à jour les informations de l'entreprise dans la représentation équilibrée
+ * Cette fonction met à jour directement l'objet dans la base de données
+ */
+export async function updateCompanyInfos(
+  siren: string,
+  year: number,
+  updatedCompanyData: CompanyDTO,
+  oldSiren?: string,
+): Promise<ServerActionResponse<undefined, string>> {
+  try {
+    // Vérifier l'autorisation
+    await assertServerSession({
+      owner: {
+        check: siren,
+        message: "Not authorized to update company infos for this Siren.",
+      },
+      staff: true,
+    });
+
+    // Récupérer la représentation équilibrée existante
+    const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
+    const existingRepEq = await useCase.execute({ siren: oldSiren || siren, year });
+
+    if (!existingRepEq) {
+      return {
+        ok: false,
+        error: "Représentation équilibrée non trouvée.",
+      };
+    }
+
+    // Créer une clé primaire pour la représentation équilibrée
+    const pk: [Siren, PositiveNumber] = [new Siren(siren), new PositiveNumber(year)];
+
+    // Récupérer l'objet RepresentationEquilibree depuis le repository
+    const repEqEntity = await representationEquilibreeRepo.getOne(pk);
+
+    if (!repEqEntity) {
+      return {
+        ok: false,
+        error: "Représentation équilibrée non trouvée dans le repository.",
+      };
+    }
+
+    // Créer un nouvel objet RepresentationEquilibree avec les informations de l'entreprise mises à jour
+    const updatedRepEq = repEqEntity.fromJson({
+      company: {
+        name: updatedCompanyData.name,
+        address: updatedCompanyData.address || "",
+        city: updatedCompanyData.city || "",
+        postalCode: updatedCompanyData.postalCode || "",
+        countryCode: updatedCompanyData.countryIsoCode,
+        nafCode: updatedCompanyData.nafCode,
+        county: updatedCompanyData.county,
+        region: updatedCompanyData.region,
+        siren: siren,
+      },
+      modifiedAt: new Date(),
+    });
+
+    // Sauvegarder directement l'objet dans la base de données
+    await representationEquilibreeRepo.saveWithIndex(updatedRepEq);
+
+    // Si le SIREN a été modifié, supprimer l'ancienne représentation équilibrée
+    if (oldSiren && oldSiren !== siren) {
+      const oldPk: [Siren, PositiveNumber] = [new Siren(oldSiren), new PositiveNumber(year)];
+      await representationEquilibreeRepo.delete(oldPk);
+    }
+
+    return {
+      ok: true,
+    };
+  } catch (error: unknown) {
+    console.error("Erreur lors de la mise à jour directe des informations de l'entreprise:", error);
+    return {
+      ok: false,
+      error: "Une erreur est survenue lors de la mise à jour des informations de l'entreprise.",
+    };
   }
 }

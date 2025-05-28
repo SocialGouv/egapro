@@ -233,11 +233,12 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
     formState: { isValid, errors },
     setValue,
     watch,
+    getValues,
   } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
+    mode: "all", // Valider le formulaire en continu
   });
-  console.log("errors", JSON.stringify(errors));
   // Nous n'avons plus besoin de cet effet car le gestionnaire d'événements onChange du champ de sélection du pays
   // s'occupe déjà de mettre à jour selectedCountry et de vider les champs si nécessaire
 
@@ -439,7 +440,16 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                 </option>
               </Select>
 
-              <Button type="submit" disabled={!isValid}>
+              <Button
+                type="button"
+                onClick={() => {
+                  // Récupérer les valeurs actuelles du formulaire avec getValues()
+                  const formValues = getValues();
+
+                  // Appeler directement handleOnSummit avec les valeurs du formulaire
+                  handleOnSummit(formValues);
+                }}
+              >
                 Valider les modifications
               </Button>
             </form>

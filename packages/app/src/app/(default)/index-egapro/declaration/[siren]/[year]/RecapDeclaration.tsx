@@ -2,6 +2,7 @@
 
 import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import { CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
@@ -11,6 +12,7 @@ import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { BigNote, Box, RecapCard, RecapCardCompany } from "@design-system";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { funnelStaticConfig } from "../../declarationFunnelConfiguration";
 import { updateCompanyInfos } from "./actions";
@@ -23,6 +25,8 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
   // console.log(déclaration);
   const router = useRouter();
+  const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   // console.log(entreprise);
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
@@ -50,39 +54,68 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
   const year = déclaration.commencer?.annéeIndicateurs || 2023;
 
   const onSubmit = async (data: CompanyDTO) => {
-    const newFormData: DeclarationDTO = {
-      ...déclaration,
-      entreprise: {
-        ...déclaration.entreprise,
-        entrepriseDéclarante: {
-          ...déclaration.entreprise?.entrepriseDéclarante,
-          raisonSociale: data.name,
-          codeNaf: data.nafCode,
-          siren: data.siren,
-          commune: data.city,
-          codePostal: data.postalCode,
-          adresse: data.address ?? "",
-          département: data.county,
-          région: data.region,
-          codePays: data.countryIsoCode,
-        },
-      },
-    };
-    const isEditingSiren = data.siren != déclaration.entreprise?.entrepriseDéclarante?.siren;
+    try {
+      setIsSaving(true);
+      setSaveStatus(null);
 
-    const { ok } = await updateCompanyInfos(
-      newFormData,
-      isEditingSiren ? déclaration.entreprise?.entrepriseDéclarante?.siren : void 0,
-    );
-    if (!ok)
-      return alert(
-        "Une erreur est survenue lors de la sauvegarde des informations de l'entreprise, veuillez réessayer.",
+      const newFormData: DeclarationDTO = {
+        ...déclaration,
+        entreprise: {
+          ...déclaration.entreprise,
+          entrepriseDéclarante: {
+            ...déclaration.entreprise?.entrepriseDéclarante,
+            raisonSociale: data.name,
+            codeNaf: data.nafCode,
+            siren: data.siren,
+            commune: data.city,
+            codePostal: data.postalCode,
+            adresse: data.address ?? "",
+            département: data.county,
+            région: data.region,
+            codePays: data.countryIsoCode,
+          },
+        },
+      };
+      const isEditingSiren = data.siren != déclaration.entreprise?.entrepriseDéclarante?.siren;
+
+      const { ok } = await updateCompanyInfos(
+        newFormData,
+        isEditingSiren ? déclaration.entreprise?.entrepriseDéclarante?.siren : void 0,
       );
 
-    if (isEditingSiren) {
-      router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);
+      if (!ok) {
+        setSaveStatus({
+          success: false,
+          message:
+            "Une erreur est survenue lors de la sauvegarde des informations de l'entreprise, veuillez réessayer.",
+        });
+        return;
+      }
+
+      // Afficher un message de succès
+      setSaveStatus({
+        success: true,
+        message: "Les modifications ont été enregistrées avec succès.",
+      });
+
+      if (isEditingSiren) {
+        router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);
+      } else {
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des informations de l'entreprise:", error);
+
+      setSaveStatus({
+        success: false,
+        message:
+          typeof error === "object" && error !== null && "message" in error
+            ? String(error.message)
+            : "Une erreur est survenue lors de l'enregistrement des modifications.",
+      });
+    } finally {
+      setIsSaving(false);
     }
-    router.refresh();
   };
 
   return (
@@ -129,6 +162,14 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         title="Informations Entreprise / UES"
         onSubmit={onSubmit}
       />
+      {saveStatus && (
+        <Alert
+          severity={saveStatus.success ? "success" : "error"}
+          className={fr.cx("fr-mb-2w")}
+          description={saveStatus.message}
+          small
+        />
+      )}
       {company.ues?.name && (
         <RecapCard
           title="Informations UES"
