@@ -16,18 +16,43 @@ export interface DetailRepEqProps {
 
 // TODO: update RepresentationEquilibreeDTO to use CompanyProps instead.
 const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO => {
-  const { address, city, countryCode, nafCode, name, postalCode } = repEq.company;
+  // Afficher l'objet company pour déboguer
+  console.log("repEq.company:", repEq.company);
+
+  const { address, city, countryCode, nafCode, name, postalCode, county, region } = repEq.company;
   const siren = repEq.siren;
 
-  return {
-    address,
-    city,
+  // Créer l'objet CompanyDTO avec les valeurs par défaut pour les champs qui pourraient être undefined
+  // Créer l'objet CompanyDTO avec les valeurs par défaut pour les champs qui pourraient être undefined ou vides
+  const companyDTO: CompanyDTO = {
     countryIsoCode: countryCode,
     nafCode: nafCode,
     name,
-    postalCode: postalCode,
     siren,
+    county,
+    region,
   };
+
+  // Ajouter explicitement les propriétés avec des valeurs par défaut si elles sont vides ou undefined
+  if (!address || address.trim() === "") {
+    companyDTO.address = "Non renseigné";
+  } else {
+    companyDTO.address = address;
+  }
+
+  if (!city || city.trim() === "") {
+    companyDTO.city = "Non renseigné";
+  } else {
+    companyDTO.city = city;
+  }
+
+  if (!postalCode || postalCode.trim() === "") {
+    companyDTO.postalCode = "Non renseigné";
+  } else {
+    companyDTO.postalCode = postalCode;
+  }
+
+  return companyDTO;
 };
 
 export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
@@ -51,7 +76,17 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         />
       )}
 
-      <RecapCardCompany mode="admin" company={buildCompanyFromRepeq(repEq)} />
+      {/* Afficher l'objet company pour déboguer */}
+      {console.log("Company object passed to RecapCardCompany:", buildCompanyFromRepeq(repEq))}
+      <RecapCardCompany
+        mode="admin"
+        company={buildCompanyFromRepeq(repEq)}
+        onSubmit={data => {
+          console.log("Form submitted with data:", data);
+          // Afficher une alerte pour indiquer que les modifications ont été enregistrées
+          alert("Les modifications ont été enregistrées (simulation)");
+        }}
+      />
 
       {!publicMode && (
         <RecapCard

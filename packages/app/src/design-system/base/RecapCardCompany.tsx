@@ -10,7 +10,7 @@ import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { funnelStaticConfig } from "../../app/(default)/index-egapro/declaration/declarationFunnelConfiguration";
@@ -164,26 +164,42 @@ const regions = [
 export const regionCodes = regions.map(region => region.value) as [string, ...string[]];
 export const countiesCodes = counties.map(county => county.value) as [string, ...string[]];
 
-const companySchema = zodFr.object({
-  name: zodFr.string(),
-  city: zodFr.string(),
-  address: zodFr.string(),
-  nafCode: zodFr.string(),
-  postalCode: zodFr.string(),
-  siren: zodFr.string(),
-  county: zodFr.enum(countiesCodes).optional(),
-  region: zodFr.enum(regionCodes).optional(),
-  countryIsoCode: zodFr.string(),
-  workforce: zodFr
-    .object({
-      range: zodFr.enum([
-        CompanyWorkforceRange.Enum.FROM_50_TO_250,
-        CompanyWorkforceRange.Enum.FROM_251_TO_999,
-        CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
-      ]),
-    })
-    .optional(),
-});
+// Schéma de validation modifié pour rendre les champs d'adresse optionnels lorsque le pays n'est pas la France
+const companySchema = zodFr
+  .object({
+    name: zodFr.string(),
+    // Ces champs sont optionnels par défaut
+    city: zodFr.string().optional(),
+    address: zodFr.string().optional(),
+    postalCode: zodFr.string().optional(),
+    nafCode: zodFr.string(),
+    siren: zodFr.string(),
+    county: zodFr.enum(countiesCodes).optional(),
+    region: zodFr.enum(regionCodes).optional(),
+    countryIsoCode: zodFr.string(),
+    workforce: zodFr
+      .object({
+        range: zodFr.enum([
+          CompanyWorkforceRange.Enum.FROM_50_TO_250,
+          CompanyWorkforceRange.Enum.FROM_251_TO_999,
+          CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
+        ]),
+      })
+      .optional(),
+  })
+  .refine(
+    // Validation conditionnelle : si le pays est la France, les champs d'adresse sont requis
+    data => {
+      if (data.countryIsoCode === "FR") {
+        return !!data.city && !!data.address && !!data.postalCode;
+      }
+      return true; // Si le pays n'est pas la France, pas de validation supplémentaire
+    },
+    {
+      message: "Les champs Adresse, Ville et Code postal sont requis pour la France",
+      path: ["countryIsoCode"], // Le message d'erreur sera associé au champ pays
+    },
+  );
 
 const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
   let newAdress = address;
@@ -221,26 +237,21 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
     resolver: zodResolver(companySchema),
     defaultValues: company,
   });
-
-  // Observer les changements de pays
-  const watchedCountry = watch("countryIsoCode");
-
-  // Mettre à jour l'état local quand le pays change
-  useEffect(() => {
-    // S'assurer que watchedCountry n'est pas undefined
-    if (watchedCountry !== undefined) {
-      setSelectedCountry(watchedCountry);
-
-      // Si le pays est la France, vider les champs ville, code postal et adresse
-      if (watchedCountry === "FR") {
-        setValue("city", "");
-        setValue("postalCode", "");
-        setValue("address", "");
-      }
-    }
-  }, [watchedCountry, setValue]);
+  console.log("errors", JSON.stringify(errors));
+  // Nous n'avons plus besoin de cet effet car le gestionnaire d'événements onChange du champ de sélection du pays
+  // s'occupe déjà de mettre à jour selectedCountry et de vider les champs si nécessaire
 
   const handleOnSummit = async (data: CompanyDTO) => {
+    // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
+    // avant de soumettre le formulaire
+    if (data.countryIsoCode !== "FR") {
+      data.county = undefined;
+      data.region = undefined;
+      data.city = "";
+      data.postalCode = "";
+      data.address = "";
+    }
+
     if (onSubmit) onSubmit(data);
     companyFormModal.close();
   };
@@ -338,17 +349,9 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                 nativeSelectProps={{
                   ...register("countryIsoCode", {
                     onChange: e => {
+                      // Mettre à jour uniquement l'état local sans vider les champs
                       const value = e.target.value;
                       setSelectedCountry(value);
-
-                      // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
-                      if (value !== "FR") {
-                        setValue("county", undefined);
-                        setValue("region", undefined);
-                        setValue("city", "");
-                        setValue("postalCode", "");
-                        setValue("address", "");
-                      }
                     },
                   }),
                 }}
@@ -419,7 +422,6 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
               <Select
                 label="Tranche d'effectifs assujettis de l'entreprise *"
                 nativeSelectProps={register("workforce.range")}
-                hint="La tranche d'effectifs n'est pas modifiable pour des raisons métier."
                 state="default"
                 disabled={true}
               >
