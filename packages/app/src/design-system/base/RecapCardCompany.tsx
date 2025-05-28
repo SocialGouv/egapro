@@ -10,6 +10,7 @@ import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { funnelStaticConfig } from "../../app/(default)/index-egapro/declaration/declarationFunnelConfiguration";
@@ -197,6 +198,10 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
 
+  // État pour suivre le pays sélectionné
+  const [selectedCountry, setSelectedCountry] = useState(countryIsoCode || "");
+  const isFrance = selectedCountry === "FR";
+
   const countyName = county && counties.find(c => c.value === county)?.label;
   const regionName = region && regions.find(r => r.value === region)?.label;
 
@@ -210,10 +215,30 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
     register,
     handleSubmit,
     formState: { isValid, errors },
+    setValue,
+    watch,
   } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
   });
+
+  // Observer les changements de pays
+  const watchedCountry = watch("countryIsoCode");
+
+  // Mettre à jour l'état local quand le pays change
+  useEffect(() => {
+    // S'assurer que watchedCountry n'est pas undefined
+    if (watchedCountry !== undefined) {
+      setSelectedCountry(watchedCountry);
+
+      // Si le pays est la France, vider les champs ville, code postal et adresse
+      if (watchedCountry === "FR") {
+        setValue("city", "");
+        setValue("postalCode", "");
+        setValue("address", "");
+      }
+    }
+  }, [watchedCountry, setValue]);
 
   const handleOnSummit = async (data: CompanyDTO) => {
     if (onSubmit) onSubmit(data);
@@ -298,24 +323,6 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
               />
               <Input
                 nativeInputProps={{
-                  ...register("address"),
-                }}
-                label="Adresse *"
-              />
-              <Input
-                nativeInputProps={{
-                  ...register("postalCode"),
-                }}
-                label="Code postal *"
-              />
-              <Input
-                nativeInputProps={{
-                  ...register("city"),
-                }}
-                label="Ville *"
-              />
-              <Input
-                nativeInputProps={{
                   ...register("siren"),
                 }}
                 label="Siren *"
@@ -326,7 +333,26 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                 }}
                 label="Code Naf *"
               />
-              <Select label="Pays *" nativeSelectProps={register("countryIsoCode")}>
+              <Select
+                label="Pays *"
+                nativeSelectProps={{
+                  ...register("countryIsoCode", {
+                    onChange: e => {
+                      const value = e.target.value;
+                      setSelectedCountry(value);
+
+                      // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
+                      if (value !== "FR") {
+                        setValue("county", undefined);
+                        setValue("region", undefined);
+                        setValue("city", "");
+                        setValue("postalCode", "");
+                        setValue("address", "");
+                      }
+                    },
+                  }),
+                }}
+              >
                 <option value="" disabled>
                   Sélectionnez un pays
                 </option>
@@ -341,30 +367,61 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                     </option>
                   ))}
               </Select>
-              <Select label="Département *" nativeSelectProps={register("county")}>
-                <option value="" disabled>
-                  Sélectionnez un département
-                </option>
-                {counties.map(county => (
-                  <option key={county.value} value={county.value}>
-                    {county.label}
-                  </option>
-                ))}
-              </Select>
-              <Select label="Région *" nativeSelectProps={register("region")}>
-                <option value="" disabled>
-                  Sélectionnez une région
-                </option>
-                {regions.map(region => (
-                  <option key={region.value} value={region.value}>
-                    {region.label}
-                  </option>
-                ))}
-              </Select>
+              {/* Afficher les champs adresse, code postal et ville uniquement si le pays est la France */}
+              {isFrance && (
+                <>
+                  <Input
+                    nativeInputProps={{
+                      ...register("address"),
+                    }}
+                    label="Adresse *"
+                  />
+                  <Input
+                    nativeInputProps={{
+                      ...register("city"),
+                    }}
+                    label="Ville *"
+                  />
+                  <Input
+                    nativeInputProps={{
+                      ...register("postalCode"),
+                    }}
+                    label="Code postal *"
+                  />
+                </>
+              )}
+              {/* Afficher les champs département et région uniquement si le pays est la France */}
+              {isFrance && (
+                <>
+                  <Select label="Département *" nativeSelectProps={register("county")}>
+                    <option value="" disabled>
+                      Sélectionnez un département
+                    </option>
+                    {counties.map(county => (
+                      <option key={county.value} value={county.value}>
+                        {county.label}
+                      </option>
+                    ))}
+                  </Select>
+                  <Select label="Région *" nativeSelectProps={register("region")}>
+                    <option value="" disabled>
+                      Sélectionnez une région
+                    </option>
+                    {regions.map(region => (
+                      <option key={region.value} value={region.value}>
+                        {region.label}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
 
               <Select
                 label="Tranche d'effectifs assujettis de l'entreprise *"
                 nativeSelectProps={register("workforce.range")}
+                hint="La tranche d'effectifs n'est pas modifiable pour des raisons métier."
+                state="default"
+                disabled={true}
               >
                 <option value="" disabled>
                   Sélectionnez une tranche d'effectifs
