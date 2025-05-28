@@ -54,7 +54,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   }
 
   const session = await getServerSession(authConfig);
-  const isOwner = !!session?.user.companies.some(company => company.siren === siren) || session?.user.staff;
+  const isOwner = session?.user.staff || !!session?.user.companies.some(company => company.siren === siren);
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const olderThanOneYear = session?.data?.user.staff
