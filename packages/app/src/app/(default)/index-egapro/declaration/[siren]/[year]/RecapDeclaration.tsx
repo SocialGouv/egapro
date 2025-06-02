@@ -76,7 +76,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
           },
         },
       };
-      const isEditingSiren = data.siren != déclaration.entreprise?.entrepriseDéclarante?.siren;
+      const isEditingSiren = data.siren !== déclaration.entreprise?.entrepriseDéclarante?.siren;
 
       const { ok } = await updateCompanyInfos(
         newFormData,
