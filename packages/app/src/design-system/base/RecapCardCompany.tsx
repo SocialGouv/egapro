@@ -10,7 +10,6 @@ import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { funnelStaticConfig } from "../../app/(default)/index-egapro/declaration/declarationFunnelConfiguration";
@@ -187,19 +186,55 @@ const companySchema = zodFr
       })
       .optional(),
   })
-  .refine(
+  .superRefine((data, ctx) => {
     // Validation conditionnelle : si le pays est la France, les champs d'adresse sont requis
-    data => {
-      if (data.countryIsoCode === "FR") {
-        return !!data.city && !!data.address && !!data.postalCode;
+    if (data.countryIsoCode === "FR") {
+      // Vérification de l'adresse
+      if (!data.address) {
+        ctx.addIssue({
+          code: "custom",
+          message: "L'adresse est requise pour une entreprise française",
+          path: ["address"],
+        });
       }
-      return true; // Si le pays n'est pas la France, pas de validation supplémentaire
-    },
-    {
-      message: "Les champs Adresse, Ville et Code postal sont requis pour la France",
-      path: ["countryIsoCode"], // Le message d'erreur sera associé au champ pays
-    },
-  );
+
+      // Vérification de la ville
+      if (!data.city) {
+        ctx.addIssue({
+          code: "custom",
+          message: "La ville est requise pour une entreprise française",
+          path: ["city"],
+        });
+      }
+
+      // Vérification du code postal
+      if (!data.postalCode) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Le code postal est requis pour une entreprise française",
+          path: ["postalCode"],
+        });
+      }
+
+      // Vérification du département
+      if (!data.county) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Le département est requis pour une entreprise française",
+          path: ["county"],
+        });
+      }
+
+      // Vérification de la région
+      if (!data.region) {
+        ctx.addIssue({
+          code: "custom",
+          message: "La région est requise pour une entreprise française",
+          path: ["region"],
+        });
+      }
+    }
+  });
 
 const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
   let newAdress = address;
@@ -213,10 +248,6 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const session = useSession();
   const isStaff = session.data?.user.staff;
   const { name, address, postalCode, city, countryIsoCode, siren, nafCode, workforce, ues, county, region } = company;
-
-  // État pour suivre le pays sélectionné
-  const [selectedCountry, setSelectedCountry] = useState(countryIsoCode || "");
-  const isFrance = selectedCountry === "FR";
 
   const countyName = county && counties.find(c => c.value === county)?.label;
   const regionName = region && regions.find(r => r.value === region)?.label;
@@ -239,8 +270,10 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
     defaultValues: company,
     mode: "all", // Valider le formulaire en continu
   });
-  // Nous n'avons plus besoin de cet effet car le gestionnaire d'événements onChange du champ de sélection du pays
-  // s'occupe déjà de mettre à jour selectedCountry et de vider les champs si nécessaire
+
+  // Utiliser watch() pour obtenir la valeur actuelle du champ countryIsoCode
+  const watchedCountryIsoCode = watch("countryIsoCode");
+  const isFrance = watchedCountryIsoCode === "FR";
 
   const handleOnSummit = async (data: CompanyDTO) => {
     // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
@@ -348,13 +381,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
               <Select
                 label="Pays *"
                 nativeSelectProps={{
-                  ...register("countryIsoCode", {
-                    onChange: e => {
-                      // Mettre à jour uniquement l'état local sans vider les champs
-                      const value = e.target.value;
-                      setSelectedCountry(value);
-                    },
-                  }),
+                  ...register("countryIsoCode"),
                 }}
               >
                 <option value="" disabled>
