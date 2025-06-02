@@ -97,7 +97,7 @@ export async function updateCompanyInfos(
   oldSiren?: string,
 ): Promise<ServerActionResponse<undefined, string>> {
   try {
-    // Vérifier l'autorisation
+    // Vérifier l'autorisation sur le nouveau SIREN
     await assertServerSession({
       owner: {
         check: siren,
@@ -105,6 +105,17 @@ export async function updateCompanyInfos(
       },
       staff: true,
     });
+
+    // Si oldSiren est fourni (changement de SIREN), vérifier également l'autorisation sur l'ancien SIREN
+    if (oldSiren && oldSiren !== siren) {
+      await assertServerSession({
+        owner: {
+          check: oldSiren,
+          message: "Not authorized to modify the original company with this Siren.",
+        },
+        staff: true,
+      });
+    }
 
     // Récupérer la représentation équilibrée existante
     const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
@@ -117,11 +128,13 @@ export async function updateCompanyInfos(
       };
     }
 
-    // Créer une clé primaire pour la représentation équilibrée
-    const pk: [Siren, PositiveNumber] = [new Siren(siren), new PositiveNumber(year)];
+    // Créer une clé primaire en utilisant l'ancien SIREN (ou le SIREN original si pas de changement)
+    // pour récupérer l'enregistrement existant
+    const originalSiren = oldSiren || siren;
+    const originalPk: [Siren, PositiveNumber] = [new Siren(originalSiren), new PositiveNumber(year)];
 
-    // Récupérer l'objet RepresentationEquilibree depuis le repository
-    const repEqEntity = await representationEquilibreeRepo.getOne(pk);
+    // Récupérer l'objet RepresentationEquilibree depuis le repository avec la clé originale
+    const repEqEntity = await representationEquilibreeRepo.getOne(originalPk);
 
     if (!repEqEntity) {
       return {
@@ -144,9 +157,11 @@ export async function updateCompanyInfos(
         siren: siren,
       },
       modifiedAt: new Date(),
+      // Si le SIREN a été modifié, mettre à jour le SIREN dans l'entité
+      ...(oldSiren && oldSiren !== siren ? { siren: siren } : {}),
     });
 
-    // Sauvegarder directement l'objet dans la base de données
+    // Sauvegarder l'entité mise à jour
     await representationEquilibreeRepo.saveWithIndex(updatedRepEq);
 
     // Si le SIREN a été modifié, supprimer l'ancienne représentation équilibrée

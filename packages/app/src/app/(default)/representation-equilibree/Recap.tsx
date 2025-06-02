@@ -21,14 +21,9 @@ export interface DetailRepEqProps {
 
 // TODO: update RepresentationEquilibreeDTO to use CompanyProps instead.
 const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO => {
-  // Afficher l'objet company pour déboguer
-  console.log("repEq.company:", repEq.company);
-
   const { address, city, countryCode, nafCode, name, postalCode, county, region } = repEq.company;
   const siren = repEq.siren;
 
-  // Créer l'objet CompanyDTO avec les valeurs par défaut pour les champs qui pourraient être undefined
-  // Créer l'objet CompanyDTO avec les valeurs par défaut pour les champs qui pourraient être undefined ou vides
   const companyDTO: CompanyDTO = {
     countryIsoCode: countryCode,
     nafCode: nafCode,
@@ -38,21 +33,20 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
     region,
   };
 
-  // Ajouter explicitement les propriétés avec des valeurs par défaut si elles sont vides ou undefined
   if (!address || address.trim() === "") {
-    companyDTO.address = "Non renseigné";
+    companyDTO.address = "";
   } else {
     companyDTO.address = address;
   }
 
   if (!city || city.trim() === "") {
-    companyDTO.city = "Non renseigné";
+    companyDTO.city = "";
   } else {
     companyDTO.city = city;
   }
 
   if (!postalCode || postalCode.trim() === "") {
-    companyDTO.postalCode = "Non renseigné";
+    companyDTO.postalCode = "";
   } else {
     companyDTO.postalCode = postalCode;
   }
@@ -62,7 +56,7 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
 
 export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
+  const [_, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
 
   // Fonction pour mettre à jour les informations de l'entreprise
