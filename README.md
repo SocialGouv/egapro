@@ -257,3 +257,5 @@ Il est donc recommandé d'augmenter les ressources allouées à l'application Eg
 | fin de campagne   |           6            |           12           |
 
 > ⚠️ Il est préférable de tester le mécanisme de scale-up de l'application en production avant le commencement de la campagne. Il faut s'assurer qu'au moment du scale-up l'application pourra continuer à répondre aux requêtes des clients le temps que les nouveaux pods soient disponibles.
+
+:)
