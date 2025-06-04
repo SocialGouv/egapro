@@ -3,7 +3,6 @@ global:
 
 app:
   ~chart: app
-  ~needs: [build-app, redis]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
@@ -50,7 +49,6 @@ app:
 
 nginx:
   ~chart: app
-  ~needs: [build-nginx, app]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
@@ -94,7 +92,6 @@ nginx:
 
 api:
   ~chart: app
-  ~needs: [build-api]
   imagePackage: api
   probesPath: /healthz
   containerPort: 2626
@@ -139,7 +136,6 @@ redis:
 
 files:
   ~chart: app
-  ~needs: [build-api,build-files] # sidecar image
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
   imagePackage: files
   vars:
@@ -229,53 +225,3 @@ project:
       - dgt-representation.xlsx
       - full.ndjson
       - indexes.csv
-
-jobs:
-  ~chart: jobs
-  runs:
-    build-app:
-      use: build
-      memoryLimit: 14Gi
-      memoryRequest: 2Gi
-      env:
-        - name: NEXT_PUBLIC_SENTRY_DSN
-          valueFrom:
-            secretKeyRef:
-              name: sentry
-              key: APP_SENTRY_DSN
-      with:
-        imagePackage: app
-        dockerfile: packages/app/Dockerfile
-        buildArgs:
-          NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
-          NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
-          NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
-          NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.shortSha }}"
-          NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
-          NEXT_PUBLIC_SENTRY_DSN: "$NEXT_PUBLIC_SENTRY_DSN"
-          SENTRY_ORG: incubateur
-          SENTRY_PROJECT: egapro-app
-          SENTRY_URL: https://sentry2.fabrique.social.gouv.fr
-          SENTRY_RELEASE: "{{ .Values.global.isProd | ternary .Values.global.imageTag (.Values.global.isPreProd | ternary .Values.global.shortSha .Values.global.branchSlug32) }}"
-        secrets:
-          sentry_auth_token:
-            secretName: sentry
-            secretKey: SENTRY_AUTH_TOKEN
-
-    build-api:
-      use: build
-      with:
-        imagePackage: api
-        context: packages/api
-
-    build-nginx:
-      use: build
-      with:
-        imagePackage: nginx
-        context: packages/nginx
-
-    build-files:
-      use: build
-      with:
-        imagePackage: files
-        context: packages/files
