@@ -12,7 +12,6 @@ RUN pip3 install pipenv --user
 COPY setup.py .
 COPY setup.cfg .
 RUN	pip install .[dev,test,prod]
-RUN cp -r egapro.egg-info /tmp/egapro.egg-info
 
 EXPOSE 2626
 
