@@ -371,7 +371,28 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                   ...register("siren"),
                 }}
                 label="Siren *"
+                state="default"
+                disabled={true}
               />
+              <Select
+                label="Tranche d'effectifs assujettis de l'entreprise *"
+                nativeSelectProps={register("workforce.range")}
+                state="default"
+                disabled={true}
+              >
+                <option value="" disabled>
+                  Sélectionnez une tranche d'effectifs
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_50_TO_250}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_50_TO_250]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_251_TO_999}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_251_TO_999]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_1000_TO_MORE}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_1000_TO_MORE]}
+                </option>
+              </Select>
               <Input
                 nativeInputProps={{
                   ...register("nafCode"),
@@ -446,26 +467,6 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                   </Select>
                 </>
               )}
-
-              <Select
-                label="Tranche d'effectifs assujettis de l'entreprise *"
-                nativeSelectProps={register("workforce.range")}
-                state="default"
-                disabled={true}
-              >
-                <option value="" disabled>
-                  Sélectionnez une tranche d'effectifs
-                </option>
-                <option value={CompanyWorkforceRange.Enum.FROM_50_TO_250}>
-                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_50_TO_250]}
-                </option>
-                <option value={CompanyWorkforceRange.Enum.FROM_251_TO_999}>
-                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_251_TO_999]}
-                </option>
-                <option value={CompanyWorkforceRange.Enum.FROM_1000_TO_MORE}>
-                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_1000_TO_MORE]}
-                </option>
-              </Select>
 
               <Button
                 type="button"

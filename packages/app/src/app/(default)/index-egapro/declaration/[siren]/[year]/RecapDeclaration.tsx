@@ -76,12 +76,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
           },
         },
       };
-      const isEditingSiren = data.siren !== déclaration.entreprise?.entrepriseDéclarante?.siren;
-
-      const { ok } = await updateCompanyInfos(
-        newFormData,
-        isEditingSiren ? déclaration.entreprise?.entrepriseDéclarante?.siren : void 0,
-      );
+      const { ok } = await updateCompanyInfos(newFormData, void 0);
 
       if (!ok) {
         setSaveStatus({
@@ -92,17 +87,12 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         return;
       }
 
-      // Afficher un message de succès
       setSaveStatus({
         success: true,
         message: "Les modifications ont été enregistrées avec succès.",
       });
 
-      if (isEditingSiren) {
-        router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);
-      } else {
-        router.refresh();
-      }
+      router.refresh();
     } catch (error) {
       console.error("Erreur lors de la mise à jour des informations de l'entreprise:", error);
 

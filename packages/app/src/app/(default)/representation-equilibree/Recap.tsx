@@ -65,16 +65,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
       setIsSaving(true);
       setSaveStatus(null);
 
-      // Vérifier si le SIREN a été modifié
-      const isEditingSiren = updatedCompanyData.siren !== repEq.siren;
-
-      // Appeler l'action serveur updateCompanyInfos
-      const result = await updateCompanyInfos(
-        updatedCompanyData.siren,
-        repEq.year,
-        updatedCompanyData,
-        isEditingSiren ? repEq.siren : undefined,
-      );
+      const result = await updateCompanyInfos(updatedCompanyData.siren, repEq.year, updatedCompanyData, undefined);
 
       if (!result.ok) {
         throw new Error(result.error);
@@ -86,13 +77,7 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         message: "Les modifications ont été enregistrées avec succès.",
       });
 
-      // Si le SIREN a été modifié, rediriger vers la nouvelle page
-      if (isEditingSiren) {
-        router.push(`/representation-equilibree/${updatedCompanyData.siren}/${repEq.year}`);
-      } else {
-        // Sinon, rafraîchir la page pour afficher les nouvelles informations
-        router.refresh();
-      }
+      router.refresh();
     } catch (error) {
       console.error("Erreur lors de la mise à jour des informations de l'entreprise:", error);
 
