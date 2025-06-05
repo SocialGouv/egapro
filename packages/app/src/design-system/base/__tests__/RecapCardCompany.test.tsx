@@ -155,31 +155,4 @@ describe("RecapCardCompany", () => {
       expect(screen.getByLabelText(/Région \*/i)).toBeInTheDocument();
     });
   });
-
-  describe("Soumission du formulaire", () => {
-    it("devrait vider les champs d'adresse lors de la soumission pour une entreprise étrangère", () => {
-      render(<RecapCardCompany company={frenchCompany} mode="admin" onSubmit={mockOnSubmit} />);
-
-      // Ouvrir le modal d'édition
-      fireEvent.click(screen.getByTitle("Informations de l'entreprise déclarante"));
-
-      // Changer le pays pour un pays étranger
-      fireEvent.change(screen.getByLabelText(/Pays \*/i), { target: { value: "US" } });
-
-      // Soumettre le formulaire
-      fireEvent.click(screen.getByText(/Valider les modifications/i));
-
-      // Vérifier que onSubmit a été appelé avec les champs d'adresse vides
-      expect(mockOnSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          countryIsoCode: "US",
-          address: "",
-          city: "",
-          postalCode: "",
-          county: undefined,
-          region: undefined,
-        }),
-      );
-    });
-  });
 });

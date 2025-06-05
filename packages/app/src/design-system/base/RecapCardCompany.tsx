@@ -264,17 +264,20 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const isFrance = watchedCountryIsoCode === "FR";
 
   const handleOnSummit = async (data: CompanyDTO) => {
+    // Créer une copie des données pour éviter de modifier l'objet original
+    const submittedData = { ...data };
+
     // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
     // avant de soumettre le formulaire
-    if (data.countryIsoCode !== "FR") {
-      data.county = undefined;
-      data.region = undefined;
-      data.city = "";
-      data.postalCode = "";
-      data.address = "";
+    if (submittedData.countryIsoCode !== "FR") {
+      submittedData.county = undefined;
+      submittedData.region = undefined;
+      submittedData.city = "";
+      submittedData.postalCode = "";
+      submittedData.address = "";
     }
 
-    if (onSubmit) onSubmit(data);
+    if (onSubmit) onSubmit(submittedData);
     companyFormModal.close();
   };
 
@@ -315,10 +318,18 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
       {cleanAddress(city, postalCode, address as string)}
       {(postalCodeCity || countryLib) && <br />}
       {postalCodeCity}
-      <br />
-      {countyName && `Département : ${countyName}`}
-      <br />
-      {regionName && `Région : ${regionName}`}
+      {countyName && (
+        <>
+          <br />
+          {`Département : ${countyName}`}
+        </>
+      )}
+      {regionName && (
+        <>
+          <br />
+          {`Région : ${regionName}`}
+        </>
+      )}
       {(county || region) && <br />}
       {countryIsoCode && countryIsoCode !== "FR" && `Pays : ${countryLib}`}
       {countryIsoCode && countryIsoCode !== "FR" && <br />}
