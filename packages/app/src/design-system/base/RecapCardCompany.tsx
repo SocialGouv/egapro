@@ -248,7 +248,12 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const postalCodeCity = `${postalCode ?? ""} ${city ?? ""}`.trim();
   const countryLib = countryIsoCode && countryIsoCode !== "FR" && COUNTRIES_ISO_TO_LIB[countryIsoCode];
 
-  const { register, handleSubmit, watch, getValues } = useForm<CompanyDTO>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { isValid },
+  } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
     mode: "onBlur",
@@ -451,16 +456,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                 </>
               )}
 
-              <Button
-                type="button"
-                onClick={() => {
-                  // Récupérer les valeurs actuelles du formulaire avec getValues()
-                  const formValues = getValues();
-
-                  // Appeler directement handleOnSummit avec les valeurs du formulaire
-                  handleOnSummit(formValues);
-                }}
-              >
+              <Button type="submit" disabled={!isValid}>
                 Valider les modifications
               </Button>
             </form>
