@@ -213,6 +213,7 @@ export const SearchForm = ({ searchParams }: SearchFormProps) => {
                 title: "Rechercher",
                 children: "Rechercher",
                 disabled: !isValid,
+                type: "submit",
               },
               {
                 title: "Réinitialiser",

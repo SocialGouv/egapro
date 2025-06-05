@@ -163,17 +163,68 @@ const regions = [
 export const regionCodes = regions.map(region => region.value) as [string, ...string[]];
 export const countiesCodes = counties.map(county => county.value) as [string, ...string[]];
 
-const companySchema = zodFr.object({
-  name: zodFr.string(),
-  city: zodFr.string(),
-  address: zodFr.string(),
-  nafCode: zodFr.string(),
-  postalCode: zodFr.string(),
-  siren: zodFr.string(),
-  county: zodFr.enum(countiesCodes).optional(),
-  region: zodFr.enum(regionCodes).optional(),
-  countryIsoCode: zodFr.string(),
-});
+// Schéma de validation modifié pour rendre les champs d'adresse optionnels lorsque le pays n'est pas la France
+const companySchema = zodFr
+  .object({
+    name: zodFr.string(),
+    // Ces champs sont optionnels par défaut
+    city: zodFr.string().optional(),
+    address: zodFr.string().optional(),
+    postalCode: zodFr.string().optional(),
+    nafCode: zodFr.string(),
+    siren: zodFr.string(),
+    county: zodFr.enum(countiesCodes).optional(),
+    region: zodFr.enum(regionCodes).optional(),
+    countryIsoCode: zodFr.string(),
+    workforce: zodFr
+      .object({
+        range: zodFr.enum([
+          CompanyWorkforceRange.Enum.FROM_50_TO_250,
+          CompanyWorkforceRange.Enum.FROM_251_TO_999,
+          CompanyWorkforceRange.Enum.FROM_1000_TO_MORE,
+        ]),
+      })
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.countryIsoCode === "FR") {
+      if (!data.address) {
+        ctx.addIssue({
+          code: "custom",
+          message: "L'adresse est requise pour une entreprise française",
+          path: ["address"],
+        });
+      }
+      if (!data.city) {
+        ctx.addIssue({
+          code: "custom",
+          message: "La ville est requise pour une entreprise française",
+          path: ["city"],
+        });
+      }
+      if (!data.postalCode) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Le code postal est requis pour une entreprise française",
+          path: ["postalCode"],
+        });
+      }
+      if (!data.county) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Le département est requis pour une entreprise française",
+          path: ["county"],
+        });
+      }
+      if (!data.region) {
+        ctx.addIssue({
+          code: "custom",
+          message: "La région est requise pour une entreprise française",
+          path: ["region"],
+        });
+      }
+    }
+  });
 
 const cleanAddress = (city: string | undefined, postalCode: string | undefined, address: string) => {
   let newAdress = address;
@@ -200,14 +251,33 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const {
     register,
     handleSubmit,
-    formState: { isValid, errors },
+    watch,
+    formState: { isValid },
   } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
+    mode: "onBlur",
   });
 
+  // Utiliser watch() pour obtenir la valeur actuelle du champ countryIsoCode
+  const watchedCountryIsoCode = watch("countryIsoCode");
+  const isFrance = watchedCountryIsoCode === "FR";
+
   const handleOnSummit = async (data: CompanyDTO) => {
-    if (onSubmit) onSubmit(data);
+    // Créer une copie des données pour éviter de modifier l'objet original
+    const submittedData = { ...data };
+
+    // Si le pays n'est pas la France, vider les champs département, adresse, code postal et ville
+    // avant de soumettre le formulaire
+    if (submittedData.countryIsoCode !== "FR") {
+      submittedData.county = undefined;
+      submittedData.region = undefined;
+      submittedData.city = "";
+      submittedData.postalCode = "";
+      submittedData.address = "";
+    }
+
+    if (onSubmit) onSubmit(submittedData);
     companyFormModal.close();
   };
 
@@ -248,10 +318,18 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
       {cleanAddress(city, postalCode, address as string)}
       {(postalCodeCity || countryLib) && <br />}
       {postalCodeCity}
-      <br />
-      {countyName && `Département : ${countyName}`}
-      <br />
-      {regionName && `Région : ${regionName}`}
+      {countyName && (
+        <>
+          <br />
+          {`Département : ${countyName}`}
+        </>
+      )}
+      {regionName && (
+        <>
+          <br />
+          {`Région : ${regionName}`}
+        </>
+      )}
       {(county || region) && <br />}
       {countryIsoCode && countryIsoCode !== "FR" && `Pays : ${countryLib}`}
       {countryIsoCode && countryIsoCode !== "FR" && <br />}
@@ -289,35 +367,43 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
               />
               <Input
                 nativeInputProps={{
-                  ...register("address"),
-                }}
-                label="Adresse *"
-              />
-              <Input
-                nativeInputProps={{
-                  ...register("postalCode"),
-                }}
-                label="Code postal *"
-              />
-              <Input
-                nativeInputProps={{
-                  ...register("city"),
-                }}
-                label="Ville *"
-              />
-              <Input
-                nativeInputProps={{
                   ...register("siren"),
                 }}
                 label="Siren *"
+                state="default"
+                disabled={true}
               />
+              <Select
+                label="Tranche d'effectifs assujettis de l'entreprise *"
+                nativeSelectProps={register("workforce.range")}
+                state="default"
+                disabled={true}
+              >
+                <option value="" disabled>
+                  Sélectionnez une tranche d'effectifs
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_50_TO_250}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_50_TO_250]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_251_TO_999}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_251_TO_999]}
+                </option>
+                <option value={CompanyWorkforceRange.Enum.FROM_1000_TO_MORE}>
+                  {CompanyWorkforceRange.Label[CompanyWorkforceRange.Enum.FROM_1000_TO_MORE]}
+                </option>
+              </Select>
               <Input
                 nativeInputProps={{
                   ...register("nafCode"),
                 }}
                 label="Code Naf *"
               />
-              <Select label="Pays *" nativeSelectProps={register("countryIsoCode")}>
+              <Select
+                label="Pays *"
+                nativeSelectProps={{
+                  ...register("countryIsoCode"),
+                }}
+              >
                 <option value="" disabled>
                   Sélectionnez un pays
                 </option>
@@ -332,26 +418,54 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                     </option>
                   ))}
               </Select>
-              <Select label="Département *" nativeSelectProps={register("county")}>
-                <option value="" disabled>
-                  Sélectionnez un département
-                </option>
-                {counties.map(county => (
-                  <option key={county.value} value={county.value}>
-                    {county.label}
-                  </option>
-                ))}
-              </Select>
-              <Select label="Région *" nativeSelectProps={register("region")}>
-                <option value="" disabled>
-                  Sélectionnez une région
-                </option>
-                {regions.map(region => (
-                  <option key={region.value} value={region.value}>
-                    {region.label}
-                  </option>
-                ))}
-              </Select>
+              {/* Afficher les champs adresse, code postal et ville uniquement si le pays est la France */}
+              {isFrance && (
+                <>
+                  <Input
+                    nativeInputProps={{
+                      ...register("address"),
+                    }}
+                    label="Adresse *"
+                  />
+                  <Input
+                    nativeInputProps={{
+                      ...register("city"),
+                    }}
+                    label="Ville *"
+                  />
+                  <Input
+                    nativeInputProps={{
+                      ...register("postalCode"),
+                    }}
+                    label="Code postal *"
+                  />
+                </>
+              )}
+              {/* Afficher les champs département et région uniquement si le pays est la France */}
+              {isFrance && (
+                <>
+                  <Select label="Département *" nativeSelectProps={register("county")}>
+                    <option value="" disabled>
+                      Sélectionnez un département
+                    </option>
+                    {counties.map(county => (
+                      <option key={county.value} value={county.value}>
+                        {county.label}
+                      </option>
+                    ))}
+                  </Select>
+                  <Select label="Région *" nativeSelectProps={register("region")}>
+                    <option value="" disabled>
+                      Sélectionnez une région
+                    </option>
+                    {regions.map(region => (
+                      <option key={region.value} value={region.value}>
+                        {region.label}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
 
               <Button type="submit" disabled={!isValid}>
                 Valider les modifications

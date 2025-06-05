@@ -1,5 +1,6 @@
 "use client";
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonExecutiveRepEq";
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
@@ -7,6 +8,10 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard, RecapCardCompany } from "@design-system";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { updateCompanyInfos } from "./actions";
 
 export interface DetailRepEqProps {
   edit?: boolean;
@@ -16,21 +21,75 @@ export interface DetailRepEqProps {
 
 // TODO: update RepresentationEquilibreeDTO to use CompanyProps instead.
 const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO => {
-  const { address, city, countryCode, nafCode, name, postalCode } = repEq.company;
+  const { address, city, countryCode, nafCode, name, postalCode, county, region } = repEq.company;
   const siren = repEq.siren;
 
-  return {
-    address,
-    city,
+  const companyDTO: CompanyDTO = {
     countryIsoCode: countryCode,
     nafCode: nafCode,
     name,
-    postalCode: postalCode,
     siren,
+    county,
+    region,
   };
+
+  if (!address || address.trim() === "") {
+    companyDTO.address = "";
+  } else {
+    companyDTO.address = address;
+  }
+
+  if (!city || city.trim() === "") {
+    companyDTO.city = "";
+  } else {
+    companyDTO.city = city;
+  }
+
+  if (!postalCode || postalCode.trim() === "") {
+    companyDTO.postalCode = "";
+  } else {
+    companyDTO.postalCode = postalCode;
+  }
+
+  return companyDTO;
 };
 
 export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
+  const router = useRouter();
+  const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
+
+  // Fonction pour mettre à jour les informations de l'entreprise
+  const handleUpdateCompany = async (updatedCompanyData: CompanyDTO) => {
+    try {
+      setSaveStatus(null);
+
+      const result = await updateCompanyInfos(updatedCompanyData.siren, repEq.year, updatedCompanyData, undefined);
+
+      if (!result.ok) {
+        throw new Error(result.error);
+      }
+
+      // Afficher un message de succès
+      setSaveStatus({
+        success: true,
+        message: "Les modifications ont été enregistrées avec succès.",
+      });
+
+      router.refresh();
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des informations de l'entreprise:", error);
+
+      // Afficher un message d'erreur
+      setSaveStatus({
+        success: false,
+        message:
+          error && typeof error === "object" && "message" in error
+            ? String(error.message)
+            : "Une erreur est survenue lors de l'enregistrement des modifications.",
+      });
+    }
+  };
+
   return (
     <>
       {!publicMode && (
@@ -51,7 +110,15 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
         />
       )}
 
-      <RecapCardCompany mode="admin" company={buildCompanyFromRepeq(repEq)} />
+      <RecapCardCompany mode="admin" company={buildCompanyFromRepeq(repEq)} onSubmit={handleUpdateCompany} />
+      {saveStatus && (
+        <Alert
+          severity={saveStatus.success ? "success" : "error"}
+          className={fr.cx("fr-mb-2w")}
+          description={saveStatus.message}
+          small
+        />
+      )}
 
       {!publicMode && (
         <RecapCard
