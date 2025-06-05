@@ -187,9 +187,7 @@ const companySchema = zodFr
       .optional(),
   })
   .superRefine((data, ctx) => {
-    // Validation conditionnelle : si le pays est la France, les champs d'adresse sont requis
     if (data.countryIsoCode === "FR") {
-      // Vérification de l'adresse
       if (!data.address) {
         ctx.addIssue({
           code: "custom",
@@ -197,8 +195,6 @@ const companySchema = zodFr
           path: ["address"],
         });
       }
-
-      // Vérification de la ville
       if (!data.city) {
         ctx.addIssue({
           code: "custom",
@@ -206,8 +202,6 @@ const companySchema = zodFr
           path: ["city"],
         });
       }
-
-      // Vérification du code postal
       if (!data.postalCode) {
         ctx.addIssue({
           code: "custom",
@@ -215,8 +209,6 @@ const companySchema = zodFr
           path: ["postalCode"],
         });
       }
-
-      // Vérification du département
       if (!data.county) {
         ctx.addIssue({
           code: "custom",
@@ -224,8 +216,6 @@ const companySchema = zodFr
           path: ["county"],
         });
       }
-
-      // Vérification de la région
       if (!data.region) {
         ctx.addIssue({
           code: "custom",
@@ -258,17 +248,10 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
   const postalCodeCity = `${postalCode ?? ""} ${city ?? ""}`.trim();
   const countryLib = countryIsoCode && countryIsoCode !== "FR" && COUNTRIES_ISO_TO_LIB[countryIsoCode];
 
-  const {
-    register,
-    handleSubmit,
-    formState: { isValid, errors },
-    setValue,
-    watch,
-    getValues,
-  } = useForm<CompanyDTO>({
+  const { register, handleSubmit, watch, getValues } = useForm<CompanyDTO>({
     resolver: zodResolver(companySchema),
     defaultValues: company,
-    mode: "all", // Valider le formulaire en continu
+    mode: "onBlur",
   });
 
   // Utiliser watch() pour obtenir la valeur actuelle du champ countryIsoCode

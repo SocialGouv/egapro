@@ -163,13 +163,30 @@ export async function updateCompanyInfos(
       ...(oldSiren && oldSiren !== siren ? { siren: siren } : {}),
     });
 
-    // Sauvegarder l'entité mise à jour
-    await representationEquilibreeRepo.saveWithIndex(updatedRepEq);
-
-    // Si le SIREN a été modifié, supprimer l'ancienne représentation équilibrée
+    // Si le SIREN a été modifié, nous devons gérer la création et la suppression de manière atomique
     if (oldSiren && oldSiren !== siren) {
-      const oldPk: [Siren, PositiveNumber] = [new Siren(oldSiren), new PositiveNumber(year)];
-      await representationEquilibreeRepo.delete(oldPk);
+      try {
+        // Sauvegarder d'abord l'entité mise à jour avec le nouveau SIREN
+        await representationEquilibreeRepo.saveWithIndex(updatedRepEq);
+
+        // Puis supprimer l'ancienne représentation équilibrée avec l'ancien SIREN
+        const oldPk: [Siren, PositiveNumber] = [new Siren(oldSiren), new PositiveNumber(year)];
+        await representationEquilibreeRepo.delete(oldPk);
+      } catch (error) {
+        // En cas d'erreur lors de la suppression, essayer de supprimer la nouvelle entité
+        // pour éviter les doublons
+        console.error("Erreur lors de la mise à jour du SIREN:", error);
+        try {
+          const newPk: [Siren, PositiveNumber] = [new Siren(siren), new PositiveNumber(year)];
+          await representationEquilibreeRepo.delete(newPk);
+        } catch (rollbackError) {
+          console.error("Erreur lors de la tentative de rollback:", rollbackError);
+        }
+        throw error; // Propager l'erreur originale
+      }
+    } else {
+      // Si le SIREN n'a pas été modifié, simplement sauvegarder l'entité mise à jour
+      await representationEquilibreeRepo.saveWithIndex(updatedRepEq);
     }
 
     return {
