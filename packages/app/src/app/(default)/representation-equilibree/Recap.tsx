@@ -56,13 +56,11 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
 
 export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
   const router = useRouter();
-  const [_, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
 
   // Fonction pour mettre à jour les informations de l'entreprise
   const handleUpdateCompany = async (updatedCompanyData: CompanyDTO) => {
     try {
-      setIsSaving(true);
       setSaveStatus(null);
 
       const result = await updateCompanyInfos(updatedCompanyData.siren, repEq.year, updatedCompanyData, undefined);
@@ -85,12 +83,10 @@ export const DetailRepEq = ({ repEq, edit, publicMode }: DetailRepEqProps) => {
       setSaveStatus({
         success: false,
         message:
-          typeof error === "object" && error !== null && "message" in error
+          error && typeof error === "object" && "message" in error
             ? String(error.message)
             : "Une erreur est survenue lors de l'enregistrement des modifications.",
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 

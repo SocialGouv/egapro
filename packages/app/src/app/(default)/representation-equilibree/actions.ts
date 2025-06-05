@@ -2,6 +2,7 @@
 
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { entrepriseService } from "@api/core-domain/infra/services";
+import { EntrepriseServiceNotFoundError } from "@api/core-domain/infra/services/IEntrepriseService";
 import { referentRepo, representationEquilibreeRepo } from "@api/core-domain/repo";
 import { GetRepresentationEquilibreeBySirenAndYear } from "@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear";
 import { SaveRepresentationEquilibree } from "@api/core-domain/useCases/SaveRepresentationEquilibree";
@@ -14,6 +15,7 @@ import { assertServerSession } from "@api/utils/auth";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { UnexpectedSessionError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { type ServerActionResponse } from "@common/utils/next";
 
@@ -175,9 +177,21 @@ export async function updateCompanyInfos(
     };
   } catch (error: unknown) {
     console.error("Erreur lors de la mise à jour directe des informations de l'entreprise:", error);
-    return {
-      ok: false,
-      error: "Une erreur est survenue lors de la mise à jour des informations de l'entreprise.",
-    };
+    if (error instanceof UnexpectedSessionError) {
+      return {
+        ok: false,
+        error: "Vous n'êtes pas autorisé à modifier ces informations.",
+      };
+    } else if (error instanceof EntrepriseServiceNotFoundError) {
+      return {
+        ok: false,
+        error: "Représentation équilibrée non trouvée.",
+      };
+    } else {
+      return {
+        ok: false,
+        error: "Une erreur est survenue lors de la mise à jour des informations de l'entreprise.",
+      };
+    }
   }
 }

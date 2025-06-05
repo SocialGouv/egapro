@@ -23,11 +23,8 @@ type Props = { displayTitle?: string; déclaration: DeclarationDTO; edit?: boole
 
 export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) => {
   const entreprise = déclaration.entreprise?.entrepriseDéclarante;
-  // console.log(déclaration);
   const router = useRouter();
   const [saveStatus, setSaveStatus] = useState<{ message: string; success: boolean } | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  // console.log(entreprise);
   const company: CompanyDTO = {
     name: entreprise?.raisonSociale || "",
     address: entreprise?.adresse,
@@ -55,7 +52,6 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
 
   const onSubmit = async (data: CompanyDTO) => {
     try {
-      setIsSaving(true);
       setSaveStatus(null);
 
       const newFormData: DeclarationDTO = {
@@ -91,6 +87,11 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
         success: true,
         message: "Les modifications ont été enregistrées avec succès.",
       });
+      const isEditingSiren = data.siren !== déclaration.entreprise?.entrepriseDéclarante?.siren;
+      if (isEditingSiren) {
+        router.push(`/index-egapro/declaration/${data.siren}/${déclaration.commencer?.annéeIndicateurs}`);
+        return;
+      }
 
       router.refresh();
     } catch (error) {
@@ -99,12 +100,10 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
       setSaveStatus({
         success: false,
         message:
-          typeof error === "object" && error !== null && "message" in error
+          error && typeof error === "object" && "message" in error
             ? String(error.message)
             : "Une erreur est survenue lors de l'enregistrement des modifications.",
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
