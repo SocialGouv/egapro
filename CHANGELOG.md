@@ -1,3 +1,16 @@
+# [3.10.0](https://github.com/SocialGouv/egapro/compare/v3.9.0...v3.10.0) (2025-06-10)
+
+
+### Bug Fixes
+
+* retrait des h3 dans le footer et passage h3->h2 pour les cards ([#2517](https://github.com/SocialGouv/egapro/issues/2517)) ([cb57619](https://github.com/SocialGouv/egapro/commit/cb57619b90dc215a5de9812ab42dfdbdcdeb5e83))
+* test branch name length ([39ae319](https://github.com/SocialGouv/egapro/commit/39ae31953d21275f66df5e1e449e42fc310b4b98))
+
+
+### Features
+
+* 2284 déclaration index et repeq modifier les informations dune entreprise en tant que staff ([#2521](https://github.com/SocialGouv/egapro/issues/2521)) ([92cc200](https://github.com/SocialGouv/egapro/commit/92cc200a024cdd74aaffd05c4f343105dc23678e))
+
 # [3.9.0](https://github.com/SocialGouv/egapro/compare/v3.8.0...v3.9.0) (2025-05-14)
 
 
