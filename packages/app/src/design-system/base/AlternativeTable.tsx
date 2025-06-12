@@ -270,14 +270,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                         <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
                           {isDsfrInputProps(col) ? (
                             <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                              <Input
-                                label={col.label}
-                                state={col.state}
-                                stateRelatedMessage={col.stateRelatedMessage}
-                                nativeInputProps={col.nativeInputProps}
-                                hideLabel
-                                classes={{ message: "fr-sr-only" }}
-                              />
+                              <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                             </TooltipWrapper>
                           ) : (
                             col
@@ -298,14 +291,7 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
                       <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
                           <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                            <Input
-                              label={col.label}
-                              state={col.state}
-                              stateRelatedMessage={col.stateRelatedMessage}
-                              nativeInputProps={col.nativeInputProps}
-                              hideLabel
-                              classes={{ message: "fr-sr-only" }}
-                            />
+                            <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
                           </TooltipWrapper>
                         ) : (
                           col

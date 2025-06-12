@@ -1,7 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
@@ -29,7 +27,6 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
     register,
     reset,
     watch,
-    setValue,
   } = useForm<SearchSirenFormInput>({
     resolver: zodResolver(consultationSchema),
   });
@@ -68,27 +65,12 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
             nativeInputProps={{
               id: "query",
               title: "Saisissez le nom ou le Siren d'une entreprise déclarante",
-              type: "text",
+              autoComplete: "off",
+              type: "search",
               ...register("query"),
             }}
             stateRelatedMessage={errors.query?.message}
             state={errors.query && "error"}
-            addon={
-              <div className="flex items-center justify-center absolute right-0 h-full">
-                {watch("query") && (
-                  <Button
-                    iconId="fr-icon-close-circle-fill"
-                    className={fr.cx("fr-p-0", "fr-btn--sm")}
-                    onClick={() => setValue("query", "")}
-                    priority="tertiary no outline"
-                    title="Vider le champ"
-                    type="button"
-                  >
-                    <span className="fr-sr-only">Vider le champ</span>
-                  </Button>
-                )}
-              </div>
-            }
           />
         </GridCol>
         <GridCol sm={4}>
