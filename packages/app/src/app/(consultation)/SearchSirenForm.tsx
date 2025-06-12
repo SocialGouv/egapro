@@ -78,6 +78,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
             label=""
             nativeSelectProps={{
               id: "regionCode",
+              title: "Région",
               ...register("regionCode", {
                 setValueAs: value => (value === "" ? void 0 : value),
               }),
@@ -97,6 +98,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
             label=""
             nativeSelectProps={{
               id: "countyCode",
+              title: "Département",
               ...register("countyCode", {
                 setValueAs: value => (value === "" ? void 0 : value),
               }),
@@ -117,6 +119,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
             label=""
             nativeSelectProps={{
               id: "nafSection",
+              title: "Secteur d'activité",
               ...register("nafSection", {
                 setValueAs: value => (value === "" ? void 0 : value),
               }),
