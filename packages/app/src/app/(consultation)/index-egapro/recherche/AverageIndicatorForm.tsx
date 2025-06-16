@@ -72,6 +72,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur l'année",
+                title: "Année de déclaration",
                 ...register("year"),
               }}
             >
@@ -90,6 +91,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur la région",
+                title: "Région",
                 ...register("regionCode", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
@@ -108,6 +110,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur le département",
+                title: "Département",
                 ...register("countyCode", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
@@ -128,6 +131,7 @@ export const AverageIndicatorForm = ({ searchParams }: AverageIndicatorFormProps
               label={false}
               nativeSelectProps={{
                 "aria-label": "Filtre sur le secteur d'activité",
+                title: "Secteur d'activité",
                 ...register("nafSection", {
                   setValueAs: value => (value === "" ? void 0 : value),
                 }),
