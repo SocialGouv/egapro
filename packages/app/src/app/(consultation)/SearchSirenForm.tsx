@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
+import styles from "./SearchSirenForm.module.scss";
+
 type SearchSirenFormInput = ConsultationInput;
 export interface SearchSirenFormProps {
   searchParams: SearchSirenFormInput;
@@ -60,18 +62,45 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <Grid haveGutters>
         <GridCol>
-          <Input
-            label="Saisir le numéro Siren ou le nom de l'entreprise déclarante (privilégier le numéro Siren)"
-            nativeInputProps={{
-              id: "query",
-              title: "Saisissez le nom ou le Siren d'une entreprise déclarante",
-              autoComplete: "off",
-              type: "search",
-              ...register("query"),
-            }}
-            stateRelatedMessage={errors.query?.message}
-            state={errors.query && "error"}
-          />
+          <div className={styles.searchContainer}>
+            <Input
+              label="Saisir le numéro Siren ou le nom de l'entreprise déclarante (privilégier le numéro Siren)"
+              nativeInputProps={{
+                id: "query",
+                title: "Saisissez le nom ou le Siren d'une entreprise déclarante",
+                autoComplete: "off",
+                type: "text",
+                ...register("query"),
+              }}
+              stateRelatedMessage={errors.query?.message}
+              state={errors.query && "error"}
+            />
+            {watch("query") && (
+              <button
+                type="button"
+                onClick={() => {
+                  reset({ ...watch(), query: "" });
+                }}
+                aria-label="Effacer la recherche"
+                title="Effacer la recherche"
+                className={styles.clearButton}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M8 0C3.6 0 0 3.6 0 8C0 12.4 3.6 16 8 16C12.4 16 16 12.4 16 8C16 3.6 12.4 0 8 0ZM12 10.9L10.9 12L8 9.1L5.1 12L4 10.9L6.9 8L4 5.1L5.1 4L8 6.9L10.9 4L12 5.1L9.1 8L12 10.9Z"
+                    fill="#666666"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
         </GridCol>
         <GridCol sm={4}>
           <Select
