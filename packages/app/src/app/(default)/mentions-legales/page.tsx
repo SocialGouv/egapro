@@ -25,7 +25,7 @@ const LegalNotice = () => {
               75350&nbsp;Paris
             </p>
             <h2>Directeur de la publication</h2>
-            <p>Pierre RAMAIN, Directeur Général du travail</p>
+            <p>Pierre RAMAIN, directeur général du travail</p>
             <h2>Hébergement de la plateforme</h2>
             <p>La plateforme est hébergée par OVH, situé&nbsp;:</p>
             <p>
