@@ -40,11 +40,13 @@ const LegalNotice = () => {
               La conformité aux normes d’accessibilité numérique est un objectif ultérieur mais nous tâchons de rendre
               ce site accessible à toutes et à tous.
             </p>
-Si vous rencontrez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité
-du site, merci de nous en faire part via <Link href="mailto:contact@egapro.travail.gouv.fr">contact@egapro.travail.gouv.fr</Link>.
-<br />
-Si vous n'obtenez pas de réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances
-ou une demande de saisine au Défenseur des droits.
+            <p>
+              Si vous rencontrez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité
+              du site, merci de nous en faire part via{" "}
+              <Link href="mailto:contact@egapro.travail.gouv.fr">contact@egapro.travail.gouv.fr</Link>.
+              <br />
+              Si vous n'obtenez pas de réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances
+              ou une demande de saisine au Défenseur des droits.
             </p>
             <h3 className="fr-text--xl">En savoir plus</h3>
             <p>
