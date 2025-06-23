@@ -42,7 +42,7 @@ const LegalNotice = () => {
             </p>
             <p>
               Si vous rencontrez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité
-              du site, merci de nous en faire part via{" "}
+              du site, merci de nous en faire part via&nbsp;
               <Link href="mailto:contact@egapro.travail.gouv.fr">contact@egapro.travail.gouv.fr</Link>.
               <br />
               Si vous n'obtenez pas de réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances
