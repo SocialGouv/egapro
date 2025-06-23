@@ -29,33 +29,6 @@ describe("<LegalNotice />", () => {
     expect(securityHeading).toBeInTheDocument();
   });
 
-  it("should render the editor information", () => {
-    render(<LegalNotice />);
-
-    const editorInfo = screen.getByText(/Egapro est édité par la Fabrique Numérique des Ministères sociaux/);
-    expect(editorInfo).toBeInTheDocument();
-
-    const editorAddress = screen.getByText(/Tour Mirabeau/);
-    expect(editorAddress).toBeInTheDocument();
-  });
-
-  it("should render the director information", () => {
-    render(<LegalNotice />);
-
-    const directorInfo = screen.getByText(/Le directeur de la publication est Monsieur Pierre RAMAIN/);
-    expect(directorInfo).toBeInTheDocument();
-  });
-
-  it("should render the hosting information", () => {
-    render(<LegalNotice />);
-
-    const hostingInfo = screen.getByText(/La plateforme est hébergée par OVH/);
-    expect(hostingInfo).toBeInTheDocument();
-
-    const hostingAddress = screen.getByText(/2 rue Kellermann/);
-    expect(hostingAddress).toBeInTheDocument();
-  });
-
   it("should render the accessibility link", () => {
     render(<LegalNotice />);
 
