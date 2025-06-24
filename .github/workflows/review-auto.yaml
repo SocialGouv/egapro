@@ -13,7 +13,191 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
 jobs:
-  socialgouv:
-    name: "🇫🇷 SocialGouv"
-    uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto.yaml@v1
+  build-app:
+    environment: build-review-auto
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: 📌 Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/app
+          tags: |
+            type=sha,prefix=persist-,format=long,enable=${{
+              github.ref_name == 'dev' ||
+              github.ref_name == 'develop' ||
+              github.ref_name == 'preprod' ||
+              github.ref_name == 'main' ||
+              github.ref_name == 'master'
+            }},priority=840
+            type=sha,prefix=sha-,format=long,priority=890
+            type=ref,event=branch,priority=600
+
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+
+      - name: 📦 Build and push Docker image for app
+        uses: socialgouv/workflows/actions/buildkit@v1
+        with:
+          context: "."
+          dockerfile: "packages/app/Dockerfile"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          registry: "${{ vars.REGISTRY_URL }}"
+          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
+          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
+          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
+          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
+          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
+          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
+          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}/api
+            NEXT_PUBLIC_API_V2_URL=https://${{ steps.env.outputs.subdomain }}/apiv2
+            NEXTAUTH_URL=https://${{ steps.env.outputs.subdomain }}/api/auth
+            NEXT_PUBLIC_GITHUB_SHA=${{ steps.vars.outputs.sha_short }}
+            NEXT_PUBLIC_EGAPRO_ENV=dev
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.APP_SENTRY_DSN }}
+            SENTRY_ORG=incubateur
+            SENTRY_PROJECT=egapro-app
+            SENTRY_URL=https://sentry2.fabrique.social.gouv.fr
+            SENTRY_RELEASE=${{ github.ref_name }}
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+  build-api:
+    environment: build-review-auto
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: 📌 Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/api
+          tags: |
+            type=sha,prefix=persist-,format=long,enable=${{
+              github.ref_name == 'dev' ||
+              github.ref_name == 'develop' ||
+              github.ref_name == 'preprod' ||
+              github.ref_name == 'main' ||
+              github.ref_name == 'master'
+            }},priority=840
+            type=sha,prefix=sha-,format=long,priority=890
+            type=ref,event=branch,priority=600
+
+      - name: 📦 Build and push Docker image for api
+        uses: socialgouv/workflows/actions/buildkit@v1
+        with:
+          context: "packages/api"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          registry: "${{ vars.REGISTRY_URL }}"
+          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
+          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
+          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
+          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
+          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
+          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
+          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+
+  build-nginx:
+    environment: build-review-auto
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: 📌 Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/nginx
+          tags: |
+            type=sha,prefix=persist-,format=long,enable=${{
+              github.ref_name == 'dev' ||
+              github.ref_name == 'develop' ||
+              github.ref_name == 'preprod' ||
+              github.ref_name == 'main' ||
+              github.ref_name == 'master'
+            }},priority=840
+            type=sha,prefix=sha-,format=long,priority=890
+            type=ref,event=branch,priority=600
+
+      - name: 📦 Build and push Docker image for nginx
+        uses: socialgouv/workflows/actions/buildkit@v1
+        with:
+          context: "packages/nginx"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          registry: "${{ vars.REGISTRY_URL }}"
+          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
+          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
+          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
+          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
+          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
+          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
+          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+
+  build-files:
+    environment: build-review-auto
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: 📌 Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/files
+          tags: |
+            type=sha,prefix=persist-,format=long,enable=${{
+              github.ref_name == 'dev' ||
+              github.ref_name == 'develop' ||
+              github.ref_name == 'preprod' ||
+              github.ref_name == 'main' ||
+              github.ref_name == 'master'
+            }},priority=840
+            type=sha,prefix=sha-,format=long,priority=890
+            type=ref,event=branch,priority=600
+
+      - name: 📦 Build and push Docker image for files
+        uses: socialgouv/workflows/actions/buildkit@v1
+        with:
+          context: "packages/files"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          registry: "${{ vars.REGISTRY_URL }}"
+          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
+          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
+          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
+          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
+          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
+          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
+          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+
+  kontinuous:
+    needs: [build-app, build-api, build-nginx, build-files]
+    name: "Deploy on Kubernetes 🐳"
+    uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
