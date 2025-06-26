@@ -1,3 +1,18 @@
+# [3.11.0](https://github.com/SocialGouv/egapro/compare/v3.10.0...v3.11.0) (2025-06-25)
+
+
+### Bug Fixes
+
+* accessibilité sur le bouton icone info ([#2527](https://github.com/SocialGouv/egapro/issues/2527)) ([d2d3705](https://github.com/SocialGouv/egapro/commit/d2d37057bbc0e54daa3b2992c2d10abacb91529b))
+* buildkit in gh ([#2523](https://github.com/SocialGouv/egapro/issues/2523)) ([11b2c88](https://github.com/SocialGouv/egapro/commit/11b2c88df33cc268c0a90b79c7b44c4f6655f5b8))
+* gestion des labels des champs pour accessibilite ([#2524](https://github.com/SocialGouv/egapro/issues/2524)) ([e110fa3](https://github.com/SocialGouv/egapro/commit/e110fa3ee6c09a2ff38e49dbdb92f67a1e1b4142))
+* make search input close button accessible ([#2525](https://github.com/SocialGouv/egapro/issues/2525)) ([9385218](https://github.com/SocialGouv/egapro/commit/93852189a90d1c1a1bee9caddf6a6efb5170845a))
+
+
+### Features
+
+* rewording mention legales ([#2528](https://github.com/SocialGouv/egapro/issues/2528)) ([3c830b6](https://github.com/SocialGouv/egapro/commit/3c830b6943c1dec8db78833908ff81cf5f13a6b6))
+
 # [3.10.0](https://github.com/SocialGouv/egapro/compare/v3.9.0...v3.10.0) (2025-06-10)
 
 

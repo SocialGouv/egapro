@@ -402,6 +402,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                 label="Pays *"
                 nativeSelectProps={{
                   ...register("countryIsoCode"),
+                  title: "Pays",
                 }}
               >
                 <option value="" disabled>
@@ -444,7 +445,13 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
               {/* Afficher les champs département et région uniquement si le pays est la France */}
               {isFrance && (
                 <>
-                  <Select label="Département *" nativeSelectProps={register("county")}>
+                  <Select
+                    label="Département *"
+                    nativeSelectProps={{
+                      ...register("county"),
+                      title: "Département",
+                    }}
+                  >
                     <option value="" disabled>
                       Sélectionnez un département
                     </option>
@@ -454,7 +461,13 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
                       </option>
                     ))}
                   </Select>
-                  <Select label="Région *" nativeSelectProps={register("region")}>
+                  <Select
+                    label="Région *"
+                    nativeSelectProps={{
+                      ...register("region"),
+                      title: "Région",
+                    }}
+                  >
                     <option value="" disabled>
                       Sélectionnez une région
                     </option>
