@@ -28,6 +28,10 @@ jobs:
             type=sha,prefix=preprod-,format=long,priority=850
             type=sha,prefix=sha-,format=long,priority=890
 
+      - name: Env
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+
       - name: 📦 Build and push Docker image for app
         uses: socialgouv/workflows/actions/buildkit@v1
         with:
@@ -44,9 +48,9 @@ jobs:
           buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
           buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
           build-args: |
-            NEXT_PUBLIC_API_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/api
-            NEXT_PUBLIC_API_V2_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/apiv2
-            NEXTAUTH_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/api/auth
+            NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}/api
+            NEXT_PUBLIC_API_V2_URL=https://${{ steps.env.outputs.subdomain }}/apiv2
+            NEXTAUTH_URL=https://${{ steps.env.outputs.subdomain }}/api/auth
             NEXT_PUBLIC_GITHUB_SHA=${{ github.sha }}
             NEXT_PUBLIC_EGAPRO_ENV=preprod
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.APP_SENTRY_DSN }}
