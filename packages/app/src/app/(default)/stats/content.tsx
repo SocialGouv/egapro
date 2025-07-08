@@ -39,6 +39,52 @@ export const StatsContent = async () => {
 
   return (
     <>
+      {/* Descriptions détaillées pour l'accessibilité - masquées visuellement mais accessibles aux lecteurs d'écran */}
+      <div id="chart-description-déclarants-par-tranche-d'effectifs-assujettis" className="sr-only">
+        Ce graphique en barres horizontales présente la répartition des {stats.index.count} déclarants selon leur
+        tranche d'effectifs assujettis. Les données montrent : {stats.index.countByWorkforceRange["1000:"]} entreprises
+        de 1000 salariés et plus, {stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et{" "}
+        {stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.
+      </div>
+
+      <div id="chart-description-index-moyen-par-tranche-d'effectifs-assujettis" className="sr-only">
+        Ce graphique en barres horizontales présente l'index moyen Egapro par tranche d'effectifs assujettis. Les
+        résultats montrent : {Math.round(stats.index.averageByWorkforceRange["1000:"])} points pour les entreprises de
+        1000 salariés et plus, {Math.round(stats.index.averageByWorkforceRange["251:999"])} points pour celles de 251 à
+        999 salariés, et {Math.round(stats.index.averageByWorkforceRange["50:250"])} points pour celles de 50 à 250
+        salariés.
+      </div>
+
+      <div id="chart-description-index-moyen-par-année-de-déclaration" className="sr-only">
+        Ce graphique en barres horizontales présente l'évolution de l'index moyen Egapro sur les trois dernières années
+        de déclaration.{" "}
+        {Object.entries(stats.index.lastThreeYearsAverage)
+          .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points`)
+          .join(", ")}
+        .
+      </div>
+
+      <div id="chart-description-répartition-des-femmes-parmi-les-cadres-dirigeants" className="sr-only">
+        Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres
+        dirigeants. Sur {stats.balancedRepresentation.count} déclarants :{" "}
+        {stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes,{" "}
+        {stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et{" "}
+        {stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non
+        calculable.
+      </div>
+
+      <div
+        id="chart-description-répartition-des-femmes-parmi-les-membres-des-instances-dirigeantes"
+        className="sr-only"
+      >
+        Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les
+        membres des instances dirigeantes. Sur {stats.balancedRepresentation.count} déclarants :{" "}
+        {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de 30% de femmes,{" "}
+        {stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de femmes, et{" "}
+        {stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de représentation non
+        calculable.
+      </div>
+
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
         Index Egapro {PUBLIC_CURRENT_YEAR + 1} au titre des données {PUBLIC_CURRENT_YEAR}
       </h2>
@@ -48,7 +94,10 @@ export const StatsContent = async () => {
           <DataCard title={`Déclarant${stats.index.count > 1 ? "s" : ""}`} data={stats.index.count} />
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Déclarants par tranche d'effectifs assujettis">
+          <StatCard
+            title="Déclarants par tranche d'effectifs assujettis"
+            chartDescription={`Ce graphique en barres horizontales présente la répartition des ${stats.index.count} déclarants selon leur tranche d'effectifs assujettis. Les données montrent : ${stats.index.countByWorkforceRange["1000:"]} entreprises de 1000 salariés et plus, ${stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et ${stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.`}
+          >
             <BarChart
               xAxisSuggestedMax={stats.index.count}
               theme="multicolor"
@@ -67,6 +116,8 @@ export const StatsContent = async () => {
                 },
               ]}
               tooltipLegend="Nombre de déclarants"
+              ariaLabel={`Graphique en barres : Répartition des déclarants par tranche d'effectifs. ${stats.index.countByWorkforceRange["1000:"]} entreprises de 1000+ salariés, ${stats.index.countByWorkforceRange["251:999"]} de 251-999 salariés, ${stats.index.countByWorkforceRange["50:250"]} de 50-250 salariés.`}
+              ariaDescribedBy="chart-description-déclarants-par-tranche-d'effectifs-assujettis"
             />
           </StatCard>
         </GridCol>
@@ -84,7 +135,16 @@ export const StatsContent = async () => {
           />
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Index moyen par tranche d'effectifs assujettis">
+          <StatCard
+            title="Index moyen par tranche d'effectifs assujettis"
+            chartDescription={`Ce graphique en barres horizontales présente l'index moyen Egapro par tranche d'effectifs assujettis. Les résultats montrent : ${Math.round(
+              stats.index.averageByWorkforceRange["1000:"],
+            )} points pour les entreprises de 1000 salariés et plus, ${Math.round(
+              stats.index.averageByWorkforceRange["251:999"],
+            )} points pour celles de 251 à 999 salariés, et ${Math.round(
+              stats.index.averageByWorkforceRange["50:250"],
+            )} points pour celles de 50 à 250 salariés.`}
+          >
             <BarChart
               theme="multicolor"
               showValue
@@ -104,11 +164,26 @@ export const StatsContent = async () => {
                 },
               ]}
               tooltipLegend="Index moyen"
+              ariaLabel={`Graphique en barres : Index moyen par tranche d'effectifs. ${Math.round(
+                stats.index.averageByWorkforceRange["1000:"],
+              )} points pour 1000+ salariés, ${Math.round(
+                stats.index.averageByWorkforceRange["251:999"],
+              )} points pour 251-999 salariés, ${Math.round(
+                stats.index.averageByWorkforceRange["50:250"],
+              )} points pour 50-250 salariés.`}
+              ariaDescribedBy="chart-description-index-moyen-par-tranche-d'effectifs-assujettis"
             />
           </StatCard>
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Index moyen par année de déclaration">
+          <StatCard
+            title="Index moyen par année de déclaration"
+            chartDescription={`Ce graphique en barres horizontales présente l'évolution de l'index moyen Egapro sur les trois dernières années de déclaration. ${Object.entries(
+              stats.index.lastThreeYearsAverage,
+            )
+              .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points`)
+              .join(", ")}.`}
+          >
             <BarChart
               showValue
               data={Object.entries(stats.index.lastThreeYearsAverage)
@@ -116,6 +191,12 @@ export const StatsContent = async () => {
                 .sort((a, b) => b.legend - a.legend)}
               tooltipLegend="Index"
               yAxisMin={indexLastThreeYearsAverageYAxisMin}
+              ariaLabel={`Graphique en barres : Index moyen par année de déclaration. ${Object.entries(
+                stats.index.lastThreeYearsAverage,
+              )
+                .map(entry => `${Number(entry[0]) + 1}: ${Math.floor(Number(entry[1]))} points`)
+                .join(", ")}.`}
+              ariaDescribedBy="chart-description-index-moyen-par-année-de-déclaration"
             />
           </StatCard>
         </GridCol>
@@ -132,7 +213,10 @@ export const StatsContent = async () => {
           />
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Répartition des femmes parmi les cadres dirigeants">
+          <StatCard
+            title="Répartition des femmes parmi les cadres dirigeants"
+            chartDescription={`Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres dirigeants. Sur ${stats.balancedRepresentation.count} déclarants : ${stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non calculable.`}
+          >
             <DoughnutChart
               data={[
                 {
@@ -149,11 +233,16 @@ export const StatsContent = async () => {
                 },
               ]}
               tooltipLegend="Nombre de déclarants"
+              ariaLabel={`Graphique en secteurs : Répartition des femmes parmi les cadres dirigeants. ${stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises avec plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentExecutives.lte} avec moins de 30%, ${stats.balancedRepresentation.countWomen30percentExecutives.nc} non calculable.`}
+              ariaDescribedBy="chart-description-répartition-des-femmes-parmi-les-cadres-dirigeants"
             />
           </StatCard>
         </GridCol>
         <GridCol sm={12} md={6} lg={4}>
-          <StatCard title="Répartition des femmes parmi les membres des instances dirigeantes">
+          <StatCard
+            title="Répartition des femmes parmi les membres des instances dirigeantes"
+            chartDescription={`Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les membres des instances dirigeantes. Sur ${stats.balancedRepresentation.count} déclarants : ${stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de représentation non calculable.`}
+          >
             <DoughnutChart
               data={[
                 {
@@ -170,6 +259,8 @@ export const StatsContent = async () => {
                 },
               ]}
               tooltipLegend="Nombre de déclarants"
+              ariaLabel={`Graphique en secteurs : Répartition des femmes parmi les membres des instances dirigeantes. ${stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises avec plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentMembers.lte} avec moins de 30%, ${stats.balancedRepresentation.countWomen30percentMembers.nc} non calculable.`}
+              ariaDescribedBy="chart-description-répartition-des-femmes-parmi-les-membres-des-instances-dirigeantes"
             />
           </StatCard>
         </GridCol>
