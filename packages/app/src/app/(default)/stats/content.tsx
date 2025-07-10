@@ -41,32 +41,34 @@ export const StatsContent = async () => {
     <>
       {/* Descriptions détaillées pour l'accessibilité - masquées visuellement mais accessibles aux lecteurs d'écran */}
       <div id="chart-description-déclarants-par-tranche-d'effectifs-assujettis" className="sr-only">
-        Ce graphique en barres horizontales présente la répartition des {stats.index.count} déclarants selon leur
-        tranche d'effectifs assujettis. Les données montrent : {stats.index.countByWorkforceRange["1000:"]} entreprises
-        de 1000 salariés et plus, {stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et{" "}
+        Ce graphique en barres horizontales présente la répartition des entreprises et unités économiques et sociales
+        ayant déclaré leur index de l'égalité professionnelle selon leur tranche d'effectifs assujettis. Les données
+        montrent : {stats.index.countByWorkforceRange["1000:"]} entreprises de 1000 salariés et plus,{" "}
+        {stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et{" "}
         {stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.
       </div>
 
       <div id="chart-description-index-moyen-par-tranche-d'effectifs-assujettis" className="sr-only">
-        Ce graphique en barres horizontales présente l'index moyen Egapro par tranche d'effectifs assujettis. Les
-        résultats montrent : {Math.round(stats.index.averageByWorkforceRange["1000:"])} points pour les entreprises de
-        1000 salariés et plus, {Math.round(stats.index.averageByWorkforceRange["251:999"])} points pour celles de 251 à
-        999 salariés, et {Math.round(stats.index.averageByWorkforceRange["50:250"])} points pour celles de 50 à 250
+        Ce graphique en barres horizontales présente l'index moyen de l'égalité professionnelle des entreprises et
+        unités économiques et sociales selon leur tranche d'effectifs assujettis. Les résultats montrent :{" "}
+        {Math.round(stats.index.averageByWorkforceRange["1000:"])} points sur 100 pour les entreprises de 1000 salariés
+        et plus, {Math.round(stats.index.averageByWorkforceRange["251:999"])} points sur 100 pour celles de 251 à 999
+        salariés, et {Math.round(stats.index.averageByWorkforceRange["50:250"])} points sur 100 pour celles de 50 à 250
         salariés.
       </div>
 
       <div id="chart-description-index-moyen-par-année-de-déclaration" className="sr-only">
-        Ce graphique en barres horizontales présente l'évolution de l'index moyen Egapro sur les trois dernières années
-        de déclaration.{" "}
+        Ce graphique en barres horizontales présente l'évolution de l'index moyen de l'égalité professionnelle des
+        entreprises et unités économiques et sociales sur les trois dernières années de déclaration.
         {Object.entries(stats.index.lastThreeYearsAverage)
-          .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points`)
+          .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points sur 100`)
           .join(", ")}
         .
       </div>
 
       <div id="chart-description-répartition-des-femmes-parmi-les-cadres-dirigeants" className="sr-only">
         Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres
-        dirigeants. Sur {stats.balancedRepresentation.count} déclarants :{" "}
+        dirigeants. Sur {stats.balancedRepresentation.count} entreprises ayant déclaré leurs écarts de représentation :{" "}
         {stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes,{" "}
         {stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et{" "}
         {stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non
@@ -78,11 +80,11 @@ export const StatsContent = async () => {
         className="sr-only"
       >
         Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les
-        membres des instances dirigeantes. Sur {stats.balancedRepresentation.count} déclarants :{" "}
-        {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de 30% de femmes,{" "}
-        {stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de femmes, et{" "}
-        {stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de représentation non
-        calculable.
+        membres des instances dirigeantes. Sur {stats.balancedRepresentation.count} entreprises ayant déclaré leurs
+        écarts de représentations : {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de
+        30% de femmes, {stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de
+        femmes, et {stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de
+        représentation non calculable.
       </div>
 
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
