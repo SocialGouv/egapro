@@ -81,7 +81,7 @@ export const StatsContent = async () => {
       >
         Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les
         membres des instances dirigeantes. Sur {stats.balancedRepresentation.count} entreprises ayant déclaré leurs
-        écarts de représentations : {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de
+        écarts de représentation : {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de
         30% de femmes, {stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de
         femmes, et {stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de
         représentation non calculable.
