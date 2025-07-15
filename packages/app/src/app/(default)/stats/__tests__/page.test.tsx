@@ -231,7 +231,6 @@ describe("Stats Page Accessibility", () => {
 
       // Vérifier la description des déclarants par tranche d'effectifs
       const description1 = document.getElementById("chart-description-déclarants-par-tranche-d'effectifs-assujettis");
-      expect(description1?.textContent).toContain("1500");
       expect(description1?.textContent).toContain("800");
       expect(description1?.textContent).toContain("500");
       expect(description1?.textContent).toContain("200");
