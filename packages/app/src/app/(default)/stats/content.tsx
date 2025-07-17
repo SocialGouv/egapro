@@ -9,6 +9,37 @@ import { DoughnutChart } from "./components/client/DoughnutChart";
 import { DataCard } from "./components/DataCard";
 import { StatCard } from "./components/StatCard";
 
+type StatsData = Awaited<ReturnType<typeof getPublicStats>>;
+
+/**
+ * Génère les descriptions détaillées pour l'accessibilité et les utilisateurs
+ * @param stats - Les données statistiques
+ * @returns Un objet contenant toutes les descriptions des graphiques
+ */
+const getChartDescriptions = (stats: StatsData) => {
+  return {
+    declarantsByWorkforce: `Ce graphique en barres horizontales présente la répartition des entreprises et unités économiques et sociales ayant déclaré leur index de l'égalité professionnelle selon leur tranche d'effectifs assujettis. Les données montrent : ${stats.index.countByWorkforceRange["1000:"]} entreprises de 1000 salariés et plus, ${stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et ${stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.`,
+
+    averageIndexByWorkforce: `Ce graphique en barres horizontales présente l'index moyen de l'égalité professionnelle des entreprises et unités économiques et sociales selon leur tranche d'effectifs assujettis. Les résultats montrent : ${Math.round(
+      stats.index.averageByWorkforceRange["1000:"],
+    )} points sur 100 pour les entreprises de 1000 salariés et plus, ${Math.round(
+      stats.index.averageByWorkforceRange["251:999"],
+    )} points sur 100 pour celles de 251 à 999 salariés, et ${Math.round(
+      stats.index.averageByWorkforceRange["50:250"],
+    )} points sur 100 pour celles de 50 à 250 salariés.`,
+
+    averageIndexByYear: `Ce graphique en barres horizontales présente l'évolution de l'index moyen de l'égalité professionnelle des entreprises et unités économiques et sociales sur les trois dernières années de déclaration. ${Object.entries(
+      stats.index.lastThreeYearsAverage,
+    )
+      .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points sur 100`)
+      .join(", ")}.`,
+
+    womenExecutives: `Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres dirigeants. Sur ${stats.balancedRepresentation.count} entreprises ayant déclaré leurs écarts de représentation : ${stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non calculable.`,
+
+    womenMembers: `Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les membres des instances dirigeantes. Sur ${stats.balancedRepresentation.count} entreprises ayant déclaré leurs écarts de représentation : ${stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de représentation non calculable.`,
+  };
+};
+
 export const StatsContent = async () => {
   const stats = await getPublicStats();
 
@@ -37,54 +68,33 @@ export const StatsContent = async () => {
   const lowestIndexLastThreeYearsAverageTwentieth = Math.round(lowestIndexLastThreeYearsAverage / 20) * 20;
   const indexLastThreeYearsAverageYAxisMin = Math.max(lowestIndexLastThreeYearsAverageTwentieth, 0);
 
+  // Descriptions détaillées pour l'accessibilité et les utilisateurs
+  const chartDescriptions = getChartDescriptions(stats);
+
   return (
     <>
       {/* Descriptions détaillées pour l'accessibilité - masquées visuellement mais accessibles aux lecteurs d'écran */}
       <div id="chart-description-déclarants-par-tranche-d'effectifs-assujettis" className="sr-only">
-        Ce graphique en barres horizontales présente la répartition des entreprises et unités économiques et sociales
-        ayant déclaré leur index de l'égalité professionnelle selon leur tranche d'effectifs assujettis. Les données
-        montrent : {stats.index.countByWorkforceRange["1000:"]} entreprises de 1000 salariés et plus,{" "}
-        {stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et{" "}
-        {stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.
+        {chartDescriptions.declarantsByWorkforce}
       </div>
 
       <div id="chart-description-index-moyen-par-tranche-d'effectifs-assujettis" className="sr-only">
-        Ce graphique en barres horizontales présente l'index moyen de l'égalité professionnelle des entreprises et
-        unités économiques et sociales selon leur tranche d'effectifs assujettis. Les résultats montrent :{" "}
-        {Math.round(stats.index.averageByWorkforceRange["1000:"])} points sur 100 pour les entreprises de 1000 salariés
-        et plus, {Math.round(stats.index.averageByWorkforceRange["251:999"])} points sur 100 pour celles de 251 à 999
-        salariés, et {Math.round(stats.index.averageByWorkforceRange["50:250"])} points sur 100 pour celles de 50 à 250
-        salariés.
+        {chartDescriptions.averageIndexByWorkforce}
       </div>
 
       <div id="chart-description-index-moyen-par-année-de-déclaration" className="sr-only">
-        Ce graphique en barres horizontales présente l'évolution de l'index moyen de l'égalité professionnelle des
-        entreprises et unités économiques et sociales sur les trois dernières années de déclaration.
-        {Object.entries(stats.index.lastThreeYearsAverage)
-          .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points sur 100`)
-          .join(", ")}
-        .
+        {chartDescriptions.averageIndexByYear}
       </div>
 
       <div id="chart-description-répartition-des-femmes-parmi-les-cadres-dirigeants" className="sr-only">
-        Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres
-        dirigeants. Sur {stats.balancedRepresentation.count} entreprises ayant déclaré leurs écarts de représentation :{" "}
-        {stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes,{" "}
-        {stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et{" "}
-        {stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non
-        calculable.
+        {chartDescriptions.womenExecutives}
       </div>
 
       <div
         id="chart-description-répartition-des-femmes-parmi-les-membres-des-instances-dirigeantes"
         className="sr-only"
       >
-        Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les
-        membres des instances dirigeantes. Sur {stats.balancedRepresentation.count} entreprises ayant déclaré leurs
-        écarts de représentation : {stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de
-        30% de femmes, {stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de
-        femmes, et {stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de
-        représentation non calculable.
+        {chartDescriptions.womenMembers}
       </div>
 
       <h2 className={fr.cx("fr-mt-8w", "fr-mb-1w")}>
@@ -98,7 +108,7 @@ export const StatsContent = async () => {
         <GridCol sm={12} md={6} lg={4}>
           <StatCard
             title="Déclarants par tranche d'effectifs assujettis"
-            chartDescription={`Ce graphique en barres horizontales présente la répartition des ${stats.index.count} déclarants selon leur tranche d'effectifs assujettis. Les données montrent : ${stats.index.countByWorkforceRange["1000:"]} entreprises de 1000 salariés et plus, ${stats.index.countByWorkforceRange["251:999"]} entreprises de 251 à 999 salariés, et ${stats.index.countByWorkforceRange["50:250"]} entreprises de 50 à 250 salariés.`}
+            chartDescription={chartDescriptions.declarantsByWorkforce}
           >
             <BarChart
               xAxisSuggestedMax={stats.index.count}
@@ -139,13 +149,7 @@ export const StatsContent = async () => {
         <GridCol sm={12} md={6} lg={4}>
           <StatCard
             title="Index moyen par tranche d'effectifs assujettis"
-            chartDescription={`Ce graphique en barres horizontales présente l'index moyen Egapro par tranche d'effectifs assujettis. Les résultats montrent : ${Math.round(
-              stats.index.averageByWorkforceRange["1000:"],
-            )} points pour les entreprises de 1000 salariés et plus, ${Math.round(
-              stats.index.averageByWorkforceRange["251:999"],
-            )} points pour celles de 251 à 999 salariés, et ${Math.round(
-              stats.index.averageByWorkforceRange["50:250"],
-            )} points pour celles de 50 à 250 salariés.`}
+            chartDescription={chartDescriptions.averageIndexByWorkforce}
           >
             <BarChart
               theme="multicolor"
@@ -180,11 +184,7 @@ export const StatsContent = async () => {
         <GridCol sm={12} md={6} lg={4}>
           <StatCard
             title="Index moyen par année de déclaration"
-            chartDescription={`Ce graphique en barres horizontales présente l'évolution de l'index moyen Egapro sur les trois dernières années de déclaration. ${Object.entries(
-              stats.index.lastThreeYearsAverage,
-            )
-              .map(entry => `Année ${Number(entry[0]) + 1} : ${Math.floor(Number(entry[1]))} points`)
-              .join(", ")}.`}
+            chartDescription={chartDescriptions.averageIndexByYear}
           >
             <BarChart
               showValue
@@ -217,7 +217,7 @@ export const StatsContent = async () => {
         <GridCol sm={12} md={6} lg={4}>
           <StatCard
             title="Répartition des femmes parmi les cadres dirigeants"
-            chartDescription={`Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les cadres dirigeants. Sur ${stats.balancedRepresentation.count} déclarants : ${stats.balancedRepresentation.countWomen30percentExecutives.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentExecutives.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentExecutives.nc} entreprises ont un écart de représentation non calculable.`}
+            chartDescription={chartDescriptions.womenExecutives}
           >
             <DoughnutChart
               data={[
@@ -243,7 +243,7 @@ export const StatsContent = async () => {
         <GridCol sm={12} md={6} lg={4}>
           <StatCard
             title="Répartition des femmes parmi les membres des instances dirigeantes"
-            chartDescription={`Ce graphique en secteurs présente la répartition des entreprises selon le pourcentage de femmes parmi les membres des instances dirigeantes. Sur ${stats.balancedRepresentation.count} déclarants : ${stats.balancedRepresentation.countWomen30percentMembers.gt} entreprises ont plus de 30% de femmes, ${stats.balancedRepresentation.countWomen30percentMembers.lte} entreprises ont moins de 30% de femmes, et ${stats.balancedRepresentation.countWomen30percentMembers.nc} entreprises ont un écart de représentation non calculable.`}
+            chartDescription={chartDescriptions.womenMembers}
           >
             <DoughnutChart
               data={[
