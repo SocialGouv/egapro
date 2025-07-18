@@ -1,3 +1,20 @@
+# [3.12.0](https://github.com/SocialGouv/egapro/compare/v3.11.0...v3.12.0) (2025-07-18)
+
+
+### Bug Fixes
+
+* **ci:** subdomain typo ([9e5fb65](https://github.com/SocialGouv/egapro/commit/9e5fb65b5094fefe23f258749be66c2378b27a4e))
+* mention legal mauvais email + sous-titre manquant ([#2531](https://github.com/SocialGouv/egapro/issues/2531)) ([3568866](https://github.com/SocialGouv/egapro/commit/356886647d0d69ef80fc7a78e05e35d339eef100))
+* preprod build arg subdomain ([e45a782](https://github.com/SocialGouv/egapro/commit/e45a782d72d37f7112a6d6742992b7fd9b86ab80))
+* preprod build arg subdomain ([1337ab4](https://github.com/SocialGouv/egapro/commit/1337ab4434ba09e04d66666c2b9dc8220e9af713))
+* stats charts ([#2623](https://github.com/SocialGouv/egapro/issues/2623)) ([174f56a](https://github.com/SocialGouv/egapro/commit/174f56ad4ead8bf2e8c3dd1deb0f08cd3e6f13ba))
+* stats description text ([#2622](https://github.com/SocialGouv/egapro/issues/2622)) ([92a5563](https://github.com/SocialGouv/egapro/commit/92a5563794c8269e96c5dde3eb77fa1dc488bf54))
+
+
+### Features
+
+* ajout de l'accessibilité sur les charts de la page stats ([#2621](https://github.com/SocialGouv/egapro/issues/2621)) ([46209bb](https://github.com/SocialGouv/egapro/commit/46209bb8d01847c3114ea782fd5343b8f0b88dda))
+
 # [3.11.0](https://github.com/SocialGouv/egapro/compare/v3.10.0...v3.11.0) (2025-06-25)
 
 
