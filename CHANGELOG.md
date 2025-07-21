@@ -1,3 +1,10 @@
+## [3.12.1](https://github.com/SocialGouv/egapro/compare/v3.12.0...v3.12.1) (2025-07-21)
+
+
+### Bug Fixes
+
+* init db in scheduler ([7191ad6](https://github.com/SocialGouv/egapro/commit/7191ad61a38a2663de47c9392079f4ba6127e755))
+
 # [3.12.0](https://github.com/SocialGouv/egapro/compare/v3.11.0...v3.12.0) (2025-07-18)
 
 
