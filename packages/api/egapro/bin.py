@@ -101,6 +101,17 @@ async def run_full(path: Path):
 @minicli.cli
 async def scheduler():
     print("Scheduler started")
+
+    # Initialize database connection when running scheduler directly
+    loggers.init()
+    config.init()
+    try:
+        await db.init()
+        print("Database connection initialized successfully")
+    except RuntimeError as err:
+        print(f"CRITICAL: Database initialization failed: {err}")
+        return
+
     schedule.every().day.at("00:00").do(run_export_representation, Path("/mnt/files/dgt-export-representation.xlsx"))
     schedule.every().day.at("00:00").do(run_dump_dgt, Path("/mnt/files/dgt.xlsx"))
     schedule.every().day.at("00:00").do(run_dump_dgt_representation, Path("/mnt/files/dgt-representation.xlsx"))
@@ -108,9 +119,13 @@ async def scheduler():
     schedule.every().day.at("00:00").do(run_export_indexes, Path("/mnt/files/indexes.csv"))
     schedule.every().day.at("00:00").do(run_full, Path("/mnt/files/full.ndjson"))
 
-    while True:
-        await schedule.run_pending()
-        await asyncio.sleep(1)
+    try:
+        while True:
+            await schedule.run_pending()
+            await asyncio.sleep(1)
+    finally:
+        # Clean up database connection
+        await db.terminate()
 
 
 @minicli.cli
