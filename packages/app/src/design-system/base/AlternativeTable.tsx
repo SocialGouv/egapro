@@ -64,7 +64,9 @@ export const AlternativeTableCell = ({
             priority="tertiary"
             title="Plus d'informations"
             className={styles["modal-button"]}
-          />
+          >
+            <span className="fr-sr-only">Plus d'informations</span>
+          </Button>
 
           {modal && (
             <ClientBodyPortal>
