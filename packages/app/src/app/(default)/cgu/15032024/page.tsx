@@ -128,7 +128,8 @@ const Cgu = () => {
           </p>
           <p>
             <a href="/cgu/08022021">Version du 08/02/2021</a>
-            <br />
+          </p>
+          <p>
             <a href="/cgu/12102022">Version du 12/10/2022</a>
           </p>
         </GridCol>
