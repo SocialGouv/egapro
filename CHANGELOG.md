@@ -1,3 +1,15 @@
+# [3.13.0](https://github.com/SocialGouv/egapro/compare/v3.12.1...v3.13.0) (2025-09-10)
+
+
+### Bug Fixes
+
+* ajout d'un texte explicatif du bouton plus info ([#2624](https://github.com/SocialGouv/egapro/issues/2624)) ([e55d506](https://github.com/SocialGouv/egapro/commit/e55d506c40edaaa13ccda3bb2dbd223859b138fc))
+
+
+### Features
+
+* implémentation du versioning de cgu ([#2626](https://github.com/SocialGouv/egapro/issues/2626)) ([e2bafdc](https://github.com/SocialGouv/egapro/commit/e2bafdce594c1b944917b29d3757967fcacc21e5))
+
 ## [3.12.1](https://github.com/SocialGouv/egapro/compare/v3.12.0...v3.12.1) (2025-07-21)
 
 
