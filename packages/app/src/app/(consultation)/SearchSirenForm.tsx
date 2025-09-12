@@ -104,7 +104,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
         </GridCol>
         <GridCol sm={4}>
           <Select
-            label=""
+            label="Région"
             nativeSelectProps={{
               id: "regionCode",
               title: "Région",
@@ -113,7 +113,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option value="">Région</option>
+            <option></option>
             {SORTED_REGIONS.map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
@@ -124,7 +124,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
 
         <GridCol sm={4}>
           <Select
-            label=""
+            label="Département"
             nativeSelectProps={{
               id: "countyCode",
               title: "Département",
@@ -133,7 +133,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option value="">Département</option>
+            <option></option>
             {regionSelected &&
               FULL_SORTED_REGIONS_TO_COUNTIES[regionSelected].map(([key, value]) => (
                 <option key={key} value={key}>
@@ -145,7 +145,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
 
         <GridCol sm={4}>
           <Select
-            label=""
+            label="Secteur d'activité"
             nativeSelectProps={{
               id: "nafSection",
               title: "Secteur d'activité",
@@ -154,7 +154,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option value="">Secteur d'activité</option>
+            <option></option>
             {SORTED_NAF_SECTIONS.map(([key, value]) => (
               <option key={key} value={key}>
                 {capitalize(value)}
