@@ -113,7 +113,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option></option>
+            <option value=""></option>
             {SORTED_REGIONS.map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
@@ -133,7 +133,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option></option>
+            <option value=""></option>
             {regionSelected &&
               FULL_SORTED_REGIONS_TO_COUNTIES[regionSelected].map(([key, value]) => (
                 <option key={key} value={key}>
@@ -154,7 +154,7 @@ export const SearchSirenForm = ({ searchParams }: SearchSirenFormProps) => {
               }),
             }}
           >
-            <option></option>
+            <option value=""></option>
             {SORTED_NAF_SECTIONS.map(([key, value]) => (
               <option key={key} value={key}>
                 {capitalize(value)}
