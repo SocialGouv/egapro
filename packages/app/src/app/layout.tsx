@@ -50,7 +50,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
     isEmailLogin: config.api.security.auth.isEmailLogin,
   };
   return (
-    <html lang="fr" {...getHtmlAttributes({ defaultColorScheme })} className={style.app}>
+    <html {...getHtmlAttributes({ defaultColorScheme, lang: "fr" })} className={style.app}>
       <head>
         <StartDsfr />
         <DsfrHead
