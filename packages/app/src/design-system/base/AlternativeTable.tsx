@@ -189,6 +189,39 @@ function isDsfrInputProps(props: AlternativeTableProps.ColType): props is Altern
   return (props as AlternativeTableProps.CellInputProps).nativeInputProps !== undefined;
 }
 
+function collectErrorMessages(body: AlternativeTableProps.BodyContent[]): Array<{ id: string; message: string }> {
+  const errorMessages: Array<{ id: string; message: string }> = [];
+  let errorIndex = 0;
+
+  body.forEach((row, rowIndex) => {
+    if (row.cols) {
+      row.cols.forEach((col, colIndex) => {
+        if (isDsfrInputProps(col) && col.stateRelatedMessage) {
+          errorMessages.push({
+            id: `error-${rowIndex}-${colIndex}-${errorIndex++}`,
+            message: col.stateRelatedMessage.toString(),
+          });
+        }
+      });
+    } else if (row.subRows) {
+      row.subRows.forEach((subRow, subRowIndex) => {
+        if (subRow.cols) {
+          subRow.cols.forEach((col, colIndex) => {
+            if (isDsfrInputProps(col) && col.stateRelatedMessage) {
+              errorMessages.push({
+                id: `error-${rowIndex}-${subRowIndex}-${colIndex}-${errorIndex++}`,
+                message: col.stateRelatedMessage.toString(),
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+
+  return errorMessages.filter(item => item.message); // Filtrer les messages vides
+}
+
 export const AlternativeTable = (props: AlternativeTableProps) => {
   const { header, footer, body, classeName, bordered } = props;
 
@@ -197,156 +230,195 @@ export const AlternativeTable = (props: AlternativeTableProps) => {
   const validated = validateProps(props);
   const maxCols = validated.maxCols;
 
+  const errorMessages = collectErrorMessages(body);
+
   if (!maxCols) {
     return null;
   }
 
   return (
-    <>
-      <div
-        className={cx(
-          fr.cx("fr-table", {
-            "fr-table--bordered": bordered,
-          }),
-          styles.table,
-          classeName,
-        )}
-      >
-        <table>
-          <thead>
-            <tr>
-              {header.map((headerCol, index) => (
-                <AlternativeTableCell
-                  key={`th-top-${index}`}
-                  as="th"
-                  rowSpan={headerCol.subCols ? void 0 : 2}
-                  colSpan={headerCol.subCols?.length ?? void 0}
-                  scope={headerCol.subCols ? "colgroup" : "col"}
-                  align="center"
-                  informations={headerCol.informations}
-                >
-                  {headerCol.label}
-                </AlternativeTableCell>
-              ))}
-            </tr>
-            <tr>
-              {header.map(
-                (headerCol, index) =>
-                  headerCol.subCols?.map((headerSubCol, subIndex) => (
-                    <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
-                      {headerSubCol.label}
-                    </AlternativeTableCell>
-                  )),
-              )}
-            </tr>
-          </thead>
+    <div
+      className={cx(
+        fr.cx("fr-table", {
+          "fr-table--bordered": bordered,
+        }),
+        styles.table,
+        classeName,
+      )}
+    >
+      <table>
+        <thead>
+          <tr>
+            {header.map((headerCol, index) => (
+              <AlternativeTableCell
+                key={`th-top-${index}`}
+                as="th"
+                rowSpan={headerCol.subCols ? void 0 : 2}
+                colSpan={headerCol.subCols?.length ?? void 0}
+                scope={headerCol.subCols ? "colgroup" : "col"}
+                align="center"
+                informations={headerCol.informations}
+              >
+                {headerCol.label}
+              </AlternativeTableCell>
+            ))}
+          </tr>
+          <tr>
+            {header.map(
+              (headerCol, index) =>
+                headerCol.subCols?.map((headerSubCol, subIndex) => (
+                  <AlternativeTableCell key={`th-bottom-${index}-${subIndex}`} as="th" scope="col" align="center">
+                    {headerSubCol.label}
+                  </AlternativeTableCell>
+                )),
+            )}
+          </tr>
+        </thead>
 
-          {body.map((row, index) => {
-            return (
-              <tbody key={row.key || index}>
-                {row.subRows ? (
-                  row.subRows.map((subItem, j) => (
-                    <tr key={`${row.key || index}-${j}`}>
-                      {j === 0 && (
-                        <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
-                          <span>{row.categoryLabel}</span>
-                          {row.isDeletable && (
-                            <Button
-                              iconId="fr-icon-delete-fill"
-                              priority="tertiary"
-                              title="Label button"
-                              className={styles["delete-btn"]}
-                              size="small"
-                              type="button"
-                              onClick={row.onClickDelete}
-                            >
-                              Supprimer
-                            </Button>
-                          )}
-                        </AlternativeTableCell>
-                      )}
-                      <AlternativeTableCell as="th" scope="row">
-                        {subItem.label}
+        {body.map((row, rowIndex) => {
+          return (
+            <tbody key={row.key || rowIndex}>
+              {row.subRows ? (
+                row.subRows.map((subItem, subRowIndex) => (
+                  <tr key={`${row.key || rowIndex}-${subRowIndex}`}>
+                    {subRowIndex === 0 && (
+                      <AlternativeTableCell as="th" rowSpan={4} scope="rowgroup">
+                        <span>{row.categoryLabel}</span>
+                        {row.isDeletable && (
+                          <Button
+                            iconId="fr-icon-delete-fill"
+                            priority="tertiary"
+                            title="Label button"
+                            className={styles["delete-btn"]}
+                            size="small"
+                            type="button"
+                            onClick={row.onClickDelete}
+                          >
+                            Supprimer
+                          </Button>
+                        )}
                       </AlternativeTableCell>
-                      {subItem.cols?.map((col, k) => (
-                        <AlternativeTableCell key={`${row.key || index}-${j}-${k}`} align={row.alignCols ?? "right"}>
+                    )}
+                    <AlternativeTableCell as="th" scope="row">
+                      {subItem.label}
+                    </AlternativeTableCell>
+                    {subItem.cols?.map((col, colIndex) => {
+                      const errorId =
+                        isDsfrInputProps(col) && col.stateRelatedMessage
+                          ? `error-${rowIndex}-${subRowIndex}-${colIndex}`
+                          : undefined;
+                      return (
+                        <AlternativeTableCell
+                          key={`${row.key || rowIndex}-${subRowIndex}-${colIndex}`}
+                          align={row.alignCols ?? "right"}
+                        >
                           {isDsfrInputProps(col) ? (
                             <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                              <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                              <Input
+                                {...col}
+                                hideLabel
+                                classes={{ message: "fr-sr-only" }}
+                                textArea={false}
+                                nativeInputProps={{
+                                  ...col.nativeInputProps,
+                                  "aria-describedby": errorId,
+                                }}
+                              />
                             </TooltipWrapper>
                           ) : (
                             col
                           )}
                         </AlternativeTableCell>
-                      ))}
-                      {subItem.mergedLabel && (
-                        <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)} align="center">
-                          <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
-                        </AlternativeTableCell>
-                      )}
-                    </tr>
-                  ))
-                ) : row.cols ? (
-                  <tr>
-                    <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
-                    {row.cols.map((col, k) => (
-                      <AlternativeTableCell key={`${row.key || index}-${k}`} align={row.alignCols ?? "right"}>
+                      );
+                    })}
+                    {subItem.mergedLabel && (
+                      <AlternativeTableCell colSpan={maxCols - 2 - (subItem.cols?.length ?? 0)} align="center">
+                        <i className={cx(fr.cx("fr-text--xs"))}>{subItem.mergedLabel}</i>
+                      </AlternativeTableCell>
+                    )}
+                  </tr>
+                ))
+              ) : row.cols ? (
+                <tr>
+                  <AlternativeTableCell as="th">{row.categoryLabel}</AlternativeTableCell>
+                  {row.cols.map((col, colIndex) => {
+                    const errorId =
+                      isDsfrInputProps(col) && col.stateRelatedMessage ? `error-${rowIndex}-${colIndex}` : undefined;
+                    return (
+                      <AlternativeTableCell key={`${row.key || rowIndex}-${colIndex}`} align={row.alignCols ?? "right"}>
                         {isDsfrInputProps(col) ? (
                           <TooltipWrapper message={col?.stateRelatedMessage?.toString()}>
-                            <Input {...col} hideLabel classes={{ message: "fr-sr-only" }} textArea={false} />
+                            <Input
+                              {...col}
+                              hideLabel
+                              classes={{ message: "fr-sr-only" }}
+                              textArea={false}
+                              nativeInputProps={{
+                                ...col.nativeInputProps,
+                                "aria-describedby": errorId,
+                              }}
+                            />
                           </TooltipWrapper>
                         ) : (
                           col
                         )}
                       </AlternativeTableCell>
-                    ))}
-                    {row.mergedLabel && (
-                      <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
-                        <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
-                      </AlternativeTableCell>
-                    )}
-                  </tr>
-                ) : (
-                  <tr>
-                    <AlternativeTableCell as="th" scope="rowgroup">
-                      {row.categoryLabel}
-                    </AlternativeTableCell>
-                    <AlternativeTableCell colSpan={maxCols - 1} align="center">
+                    );
+                  })}
+                  {row.mergedLabel && (
+                    <AlternativeTableCell colSpan={maxCols - 1 - (row.cols?.length ?? 0)} align="center">
                       <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
                     </AlternativeTableCell>
-                  </tr>
-                )}
-              </tbody>
-            );
-          })}
-
-          {footer && (
-            <tfoot>
-              <tr>
-                {footer.map((footerCol, index) => (
-                  <AlternativeTableCell
-                    key={`td-footer-${index}`}
-                    colSpan={footerCol.colspan}
-                    align={footerCol.align ?? "center"}
-                  >
-                    <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
-                      {footerCol.label}
-                    </span>
-                    {typeof footerCol.data !== "undefined" && (
-                      <>
-                        <br />
-                        <strong>{footerCol.data}</strong>
-                      </>
-                    )}
+                  )}
+                </tr>
+              ) : (
+                <tr>
+                  <AlternativeTableCell as="th" scope="rowgroup">
+                    {row.categoryLabel}
                   </AlternativeTableCell>
-                ))}
-              </tr>
-            </tfoot>
-          )}
-        </table>
+                  <AlternativeTableCell colSpan={maxCols - 1} align="center">
+                    <i className={cx(fr.cx("fr-text--xs"))}>{row.mergedLabel}</i>
+                  </AlternativeTableCell>
+                </tr>
+              )}
+            </tbody>
+          );
+        })}
 
-        {withTooltip && <ReactTooltip />}
-      </div>
-    </>
+        {footer && (
+          <tfoot>
+            <tr>
+              {footer.map((footerCol, index) => (
+                <AlternativeTableCell
+                  key={`td-footer-${index}`}
+                  colSpan={footerCol.colspan}
+                  align={footerCol.align ?? "center"}
+                >
+                  <span className={cx(fr.cx(typeof footerCol.data !== "undefined" ? "fr-text--xs" : null))}>
+                    {footerCol.label}
+                  </span>
+                  {typeof footerCol.data !== "undefined" && (
+                    <>
+                      <br />
+                      <strong>{footerCol.data}</strong>
+                    </>
+                  )}
+                </AlternativeTableCell>
+              ))}
+            </tr>
+          </tfoot>
+        )}
+      </table>
+
+      {errorMessages.length > 0 && (
+        <div className={cx(fr.cx("fr-error-text"), styles["error-messages"])}>
+          <span id={errorMessages[0].id} role="alert">
+            {errorMessages[0].message}
+          </span>
+        </div>
+      )}
+
+      {withTooltip && <ReactTooltip />}
+    </div>
   );
 };
