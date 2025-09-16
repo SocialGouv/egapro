@@ -6,6 +6,7 @@ import { storePicker } from "@common/utils/zustand";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { last } from "lodash";
 import { useSelectedLayoutSegments } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 import { getFullNavigation, NAVIGATION } from "./navigation";
 import { useSimuFunnelStore, useSimuFunnelStoreHasHydrated } from "./useSimuFunnelStore";
@@ -21,6 +22,13 @@ export const Stepper = () => {
   const layoutSegments = useSelectedLayoutSegments();
   const segment = last(layoutSegments) as NavigationPath;
   const currentNavigation = NAVIGATION[segment] || {};
+  const srOnlyRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (srOnlyRef.current) {
+      srOnlyRef.current.focus();
+    }
+  }, [segment]);
 
   if (!hydrated) {
     return (
@@ -42,11 +50,16 @@ export const Stepper = () => {
   ) as (typeof NAVIGATION)[NavigationPath];
 
   return (
-    <BaseStepper
-      stepCount={steps.length}
-      currentStep={currentStep}
-      title={currentNavigation.title}
-      nextTitle={nextNavigation.title}
-    />
+    <>
+      <BaseStepper
+        stepCount={steps.length}
+        currentStep={currentStep}
+        title={currentNavigation.title}
+        nextTitle={nextNavigation.title}
+      />
+      <span ref={srOnlyRef} className="sr-only" tabIndex={-1}>
+        {currentNavigation.title}
+      </span>
+    </>
   );
 };
