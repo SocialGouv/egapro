@@ -49,7 +49,7 @@ const Cgu = () => {
           </p>
           <p>La plateforme propose également une FAQ et un moteur de recherche.</p>
           <p>
-            Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous : 
+            Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous :{" "}
             <a href="https://index-egapro.travail.gouv.fr/">https://index-egapro.travail.gouv.fr</a>
           </p>
           <h2>Responsabilités</h2>
