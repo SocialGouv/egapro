@@ -5,7 +5,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import { sanitizeClipboardText } from "../../../utils/errorHandling";
 import { TextareaCounter, type TextareaCounterProps } from "../TextAreaCounter";
 
-// Mock de @codegouvfr/react-dsfr
 jest.mock("@codegouvfr/react-dsfr", () => ({
   fr: {
     cx: jest.fn().mockImplementation((...args) => args.join(" ")),
@@ -19,13 +18,11 @@ jest.mock("@codegouvfr/react-dsfr", () => ({
   ),
 }));
 
-// Mock de Sentry
 jest.mock("@sentry/nextjs", () => ({
   captureMessage: jest.fn(),
   captureException: jest.fn(),
 }));
 
-// Composant wrapper pour tester avec react-hook-form
 const Wrapper = ({ children, defaultValues = {} }) => {
   const methods = useForm({ defaultValues });
   return <FormProvider {...methods}>{children}</FormProvider>;
@@ -98,7 +95,7 @@ describe("TextareaCounter", () => {
     );
 
     const textarea = screen.getByTestId("textarea");
-    const pastedText = "\u001F\u200B"; // Caractères filtrés
+    const pastedText = "\u001F\u200B";
 
     fireEvent.paste(textarea, {
       clipboardData: {
@@ -115,8 +112,7 @@ describe("TextareaCounter", () => {
           extra: { fieldName: "testField", rawText: pastedText },
         }),
       );
-      // Le collage par défaut doit être autorisé, donc pas de setValue
-      expect(textarea).toHaveValue(pastedText); // Comportement natif
+      expect(textarea).toHaveValue(pastedText);
     });
 
     mockSanitize.mockRestore();
