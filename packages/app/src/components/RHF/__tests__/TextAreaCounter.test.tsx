@@ -40,14 +40,14 @@ describe("TextareaCounter", () => {
     jest.clearAllMocks();
   });
 
-  it("should render textarea with correct props", () => {
+  it("should render textarea with correct props", async () => {
     render(
       <Wrapper>
         <TextareaCounter {...defaultProps} placeholder="Enter text" />
       </Wrapper>,
     );
 
-    const textarea = screen.getByTestId("textarea");
+    const textarea = await screen.findByRole("textbox");
     expect(textarea).toHaveAttribute("placeholder", "Enter text");
     expect(textarea).toHaveAttribute("maxLength", "300");
     expect(screen.getByText("Test Label")).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("TextareaCounter", () => {
       </Wrapper>,
     );
 
-    const textarea = screen.getByTestId("textarea");
+    const textarea = await screen.findByRole("textbox");
     const pastedText = "Hello World";
 
     fireEvent.paste(textarea, {
@@ -94,13 +94,17 @@ describe("TextareaCounter", () => {
       </Wrapper>,
     );
 
-    const textarea = screen.getByTestId("textarea");
-    const pastedText = "\u001F\u200B";
+    const textarea = await screen.findByRole("textbox");
+    const pastedText = "\u001F\u200B"; // Caractères filtrés
 
     fireEvent.paste(textarea, {
       clipboardData: {
         getData: () => pastedText,
       },
+    });
+
+    fireEvent.change(textarea, {
+      target: { value: pastedText },
     });
 
     await waitFor(() => {
