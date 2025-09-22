@@ -1,7 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import * as Sentry from "@sentry/nextjs";
 import { useFormContext } from "react-hook-form";
+
+import { sanitizeClipboardText } from "../../utils/errorHandling";
 
 export type TextareaCounterProps = {
   disabled?: boolean;
@@ -29,6 +32,7 @@ export const TextareaCounter = ({
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext();
 
@@ -37,6 +41,43 @@ export const TextareaCounter = ({
   const remainingCharacters = maxLength ? maxLength - (value?.length ?? 0) : 0;
   const color =
     remainingCharacters < 0 ? "text-dsfr-error" : remainingCharacters < 20 ? "text-dsfr-warning" : "text-dsfr-neutral";
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    try {
+      e.preventDefault();
+
+      const rawText = e.clipboardData.getData("text/plain");
+
+      const text = sanitizeClipboardText(rawText);
+
+      const textarea = e.currentTarget;
+      const selectionStart = textarea.selectionStart;
+      const selectionEnd = textarea.selectionEnd;
+
+      const currentValue = textarea.value;
+      const newValue = currentValue.substring(0, selectionStart) + text + currentValue.substring(selectionEnd);
+
+      setValue(fieldName, newValue, { shouldValidate: true });
+
+      setTimeout(() => {
+        textarea.selectionStart = selectionStart + text.length;
+        textarea.selectionEnd = selectionStart + text.length;
+      }, 0);
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: {
+          component: "TextareaCounter",
+          action: "handlePaste",
+        },
+        extra: {
+          fieldName,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
+
+      console.error("Erreur lors du collage de texte:", error);
+    }
+  };
 
   return (
     <>
@@ -48,6 +89,7 @@ export const TextareaCounter = ({
           readOnly,
           disabled,
           maxLength,
+          onPaste: handlePaste,
         }}
         label={label}
         id={fieldName}
