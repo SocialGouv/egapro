@@ -9,7 +9,8 @@ export function initDOMErrorHandling() {
       event.message.includes("Failed to execute 'removeChild' on 'Node'") ||
       event.message.includes("The node to be removed is not a child of this node")
     ) {
-      Sentry.captureException(event.error, {
+      const errorToCapture = event.error ?? new Error(event.message || "Unknown DOM error");
+      Sentry.captureException(errorToCapture, {
         tags: {
           errorType: "DOM_REMOVE_CHILD_ERROR",
           component: "TextArea",
@@ -33,5 +34,21 @@ export function initDOMErrorHandling() {
  * Nettoie le texte pour le copier-coller
  */
 export function sanitizeClipboardText(text: string): string {
-  return text.replace(/[^\x20-\x7E]/g, "").replace(/\u00A0/g, " ");
+  if (typeof text !== "string") {
+    return "";
+  }
+
+  const cleanedText = text
+    .normalize("NFC")
+    .replace(/\u00A0/g, " ")
+    .replace(/[\uFEFF\u200B-\u200F\u202A-\u202E]/g, "");
+
+  return cleanedText
+    .split("")
+    .filter(char => {
+      const code = char.charCodeAt(0);
+      return (code > 31 && code < 127) || code === 9 || code === 10 || code === 13 || code > 159;
+    })
+    .join("")
+    .replace(/\s+/g, " ");
 }
