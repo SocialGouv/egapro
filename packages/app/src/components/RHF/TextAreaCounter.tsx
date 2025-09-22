@@ -72,10 +72,10 @@ export const TextareaCounter = ({
 
       setValue(fieldName, newValue, { shouldValidate: true });
 
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         textarea.selectionStart = selectionStart + text.length;
         textarea.selectionEnd = selectionStart + text.length;
-      }, 0);
+      });
     } catch (error) {
       Sentry.captureException(error, {
         tags: {
