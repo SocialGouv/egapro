@@ -44,16 +44,29 @@ export const TextareaCounter = ({
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     try {
-      e.preventDefault();
-
       const rawText = e.clipboardData.getData("text/plain");
-
       const text = sanitizeClipboardText(rawText);
+
+      if (!text.trim() && rawText.trim()) {
+        Sentry.captureMessage("Sanitization removed all content, falling back to default paste", {
+          level: "warning",
+          tags: {
+            component: "TextareaCounter",
+            action: "handlePaste",
+          },
+          extra: {
+            fieldName,
+            rawText,
+          },
+        });
+        return;
+      }
+
+      e.preventDefault();
 
       const textarea = e.currentTarget;
       const selectionStart = textarea.selectionStart;
       const selectionEnd = textarea.selectionEnd;
-
       const currentValue = textarea.value;
       const newValue = currentValue.substring(0, selectionStart) + text + currentValue.substring(selectionEnd);
 
@@ -74,7 +87,6 @@ export const TextareaCounter = ({
           error: error instanceof Error ? error.message : String(error),
         },
       });
-
       console.error("Erreur lors du collage de texte:", error);
     }
   };
