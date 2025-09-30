@@ -5,6 +5,8 @@
 import * as Sentry from "@sentry/nextjs";
 import { replayIntegration } from "@sentry/nextjs";
 
+import { initDOMErrorHandling } from "./src/utils/errorHandling";
+
 const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
@@ -90,3 +92,13 @@ Sentry.init({
     }),
   ],
 });
+
+if (typeof window !== "undefined") {
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    initDOMErrorHandling();
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      initDOMErrorHandling();
+    });
+  }
+}
