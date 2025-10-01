@@ -1,3 +1,13 @@
+## [3.13.1](https://github.com/SocialGouv/egapro/compare/v3.13.0...v3.13.1) (2025-10-01)
+
+
+### Bug Fixes
+
+* ajout du titre sr-only sur les étapes de formulaire + autofocus ([#2683](https://github.com/SocialGouv/egapro/issues/2683)) ([be196f7](https://github.com/SocialGouv/egapro/commit/be196f739c8ef5a49b2626a2e95138f538221729))
+* erreur copier coller objectif progression ([#2687](https://github.com/SocialGouv/egapro/issues/2687)) ([55e35fa](https://github.com/SocialGouv/egapro/commit/55e35fa94767a25bc33c4d04acff6e0622f4ac1f))
+* Étiquettes de champs de formulaire manquantes - Critères 11.1 11.2 ([#2682](https://github.com/SocialGouv/egapro/issues/2682)) ([3d27fdb](https://github.com/SocialGouv/egapro/commit/3d27fdba7faa1b3a3a1ed439807e3cf5cea73931))
+* rgaa set page language ([#2685](https://github.com/SocialGouv/egapro/issues/2685)) ([43d51ab](https://github.com/SocialGouv/egapro/commit/43d51ab1c191ab10154e4f2f2bee86b25dc04c4a))
+
 # [3.13.0](https://github.com/SocialGouv/egapro/compare/v3.12.1...v3.13.0) (2025-09-10)
 
 
