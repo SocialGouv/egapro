@@ -39,7 +39,7 @@ export const TextareaCounter = ({
     remainingCharacters < 0 ? "text-dsfr-error" : remainingCharacters < 20 ? "text-dsfr-warning" : "text-dsfr-neutral";
 
   return (
-    <>
+    <div translate="no">
       <Input
         textArea
         nativeTextAreaProps={{
@@ -62,6 +62,6 @@ export const TextareaCounter = ({
           {remainingCharacters > 1 && "s"}
         </p>
       )}
-    </>
+    </div>
   );
 };
