@@ -133,6 +133,8 @@ redis:
     existingSecret: redis-auth
     existingSecretPasswordKey: REDIS_PASSWORD
     usePasswordFiles: false  #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
+  image:
+    repository: bitnamilegacy/redis
 
 files:
   ~chart: app
