@@ -1,33 +1,74 @@
-import { Header as DsfrHeader, type HeaderProps as DsfrHeaderProps } from "@codegouvfr/react-dsfr/Header";
-import { Brand } from "@components/Brand";
+"use client";
 
-import { LoginLogoutHeaderItem, UserHeaderItem } from "./AuthHeaderItems";
+import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
+import { usePathname } from "next/navigation";
 
-export interface HeaderProps extends Pick<DsfrHeaderProps, "navigation" | "serviceTagline" | "serviceTitle"> {
-  auth?: boolean;
-}
+export function AppHeader() {
+  const pathname = usePathname();
 
-export const Header = ({
-  auth,
-  navigation,
-  serviceTitle = "Egapro",
-  serviceTagline = "Index de l’égalité professionnelle et représentation équilibrée femmes\u2011hommes",
-}: HeaderProps) => {
+  const navigationItems = [
+    {
+      text: "Accueil",
+      linkProps: {
+        href: "/",
+        target: "_self",
+      },
+      isActive: pathname === "/",
+    },
+    {
+      text: "Index de l'égalité professionnelle",
+      linkProps: {
+        href: "/index-egapro",
+        target: "_self",
+      },
+      isActive: pathname?.startsWith("/index-egapro"),
+    },
+    {
+      text: "Écarts de représentation F/H",
+      linkProps: {
+        href: "/representation-equilibree",
+        target: "_self",
+      },
+      isActive: pathname?.startsWith("/representation-equilibree"),
+    },
+    {
+      text: "Aide",
+      linkProps: {
+        href: "/aide",
+        target: "_self",
+      },
+      isActive: pathname?.startsWith("/aide"),
+    },
+  ];
+
   return (
     <DsfrHeader
-      brandTop={<Brand />}
-      serviceTitle={serviceTitle}
-      serviceTagline={serviceTagline}
+      brandTop={
+        <>
+          RÉPUBLIQUE
+          <br />
+          FRANÇAISE
+        </>
+      }
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion",
+        title: "Accueil - Egapro",
       }}
-      navigation={navigation}
-      quickAccessItems={
-        auth
-          ? [<UserHeaderItem key="hqai-user" />, <LoginLogoutHeaderItem key="hqai-loginlogout" />].filter(Boolean)
-          : []
-      }
+      serviceTitle="Egapro"
+      serviceTagline="L'égalité professionnelle entre les femmes et les hommes"
+      navigation={navigationItems}
+      quickAccessItems={[
+        {
+          iconId: "fr-icon-account-line",
+          linkProps: {
+            href: "/mon-espace",
+          },
+          text: "Mon espace",
+        },
+      ]}
     />
   );
-};
+}
+
+// Export nommé pour la compatibilité avec les imports existants
+export const Header = AppHeader;

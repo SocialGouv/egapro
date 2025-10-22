@@ -1,10 +1,5 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { type NextServerPageProps } from "@common/utils/next";
-import { CenteredContainer } from "@design-system";
 import { notFound } from "next/navigation";
-
-import { Footer } from "../Footer";
-import { Header } from "../Header";
 
 const controlledErrors: Record<string, string | { message: string; source: string }> = {
   AccessDenied: {
@@ -13,7 +8,7 @@ const controlledErrors: Record<string, string | { message: string; source: strin
   },
 };
 
-const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error" | "source">) => {
+const ControlledErrorPage = ({ searchParams }) => {
   const error = controlledErrors[`${searchParams.error}`];
   const source = `${searchParams.source}`;
 
@@ -25,13 +20,9 @@ const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error
 
   return (
     <>
-      <Header />
       <main role="main" id="content" className="grow">
-        <CenteredContainer py="6w">
-          <Alert title="Erreur" severity="error" description={errorMessage} />
-        </CenteredContainer>
+        <Alert title="Erreur" severity="error" description={errorMessage} />
       </main>
-      <Footer />
     </>
   );
 };

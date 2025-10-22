@@ -26,7 +26,6 @@ export const HeaderAccountMenu = (props: {
               className={`${props.staff ? "fr-icon-github-line" : "fr-icon-menu-fill"} fr-pr-2v`}
               aria-hidden="true"
             />
-            {`${props.session.data.user.email}${props.staff ? " " : ""}`}
           </button>
           <div className={cx(fr.cx("fr-collapse"), style["account-menu-list"])} id="account-menu-list">
             <ul className="fr-menu__list">

@@ -1,0 +1,5 @@
+/* Import DSFR styles */
+@import url("@codegouvfr/react-dsfr/dsfr/dsfr.min.css");
+@import url("@codegouvfr/react-dsfr/dsfr/utility/utility.min.css");
+
+/* Additional DSFR customizations can be added here */
