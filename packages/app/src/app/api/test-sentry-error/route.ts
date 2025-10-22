@@ -1,9 +1,20 @@
+import { config } from "@common/config";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // Ensure the route is not statically optimized
 
 export async function GET(request: Request) {
+  // Vérifier l'environnement et bloquer l'accès en production
+  const environment = config.env;
+  if (environment === "production") {
+    return new NextResponse(JSON.stringify({ error: "Cette route n'est pas disponible en production" }), {
+      status: 404,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+    });
+  }
   try {
     console.log("API route hit:", request.url);
     console.log("Headers:", Object.fromEntries(headers()));

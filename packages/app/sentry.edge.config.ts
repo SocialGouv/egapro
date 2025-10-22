@@ -1,17 +1,18 @@
 // This file configures the initialization of Sentry for edge runtimes
 // The config you add here will be used whenever your app runs on the edge
 
+import { config } from "@common/config";
 import * as Sentry from "@sentry/nextjs";
 
-const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
+const ENVIRONMENT = config.env;
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
 Sentry.init({
   // Basic configuration
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: config.sentry.dsn,
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
-  dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+  dist: config.githubSha,
 
   // Performance monitoring and source maps
   // enableTracing: true,

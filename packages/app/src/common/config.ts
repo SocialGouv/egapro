@@ -31,6 +31,14 @@ export const config = {
     url: process.env.NEXT_PUBLIC_MATOMO_URL || "",
     siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID || "",
   },
+  sentry: {
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "",
+    url: process.env.SENTRY_URL || "",
+    org: process.env.SENTRY_ORG || "",
+    project: process.env.SENTRY_PROJECT || "",
+    authToken: process.env.SENTRY_AUTH_TOKEN || "",
+    release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+  },
   env: process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev",
   get ff() {
     return {

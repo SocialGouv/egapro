@@ -1,9 +1,10 @@
+import { config } from "@common/config";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const sentryUrl = process.env.SENTRY_URL;
+  const sentryUrl = config.sentry.url;
   if (!sentryUrl) {
     console.error("Sentry URL not configured");
     return new Response("Sentry URL not configured", { status: 500 });
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Fallback to environment DSN if needed
     if (!projectId || !publicKey) {
-      const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+      const dsn = config.sentry.dsn;
       if (dsn) {
         try {
           const dsnUrl = new URL(dsn);

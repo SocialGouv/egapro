@@ -7,9 +7,11 @@ import { DsfrHeadBase as DsfrHead } from "@codegouvfr/react-dsfr/next-app-router
 import { DsfrProviderBase as DsfrProvider } from "@codegouvfr/react-dsfr/next-app-router/DsfrProvider";
 import { createGetHtmlAttributes } from "@codegouvfr/react-dsfr/next-app-router/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
+import { config } from "@common/config";
+import { Matomo } from "@components/utils/Matomo";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 
 import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { AppFooter } from "./Footer";
@@ -67,9 +69,9 @@ const RootLayout = ({ children }: PropsWithChildren) => {
         {/* for styled-jsx */}
         <meta property="csp-nonce" content={nonce} />
 
-        {/* <Suspense>
+        <Suspense>
           <Matomo env={config.env} nonce={nonce} matomo={config.matomo} />
-        </Suspense> */}
+        </Suspense>
       </head>
       <body>
         <DsfrProvider Link={Link} lang="fr" defaultColorScheme="system">

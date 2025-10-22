@@ -2,9 +2,10 @@
 // The config you add here will be used whenever the server handles a request.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { config } from "@common/config";
 import * as Sentry from "@sentry/nextjs";
 
-const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
+const ENVIRONMENT = config.env;
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
 // Check for Cypress test environment
@@ -12,10 +13,10 @@ const isCypressTest = process.env.CYPRESS === "true";
 
 Sentry.init({
   // Basic configuration
-  dsn: isCypressTest ? undefined : process.env.NEXT_PUBLIC_SENTRY_DSN, // Disable Sentry in Cypress
+  dsn: isCypressTest ? undefined : config.sentry.dsn, // Disable Sentry in Cypress
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
-  dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+  dist: config.githubSha,
 
   // Performance monitoring and source maps
   // enableTracing: true,

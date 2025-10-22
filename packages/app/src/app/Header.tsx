@@ -15,30 +15,6 @@ export function AppHeader() {
       },
       isActive: pathname === "/",
     },
-    {
-      text: "Index de l'égalité professionnelle",
-      linkProps: {
-        href: "/index-egapro",
-        target: "_self",
-      },
-      isActive: pathname?.startsWith("/index-egapro"),
-    },
-    {
-      text: "Écarts de représentation F/H",
-      linkProps: {
-        href: "/representation-equilibree",
-        target: "_self",
-      },
-      isActive: pathname?.startsWith("/representation-equilibree"),
-    },
-    {
-      text: "Aide",
-      linkProps: {
-        href: "/aide",
-        target: "_self",
-      },
-      isActive: pathname?.startsWith("/aide"),
-    },
   ];
 
   return (
@@ -61,9 +37,9 @@ export function AppHeader() {
         {
           iconId: "fr-icon-account-line",
           linkProps: {
-            href: "/mon-espace",
+            href: "/login",
           },
-          text: "Mon espace",
+          text: "Se connecter",
         },
       ]}
     />

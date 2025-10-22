@@ -2,10 +2,11 @@
 // The config you add here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { config } from "@common/config";
 import * as Sentry from "@sentry/nextjs";
 import { replayIntegration } from "@sentry/nextjs";
 
-const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
+const ENVIRONMENT = config.env;
 const IS_PRODUCTION = ENVIRONMENT === "production";
 
 // Declare Cypress on window for TypeScript
@@ -20,10 +21,10 @@ const isCypressTest = typeof window !== "undefined" && window.Cypress !== undefi
 
 Sentry.init({
   // Basic configuration
-  dsn: isCypressTest ? undefined : process.env.NEXT_PUBLIC_SENTRY_DSN, // Disable Sentry in Cypress by setting DSN to undefined
+  dsn: isCypressTest ? undefined : config.sentry.dsn, // Disable Sentry in Cypress by setting DSN to undefined
   environment: ENVIRONMENT,
   debug: true, // Temporarily enable debug mode to troubleshoot
-  dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+  dist: config.githubSha,
 
   // Enable tunneling to avoid ad-blockers (using custom implementation for self-hosted instance)
   tunnel: "/api/monitoring/envelope",
