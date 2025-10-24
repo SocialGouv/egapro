@@ -1,7 +1,0 @@
-recursive-include egapro/emails *
-recursive-include egapro/pdf *
-recursive-include egapro/sql *
-recursive-include egapro/schema *
-recursive-include egapro/migrations *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]

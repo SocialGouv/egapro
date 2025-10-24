@@ -17,6 +17,7 @@ import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { AppFooter } from "./Footer";
 import { AppHeader } from "./Header";
 import style from "./root.module.scss";
+import { SessionProvider } from "./SessionProvider";
 
 const { getHtmlAttributes } = createGetHtmlAttributes({
   defaultColorScheme: "system",
@@ -47,6 +48,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
   //   isProConnectTest: config.api.security.moncomptepro.appTest,
   //   isEmailLogin: config.api.security.auth.isEmailLogin,
   // };
+  console.log(config.matomo);
   return (
     <html {...getHtmlAttributes({ lang: "fr" })} className={style.app}>
       <head>
@@ -74,28 +76,30 @@ const RootLayout = ({ children }: PropsWithChildren) => {
         </Suspense>
       </head>
       <body>
-        <DsfrProvider Link={Link} lang="fr" defaultColorScheme="system">
-          <SkipLinks
-            links={[
-              {
-                anchor: "#content",
-                label: "Contenu",
-              },
-              {
-                anchor: "#footer",
-                label: "Pied de page",
-              },
-            ]}
-          />
-          <ConsentBannerAndConsentManagement />
-          <AppHeader />
-          <div className={fr.cx("fr-container")}>
-            <div className={fr.cx("fr-mt-2w")} id="content">
-              {children}
+        <SessionProvider>
+          <DsfrProvider Link={Link} lang="fr" defaultColorScheme="system">
+            <SkipLinks
+              links={[
+                {
+                  anchor: "#content",
+                  label: "Contenu",
+                },
+                {
+                  anchor: "#footer",
+                  label: "Pied de page",
+                },
+              ]}
+            />
+            <ConsentBannerAndConsentManagement />
+            <AppHeader />
+            <div className={fr.cx("fr-container")}>
+              <div className={fr.cx("fr-mt-2w")} id="content">
+                {children}
+              </div>
             </div>
-          </div>
-          <AppFooter />
-        </DsfrProvider>
+            <AppFooter />
+          </DsfrProvider>
+        </SessionProvider>
       </body>
     </html>
   );
