@@ -9,7 +9,7 @@ export const SentryTest = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const newText = typedText + event.key.toLowerCase();
+      const newText = typedText + event.key?.toLowerCase();
       setTypedText(newText.slice(-6)); // Keep only last 6 characters
 
       if (newText.endsWith("sentry")) {
