@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "crypto": "^1.0.1",
-    "ioredis": "^5.6.1"
+    "ioredis": "^5.8.2"
   }
 }

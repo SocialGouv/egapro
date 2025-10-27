@@ -24,7 +24,7 @@ const CommencerPage = async () => {
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  if (!(session.user.companies.length || session.user.staff)) {
+  if (!(session.user.staff || session.user.companies.length)) {
     return isEmailLogin ? (
       <Alert
         severity="warning"

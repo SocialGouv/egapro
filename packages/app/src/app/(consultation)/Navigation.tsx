@@ -16,13 +16,6 @@ export const Navigation = () => {
           },
         },
         {
-          text: "Index égalité professionnelle",
-          linkProps: {
-            href: "/index-egapro/recherche",
-          },
-          isActive: segment === "index-egapro",
-        },
-        {
           text: "Représentation équilibrée",
           linkProps: {
             href: "/representation-equilibree/recherche",

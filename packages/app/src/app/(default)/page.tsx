@@ -36,42 +36,6 @@ const Home = async () => {
           <GridCol md={6}>
             <Card
               horizontal
-              title="Index de l'égalité professionnelle femmes‑hommes"
-              desc="Calculer et/ou déclarer votre index de l'égalité professionnelle entre les femmes et les hommes."
-              linkProps={{
-                href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
-                target: "_blank",
-                rel: "noreferrer",
-                title: "Pour plus d'informations sur l'index Egapro",
-              }}
-              titleAs="h2"
-              footer={
-                <ButtonsGroup
-                  isReverseOrder
-                  inlineLayoutWhen="lg and up"
-                  buttons={[
-                    {
-                      children: "Calculer - Déclarer mon Index",
-                      linkProps: {
-                        href: "/index-egapro",
-                      },
-                    },
-                    {
-                      children: "Consulter l'Index",
-                      linkProps: {
-                        href: "/index-egapro/recherche",
-                        target: "_blank",
-                      },
-                      priority: "tertiary no outline",
-                    },
-                  ]}
-                />
-              }
-            />
-          </GridCol>
-          <GridCol md={6}>
-            <Card
-              horizontal
               title="Représentation équilibrée femmes‑hommes"
               desc="Déclarer vos écarts de représentation entre les femmes et les hommes dans les postes de direction."
               linkProps={{
