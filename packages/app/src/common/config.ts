@@ -56,7 +56,9 @@ export const config = {
       return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
-      return `${this.issuer}/.well-known/openid-configuration`;
+      return this.env !== "prod" && process.env.EGAPRO_PROCONNECT_DISCOVERY_URL
+        ? `${process.env.EGAPRO_PROCONNECT_DISCOVERY_URL}/.well-known/openid-configuration`
+        : `${this.issuer}/.well-known/openid-configuration`;
     },
 
     clientId: ensureApiEnvVar(process.env.SECURITY_PROCONNECT_CLIENT_ID, ""),
@@ -69,7 +71,7 @@ export const config = {
     ),
     signinUrl: ensureNextEnvVar(
       process.env.EGAPRO_PROCONNECT_SIGN_IN_URL,
-      `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/connexion`,
+      `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/login`,
     ),
     manageOrganisationUrl: ensureNextEnvVar(
       process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL,

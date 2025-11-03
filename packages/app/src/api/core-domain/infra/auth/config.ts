@@ -17,6 +17,7 @@ import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
+// === DÉCLARATIONS DE TYPES ===
 declare module "next-auth" {
   interface Session {
     staff: {
@@ -46,9 +47,11 @@ declare module "next-auth/jwt" {
   }
 }
 
+// === URLs CHARON (pour dev/preprod) ===
 const charonMcpUrl = new URL(`fabriqueKeycloak/`, config.api.security.auth.charonUrl);
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 
+// === PROCONNECT PROVIDER ===
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
@@ -61,6 +64,7 @@ export const proConnectProvider = ProConnectProvider({
       }),
 });
 
+// === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   jwt: {
     async encode({ token, secret }): Promise<string> {
@@ -155,13 +159,14 @@ export const authConfig: AuthOptions = {
       try {
         const isStaff = token.user?.staff || token.staff?.impersonating || false;
 
+        // === IMPERSONATION ===
         if (trigger === "update" && session && isStaff) {
           if (session.staff.impersonating === true) {
             assertImpersonatedSession(session);
             token.user.staff = session.user.staff;
             token.user.companiesHash = session.user.companies
               ? await companiesUtils.hashCompanies(session.user.companies)
-              : session.user.companiesHash;
+              : session.user.companiesHash ?? "";
             token.staff.impersonating = true;
             if (session.user.companies) {
               token.staff.lastImpersonatedHash = await companiesUtils.hashCompanies(
@@ -177,7 +182,7 @@ export const authConfig: AuthOptions = {
 
         if (trigger !== "signUp") return token;
 
-        // Initialisation complète avec tous les champs
+        // === INITIALISATION COMPLÈTE ===
         token.user = {
           companies: [],
           companiesHash: "",
@@ -194,6 +199,7 @@ export const authConfig: AuthOptions = {
           lastImpersonatedHash: "",
         } as Session["staff"];
 
+        // === GITHUB ===
         if (account?.provider === "github") {
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
@@ -201,6 +207,8 @@ export const authConfig: AuthOptions = {
           const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
           token.user.firstname = firstname || undefined;
           token.user.lastname = lastname || undefined;
+
+          // === EMAIL ===
         } else if (account?.provider === "email") {
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
@@ -210,11 +218,31 @@ export const authConfig: AuthOptions = {
           } else {
             token.user.companiesHash = "";
           }
+
+          // === PROCONNECT ===
         } else {
           const proConnectProfile = profile as ProConnectProfile;
+          const keycloakProfile = profile as any; // For Keycloak custom claims
 
-          const sirenList = proConnectProfile.organizations
-            ?.filter(org => !!org)
+          // Handle both real ProConnect (with organizations array) and Keycloak (with individual claims)
+          let organizations: Array<{ label?: string | null; siren?: string; siret?: string }> = [];
+
+          if (proConnectProfile.organizations && Array.isArray(proConnectProfile.organizations)) {
+            // Real ProConnect structure
+            organizations = proConnectProfile.organizations;
+          } else if (keycloakProfile.organization || keycloakProfile.siret) {
+            // Keycloak structure - create mock organization from individual claims
+            organizations = [
+              {
+                siren: typeof keycloakProfile.siret === "string" ? keycloakProfile.siret.substring(0, 9) : undefined,
+                siret: typeof keycloakProfile.siret === "string" ? keycloakProfile.siret : undefined,
+                label: typeof keycloakProfile.organization === "string" ? keycloakProfile.organization : null,
+              },
+            ];
+          }
+
+          const sirenList = organizations
+            .filter(org => !!org)
             .map(org => org.siren || org.siret?.substring(0, 9))
             .filter(Boolean) as string[];
 
@@ -231,14 +259,13 @@ export const authConfig: AuthOptions = {
             }
           }
 
-          const companiesList =
-            proConnectProfile.organizations
-              ?.filter(org => !!org)
-              .map(org => ({
-                siren: org.siren || org.siret?.substring(0, 9),
-                label: org.label,
-              }))
-              .filter(c => c.siren) ?? [];
+          const companiesList: Company[] = organizations
+            .filter(org => !!org && (org.siren || org.siret))
+            .map(org => ({
+              siren: org.siren || (org.siret ? org.siret.substring(0, 9) : ""),
+              label: org.label || null,
+            }))
+            .filter(c => c.siren) as Company[];
 
           token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
           token.user.staff = config.api.staff.includes(proConnectProfile.email ?? "");
@@ -290,6 +317,7 @@ export const authConfig: AuthOptions = {
   },
 };
 
+// === TOKEN API V1 (legacy) ===
 const createTokenApiV1 = (email: string) => {
   return jwt.sign({ sub: email }, config.api.security.jwtv1.secret, {
     algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,

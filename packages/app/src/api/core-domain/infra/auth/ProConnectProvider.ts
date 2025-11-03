@@ -1,4 +1,7 @@
+// @api/core-domain/infra/auth/ProConnectProvider.ts
+
 import { logger } from "@api/utils/pino";
+import { config } from "@common/config";
 import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers/oauth";
 
 export interface Organization {
@@ -26,27 +29,25 @@ export interface ProConnectProfile {
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
-  const scope = process.env.EGAPRO_PROCONNECT_SCOPE;
-  const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
+  const scope = config.proconnect.scope;
+  const proconnectDiscoveryUrl = config.proconnect.issuer;
 
   return {
-    id: "moncomptepro",
+    id: "proconnect", // CHANGÉ ICI
     type: "oauth",
-    name: "Mon Compte Pro",
+    name: "ProConnect", // CHANGÉ ICI
     allowDangerousEmailAccountLinking: true,
-    wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
+    wellKnown: config.proconnect.well_known,
     authorization: {
       params: { scope },
     },
     checks: ["pkce", "state"],
     userinfo: {
       async request({ tokens: { access_token }, client }) {
-        // logger.child({ tokens: { access_token } }).info(`userinfo request`);
         logger.info(`userinfo request`);
         if (!access_token) {
           throw new Error("ProConnectProvider - Userinfo request is missing access_token.");
         }
-
         return client.userinfo<ProConnectProfile>(access_token);
       },
     },
@@ -55,7 +56,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         id: profile.sub,
         email: profile.email,
         name: profile.given_name,
-        phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""), //TODO: remove when handled in MCP
+        phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""),
       };
     },
     ...options,
