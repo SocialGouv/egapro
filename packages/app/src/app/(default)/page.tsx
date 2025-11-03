@@ -1,10 +1,15 @@
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
+import { config } from "@common/config";
 import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system";
 
 import styles from "./index.module.css";
 
 export const dynamic = "force-static";
+
+export const metadata = {
+  robots: config.env === "prod" ? "index, follow" : "noindex, nofollow",
+};
 
 const Home = async () => {
   return (

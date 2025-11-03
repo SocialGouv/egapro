@@ -41,6 +41,7 @@ export const metadata = {
     },
     description,
   },
+  robots: "noindex, nofollow",
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => {
