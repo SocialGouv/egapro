@@ -119,7 +119,7 @@ export const EcartsMembresForm = () => {
                   label: "Pourcentage d'hommes parmi les membres des instances dirigeantes *",
                 }}
                 options={{
-                  disabled: isComputable === false,
+                  disabled: false,
                   max: 100,
                   min: 0,
                   step: 0.1,

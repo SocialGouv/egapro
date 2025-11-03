@@ -164,7 +164,7 @@ export const PublicationForm = () => {
               type: "url",
               pattern: REGEX_URL.source,
               ...register("publishUrl", {
-                disabled: hasWebsite === false,
+                disabled: false,
               }),
             }}
           />

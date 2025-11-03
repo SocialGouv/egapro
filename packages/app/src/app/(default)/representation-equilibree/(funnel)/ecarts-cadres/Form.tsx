@@ -113,7 +113,7 @@ export const EcartsCadresForm = () => {
                 }}
                 second={{ formKey: "executiveMenPercent", label: "Pourcentage d'hommes parmi les cadres dirigeants *" }}
                 options={{
-                  disabled: isComputable === false,
+                  disabled: false,
                   max: 100,
                   min: 0,
                   step: 0.1,
