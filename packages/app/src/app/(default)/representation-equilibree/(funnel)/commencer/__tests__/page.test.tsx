@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { getServerSession } from "next-auth";
 
 import CommencerPage from "../page";
 
@@ -6,7 +7,7 @@ jest.mock("next-auth", () => ({
   getServerSession: jest.fn(),
 }));
 
-const mockGetServerSession = jest.mocked(require("next-auth")).getServerSession;
+const mockGetServerSession = jest.mocked(getServerSession);
 
 // Mock auth config
 jest.mock("@api/core-domain/infra/auth/config", () => ({
@@ -79,7 +80,8 @@ describe("CommencerPage", () => {
     };
     mockGetServerSession.mockResolvedValue(session);
 
-    (config as any).api.security.auth.isEmailLogin = true;
+    (config as unknown as { api: { security: { auth: { isEmailLogin: boolean } } } }).api.security.auth.isEmailLogin =
+      true;
 
     const result = await CommencerPage();
     expect(result).not.toBeNull();
@@ -106,7 +108,8 @@ describe("CommencerPage", () => {
     };
     mockGetServerSession.mockResolvedValue(session);
 
-    (config as any).api.security.auth.isEmailLogin = false;
+    (config as unknown as { api: { security: { auth: { isEmailLogin: boolean } } } }).api.security.auth.isEmailLogin =
+      false;
 
     const result = await CommencerPage();
     expect(result).not.toBeNull();

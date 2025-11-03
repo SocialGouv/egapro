@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { getServerSession } from "next-auth";
 
 import DeclarantPage from "../page";
 
@@ -6,7 +7,7 @@ jest.mock("next-auth", () => ({
   getServerSession: jest.fn(),
 }));
 
-const mockGetServerSession = jest.mocked(require("next-auth")).getServerSession;
+const mockGetServerSession = jest.mocked(getServerSession);
 
 // Mock auth config
 jest.mock("@api/core-domain/infra/auth/config", () => ({

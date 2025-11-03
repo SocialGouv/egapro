@@ -31,7 +31,7 @@ const formDataDefault: State["formData"] = {
 export const useDeclarationFormManager = create<Actions & State>()(
   persist(
     immer(
-      devtools((set, get) => ({
+      devtools((set, _get) => ({
         formData: formDataDefault,
         saveFormData: (data: DeclarationDTO) => set({ formData: data }),
         savePageData: <K extends keyof DeclarationDTO>(page: K, data: DeclarationDTO[K]) =>

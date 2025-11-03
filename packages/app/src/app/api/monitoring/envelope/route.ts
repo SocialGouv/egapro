@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get origin for CORS headers
-    const origin = request.headers.get("origin");
+    const _origin = request.headers.get("origin");
 
     // Forward the request to Sentry's envelope endpoint
     const sentryResponse = await fetch(`${sentryUrl}/api/${projectId}/envelope/`, {

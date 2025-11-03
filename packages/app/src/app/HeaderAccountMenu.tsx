@@ -4,7 +4,7 @@ import { type Session } from "next-auth";
 
 import style from "./root.module.scss";
 
-const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
+const _proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
 export const HeaderAccountMenu = (props: {
   isEmailLogin: boolean;

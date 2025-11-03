@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { useSelectedLayoutSegment } from "next/navigation";
 
 import { RepEqBreadcrumb } from "../Breadcrumb";
 
@@ -7,7 +8,7 @@ jest.mock("next/navigation", () => ({
   useSelectedLayoutSegment: jest.fn(),
 }));
 
-const mockUseSelectedLayoutSegment = require("next/navigation").useSelectedLayoutSegment;
+const mockUseSelectedLayoutSegment = jest.mocked(useSelectedLayoutSegment);
 
 describe("RepEqBreadcrumb", () => {
   beforeEach(() => {
@@ -29,8 +30,8 @@ describe("RepEqBreadcrumb", () => {
     expect(screen.getByText("Représentation équilibrée")).toBeInTheDocument();
   });
 
-  it("renders only home link when segment is undefined", () => {
-    mockUseSelectedLayoutSegment.mockReturnValue(undefined);
+  it("renders only home link when segment is null", () => {
+    mockUseSelectedLayoutSegment.mockReturnValue(null);
 
     render(<RepEqBreadcrumb />);
 
