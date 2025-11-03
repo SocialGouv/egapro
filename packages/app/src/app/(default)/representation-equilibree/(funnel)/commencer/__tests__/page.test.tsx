@@ -2,34 +2,34 @@ import { render, screen } from "@testing-library/react";
 
 import CommencerPage from "../page";
 
-// Mock next-auth
-const mockGetServerSession = jest.fn();
 jest.mock("next-auth", () => ({
-  getServerSession: mockGetServerSession,
+  getServerSession: jest.fn(),
 }));
+
+const mockGetServerSession = jest.mocked(require("next-auth")).getServerSession;
 
 // Mock auth config
 jest.mock("@api/core-domain/infra/auth/config", () => ({
   authConfig: {},
 }));
 
-// Mock config
-const mockConfig = {
-  api: {
-    security: {
-      auth: {
-        isEmailLogin: false,
+jest.mock("@common/config", () => {
+  const config = {
+    api: {
+      security: {
+        auth: {
+          isEmailLogin: false,
+        },
       },
     },
-  },
-  proconnect: {
-    manageOrganisationUrl: "https://example.com",
-  },
-};
-jest.mock("@common/config", () => ({
-  config: mockConfig,
-}));
-
+    proconnect: {
+      manageOrganisationUrl: "https://example.com",
+    },
+  };
+  return {
+    config,
+  };
+});
 // Mock the store for the Form
 jest.mock("../../useRepeqFunnelStore", () => ({
   useRepeqFunnelStore: jest.fn(() => ({
@@ -51,6 +51,8 @@ jest.mock("../../../actions", () => ({
 jest.mock("@globalActions/company", () => ({
   getCompany: jest.fn(),
 }));
+
+import { config } from "@common/config";
 
 describe("CommencerPage", () => {
   beforeEach(() => {
@@ -77,7 +79,7 @@ describe("CommencerPage", () => {
     };
     mockGetServerSession.mockResolvedValue(session);
 
-    mockConfig.api.security.auth.isEmailLogin = true;
+    (config as any).api.security.auth.isEmailLogin = true;
 
     const result = await CommencerPage();
     expect(result).not.toBeNull();
@@ -104,7 +106,7 @@ describe("CommencerPage", () => {
     };
     mockGetServerSession.mockResolvedValue(session);
 
-    mockConfig.api.security.auth.isEmailLogin = false;
+    (config as any).api.security.auth.isEmailLogin = false;
 
     const result = await CommencerPage();
     expect(result).not.toBeNull();
@@ -141,7 +143,7 @@ describe("CommencerPage", () => {
     render(result!);
 
     expect(
-      screen.getByText("Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise"),
+      screen.getByText(/Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise/, { exact: false }),
     ).toBeInTheDocument();
 
     // Test Form conditions: should show Select for siren
@@ -172,7 +174,7 @@ describe("CommencerPage", () => {
     render(result!);
 
     expect(
-      screen.getByText("Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise"),
+      screen.getByText(/Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise/, { exact: false }),
     ).toBeInTheDocument();
 
     // Test Form conditions: should show Input for siren

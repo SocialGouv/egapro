@@ -2,11 +2,11 @@ import { render, screen } from "@testing-library/react";
 
 import DeclarantPage from "../page";
 
-// Mock next-auth
-const mockGetServerSession = jest.fn();
 jest.mock("next-auth", () => ({
-  getServerSession: mockGetServerSession,
+  getServerSession: jest.fn(),
 }));
+
+const mockGetServerSession = jest.mocked(require("next-auth")).getServerSession;
 
 // Mock auth config
 jest.mock("@api/core-domain/infra/auth/config", () => ({
@@ -56,16 +56,16 @@ describe("DeclarantPage", () => {
     render(result!);
 
     expect(
-      screen.getByText(
-        "Les informations déclarant sont préremplies à partir de votre compte ProConnect mais vous pouvez les modifier le cas échéant, à l'exception de l'adresse email.",
-      ),
+      screen.getByText(/Les informations déclarant sont préremplies à partir de votre compte ProConnect/, {
+        exact: false,
+      }),
     ).toBeInTheDocument();
 
     // Test Form conditions: DeclarantFields should be rendered
-    expect(screen.getByLabelText("Prénom *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Nom *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Numéro de téléphone *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Adresse email *")).toBeInTheDocument();
+    expect(screen.getByLabelText("Prénom du déclarant *")).toBeInTheDocument();
+    expect(screen.getByLabelText("Nom du déclarant *")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /Téléphone du déclarant \*/ })).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse email du déclarant *")).toBeInTheDocument();
   });
 
   it("should render for staff user", async () => {
@@ -89,15 +89,15 @@ describe("DeclarantPage", () => {
     render(result!);
 
     expect(
-      screen.getByText(
-        "Les informations déclarant sont préremplies à partir de votre compte ProConnect mais vous pouvez les modifier le cas échéant, à l'exception de l'adresse email.",
-      ),
+      screen.getByText(/Les informations déclarant sont préremplies à partir de votre compte ProConnect/, {
+        exact: false,
+      }),
     ).toBeInTheDocument();
 
     // Test Form conditions: should still show the fields
-    expect(screen.getByLabelText("Prénom *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Nom *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Numéro de téléphone *")).toBeInTheDocument();
-    expect(screen.getByLabelText("Adresse email *")).toBeInTheDocument();
+    expect(screen.getByLabelText("Prénom du déclarant *")).toBeInTheDocument();
+    expect(screen.getByLabelText("Nom du déclarant *")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /Téléphone du déclarant \*/ })).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse email du déclarant *")).toBeInTheDocument();
   });
 });

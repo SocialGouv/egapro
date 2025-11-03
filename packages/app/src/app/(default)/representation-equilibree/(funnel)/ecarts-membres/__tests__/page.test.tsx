@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import EcartsMembres from "../page";
 
@@ -30,12 +31,12 @@ describe("EcartsMembres", () => {
     expect(legalLink).toHaveAttribute("rel", "nofollow");
   });
 
-  it("should show NumberPairInputs when computable is selected", () => {
+  it("should show NumberPairInputs when computable is selected", async () => {
     render(<EcartsMembres />);
 
     // Click on "Oui" radio button
     const ouiRadio = screen.getByLabelText("Oui");
-    fireEvent.click(ouiRadio);
+    await userEvent.click(ouiRadio);
 
     // Check that NumberPairInputs are visible
     expect(

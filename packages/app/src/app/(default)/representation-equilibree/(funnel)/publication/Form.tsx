@@ -154,28 +154,30 @@ export const PublicationForm = () => {
             },
           ]}
         />
-        <Input
-          label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables *"
-          state={errors.publishUrl && "error"}
-          stateRelatedMessage={errors.publishUrl?.message}
-          className={hasWebsite ? "block" : "hidden"}
-          nativeInputProps={{
-            placeholder: "https://",
-            type: "url",
-            pattern: REGEX_URL.source,
-            ...register("publishUrl", {
-              disabled: hasWebsite === false,
-            }),
-          }}
-        />
-        <Input
-          textArea
-          label="Préciser les modalités de communication des écarts calculables auprès de vos salariés *"
-          state={errors.publishModalities && "error"}
-          stateRelatedMessage={errors.publishModalities?.message}
-          className={hasWebsite === false ? "block" : "hidden"}
-          nativeTextAreaProps={register("publishModalities", { disabled: hasWebsite })}
-        />
+        {hasWebsite && (
+          <Input
+            label="Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables *"
+            state={errors.publishUrl && "error"}
+            stateRelatedMessage={errors.publishUrl?.message}
+            nativeInputProps={{
+              placeholder: "https://",
+              type: "url",
+              pattern: REGEX_URL.source,
+              ...register("publishUrl", {
+                disabled: hasWebsite === false,
+              }),
+            }}
+          />
+        )}
+        {hasWebsite === false && (
+          <Input
+            textArea
+            label="Préciser les modalités de communication des écarts calculables auprès de vos salariés *"
+            state={errors.publishModalities && "error"}
+            stateRelatedMessage={errors.publishModalities?.message}
+            nativeTextAreaProps={register("publishModalities", { disabled: hasWebsite })}
+          />
+        )}
         <BackNextButtonsGroup
           backProps={{
             linkProps: {
