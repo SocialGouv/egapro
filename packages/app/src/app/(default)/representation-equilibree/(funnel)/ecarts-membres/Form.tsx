@@ -106,47 +106,50 @@ export const EcartsMembresForm = () => {
             },
           ]}
         />
-        <Box className={isComputable ? "block" : "hidden"}>
-          <FormProvider {...methods}>
-            <NumberPairInputs<EcartsMembresFormType>
-              first={{
-                formKey: "memberWomenPercent",
-                label: "Pourcentage de femmes parmi les membres des instances dirigeantes *",
-              }}
-              second={{
-                formKey: "memberMenPercent",
-                label: "Pourcentage d'hommes parmi les membres des instances dirigeantes *",
-              }}
-              options={{
-                disabled: isComputable === false,
-                max: 100,
-                min: 0,
-                step: 0.1,
-                iconId: "ri-percent-line",
-              }}
-            />
-          </FormProvider>
-        </Box>
-        <Select
-          label="Motif de non calculabilité *"
-          state={errors.notComputableReasonMembers && "error"}
-          stateRelatedMessage={errors.notComputableReasonMembers?.message}
-          className={isComputable === false ? "block" : "hidden"}
-          nativeSelectProps={{
-            ...register("notComputableReasonMembers", {
-              disabled: isComputable,
-            }),
-          }}
-        >
-          <option value="" hidden>
-            Sélectionnez un motif
-          </option>
-          {Object.entries(NotComputableReasonMemberRepEq.Label).map(([key, label]) => (
-            <option value={key} key={key}>
-              {label}
+        {isComputable && (
+          <Box>
+            <FormProvider {...methods}>
+              <NumberPairInputs<EcartsMembresFormType>
+                first={{
+                  formKey: "memberWomenPercent",
+                  label: "Pourcentage de femmes parmi les membres des instances dirigeantes *",
+                }}
+                second={{
+                  formKey: "memberMenPercent",
+                  label: "Pourcentage d'hommes parmi les membres des instances dirigeantes *",
+                }}
+                options={{
+                  disabled: false,
+                  max: 100,
+                  min: 0,
+                  step: 0.1,
+                  iconId: "ri-percent-line",
+                }}
+              />
+            </FormProvider>
+          </Box>
+        )}
+        {isComputable === false && (
+          <Select
+            label="Motif de non calculabilité *"
+            state={errors.notComputableReasonMembers && "error"}
+            stateRelatedMessage={errors.notComputableReasonMembers?.message}
+            nativeSelectProps={{
+              ...register("notComputableReasonMembers", {
+                disabled: isComputable,
+              }),
+            }}
+          >
+            <option value="" hidden>
+              Sélectionnez un motif
             </option>
-          ))}
-        </Select>
+            {Object.entries(NotComputableReasonMemberRepEq.Label).map(([key, label]) => (
+              <option value={key} key={key}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        )}
         <BackNextButtonsGroup
           backProps={{
             linkProps: {

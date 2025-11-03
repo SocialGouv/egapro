@@ -1,10 +1,15 @@
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
+import { config } from "@common/config";
 import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system";
 
 import styles from "./index.module.css";
 
 export const dynamic = "force-static";
+
+export const metadata = {
+  robots: config.env === "prod" ? "index, follow" : "noindex, nofollow",
+};
 
 const Home = async () => {
   return (
@@ -33,42 +38,6 @@ const Home = async () => {
       </Box>
       <Container mt="8w">
         <Grid haveGutters mb="8w">
-          <GridCol md={6}>
-            <Card
-              horizontal
-              title="Index de l'égalité professionnelle femmes‑hommes"
-              desc="Calculer et/ou déclarer votre index de l'égalité professionnelle entre les femmes et les hommes."
-              linkProps={{
-                href: "https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro",
-                target: "_blank",
-                rel: "noreferrer",
-                title: "Pour plus d'informations sur l'index Egapro",
-              }}
-              titleAs="h2"
-              footer={
-                <ButtonsGroup
-                  isReverseOrder
-                  inlineLayoutWhen="lg and up"
-                  buttons={[
-                    {
-                      children: "Calculer - Déclarer mon Index",
-                      linkProps: {
-                        href: "/index-egapro",
-                      },
-                    },
-                    {
-                      children: "Consulter l'Index",
-                      linkProps: {
-                        href: "/index-egapro/recherche",
-                        target: "_blank",
-                      },
-                      priority: "tertiary no outline",
-                    },
-                  ]}
-                />
-              }
-            />
-          </GridCol>
           <GridCol md={6}>
             <Card
               horizontal

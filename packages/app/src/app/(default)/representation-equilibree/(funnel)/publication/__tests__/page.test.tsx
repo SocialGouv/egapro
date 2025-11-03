@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 
@@ -85,6 +85,40 @@ describe("Publication", () => {
     const nonRadio = screen.getByLabelText("Non");
     expect(nonRadio).toBeInTheDocument();
     expect(nonRadio).toHaveAttribute("type", "radio");
+  });
+
+  it("should show URL input when website is selected", () => {
+    render(<Publication />);
+
+    // Click on "Oui" radio button
+    const ouiRadio = screen.getByLabelText("Oui");
+    fireEvent.click(ouiRadio);
+
+    // Check that URL input is visible
+    expect(
+      screen.getByLabelText(/Indiquer l'adresse exacte de la page Internet/, { exact: false }),
+    ).toBeInTheDocument();
+
+    // Check that modalities textarea is hidden
+    expect(
+      screen.queryByLabelText(/Préciser les modalités de communication/, { exact: false }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show modalities textarea when no website is selected", () => {
+    render(<Publication />);
+
+    // Click on "Non" radio button
+    const nonRadio = screen.getByLabelText("Non");
+    fireEvent.click(nonRadio);
+
+    // Check that modalities textarea is visible
+    expect(screen.getByLabelText(/Préciser les modalités de communication/, { exact: false })).toBeInTheDocument();
+
+    // Check that URL input is hidden
+    expect(
+      screen.queryByLabelText(/Indiquer l'adresse exacte de la page Internet/, { exact: false }),
+    ).not.toBeInTheDocument();
   });
 
   it("should have navigation buttons", () => {

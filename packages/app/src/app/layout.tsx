@@ -2,9 +2,9 @@ import "./global.css";
 import "@design-system/utils/client/skeleton/Skeleton.scss";
 import "react-tooltip/dist/react-tooltip.css";
 
-import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
-import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
-import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
+import { DsfrProviderBase } from "@codegouvfr/react-dsfr/next-app-router";
+import { DsfrHeadBase } from "@codegouvfr/react-dsfr/next-app-router/DsfrHead";
+import { createGetHtmlAttributes } from "@codegouvfr/react-dsfr/next-app-router/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
 import { config } from "@common/config";
 import { ConfigProvider } from "@components/utils/ConfigProvider";
@@ -41,6 +41,7 @@ export const metadata = {
     },
     description,
   },
+  robots: "noindex, nofollow",
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => {
@@ -49,11 +50,12 @@ const RootLayout = ({ children }: PropsWithChildren) => {
     isProConnectTest: config.api.security.moncomptepro.appTest,
     isEmailLogin: config.api.security.auth.isEmailLogin,
   };
+  const { getHtmlAttributes } = createGetHtmlAttributes({ defaultColorScheme });
   return (
-    <html {...getHtmlAttributes({ defaultColorScheme, lang: "fr" })} className={style.app}>
+    <html {...getHtmlAttributes({ lang: "fr" })} className={style.app}>
       <head>
         <StartDsfr />
-        <DsfrHead
+        <DsfrHeadBase
           Link={Link}
           preloadFonts={[
             "Marianne-Light",
@@ -79,7 +81,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
       <body>
         <FeatureStatusProvider>
           <SessionProvider basePath="/api/auth" refetchOnWindowFocus>
-            <DsfrProvider>
+            <DsfrProviderBase lang="fr" defaultColorScheme={defaultColorScheme} Link={Link}>
               <SkeletonTheme
                 baseColor="var(--background-contrast-grey)"
                 highlightColor="var(--background-contrast-grey-active)"
@@ -106,7 +108,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
                   <SentryErrorBoundary>{children}</SentryErrorBoundary>
                 </ConfigProvider>
               </SkeletonTheme>
-            </DsfrProvider>
+            </DsfrProviderBase>
           </SessionProvider>
         </FeatureStatusProvider>
       </body>

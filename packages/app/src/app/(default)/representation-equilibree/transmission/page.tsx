@@ -1,7 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Card from "@codegouvfr/react-dsfr/Card";
-import { Box, CenteredContainer, Container, Grid, GridCol, ImgJDMA, ImgSuccessLight, Link } from "@design-system";
-import questionImg from "@public/img/question.svg";
+import { Box, CenteredContainer, ImgJDMA, ImgSuccessLight, Link } from "@design-system";
 
 import { DownloadRepeqPdf } from "./DownloadRepeqPdf";
 import { SendReceipt } from "./SendReceipt";
@@ -69,32 +68,6 @@ const Transmission = () => {
         </Box>
         <SendReceipt />
       </CenteredContainer>
-      <Box className="bg-dsfr-alt-grey" py="4w">
-        <Container as="section">
-          <Grid align="center" haveGutters>
-            <GridCol md={8}>
-              <Card
-                enlargeLink
-                horizontal
-                border={false}
-                linkProps={{
-                  href: "https://egapro.travail.gouv.fr/index-egapro/",
-                }}
-                title="Avez-vous déclaré l’index égalité professionnelle F/H ?"
-                desc={
-                  <>
-                    Toutes les entreprises et unités économiques et sociales (UES) d’au moins 50 salariés doivent
-                    calculer et publier leur Index de l’égalité professionnelle entre les femmes et les hommes, chaque
-                    année au plus tard le 1er mars.
-                  </>
-                }
-                imageUrl={questionImg.src}
-                imageAlt=""
-              />
-            </GridCol>
-          </Grid>
-        </Container>
-      </Box>
     </>
   );
 };

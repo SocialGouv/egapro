@@ -319,32 +319,6 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
     });
   }
 
-  table.push({
-    title: "Index égalité professionnelle",
-    rows: [
-      {
-        key: "Total de points obtenus",
-        value: declaration.points?.getValue(),
-      },
-      {
-        key: "Nombre de points maximum pouvant être obtenus",
-        value: declaration.computablePoints?.getValue(),
-      },
-      {
-        key: "Résultat final sur 100 points",
-        value: declaration.index?.getValue() ?? "Non calculable",
-      },
-      ...(declaration.correctiveMeasures?.getValue()
-        ? [
-            {
-              key: "Mesures de correction prévues",
-              value: declaration.correctiveMeasures?.getLabel(),
-            },
-          ]
-        : []),
-    ],
-  });
-
   if (declaration.publication) {
     table.push({
       title: "Publication des résultats obtenus",

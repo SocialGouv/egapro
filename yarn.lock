@@ -611,27 +611,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codegouvfr/react-dsfr@npm:0.78.2":
-  version: 0.78.2
-  resolution: "@codegouvfr/react-dsfr@npm:0.78.2"
+"@codegouvfr/react-dsfr@npm:^1.28.0":
+  version: 1.28.0
+  resolution: "@codegouvfr/react-dsfr@npm:1.28.0"
   dependencies:
-    tsafe: "npm:^1.6.3"
+    tsafe: "npm:^1.8.5"
+    yargs-parser: "npm:^21.1.1"
+  peerDependencies:
+    "@gouvfr/dsfr-chart": ^1.0.0
+  peerDependenciesMeta:
+    "@gouvfr/dsfr-chart":
+      optional: true
   bin:
     copy-dsfr-to-public: bin/copy-dsfr-to-public.js
     only-include-used-icons: bin/only-include-used-icons.js
-  checksum: 9d6da18e3d3d9a5c9ae3a1cd679e9ec3ed427df54f92455466c551d19c535d8ce65ad4692176ea81f4590d688afe3d3176d78280bd5230d59645a1df0a73e749
-  languageName: node
-  linkType: hard
-
-"@codegouvfr/react-dsfr@patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch":
-  version: 0.78.2
-  resolution: "@codegouvfr/react-dsfr@patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch::version=0.78.2&hash=0f2ee9"
-  dependencies:
-    tsafe: "npm:^1.6.3"
-  bin:
-    copy-dsfr-to-public: bin/copy-dsfr-to-public.js
-    only-include-used-icons: bin/only-include-used-icons.js
-  checksum: f00e19433ad50cf5a699da6c1dea83fb951ec3aa27b44cd08fbcadaf0ef0f81fa2fa192fe44c9b9322de1212f34996f9fa9dfcdcc7c8baafb1561413b1cdeb80
+    react-dsfr: bin/react-dsfr.js
+  checksum: 968d9c7af6a7f8748173ca707d3d60d81adb42deee6b2147991db747c122d55e01a914d30c314a38092b0dd5435e90e4c4ef935a690172301fed94eec04c269c
   languageName: node
   linkType: hard
 
@@ -4217,7 +4212,7 @@ __metadata:
   resolution: "app@workspace:packages/app"
   dependencies:
     "@babel/core": "npm:^7.23.0"
-    "@codegouvfr/react-dsfr": "patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch"
+    "@codegouvfr/react-dsfr": "npm:^1.28.0"
     "@faker-js/faker": "npm:^8.1.0"
     "@formkit/auto-animate": "npm:^0.8.0"
     "@hookform/devtools": "npm:^4.3.0"
@@ -14693,10 +14688,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsafe@npm:^1.6.3":
-  version: 1.6.5
-  resolution: "tsafe@npm:1.6.5"
-  checksum: 3084f1005c20954a8939d25b624dbfcb25008b3ee4f5cbd6e5736c775765bbb7e01e6d0a3e254f0e37f89388f693b040ea63147aaaaf7d22e3428896ad2dee29
+"tsafe@npm:^1.8.5":
+  version: 1.8.12
+  resolution: "tsafe@npm:1.8.12"
+  checksum: 382b1e2eb8d92007a05bb137b1557839eb4770c944b2f1db767af4451e1f2b03aa7c2803867c634dfd557ebc887bdd9dcca98a3118921320c2cb4caa0bd68c2b
   languageName: node
   linkType: hard
 

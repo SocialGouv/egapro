@@ -46,7 +46,7 @@ export const DeclarantFields = <FormType extends SimpleObject>({
 
   useEffect(() => {
     trigger();
-  }, [phoneValue]);
+  }, [phoneValue, trigger]);
 
   return (
     <>

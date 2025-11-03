@@ -24,7 +24,7 @@
     "migrateSimulations": "ts-node --project scripts/tsconfig.json scripts/sql-scripts/migrate-simulations.ts"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch",
+    "@codegouvfr/react-dsfr": "^1.28.0",
     "@formkit/auto-animate": "^0.8.0",
     "@hookform/resolvers": "^3.1.1",
     "@json2csv/node": "^7.0.1",
