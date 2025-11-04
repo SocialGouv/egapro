@@ -61,8 +61,30 @@ export const config = {
         : `${this.issuer}/.well-known/openid-configuration`;
     },
 
-    clientId: ensureApiEnvVar(process.env.SECURITY_PROCONNECT_CLIENT_ID, ""),
-    clientSecret: ensureApiEnvVar(process.env.SECURITY_PROCONNECT_CLIENT_SECRET, ""),
+    get clientId() {
+      return ensureApiEnvVar(
+        process.env.SECURITY_PROCONNECT_CLIENT_ID,
+        (val) => {
+          if (!val && this.env !== 'dev') {
+            throw new Error('SECURITY_PROCONNECT_CLIENT_ID is required for non-dev environments');
+          }
+          return val;
+        },
+        this.env === 'dev' ? 'egapro-dev' : ''
+      );
+    },
+    get clientSecret() {
+      return ensureApiEnvVar(
+        process.env.SECURITY_PROCONNECT_CLIENT_SECRET,
+        (val) => {
+          if (!val && this.env !== 'dev') {
+            throw new Error('SECURITY_PROCONNECT_CLIENT_SECRET is required for non-dev environments');
+          }
+          return val;
+        },
+        this.env === 'dev' ? 'dev-secret-key-for-local-development-only' : ''
+      );
+    },
     callbackUrl: ensureNextEnvVar(
       process.env.NEXT_PUBLIC_PROCONNECT_CALLBACK_URL,
       `${

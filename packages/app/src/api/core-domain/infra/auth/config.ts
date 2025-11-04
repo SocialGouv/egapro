@@ -222,21 +222,29 @@ export const authConfig: AuthOptions = {
           // === PROCONNECT ===
         } else {
           const proConnectProfile = profile as ProConnectProfile;
-          const keycloakProfile = profile as any; // For Keycloak custom claims
 
-          // Handle both real ProConnect (with organizations array) and Keycloak (with individual claims)
+          type KeycloakProfile = {
+            organization?: string | string[];
+            siret?: string | string[];
+          };
+
+          const keycloakProfile = profile as ProConnectProfile & KeycloakProfile;
           let organizations: Array<{ label?: string | null; siren?: string; siret?: string }> = [];
-
           if (proConnectProfile.organizations && Array.isArray(proConnectProfile.organizations)) {
-            // Real ProConnect structure
             organizations = proConnectProfile.organizations;
           } else if (keycloakProfile.organization || keycloakProfile.siret) {
-            // Keycloak structure - create mock organization from individual claims
+            const org = Array.isArray(keycloakProfile.organization)
+              ? keycloakProfile.organization[0]
+              : keycloakProfile.organization;
+            const siret = Array.isArray(keycloakProfile.siret)
+              ? keycloakProfile.siret[0]
+              : keycloakProfile.siret;
+
             organizations = [
               {
-                siren: typeof keycloakProfile.siret === "string" ? keycloakProfile.siret.substring(0, 9) : undefined,
-                siret: typeof keycloakProfile.siret === "string" ? keycloakProfile.siret : undefined,
-                label: typeof keycloakProfile.organization === "string" ? keycloakProfile.organization : null,
+                siren: typeof siret === "string" ? siret.substring(0, 9) : undefined,
+                siret: typeof siret === "string" ? siret : undefined,
+                label: typeof org === "string" ? org : null,
               },
             ];
           }
