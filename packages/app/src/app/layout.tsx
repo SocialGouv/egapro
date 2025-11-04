@@ -3,7 +3,6 @@ import "./global.css";
 import "@design-system/utils/client/skeleton/Skeleton.scss";
 import "react-tooltip/dist/react-tooltip.css";
 
-import { DsfrProviderBase } from "@codegouvfr/react-dsfr/next-app-router";
 import { DsfrHeadBase } from "@codegouvfr/react-dsfr/next-app-router/DsfrHead";
 import { createGetHtmlAttributes } from "@codegouvfr/react-dsfr/next-app-router/getHtmlAttributes";
 import SkipLinks from "@codegouvfr/react-dsfr/SkipLinks";
@@ -19,6 +18,7 @@ import { type PropsWithChildren, Suspense } from "react";
 
 import { ConsentBannerAndConsentManagement } from "./consentManagement";
 import { defaultColorScheme } from "./defaultColorScheme";
+import { DsfrProviderWrapper } from "./DsfrProviderWrapper";
 import { ImpersonateNotice } from "./ImpersonateNotice";
 import style from "./root.module.scss";
 import { SessionProvider } from "./SessionProvider";
@@ -81,7 +81,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
       <body>
         <FeatureStatusProvider>
           <SessionProvider basePath="/api/auth" refetchOnWindowFocus>
-            <DsfrProviderBase lang="fr" defaultColorScheme={defaultColorScheme} Link={Link}>
+            <DsfrProviderWrapper lang="fr" defaultColorScheme={defaultColorScheme}>
               <SkeletonTheme
                 baseColor="var(--background-contrast-grey)"
                 highlightColor="var(--background-contrast-grey-active)"
@@ -108,7 +108,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
                   <SentryErrorBoundary>{children}</SentryErrorBoundary>
                 </ConfigProvider>
               </SkeletonTheme>
-            </DsfrProviderBase>
+            </DsfrProviderWrapper>
           </SessionProvider>
         </FeatureStatusProvider>
       </body>
