@@ -16,7 +16,7 @@
       "description": "Egapro Application",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "dev-secret-key-for-local-development-only",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "implicitFlowEnabled": false,
