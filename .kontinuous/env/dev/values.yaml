@@ -15,6 +15,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://proconnect.gouv.fr/api/v2"
 
 maildev: {}
 pgweb: {}
