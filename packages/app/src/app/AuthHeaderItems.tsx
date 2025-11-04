@@ -60,7 +60,15 @@ export const LoginLogoutHeaderItem = () => {
               className: fr.cx("fr-btn--secondary"),
               async onClick(e) {
                 e.preventDefault();
+                // Sign out from NextAuth first
                 await signOut({ callbackUrl: "/" });
+                // Then redirect to Keycloak logout to clear the OAuth session
+                const idTokenHint = session.data.user.idToken;
+                const redirectUri = encodeURIComponent(window.location.origin);
+                const logoutUrl = idTokenHint
+                  ? `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?id_token_hint=${encodeURIComponent(idTokenHint)}&post_logout_redirect_uri=${redirectUri}`
+                  : `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}`;
+                window.location.href = logoutUrl;
               },
             },
             text: "Se déconnecter",

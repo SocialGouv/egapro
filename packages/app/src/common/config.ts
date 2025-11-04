@@ -41,16 +41,22 @@ export const config = {
   // PROCONNECT CONFIGURATION
   proconnect: {
     get issuer() {
+      if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
+        return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
+      }
       return this.env === "dev" ? "https://sandbox.proconnect.gouv.fr" : "https://proconnect.gouv.fr";
     },
     get authorization_endpoint() {
-      return `${this.issuer}/oidc/authorize`;
+      const isKeycloak = this.issuer.includes("localhost");
+      return isKeycloak ? `${this.issuer}/protocol/openid-connect/auth` : `${this.issuer}/oidc/authorize`;
     },
     get token_endpoint() {
-      return `${this.issuer}/oidc/token`;
+      const isKeycloak = this.issuer.includes("localhost");
+      return isKeycloak ? `${this.issuer}/protocol/openid-connect/token` : `${this.issuer}/oidc/token`;
     },
     get userinfo_endpoint() {
-      return `${this.issuer}/oidc/userinfo`;
+      const isKeycloak = this.issuer.includes("localhost");
+      return isKeycloak ? `${this.issuer}/protocol/openid-connect/userinfo` : `${this.issuer}/oidc/userinfo`;
     },
     get jwks_uri() {
       return `${this.issuer}/oidc/.well-known/jwks`;

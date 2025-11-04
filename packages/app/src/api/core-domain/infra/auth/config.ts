@@ -35,6 +35,7 @@ declare module "next-auth" {
       phoneNumber?: string;
       staff: boolean;
       tokenApiV1: string;
+      idToken?: string; // Add ID token for logout
     };
   }
 
@@ -55,35 +56,10 @@ const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
-  ...(config.env !== "prod"
-    ? {
-        well_known: config.proconnect.well_known,
-      }
-    : {
-        well_known: "https://proconnect.gouv.fr/.well-known/openid-configuration",
-      }),
 });
 
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
-  jwt: {
-    async encode({ token, secret }): Promise<string> {
-      try {
-        return sign(token as JWT, secret, { algorithm: "HS256" });
-      } catch (error) {
-        logger.error({ error }, "Error while encoding token");
-        throw new Error("Error while encoding token");
-      }
-    },
-    async decode({ token, secret }): Promise<JWT | null> {
-      try {
-        return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
-      } catch (error) {
-        logger.error({ error }, "Error while decoding token");
-        return null;
-      }
-    },
-  },
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
     warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
@@ -158,6 +134,11 @@ export const authConfig: AuthOptions = {
     async jwt({ token, profile, trigger, account, session }) {
       try {
         const isStaff = token.user?.staff || token.staff?.impersonating || false;
+
+        // Store ID token for logout (available during initial sign in)
+        if (account?.id_token) {
+          token.idToken = account.id_token;
+        }
 
         // === IMPERSONATION ===
         if (trigger === "update" && session && isStaff) {
@@ -294,6 +275,7 @@ export const authConfig: AuthOptions = {
     async session({ session, token }) {
       session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
+      session.user.idToken = token.idToken as string; // Include ID token for logout
       session.staff = {};
 
       if (token.user.companiesHash) {

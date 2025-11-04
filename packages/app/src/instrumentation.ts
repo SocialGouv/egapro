@@ -9,7 +9,13 @@ export const onRequestError = (
   Sentry.captureException(error, {
     extra: {
       ...requestInfo,
-      requestHeaders: Object.fromEntries(request.headers),
+      requestHeaders: (() => {
+        try {
+          return Object.fromEntries(request.headers);
+        } catch {
+          return {};
+        }
+      })(),
     },
   });
 };

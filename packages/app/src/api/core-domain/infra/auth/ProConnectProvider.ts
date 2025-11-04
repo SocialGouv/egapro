@@ -33,16 +33,20 @@ export function ProConnectProvider<P extends ProConnectProfile>(
   const proconnectDiscoveryUrl = config.proconnect.issuer;
 
   return {
-    id: "proconnect", // CHANGÉ ICI
+    id: "proconnect",
     type: "oauth",
-    name: "ProConnect", // CHANGÉ ICI
+    name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
-    wellKnown: config.proconnect.well_known,
+    issuer: proconnectDiscoveryUrl,
+    jwks_endpoint: `${proconnectDiscoveryUrl}/protocol/openid-connect/certs`,
     authorization: {
+      url: config.proconnect.authorization_endpoint,
       params: { scope },
     },
+    token: config.proconnect.token_endpoint,
     checks: ["pkce", "state"],
     userinfo: {
+      url: config.proconnect.userinfo_endpoint,
       async request({ tokens: { access_token }, client }) {
         logger.info(`userinfo request`);
         if (!access_token) {
@@ -56,7 +60,14 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         id: profile.sub,
         email: profile.email,
         name: profile.given_name,
+        given_name: profile.given_name,
+        family_name: profile.family_name,
         phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""),
+        email_verified: profile.email_verified,
+        job: profile.job,
+        organizations: profile.organizations,
+        sub: profile.sub,
+        updated_at: profile.updated_at,
       };
     },
     ...options,
