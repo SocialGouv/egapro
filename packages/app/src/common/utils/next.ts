@@ -63,9 +63,9 @@ export const withSearchParamsValidation =
 export type NextRouteHandler<TParams extends string = string> = (
   req: NextRequest,
   context: {
-    params: {
+    params: Promise<{
       [T in TParams as T extends `...${infer R extends string}` ? R : T]: T extends `...${string}` ? string[] : string;
-    };
+    }>;
   },
 ) => NextResponse | Promise<NextResponse | Response> | Response;
 

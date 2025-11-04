@@ -46,8 +46,6 @@ export async function register() {
       sampleRate: 0.1,
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
       debug: false,
-      // enableTracing: true,
-      enableTracing: false, // temp disable trying to reduce race condition error bubbling up
 
       beforeSend(event) {
         if (IS_PRODUCTION && !event.exception) return null;
@@ -87,7 +85,6 @@ export async function register() {
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       environment: ENVIRONMENT,
-      enableTracing: false,
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
       sampleRate: 0.1,
       debug: false,

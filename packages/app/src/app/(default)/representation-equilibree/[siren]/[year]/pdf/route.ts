@@ -15,7 +15,8 @@ import { getServerSession } from "next-auth";
 // export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
 
-export const GET: NextRouteHandler<"siren" | "year"> = async (_, { params: { siren, year } }) => {
+export const GET: NextRouteHandler<"siren" | "year"> = async (_, { params }) => {
+  const { siren, year } = await params;
   const session = await getServerSession(authConfig);
 
   if (!session?.user) {
@@ -28,7 +29,7 @@ export const GET: NextRouteHandler<"siren" | "year"> = async (_, { params: { sir
     const useCase = new DownloadRepresentationEquilibreeReceipt(representationEquilibreeRepo, jsxPdfService);
     const buffer = await useCase.execute({ siren, year: +year });
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: StatusCodes.OK,
       headers: {
         "Content-Type": "application/pdf",

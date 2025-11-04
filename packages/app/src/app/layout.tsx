@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import "./global.css";
 import "@design-system/utils/client/skeleton/Skeleton.scss";
 import "react-tooltip/dist/react-tooltip.css";
@@ -13,7 +14,6 @@ import { Matomo } from "@components/utils/Matomo";
 import { SentryErrorBoundary } from "@components/utils/SentryErrorBoundary";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { SkeletonTheme } from "@design-system/utils/client/skeleton";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 
@@ -45,7 +45,7 @@ export const metadata = {
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => {
-  const nonce = headers().get("x-nonce") ?? void 0;
+  const nonce = undefined; // TODO: fix nonce in Next.js 16
   const mcpconfig = {
     isProConnectTest: config.api.security.moncomptepro.appTest,
     isEmailLogin: config.api.security.auth.isEmailLogin,

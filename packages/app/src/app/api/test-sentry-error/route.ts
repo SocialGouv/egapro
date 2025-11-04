@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"; // Ensure the route is not statically op
 export async function GET(request: Request) {
   try {
     console.log("API route hit:", request.url);
-    console.log("Headers:", Object.fromEntries(headers()));
+    console.log("Headers:", Object.fromEntries(await headers()));
 
     const { searchParams } = new URL(request.url);
     const shouldError = searchParams.get("trigger") === "true";
