@@ -2,6 +2,10 @@ import {
   type ProConnectProfile,
   ProConnectProvider,
 } from "@api/core-domain/infra/auth/ProConnectProvider";
+import {
+  companiesUtils,
+  type Company,
+} from "@api/core-domain/infra/companies-store";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -163,16 +167,16 @@ export const authConfig: AuthOptions = {
           if (session.staff.impersonating === true) {
             assertImpersonatedSession(session);
             token.user.staff = session.user.staff;
-            // token.user.companiesHash = session.user.companies
-            //   ? await companiesUtils.hashCompanies(session.user.companies)
-            //   : session.user.companiesHash ?? "";
+            token.user.companiesHash = session.user.companies
+              ? await companiesUtils.hashCompanies(session.user.companies)
+              : session.user.companiesHash ?? "";
             token.staff.impersonating = true;
-            // if (session.user.companies) {
-            //   token.staff.lastImpersonatedHash =
-            //     await companiesUtils.hashCompanies(
-            //       session.user.companies as Company[],
-            //     );
-            // }
+            if (session.user.companies) {
+              token.staff.lastImpersonatedHash =
+                await companiesUtils.hashCompanies(
+                  session.user.companies as Company[],
+                );
+            }
           } else if (session.staff.impersonating === false) {
             token.user.staff = true;
             token.user.companiesHash = "";
@@ -316,6 +320,37 @@ export const authConfig: AuthOptions = {
       session.user.idToken = token.idToken as string; // Include ID token for logout
       session.staff = {};
 
+      if (token.user.companiesHash) {
+        try {
+          const companies = await companiesUtils.getCompaniesFromRedis(
+            token.user.companiesHash,
+          );
+          if (companies.length > 0) {
+            session.user.companies = companies;
+          }
+        } catch (error) {
+          logger.error({ error }, "Error loading companies from Redis");
+        }
+      }
+
+      if (token.user.staff || token.staff.impersonating) {
+        session.staff = token.staff;
+        if (token.staff.lastImpersonatedHash) {
+          try {
+            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(
+              token.staff.lastImpersonatedHash,
+            );
+            if (lastImpersonated.length > 0) {
+              session.user.lastImpersonated = lastImpersonated;
+            }
+          } catch (error) {
+            logger.error(
+              { error },
+              "Error loading last impersonated companies",
+            );
+          }
+        }
+      }
       return session;
     },
   },
