@@ -32,3 +32,5 @@ nginx:
 
 redis:
   architecture: standalone
+  image:
+    tag: latest
