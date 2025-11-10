@@ -1,5 +1,11 @@
-import { type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
-import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
+import {
+  type ProConnectProfile,
+  ProConnectProvider,
+} from "@api/core-domain/infra/auth/ProConnectProvider";
+import {
+  companiesUtils,
+  type Company,
+} from "@api/core-domain/infra/companies-store";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -49,7 +55,10 @@ declare module "next-auth/jwt" {
 }
 
 // === URLs CHARON (pour dev/preprod) ===
-const charonMcpUrl = new URL(`fabriqueKeycloak/`, config.api.security.auth.charonUrl);
+const charonMcpUrl = new URL(
+  `fabriqueKeycloak/`,
+  config.api.security.auth.charonUrl,
+);
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 
 // === PROCONNECT PROVIDER ===
@@ -63,7 +72,8 @@ export const authConfig: AuthOptions = {
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
     warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
-    info: (code: string, ...message: string[]) => logger.info({ ...message, code }, "Info"),
+    info: (code: string, ...message: string[]) =>
+      logger.info({ ...message, code }, "Info"),
     debug: (code, ...message) => {
       if (config.env === "dev") {
         logger.info({ ...message, code }, "Debug");
@@ -87,9 +97,17 @@ export const authConfig: AuthOptions = {
     EmailProvider({
       async sendVerificationRequest({ identifier: to, url }) {
         await globalMailerService.init();
-        const [, rejected] = await globalMailerService.sendMail("login_sendVerificationUrl", { to }, url);
+        const [, rejected] = await globalMailerService.sendMail(
+          "login_sendVerificationUrl",
+          { to },
+          url,
+        );
         if (rejected.length) {
-          throw new UnexpectedError(`Cannot send verification request to email(s) : ${rejected.join(", ")}`);
+          throw new UnexpectedError(
+            `Cannot send verification request to email(s) : ${rejected.join(
+              ", ",
+            )}`,
+          );
         }
       },
     }),
@@ -101,7 +119,10 @@ export const authConfig: AuthOptions = {
               url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
               params: { scope: "user:email read:user read:org" },
             },
-            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
+            token: new URL(
+              "login/oauth/access_token",
+              charonGithubUrl,
+            ).toString(),
           }
         : {
             authorization: {
@@ -133,7 +154,8 @@ export const authConfig: AuthOptions = {
 
     async jwt({ token, profile, trigger, account, session }) {
       try {
-        const isStaff = token.user?.staff || token.staff?.impersonating || false;
+        const isStaff =
+          token.user?.staff || token.staff?.impersonating || false;
 
         // Store ID token for logout (available during initial sign in)
         if (account?.id_token) {
@@ -150,9 +172,10 @@ export const authConfig: AuthOptions = {
               : session.user.companiesHash ?? "";
             token.staff.impersonating = true;
             if (session.user.companies) {
-              token.staff.lastImpersonatedHash = await companiesUtils.hashCompanies(
-                session.user.companies as Company[],
-              );
+              token.staff.lastImpersonatedHash =
+                await companiesUtils.hashCompanies(
+                  session.user.companies as Company[],
+                );
             }
           } else if (session.staff.impersonating === false) {
             token.user.staff = true;
@@ -193,9 +216,16 @@ export const authConfig: AuthOptions = {
         } else if (account?.provider === "email") {
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
-            const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email), token.email);
-            const companiesList = companies.map(siren => ({ label: "", siren }));
-            token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
+            const companies = await ownershipRepo.getAllSirenByEmail(
+              new Email(token.email),
+              token.email,
+            );
+            const companiesList = companies.map((siren) => ({
+              label: "",
+              siren,
+            }));
+            token.user.companiesHash =
+              await companiesUtils.hashCompanies(companiesList);
           } else {
             token.user.companiesHash = "";
           }
@@ -209,9 +239,17 @@ export const authConfig: AuthOptions = {
             siret?: string | string[];
           };
 
-          const keycloakProfile = profile as ProConnectProfile & KeycloakProfile;
-          let organizations: Array<{ label?: string | null; siren?: string; siret?: string }> = [];
-          if (proConnectProfile.organizations && Array.isArray(proConnectProfile.organizations)) {
+          const keycloakProfile = profile as ProConnectProfile &
+            KeycloakProfile;
+          let organizations: Array<{
+            label?: string | null;
+            siren?: string;
+            siret?: string;
+          }> = [];
+          if (
+            proConnectProfile.organizations &&
+            Array.isArray(proConnectProfile.organizations)
+          ) {
             organizations = proConnectProfile.organizations;
           } else if (keycloakProfile.organization || keycloakProfile.siret) {
             const org = Array.isArray(keycloakProfile.organization)
@@ -223,7 +261,8 @@ export const authConfig: AuthOptions = {
 
             organizations = [
               {
-                siren: typeof siret === "string" ? siret.substring(0, 9) : undefined,
+                siren:
+                  typeof siret === "string" ? siret.substring(0, 9) : undefined,
                 siret: typeof siret === "string" ? siret : undefined,
                 label: typeof org === "string" ? org : null,
               },
@@ -231,8 +270,8 @@ export const authConfig: AuthOptions = {
           }
 
           const sirenList = organizations
-            .filter(org => !!org)
-            .map(org => org.siren || org.siret?.substring(0, 9))
+            .filter((org) => !!org)
+            .map((org) => org.siren || org.siret?.substring(0, 9))
             .filter(Boolean) as string[];
 
           if (proConnectProfile.email && sirenList.length > 0) {
@@ -249,17 +288,20 @@ export const authConfig: AuthOptions = {
           }
 
           const companiesList: Company[] = organizations
-            .filter(org => !!org && (org.siren || org.siret))
-            .map(org => ({
+            .filter((org) => !!org && (org.siren || org.siret))
+            .map((org) => ({
               siren: org.siren || (org.siret ? org.siret.substring(0, 9) : ""),
               label: org.label || null,
             }))
-            .filter(c => c.siren) as Company[];
+            .filter((c) => c.siren) as Company[];
 
-          token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
-          token.user.staff = config.api.staff.includes(proConnectProfile.email ?? "");
+          token.user.companiesHash =
+            await companiesUtils.hashCompanies(companiesList);
+          token.user.staff = config.api.staff.includes(
+            proConnectProfile.email ?? "",
+          );
           token.user.firstname = proConnectProfile.given_name ?? undefined;
-          token.user.lastname = proConnectProfile.family_name ?? undefined;
+          token.user.lastname = proConnectProfile.usual_name ?? undefined;
           token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
         }
 
@@ -280,7 +322,9 @@ export const authConfig: AuthOptions = {
 
       if (token.user.companiesHash) {
         try {
-          const companies = await companiesUtils.getCompaniesFromRedis(token.user.companiesHash);
+          const companies = await companiesUtils.getCompaniesFromRedis(
+            token.user.companiesHash,
+          );
           if (companies.length > 0) {
             session.user.companies = companies;
           }
@@ -293,12 +337,17 @@ export const authConfig: AuthOptions = {
         session.staff = token.staff;
         if (token.staff.lastImpersonatedHash) {
           try {
-            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(token.staff.lastImpersonatedHash);
+            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(
+              token.staff.lastImpersonatedHash,
+            );
             if (lastImpersonated.length > 0) {
               session.user.lastImpersonated = lastImpersonated;
             }
           } catch (error) {
-            logger.error({ error }, "Error loading last impersonated companies");
+            logger.error(
+              { error },
+              "Error loading last impersonated companies",
+            );
           }
         }
       }
