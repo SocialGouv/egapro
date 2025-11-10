@@ -105,7 +105,7 @@ export const config = {
       process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL,
       "https://app.proconnect.gouv.fr/manage-organizations",
     ),
-    scope: "openid email profile",
+    scope: "openid email given_name usual_name phone_number organizations",
   },
 
   api: {

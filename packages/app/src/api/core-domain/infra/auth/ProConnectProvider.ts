@@ -2,7 +2,10 @@
 
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
-import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers/oauth";
+import {
+  type OAuthConfig,
+  type OAuthUserConfig,
+} from "next-auth/providers/oauth";
 
 export interface Organization {
   id: number;
@@ -17,7 +20,7 @@ export interface Organization {
 export interface ProConnectProfile {
   email: string;
   email_verified: boolean;
-  family_name: string | null;
+  usual_name: string | null;
   given_name: string | null;
   job: string | null;
   organizations: Organization[];
@@ -50,7 +53,9 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       async request({ tokens: { access_token }, client }) {
         logger.info(`userinfo request`);
         if (!access_token) {
-          throw new Error("ProConnectProvider - Userinfo request is missing access_token.");
+          throw new Error(
+            "ProConnectProvider - Userinfo request is missing access_token.",
+          );
         }
         return client.userinfo<ProConnectProfile>(access_token);
       },
@@ -59,13 +64,12 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       return {
         id: profile.sub,
         email: profile.email,
-        name: profile.given_name,
         given_name: profile.given_name,
-        family_name: profile.family_name,
+        family_name: profile.usual_name,
         phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""),
         email_verified: profile.email_verified,
         job: profile.job,
-        organizations: profile.organizations,
+        organizations: profile.organizations || [],
         sub: profile.sub,
         updated_at: profile.updated_at,
       };
