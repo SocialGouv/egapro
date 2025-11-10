@@ -11,17 +11,25 @@ export const config = {
   get nonce() {
     return this.githubSha;
   },
-  githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
+  githubSha: ensureNextEnvVar(
+    process.env.NEXT_PUBLIC_GITHUB_SHA,
+    "<githubSha>",
+  ),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
   get host() {
     try {
       return new URL(this.apiv2_url).origin;
     } catch (e) {
-      return typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+      return typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000";
     }
   },
   get apiv2_url() {
-    return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
+    return ensureNextEnvVar(
+      process.env.NEXT_PUBLIC_API_V2_URL,
+      `${this.api_url}v2`,
+    );
   },
   get base_declaration_url() {
     return "/index-egapro/declaration";
@@ -33,7 +41,10 @@ export const config = {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),
   },
-  env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.NEXT_PUBLIC_EGAPRO_ENV, "dev"),
+  env: ensureApiEnvVar<"dev" | "preprod" | "prod">(
+    process.env.NEXT_PUBLIC_EGAPRO_ENV,
+    "dev",
+  ),
   get ff() {
     return {};
   },
@@ -44,19 +55,27 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
-      return this.env === "dev" ? "https://sandbox.proconnect.gouv.fr" : "https://proconnect.gouv.fr";
+      return this.env === "dev"
+        ? "https://sandbox.proconnect.gouv.fr"
+        : "https://proconnect.gouv.fr";
     },
     get authorization_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak ? `${this.issuer}/protocol/openid-connect/auth` : `${this.issuer}/oidc/authorize`;
+      return isKeycloak
+        ? `${this.issuer}/protocol/openid-connect/auth`
+        : `${this.issuer}/api/v2/authorize`;
     },
     get token_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak ? `${this.issuer}/protocol/openid-connect/token` : `${this.issuer}/oidc/token`;
+      return isKeycloak
+        ? `${this.issuer}/protocol/openid-connect/token`
+        : `${this.issuer}/api/v2/token`;
     },
     get userinfo_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak ? `${this.issuer}/protocol/openid-connect/userinfo` : `${this.issuer}/oidc/userinfo`;
+      return isKeycloak
+        ? `${this.issuer}/protocol/openid-connect/userinfo`
+        : `${this.issuer}/api/v2/userinfo`;
     },
     get jwks_uri() {
       return `${this.issuer}/oidc/.well-known/jwks`;
@@ -71,35 +90,45 @@ export const config = {
       return ensureApiEnvVar(
         process.env.SECURITY_PROCONNECT_CLIENT_ID,
         (val) => {
-          if (!val && this.env !== 'dev') {
-            throw new Error('SECURITY_PROCONNECT_CLIENT_ID is required for non-dev environments');
+          if (!val && this.env !== "dev") {
+            throw new Error(
+              "SECURITY_PROCONNECT_CLIENT_ID is required for non-dev environments",
+            );
           }
           return val;
         },
-        this.env === 'dev' ? 'egapro-dev' : ''
+        this.env === "dev" ? "egapro-dev" : "",
       );
     },
     get clientSecret() {
       return ensureApiEnvVar(
         process.env.SECURITY_PROCONNECT_CLIENT_SECRET,
         (val) => {
-          if (!val && this.env !== 'dev') {
-            throw new Error('SECURITY_PROCONNECT_CLIENT_SECRET is required for non-dev environments');
+          if (!val && this.env !== "dev") {
+            throw new Error(
+              "SECURITY_PROCONNECT_CLIENT_SECRET is required for non-dev environments",
+            );
           }
           return val;
         },
-        this.env === 'dev' ? 'dev-secret-key-for-local-development-only' : ''
+        this.env === "dev" ? "dev-secret-key-for-local-development-only" : "",
       );
     },
     callbackUrl: ensureNextEnvVar(
       process.env.NEXT_PUBLIC_PROCONNECT_CALLBACK_URL,
       `${
-        typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "http://localhost:3000"
       }/api/auth/callback/proconnect`,
     ),
     signinUrl: ensureNextEnvVar(
       process.env.EGAPRO_PROCONNECT_SIGN_IN_URL,
-      `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/login`,
+      `${
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "http://localhost:3000"
+      }/login`,
     ),
     manageOrganisationUrl: ensureNextEnvVar(
       process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL,
@@ -109,7 +138,11 @@ export const config = {
   },
 
   api: {
-    staff: ensureApiEnvVar(process.env.EGAPRO_STAFF, envVar => envVar.split(",").filter(v => v), []),
+    staff: ensureApiEnvVar(
+      process.env.EGAPRO_STAFF,
+      (envVar) => envVar.split(",").filter((v) => v),
+      [],
+    ),
     mailer: {
       enable: ensureApiEnvVar(process.env.MAILER_ENABLE, isTruthy, false),
       host: ensureApiEnvVar(process.env.MAILER_SMTP_HOST, "127.0.0.1"),
@@ -119,8 +152,14 @@ export const config = {
         login: ensureApiEnvVar(process.env.MAILER_SMTP_LOGIN, ""),
         ssl: ensureApiEnvVar(process.env.MAILER_SMTP_SSL, isTruthy, false),
       },
-      from: ensureApiEnvVar(process.env.MAILER_FROM_EMAIL, "EgaPro <index@travail.gouv.fr>"),
-      signature: ensureApiEnvVar(process.env.MAILER_EMAIL_SIGNATURE, "L’équipe Egapro"),
+      from: ensureApiEnvVar(
+        process.env.MAILER_FROM_EMAIL,
+        "EgaPro <index@travail.gouv.fr>",
+      ),
+      signature: ensureApiEnvVar(
+        process.env.MAILER_EMAIL_SIGNATURE,
+        "L’équipe Egapro",
+      ),
     },
     security: {
       jwtv1: {
@@ -130,14 +169,27 @@ export const config = {
 
       // DÉPRÉCIÉ : MonComptePro
       moncomptepro: {
-        clientId: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID, ""),
-        clientSecret: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET, ""),
-        appTest: ensureApiEnvVar(process.env.SECURITY_MONCOMPTEPRO_TEST, isTruthy, false),
+        clientId: ensureApiEnvVar(
+          process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID,
+          "",
+        ),
+        clientSecret: ensureApiEnvVar(
+          process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET,
+          "",
+        ),
+        appTest: ensureApiEnvVar(
+          process.env.SECURITY_MONCOMPTEPRO_TEST,
+          isTruthy,
+          false,
+        ),
       },
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
-        clientSecret: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_SECRET, ""),
+        clientSecret: ensureApiEnvVar(
+          process.env.SECURITY_GITHUB_CLIENT_SECRET,
+          "",
+        ),
       },
 
       auth: {
@@ -166,9 +218,20 @@ export const config = {
       password: ensureApiEnvVar(process.env.POSTGRES_PASSWORD, "postgres"),
       db: ensureApiEnvVar(process.env.POSTGRES_DB, "egapro"),
       port: ensureApiEnvVar(process.env.POSTGRES_PORT, Number, -1),
-      ssl: ensureApiEnvVar<"prefer" | "require">(process.env.POSTGRES_SSLMODE, "prefer"),
-      poolMinSize: ensureApiEnvVar(process.env.POSTGRES_POOL_MIN_SIZE, Number, 2),
-      poolMaxSize: ensureApiEnvVar(process.env.POSTGRES_POOL_MAX_SIZE, Number, 10),
+      ssl: ensureApiEnvVar<"prefer" | "require">(
+        process.env.POSTGRES_SSLMODE,
+        "prefer",
+      ),
+      poolMinSize: ensureApiEnvVar(
+        process.env.POSTGRES_POOL_MIN_SIZE,
+        Number,
+        2,
+      ),
+      poolMaxSize: ensureApiEnvVar(
+        process.env.POSTGRES_POOL_MAX_SIZE,
+        Number,
+        10,
+      ),
     },
   },
 } as const;

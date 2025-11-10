@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: proconnect
 data:
-  PROCONNECT_ISSUER: https://app.proconnect.gouv.fr
+  NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: https://app.proconnect.gouv.fr
   PROCONNECT_AUTHORIZATION_ENDPOINT: https://app.proconnect.gouv.fr/api/v2/authorize
   PROCONNECT_TOKEN_ENDPOINT: https://app.proconnect.gouv.fr/api/v2/token
   PROCONNECT_USERINFO_ENDPOINT: https://app.proconnect.gouv.fr/api/v2/userinfo
