@@ -21,20 +21,8 @@ app:
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
     NODE_ENV: production
-#    EMAIL_LOGIN: "True"
-    REDIS_SENTINEL_MASTER_NAME: "mymaster"
-    REDIS_SENTINEL_HOSTS: |
-      [
-        { "host": "redis-node-0.redis-headless", "port": 26379 },
-        { "host": "redis-node-1.redis-headless", "port": 26379 },
-        { "host": "redis-node-2.redis-headless", "port": 26379 }
-      ]
   annotations:
     oblik.socialgouv.io/min-request-cpu: 500m
 
 maildev: {}
 pgweb: {}
-
-redis:
-  sentinel:
-    enabled: true

@@ -21,8 +21,6 @@ app:
         name: github-oauth
     - configMapRef:
         name: egapro
-    - secretRef:
-        name: redis-auth
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
@@ -44,8 +42,6 @@ app:
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
-    REDIS_HOST: "redis-master"
-    REDIS_PORT: "6379"
 
 nginx:
   ~chart: app
@@ -125,15 +121,6 @@ api:
 pg:
   ~chart: pg
 
-redis:
-  fullnameOverride: redis
-  ~tpl~namespaceOverride: "{{ .Values.global.namespace }}"
-  ~forceRestart: false
-  auth:
-    existingSecret: redis-auth
-    existingSecretPasswordKey: REDIS_PASSWORD
-    usePasswordFiles: false  #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
-
 files:
   ~chart: app
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
@@ -157,8 +144,8 @@ files:
       secret:
         secretName: basic-auth
         items:
-        - key: auth
-          path: basic-auth.passwd
+          - key: auth
+            path: basic-auth.passwd
   replicas: 1 # mandatory because volume is RWO
   strategyType: Recreate # idem
   securityContext:
@@ -174,35 +161,35 @@ files:
       ~tpl~image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
       extraSpec:
         envFrom:
-        - secretRef:
-            ~tpl~name: "{{ .Values.global.pgSecretName }}"
-        - secretRef:
-            name: "staff"
-        - secretRef:
-            name: "egapro-secret"
+          - secretRef:
+              ~tpl~name: "{{ .Values.global.pgSecretName }}"
+          - secretRef:
+              name: "staff"
+          - secretRef:
+              name: "egapro-secret"
         env:
-        - name: EGAPRO_DBHOST
-          value: "$(PGHOST)"
-        - name: EGAPRO_DBNAME
-          value: "$(PGDATABASE)"
-        - name: EGAPRO_DBPORT
-          value: "$(PGPORT)"
-        - name: EGAPRO_DBUSER
-          value: "$(PGUSER)"
-        - name: EGAPRO_DBPASS
-          value: "$(PGPASSWORD)"
-        - name: EGAPRO_DBSSL
-          value: "$(PGSSLMODE)"
-        # - name: EGAPRO_SENTRY_DSN
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: sentry
-        #       key: API_SENTRY_DSN
-        - name: SCHEDULER
-          value: "True"
+          - name: EGAPRO_DBHOST
+            value: "$(PGHOST)"
+          - name: EGAPRO_DBNAME
+            value: "$(PGDATABASE)"
+          - name: EGAPRO_DBPORT
+            value: "$(PGPORT)"
+          - name: EGAPRO_DBUSER
+            value: "$(PGUSER)"
+          - name: EGAPRO_DBPASS
+            value: "$(PGPASSWORD)"
+          - name: EGAPRO_DBSSL
+            value: "$(PGSSLMODE)"
+          # - name: EGAPRO_SENTRY_DSN
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: sentry
+          #       key: API_SENTRY_DSN
+          - name: SCHEDULER
+            value: "True"
         volumeMounts:
-        - name: files
-          mountPath: /mnt/files
+          - name: files
+            mountPath: /mnt/files
 
 project:
   # whitelist:
