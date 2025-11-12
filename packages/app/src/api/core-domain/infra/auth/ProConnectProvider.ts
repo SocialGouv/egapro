@@ -41,6 +41,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
     issuer: proconnectDiscoveryUrl,
+    jwks_endpoint: `${proconnectDiscoveryUrl}/jwks`,
     authorization: {
       url: config.proconnect.authorization_endpoint,
       params: { scope },
