@@ -48,18 +48,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     token: config.proconnect.token_endpoint,
     checks: ["pkce", "state"],
-    userinfo: {
-      url: config.proconnect.userinfo_endpoint,
-      async request({ tokens: { access_token }, client }) {
-        logger.info(`userinfo request`);
-        if (!access_token) {
-          throw new Error(
-            "ProConnectProvider - Userinfo request is missing access_token.",
-          );
-        }
-        return client.userinfo<ProConnectProfile>(access_token);
-      },
-    },
+    userinfo: config.proconnect.userinfo_endpoint,
     profile(profile) {
       return {
         id: profile.sub,
