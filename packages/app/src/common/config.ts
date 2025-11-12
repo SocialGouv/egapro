@@ -52,6 +52,9 @@ export const config = {
   // PROCONNECT CONFIGURATION
   proconnect: {
     get issuer() {
+      if (process.env.EGAPRO_PROCONNECT_ISSUER) {
+        return process.env.EGAPRO_PROCONNECT_ISSUER;
+      }
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
@@ -81,6 +84,9 @@ export const config = {
       return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
+      if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
+        return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
+      }
       return this.env !== "prod" && process.env.EGAPRO_PROCONNECT_DISCOVERY_URL
         ? `${process.env.EGAPRO_PROCONNECT_DISCOVERY_URL}/.well-known/openid-configuration`
         : `${this.issuer}/.well-known/openid-configuration`;
