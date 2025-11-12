@@ -56,7 +56,7 @@ export const config = {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
       return this.env === "dev"
-        ? "https://sandbox.proconnect.gouv.fr"
+        ? "https://fca.integ01.dev-agentconnect.fr/api/v2"
         : "https://proconnect.gouv.fr";
     },
     get authorization_endpoint() {
