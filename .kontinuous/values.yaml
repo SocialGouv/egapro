@@ -46,7 +46,6 @@ app:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     REDIS_HOST: "redis-master"
     REDIS_PORT: "6379"
-    REDIS_PASSWORD: "$(REDIS_PASSWORD)"
 
 nginx:
   ~chart: app

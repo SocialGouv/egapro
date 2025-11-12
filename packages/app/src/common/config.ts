@@ -57,7 +57,7 @@ export const config = {
       }
       return this.env === "dev"
         ? "https://fca.integ01.dev-agentconnect.fr/api/v2"
-        : "https://proconnect.gouv.fr";
+        : "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
