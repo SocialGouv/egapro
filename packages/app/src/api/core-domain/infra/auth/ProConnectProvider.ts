@@ -41,7 +41,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
     issuer: proconnectDiscoveryUrl,
-    wellKnown: config.proconnect.well_known,
     authorization: {
       url: config.proconnect.authorization_endpoint,
       params: { scope },

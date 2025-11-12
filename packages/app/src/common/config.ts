@@ -64,21 +64,36 @@ export const config = {
     },
     get authorization_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak
-        ? `${this.issuer}/protocol/openid-connect/auth`
-        : `${this.issuer}/api/v2/authorize`;
+      if (isKeycloak) {
+        return `${this.issuer}/protocol/openid-connect/auth`;
+      }
+      // If issuer already includes /api/v2, don't add it again
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak
-        ? `${this.issuer}/protocol/openid-connect/token`
-        : `${this.issuer}/api/v2/token`;
+      if (isKeycloak) {
+        return `${this.issuer}/protocol/openid-connect/token`;
+      }
+      // If issuer already includes /api/v2, don't add it again
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
-      return isKeycloak
-        ? `${this.issuer}/protocol/openid-connect/userinfo`
-        : `${this.issuer}/api/v2/userinfo`;
+      if (isKeycloak) {
+        return `${this.issuer}/protocol/openid-connect/userinfo`;
+      }
+      // If issuer already includes /api/v2, don't add it again
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/userinfo`;
     },
     get jwks_uri() {
       return `${this.issuer}/oidc/.well-known/jwks`;
