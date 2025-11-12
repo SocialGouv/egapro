@@ -33,14 +33,13 @@ export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
   const scope = config.proconnect.scope;
-  const proconnectDiscoveryUrl = config.proconnect.issuer;
 
   return {
     id: "proconnect",
     type: "oauth",
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
-    issuer: proconnectDiscoveryUrl,
+    wellKnown: config.proconnect.well_known,
     authorization: {
       url: config.proconnect.authorization_endpoint,
       params: { scope },
