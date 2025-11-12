@@ -40,8 +40,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     type: "oauth",
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
-    issuer: proconnectDiscoveryUrl,
-    jwks_endpoint: `${proconnectDiscoveryUrl}/protocol/openid-connect/certs`,
+    wellKnown: config.proconnect.well_known,
     authorization: {
       url: config.proconnect.authorization_endpoint,
       params: { scope },
