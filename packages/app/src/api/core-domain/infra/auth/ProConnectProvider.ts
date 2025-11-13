@@ -41,13 +41,14 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
     issuer: proconnectDiscoveryUrl,
-    jwks_endpoint: `${proconnectDiscoveryUrl}/jwks`,
+    jwks_endpoint: proconnectDiscoveryUrl.includes('localhost') ? `${proconnectDiscoveryUrl}/protocol/openid-connect/certs` : `${proconnectDiscoveryUrl}/jwks`,
     authorization: {
       url: config.proconnect.authorization_endpoint,
       params: { scope },
     },
     token: config.proconnect.token_endpoint,
     checks: ["pkce", "state"],
+    idToken: config.env === "prod",
     userinfo: config.proconnect.userinfo_endpoint,
     profile(profile) {
       return {
