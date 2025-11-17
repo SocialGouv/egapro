@@ -18,6 +18,7 @@ import { Octokit } from "@octokit/rest";
 import jwt, { sign, verify } from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
+import { SignJWT, jwtVerify } from "jose";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
@@ -353,6 +354,23 @@ export const authConfig: AuthOptions = {
         }
       }
       return session;
+    },
+  },
+  jwt: {
+    async encode({ token, secret, maxAge }): Promise<string> {
+      const secretAsKey = new TextEncoder().encode(secret as string);
+      const jwt = new SignJWT(token).setProtectedHeader({ alg: "HS256" }).setIssuedAt();
+      if (maxAge) jwt.setExpirationTime(maxAge * 1000);
+      return await jwt.sign(secretAsKey);
+    },
+    async decode({ token, secret }): Promise<JWT | null> {
+      try {
+        const secretAsKey = new TextEncoder().encode(secret as string);
+        return (await jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
+      } catch (error) {
+        logger.error({ error }, "Error while decoding token");
+        return null;
+      }
     },
   },
 };
