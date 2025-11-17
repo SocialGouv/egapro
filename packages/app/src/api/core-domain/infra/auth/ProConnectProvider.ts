@@ -44,25 +44,21 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     authorization: {
       params: { scope },
     },
+    userinfo: config.proconnect.userinfo_endpoint,
     checks: ["pkce", "state"],
-    idToken: true,
-    profile: async (profile, tokens) => {
-      const response = await fetch(config.proconnect.userinfo_endpoint, {
-        headers: { Authorization: `Bearer ${tokens.access_token}` }
-      });
-      const userinfo = await response.json();
-      console.log("userinfo", JSON.stringify(userinfo));
+    profile(profile) {
+      console.log("userinfo", JSON.stringify(profile));
       return {
-        id: userinfo.sub,
-        email: userinfo.email,
-        given_name: userinfo.given_name,
-        family_name: userinfo.usual_name,
-        phone_number: userinfo.phone_number?.replace(/[.\-\s]/g, ""),
-        email_verified: userinfo.email_verified,
-        job: userinfo.job,
-        organizations: userinfo.organizations || [],
-        sub: userinfo.sub,
-        updated_at: userinfo.updated_at,
+        id: profile.sub,
+        email: profile.email,
+        given_name: profile.given_name,
+        family_name: profile.usual_name,
+        phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""),
+        email_verified: profile.email_verified,
+        job: profile.job,
+        organizations: profile.organizations || [],
+        sub: profile.sub,
+        updated_at: profile.updated_at,
       };
     },
     ...options,
