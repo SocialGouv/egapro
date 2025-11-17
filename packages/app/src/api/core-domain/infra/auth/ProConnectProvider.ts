@@ -46,18 +46,22 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     checks: ["pkce", "state"],
     idToken: true,
-    profile(profile) {
+    profile: async (profile, tokens) => {
+      const response = await fetch(config.proconnect.userinfo_endpoint, {
+        headers: { Authorization: `Bearer ${tokens.access_token}` }
+      });
+      const userinfo = await response.json();
       return {
-        id: profile.sub,
-        email: profile.email,
-        given_name: profile.given_name,
-        family_name: profile.usual_name,
-        phone_number: profile.phone_number?.replace(/[.\-\s]/g, ""),
-        email_verified: profile.email_verified,
-        job: profile.job,
-        organizations: profile.organizations || [],
-        sub: profile.sub,
-        updated_at: profile.updated_at,
+        id: userinfo.sub,
+        email: userinfo.email,
+        given_name: userinfo.given_name,
+        family_name: userinfo.usual_name,
+        phone_number: userinfo.phone_number?.replace(/[.\-\s]/g, ""),
+        email_verified: userinfo.email_verified,
+        job: userinfo.job,
+        organizations: userinfo.organizations || [],
+        sub: userinfo.sub,
+        updated_at: userinfo.updated_at,
       };
     },
     ...options,
