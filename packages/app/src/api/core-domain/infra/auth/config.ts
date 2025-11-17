@@ -233,6 +233,7 @@ export const authConfig: AuthOptions = {
           // === PROCONNECT ===
         } else {
           const proConnectProfile = profile as ProConnectProfile;
+          logger.info({ proConnectProfile }, "Received ProConnect profile after user connection");
 
           type KeycloakProfile = {
             organization?: string | string[];
