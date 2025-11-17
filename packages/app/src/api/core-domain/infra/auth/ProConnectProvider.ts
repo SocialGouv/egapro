@@ -51,6 +51,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         headers: { Authorization: `Bearer ${tokens.access_token}` }
       });
       const userinfo = await response.json();
+      console.log("userinfo", JSON.stringify(userinfo));
       return {
         id: userinfo.sub,
         email: userinfo.email,
