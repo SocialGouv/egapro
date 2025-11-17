@@ -121,8 +121,9 @@ const wrappedMiddleware = withAuth(
     jwt: {
       async decode({ token, secret }): Promise<JWT | null> {
         try {
-          const secretAsKey = new TextEncoder().encode(secret as string);
-          return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
+          const encryptionSecret = new TextEncoder().encode(secret as string);
+          const { plaintext } = await jose.compactDecrypt(token as string, encryptionSecret);
+          return JSON.parse(new TextDecoder().decode(plaintext)) as JWT;
         } catch (error) {
           logger.error({ error }, "Error while decoding token");
           return null;
