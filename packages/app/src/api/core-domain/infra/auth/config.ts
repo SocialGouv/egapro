@@ -360,7 +360,7 @@ export const authConfig: AuthOptions = {
     async encode({ token, secret, maxAge }): Promise<string> {
       const secretAsKey = new TextEncoder().encode(secret as string);
       const jwt = new SignJWT(token).setProtectedHeader({ alg: "HS256" }).setIssuedAt();
-      if (maxAge) jwt.setExpirationTime(maxAge * 1000);
+      if (maxAge) jwt.setExpirationTime(maxAge);
       return await jwt.sign(secretAsKey);
     },
     async decode({ token, secret }): Promise<JWT | null> {
