@@ -6,7 +6,6 @@ import * as jose from "jose";
 import { NextResponse } from "next/server";
 import { type JWT } from "next-auth/jwt";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
-import crypto from "crypto";
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -122,7 +121,9 @@ const wrappedMiddleware = withAuth(
     jwt: {
       async decode({ token, secret }): Promise<JWT | null> {
         try {
-          const encryptionSecret = crypto.createHash('sha256').update(secret).digest();
+          const secretBytes = new TextEncoder().encode(secret as string);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', secretBytes);
+          const encryptionSecret = new Uint8Array(hashBuffer);
           const { plaintext } = await jose.compactDecrypt(token as string, encryptionSecret);
           return JSON.parse(new TextDecoder().decode(plaintext)) as JWT;
         } catch (error) {
