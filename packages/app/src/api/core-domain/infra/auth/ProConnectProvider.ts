@@ -48,7 +48,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     token: config.proconnect.token_endpoint,
     checks: ["pkce", "state"],
-    idToken: config.env === "prod",
+    idToken: true,
     userinfo: config.proconnect.userinfo_endpoint,
     profile(profile) {
       return {
