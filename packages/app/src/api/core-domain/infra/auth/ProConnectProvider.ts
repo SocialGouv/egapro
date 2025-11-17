@@ -40,16 +40,12 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     type: "oauth",
     name: "ProConnect",
     allowDangerousEmailAccountLinking: true,
-    issuer: proconnectDiscoveryUrl,
-    jwks_endpoint: proconnectDiscoveryUrl.includes('localhost') ? `${proconnectDiscoveryUrl}/protocol/openid-connect/certs` : `${proconnectDiscoveryUrl}/jwks`,
+    wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      url: config.proconnect.authorization_endpoint,
       params: { scope },
     },
-    token: config.proconnect.token_endpoint,
     checks: ["pkce", "state"],
     idToken: true,
-    userinfo: config.proconnect.userinfo_endpoint,
     profile(profile) {
       return {
         id: profile.sub,
