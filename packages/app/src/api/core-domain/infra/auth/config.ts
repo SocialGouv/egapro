@@ -357,22 +357,35 @@ export const authConfig: AuthOptions = {
     },
   },
   jwt: {
-    async encode({ token, secret, maxAge }): Promise<string> {
-      const secretAsKey = new TextEncoder().encode(secret as string);
-      const jwt = new SignJWT(token).setProtectedHeader({ alg: "HS256" }).setIssuedAt();
-      if (maxAge) jwt.setExpirationTime(maxAge);
-      return await jwt.sign(secretAsKey);
-    },
-    async decode({ token, secret }): Promise<JWT | null> {
-      try {
-        const secretAsKey = new TextEncoder().encode(secret as string);
-        return (await jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
-      } catch (error) {
-        logger.error({ error }, "Error while decoding token");
-        return null;
-      }
-    },
+  async encode({ token, secret, maxAge }) {
+    const secretAsKey = new TextEncoder().encode(secret as string);
+
+    const jwt = new SignJWT(token ?? {})
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt();
+
+    // Correct : ajouter maxAge au iat courant
+    if (maxAge) {
+      const now = Math.floor(Date.now() / 1000);
+      jwt.setExpirationTime(now + maxAge);
+    }
+
+    return await jwt.sign(secretAsKey);
   },
+
+  async decode({ token, secret }) {
+    try {
+      const secretAsKey = new TextEncoder().encode(secret as string);
+      const { payload } = await jwtVerify(token as string, secretAsKey, {
+        algorithms: ["HS256"],
+      });
+      return payload as JWT;
+    } catch (error) {
+      logger.error({ error }, "Error while decoding token");
+      return null;
+    }
+  },
+},
 };
 
 // === TOKEN API V1 (legacy) ===
