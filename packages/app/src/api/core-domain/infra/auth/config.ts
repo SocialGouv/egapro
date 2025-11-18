@@ -353,6 +353,7 @@ export const authConfig: AuthOptions = {
           }
         }
       }
+      console.log("session", JSON.stringify(session));
       return session;
     },
   },
