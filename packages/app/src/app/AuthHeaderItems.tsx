@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
+import { config as appConfig } from "@common/config";
 import { signOut, useSession } from "next-auth/react";
 import { useContext } from "react";
 
@@ -65,9 +66,19 @@ export const LoginLogoutHeaderItem = () => {
                 // Then redirect to Keycloak logout to clear the OAuth session
                 const idTokenHint = session.data.user.idToken;
                 const redirectUri = encodeURIComponent(window.location.origin);
-                const logoutUrl = idTokenHint
-                  ? `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?id_token_hint=${encodeURIComponent(idTokenHint)}&post_logout_redirect_uri=${redirectUri}`
-                  : `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}`;
+                const isLocal = appConfig.proconnect.issuer.includes("localhost");
+                let logoutUrl: string;
+                if (isLocal) {
+                  logoutUrl = idTokenHint
+                    ? `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?id_token_hint=${encodeURIComponent(idTokenHint)}&post_logout_redirect_uri=${redirectUri}`
+                    : `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}`;
+                } else {
+                  // For dev and prod, use specific logout URLs
+                  const logoutBaseUrl = appConfig.env === "prod"
+                    ? "https://app.proconnect.gouv.fr/api/v2"
+                    : appConfig.proconnect.issuer;
+                  logoutUrl = `${logoutBaseUrl}/logout?id_token_hint=${encodeURIComponent(idTokenHint || "")}&post_logout_redirect_uri=${redirectUri}`;
+                }
                 window.location.href = logoutUrl;
               },
             },
