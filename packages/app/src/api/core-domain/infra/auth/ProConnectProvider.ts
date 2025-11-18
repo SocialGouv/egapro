@@ -42,7 +42,11 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     allowDangerousEmailAccountLinking: true,
     wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      params: { scope },
+      url: config.proconnect.authorization_endpoint,
+      params: {
+        scope,
+        prompt: "select_account",
+      },
     },
     userinfo: {
       url: config.proconnect.userinfo_endpoint,
