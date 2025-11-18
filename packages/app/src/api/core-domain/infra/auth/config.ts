@@ -87,6 +87,7 @@ export const authConfig: AuthOptions = {
   pages: {
     signIn: "/login",
     error: "/error?source=login",
+    signOut: "/api/auth/proconnect-logout",
   },
   debug: config.env === "dev",
   adapter: egaproNextAuthAdapter,
@@ -314,6 +315,14 @@ export const authConfig: AuthOptions = {
         logger.error({ error }, "Error while creating token");
         throw new Error("Error while creating token");
       }
+    },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("https://fca.integ01.dev-agentconnect.fr/api/v2/logout") ||
+          url.startsWith("https://app.proconnect.gouv.fr/api/v2/logout")) {
+        return url;
+      }
+      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
     },
 
     async session({ session, token }) {

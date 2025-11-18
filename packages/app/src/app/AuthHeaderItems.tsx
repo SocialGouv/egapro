@@ -48,58 +48,33 @@ export const UserHeaderItem = () => {
 };
 
 export const LoginLogoutHeaderItem = () => {
-  const session = useSession();
+  const { status } = useSession();
 
-  switch (session.status) {
-    case "authenticated":
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-authenticated-logout"
-          quickAccessItem={{
-            iconId: "fr-icon-lock-unlock-line",
-            buttonProps: {
-              className: fr.cx("fr-btn--secondary"),
-              async onClick(e) {
-                e.preventDefault();
-                // Sign out from NextAuth first
-                await signOut({ callbackUrl: "/" });
-                // Then redirect to Keycloak logout to clear the OAuth session
-                const idTokenHint = session.data.user.idToken;
-                const redirectUri = encodeURIComponent(window.location.origin);
-                const isLocal = appConfig.proconnect.issuer.includes("localhost");
-                let logoutUrl: string;
-                if (isLocal) {
-                  logoutUrl = idTokenHint
-                    ? `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?id_token_hint=${encodeURIComponent(idTokenHint)}&post_logout_redirect_uri=${redirectUri}`
-                    : `http://localhost:8081/realms/atlas/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}`;
-                } else {
-                  // For dev and prod, use specific logout URLs
-                  const logoutBaseUrl = appConfig.env === "prod"
-                    ? "https://app.proconnect.gouv.fr/api/v2"
-                    : appConfig.proconnect.issuer;
-                  logoutUrl = `${logoutBaseUrl}/logout?id_token_hint=${encodeURIComponent(idTokenHint || "")}&post_logout_redirect_uri=${redirectUri}`;
-                }
-                window.location.href = logoutUrl;
-              },
-            },
-            text: "Se déconnecter",
-          }}
-        />
-      );
-
-    default: // loading
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-unauthenticated-login"
-          quickAccessItem={{
-            iconId: "fr-icon-lock-line",
-            linkProps: {
-              href: "/login",
-              className: fr.cx("fr-btn--secondary"),
-            },
-            text: "Se connecter",
-          }}
-        />
-      );
+  if (status === "authenticated") {
+    return (
+      <HeaderQuickAccessItem
+        quickAccessItem={{
+          iconId: "fr-icon-lock-unlock-line",
+          buttonProps: {
+            className: fr.cx("fr-btn--secondary"),
+            onClick: () => signOut({ callbackUrl: "/" }), // ← juste ça
+          },
+          text: "Se déconnecter",
+        }}
+      />
+    );
   }
+
+  return (
+    <HeaderQuickAccessItem
+      quickAccessItem={{
+        iconId: "fr-icon-lock-line",
+        linkProps: {
+          href: "/login",
+          className: fr.cx("fr-btn--secondary"),
+        },
+        text: "Se connecter",
+      }}
+    />
+  );
 };
