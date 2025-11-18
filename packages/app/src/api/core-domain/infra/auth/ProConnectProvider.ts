@@ -45,7 +45,8 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       url: config.proconnect.authorization_endpoint,
       params: {
         scope,
-        prompt: "select_account",
+        prompt: "login",
+        max_age: 0
       },
     },
     userinfo: {
