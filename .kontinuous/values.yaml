@@ -16,8 +16,6 @@ app:
     - secretRef:
         name: "egapro-secret"
     - secretRef:
-        name: "moncomptepro"
-    - secretRef:
         name: github-oauth
     - configMapRef:
         name: egapro

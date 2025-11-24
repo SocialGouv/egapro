@@ -47,7 +47,7 @@ export const metadata = {
 const RootLayout = ({ children }: PropsWithChildren) => {
   const nonce = undefined; // TODO: fix nonce in Next.js 16
   const mcpconfig = {
-    isProConnectTest: config.api.security.moncomptepro.appTest,
+    isProConnectTest: false,
     isEmailLogin: config.api.security.auth.isEmailLogin,
   };
   const { getHtmlAttributes } = createGetHtmlAttributes({ defaultColorScheme });

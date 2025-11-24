@@ -188,22 +188,6 @@ export const config = {
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
 
-      // DÉPRÉCIÉ : MonComptePro
-      moncomptepro: {
-        clientId: ensureApiEnvVar(
-          process.env.SECURITY_MONCOMPTEPRO_CLIENT_ID,
-          "",
-        ),
-        clientSecret: ensureApiEnvVar(
-          process.env.SECURITY_MONCOMPTEPRO_CLIENT_SECRET,
-          "",
-        ),
-        appTest: ensureApiEnvVar(
-          process.env.SECURITY_MONCOMPTEPRO_TEST,
-          isTruthy,
-          false,
-        ),
-      },
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
