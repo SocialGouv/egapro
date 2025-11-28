@@ -1,10 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import * as Sentry from "@sentry/nextjs";
 import { useFormContext } from "react-hook-form";
-
-import { sanitizeClipboardText } from "../../utils/errorHandling";
 
 export type TextareaCounterProps = {
   disabled?: boolean;
@@ -32,7 +29,6 @@ export const TextareaCounter = ({
   const {
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useFormContext();
 
@@ -42,57 +38,8 @@ export const TextareaCounter = ({
   const color =
     remainingCharacters < 0 ? "text-dsfr-error" : remainingCharacters < 20 ? "text-dsfr-warning" : "text-dsfr-neutral";
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    try {
-      const rawText = e.clipboardData.getData("text/plain");
-      const text = sanitizeClipboardText(rawText);
-
-      if (!text.trim() && rawText.trim()) {
-        Sentry.captureMessage("Sanitization removed all content, falling back to default paste", {
-          level: "warning",
-          tags: {
-            component: "TextareaCounter",
-            action: "handlePaste",
-          },
-          extra: {
-            fieldName,
-            rawText,
-          },
-        });
-        return;
-      }
-
-      e.preventDefault();
-
-      const textarea = e.currentTarget;
-      const selectionStart = textarea.selectionStart;
-      const selectionEnd = textarea.selectionEnd;
-      const currentValue = textarea.value;
-      const newValue = currentValue.substring(0, selectionStart) + text + currentValue.substring(selectionEnd);
-
-      setValue(fieldName, newValue, { shouldValidate: true });
-
-      requestAnimationFrame(() => {
-        textarea.selectionStart = selectionStart + text.length;
-        textarea.selectionEnd = selectionStart + text.length;
-      });
-    } catch (error) {
-      Sentry.captureException(error, {
-        tags: {
-          component: "TextareaCounter",
-          action: "handlePaste",
-        },
-        extra: {
-          fieldName,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      });
-      console.error("Erreur lors du collage de texte:", error);
-    }
-  };
-
   return (
-    <>
+    <div translate="no">
       <Input
         textArea
         nativeTextAreaProps={{
@@ -101,7 +48,6 @@ export const TextareaCounter = ({
           readOnly,
           disabled,
           maxLength,
-          onPaste: handlePaste,
         }}
         label={label}
         id={fieldName}
@@ -116,6 +62,6 @@ export const TextareaCounter = ({
           {remainingCharacters > 1 && "s"}
         </p>
       )}
-    </>
+    </div>
   );
 };

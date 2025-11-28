@@ -1,3 +1,10 @@
+## [3.13.2](https://github.com/SocialGouv/egapro/compare/v3.13.1...v3.13.2) (2025-10-08)
+
+
+### Bug Fixes
+
+* bug copy paste translated texte ([#2688](https://github.com/SocialGouv/egapro/issues/2688)) ([016f7c5](https://github.com/SocialGouv/egapro/commit/016f7c527759063a9cef96ea6022a757f91b0a90)), closes [#2687](https://github.com/SocialGouv/egapro/issues/2687)
+
 ## [3.13.1](https://github.com/SocialGouv/egapro/compare/v3.13.0...v3.13.1) (2025-10-01)
 
 
