@@ -116,7 +116,8 @@
         "role_list",
         "roles",
         "profile",
-        "email"
+        "email",
+        "phone"
       ],
       "optionalClientScopes": [
         "address",
@@ -243,6 +244,31 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "phone",
+      "description": "OpenID Connect scope for phone",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "phone number",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "phoneNumber",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "phone_number",
             "jsonType.label": "String"
           }
         }

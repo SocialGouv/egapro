@@ -49,38 +49,42 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         max_age: 0
       },
     },
-    userinfo: {
-      url: config.proconnect.userinfo_endpoint,
-      async request({ tokens }) {
-        if (!tokens.access_token) {
-          throw new Error("No access token");
+    userinfo: proconnectDiscoveryUrl.includes("localhost")
+      ? {
+          url: config.proconnect.userinfo_endpoint,
         }
+      : {
+          url: config.proconnect.userinfo_endpoint,
+          async request({ tokens }) {
+            if (!tokens.access_token) {
+              throw new Error("No access token");
+            }
 
-        const response = await fetch(config.proconnect.userinfo_endpoint, {
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`,
+            const response = await fetch(config.proconnect.userinfo_endpoint, {
+              headers: {
+                Authorization: `Bearer ${tokens.access_token}`,
+              },
+            });
+
+            if (!response.ok) {
+              const text = await response.text();
+              logger.error({ status: response.status, body: text }, "ProConnect userinfo error");
+              throw new Error(`ProConnect userinfo failed: ${response.status}`);
+            }
+
+            const body = await response.text();
+
+            // integ01 renvoie un JWT, prod renvoie du JSON → on gère les deux
+            if (body.includes(".")) {
+              const payload = body.split(".")[1];
+              const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+              const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+              return JSON.parse(Buffer.from(padded, "base64").toString("utf-8"));
+            }
+
+            return JSON.parse(body);
           },
-        });
-
-        if (!response.ok) {
-          const text = await response.text();
-          logger.error({ status: response.status, body: text }, "ProConnect userinfo error");
-          throw new Error(`ProConnect userinfo failed: ${response.status}`);
-        }
-
-        const body = await response.text();
-
-        // integ01 renvoie un JWT, prod renvoie du JSON → on gère les deux
-        if (body.includes(".")) {
-          const payload = body.split(".")[1];
-          const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-          const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
-          return JSON.parse(Buffer.from(padded, "base64").toString("utf-8"));
-        }
-
-        return JSON.parse(body);
-      },
-    },
+        },
     checks: ["pkce", "state"],
     profile(profile) {
       console.log("userinfo décodé →", JSON.stringify(profile, null, 2));
