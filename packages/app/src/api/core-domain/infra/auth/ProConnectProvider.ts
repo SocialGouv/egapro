@@ -31,9 +31,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     authorization: {
       url: proconnect.authorization_endpoint,
       params: {
-        scope: isLocalhost
-        ? "openid email profile"
-        : "openid email given_name usual_name siret", // ← clé de voûte
+        scope: "openid email given_name usual_name siret",
         prompt: "login",
         max_age: 0,
       },

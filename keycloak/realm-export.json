@@ -441,7 +441,9 @@
       "firstName": "Test",
       "lastName": "User",
       "email": "test@example.com",
-      "attributes": {},
+      "attributes": {
+        "siret": ["12345678901234"]
+      },
       "credentials": [
         {
           "type": "password",
