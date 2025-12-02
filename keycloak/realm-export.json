@@ -109,6 +109,20 @@
             "claim.name": "siret",
             "jsonType.label": "String"
           }
+        },
+        {
+          "name": "organizations",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "organizations",
+            "claim.value": "[{\"id\": 12345, \"is_collectivite_territoriale\": false, \"is_external\": false, \"is_service_public\": true, \"label\": \"Ministère du Travail\", \"siren\": \"123456789\", \"siret\": \"12345678901234\"}]",
+            "jsonType.label": "JSON"
+          }
         }
       ],
       "defaultClientScopes": [
@@ -350,10 +364,7 @@
       "firstName": "Test",
       "lastName": "User",
       "email": "test@example.com",
-      "attributes": {
-        "organization": ["Test Company"],
-        "siret": ["12345678901234"]
-      },
+      "attributes": {},
       "credentials": [
         {
           "type": "password",
