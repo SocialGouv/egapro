@@ -69,7 +69,7 @@ const CommencerPage = async () => {
         description="Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
           correspondantes à la déclaration."
       />
-      <CommencerForm session={session} monCompteProHost={proconnectManageOrganisationsUrl ?? ""} />
+      <CommencerForm session={session} proconnectHost={proconnectManageOrganisationsUrl ?? ""} />
     </>
   );
 };

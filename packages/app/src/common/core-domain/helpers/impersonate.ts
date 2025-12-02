@@ -5,6 +5,7 @@ import { sirenSchema } from "../dtos/helpers/common";
 export const impersonatedSessionSchema = z.object({
   user: z.object({
     staff: z.literal(false),
+    companiesHash: z.string(),
     companies: z
       .array(
         z.object({

@@ -44,8 +44,6 @@ app:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
     - secretRef:
-        name: "moncomptepro"
-    - secretRef:
         name: "staff"
     - secretRef:
         name: "egapro-secret"

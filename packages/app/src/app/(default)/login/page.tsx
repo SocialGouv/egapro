@@ -36,8 +36,9 @@ const signinErrors: Record<string, string> = {
 
 const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
   const session = await getServerSession(authConfig);
-  const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
-  const error = typeof searchParams.error === "string" ? searchParams.error : "";
+  const params = await searchParams;
+  const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "";
+  const error = typeof params.error === "string" ? params.error : "";
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   return (
