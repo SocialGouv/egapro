@@ -11,7 +11,6 @@ import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
@@ -34,12 +33,12 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
 
-  const companies = session.user.companies;
+  const organization = session.user.organization;
 
   const schemaWithOwnedSiren = session.user.staff
     ? createSteps.commencer
     : createSteps.commencer.superRefine((val, ctx) => {
-        if (!companies.some(company => company.siren === val.siren)) {
+        if (!organization) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: OWNER_ERROR,
@@ -53,7 +52,7 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
     handleSubmit,
     setValue,
     reset: resetForm,
-    formState: { errors, isValid },
+    formState: { errors, isValid, },
     setError,
   } = useForm<CommencerFormType>({
     mode: "onChange",
@@ -128,6 +127,9 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
     }
   };
 
+  console.log("errors", errors);
+  console.log("isValid", isValid);
+  console.log("isPending", isPending);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -168,22 +170,8 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
               }}
             />
           ) : (
-            <Select
-              label="Numéro Siren de l’entreprise *"
-              state={errors.siren && "error"}
-              stateRelatedMessage={errors.siren?.message}
-              nativeSelectProps={register("siren")}
-            >
-              <option value="" disabled>
-                Sélectionnez une entreprise
-              </option>
-              {sortBy(companies, "siren").map(company => (
-                <option key={company.siren} value={company.siren}>
-                  {company.siren}
-                  {company.label ? ` (${company.label})` : ""}
-                </option>
-              ))}
-            </Select>
+            <p>{session.user?.organization?.siren}
+                  {session.user?.organization?.label ? ` (${session.user?.organization?.label})` : ""}</p>
           )}
           <p>
             Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}

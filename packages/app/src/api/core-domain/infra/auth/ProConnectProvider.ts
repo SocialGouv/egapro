@@ -2,6 +2,15 @@ import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
 
+export interface Organization {
+  id: number;
+  is_collectivite_territoriale: boolean;
+  is_external: boolean;
+  is_service_public: boolean;
+  label: string | null;
+  siren: string;
+  siret: string;
+}
 
 export interface ProConnectProfile {
   sub: string;
@@ -16,6 +25,8 @@ export interface ProConnectProfile {
   iat?: number;
   exp?: number;
 }
+
+
 
 export function ProConnectProvider<P extends ProConnectProfile>(
   options?: OAuthUserConfig<P>,
@@ -80,7 +91,8 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       },
     },
     checks: ["pkce", "state"],
-    profile(profile: ProConnectProfile) {
+    async profile(profile: ProConnectProfile) {
+      console.log("Profile function called with profile:", profile);
       logger.info({ profile }, "ProConnect profile reçu");
 
       return {
@@ -94,7 +106,15 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           ? profile.phone_number.replace(/[.\-\s]/g, "")
           : null,
         siret: profile.siret || null,
-        organizations: "organizations" in profile ? profile.organizations : [],
+        organization: profile.siret ? {
+          id: parseInt(profile.siret, 10),
+          label: null,
+          siren: profile.siret.substring(0, 9),
+          siret: profile.siret,
+          is_collectivite_territoriale: false,
+          is_external: false,
+          is_service_public: false,
+        } : undefined,
         raw: profile,
       };
     },
