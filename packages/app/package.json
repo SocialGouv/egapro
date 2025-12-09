@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "predev": "only-include-used-icons",
-    "dev": "node --stack-size=2000 ../../node_modules/.bin/next dev",
+    "dev": "npx next dev",
     "prebuild": "only-include-used-icons",
-    "build": "node --stack-size=2000 ../../node_modules/.bin/next build",
+    "build": "npx next build",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",
