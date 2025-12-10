@@ -139,6 +139,7 @@ redis:
   sentinel:
     image:
       repository: bitnamilegacy/redis-sentinel
+      tag: 7.4.2-debian-12-r4
 
 files:
   ~chart: app
