@@ -25,7 +25,6 @@ export const egaproNextAuthAdapter: Adapter = {
     return null;
   },
 
-  /** Using the provider id and the id of the user for a specific account, get the user. */
   async getUserByAccount(_): Promise<AdapterUser | null> {
     return null;
   },
@@ -38,7 +37,6 @@ export const egaproNextAuthAdapter: Adapter = {
     return _;
   },
 
-  /** Creates a session for the user and returns it. */
   async createSession(session) {
     return session;
   },
@@ -51,11 +49,6 @@ export const egaproNextAuthAdapter: Adapter = {
     return null;
   },
 
-  /**
-   * Deletes a session from the database.
-   * It is preferred that this method also returns the session
-   * that is being deleted for logging purposes.
-   */
   async deleteSession(_) {
     return null;
   },
@@ -65,10 +58,6 @@ export const egaproNextAuthAdapter: Adapter = {
     return verificationToken;
   },
 
-  /**
-   * Return verification token from the database
-   * and delete it so it cannot be used again.
-   */
   async useVerificationToken({ identifier, token }: SentVerificationToken): Promise<VerificationToken | null> {
     const foundToken = tokenCache.get(identifier);
     if (foundToken?.token === token) {

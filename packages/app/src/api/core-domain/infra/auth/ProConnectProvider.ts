@@ -74,7 +74,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 
             const body = await response.text();
 
-            // integ01 renvoie un JWT, prod renvoie du JSON → on gère les deux
             if (body.includes(".")) {
               const payload = body.split(".")[1];
               const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
@@ -87,7 +86,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         },
     checks: ["pkce", "state"],
     profile(profile) {
-      console.log("userinfo décodé →", JSON.stringify(profile, null, 2));
       return {
         id: profile.sub,
         email: profile.email,

@@ -15,7 +15,7 @@ import { assertImpersonatedSession } from "@common/core-domain/helpers/impersona
 import { UnexpectedError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
-import jwt, { sign, verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import { SignJWT, jwtVerify } from "jose";
@@ -24,7 +24,6 @@ import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
-// === DÉCLARATIONS DE TYPES ===
 declare module "next-auth" {
   interface Session {
     staff: {
@@ -42,7 +41,7 @@ declare module "next-auth" {
       phoneNumber?: string;
       staff: boolean;
       tokenApiV1: string;
-      idToken?: string; // Add ID token for logout
+      idToken?: string;
     };
   }
 
@@ -55,20 +54,13 @@ declare module "next-auth/jwt" {
   }
 }
 
-// === URLs CHARON (pour dev/preprod) ===
-const charonMcpUrl = new URL(
-  `fabriqueKeycloak/`,
-  config.api.security.auth.charonUrl,
-);
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 
-// === PROCONNECT PROVIDER ===
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
 });
 
-// === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
@@ -159,12 +151,10 @@ export const authConfig: AuthOptions = {
         const isStaff =
           token.user?.staff || token.staff?.impersonating || false;
 
-        // Store ID token for logout (available during initial sign in)
         if (account?.id_token) {
           token.idToken = account.id_token;
         }
 
-        // === IMPERSONATION ===
         if (trigger === "update" && session && isStaff) {
           if (session.staff.impersonating === true) {
             assertImpersonatedSession(session);
@@ -188,7 +178,6 @@ export const authConfig: AuthOptions = {
 
         if (trigger !== "signUp") return token;
 
-        // === INITIALISATION COMPLÈTE ===
         token.user = {
           companies: [],
           companiesHash: "",
@@ -205,7 +194,6 @@ export const authConfig: AuthOptions = {
           lastImpersonatedHash: "",
         } as Session["staff"];
 
-        // === GITHUB ===
         if (account?.provider === "github") {
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
@@ -214,7 +202,6 @@ export const authConfig: AuthOptions = {
           token.user.firstname = firstname || undefined;
           token.user.lastname = lastname || undefined;
 
-          // === EMAIL ===
         } else if (account?.provider === "email") {
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
@@ -232,7 +219,6 @@ export const authConfig: AuthOptions = {
             token.user.companiesHash = "";
           }
 
-          // === PROCONNECT ===
         } else {
           const proConnectProfile = profile as ProConnectProfile;
           logger.info({ proConnectProfile }, "Received ProConnect profile after user connection");
@@ -328,7 +314,7 @@ export const authConfig: AuthOptions = {
     async session({ session, token }) {
       session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
-      session.user.idToken = token.idToken as string; // Include ID token for logout
+      session.user.idToken = token.idToken as string;
       session.staff = {};
 
       if (token.user.companiesHash) {
@@ -374,7 +360,6 @@ export const authConfig: AuthOptions = {
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt();
 
-    // Correct : ajouter maxAge au iat courant
     if (maxAge) {
       const now = Math.floor(Date.now() / 1000);
       jwt.setExpirationTime(now + maxAge);
@@ -398,7 +383,6 @@ export const authConfig: AuthOptions = {
 },
 };
 
-// === TOKEN API V1 (legacy) ===
 const createTokenApiV1 = (email: string) => {
   return jwt.sign({ sub: email }, config.api.security.jwtv1.secret, {
     algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
