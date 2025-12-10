@@ -30,6 +30,12 @@ jest.mock("@formkit/auto-animate/react", () => ({
   useAutoAnimate: jest.fn(() => []),
 }));
 
+jest.mock("jose", () => ({
+  SignJWT: jest.fn().mockReturnThis(),
+  jwtVerify: jest.fn(),
+  compactDecrypt: jest.fn(),
+}));
+
 console.error = (...args) => {
   return;
 };

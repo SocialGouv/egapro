@@ -29,7 +29,7 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
-export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost: string; session: Session }) => {
+export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: string; session: Session }) => {
   const router = useRouter();
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
@@ -187,7 +187,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
           )}
           <p>
             Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link href={`${monCompteProHost}`} target="_blank">
+            <Link href={`${proconnectHost}`} target="_blank">
               cliquez ici
             </Link>
           </p>
@@ -197,7 +197,7 @@ export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost:
             <Button
               onClick={e => {
                 e.preventDefault();
-                signIn("moncomptepro", { redirect: false });
+                signIn("proconnect", { redirect: false });
               }}
             >
               <Icon icon="fr-icon-refresh-line" />
