@@ -170,28 +170,12 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
               }}
             />
           ) : (
-            <p>{session.user?.organization?.siren}
-                  {session.user?.organization?.label ? ` (${session.user?.organization?.label})` : ""}</p>
+            <>
+              <label className={fr.cx("fr-label")}>Siren entreprise</label>
+              <p>{session.user?.organization?.siren}
+                    {session.user?.organization?.label ? ` (${session.user?.organization?.label})` : ""}</p>
+            </>
           )}
-          <p>
-            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link href={`${proconnectHost}`} target="_blank">
-              cliquez ici
-            </Link>
-          </p>
-          <div className={fr.cx("fr-pt-3v")}>
-            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur
-            ce bouton : <br />
-            <Button
-              onClick={e => {
-                e.preventDefault();
-                signIn("proconnect", { redirect: false });
-              }}
-            >
-              <Icon icon="fr-icon-refresh-line" />
-              Rafraichir
-            </Button>
-          </div>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-6w")}
             backProps={{
