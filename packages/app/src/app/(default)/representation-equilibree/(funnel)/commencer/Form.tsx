@@ -172,7 +172,7 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
           ) : (
             <>
               <label className={fr.cx("fr-label")}>Siren entreprise</label>
-              <p>{session.user?.organization?.siren}
+              <p className={fr.cx("fr-mt-1w")}>{session.user?.organization?.siren}
                     {session.user?.organization?.label ? ` (${session.user?.organization?.label})` : ""}</p>
             </>
           )}
