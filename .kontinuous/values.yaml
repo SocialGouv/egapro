@@ -136,6 +136,9 @@ redis:
   image:
     repository: bitnamilegacy/redis
   .global.security.allowInsecureImages: true
+  sentinel:
+    image:
+      repository: bitnamilegacy/redis-sentinel
 
 files:
   ~chart: app
