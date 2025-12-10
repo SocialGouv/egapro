@@ -1,3 +1,5 @@
+// packages/app/src/api/core-domain/infra/auth/config.ts
+
 import {
   Organization,
   type ProConnectProfile,
@@ -11,6 +13,7 @@ import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
+import jwt from "jsonwebtoken";
 import { Session, type AuthOptions } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import { SignJWT, jwtVerify } from "jose";
@@ -18,6 +21,7 @@ import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
+// === DÉCLARATIONS DE TYPES ===
 declare module "next-auth" {
   interface Session {
     staff: {
@@ -34,7 +38,7 @@ declare module "next-auth" {
       staff: boolean;
       tokenApiV1: string;
       idToken?: string;
-      siret?: string;
+      siret?: string; // Optionnel, pour debug
       lastImpersonated?: Array<{ label: string | null; siren: string }>;
     };
   }
@@ -50,8 +54,10 @@ declare module "next-auth/jwt" {
   }
 }
 
+// === URLs CHARON ===
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 
+// === PROCONNECT PROVIDER (déjà enrichi avec Weez) ===
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
@@ -79,14 +85,17 @@ async function fetchWeezEtablissement(siret: string): Promise<Organization | nul
       return null;
     }
 
+    // Mapper vers ton interface Organization
+    // Note: Certains champs comme is_collectivite_territoriale etc. ne sont pas directs dans Weez
+    // Tu peux les déduire via SIREN/INSEE si besoin, ou les mettre à false par défaut
     return {
-      id: parseInt(etablissement.siret, 10),
-      label: etablissement.raisonsociale || null,
+      id: parseInt(etablissement.siret, 10), // SIRET comme ID numérique
+      label: etablissement.raisonsociale || null, // Raison sociale
       siren: etablissement.siren,
       siret: etablissement.siret,
-      is_collectivite_territoriale: false,
-      is_external: false,
-      is_service_public: false,
+      is_collectivite_territoriale: false, // À déduire via API INSEE si besoin (ex: type "local authority")
+      is_external: false, // Par défaut, adapte si logique métier
+      is_service_public: false, // Par défaut
     };
   } catch (error) {
     logger.error({ siret, error }, "Weez API fetch failed");
@@ -94,6 +103,7 @@ async function fetchWeezEtablissement(siret: string): Promise<Organization | nul
   }
 }
 
+// === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
@@ -153,10 +163,12 @@ export const authConfig: AuthOptions = {
         const isStaff =
           token.user?.staff || token.staff?.impersonating || false;
 
+        // Store ID token for logout (available during initial sign in)
         if (account?.id_token) {
           token.idToken = account.id_token;
         }
 
+        // === IMPERSONATION ===
         if (trigger === "update" && session && isStaff) {
           if (session.staff.impersonating === true) {
             assertImpersonatedSession(session);
@@ -176,6 +188,7 @@ export const authConfig: AuthOptions = {
 
         if (trigger !== "signUp") return token;
 
+        // === INITIALISATION COMPLÈTE ===
         token.user = {
           company: undefined,
           email: token.email,
@@ -191,6 +204,7 @@ export const authConfig: AuthOptions = {
           lastImpersonatedHash: "",
         } as Session["staff"];
 
+        // === GITHUB ===
         if (account?.provider === "github") {
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
@@ -215,6 +229,7 @@ export const authConfig: AuthOptions = {
           token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
           token.user.siret = proConnectProfile.siret ?? undefined;
         }
+        console.log("JWT", JSON.stringify(token.user))
         return token;
     },
 

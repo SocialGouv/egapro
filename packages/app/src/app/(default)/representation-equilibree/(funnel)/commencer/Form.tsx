@@ -1,17 +1,19 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { REPEQ_ADMIN_YEARS, YEARS } from "@common/dict";
-import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
+import { signIn } from "next-auth/react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -60,6 +62,7 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
 
   const saveAndGoNext = async (siren: string, year: number) =>
     startTransition(async () => {
+      // Synchronise with potential data in DB.
       const exists = await getRepresentationEquilibree(siren, year);
       if (exists) {
         return router.push(`/representation-equilibree/${siren}/${year}`);
@@ -84,6 +87,7 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
         });
       }
 
+      // Otherwise, this is a creation.
       setIsEdit(false);
       resetFunnel();
       saveFunnel({ year, siren });
@@ -92,20 +96,25 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
 
   const onSubmit = async ({ siren, year }: CommencerFormType) => {
     const { siren: funnelSiren, year: funnelYear } = funnel ?? {};
+    // If no data are present in session storage.
     if (!(funnelSiren && funnelYear)) {
       return saveAndGoNext(siren, year);
     }
 
+    // If data are present in session storage and Siren and year have not changed.
     if (siren === funnelSiren && year === funnelYear) {
       return router.push(
         isEdit ? `/representation-equilibree/${siren}/${year}` : "/representation-equilibree/declarant",
       );
     }
 
+    // If Siren or year have changed, we ask the user if he really wants to erase the data.
     if (confirm(buildConfirmMessage({ siren: funnelSiren, year: funnelYear }))) {
+      // Start a new declaration of representation.
       resetFunnel();
       await saveAndGoNext(siren, year);
     } else {
+      // Rollback to the old Siren.
       setValue("siren", funnelSiren);
     }
   };
@@ -118,6 +127,9 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
     }
   };
 
+  console.log("errors", errors);
+  console.log("isValid", isValid);
+  console.log("isPending", isPending);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
