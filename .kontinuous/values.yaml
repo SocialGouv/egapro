@@ -142,7 +142,7 @@ files:
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
   imagePackage: files
   vars:
-    WHITELIST_IP: "94.23.250.213,37.187.27.197,37.187.137.149,217.182.225.117,217.182.225.113,217.182.142.112,51.38.59.32,51.254.44.90"
+    WHITELIST_IP: "94.23.250.213,37.187.27.197,37.187.137.149,217.182.225.117,217.182.225.113,217.182.142.112,51.38.59.32,51.254.44.90,212.83.139.156"
     AUTH_PASSWD_FILE: /secrets/basic-auth.passwd
     TRUSTED_PROXY_IP: "20.74.10.146"
     FILES_PUBLIC: index-egalite-fh.xlsx,dgt-export-representation.xlsx
