@@ -125,9 +125,6 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
     }
   };
 
-  console.log("errors", errors);
-  console.log("isValid", isValid);
-  console.log("isPending", isPending);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
