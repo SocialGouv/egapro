@@ -1,3 +1,5 @@
+// @api/core-domain/infra/auth/ProConnectProvider.ts
+
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
@@ -32,7 +34,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
   options?: OAuthUserConfig<P>,
 ): OAuthConfig<P> {
   const { proconnect } = config;
-  const isLocalhost = proconnect.issuer.includes("localhost");
 
   return {
     id: "proconnect",
@@ -92,7 +93,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
-      console.log("Profile function called with profile:", profile);
       logger.info({ profile }, "ProConnect profile reçu");
 
       return {

@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
@@ -13,7 +12,6 @@ import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { signIn } from "next-auth/react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

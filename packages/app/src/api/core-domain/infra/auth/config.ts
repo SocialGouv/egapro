@@ -133,7 +133,10 @@ export const authConfig: AuthOptions = {
               url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
               params: { scope: "user:email read:user read:org" },
             },
-            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
+            token: new URL(
+              "login/oauth/access_token",
+              charonGithubUrl,
+            ).toString(),
           }
         : { authorization: { params: { scope: "user:email read:user read:org" } } }),
     }),
@@ -239,8 +242,6 @@ export const authConfig: AuthOptions = {
     },
 
     async session({ session, token }) {
-      console.log("SESSION", JSON.stringify(session))
-      console.log("TOKEN", JSON.stringify(token.user))
       session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
       session.user.idToken = token.idToken as string;
