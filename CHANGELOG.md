@@ -1,3 +1,28 @@
+# [3.14.0](https://github.com/SocialGouv/egapro/compare/v3.13.2...v3.14.0) (2025-12-11)
+
+
+### Bug Fixes
+
+* add sentinel image tag ([27996fb](https://github.com/SocialGouv/egapro/commit/27996fbed696062c340a5039fa0429835aba7c88))
+* add tag to redis image ([a83b1e9](https://github.com/SocialGouv/egapro/commit/a83b1e9e4ec44fc62877ae3b08c346c640aa9f75))
+* bitnami redis legacy ([e909278](https://github.com/SocialGouv/egapro/commit/e9092782ec55933fa58ccccdb018508e7503d34e))
+* **redis-sentinel:** bitnamilegacy ([f7006b5](https://github.com/SocialGouv/egapro/commit/f7006b5b4676a276ae027b4dff488c3d28d9c34c))
+* remove sentinel definition ([d3f9831](https://github.com/SocialGouv/egapro/commit/d3f9831f6e6ac022ae66e0d8f5084c382a0b02af))
+* target nested redis ([1ad3b59](https://github.com/SocialGouv/egapro/commit/1ad3b59ba4b6bb5daa2f34051b45518e38658c0b))
+* update redis chart ([5503820](https://github.com/SocialGouv/egapro/commit/55038203d088e03a38cccd5c32817fc6c2b6a736))
+* update sentinel preprod config ([3694ef3](https://github.com/SocialGouv/egapro/commit/3694ef37985829a9396a8c0f886f0db3fc9ff95d))
+* update sentinel preprod config, again ([69fc629](https://github.com/SocialGouv/egapro/commit/69fc629d15df1921a1cbd47fb391d419af5c9d14))
+
+
+### Features
+
+* add IP invenis ([#2721](https://github.com/SocialGouv/egapro/issues/2721)) ([3ec5f5f](https://github.com/SocialGouv/egapro/commit/3ec5f5f644920faf3447d991c0c657877680590d))
+
+
+### Reverts
+
+* Revert "fix: erreur copier coller objectif progression (#2687)" ([317fdda](https://github.com/SocialGouv/egapro/commit/317fddaf314f5e1ff318d10703b7b930ecd43cb8)), closes [#2687](https://github.com/SocialGouv/egapro/issues/2687)
+
 ## [3.13.2](https://github.com/SocialGouv/egapro/compare/v3.13.1...v3.13.2) (2025-10-08)
 
 
