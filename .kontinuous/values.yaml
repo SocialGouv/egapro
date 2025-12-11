@@ -135,6 +135,7 @@ redis:
     usePasswordFiles: false  #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
   image:
     repository: bitnamilegacy/redis
+    tag: 7.4.2-debian-12-r4
   .global.security.allowInsecureImages: true
   sentinel:
     image:
