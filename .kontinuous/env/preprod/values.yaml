@@ -36,14 +36,5 @@ maildev: {}
 pgweb: {}
 
 redis:
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/redis
-    tag: 7.4.2-debian-12-r4
-
   sentinel:
     enabled: true
-    image:
-      registry: docker.io
-      repository: bitnamilegacy/redis-sentinel
-      tag: 7.4.2-debian-12-r4
