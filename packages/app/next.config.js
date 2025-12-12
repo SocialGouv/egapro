@@ -8,7 +8,43 @@ const nextConfig = {
   experimental: {
     // typedRoutes: true, // TODO activate <3
     // outputFileTracingRoot: path.join(__dirname, "../../"),
-    serverComponentsExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node"],
+    serverComponentsExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node", "pino"],
+    turbo: {
+      rules: {
+        '*.test.js': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.test.ts': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.test.mjs': {
+          loaders: [],
+          asFile: true,
+        },
+        'LICENSE': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.md': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.zip': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.yml': {
+          loaders: [],
+          asFile: true,
+        },
+        '*.sh': {
+          loaders: [],
+          asFile: true,
+        },
+      },
+    },
   },
   eslint: {
     ignoreDuringBuilds: true,
