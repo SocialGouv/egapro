@@ -88,6 +88,12 @@ nginx:
       cpu: 2
       memory: 1G
 
+api:
+  enabled: false
+
+files:
+  enabled: false
+
 pg:
   ~chart: pg
 
