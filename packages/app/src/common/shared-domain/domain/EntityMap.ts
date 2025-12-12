@@ -13,10 +13,6 @@ export class EntityMap<
 > extends Map<K, V> {
   private _keys = new Map<KRaw, K>();
 
-  public [Symbol.iterator]() {
-    return this.entries();
-  }
-
   constructor(entries?: Iterable<readonly [K, V]>) {
     super();
     if (entries) {
