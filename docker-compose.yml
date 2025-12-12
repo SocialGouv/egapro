@@ -1,25 +1,6 @@
 version: "3.8"
 
 services:
-  files:
-    image: egapro_files
-    build:
-      context: ./packages/files
-      dockerfile: Dockerfile
-    volumes:
-      - ./packages/files:/app
-      - ./mnt:/mnt
-    environment:
-      ROOT_PATH: /mnt
-      TRUSTED_PROXY_IP: "172.17.0.1"
-      AUTH_PASSWD_FILE: "/app/.htpasswd"
-      WHITELIST_IP: "127.0.0.1"
-      FILES_PUBLIC: "dgt.xlsx,dgt-representation.xlsx,index-egalite-fh.xlsx,indexes.csv,full.ndjson,dgt-export-representation.xlsx"
-      FILES_RESTRICTED: ""
-    ports:
-      - 8080:8080
-    restart: always
-
   redis-init:
     image: node:18-alpine
     depends_on:

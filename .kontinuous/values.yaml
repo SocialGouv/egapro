@@ -99,42 +99,6 @@ redis:
     existingSecret: redis-auth
     existingSecretPasswordKey: REDIS_PASSWORD
     usePasswordFiles: false #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
-
-files:
-  ~chart: app
-  # image: ghcr.io/socialgouv/docker/nginx:7.0.1
-  imagePackage: files
-  vars:
-    WHITELIST_IP: "94.23.250.213,37.187.27.197,37.187.137.149,217.182.225.117,217.182.225.113,217.182.142.112,51.38.59.32,51.254.44.90"
-    AUTH_PASSWD_FILE: /secrets/basic-auth.passwd
-    TRUSTED_PROXY_IP: "20.74.10.146"
-    FILES_PUBLIC: index-egalite-fh.xlsx,dgt-export-representation.xlsx
-    FILES_RESTRICTED: dgt.xlsx,dgt-representation.xlsx,full.ndjson,indexes.csv
-    ROOT_PATH: /mnt/files
-  containerPort: 8080
-  probesPort: 8080
-  host: "{{ .Values.global.host }}"
-  .ingress.enabled: false
-  volumes:
-    - name: files
-      persistentVolumeClaim:
-        claimName: files
-    - name: nginx-auth
-      secret:
-        secretName: basic-auth
-        items:
-          - key: auth
-            path: basic-auth.passwd
-  replicas: 1 # mandatory because volume is RWO
-  strategyType: Recreate # idem
-  securityContext:
-    fsGroup: 101
-  volumeMounts:
-    - name: files
-      # mountPath: /usr/share/nginx/html
-      mountPath: /mnt/files
-    - name: nginx-auth
-      mountPath: /secrets
 project:
   # whitelist:
   #   # DigDash dev
@@ -147,12 +111,3 @@ project:
   #   # Invenis prod old and new
   #   - "217.182.142.112"
   #   - "51.38.59.32"
-  files:
-    public:
-      - index-egalite-fh.xlsx
-      - dgt-export-representation.xlsx
-    restricted:
-      - dgt.xlsx
-      - dgt-representation.xlsx
-      - full.ndjson
-      - indexes.csv
