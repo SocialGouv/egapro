@@ -55,7 +55,7 @@ export class EntityMap<
     return this._keys.keys();
   }
 
-  public entries(): IterableIterator<[K, V]> {
+  public entries(): MapIterator<[K, V]> {
     const rawEntries = this.rawEntries();
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed in iterator
     const that = this;
@@ -87,7 +87,7 @@ export class EntityMap<
         }
         throw error;
       },
-    };
+    } as unknown as MapIterator<[K, V]>;
   }
 
   public rawEntries(): IterableIterator<[KRaw, V]> {
