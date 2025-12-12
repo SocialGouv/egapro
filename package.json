@@ -12,21 +12,16 @@
     "dev": "scripts/dev",
     "pgadmin": "docker-compose up --build --force-recreate --remove-orphans pgadmin",
     "dev:app": "yarn workspace app run dev",
-    "dev:api": "docker-compose up --build api",
     "dev:maildev": "docker-compose up --build maildev",
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
-    "egapro:local": "packages/api/egapro/bin/egapro",
     "lint": "yarn workspaces foreach -A run lint",
     "fresh-install": "scripts/fresh-install",
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
-    "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
-    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
     "test:app": "yarn --cwd packages/app/ test",
     "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} yarn --cwd packages/app/ test:e2e",
-    "build:app": "yarn --cwd packages/app/ build",
-    "generate-file:dgt": "docker-compose exec api egapro dump-dgt /mnt/dgt.xlsx"
+    "build:app": "yarn --cwd packages/app/ build"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",
