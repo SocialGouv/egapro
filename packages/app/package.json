@@ -2,6 +2,7 @@
   "name": "app",
   "version": "1.21.0",
   "private": true,
+  "inject-workspace-packages": true,
   "scripts": {
     "predev": "only-include-used-icons",
     "dev": "npx next dev",
