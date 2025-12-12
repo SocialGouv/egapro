@@ -1,7 +1,8 @@
 FROM node:20
 WORKDIR /app
 COPY packages/files/package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
 COPY packages/files/index.js packages/files/.htpasswd ./
 CMD [ "node", "index.js" ]
 USER 1000
