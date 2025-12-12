@@ -53,37 +53,6 @@ services:
       MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT:-1025}
     restart: always
 
-  api:
-    image: egapro_api
-    build:
-      context: ./packages/api
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./packages/api:/app
-      - api_egginfos:/app/egapro.egg-info
-      - ./mnt:/mnt
-    environment:
-      SCHEDULER: "True"
-      EGAPRO_SEND_EMAILS: "True"
-      EGAPRO_SMTP_HOST: maildev
-      EGAPRO_SMTP_PORT: ${MAILDEV_SMTP_PORT}
-      EGAPRO_SMTP_LOGIN: ""
-      EGAPRO_SMTP_PASSWORD: ""
-      EGAPRO_SMTP_SSL: ""
-      EGAPRO_TEST_DBHOST: test_db
-      EGAPRO_DBHOST: ${EGAPRO_DBHOST:-db}
-      EGAPRO_DBNAME: ${EGAPRO_DBNAME:-egapro}
-      EGAPRO_DBPORT: ${EGAPRO_DBPORT:-5432}
-      EGAPRO_DBUSER: ${EGAPRO_DBUSER:-postgres}
-      EGAPRO_DBPASS: ${EGAPRO_DBPASS:-postgres}
-      EGAPRO_STAFF: ${EGAPRO_STAFF:-""}
-    ports:
-      - 2626:2626
-    depends_on:
-      - db
-      - test_db
-    restart: always
-
   db:
     restart: always
     image: postgres
@@ -105,8 +74,6 @@ services:
       POSTGRES_DB: test_egapro
     ports:
       - 5436:5432
-    volumes:
-      - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
 
   pgadmin:
     image: dcagatay/pwless-pgadmin4
@@ -173,4 +140,3 @@ volumes:
   pgdata:
   pgadmin:
   redis_data:
-  api_egginfos:

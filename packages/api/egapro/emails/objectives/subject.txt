@@ -1,8 +1,0 @@
-{% if déclaration.index is defined and déclaration.index is not none %}
-{% if déclaration.index >= 75 and déclaration.index < 85 %}
-Déclaration des objectifs de progression de l’index égalité professionnelle femmes-homme
-{% endif %}
-{% if déclaration.index < 75 %}
-Déclaration des objectifs de progression et mesures de correction de l’index égalité professionnelle femmes-hommes
-{% endif %}
-{% endif %}
