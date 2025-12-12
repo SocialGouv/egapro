@@ -2,8 +2,8 @@
 
 set -e
 
-yarn workspaces foreach -A run lint
-yarn workspaces foreach -A run build --no-lint
+pnpm -r run lint
+pnpm -r run build --no-lint
 
 # Tests API
-yarn test:api
+pnpm test:api

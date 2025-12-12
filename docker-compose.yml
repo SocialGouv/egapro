@@ -4,8 +4,8 @@ services:
   files:
     image: egapro_files
     build:
-      context: ./packages/files
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: packages/files/Dockerfile
     volumes:
       - ./packages/files:/app
       - ./mnt:/mnt

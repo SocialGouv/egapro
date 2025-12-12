@@ -2,6 +2,6 @@
 
 set -e
 
-exec yarn concurrently \
+exec pnpm concurrently \
   "docker-compose up --build" \
-  "yarn workspace app run dev"
+  "pnpm --filter app run dev"
