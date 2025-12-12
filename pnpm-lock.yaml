@@ -219,6 +219,9 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.3
         version: 9.0.10
+      '@types/lodash':
+        specifier: ^4.17.7
+        version: 4.17.21
       '@types/mime':
         specifier: ^3.0.1
         version: 3.0.4
