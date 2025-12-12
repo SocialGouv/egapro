@@ -1,32 +1,6 @@
 global:
   host: egapro.travail.gouv.fr
 
-api:
-  autoscale:
-    enabled: true
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1G
-    limits:
-      cpu: 2
-      memory: 2G
-  # env:
-  #   - name: EGAPRO_SENTRY_DSN
-  #     valueFrom:
-  #       secretKeyRef:
-  #         name: sentry
-  #         key: API_SENTRY_DSN
-  envFrom:
-    - secretRef:
-        name: "{{ .Values.global.pgSecretName }}"
-    - secretRef:
-        name: "staff"
-    - secretRef:
-        name: "egapro-secret"
-    - secretRef:
-        name: smtp
-
 app:
   vars:
     MAILER_ENABLE: "True"
@@ -43,8 +17,6 @@ app:
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
-    - secretRef:
-        name: "moncomptepro"
     - secretRef:
         name: "staff"
     - secretRef:

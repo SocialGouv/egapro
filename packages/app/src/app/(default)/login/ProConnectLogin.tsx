@@ -5,12 +5,13 @@ import { signIn } from "next-auth/react";
 export interface ProConnectLoginProps {
   callbackUrl: string;
 }
+
 export const ProConnectLogin = ({ callbackUrl }: ProConnectLoginProps) => (
   <div className="fr-connect-group">
     <button
       onClick={e => {
         e.preventDefault();
-        signIn("moncomptepro", { callbackUrl });
+        signIn("proconnect", { callbackUrl });
       }}
       className="fr-connect"
       role="link"

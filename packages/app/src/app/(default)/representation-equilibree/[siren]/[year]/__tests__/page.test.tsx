@@ -22,9 +22,6 @@ jest.mock("@common/config", () => ({
   config: {
     api: {
       security: {
-        moncomptepro: {
-          appTest: false,
-        },
       },
     },
   },

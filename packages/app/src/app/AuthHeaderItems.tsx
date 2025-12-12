@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
+import { config as appConfig } from "@common/config";
 import { signOut, useSession } from "next-auth/react";
 import { useContext } from "react";
 
@@ -47,40 +48,33 @@ export const UserHeaderItem = () => {
 };
 
 export const LoginLogoutHeaderItem = () => {
-  const session = useSession();
+  const { status } = useSession();
 
-  switch (session.status) {
-    case "authenticated":
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-authenticated-logout"
-          quickAccessItem={{
-            iconId: "fr-icon-lock-unlock-line",
-            buttonProps: {
-              className: fr.cx("fr-btn--secondary"),
-              async onClick(e) {
-                e.preventDefault();
-                await signOut({ callbackUrl: "/" });
-              },
-            },
-            text: "Se déconnecter",
-          }}
-        />
-      );
-
-    default: // loading
-      return (
-        <HeaderQuickAccessItem
-          key="hqai-unauthenticated-login"
-          quickAccessItem={{
-            iconId: "fr-icon-lock-line",
-            linkProps: {
-              href: "/login",
-              className: fr.cx("fr-btn--secondary"),
-            },
-            text: "Se connecter",
-          }}
-        />
-      );
+  if (status === "authenticated") {
+    return (
+      <HeaderQuickAccessItem
+        quickAccessItem={{
+          iconId: "fr-icon-lock-unlock-line",
+          buttonProps: {
+            className: fr.cx("fr-btn--secondary"),
+            onClick: () => signOut({ callbackUrl: "/" }), // ← juste ça
+          },
+          text: "Se déconnecter",
+        }}
+      />
+    );
   }
+
+  return (
+    <HeaderQuickAccessItem
+      quickAccessItem={{
+        iconId: "fr-icon-lock-line",
+        linkProps: {
+          href: "/login",
+          className: fr.cx("fr-btn--secondary"),
+        },
+        text: "Se connecter",
+      }}
+    />
+  );
 };

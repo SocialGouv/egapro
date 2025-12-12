@@ -1,2 +1,0 @@
-UPDATE declaration SET data = jsonb_set(data, '{déclarant,téléphone}', to_jsonb(concat('0', data->'déclarant'->>'téléphone'))) WHERE length(data->'déclarant'->>'téléphone') = 9;
-UPDATE declaration SET data = jsonb_set(data, '{déclarant,téléphone}', to_jsonb(concat('+', data->'déclarant'->>'téléphone'))) WHERE length(data->'déclarant'->>'téléphone') > 10 AND NOT data->'déclarant'->>'téléphone' ~ '^[0+]';

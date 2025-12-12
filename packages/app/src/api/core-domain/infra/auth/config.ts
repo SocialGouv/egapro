@@ -1,5 +1,11 @@
-import { type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
-import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
+import {
+  type ProConnectProfile,
+  ProConnectProvider,
+} from "@api/core-domain/infra/auth/ProConnectProvider";
+import {
+  companiesUtils,
+  type Company,
+} from "@api/core-domain/infra/companies-store";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -9,9 +15,10 @@ import { assertImpersonatedSession } from "@common/core-domain/helpers/impersona
 import { UnexpectedError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
-import jwt, { sign, verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
+import { SignJWT, jwtVerify } from "jose";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
@@ -27,7 +34,6 @@ declare module "next-auth" {
     user: {
       companies: Array<{ label: string | null; siren: string }>;
       companiesHash: string;
-      // For backward compatibility
       email: string;
       firstname?: string;
       lastImpersonated?: Array<{ label: string | null; siren: string }>;
@@ -35,6 +41,7 @@ declare module "next-auth" {
       phoneNumber?: string;
       staff: boolean;
       tokenApiV1: string;
+      idToken?: string;
     };
   }
 
@@ -47,43 +54,19 @@ declare module "next-auth/jwt" {
   }
 }
 
-const charonMcpUrl = new URL(`fabriqueKeycloak/`, config.api.security.auth.charonUrl);
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
-export const monCompteProProvider = ProConnectProvider({
-  ...config.api.security.moncomptepro,
-  ...(config.env !== "prod"
-    ? {
-        wellKnown: new URL(`.well-known/openid-configuration`, charonMcpUrl).toString(),
-      }
-    : {}),
+
+export const proConnectProvider = ProConnectProvider({
+  clientId: config.proconnect.clientId,
+  clientSecret: config.proconnect.clientSecret,
 });
+
 export const authConfig: AuthOptions = {
-  jwt: {
-    async encode({ token, secret }): Promise<string> {
-      // Sign the token using HS256 without encrypting the payload.
-      try {
-        return sign(token as JWT, secret, {
-          algorithm: "HS256",
-        });
-      } catch (error) {
-        logger.error({ error }, "Error while encoding token");
-        throw new Error("Error while encoding token");
-      }
-    },
-    async decode({ token, secret }): Promise<JWT | null> {
-      try {
-        // Verify and decode the token using HS256.
-        return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
-      } catch (error) {
-        logger.error({ error }, "Error while decoding token");
-        return null;
-      }
-    },
-  },
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
     warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
-    info: (code: string, ...message: string[]) => logger.info({ ...message, code }, "Info"),
+    info: (code: string, ...message: string[]) =>
+      logger.info({ ...message, code }, "Info"),
     debug: (code, ...message) => {
       if (config.env === "dev") {
         logger.info({ ...message, code }, "Debug");
@@ -96,22 +79,29 @@ export const authConfig: AuthOptions = {
   pages: {
     signIn: "/login",
     error: "/error?source=login",
+    signOut: "/api/auth/proconnect-logout",
   },
   debug: config.env === "dev",
-  // need a very basic adapter to consider every login as signup
   adapter: egaproNextAuthAdapter,
-  // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
-    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60, // 24 hours in prod and preprod, 7 days in dev
+    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60,
   },
   providers: [
     EmailProvider({
       async sendVerificationRequest({ identifier: to, url }) {
         await globalMailerService.init();
-        const [, rejected] = await globalMailerService.sendMail("login_sendVerificationUrl", { to }, url);
+        const [, rejected] = await globalMailerService.sendMail(
+          "login_sendVerificationUrl",
+          { to },
+          url,
+        );
         if (rejected.length) {
-          throw new UnexpectedError(`Cannot send verification request to email(s) : ${rejected.join(", ")}`);
+          throw new UnexpectedError(
+            `Cannot send verification request to email(s) : ${rejected.join(
+              ", ",
+            )}`,
+          );
         }
       },
     }),
@@ -123,7 +113,10 @@ export const authConfig: AuthOptions = {
               url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
               params: { scope: "user:email read:user read:org" },
             },
-            token: new URL("login/oauth/access_token", charonGithubUrl).toString(),
+            token: new URL(
+              "login/oauth/access_token",
+              charonGithubUrl,
+            ).toString(),
           }
         : {
             authorization: {
@@ -131,228 +124,268 @@ export const authConfig: AuthOptions = {
             },
           }),
     }),
-    monCompteProProvider,
+    proConnectProvider,
   ],
   callbacks: {
     async signIn({ account, profile }) {
-      if (account?.provider !== "github") {
-        return true;
-      }
+      if (account?.provider !== "github") return true;
 
       const githubProfile = profile as unknown as GithubProfile;
-      if (!account.access_token || !githubProfile?.login) {
-        return false;
-      }
+      if (!account.access_token || !githubProfile?.login) return false;
 
-      const octokit = new Octokit({
-        auth: account.access_token,
-      });
-
+      const octokit = new Octokit({ auth: account.access_token });
       try {
         const membership = await octokit.teams.getMembershipForUserInOrg({
           org: "SocialGouv",
           team_slug: "egapro",
           username: githubProfile.login,
         });
-
         return membership.data.state === "active";
       } catch {
         return false;
       }
     },
-    // prefill JWT encoded data with staff and ownership on signup
-    // by design user always "signup" from our pov because we don't save user accounts
+
     async jwt({ token, profile, trigger, account, session }) {
       try {
-        const isStaff = token.user?.staff || token.staff?.impersonating || false;
+        const isStaff =
+          token.user?.staff || token.staff?.impersonating || false;
+
+        if (account?.id_token) {
+          token.idToken = account.id_token;
+        }
 
         if (trigger === "update" && session && isStaff) {
           if (session.staff.impersonating === true) {
-            // staff starts impersonating
             assertImpersonatedSession(session);
             token.user.staff = session.user.staff;
-
-            // Store companies in Redis if available
-            if (session.user.companies) {
-              // Create hash and store companies in Redis
-              token.user.companiesHash = await companiesUtils.hashCompanies(session.user.companies);
-            } else if ("companiesHash" in session.user && session.user.companiesHash) {
-              // Use existing hash
-              token.user.companiesHash = session.user.companiesHash as string;
-            }
-
+            token.user.companiesHash = session.user.companies
+              ? await companiesUtils.hashCompanies(session.user.companies)
+              : session.user.companiesHash ?? "";
             token.staff.impersonating = true;
-
-            // If impersonating, store the current companies for later
             if (session.user.companies) {
-              // Create last impersonated hash and store in Redis
-              const companiesList = session.user.companies as Company[];
-              token.staff.lastImpersonatedHash = await companiesUtils.hashCompanies(companiesList);
+              token.staff.lastImpersonatedHash =
+                await companiesUtils.hashCompanies(
+                  session.user.companies as Company[],
+                );
             }
           } else if (session.staff.impersonating === false) {
-            // staff stops impersonating
             token.user.staff = true;
-            token.user.companiesHash = ""; // Empty hash for no companies
+            token.user.companiesHash = "";
             token.staff.impersonating = false;
           }
         }
+
         if (trigger !== "signUp") return token;
+
         token.user = {
+          companies: [],
           companiesHash: "",
           email: token.email,
           staff: false,
           tokenApiV1: "",
+          firstname: undefined,
+          lastname: undefined,
+          phoneNumber: undefined,
         } as Session["user"];
+
         token.staff = {
           impersonating: false,
           lastImpersonatedHash: "",
         } as Session["staff"];
+
         if (account?.provider === "github") {
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
-          token.user.companiesHash = ""; // Empty hash for no companies
+          token.user.companiesHash = "";
           const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
-          token.user.firstname = firstname;
-          token.user.lastname = lastname;
+          token.user.firstname = firstname || undefined;
+          token.user.lastname = lastname || undefined;
+
         } else if (account?.provider === "email") {
           token.user.staff = config.api.staff.includes(profile?.email ?? "");
           if (token.email && !token.user.staff) {
-            const companies = await ownershipRepo.getAllSirenByEmail(new Email(token.email), token.email);
-            const companiesList = companies.map(siren => ({ label: "", siren }));
-
-            // Create hash and store companies in Redis
-            token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
+            const companies = await ownershipRepo.getAllSirenByEmail(
+              new Email(token.email),
+              token.email,
+            );
+            const companiesList = companies.map((siren) => ({
+              label: "",
+              siren,
+            }));
+            token.user.companiesHash =
+              await companiesUtils.hashCompanies(companiesList);
           } else {
-            token.user.companiesHash = ""; // Empty hash for no companies
+            token.user.companiesHash = "";
           }
+
         } else {
-          const sirenList = profile?.organizations
-            .filter(orga => !!orga)
-            .map(orga => orga.siren || orga.siret.substring(0, 9));
-          if (profile?.email && sirenList) {
+          const proConnectProfile = profile as ProConnectProfile;
+          logger.info({ proConnectProfile }, "Received ProConnect profile after user connection");
+
+          type KeycloakProfile = {
+            organization?: string | string[];
+            siret?: string | string[];
+          };
+
+          const keycloakProfile = profile as ProConnectProfile &
+            KeycloakProfile;
+          let organizations: Array<{
+            label?: string | null;
+            siren?: string;
+            siret?: string;
+          }> = [];
+          if (
+            proConnectProfile.organizations &&
+            Array.isArray(proConnectProfile.organizations)
+          ) {
+            organizations = proConnectProfile.organizations;
+          } else if (keycloakProfile.organization || keycloakProfile.siret) {
+            const org = Array.isArray(keycloakProfile.organization)
+              ? keycloakProfile.organization[0]
+              : keycloakProfile.organization;
+            const siret = Array.isArray(keycloakProfile.siret)
+              ? keycloakProfile.siret[0]
+              : keycloakProfile.siret;
+
+            organizations = [
+              {
+                siren:
+                  typeof siret === "string" ? siret.substring(0, 9) : undefined,
+                siret: typeof siret === "string" ? siret : undefined,
+                label: typeof org === "string" ? org : null,
+              },
+            ];
+          }
+
+          const sirenList = organizations
+            .filter((org) => !!org)
+            .map((org) => org.siren || org.siret?.substring(0, 9))
+            .filter(Boolean) as string[];
+
+          if (proConnectProfile.email && sirenList.length > 0) {
             try {
               const useCase = new SyncOwnership(ownershipRepo);
-              await useCase.execute({ sirens: sirenList, email: profile.email, username: profile.email });
-            } catch (error: unknown) {
+              await useCase.execute({
+                sirens: sirenList,
+                email: proConnectProfile.email,
+                username: proConnectProfile.email,
+              });
+            } catch (error) {
               logger.error({ error }, "Error while syncing ownerships");
             }
           }
-          const companiesList =
-            profile?.organizations
-              .filter(orga => !!orga)
-              .map(orga => ({
-                siren: orga.siren || orga.siret.substring(0, 9),
-                label: orga.label,
-              })) ?? [];
 
-          // Create hash and store companies in Redis
-          token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
+          const companiesList: Company[] = organizations
+            .filter((org) => !!org && (org.siren || org.siret))
+            .map((org) => ({
+              siren: org.siren || (org.siret ? org.siret.substring(0, 9) : ""),
+              label: org.label || null,
+            }))
+            .filter((c) => c.siren) as Company[];
 
-          token.user.staff = config.api.staff.includes(profile?.email ?? "");
-          token.user.firstname = profile?.given_name ?? void 0;
-          token.user.lastname = profile?.family_name ?? void 0;
-          token.user.phoneNumber = profile?.phone_number ?? void 0;
+          token.user.companiesHash =
+            await companiesUtils.hashCompanies(companiesList);
+          token.user.staff = config.api.staff.includes(
+            proConnectProfile.email ?? "",
+          );
+          token.user.firstname = proConnectProfile.given_name ?? undefined;
+          token.user.lastname = proConnectProfile.usual_name ?? undefined;
+          token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
         }
 
-        // Token legacy for usage with API v1.
         token.user.tokenApiV1 = createTokenApiV1(token.email);
 
-        try {
-          const companiesHash = token.user.companiesHash || "";
-
-          logger.info(
-            {
-              companiesHash,
-            },
-            "Companies hash in token",
-          );
-
-          logger.info(
-            {
-              tokenSize: JSON.stringify(token).length,
-            },
-            "Total token size",
-          );
-        } catch (error) {
-          logger.error(
-            {
-              err: error,
-            },
-            "Error while logging token",
-          );
-        }
         return token;
-      } catch (error: unknown) {
-        logger.error(
-          {
-            error,
-          },
-          "Error while creating token",
-        );
+      } catch (error) {
+        logger.error({ error }, "Error while creating token");
         throw new Error("Error while creating token");
       }
     },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("https://fca.integ01.dev-agentconnect.fr/api/v2/logout") ||
+          url.startsWith("https://app.proconnect.gouv.fr/api/v2/logout")) {
+        return url;
+      }
+      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+    },
+
     async session({ session, token }) {
-      session.user = JSON.parse(JSON.stringify(token.user)); // very important ! to avoid token mutation. Else the companies are added to the token and the headers will too big & rejected by nginx
+      session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
+      session.user.idToken = token.idToken as string;
       session.staff = {};
 
-      // Load companies from Redis using the hash if it exists
       if (token.user.companiesHash) {
         try {
-          const companies = await companiesUtils.getCompaniesFromRedis(token.user.companiesHash);
+          const companies = await companiesUtils.getCompaniesFromRedis(
+            token.user.companiesHash,
+          );
           if (companies.length > 0) {
             session.user.companies = companies;
           }
         } catch (error) {
-          logger.error(
-            {
-              error,
-            },
-            "Error loading companies from Redis",
-          );
+          logger.error({ error }, "Error loading companies from Redis");
         }
       }
 
       if (token.user.staff || token.staff.impersonating) {
         session.staff = token.staff;
-
-        // Load last impersonated companies if hash exists
         if (token.staff.lastImpersonatedHash) {
           try {
-            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(token.staff.lastImpersonatedHash);
+            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(
+              token.staff.lastImpersonatedHash,
+            );
             if (lastImpersonated.length > 0) {
-              // For backward compatibility, include the actual companies in the session
               session.user.lastImpersonated = lastImpersonated;
             }
           } catch (error) {
             logger.error(
-              {
-                error,
-              },
-              "Error loading last impersonated companies from Redis",
+              { error },
+              "Error loading last impersonated companies",
             );
           }
         }
       }
+      console.log("session", JSON.stringify(session));
       return session;
     },
   },
+  jwt: {
+  async encode({ token, secret, maxAge }) {
+    const secretAsKey = new TextEncoder().encode(secret as string);
+
+    const jwt = new SignJWT(token ?? {})
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt();
+
+    if (maxAge) {
+      const now = Math.floor(Date.now() / 1000);
+      jwt.setExpirationTime(now + maxAge);
+    }
+
+    return await jwt.sign(secretAsKey);
+  },
+
+  async decode({ token, secret }) {
+    try {
+      const secretAsKey = new TextEncoder().encode(secret as string);
+      const { payload } = await jwtVerify(token as string, secretAsKey, {
+        algorithms: ["HS256"],
+      });
+      return payload as JWT;
+    } catch (error) {
+      logger.error({ error }, "Error while decoding token");
+      return null;
+    }
+  },
+},
 };
 
-/**
- * Create a token in API v1 expected format.
- * See packages/api/egapro/tokens.py@create for further details.
- */
 const createTokenApiV1 = (email: string) => {
-  return jwt.sign(
-    {
-      sub: email,
-    },
-    config.api.security.jwtv1.secret,
-    {
-      algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
-      expiresIn: "24h",
-    },
-  );
+  return jwt.sign({ sub: email }, config.api.security.jwtv1.secret, {
+    algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
+    expiresIn: "24h",
+  });
 };

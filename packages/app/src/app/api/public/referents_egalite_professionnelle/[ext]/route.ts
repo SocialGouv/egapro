@@ -15,7 +15,8 @@ import { NextResponse } from "next/server";
 export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
 
-export const GET: NextRouteHandler<"ext"> = async (_, { params: { ext } }) => {
+export const GET: NextRouteHandler<"ext"> = async (_, { params }) => {
+  const { ext } = await params;
   const useCase = new ExportReferents(referentRepo);
 
   try {

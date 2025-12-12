@@ -3,8 +3,4 @@ apiVersion: v1
 metadata:
   name: egapro
 data:
-  EGAPRO_PROCONNECT_SCOPE: "openid email profile"
-  EGAPRO_PROCONNECT_DISCOVERY_URL: https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas
-  EGAPRO_PROCONNECT_SIGN_IN_URL: https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/control-plane-egapro-preprod
-  EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/account
-  EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: https://keycloak.undercloud.fabrique.social.gouv.fr/realms/atlas/account
+  NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: "https://{{ .Values.global.host }}/api/auth/callback/proconnect"

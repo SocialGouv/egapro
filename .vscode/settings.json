@@ -11,7 +11,7 @@
     "source.fixAll.eslint": "explicit"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
@@ -26,43 +26,30 @@
     "editor.formatOnType": false
   },
   "files.associations": {
-    ".env*": "dotenv",
+    ".env*": "dotenv"
   },
   "vsicons.associations.files": [
     {
       "icon": "tsconfig",
-      "extensions": [
-        "tsconfig.build.json",
-        "tsconfig.paths.json",
-      ],
+      "extensions": ["tsconfig.build.json", "tsconfig.paths.json"],
       "filename": true
     },
     {
       "icon": "todo",
-      "extensions": [
-        "TODO.md",
-      ],
+      "extensions": ["TODO.md"],
       "filename": true
     },
     {
       "icon": "docker",
-      "extensions": [
-        "docker-compose.build.yml",
-      ],
+      "extensions": ["docker-compose.build.yml"],
       "filename": true
-    },
+    }
   ],
   "docker.languageserver.formatter.ignoreMultilineInstructions": true,
-  "python.autoComplete.extraPaths": [
-    "packages/api/"
-  ],
+  "python.autoComplete.extraPaths": ["packages/api/"],
   "python.analysis.autoImportCompletions": true,
   "python.defaultInterpreterPath": "packages/api/venv/bin/python",
   "python.analysis.typeCheckingMode": "off",
-  "python.analysis.extraPaths": [
-    "packages/api/"
-  ],
-  "githubPullRequests.ignoredPullRequestBranches": [
-    "master"
-  ]
+  "python.analysis.extraPaths": ["packages/api/"],
+  "githubPullRequests.ignoredPullRequestBranches": ["master"]
 }
