@@ -1,7 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
@@ -11,10 +10,8 @@ import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { signIn } from "next-auth/react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,12 +31,12 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
 
-  const companies = session.user.companies;
+  const organization = session.user.organization;
 
   const schemaWithOwnedSiren = session.user.staff
     ? createSteps.commencer
     : createSteps.commencer.superRefine((val, ctx) => {
-        if (!companies.some(company => company.siren === val.siren)) {
+        if (!organization) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: OWNER_ERROR,
@@ -53,7 +50,7 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
     handleSubmit,
     setValue,
     reset: resetForm,
-    formState: { errors, isValid },
+    formState: { errors, isValid, },
     setError,
   } = useForm<CommencerFormType>({
     mode: "onChange",
@@ -168,42 +165,12 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
               }}
             />
           ) : (
-            <Select
-              label="Numéro Siren de l’entreprise *"
-              state={errors.siren && "error"}
-              stateRelatedMessage={errors.siren?.message}
-              nativeSelectProps={register("siren")}
-            >
-              <option value="" disabled>
-                Sélectionnez une entreprise
-              </option>
-              {sortBy(companies, "siren").map(company => (
-                <option key={company.siren} value={company.siren}>
-                  {company.siren}
-                  {company.label ? ` (${company.label})` : ""}
-                </option>
-              ))}
-            </Select>
+            <>
+              <label className={fr.cx("fr-label")}>Siren entreprise</label>
+              <p className={fr.cx("fr-mt-1w")}>{session.user?.organization?.siren}
+                    {session.user?.organization?.label ? ` (${session.user?.organization?.label})` : ""}</p>
+            </>
           )}
-          <p>
-            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-            <Link href={`${proconnectHost}`} target="_blank">
-              cliquez ici
-            </Link>
-          </p>
-          <div className={fr.cx("fr-pt-3v")}>
-            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur
-            ce bouton : <br />
-            <Button
-              onClick={e => {
-                e.preventDefault();
-                signIn("proconnect", { redirect: false });
-              }}
-            >
-              <Icon icon="fr-icon-refresh-line" />
-              Rafraichir
-            </Button>
-          </div>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-6w")}
             backProps={{

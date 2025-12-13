@@ -41,7 +41,7 @@ ENV GENERATE_SOURCEMAP=true \
     NODE_ENV=production
 
 # Clean output directory and build with source maps
-RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token); \
+RUN --mount=type=secret,id=sentry export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_TOKEN=' /run/secrets/sentry | cut -d'=' -f2); \
     export NODE_OPTIONS="--max-old-space-size=8192"; \
     export GENERATE_SOURCEMAP=true; \
     export SENTRY_ALLOW_FAILURE=true; \

@@ -2,17 +2,9 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   // TODO optimize deployed output in build mode
   //   output: "standalone",
-  experimental: {
-    // typedRoutes: true, // TODO activate <3
-    // outputFileTracingRoot: path.join(__dirname, "../../"),
-    serverComponentsExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node"],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  serverExternalPackages: ["@react-pdf/renderer", "xlsx", "xlsx", "js-xlsx", "@json2csv/node"],
   webpack: (config, { dev, isServer }) => {
     // Handle font files
     config.module.rules.push({
