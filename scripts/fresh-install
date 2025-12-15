@@ -5,4 +5,4 @@ set -e
 rm -rf node_modules
 rm -rf packages/app/node_modules packages/app/build
 
-yarn
+pnpm install
