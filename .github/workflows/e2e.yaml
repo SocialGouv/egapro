@@ -23,11 +23,13 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-      - name: Cache Cypress binary
+      - name: Cypress binary cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('packages/app/pnpm-lock.yaml') }}
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Cypress
+        run: pnpm --filter app exec cypress install
 
       - name: Load SocialGouv variables
         id: env
