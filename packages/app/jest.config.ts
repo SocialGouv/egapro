@@ -13,9 +13,19 @@ const config = {
   testMatch: ["**/__tests__/**/*?(*.)+(test|spec).[jt]s?(x)"],
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
   testTimeout: 20000,
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  globals: {
+    "ts-jest": {
+      useESM: true,
+      tsconfig: {
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+      },
+    },
+  },
   // Add transformIgnorePatterns to handle ESM modules in node_modules
   transformIgnorePatterns: [
-    "/node_modules/(?!(.pnpm/)?(next|next-auth|@next|jose|openid-client|uuid|@panva|preact|@babel|@swc|@codegouvfr|react-dsfr)/)",
+    "/node_modules/(?!(.pnpm/)?(@codegouvfr[^/]*|react-dsfr|next|next-auth|@next|jose|openid-client|uuid|@panva|preact|@babel|@swc)/)",
   ],
   // Coverage configuration
   collectCoverageFrom: [

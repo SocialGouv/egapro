@@ -11,14 +11,4 @@ if [ "$PRODUCTION" = "" ]; then
 
   ROOT_DIR=$PWD
 
-  # install python package on local laptop (used for running tests from laptop)
-  cd packages/api
-  if [ ! -d venv ]; then
-    python3 -m venv venv
-    set -o allexport
-    source venv/bin/activate
-    ./venv/bin/pip3 install -e .[dev,test,prod]
-  fi
-  cd $ROOT_DIR
-
 fi

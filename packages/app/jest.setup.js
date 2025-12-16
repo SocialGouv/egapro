@@ -1,7 +1,7 @@
-import "@testing-library/jest-dom";
+require("@testing-library/jest-dom");
 
-import { expect, jest } from "@jest/globals";
-import { screen } from "@testing-library/react";
+const { expect } = require("@jest/globals");
+const { screen } = require("@testing-library/react");
 
 global.jest = jest;
 global.expect = expect;
@@ -36,6 +36,13 @@ jest.mock("jose", () => ({
   compactDecrypt: jest.fn(),
 }));
 
+
 console.error = (...args) => {
   return;
 };
+
+// Mock styled-jsx to prevent useInsertionEffect error
+jest.mock('styled-jsx/style', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));

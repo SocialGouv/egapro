@@ -6,9 +6,11 @@ FROM node:$NODE_VERSION AS builder
 
 WORKDIR /app
 
-COPY yarn.lock .yarnrc.yml ./
-COPY .yarn .yarn
-RUN yarn fetch workspaces focus app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install -g pnpm
+RUN mkdir -p packages/app
+COPY packages/app/package.json packages/app/package.json
+RUN pnpm install --frozen-lockfile --filter app
 
 COPY packages/app/ ./packages/app/
 
@@ -45,10 +47,9 @@ RUN --mount=type=secret,id=sentry export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_
     export NODE_OPTIONS="--max-old-space-size=8192"; \
     export GENERATE_SOURCEMAP=true; \
     export SENTRY_ALLOW_FAILURE=true; \
-    yarn workspace app build
+    pnpm --filter app build
 
-RUN yarn workspaces focus app --production && yarn cache clean
-RUN mkdir -p ./packages/app/node_modules
+RUN pnpm --filter app --prod deploy ./prod --legacy && pnpm store prune
 
 
 # Runner
@@ -59,15 +60,14 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-COPY --from=builder /app/packages/app/next.config.js .
-COPY --from=builder /app/packages/app/package.json .
-COPY --from=builder /app/packages/app/.env.production .
-COPY --from=builder /app/packages/app/.env.development .
-COPY --from=builder /app/packages/app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/app/node_modules ./packages/app/node_modules
-COPY --from=builder /app/packages/app/sentry.*.ts .
-COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
+COPY --from=builder /app/prod/next.config.js .
+COPY --from=builder /app/prod/package.json .
+COPY --from=builder /app/prod/.env.production .
+COPY --from=builder /app/prod/.env.development .
+COPY --from=builder /app/prod/public ./public
+COPY --from=builder /app/prod/node_modules ./node_modules
+COPY --from=builder /app/prod/sentry.*.ts .
+COPY --from=builder --chown=node:node /app/prod/.next ./.next
 
 USER 1000
 

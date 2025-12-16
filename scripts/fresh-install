@@ -4,6 +4,5 @@ set -e
 
 rm -rf node_modules
 rm -rf packages/app/node_modules packages/app/build
-rm -rf packages/api/venv packages/api/egapro.egg-info
 
-yarn
+pnpm install

@@ -1,12 +1,3 @@
-api:
-  vars:
-    EGAPRO_SEND_EMAILS: "True"
-    EGAPRO_SMTP_HOST: maildev
-    EGAPRO_SMTP_PORT: "1025"
-    EGAPRO_SMTP_LOGIN: ""
-    EGAPRO_SMTP_PASSWORD: ""
-    EGAPRO_SMTP_SSL: ""
-
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
