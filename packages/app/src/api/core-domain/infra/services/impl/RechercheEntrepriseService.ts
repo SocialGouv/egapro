@@ -1,8 +1,7 @@
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type Siret } from "@common/core-domain/domain/valueObjects/Siret";
-import { type Objectize } from "@common/utils/types";
+import { type CodeNaf } from "@common/models/generated";
 import { StatusCodes } from "http-status-codes";
-import { stringify } from "querystring";
 
 import {
   type BaseInfo,
@@ -18,6 +17,42 @@ import {
 } from "../IEntrepriseService";
 
 const RECHERCHE_ENTREPRISE_URL = new URL("https://recherche-entreprises.api.gouv.fr/");
+
+// API response types
+interface ApiEtablissement {
+  activite_principale?: string;
+  adresse?: string;
+  commune?: string;
+  code_pays_etranger?: string;
+  code_postal?: string;
+  est_siege?: boolean;
+  liste_idcc?: string[];
+  libelle_commune?: string;
+  siret?: string;
+  date_debut_activite?: string;
+  date_creation?: string;
+  nom_commercial?: string;
+  date_fermeture?: string;
+  etat_administratif?: string;
+}
+
+interface ApiUniteLegale {
+  complements?: {
+    liste_idcc?: string[];
+  };
+  activite_principale?: string;
+  caractere_employeur?: string;
+  nature_juridique?: string;
+  date_creation?: string;
+  nombre_etablissements?: number;
+  etat_administratif?: string;
+  nom_complet?: string;
+  nom_raison_sociale?: string;
+  matching_etablissements?: ApiEtablissement[];
+  siren?: string;
+  date_fermeture?: string;
+  siege?: ApiEtablissement;
+}
 
 export class RechercheEntrepriseService implements IEntrepriseService {
   public async search(parameters: SearchParameters): Promise<Entreprise[]> {
@@ -156,15 +191,15 @@ export class RechercheEntrepriseService implements IEntrepriseService {
     }
   }
   
-    private mapToShortEtablissement(etab: any): ShortEtablissement {
+    private mapToShortEtablissement(etab: ApiEtablissement): ShortEtablissement {
       return {
-        activitePrincipaleEtablissement: etab.activite_principale,
+        activitePrincipaleEtablissement: (etab.activite_principale || "") as CodeNaf,
         address: etab.adresse || "",
         codeCommuneEtablissement: etab.commune || "",
         codePaysEtrangerEtablissement: etab.code_pays_etranger,
         codePostalEtablissement: etab.code_postal || "",
         etablissementSiege: etab.est_siege || false,
-        idccs: etab.liste_idcc || [],
+        idccs: etab.liste_idcc?.map(idcc => parseInt(idcc, 10)) || [],
         libelleCommuneEtablissement: etab.libelle_commune || "",
         siret: etab.siret || "",
         // categorieEntreprise optional, skip if not present
@@ -185,14 +220,14 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       };
     }
   
-    private mapToEntreprise(item: any): Entreprise {
-      const conventions = item.complements?.liste_idcc
+    private mapToEntreprise(item: ApiUniteLegale): Entreprise {
+      const conventions: Convention[] = item.complements?.liste_idcc
         ? item.complements.liste_idcc.map(this.mapConvention.bind(this))
         : [];
-  
+
       const base: BaseInfo = {
-        activitePrincipale: item.activite_principale,
-        activitePrincipaleUniteLegale: item.activite_principale,
+        activitePrincipale: item.activite_principale || "",
+        activitePrincipaleUniteLegale: (item.activite_principale || "") as CodeNaf,
         caractereEmployeurUniteLegale: item.caractere_employeur || "N",
         categorieJuridiqueUniteLegale: item.nature_juridique || "",
         conventions,
@@ -206,17 +241,25 @@ export class RechercheEntrepriseService implements IEntrepriseService {
         matching: item.matching_etablissements?.length || 0,
         siren: item.siren || "",
       };
-  
+
       if (item.date_fermeture) {
         base.dateCessation = item.date_fermeture;
       }
-  
-      const allMatchingEtablissements = item.matching_etablissements
+
+      const allMatchingEtablissements: ShortEtablissement[] = item.matching_etablissements
         ? item.matching_etablissements.map(this.mapToShortEtablissement.bind(this))
         : [];
-  
-      const firstMatchingEtablissement = allMatchingEtablissements[0] || this.mapToShortEtablissement(item.siege);
-  
+
+      const firstMatchingEtablissement: ShortEtablissement = allMatchingEtablissements[0] || (item.siege ? this.mapToShortEtablissement(item.siege) : {
+        activitePrincipaleEtablissement: "" as CodeNaf,
+        address: "",
+        codeCommuneEtablissement: "",
+        codePostalEtablissement: "",
+        etablissementSiege: false,
+        libelleCommuneEtablissement: "",
+        siret: "",
+      });
+
       return {
         ...base,
         allMatchingEtablissements,
@@ -224,18 +267,18 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       };
     }
   
-    private mapToEtablissementFromUniteLegale(uniteLegale: any, etabData: any): Etablissement {
+    private mapToEtablissementFromUniteLegale(uniteLegale: ApiUniteLegale, etabData: ApiEtablissement): Etablissement {
       const short = this.mapToShortEtablissement(etabData);
-  
-      const conventions = etabData.liste_idcc
+
+      const conventions: Convention[] = etabData.liste_idcc
         ? etabData.liste_idcc.map(this.mapConvention.bind(this))
         : uniteLegale.complements?.liste_idcc
         ? uniteLegale.complements.liste_idcc.map(this.mapConvention.bind(this))
         : [];
-  
+
       const base: BaseInfo = {
-        activitePrincipale: etabData.activite_principale,
-        activitePrincipaleUniteLegale: uniteLegale.activite_principale,
+        activitePrincipale: etabData.activite_principale || "",
+        activitePrincipaleUniteLegale: (uniteLegale.activite_principale || "") as CodeNaf,
         caractereEmployeurUniteLegale: uniteLegale.caractere_employeur || "N",
         categorieJuridiqueUniteLegale: uniteLegale.nature_juridique || "",
         conventions,
@@ -249,11 +292,11 @@ export class RechercheEntrepriseService implements IEntrepriseService {
         matching: 1,
         siren: uniteLegale.siren || "",
       };
-  
+
       if (etabData.date_fermeture || uniteLegale.date_fermeture) {
         base.dateCessation = etabData.date_fermeture || uniteLegale.date_fermeture;
       }
-  
+
       return {
         ...base,
         ...short,
