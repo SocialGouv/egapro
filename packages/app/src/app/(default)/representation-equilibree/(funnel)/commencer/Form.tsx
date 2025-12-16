@@ -12,7 +12,7 @@ import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +26,7 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
-export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: string; session: Session }) => {
+export const CommencerForm = ({ session }: { session: Session }) => {
   const router = useRouter();
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
@@ -124,6 +124,15 @@ export const CommencerForm = ({ session, proconnectHost }: { proconnectHost: str
       if (session.user.staff) setValue("siren", "");
     }
   };
+
+  useEffect(() => {
+    if (!session.user.staff && session.user?.organization?.siren) {
+      setValue("siren", session.user.organization.siren, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [session.user, setValue]);
 
   return (
     <>
