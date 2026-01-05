@@ -48,7 +48,7 @@ describe("Declaration", () => {
       "Oui",
     );
     cy.selectByLabel("Date de fin de la période de référence choisie pour le calcul des indicateurs *").type(
-      "2024-12-31",
+      "2025-12-31",
     );
     cy.selectByLabel(
       "Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *",
@@ -116,7 +116,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-03-03");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2026-03-03");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Non");
     cy.selectByLabel("Préciser les modalités de communication des résultats obtenus auprès de vos salariés *")
       .clear()
@@ -145,7 +145,7 @@ describe("Declaration", () => {
     // Déclaration progression
     cy.contains("a", "À renseigner").click();
 
-    cy.checkUrl("/index-egapro/objectifs-mesures/817989791/2024");
+    cy.checkUrl("/index-egapro/objectifs-mesures/817989791/2025");
     cy.get("#objectifIndicateurUn").within(() => {
       cy.get("textarea")
         .should("be.visible")
@@ -158,7 +158,7 @@ describe("Declaration", () => {
         .should("not.be.disabled")
         .type("Objectif 10/10 en réduisant l'écart de rémunération entre les hommes et les femmes à moins de 5%");
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-04-10");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-04-10");
     cy.selectByLabel("Préciser les modalités de communication des objectifs de progression auprès de vos salariés.")
       .clear()
       .type("Affichage au sein de l'entreprise");

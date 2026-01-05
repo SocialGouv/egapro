@@ -48,7 +48,7 @@ describe("Declaration", () => {
       "Oui",
     );
     cy.selectByLabel("Date de fin de la période de référence choisie pour le calcul des indicateurs *").type(
-      "2024-12-31",
+      "2025-12-31",
     );
     cy.selectByLabel(
       "Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *",

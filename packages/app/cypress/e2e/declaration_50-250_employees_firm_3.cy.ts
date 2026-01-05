@@ -60,7 +60,7 @@ describe("Declaration", () => {
       "Oui",
     );
     cy.selectByLabel("Date de fin de la période de référence choisie pour le calcul des indicateurs *").type(
-      "2024-12-31",
+      "2025-12-31",
     );
     cy.selectByLabel(
       "Nombre de salariés pris en compte pour le calcul des indicateurs sur la période de référence (en effectif physique) *",
@@ -171,13 +171,13 @@ describe("Declaration", () => {
     // Déclaration progression
     cy.contains("a", "À renseigner").click();
 
-    cy.checkUrl("/index-egapro/objectifs-mesures/983923384/2024");
+    cy.checkUrl("/index-egapro/objectifs-mesures/983923384/2025");
     cy.get("#objectifIndicateurUn").within(() => {
       cy.get("textarea")
         .should("be.visible")
         .should("not.be.disabled")
         .type(
-          "Poursuivre les efforts faits en 2024 pour réduire les écarts de rémunération constatés en faveur des hommes pour des emplois comparables (à compétences, performances et expériences égales) et se rapprocher plus étroitement des 40 points.",
+          "Poursuivre les efforts faits en 2025 pour réduire les écarts de rémunération constatés en faveur des hommes pour des emplois comparables (à compétences, performances et expériences égales) et se rapprocher plus étroitement des 40 points.",
         );
     });
     cy.get("#objectifIndicateurDeuxTrois").within(() => {
