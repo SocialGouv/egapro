@@ -298,7 +298,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
           <GridCol sm={9} className="fr-pb-0">
             <strong>Code NAF</strong>
             <br />
-            {nafCode} - {NAF[nafCode] ? NAF[nafCode].description : ""}
+            {nafCode == "[NON-DIFFUSIBLE]" ? nafCode : `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`}
           </GridCol>
         )}
         <GridCol sm={12}>

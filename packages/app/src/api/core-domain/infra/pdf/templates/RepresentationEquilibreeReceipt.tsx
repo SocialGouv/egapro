@@ -58,7 +58,8 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         },
         {
           key: "Code NAF",
-          value: `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`,
+          value:
+            nafCode == "[NON-DIFFUSIBLE]" ? nafCode : `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`,
         },
         {
           key: "Adresse",

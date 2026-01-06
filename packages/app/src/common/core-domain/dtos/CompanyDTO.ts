@@ -5,7 +5,7 @@ import { type CompanyWorkforceRange } from "../domain/valueObjects/declaration/C
 export type PublicCompanyDTO = {
   countryIsoCode?: CountryIsoCode;
   county?: keyof COUNTIES;
-  nafCode: keyof NAF;
+  nafCode: keyof NAF | "[NON-DIFFUSIBLE]";
   name: string;
   region?: keyof REGIONS;
   siren: string;
