@@ -95,6 +95,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
           etat_administratif: "A",
           nombre_etablissements: 0,
           matching_etablissements: [],
+          activite_principale: "[NON-DIFFUSIBLE]",
           siege: {
             adresse: "[NON-DIFFUSIBLE]",
           },
@@ -156,6 +157,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
           etat_administratif: "A",
           nombre_etablissements: 0,
           matching_etablissements: [],
+          activite_principale: "[NON-DIFFUSIBLE]",
           siege: {
             adresse: "[NON-DIFFUSIBLE]",
           },
