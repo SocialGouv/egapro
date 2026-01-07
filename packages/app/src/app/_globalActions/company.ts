@@ -10,7 +10,7 @@ import { CompanyErrorCodes } from "./companyErrorCodes";
 
 export async function getCompany(siren: string): Promise<ServerActionResponse<Entreprise, CompanyErrorCodes>> {
   // Cache the result for 5 minutes.
-  const moizedGetCompany = moize(entrepriseService.siren, { isPromise: true, maxAge: 5 * 60_000 });
+  const moizedGetCompany = moize((s: Siren) => entrepriseService.siren(s), { isPromise: true, maxAge: 5 * 60_000 });
 
   try {
     return {
