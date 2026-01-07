@@ -294,21 +294,24 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
           <br />
           {siren}
         </GridCol>
-        {nafCode && (
-          <GridCol sm={9} className="fr-pb-0">
-            <strong>Code NAF</strong>
-            <br />
-            {nafCode == "[NON-DIFFUSIBLE]" ? nafCode : `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`}
-          </GridCol>
-        )}
+        <GridCol sm={9} className="fr-pb-0">
+          <strong>Code NAF</strong>
+          <br />
+          {!nafCode ? "[NON-DIFFUSIBLE]" : `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`}
+        </GridCol>
         <GridCol sm={12}>
           <strong>Adresse</strong>
           <br />
           {cleanAddress(city, postalCode, address as string)}
           {postalCodeCity ? `, ${postalCodeCity}` : " "}
-          <br />
-          {countryLib}
         </GridCol>
+        {countryLib && (
+          <GridCol sm={12}>
+            <strong>Pays</strong>
+            <br />
+            {countryLib}
+          </GridCol>
+        )}
       </Grid>
     </>
   ) : (
