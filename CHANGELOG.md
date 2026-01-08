@@ -1,3 +1,11 @@
+# [3.15.0](https://github.com/SocialGouv/egapro/compare/v3.14.0...v3.15.0) (2026-01-08)
+
+
+### Features
+
+* Ouverture des déclarations 2026 ([#2731](https://github.com/SocialGouv/egapro/issues/2731)) ([8ab6cfc](https://github.com/SocialGouv/egapro/commit/8ab6cfc89bdc6351500a4de197708b04977e444c))
+* utilisation de l'api annuaire entreprise ([#2728](https://github.com/SocialGouv/egapro/issues/2728)) ([1bdeca7](https://github.com/SocialGouv/egapro/commit/1bdeca7d853c4b50dc61cc8127b6c5e4628fc9c6))
+
 # [3.14.0](https://github.com/SocialGouv/egapro/compare/v3.13.2...v3.14.0) (2025-12-11)
 
 
