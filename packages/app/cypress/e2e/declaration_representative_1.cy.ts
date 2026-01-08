@@ -47,7 +47,7 @@ describe("Declaration", () => {
     cy.checkUrl("/representation-equilibree/periode-reference");
     cy.selectByLabel(
       "Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts *",
-    ).type("2024-12-31");
+    ).type("2025-12-31");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/ecarts-cadres");

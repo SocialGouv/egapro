@@ -26,8 +26,6 @@ const config = {
     "plugin:import/typescript",
     // include prettier config which avoid conflict
     "prettier",
-    // disable conflicting rules with plugin (not config!)
-    "plugin:prettier/recommended",
   ],
   plugins: ["prettier", "unused-imports", "simple-import-sort", "lodash"],
   ignorePatterns: ["!**/.*.js?(x)", "node_modules"],
@@ -47,7 +45,8 @@ const config = {
         forbid: [
           {
             propName: "style",
-            message: "Utiliser className à la place de style (react-dsfr ou global.css).",
+            message:
+              "Utiliser className à la place de style (react-dsfr ou global.css).",
           },
         ],
       },
@@ -58,7 +57,8 @@ const config = {
         forbid: [
           {
             propName: "style",
-            message: "Utiliser className à la place de style (react-dsfr ou global.css).",
+            message:
+              "Utiliser className à la place de style (react-dsfr ou global.css).",
           },
         ],
       },
@@ -102,17 +102,6 @@ const config = {
     "import/no-duplicates": ["error", { "prefer-inline": true }],
     "sort-import": "off",
     "lodash/import-scope": ["error", "member"],
-    "prettier/prettier": [
-      "error",
-      {
-        tabWidth: 2,
-        trailingComma: "all",
-        printWidth: 120,
-        singleQuote: false,
-        parser: "typescript",
-        arrowParens: "avoid",
-      },
-    ],
   },
   overrides: [
     {
@@ -187,7 +176,11 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)", "src/_pages/**/*.ts?(x)", `src/app/**/+(${nextFiles}).tsx`],
+      files: [
+        "src/pages/**/*.ts?(x)",
+        "src/_pages/**/*.ts?(x)",
+        `src/app/**/+(${nextFiles}).tsx`,
+      ],
       rules: {
         "import/no-default-export": "off",
       },

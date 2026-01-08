@@ -321,6 +321,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
       {cleanAddress(city, postalCode, address as string)}
       {(postalCodeCity || countryLib) && <br />}
       {postalCodeCity}
+      {!countyName && !regionName && (!countryIsoCode || countryIsoCode === "FR") && <br />}
       {countyName && (
         <>
           <br />
