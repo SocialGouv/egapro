@@ -16,7 +16,7 @@
       "description": "Egapro Application",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "secret": "dev-secret-key-for-local-development-only",
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "implicitFlowEnabled": false,
@@ -132,6 +132,54 @@
         "http://localhost:3000/api/auth/callback/proconnect",
         "http://localhost:3001/api/auth/callback/proconnect"
       ]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "proconnect",
+      "providerId": "oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "config": {
+        "clientId": "7a87aa441317d96fe88f99ade82dc160207007c935ffec516d672e2c953174b7",
+        "clientSecret": "98fb3d299822cc764e391243a9c93fcc492b45a0fecacf4a49f0a58606159131",
+        "authorizationUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/authorize",
+        "tokenUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/token",
+        "userInfoUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/userinfo",
+        "clientAuthMethod": "client_secret_post",
+        "logoutUrl": "",
+        "issuer": "https://fca.integ01.dev-agentconnect.fr/api/v2",
+        "defaultScope": "openid email given_name usual_name siret",
+        "prompt": "login",
+        "maxAge": "0",
+        "uiLocales": "",
+        "backchannelSupported": "",
+        "syncMode": "IMPORT",
+        "useJwksUrl": "true",
+        "jwksUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/oidc/.well-known/jwks",
+        "validateSignature": "true",
+        "pkceEnabled": "true",
+        "pkceMethod": "S256",
+        "tokenMinValidity": "10",
+        "forwardParameters": "",
+        "attributeConsumingServiceIndex": "",
+        "attributeConsumingServiceName": "",
+        "attributeList": "",
+        "allowedClockSkew": "0",
+        "loginHint": "",
+        "passLoginHint": "false",
+        "passMaxAge": "false",
+        "acceptsPromptNoneForwardFromClient": "false",
+        "disableUserInfo": "",
+        "filteredByClaims": "",
+        "firstBrokerLoginFlowAlias": "first broker login",
+        "postBrokerLoginFlowAlias": ""
+      }
     }
   ],
   "clientScopes": [
