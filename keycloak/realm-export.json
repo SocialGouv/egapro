@@ -109,27 +109,15 @@
             "claim.name": "siret",
             "jsonType.label": "String"
           }
-        },
-        {
-          "name": "organizations",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-hardcoded-claim-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "organizations",
-            "claim.value": "[{\"id\": 12345, \"is_collectivite_territoriale\": false, \"is_external\": false, \"is_service_public\": true, \"label\": \"Ministère du Travail\", \"siren\": \"123456789\", \"siret\": \"12345678901234\"}]",
-            "jsonType.label": "JSON"
-          }
         }
       ],
       "defaultClientScopes": [
         "web-origins",
         "role_list",
         "roles",
-        "profile",
+        "given_name",
+        "usual_name",
+        "siret",
         "email",
         "phone"
       ],
@@ -354,6 +342,81 @@
           "config": {}
         }
       ]
+    },
+    {
+      "name": "given_name",
+      "description": "Given name scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "firstName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "given_name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "usual_name",
+      "description": "Usual name scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "usual name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lastName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "usual_name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "siret",
+      "description": "Siret scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "siret",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "siret",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "siret",
+            "jsonType.label": "String"
+          }
+        }
+      ]
     }
   ],
   "users": [
@@ -364,7 +427,9 @@
       "firstName": "Test",
       "lastName": "User",
       "email": "test@example.com",
-      "attributes": {},
+      "attributes": {
+        "siret": ["83525644700011"]
+      },
       "credentials": [
         {
           "type": "password",

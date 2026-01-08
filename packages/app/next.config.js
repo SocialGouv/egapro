@@ -2,7 +2,6 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {

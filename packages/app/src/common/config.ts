@@ -156,9 +156,7 @@ export const config = {
       "https://app.proconnect.gouv.fr/manage-organizations",
     ),
     get scope() {
-      return this.issuer.includes("localhost")
-        ? "openid email profile phone"
-        : "openid email given_name usual_name phone_number organizations";
+      return "openid email given_name usual_name siret";
     },
   },
 

@@ -225,6 +225,9 @@ importers:
       '@types/mime':
         specifier: ^3.0.1
         version: 3.0.4
+      '@types/minimatch':
+        specifier: ^6.0.0
+        version: 6.0.0
       '@types/node':
         specifier: ^20.7.0
         version: 20.19.26
