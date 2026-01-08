@@ -42,8 +42,8 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async saveDeclarationOpmcWithIndex(item: DeclarationOpmc): Promise<void> {
     await this.sql.begin(async transac => {
-      const thisRepo = new PostgresDeclarationRepo(transac);
-      const searchRepo = new PostgresDeclarationSearchRepo(transac);
+      const thisRepo = new PostgresDeclarationRepo(transac as unknown as typeof sql);
+      const searchRepo = new PostgresDeclarationSearchRepo(transac as unknown as typeof sql);
       await thisRepo.saveDeclarationOpmc(item);
       await searchRepo.index(item.declaration);
     });
@@ -154,8 +154,8 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async saveWithIndex(item: Declaration): Promise<void> {
     await this.sql.begin(async transac => {
-      const thisRepo = new PostgresDeclarationRepo(transac);
-      const searchRepo = new PostgresDeclarationSearchRepo(transac);
+      const thisRepo = new PostgresDeclarationRepo(transac as unknown as typeof sql);
+      const searchRepo = new PostgresDeclarationSearchRepo(transac as unknown as typeof sql);
       await thisRepo.save(item);
       await searchRepo.index(item);
     });

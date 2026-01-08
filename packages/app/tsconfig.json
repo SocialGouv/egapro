@@ -19,6 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,
     "downlevelIteration": true,
+    "types": ["node", "jest"],
     "plugins": [
       {
         "name": "next"
