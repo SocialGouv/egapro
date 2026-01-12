@@ -5,7 +5,7 @@ import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system"
 
 import styles from "./index.module.css";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   robots: config.env === "prod" ? "index, follow" : "noindex, nofollow",

@@ -20,7 +20,8 @@
     "setup-python": "scripts/postinstall",
     "test:app": "pnpm --filter app test",
     "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app test:e2e",
-    "build:app": "pnpm --filter app build"
+    "build:app": "pnpm --filter app build",
+    "build": "pnpm build:app"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",
