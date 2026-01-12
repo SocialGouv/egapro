@@ -2,6 +2,7 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  turbopack: {},
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
