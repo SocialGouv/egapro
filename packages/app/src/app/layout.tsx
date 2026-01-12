@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 import "./global.css";
 import style from "./root.module.scss";
+import { Providers } from "./providers";
+import "@codegouvfr/react-dsfr/dsfr/dsfr.min.css";
 
 const description =
   "Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression.";
@@ -29,7 +31,7 @@ const RootLayout = ({ children }) => {
         {/* <StartDsfr /> */}
       </head>
       <body>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

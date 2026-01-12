@@ -29,5 +29,9 @@
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
     "semantic-release": "^19"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
 }

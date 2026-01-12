@@ -17,7 +17,7 @@ export const UserHeaderItem = () => {
   let isStaff = false;
   switch (session.status) {
     case "authenticated":
-      isStaff = session.data.user.staff || session.data.staff?.impersonating || false;
+      isStaff = session.data.user?.staff || session.data.staff?.impersonating || false;
       return (
         <HeaderAccountMenu
           staff={isStaff}
