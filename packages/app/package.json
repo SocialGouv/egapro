@@ -4,9 +4,8 @@
   "private": true,
   "inject-workspace-packages": true,
   "scripts": {
-    "predev": "only-include-used-icons",
+    "prebuild": "cp -R node_modules/@codegouvfr/react-dsfr/dsfr/fonts public/dsfr/",
     "dev": "npx next dev",
-    "prebuild": "only-include-used-icons",
     "build": "npx next build",
     "export": "next export",
     "start": "next start",
@@ -25,7 +24,7 @@
     "migrateSimulations": "ts-node --project scripts/tsconfig.json scripts/sql-scripts/migrate-simulations.ts"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "^1.28.0",
+    "@codegouvfr/react-dsfr": "^1.31.0",
     "@formkit/auto-animate": "^0.8.0",
     "@hookform/resolvers": "^3.1.1",
     "@json2csv/node": "^7.0.1",

@@ -10,7 +10,7 @@ export interface DownloadCardProps {
   endDetail: string;
   fileType: string;
   filename: string;
-  href: LinkProps["href"];
+  href: string;
   title: string;
 }
 
@@ -22,11 +22,9 @@ export const DownloadCard = ({ className, desc, endDetail, fileType, filename, h
     linkProps={{
       href: href,
       download: filename,
-      prefetch: false,
-      replace: false,
       target: "_blank",
       type: fileType,
-      rel: "noopener noreferer",
+      rel: "noopener noreferrer",
     }}
     desc={desc}
     iconId="fr-icon-download-line"

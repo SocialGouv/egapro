@@ -34,8 +34,8 @@ importers:
   packages/app:
     dependencies:
       '@codegouvfr/react-dsfr':
-        specifier: ^1.28.0
-        version: 1.28.0
+        specifier: ^1.31.0
+        version: 1.31.0
       '@formkit/auto-animate':
         specifier: ^0.8.0
         version: 0.8.4
@@ -630,8 +630,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@codegouvfr/react-dsfr@1.28.0':
-    resolution: {integrity: sha512-/RnN9KcBPrye/gfd6eK0M8f/Mj/6x+6rmVDE4f5qvPtxeICRX2IuJtkUu6VcMroQLBwtk8uypfjQdSKd5uiuAA==}
+  '@codegouvfr/react-dsfr@1.31.0':
+    resolution: {integrity: sha512-35dl9rLiNnNC/D8avooBXlM+uEROu0ygccr9+6s/NI8eUEsWW5p8X9cJ1uJoWcsTFHOuD6+rtsqNtrxkolua4g==}
     hasBin: true
     peerDependencies:
       '@gouvfr/dsfr-chart': ^1.0.0
@@ -7604,7 +7604,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@codegouvfr/react-dsfr@1.28.0':
+  '@codegouvfr/react-dsfr@1.31.0':
     dependencies:
       tsafe: 1.8.12
       yargs-parser: 21.1.1
