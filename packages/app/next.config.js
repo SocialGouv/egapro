@@ -22,7 +22,7 @@ const nextConfig = {
     if (isServer) {
       config.externals = config.externals || [];
       config.externals.push(({ context, request }, callback) => {
-        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
+        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres", "require-in-the-middle"];
         if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
           return callback(null, `commonjs ${request}`);
         }
@@ -84,3 +84,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
