@@ -7,10 +7,9 @@ import { type SimpleObject } from "@common/utils/types";
 import { AsyncParser } from "@json2csv/node";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import JS_XLSX from "js-xlsx";
 import { groupBy, orderBy, partition } from "lodash";
 import { Readable } from "stream";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 
 import { type IReferentRepo } from "../../repo/IReferentRepo";
 
@@ -97,7 +96,7 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
     const worksheet = convertToWorksheet(json);
     XLSX.utils.book_append_sheet(workbook, worksheet, "Référents EgaPro");
 
-    const buf: Buffer = JS_XLSX.write(workbook, { type: "buffer" });
+    const buf: Buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
     return Readable.from(buf);
   }
 }

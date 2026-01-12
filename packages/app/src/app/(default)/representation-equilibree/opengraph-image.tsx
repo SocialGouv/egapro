@@ -1,4 +1,3 @@
-import { ImgRepresentationEquilibree } from "@design-system";
 import { ImageResponse } from "next/og";
 
 export const alt = "Représentation Équilibrée Egapro";
@@ -8,8 +7,27 @@ export const size = {
 };
 export const contentType = "image/png";
 
-const og = () => {
-  return new ImageResponse(<ImgRepresentationEquilibree />, size);
-};
-
-export default og;
+export default function og() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 40,
+          fontWeight: "bold",
+          letterSpacing: "-0.025em",
+          color: "#000",
+          background: "white",
+        }}
+      >
+        Représentation<br/>Équilibrée<br/>Egapro
+      </div>
+    ),
+    size
+  );
+}
