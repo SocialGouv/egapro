@@ -3,14 +3,12 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   turbopack: {},
+  serverExternalPackages: ["require-in-the-middle"],
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
     // typedRoutes: true, // TODO activate <3
     // outputFileTracingRoot: path.join(__dirname, "../../"),
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   webpack: (config, { dev, isServer }) => {
     // Handle font files
