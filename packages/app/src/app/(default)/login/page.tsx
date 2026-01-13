@@ -34,7 +34,7 @@ const signinErrors: Record<string, string> = {
   default: "Impossible de se connecter.",
 };
 
-const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackUrl" | "error">) => {
+const LoginPage = async ({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; error?: string }> }) => {
   const session = await getServerSession(authConfig);
   const params = await searchParams;
   const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "";

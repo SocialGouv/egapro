@@ -13,9 +13,10 @@ const controlledErrors: Record<string, string | { message: string; source: strin
   },
 };
 
-const ControlledErrorPage = ({ searchParams }: NextServerPageProps<never, "error" | "source">) => {
-  const error = controlledErrors[`${searchParams.error}`];
-  const source = `${searchParams.source}`;
+const ControlledErrorPage = async ({ searchParams }: { searchParams: Promise<Partial<Record<"error" | "source", string | string[]>>> }) => {
+  const sParams = await searchParams;
+  const error = controlledErrors[`${sParams.error}`];
+  const source = `${sParams.source}`;
 
   if (!error) {
     notFound();

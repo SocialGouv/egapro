@@ -33,7 +33,7 @@ export type NextServerPageProps<
   Param extends string = string,
   SearchParams extends z.ZodType | object | string = never,
 > = {
-  params: Record<Param, string>;
+  params: Promise<Record<Param, string>>;
 } & (SearchParamsObject<SearchParams> | SearchParamsString<SearchParams> | SearchParamsZod<SearchParams>);
 
 export type ValidationOptions = {

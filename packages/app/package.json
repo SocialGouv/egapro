@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "cp -R node_modules/@codegouvfr/react-dsfr/dsfr/fonts public/dsfr/",
     "dev": "npx next dev",
-    "build": "npx next build",
+    "build": "npx next build --webpack",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",

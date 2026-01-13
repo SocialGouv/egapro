@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
-const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
+const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: string }> }) => {  const { siren, year: strYear } = await params;
   const year = +strYear;
   const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
 
