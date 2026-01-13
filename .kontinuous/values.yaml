@@ -42,6 +42,8 @@ app:
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     OTEL_NODE_ENABLED_INSTRUMENTATIONS: "http,express,postgres"
+    REDIS_HOST: ""
+    REDIS_PORT: ""
 
 nginx:
   ~chart: app
