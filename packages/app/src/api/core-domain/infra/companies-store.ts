@@ -1,22 +1,13 @@
 import { logger } from "@api/utils/pino";
 import * as crypto from "crypto";
-
-
 export type Company = { label: string | null; siren: string };
-
-// Configure Redis connection based on environment variables or defaults
-
-
-
-
 /**
- * Utilities for hashing and storing company data using Redis
+ * Utilities for hashing company data
  */
 export const companiesUtils = {
   /**
    * Generate a hash for companies array
    * This hash will be stored in the JWT for reference
-   * The actual companies data will be stored in Redis using this hash as key
    */
   async hashCompanies(companies: Company[]): Promise<string> {
     try {
@@ -39,8 +30,4 @@ export const companiesUtils = {
       return "";
     }
   },
-
-
-
-
 };

@@ -20,7 +20,6 @@ app:
     - configMapRef:
         name: egapro
     - secretRef:
-        name: redis-auth
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
@@ -42,8 +41,6 @@ app:
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
-    REDIS_HOST: "redis-master"
-    REDIS_PORT: "6379"
 
 nginx:
   ~chart: app
@@ -91,14 +88,7 @@ nginx:
 pg:
   ~chart: pg
 
-redis:
-  fullnameOverride: redis
-  ~tpl~namespaceOverride: "{{ .Values.global.namespace }}"
-  ~forceRestart: false
-  auth:
-    existingSecret: redis-auth
-    existingSecretPasswordKey: REDIS_PASSWORD
-    usePasswordFiles: false #  Remove when https://github.com/bitnami/charts/pull/32215 is merged
+
 
 files:
   ~chart: app
