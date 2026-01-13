@@ -3,7 +3,6 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   turbopack: {},
-  serverExternalPackages: ["require-in-the-middle"],
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
@@ -17,16 +16,20 @@ const nextConfig = {
       type: "asset/resource",
     });
 
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push(({ context, request }, callback) => {
-        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres", "require-in-the-middle"];
-        if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
-          return callback(null, `commonjs ${request}`);
-        }
-        callback();
-      });
-    }
+      if (isServer) {
+        config.externals = config.externals || [];
+        config.externals.push(({ context, request }, callback) => {
+          // keep large native/non-bundled packages externalized for server build,
+          // but deliberately DO NOT externalize `require-in-the-middle` because
+          // turbowork/runtime may generate pnpm-aliased import ids which won't
+          // exist in the runtime image under that generated name.
+          const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
+          if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        });
+      }
 
     // Configure source maps for production
     if (!isServer && !dev) {
@@ -82,4 +85,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
