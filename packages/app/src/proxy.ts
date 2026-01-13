@@ -135,12 +135,12 @@ const wrappedMiddleware = withAuth(
   },
 );
 
-// Next.js requires both named and default exports for middleware
+// Next.js requires both named and default exports for proxy
 // eslint-disable-next-line import/no-default-export
 export default wrappedMiddleware;
-export const middleware = wrappedMiddleware;
+export const proxy = wrappedMiddleware;
 
-// Config to exclude Sentry tunnel route from middleware
+// Config to exclude Sentry tunnel route from proxy
 export const config = {
   matcher: ["/((?!api/monitoring/envelope).*)"],
 };
