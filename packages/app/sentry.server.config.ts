@@ -2,7 +2,17 @@
 // The config you add here will be used whenever the server handles a request.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
+// Guard import to allow disabling Sentry instrumentation during debugging.
+// When SENTRY_DISABLED=true we avoid importing @sentry/nextjs entirely to
+// prevent build/runtime instrumentation hooks (eg. require-in-the-middle) from
+// being evaluated.
+let Sentry: any = undefined;
+if (process.env.SENTRY_DISABLED === "true") {
+  // Sentry disabled: do not import or initialize
+} else {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  Sentry = require("@sentry/nextjs");
+}
 
 const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
 const IS_PRODUCTION = ENVIRONMENT === "production";

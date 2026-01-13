@@ -20,7 +20,7 @@ const nextConfig = {
       config.externals = config.externals || [];
       config.externals.push(({ context, request }, callback) => {
         // Keep heavy server-only packages external to avoid bundling them into the server build.
-        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
+        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres", "require-in-the-middle"];
         if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
           return callback(null, `commonjs ${request}`);
         }
