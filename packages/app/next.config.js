@@ -2,13 +2,7 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  turbopack: {},
-  // TODO optimize deployed output in build mode
-  //   output: "standalone",
-  experimental: {
-    // typedRoutes: true, // TODO activate <3
-    // outputFileTracingRoot: path.join(__dirname, "../../"),
-  },
+  experimental: {},
   webpack: (config, { dev, isServer }) => {
     // Handle font files
     config.module.rules.push({
