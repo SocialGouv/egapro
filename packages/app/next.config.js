@@ -3,7 +3,6 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   turbopack: {},
-  serverExternalPackages: ["require-in-the-middle"],
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
@@ -20,7 +19,8 @@ const nextConfig = {
     if (isServer) {
       config.externals = config.externals || [];
       config.externals.push(({ context, request }, callback) => {
-        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres", "require-in-the-middle"];
+        // Keep heavy server-only packages external to avoid bundling them into the server build.
+        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
         if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
           return callback(null, `commonjs ${request}`);
         }
@@ -82,4 +82,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
