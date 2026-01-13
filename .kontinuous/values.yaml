@@ -41,6 +41,7 @@ app:
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+    OTEL_NODE_ENABLED_INSTRUMENTATIONS: "http,express,postgres"
 
 nginx:
   ~chart: app
