@@ -4,9 +4,9 @@
   "private": true,
   "inject-workspace-packages": true,
   "scripts": {
-    "prebuild": "cp -R node_modules/@codegouvfr/react-dsfr/dsfr/fonts public/dsfr/",
-    "dev": "npx next dev",
-    "build": "npx next build --webpack",
+    "prebuild": "node scripts/prebuild-dsfr.js",
+    "dev": "npm run prebuild && npx next dev",
+    "build": "npm run prebuild && npx next build --webpack",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",

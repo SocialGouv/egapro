@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { type Session } from "next-auth";
 
@@ -16,13 +17,13 @@ export const HeaderAccountMenu = (props: {
     <nav className="fr-nav fr-pr-4v">
       <ul className="fr-nav__list">
         <li className="fr-nav__item">
-          <button className={cx(fr.cx("fr-btn"), style["account-menu-button"])}>
-            <span
-              className={`${props.staff ? "fr-icon-github-line" : "fr-icon-menu-fill"} fr-pr-2v`}
-              aria-hidden="true"
-            />
+          <Button
+            priority="secondary"
+            iconId="fr-icon-account-fill"
+            className="fr-pr-2v"
+          >
             {`${props.session.data.user.email}${props.staff ? " " : ""}`}
-          </button>
+          </Button>
         </li>
       </ul>
     </nav>

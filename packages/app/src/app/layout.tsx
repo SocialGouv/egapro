@@ -1,5 +1,3 @@
-import "@codegouvfr/react-dsfr/dsfr/dsfr.min.css";
-
 export const dynamic = "force-dynamic";
 import "./global.css";
 import style from "./root.module.scss";
@@ -29,7 +27,10 @@ export const metadata = {
 const RootLayout = ({ children }) => {
   return (
     <html lang="fr" className={style.app}>
-      <head />
+      <head>
+        <link rel="stylesheet" href="/dsfr/dsfr.min.css" />
+        <link rel="stylesheet" href="/dsfr/utility/icons/icons.min.css" />
+      </head>
       <body>
         <DsfrClientInit />
         <Providers>{children}</Providers>
