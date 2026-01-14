@@ -1,6 +1,7 @@
 import { stringify } from "querystring";
 import { StatusCodes } from "http-status-codes";
 
+import { Organization } from "@api/core-domain/infra/auth/ProConnectProvider";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 
@@ -234,4 +235,46 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       .filter(Boolean)
       .join(" ");
   }
+   /* =====================================================
+    * 🏢 Recherche par SIRET pour Organization
+    * ===================================================== */
+   async getOrganizationBySiret(siret: string): Promise<Organization | null> {
+     try {
+       const url = new URL(`${BASE_URL}/etablissement/findbysiret`);
+       url.search = stringify({
+         siret,
+         page: 0,
+       });
+
+       const res = await fetch(url.toString(), {
+         method: "GET",
+         headers: { Accept: "application/json" },
+         cache: "no-store",
+       });
+
+       if (!res.ok) {
+         return null;
+       }
+
+       const data = await res.json() as { content: any[] };
+       const etablissement = data.content[0];
+
+       if (!etablissement) {
+         return null;
+       }
+
+       // Mapper vers Organization
+       return {
+         id: parseInt(etablissement.siret, 10),
+         label: etablissement.raisonsociale || null,
+         siren: etablissement.siren,
+         siret: etablissement.siret,
+         is_collectivite_territoriale: false,
+         is_external: false,
+         is_service_public: false,
+       };
+     } catch (error) {
+       return null;
+     }
+   }
 }

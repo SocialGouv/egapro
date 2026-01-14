@@ -17,49 +17,72 @@ interface Actions {
   setIsEdit(isEdit: boolean): void;
 }
 
-export type RepeqFunnelStore = Actions & State;
+export type RepeqFunnelStore = State & Actions;
 
+/**
+ * 🧠 Store principal (persisté en sessionStorage)
+ */
 export const useRepeqFunnelStore = create<RepeqFunnelStore>()(
   persist(
     immer((set, get) => ({
+      // -------- State --------
+      funnel: undefined,
       isEdit: false,
       _hasHydrated: false,
+
+      // -------- Actions --------
       setIsEdit: isEdit => set({ isEdit }),
-      saveFunnel: funnel =>
+
+      saveFunnel: funnel => {
         set({
           funnel: { ...get().funnel, ...funnel },
-        }),
+        });
+      },
+
       resetFunnel: () =>
         set({
-          funnel: void 0,
+          funnel: undefined,
         }),
-      ...{
-        setHasHydrated(hydrated: boolean) {
-          set({
-            _hasHydrated: hydrated,
-          });
-        },
+
+      // -------- Internal hydration flag --------
+      setHasHydrated(hydrated: boolean) {
+        set({
+          _hasHydrated: hydrated,
+        });
       },
     })),
     {
       name: "repeq-funnel-store",
       storage: createJSONStorage(() => sessionStorage),
+
       onRehydrateStorage: () => state => {
-        (state as Any).setHasHydrated(true);
+        // ⚠️ Zustand appelle ceci APRES hydratation
+        (state as Any)?.setHasHydrated(true);
       },
     },
   ),
 );
 
+/**
+ * ✅ Hook client SAFE
+ * - ne retourne JAMAIS undefined
+ * - ne bloque pas le render
+ * - l’hydratation est gérée via `_hasHydrated`
+ */
 export const useRepeqFunnelClientStore = ((...args: Parameters<typeof useRepeqFunnelStore>) => {
-  const result = useRepeqFunnelStore(...args);
-  const [hasMounted, setMounted] = useState(false);
+  const store = useRepeqFunnelStore(...args);
 
+  // Optionnel : force un render client (évite warnings SSR/CSR)
+  const [, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (hasMounted) return result;
+  return store;
 }) as typeof useRepeqFunnelStore;
 
-export const useRepeqFunnelStoreHasHydrated = () => useRepeqFunnelClientStore(state => state._hasHydrated);
+/**
+ * 🔍 Hook utilitaire pour savoir si le store est prêt
+ */
+export const useRepeqFunnelStoreHasHydrated = () =>
+  useRepeqFunnelStore(state => state._hasHydrated);

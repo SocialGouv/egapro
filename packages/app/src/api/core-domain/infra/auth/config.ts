@@ -9,11 +9,12 @@ import {
   companiesUtils,
   type Company,
 } from "@api/core-domain/infra/companies-store";
+import { entrepriseService } from "@api/core-domain/infra/services";
+import { RechercheEntrepriseService } from "@api/core-domain/infra/services/impl/RechercheEntrepriseService";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
 import { Octokit } from "@octokit/rest";
-import jwt from "jsonwebtoken";
 import { Session, type AuthOptions } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import { SignJWT, jwtVerify } from "jose";
@@ -63,45 +64,7 @@ export const proConnectProvider = ProConnectProvider({
   clientSecret: config.proconnect.clientSecret,
 });
 
-async function fetchWeezEtablissement(siret: string): Promise<Organization | null> {
-  try {
-    const url = `https://dgt.rct01.kleegroup.com/weez/api/public/next/etablissement/findbysiret?siret=${siret}&page=0`;
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
 
-    if (!response.ok) {
-      logger.warn({ siret, status: response.status }, "Weez API error");
-      return null;
-    }
-
-    const data = await response.json() as { content: any[] };
-    const etablissement = data.content[0];
-
-    if (!etablissement) {
-      logger.warn({ siret }, "No etablissement found in Weez response");
-      return null;
-    }
-
-    // Mapper vers ton interface Organization
-    // Note: Certains champs comme is_collectivite_territoriale etc. ne sont pas directs dans Weez
-    // Tu peux les déduire via SIREN/INSEE si besoin, ou les mettre à false par défaut
-    return {
-      id: parseInt(etablissement.siret, 10), // SIRET comme ID numérique
-      label: etablissement.raisonsociale || null, // Raison sociale
-      siren: etablissement.siren,
-      siret: etablissement.siret,
-      is_collectivite_territoriale: false, // À déduire via API INSEE si besoin (ex: type "local authority")
-      is_external: false, // Par défaut, adapte si logique métier
-      is_service_public: false, // Par défaut
-    };
-  } catch (error) {
-    logger.error({ siret, error }, "Weez API fetch failed");
-    return null;
-  }
-}
 
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
@@ -220,7 +183,7 @@ export const authConfig: AuthOptions = {
           logger.info({ proConnectProfile }, "ProConnect profile reçu → enrichissement Weez");
 
           if (proConnectProfile.siret) {
-            const org = await fetchWeezEtablissement(proConnectProfile.siret);
+            const org = await (entrepriseService as RechercheEntrepriseService).getOrganizationBySiret(proConnectProfile.siret);
             if (org) {
               token.user.organization = org;
             }
