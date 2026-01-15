@@ -77,3 +77,4 @@ export const DeclarantForm = ({ session }: { session: Session }) => {
     </FormProvider>
   );
 };
+
