@@ -12,7 +12,7 @@ import { Navigation } from "./Navigation";
 const DefaultLayout = async ({ children }: PropsWithChildren) => {
   return (
     <div className={styles.app}>
-      <Header auth navigation={<Navigation />} />
+      <Header serviceTitle = "Egapro" serviceTagline = "Index de l’égalité professionnelle et représentation équilibrée femmes\u2011hommes" auth navigation={<Navigation />} />
       <main role="main" id="content" className={styles.content}>
         {children}
       </main>

@@ -45,12 +45,13 @@ export interface ShortEtablissement {
   categorieEntreprise?: string;
   codeCommuneEtablissement: string;
   /** COG (Code Officiel Géographique) / Code Insee */
-  codePaysEtrangerEtablissement?: string;
-  codePostalEtablissement: string; // TODO: may be undefined https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/412653180
   etablissementSiege: boolean;
   idccs?: number[];
   libelleCommuneEtablissement: string;
   siret: string;
+  city: string;
+  postalCode: string;
+  countryIsoCode: string;
 }
 
 export interface Etablissement extends BaseInfo, ShortEtablissement {

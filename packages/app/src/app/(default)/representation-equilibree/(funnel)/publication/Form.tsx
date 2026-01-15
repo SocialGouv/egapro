@@ -11,7 +11,7 @@ import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isBefore, isEqual, isValid, parseISO } from "date-fns";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -78,20 +78,21 @@ export const PublicationForm = () => {
   });
 
   useEffect(() => {
-    if (!funnel?.endOfPeriod) redirect("/representation-equilibree/commencer");
+    if (!funnel?.endOfPeriod || !funnel?.year) {
+      router.push("/representation-equilibree/commencer");
+      return;
+    }
 
     if ("publishUrl" in funnel) {
       setHasWebsite(true);
     } else if ("publishModalities" in funnel) {
       setHasWebsite(false);
     }
-  }, [funnel]);
+  }, [funnel, router]);
 
   if (!hydrated) {
     return <SkeletonForm fields={3} />;
   }
-
-  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
 
   const onSubmit = async (data: PublicationFormType) => {
     if (!funnel) return;

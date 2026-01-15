@@ -1,3 +1,5 @@
+// packages/app/src/api/core-domain/infra/auth/config.ts
+
 import {
   type ProConnectProfile,
   ProConnectProvider,
@@ -6,24 +8,22 @@ import {
   companiesUtils,
   type Company,
 } from "@api/core-domain/infra/companies-store";
-import { globalMailerService } from "@api/core-domain/infra/mail";
-import { ownershipRepo } from "@api/core-domain/repo";
-import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
+import { entrepriseService } from "@api/core-domain/infra/services";
+import { type Etablissement, type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
-import { UnexpectedError } from "@common/shared-domain";
-import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
-import jwt from "jsonwebtoken";
-import { type AuthOptions, type Session } from "next-auth";
+import { Session, type AuthOptions } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
 import { SignJWT, jwtVerify } from "jose";
-import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
 
+// === DÉCLARATIONS DE TYPES ===
 declare module "next-auth" {
   interface Session {
     staff: {
@@ -32,20 +32,23 @@ declare module "next-auth" {
       lastImpersonatedHash?: string;
     };
     user: {
-      companies: Array<{ label: string | null; siren: string }>;
-      companiesHash: string;
+      entreprise?: Etablissement;
       email: string;
       firstname?: string;
-      lastImpersonated?: Array<{ label: string | null; siren: string }>;
       lastname?: string;
       phoneNumber?: string;
       staff: boolean;
       tokenApiV1: string;
       idToken?: string;
+      siret?: string; // Optionnel, pour debug
+      siren?: string;
+      lastImpersonated?: Array<{ label: string | null; siren: string }>;
     };
   }
 
-  interface Profile extends ProConnectProfile {}
+  interface Profile extends ProConnectProfile {
+    entreprise?: Entreprise;
+  }
 }
 
 declare module "next-auth/jwt" {
@@ -54,13 +57,18 @@ declare module "next-auth/jwt" {
   }
 }
 
+// === URLs CHARON ===
 const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 
+// === PROCONNECT PROVIDER (déjà enrichi avec Weez) ===
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
 });
 
+
+
+// === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
@@ -68,11 +76,8 @@ export const authConfig: AuthOptions = {
     info: (code: string, ...message: string[]) =>
       logger.info({ ...message, code }, "Info"),
     debug: (code, ...message) => {
-      if (config.env === "dev") {
-        logger.info({ ...message, code }, "Debug");
-      } else {
-        logger.debug({ ...message, code }, "Debug");
-      }
+      if (config.env === "dev") logger.info({ ...message, code }, "Debug");
+      else logger.debug({ ...message, code }, "Debug");
     },
   },
   secret: config.api.security.auth.secret,
@@ -83,28 +88,8 @@ export const authConfig: AuthOptions = {
   },
   debug: config.env === "dev",
   adapter: egaproNextAuthAdapter,
-  session: {
-    strategy: "jwt",
-    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60,
-  },
+  session: { strategy: "jwt", maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60 },
   providers: [
-    EmailProvider({
-      async sendVerificationRequest({ identifier: to, url }) {
-        await globalMailerService.init();
-        const [, rejected] = await globalMailerService.sendMail(
-          "login_sendVerificationUrl",
-          { to },
-          url,
-        );
-        if (rejected.length) {
-          throw new UnexpectedError(
-            `Cannot send verification request to email(s) : ${rejected.join(
-              ", ",
-            )}`,
-          );
-        }
-      },
-    }),
     GithubProvider({
       ...config.api.security.github,
       ...(config.env !== "prod"
@@ -118,11 +103,7 @@ export const authConfig: AuthOptions = {
               charonGithubUrl,
             ).toString(),
           }
-        : {
-            authorization: {
-              params: { scope: "user:email read:user read:org" },
-            },
-          }),
+        : { authorization: { params: { scope: "user:email read:user read:org" } } }),
     }),
     proConnectProvider,
   ],
@@ -147,21 +128,19 @@ export const authConfig: AuthOptions = {
     },
 
     async jwt({ token, profile, trigger, account, session }) {
-      try {
         const isStaff =
           token.user?.staff || token.staff?.impersonating || false;
 
+        // Store ID token for logout (available during initial sign in)
         if (account?.id_token) {
           token.idToken = account.id_token;
         }
 
+        // === IMPERSONATION ===
         if (trigger === "update" && session && isStaff) {
           if (session.staff.impersonating === true) {
             assertImpersonatedSession(session);
             token.user.staff = session.user.staff;
-            token.user.companiesHash = session.user.companies
-              ? await companiesUtils.hashCompanies(session.user.companies)
-              : session.user.companiesHash ?? "";
             token.staff.impersonating = true;
             if (session.user.companies) {
               token.staff.lastImpersonatedHash =
@@ -171,16 +150,15 @@ export const authConfig: AuthOptions = {
             }
           } else if (session.staff.impersonating === false) {
             token.user.staff = true;
-            token.user.companiesHash = "";
             token.staff.impersonating = false;
           }
         }
 
         if (trigger !== "signUp") return token;
 
+        // === INITIALISATION COMPLÈTE ===
         token.user = {
-          companies: [],
-          companiesHash: "",
+          company: undefined,
           email: token.email,
           staff: false,
           tokenApiV1: "",
@@ -194,120 +172,38 @@ export const authConfig: AuthOptions = {
           lastImpersonatedHash: "",
         } as Session["staff"];
 
+        // === GITHUB ===
         if (account?.provider === "github") {
           const githubProfile = profile as unknown as GithubProfile;
           token.user.staff = true;
-          token.user.companiesHash = "";
           const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
           token.user.firstname = firstname || undefined;
           token.user.lastname = lastname || undefined;
 
-        } else if (account?.provider === "email") {
-          token.user.staff = config.api.staff.includes(profile?.email ?? "");
-          if (token.email && !token.user.staff) {
-            const companies = await ownershipRepo.getAllSirenByEmail(
-              new Email(token.email),
-              token.email,
-            );
-            const companiesList = companies.map((siren) => ({
-              label: "",
-              siren,
-            }));
-            token.user.companiesHash =
-              await companiesUtils.hashCompanies(companiesList);
-          } else {
-            token.user.companiesHash = "";
-          }
-
         } else {
           const proConnectProfile = profile as ProConnectProfile;
-          logger.info({ proConnectProfile }, "Received ProConnect profile after user connection");
+          logger.info({ proConnectProfile }, "ProConnect profile reçu → enrichissement Weez");
 
-          type KeycloakProfile = {
-            organization?: string | string[];
-            siret?: string | string[];
-          };
-
-          const keycloakProfile = profile as ProConnectProfile &
-            KeycloakProfile;
-          let organizations: Array<{
-            label?: string | null;
-            siren?: string;
-            siret?: string;
-          }> = [];
-          if (
-            proConnectProfile.organizations &&
-            Array.isArray(proConnectProfile.organizations)
-          ) {
-            organizations = proConnectProfile.organizations;
-          } else if (keycloakProfile.organization || keycloakProfile.siret) {
-            const org = Array.isArray(keycloakProfile.organization)
-              ? keycloakProfile.organization[0]
-              : keycloakProfile.organization;
-            const siret = Array.isArray(keycloakProfile.siret)
-              ? keycloakProfile.siret[0]
-              : keycloakProfile.siret;
-
-            organizations = [
-              {
-                siren:
-                  typeof siret === "string" ? siret.substring(0, 9) : undefined,
-                siret: typeof siret === "string" ? siret : undefined,
-                label: typeof org === "string" ? org : null,
-              },
-            ];
-          }
-
-          const sirenList = organizations
-            .filter((org) => !!org)
-            .map((org) => org.siren || org.siret?.substring(0, 9))
-            .filter(Boolean) as string[];
-
-          if (proConnectProfile.email && sirenList.length > 0) {
+          if (proConnectProfile.siret) {
             try {
-              const useCase = new SyncOwnership(ownershipRepo);
-              await useCase.execute({
-                sirens: sirenList,
-                email: proConnectProfile.email,
-                username: proConnectProfile.email,
-              });
+              const etablissement = await entrepriseService.siret(new Siret(proConnectProfile.siret));
+              token.user.entreprise = etablissement;
             } catch (error) {
-              logger.error({ error }, "Error while syncing ownerships");
+              logger.warn({ siret: proConnectProfile.siret, error }, "Failed to fetch organization for siret");
             }
           }
 
-          const companiesList: Company[] = organizations
-            .filter((org) => !!org && (org.siren || org.siret))
-            .map((org) => ({
-              siren: org.siren || (org.siret ? org.siret.substring(0, 9) : ""),
-              label: org.label || null,
-            }))
-            .filter((c) => c.siren) as Company[];
-
-          token.user.companiesHash =
-            await companiesUtils.hashCompanies(companiesList);
-          token.user.staff = config.api.staff.includes(
-            proConnectProfile.email ?? "",
-          );
+          token.user.staff = config.api.staff.includes(proConnectProfile.email ?? "");
           token.user.firstname = proConnectProfile.given_name ?? undefined;
           token.user.lastname = proConnectProfile.usual_name ?? undefined;
           token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
+          token.user.siret = proConnectProfile.siret ?? undefined;
         }
-
-        token.user.tokenApiV1 = createTokenApiV1(token.email);
-
         return token;
-      } catch (error) {
-        logger.error({ error }, "Error while creating token");
-        throw new Error("Error while creating token");
-      }
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("https://fca.integ01.dev-agentconnect.fr/api/v2/logout") ||
-          url.startsWith("https://app.proconnect.gouv.fr/api/v2/logout")) {
-        return url;
-      }
+      if (url.includes("/api/v2/logout")) return url;
       return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
     },
 
@@ -315,77 +211,31 @@ export const authConfig: AuthOptions = {
       session.user = JSON.parse(JSON.stringify(token.user));
       session.user.email = token.email;
       session.user.idToken = token.idToken as string;
-      session.staff = {};
-
-      if (token.user.companiesHash) {
-        try {
-          const companies = await companiesUtils.getCompaniesFromRedis(
-            token.user.companiesHash,
-          );
-          if (companies.length > 0) {
-            session.user.companies = companies;
-          }
-        } catch (error) {
-          logger.error({ error }, "Error loading companies from Redis");
-        }
-      }
-
-      if (token.user.staff || token.staff.impersonating) {
-        session.staff = token.staff;
-        if (token.staff.lastImpersonatedHash) {
-          try {
-            const lastImpersonated = await companiesUtils.getCompaniesFromRedis(
-              token.staff.lastImpersonatedHash,
-            );
-            if (lastImpersonated.length > 0) {
-              session.user.lastImpersonated = lastImpersonated;
-            }
-          } catch (error) {
-            logger.error(
-              { error },
-              "Error loading last impersonated companies",
-            );
-          }
-        }
-      }
-      console.log("session", JSON.stringify(session));
+      session.user.siret = token.user.siret;
+      session.user.siren = token.user.entreprise?.siren;
+      session.user.entreprise = token.user.entreprise;
       return session;
     },
   },
+
+
+
   jwt: {
-  async encode({ token, secret, maxAge }) {
-    const secretAsKey = new TextEncoder().encode(secret as string);
-
-    const jwt = new SignJWT(token ?? {})
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt();
-
-    if (maxAge) {
-      const now = Math.floor(Date.now() / 1000);
-      jwt.setExpirationTime(now + maxAge);
-    }
-
-    return await jwt.sign(secretAsKey);
-  },
-
-  async decode({ token, secret }) {
-    try {
+    async encode({ token, secret, maxAge }) {
       const secretAsKey = new TextEncoder().encode(secret as string);
-      const { payload } = await jwtVerify(token as string, secretAsKey, {
-        algorithms: ["HS256"],
-      });
-      return payload as JWT;
-    } catch (error) {
-      logger.error({ error }, "Error while decoding token");
-      return null;
-    }
+      const jwt = new SignJWT(token ?? {}).setProtectedHeader({ alg: "HS256" }).setIssuedAt();
+      if (maxAge) jwt.setExpirationTime(Math.floor(Date.now() / 1000) + maxAge);
+      return await jwt.sign(secretAsKey);
+    },
+    async decode({ token, secret }) {
+      try {
+        const secretAsKey = new TextEncoder().encode(secret as string);
+        const { payload } = await jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] });
+        return payload as JWT;
+      } catch (error) {
+        logger.error({ error }, "Erreur décodage token");
+        return null;
+      }
+    },
   },
-},
-};
-
-const createTokenApiV1 = (email: string) => {
-  return jwt.sign({ sub: email }, config.api.security.jwtv1.secret, {
-    algorithm: config.api.security.jwtv1.algorithm as jwt.Algorithm,
-    expiresIn: "24h",
-  });
 };

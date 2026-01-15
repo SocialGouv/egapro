@@ -8,14 +8,14 @@ export const getAdditionalMeta = (company: Entreprise) => {
     : undefined;
   const regionCode = countyCode ? COUNTY_TO_REGION[countyCode] : null;
   const postalCode =
-    company.firstMatchingEtablissement.codePostalEtablissement &&
-    !company.firstMatchingEtablissement.codePostalEtablissement.includes("[ND]")
-      ? company.firstMatchingEtablissement.codePostalEtablissement
+    company.firstMatchingEtablissement.postalCode &&
+    !company.firstMatchingEtablissement.postalCode.includes("[ND]")
+      ? company.firstMatchingEtablissement.postalCode
       : undefined;
   const address = postalCode
     ? company.firstMatchingEtablissement.address.split(postalCode)[0].trim()
     : company.firstMatchingEtablissement.address;
-  const countryCodeCOG = company.firstMatchingEtablissement.codePaysEtrangerEtablissement ?? DEFAULT_COUNTRY_COG;
+  const countryCodeCOG = company.firstMatchingEtablissement.countryIsoCode === "FR" ? DEFAULT_COUNTRY_COG : "99100";
 
   return {
     countyCode,

@@ -139,8 +139,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
         email: item.email!,
         siren: item.siren!,
       });
-      const ownershipRepo = new PostgresOwnershipRepo(transac);
-      const thisRepo = new PostgresOwnershipRequestRepo(transac);
+      const ownershipRepo = new PostgresOwnershipRepo(transac as unknown as typeof sql);
+      const thisRepo = new PostgresOwnershipRequestRepo(transac as unknown as typeof sql);
       await ownershipRepo.save(ownership);
       await thisRepo.update(item);
     });
@@ -157,8 +157,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
               siren: item.siren!,
             }),
         );
-      const ownershipRepo = new PostgresOwnershipRepo(transac);
-      const thisRepo = new PostgresOwnershipRequestRepo(transac);
+      const ownershipRepo = new PostgresOwnershipRepo(transac as unknown as typeof sql);
+      const thisRepo = new PostgresOwnershipRequestRepo(transac as unknown as typeof sql);
 
       if (ownerships.length) await ownershipRepo.saveBulk(...ownerships);
       await thisRepo.updateBulk(...items);

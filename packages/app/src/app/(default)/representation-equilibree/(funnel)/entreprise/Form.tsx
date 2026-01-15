@@ -1,34 +1,34 @@
 "use client";
 
-import { type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
+import { type Etablissement } from "@api/core-domain/infra/services/IEntrepriseService";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
-import { getAdditionalMeta } from "@common/core-domain/helpers/entreprise";
-import { COUNTRIES_COG_TO_ISO } from "@common/dict";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { BackNextButtonsGroup, FormLayout, RecapCard, RecapCardCompany } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
-import { getCompany } from "@globalActions/company";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { type Session } from "next-auth";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
-export const EntrepriseForm = () => {
-  const [company, setCompany] = useState<Entreprise | null>(null);
+export const EntrepriseForm = ({session} : {session: Session}) => {
+  const router = useRouter();
+  const [company, setCompany] = useState<Etablissement | null>(null);
   const funnel = useRepeqFunnelStore(state => state.funnel);
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
-    if (funnel?.siren && !company) {
-      getCompany(funnel.siren).then(company => {
-        if (company.ok) {
-          setCompany(company.data);
-        } else {
-          throw new Error(`Could not fetch company with siren ${funnel.siren} (code ${company.error})`);
-        }
-      });
+    if (hydrated && !funnel?.siren) {
+      router.push("/representation-equilibree/commencer");
+      return;
     }
-  }, [funnel, company]);
+
+    if (funnel?.siren && session.user.entreprise?.siren === funnel.siren) {
+      setCompany(session.user.entreprise);
+    } else {
+      setCompany(null);
+    }
+  }, [funnel, session.user.entreprise, hydrated, router]);
 
   if (!hydrated || !company) {
     return (
@@ -38,21 +38,13 @@ export const EntrepriseForm = () => {
     );
   }
 
-  if (hydrated && !funnel?.siren) {
-    return redirect("/representation-equilibree/commencer");
-  }
-
-  const { address, countryCodeCOG, postalCode } = getAdditionalMeta(company);
-
   const companyDto: CompanyDTO = {
-    address: address?.includes("[ND]") ? "Information non diffusible" : address,
-    city: company.firstMatchingEtablissement.libelleCommuneEtablissement?.includes("[ND]")
-      ? ""
-      : company.firstMatchingEtablissement.libelleCommuneEtablissement || "",
-    countryIsoCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
-    nafCode: company.activitePrincipaleUniteLegale,
-    name: company.simpleLabel,
-    postalCode: postalCode?.includes("[ND]") ? "" : postalCode,
+    address: company.address,
+    city: company.city,
+    countryIsoCode: company.countryIsoCode as any,
+    nafCode: company.activitePrincipaleUniteLegale as any,
+    name: company.simpleLabel || "",
+    postalCode: company.postalCode,
     siren: company.siren,
   };
 

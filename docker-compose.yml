@@ -20,27 +20,6 @@ services:
       - 8080:8080
     restart: always
 
-  redis-init:
-    image: node:18-alpine
-    depends_on:
-      - redis
-    volumes:
-      - ./scripts:/scripts
-    working_dir: /scripts
-    command: sh -c "npm install ioredis crypto && node populate-redis.js"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    restart: on-failure
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    restart: always
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
 
   maildev:
     image: djfarrelly/maildev
@@ -139,4 +118,3 @@ services:
 volumes:
   pgdata:
   pgadmin:
-  redis_data:

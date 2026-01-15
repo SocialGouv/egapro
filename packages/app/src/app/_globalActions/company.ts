@@ -9,8 +9,7 @@ import moize from "moize";
 import { CompanyErrorCodes } from "./companyErrorCodes";
 
 export async function getCompany(siren: string): Promise<ServerActionResponse<Entreprise, CompanyErrorCodes>> {
-  // Cache the result for 5 minutes.
-  const moizedGetCompany = moize(entrepriseService.siren, { isPromise: true, maxAge: 5 * 60_000 });
+  const moizedGetCompany = moize(entrepriseService.siren.bind(entrepriseService), { isPromise: true, maxAge: 5 * 60_000 });
 
   try {
     return {
@@ -18,7 +17,6 @@ export async function getCompany(siren: string): Promise<ServerActionResponse<En
       ok: true,
     };
   } catch (error: unknown) {
-    console.log("Error in getCompany", error);
     return {
       ok: false,
       error: error instanceof EntrepriseServiceNotFoundError ? CompanyErrorCodes.NOT_FOUND : CompanyErrorCodes.UNKNOWN,
