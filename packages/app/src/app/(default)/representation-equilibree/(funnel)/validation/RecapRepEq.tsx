@@ -17,7 +17,7 @@ import { RecapCard } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 
 import { times } from "lodash";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type ZodError } from "zod";
 import { type Session } from "next-auth";
@@ -40,6 +40,11 @@ export const ValidationRecapRepEq = ({ session }: { session: Session }) => {
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
+    if (hydrated && !funnel?.siren) {
+      router.push("/representation-equilibree/commencer");
+      return;
+    }
+
     if (funnel?.siren && session.user.entreprise?.siren === funnel.siren) {
       // Construct Entreprise from Etablissement
       const etab = session.user.entreprise;
@@ -74,11 +79,7 @@ export const ValidationRecapRepEq = ({ session }: { session: Session }) => {
       };
       setCompany(entreprise);
     }
-  }, [funnel, session.user.entreprise]);
-
-  if (hydrated && !funnel?.siren) {
-    return redirect("/representation-equilibree/commencer");
-  }
+  }, [funnel, session.user.entreprise, hydrated, router]);
   if (!hydrated || !company) {
     return (
       <>

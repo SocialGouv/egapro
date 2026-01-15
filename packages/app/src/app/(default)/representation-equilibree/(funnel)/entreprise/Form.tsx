@@ -5,24 +5,30 @@ import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { BackNextButtonsGroup, FormLayout, RecapCard, RecapCardCompany } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type Session } from "next-auth";
 
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 export const EntrepriseForm = ({session} : {session: Session}) => {
+  const router = useRouter();
   const [company, setCompany] = useState<Etablissement | null>(null);
   const funnel = useRepeqFunnelStore(state => state.funnel);
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
+    if (hydrated && !funnel?.siren) {
+      router.push("/representation-equilibree/commencer");
+      return;
+    }
+
     if (funnel?.siren && session.user.entreprise?.siren === funnel.siren) {
       setCompany(session.user.entreprise);
     } else {
       setCompany(null);
     }
-  }, [funnel, session.user.entreprise]);
+  }, [funnel, session.user.entreprise, hydrated, router]);
 
   if (!hydrated || !company) {
     return (
@@ -30,10 +36,6 @@ export const EntrepriseForm = ({session} : {session: Session}) => {
         <RecapCard title={<SkeletonFlex />} content={<Skeleton count={6} />} />
       </FormLayout>
     );
-  }
-
-  if (hydrated && !funnel?.siren) {
-    return redirect("/representation-equilibree/commencer");
   }
 
   const companyDto: CompanyDTO = {

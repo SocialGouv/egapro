@@ -9,7 +9,7 @@ import { BackNextButtonsGroup, FormLayout } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -68,7 +68,16 @@ export const PeriodeReferenceForm = () => {
     router.push("/representation-equilibree/ecarts-cadres");
   };
 
-  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
+  useEffect(() => {
+    if (funnel?.siren) setValue("siren", funnel.siren);
+    if (funnel?.year) setValue("year", funnel.year);
+  }, [funnel?.siren, funnel?.year, setValue]);
+
+  useEffect(() => {
+    if (hydrated && !funnel?.year) {
+      router.push("/representation-equilibree/commencer");
+    }
+  }, [hydrated, funnel?.year, router]);
 
   return (
     <>
