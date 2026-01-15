@@ -1,7 +1,7 @@
 // packages/app/src/api/core-domain/infra/auth/config.ts
 
 import {
-  Organization,
+  Entreprise,
   type ProConnectProfile,
   ProConnectProvider,
 } from "@api/core-domain/infra/auth/ProConnectProvider";
@@ -10,7 +10,8 @@ import {
   type Company,
 } from "@api/core-domain/infra/companies-store";
 import { entrepriseService } from "@api/core-domain/infra/services";
-import { RechercheEntrepriseService } from "@api/core-domain/infra/services/impl/RechercheEntrepriseService";
+import { type Etablissement } from "@api/core-domain/infra/services/IEntrepriseService";
+import { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
@@ -31,7 +32,7 @@ declare module "next-auth" {
       lastImpersonatedHash?: string;
     };
     user: {
-      organization?: Organization;
+      entreprise?: Etablissement;
       email: string;
       firstname?: string;
       lastname?: string;
@@ -40,12 +41,13 @@ declare module "next-auth" {
       tokenApiV1: string;
       idToken?: string;
       siret?: string; // Optionnel, pour debug
+      siren?: string;
       lastImpersonated?: Array<{ label: string | null; siren: string }>;
     };
   }
 
   interface Profile extends ProConnectProfile {
-    organization?: Organization;
+    entreprise?: Entreprise;
   }
 }
 
@@ -183,9 +185,11 @@ export const authConfig: AuthOptions = {
           logger.info({ proConnectProfile }, "ProConnect profile reçu → enrichissement Weez");
 
           if (proConnectProfile.siret) {
-            const org = await (entrepriseService as RechercheEntrepriseService).getOrganizationBySiret(proConnectProfile.siret);
-            if (org) {
-              token.user.organization = org;
+            try {
+              const etablissement = await entrepriseService.siret(new Siret(proConnectProfile.siret));
+              token.user.entreprise = etablissement;
+            } catch (error) {
+              logger.warn({ siret: proConnectProfile.siret, error }, "Failed to fetch organization for siret");
             }
           }
 
@@ -195,7 +199,6 @@ export const authConfig: AuthOptions = {
           token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
           token.user.siret = proConnectProfile.siret ?? undefined;
         }
-        console.log("JWT", JSON.stringify(token.user))
         return token;
     },
 
@@ -209,8 +212,8 @@ export const authConfig: AuthOptions = {
       session.user.email = token.email;
       session.user.idToken = token.idToken as string;
       session.user.siret = token.user.siret;
-      session.user.organization = token.user.organization;
-
+      session.user.siren = token.user.entreprise?.siren;
+      session.user.entreprise = token.user.entreprise;
       return session;
     },
   },

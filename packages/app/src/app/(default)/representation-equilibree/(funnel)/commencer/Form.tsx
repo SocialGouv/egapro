@@ -37,7 +37,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } =
     useRepeqFunnelClientStore();
 
-  const organization = session.user.organization;
+  const organization = session.user.entreprise;
 
   /** ---------------- Schema ---------------- */
   const schemaWithOwnedSiren = session.user.staff
@@ -124,12 +124,19 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   /** ---------------- Init siren non staff ---------------- */
   useEffect(() => {
-    if (!session.user.staff && session.user.organization?.siren) {
-      setValue("siren", session.user.organization.siren, {
+    if (!session.user.staff && session.user.entreprise?.siren) {
+      setValue("siren", session.user.entreprise.siren, {
         shouldValidate: true,
       });
     }
   }, [session.user, setValue]);
+
+  /** ---------------- Sync store siren with session for non-staff ---------------- */
+  useEffect(() => {
+    if (hasHydrated && !session.user.staff && session.user.entreprise?.siren && funnel?.siren !== session.user.entreprise.siren) {
+      saveFunnel({ siren: session.user.entreprise.siren });
+    }
+  }, [hasHydrated, session.user, funnel?.siren, saveFunnel]);
 
   /** ---------------- Render ---------------- */
   return (
@@ -170,8 +177,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
             <label className={fr.cx("fr-label")}>Siren entreprise</label>
             <p className={fr.cx("fr-mt-1w")}>
-              {session.user.organization?.siren}
-              {session.user.organization?.label && ` (${session.user.organization.label})`}
+              {session.user.entreprise?.label}
             </p>
           </>
         )}

@@ -13,9 +13,9 @@ export const ImpersonateNotice = () => {
 
   const isImpersonating = session.data.staff?.impersonating || false;
 
-  if (!isImpersonating || !session.data.user.organization) return null;
+  if (!isImpersonating || !session.data.user.entreprise) return null;
 
-  const { siren, label } = session.data.user.organization;
+  const { siren, label } = session.data.user.entreprise;
 
   return (
     <>

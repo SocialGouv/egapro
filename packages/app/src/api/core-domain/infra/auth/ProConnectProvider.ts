@@ -4,7 +4,7 @@ import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
 
-export interface Organization {
+export interface Entreprise {
   id: number;
   is_collectivite_territoriale: boolean;
   is_external: boolean;
@@ -12,6 +12,8 @@ export interface Organization {
   label: string | null;
   siren: string;
   siret: string;
+  naf: string;
+  address: string;
 }
 
 export interface ProConnectProfile {

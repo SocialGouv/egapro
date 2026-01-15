@@ -1,6 +1,6 @@
 "use client";
 
-import { type Organization } from "@api/core-domain/infra/auth/ProConnectProvider";
+import { type Etablissement } from "@api/core-domain/infra/services/IEntrepriseService";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { BackNextButtonsGroup, FormLayout, RecapCard, RecapCardCompany } from "@design-system";
@@ -12,17 +12,17 @@ import { type Session } from "next-auth";
 import { useRepeqFunnelStore, useRepeqFunnelStoreHasHydrated } from "../useRepeqFunnelStore";
 
 export const EntrepriseForm = ({session} : {session: Session}) => {
-  const [company, setCompany] = useState<Organization | null>(null);
+  const [company, setCompany] = useState<Etablissement | null>(null);
   const funnel = useRepeqFunnelStore(state => state.funnel);
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
-    if (funnel?.siren && session.user.organization?.siren === funnel.siren) {
-      setCompany(session.user.organization);
+    if (funnel?.siren && session.user.entreprise?.siren === funnel.siren) {
+      setCompany(session.user.entreprise);
     } else {
       setCompany(null);
     }
-  }, [funnel, session.user.organization]);
+  }, [funnel, session.user.entreprise]);
 
   if (!hydrated || !company) {
     return (
@@ -37,12 +37,12 @@ export const EntrepriseForm = ({session} : {session: Session}) => {
   }
 
   const companyDto: CompanyDTO = {
-    address: "",
-    city: "",
-    countryIsoCode: "FR",
-    nafCode: "01.11Z",
-    name: company.label || "",
-    postalCode: "",
+    address: company.address,
+    city: company.city,
+    countryIsoCode: company.countryIsoCode as any,
+    nafCode: company.activitePrincipaleUniteLegale as any,
+    name: company.simpleLabel || "",
+    postalCode: company.postalCode,
     siren: company.siren,
   };
 

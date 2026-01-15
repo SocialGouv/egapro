@@ -31,7 +31,7 @@ export const assertServerSession = async ({
   const sirenToCheck = typeof owner === "string" ? owner : owner?.check;
   const shouldCheckOwner = !!sirenToCheck;
   const shouldCheckStaff = staff === true || staff?.check;
-  const isOwner = session.user.staff || session.user.organization?.siren === sirenToCheck;
+  const isOwner = session.user.staff || session.user.entreprise?.siren === sirenToCheck;
   const ownerErrorMessage = owner
     ? typeof owner === "string"
       ? defaultOwnerMessage

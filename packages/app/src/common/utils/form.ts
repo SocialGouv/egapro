@@ -152,6 +152,5 @@ export const setValueAsFloatOrEmptyString = (value: string) => (isNaN(parseFloat
 export const deleteEmptyStringOnPaste = (e: ClipboardEvent<HTMLInputElement>) => {
   e.preventDefault();
   const text = e.clipboardData?.getData("text/plain") || "";
-  console.log(text);
   document.execCommand("insertText", false, text.replace(/\s/g, ""));
 };
