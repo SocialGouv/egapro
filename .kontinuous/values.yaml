@@ -32,12 +32,6 @@ app:
           name: sentry
           key: APP_SENTRY_DSN
   vars:
-    POSTGRES_HOST: "$(PGHOST)"
-    POSTGRES_DB: "$(PGDATABASE)"
-    POSTGRES_PORT: "$(PGPORT)"
-    POSTGRES_USER: "$(PGUSER)"
-    POSTGRES_PASSWORD: "$(PGPASSWORD)"
-    POSTGRES_SSLMODE: "$(PGSSLMODE)"
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
