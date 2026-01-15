@@ -1,5 +1,4 @@
 import { ValidationError, ValueObject } from "@common/shared-domain";
-import { isValid } from "@common/utils/luhn";
 
 export class Siren extends ValueObject<string> {
   constructor(private siren: string) {
@@ -18,6 +17,5 @@ export class Siren extends ValueObject<string> {
   public validate(): asserts this {
     if (this.siren.length !== 9 || isNaN(+this.siren))
       throw new ValidationError(`Le Siren "${this.siren}" doit faire 9 chiffres sans espace.`);
-    if (!isValid(this.siren)) throw new ValidationError(`Le Siren "${this.siren}" n'est pas valide.`);
   }
 }
