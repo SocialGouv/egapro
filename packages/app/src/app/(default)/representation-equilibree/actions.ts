@@ -47,14 +47,19 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
   await useCase.execute({ repEq, override: session.user.staff });
 
-  const receiptUseCase = new SendRepresentationEquilibreeReceipt(
-    representationEquilibreeRepo,
-    referentRepo,
-    globalMailerService,
-    jsxPdfService,
-  );
+  try {
+    const receiptUseCase = new SendRepresentationEquilibreeReceipt(
+      representationEquilibreeRepo,
+      referentRepo,
+      globalMailerService,
+      jsxPdfService,
+    );
 
-  await receiptUseCase.execute(repEq);
+    await receiptUseCase.execute(repEq);
+  } catch (error) {
+    console.error("Failed to send receipt:", error);
+    // Don't fail the whole operation if receipt sending fails
+  }
 
   // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);

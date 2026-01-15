@@ -19,7 +19,7 @@ export interface RepresentationEquilibreeReceiptProps {
 }
 
 export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilibreeReceiptProps) => {
-  const nafCode = repEq.company.nafCode.getValue();
+  const nafCode = repEq.company.nafCode?.getValue();
 
   const { address, postalCode, city } = repEq.company;
   let addressValue = "Information non diffusible";
@@ -58,7 +58,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         },
         {
           key: "Code NAF",
-          value: `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`,
+          value: nafCode ? `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}` : "Non disponible",
         },
         {
           key: "Adresse",
