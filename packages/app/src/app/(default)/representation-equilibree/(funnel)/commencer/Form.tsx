@@ -173,7 +173,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
         ) : (
           <>
             {/* 🔑 champ requis pour RHF */}
-            <input type="hidden" {...register("siren")} />
+            <input type="hidden" {...register("siren")} value={session.user.entreprise?.siren} />
 
             <label className={fr.cx("fr-label")}>Siren entreprise</label>
             <p className={fr.cx("fr-mt-1w")}>

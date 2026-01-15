@@ -9,7 +9,7 @@ import moize from "moize";
 import { CompanyErrorCodes } from "./companyErrorCodes";
 
 export async function getCompany(siren: string): Promise<ServerActionResponse<Entreprise, CompanyErrorCodes>> {
-  const moizedGetCompany = moize(entrepriseService.siren, { isPromise: true, maxAge: 5 * 60_000 });
+  const moizedGetCompany = moize(entrepriseService.siren.bind(entrepriseService), { isPromise: true, maxAge: 5 * 60_000 });
 
   try {
     return {

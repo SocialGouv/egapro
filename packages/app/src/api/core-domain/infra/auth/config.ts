@@ -1,7 +1,6 @@
 // packages/app/src/api/core-domain/infra/auth/config.ts
 
 import {
-  Entreprise,
   type ProConnectProfile,
   ProConnectProvider,
 } from "@api/core-domain/infra/auth/ProConnectProvider";
@@ -10,7 +9,8 @@ import {
   type Company,
 } from "@api/core-domain/infra/companies-store";
 import { entrepriseService } from "@api/core-domain/infra/services";
-import { type Etablissement } from "@api/core-domain/infra/services/IEntrepriseService";
+import { type Etablissement, type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";

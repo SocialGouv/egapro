@@ -15,11 +15,12 @@ import { storePicker } from "@common/utils/zustand";
 import { SkeletonFlex } from "@components/utils/skeleton/SkeletonFlex";
 import { RecapCard } from "@design-system";
 import { Skeleton } from "@design-system/utils/client/skeleton";
-import { getCompany } from "@globalActions/company";
+
 import { times } from "lodash";
 import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type ZodError } from "zod";
+import { type Session } from "next-auth";
 
 import { saveRepresentationEquilibree } from "../../actions";
 import { DetailRepEq } from "../../Recap";
@@ -32,23 +33,48 @@ function assertRepEq(
 }
 
 const useStore = storePicker(useRepeqFunnelStore);
-export const ValidationRecapRepEq = () => {
+export const ValidationRecapRepEq = ({ session }: { session: Session }) => {
   const router = useRouter();
   const [company, setCompany] = useState<Entreprise | null>(null);
   const [funnel, setIsEdit] = useStore("funnel", "setIsEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
   useEffect(() => {
-    if (funnel?.siren && !company) {
-      getCompany(funnel.siren).then(company => {
-        if (company.ok) {
-          setCompany(company.data);
-        } else {
-          throw new Error(`Could not fetch company with siren ${funnel.siren} (code ${company.error})`);
-        }
-      });
+    if (funnel?.siren && session.user.entreprise?.siren === funnel.siren) {
+      // Construct Entreprise from Etablissement
+      const etab = session.user.entreprise;
+      const shortEtab = {
+        siret: etab.siret,
+        etablissementSiege: etab.etablissementSiege,
+        activitePrincipaleEtablissement: etab.activitePrincipaleEtablissement,
+        address: etab.address,
+        city: etab.city,
+        postalCode: etab.postalCode,
+        countryIsoCode: etab.countryIsoCode,
+        codeCommuneEtablissement: etab.codeCommuneEtablissement,
+        libelleCommuneEtablissement: etab.libelleCommuneEtablissement,
+        categorieEntreprise: etab.categorieEntreprise,
+      };
+      const entreprise: Entreprise = {
+        siren: etab.siren,
+        label: `${etab.simpleLabel || ''} (${etab.siren})`,
+        simpleLabel: etab.simpleLabel || '',
+        highlightLabel: etab.simpleLabel || '',
+        matching: 1,
+        activitePrincipaleUniteLegale: etab.activitePrincipaleUniteLegale || '',
+        categorieJuridiqueUniteLegale: etab.categorieJuridiqueUniteLegale || '',
+        caractereEmployeurUniteLegale: etab.caractereEmployeurUniteLegale || '',
+        etatAdministratifUniteLegale: etab.etatAdministratifUniteLegale || '',
+        dateCreationUniteLegale: etab.dateCreationUniteLegale || '',
+        dateDebut: '',
+        etablissements: 1,
+        conventions: [],
+        allMatchingEtablissements: [shortEtab],
+        firstMatchingEtablissement: shortEtab,
+      };
+      setCompany(entreprise);
     }
-  }, [funnel, company]);
+  }, [funnel, session.user.entreprise]);
 
   if (hydrated && !funnel?.siren) {
     return redirect("/representation-equilibree/commencer");

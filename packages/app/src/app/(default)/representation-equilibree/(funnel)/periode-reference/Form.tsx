@@ -10,6 +10,8 @@ import { Skeleton } from "@design-system/utils/client/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, formatISO, getYear } from "date-fns";
 import { redirect, useRouter } from "next/navigation";
+
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -38,11 +40,20 @@ export const PeriodeReferenceForm = () => {
     handleSubmit,
     register,
     setValue,
+    getValues,
   } = useForm<PeriodeReferenceFormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: funnel,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('PeriodeReferenceForm errors:', errors);
+    console.log('PeriodeReferenceForm isValid:', isValid);
+    console.log('PeriodeReferenceForm funnel:', funnel);
+    console.log('PeriodeReferenceForm form values:', getValues());
+  }, [errors, isValid, funnel, getValues]);
 
   const selectEndDateOfFunnelYear = () => {
     if (!funnel?.year) return;
@@ -69,6 +80,9 @@ export const PeriodeReferenceForm = () => {
         est l'année au titre de laquelle les écarts de représentation sont calculés.
       </Highlight>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        {/* Hidden inputs for schema validation */}
+        <input type="hidden" {...register("siren")} value={funnel?.siren} />
+        <input type="hidden" {...register("year", { valueAsNumber: true })} value={funnel?.year} />
         <FormLayout>
           <Input
             label="Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts *"
