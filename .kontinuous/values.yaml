@@ -61,8 +61,12 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
+    - name: SECURITY_JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: EGAPRO_SECRET
   vars:
-    SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     OTEL_SDK_DISABLED: "true"
@@ -114,6 +118,44 @@ nginx:
 
 pg:
   ~chart: pg
+
+db-init:
+  ~chart: job
+  imagePackage: app # Use the app image which has the SQL file
+  env:
+    - name: PGHOST
+      value: pg-rw
+    - name: PGUSER
+      valueFrom:
+        secretKeyRef:
+          name: pg-app
+          key: PGUSER
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: pg-app
+          key: PGPASSWORD
+    - name: PGDATABASE
+      valueFrom:
+        secretKeyRef:
+          name: pg-app
+          key: PGDATABASE
+  command: ["/bin/bash", "-c"]
+  args:
+    - |
+      set -e
+      # Wait for DB to be ready
+      until pg_isready -h $PGHOST -U $PGUSER; do
+        echo "Waiting for database..."
+        sleep 2
+      done
+      # Apply schema from the file in the image
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f packages/app/docker/db/egapro.sql
+      # Grant permissions
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";"
+  restartPolicy: Never
 
 files:
   ~chart: app
