@@ -198,6 +198,7 @@ export const config = {
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
 
+
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(
@@ -227,29 +228,13 @@ export const config = {
       },
     },
     postgres: {
-      host: ensureApiEnvVar(
-        process.env.PGHOST || process.env.POSTGRES_HOST,
-        "db",
-      ),
-      user: ensureApiEnvVar(
-        process.env.PGUSER || process.env.POSTGRES_USER,
-        "postgres",
-      ),
-      password: ensureApiEnvVar(
-        process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD,
-        "postgres",
-      ),
-      db: ensureApiEnvVar(
-        process.env.PGDATABASE || process.env.POSTGRES_DB,
-        "egapro",
-      ),
-      port: ensureApiEnvVar(
-        process.env.PGPORT || process.env.POSTGRES_PORT,
-        Number,
-        -1,
-      ),
+      host: ensureApiEnvVar(process.env.POSTGRES_HOST, "db"),
+      user: ensureApiEnvVar(process.env.POSTGRES_USER, "postgres"),
+      password: ensureApiEnvVar(process.env.POSTGRES_PASSWORD, "postgres"),
+      db: ensureApiEnvVar(process.env.POSTGRES_DB, "egapro"),
+      port: ensureApiEnvVar(process.env.POSTGRES_PORT, Number, -1),
       ssl: ensureApiEnvVar<"prefer" | "require">(
-        process.env.PGSSLMODE || process.env.POSTGRES_SSLMODE,
+        process.env.POSTGRES_SSLMODE,
         "prefer",
       ),
       poolMinSize: ensureApiEnvVar(
