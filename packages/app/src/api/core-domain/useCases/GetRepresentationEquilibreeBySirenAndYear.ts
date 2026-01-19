@@ -25,12 +25,6 @@ export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<
     year,
   }: Input): Promise<RepresentationEquilibreeDTO | null> {
     try {
-      console.log("DEBUG: POSTGRES_HOST =", process.env.POSTGRES_HOST);
-      console.log("DEBUG: PGHOST =", process.env.PGHOST);
-      console.log(
-        "DEBUG: config.api.postgres.host =",
-        config.api.postgres.host,
-      );
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
       const representationEquilibree =
