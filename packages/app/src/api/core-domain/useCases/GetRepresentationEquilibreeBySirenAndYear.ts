@@ -3,6 +3,7 @@ import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/Repre
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import { AppError, type UseCase } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+import { config } from "@common/config";
 
 import { type IRepresentationEquilibreeRepo } from "../repo/IRepresentationEquilibreeRepo";
 
@@ -11,15 +12,29 @@ interface Input {
   year: number;
 }
 
-export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input, RepresentationEquilibreeDTO | null> {
-  constructor(private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo) {}
+export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<
+  Input,
+  RepresentationEquilibreeDTO | null
+> {
+  constructor(
+    private readonly representationEquilibreeRepo: IRepresentationEquilibreeRepo,
+  ) {}
 
-  public async execute({ siren, year }: Input): Promise<RepresentationEquilibreeDTO | null> {
+  public async execute({
+    siren,
+    year,
+  }: Input): Promise<RepresentationEquilibreeDTO | null> {
     try {
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(year);
-      const representationEquilibree = await this.representationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
-      return representationEquilibree ? representationEquilibreeMap.toDTO(representationEquilibree) : null;
+      const representationEquilibree =
+        await this.representationEquilibreeRepo.getOne([
+          validatedSiren,
+          validatedYear,
+        ]);
+      return representationEquilibree
+        ? representationEquilibreeMap.toDTO(representationEquilibree)
+        : null;
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenAndYearError(
         "Cannot get desired representation equilibree",

@@ -31,14 +31,42 @@ app:
         secretKeyRef:
           name: sentry
           key: APP_SENTRY_DSN
+    - name: POSTGRES_HOST
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGHOST
+    - name: POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGDATABASE
+    - name: POSTGRES_PORT
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGPORT
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGUSER
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGPASSWORD
+    - name: POSTGRES_SSLMODE
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGSSLMODE
+    - name: SECURITY_JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: EGAPRO_SECRET
   vars:
-    POSTGRES_HOST: "$(PGHOST)"
-    POSTGRES_DB: "$(PGDATABASE)"
-    POSTGRES_PORT: "$(PGPORT)"
-    POSTGRES_USER: "$(PGUSER)"
-    POSTGRES_PASSWORD: "$(PGPASSWORD)"
-    POSTGRES_SSLMODE: "$(PGSSLMODE)"
-    SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     OTEL_SDK_DISABLED: "true"
@@ -91,7 +119,26 @@ nginx:
 pg:
   ~chart: pg
 
+dbinit:
+  ~chart: job
+  imagePackage: app
+  envFrom:
+    - secretRef:
+        name: pg-app
+  command:
+    - /bin/bash
+    - -ec
+    - |
+      until pg_isready -h "$PGHOST" -U "$PGUSER"; do
+        echo "Waiting for database..."
+        sleep 2
+      done
 
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -f packages/app/docker/db/egapro.sql
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";"
+  restartPolicy: Never
 
 files:
   ~chart: app

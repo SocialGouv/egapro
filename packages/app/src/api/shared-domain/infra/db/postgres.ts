@@ -1,10 +1,6 @@
 import { config } from "@common/config";
 import postgres from "postgres";
 
-console.log("DEBUG: POSTGRES_HOST =", process.env.POSTGRES_HOST);
-console.log("DEBUG: PGHOST =", process.env.PGHOST);
-console.log("DEBUG: config.api.postgres.host =", config.api.postgres.host);
-
 export const sql = postgres({
   debug: true,
   host: config.api.postgres.host,
