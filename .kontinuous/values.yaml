@@ -144,14 +144,11 @@ db-init:
   args:
     - |
       set -e
-      # Wait for DB to be ready
       until pg_isready -h $PGHOST -U $PGUSER; do
         echo "Waiting for database..."
         sleep 2
       done
-      # Apply schema from the file in the image
       psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f packages/app/docker/db/egapro.sql
-      # Grant permissions
       psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PGUSER\";"
       psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PGUSER\";"
       psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";"
