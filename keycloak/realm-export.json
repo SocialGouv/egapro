@@ -16,7 +16,7 @@
       "description": "Egapro Application",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "secret": "dev-secret-key-for-local-development-only",
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "implicitFlowEnabled": false,
@@ -109,27 +109,15 @@
             "claim.name": "siret",
             "jsonType.label": "String"
           }
-        },
-        {
-          "name": "organizations",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-hardcoded-claim-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "organizations",
-            "claim.value": "[{\"id\": 12345, \"is_collectivite_territoriale\": false, \"is_external\": false, \"is_service_public\": true, \"label\": \"Ministère du Travail\", \"siren\": \"123456789\", \"siret\": \"12345678901234\"}]",
-            "jsonType.label": "JSON"
-          }
         }
       ],
       "defaultClientScopes": [
         "web-origins",
         "role_list",
         "roles",
-        "profile",
+        "given_name",
+        "usual_name",
+        "siret",
         "email",
         "phone"
       ],
@@ -144,6 +132,54 @@
         "http://localhost:3000/api/auth/callback/proconnect",
         "http://localhost:3001/api/auth/callback/proconnect"
       ]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "proconnect",
+      "providerId": "oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "config": {
+        "clientId": "7a87aa441317d96fe88f99ade82dc160207007c935ffec516d672e2c953174b7",
+        "clientSecret": "98fb3d299822cc764e391243a9c93fcc492b45a0fecacf4a49f0a58606159131",
+        "authorizationUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/authorize",
+        "tokenUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/token",
+        "userInfoUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/userinfo",
+        "clientAuthMethod": "client_secret_post",
+        "logoutUrl": "",
+        "issuer": "https://fca.integ01.dev-agentconnect.fr/api/v2",
+        "defaultScope": "openid email given_name usual_name siret",
+        "prompt": "login",
+        "maxAge": "0",
+        "uiLocales": "",
+        "backchannelSupported": "",
+        "syncMode": "IMPORT",
+        "useJwksUrl": "true",
+        "jwksUrl": "https://fca.integ01.dev-agentconnect.fr/api/v2/oidc/.well-known/jwks",
+        "validateSignature": "true",
+        "pkceEnabled": "true",
+        "pkceMethod": "S256",
+        "tokenMinValidity": "10",
+        "forwardParameters": "",
+        "attributeConsumingServiceIndex": "",
+        "attributeConsumingServiceName": "",
+        "attributeList": "",
+        "allowedClockSkew": "0",
+        "loginHint": "",
+        "passLoginHint": "false",
+        "passMaxAge": "false",
+        "acceptsPromptNoneForwardFromClient": "false",
+        "disableUserInfo": "",
+        "filteredByClaims": "",
+        "firstBrokerLoginFlowAlias": "first broker login",
+        "postBrokerLoginFlowAlias": ""
+      }
     }
   ],
   "clientScopes": [
@@ -354,6 +390,81 @@
           "config": {}
         }
       ]
+    },
+    {
+      "name": "given_name",
+      "description": "Given name scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "firstName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "given_name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "usual_name",
+      "description": "Usual name scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "usual name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lastName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "usual_name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "siret",
+      "description": "Siret scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "siret",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "siret",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "siret",
+            "jsonType.label": "String"
+          }
+        }
+      ]
     }
   ],
   "users": [
@@ -364,7 +475,9 @@
       "firstName": "Test",
       "lastName": "User",
       "email": "test@example.com",
-      "attributes": {},
+      "attributes": {
+        "siret": ["83525644700011"]
+      },
       "credentials": [
         {
           "type": "password",

@@ -74,8 +74,8 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
 
   public async saveWithIndex(item: RepresentationEquilibree): Promise<void> {
     await this.sql.begin(async transac => {
-      const thisRepo = new PostgresRepresentationEquilibreeRepo(transac);
-      const searchRepo = new PostgresRepresentationEquilibreeSearchRepo(transac);
+      const thisRepo = new PostgresRepresentationEquilibreeRepo(transac as unknown as typeof sql);
+      const searchRepo = new PostgresRepresentationEquilibreeSearchRepo(transac as unknown as typeof sql);
       await thisRepo.save(item);
       await searchRepo.index(item);
     });

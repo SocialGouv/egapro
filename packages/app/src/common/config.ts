@@ -65,7 +65,7 @@ export const config = {
     get authorization_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
       if (isKeycloak) {
-        return `${this.issuer}/protocol/openid-connect/auth`;
+        return `${this.issuer}/realms/atlas/protocol/openid-connect/auth`;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -76,7 +76,7 @@ export const config = {
     get token_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
       if (isKeycloak) {
-        return `${this.issuer}/protocol/openid-connect/token`;
+        return `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -87,7 +87,7 @@ export const config = {
     get userinfo_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
       if (isKeycloak) {
-        return `${this.issuer}/protocol/openid-connect/userinfo`;
+        return `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -96,11 +96,19 @@ export const config = {
       return `${baseUrl}/userinfo`;
     },
     get jwks_uri() {
+      const isKeycloak = this.issuer.includes("localhost");
+      if (isKeycloak) {
+        return `${this.issuer}/realms/atlas/protocol/openid-connect/certs`;
+      }
       return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
       if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
         return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
+      }
+      const isKeycloak = this.issuer.includes("localhost");
+      if (isKeycloak) {
+        return `${this.issuer}/realms/atlas/.well-known/openid-configuration`;
       }
       return this.env !== "prod" && process.env.EGAPRO_PROCONNECT_DISCOVERY_URL
         ? `${process.env.EGAPRO_PROCONNECT_DISCOVERY_URL}/.well-known/openid-configuration`
@@ -156,9 +164,7 @@ export const config = {
       "https://app.proconnect.gouv.fr/manage-organizations",
     ),
     get scope() {
-      return this.issuer.includes("localhost")
-        ? "openid email profile phone"
-        : "openid email given_name usual_name phone_number organizations";
+      return "openid email given_name usual_name siret";
     },
   },
 

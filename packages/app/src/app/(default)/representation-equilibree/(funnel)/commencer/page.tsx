@@ -24,7 +24,7 @@ const CommencerPage = async () => {
   if (!session) return null;
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
-  if (!(session.user.staff || session.user.companies.length)) {
+  if (!(session.user.staff || session.user.siret)) {
     return isEmailLogin ? (
       <Alert
         severity="warning"
@@ -69,7 +69,7 @@ const CommencerPage = async () => {
         description="Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
           correspondantes à la déclaration."
       />
-      <CommencerForm session={session} proconnectHost={proconnectManageOrganisationsUrl ?? ""} />
+      <CommencerForm session={session} />
     </>
   );
 };

@@ -39,6 +39,12 @@ services:
     ports:
       - 3000:3000
     restart: "no"
+    secrets:
+      - sentry
+
+secrets:
+  sentry:
+    external: true
 
 volumes:
   pgdata:

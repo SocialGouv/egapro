@@ -10,7 +10,7 @@ import { NumberPairInputs } from "@components/RHF/NumbersPairInputs";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
 import { BackNextButtonsGroup, Box, FormLayout } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { type z } from "zod";
@@ -50,11 +50,15 @@ export const EcartsCadresForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- need to be triggered on mount only
   }, []);
 
+  useEffect(() => {
+    if (hydrated && !funnel?.year) {
+      router.push("/representation-equilibree/commencer");
+    }
+  }, [hydrated, funnel?.year, router]);
+
   if (!hydrated) {
     return <SkeletonForm fields={1} />;
   }
-
-  if (hydrated && !funnel?.year) redirect("/representation-equilibree/commencer");
 
   const onSubmit = (data: EcartsCadresFormType) => {
     if (!funnel) return;

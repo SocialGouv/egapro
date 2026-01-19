@@ -20,7 +20,8 @@
     "setup-python": "scripts/postinstall",
     "test:app": "pnpm --filter app test",
     "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app test:e2e",
-    "build:app": "pnpm --filter app build"
+    "build:app": "pnpm --filter app build",
+    "build": "pnpm build:app"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",
@@ -28,5 +29,10 @@
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
     "semantic-release": "^19"
+  },
+  "dependencies": {
+    "@codegouvfr/react-dsfr": "^1.31.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
 }

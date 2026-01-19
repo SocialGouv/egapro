@@ -1,4 +1,4 @@
-import { logger } from "@api/utils/pino";
+
 import { config as _config } from "@common/config";
 import { captureError } from "@common/error";
 import { StatusCodes } from "http-status-codes";
@@ -124,7 +124,7 @@ const wrappedMiddleware = withAuth(
           const secretAsKey = new TextEncoder().encode(secret as string);
           return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
         } catch (error) {
-          logger.error({ error }, "Error while decoding token");
+          console.error(error, "Error while decoding token");
           return null;
         }
       },
@@ -135,12 +135,12 @@ const wrappedMiddleware = withAuth(
   },
 );
 
-// Next.js requires both named and default exports for middleware
+// Next.js requires both named and default exports for proxy
 // eslint-disable-next-line import/no-default-export
 export default wrappedMiddleware;
-export const middleware = wrappedMiddleware;
+export const proxy = wrappedMiddleware;
 
-// Config to exclude Sentry tunnel route from middleware
+// Config to exclude Sentry tunnel route from proxy
 export const config = {
   matcher: ["/((?!api/monitoring/envelope).*)"],
 };

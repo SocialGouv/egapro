@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { TITLES } from "../titles";
 import { ValidationRecapRepEq } from "./RecapRepEq";
+import { getServerSession } from "next-auth";
+import { authConfig } from "@api/core-domain/infra/auth/config";
 
 const title = TITLES.validation;
 
@@ -13,7 +15,11 @@ export const metadata = {
   },
 };
 
-const Validation = () => {
+const Validation = async () => {
+  const session = await getServerSession(authConfig);
+  if (!session) {
+    return <div>Session required</div>;
+  }
   return (
     <>
       <p>
@@ -31,7 +37,7 @@ const Validation = () => {
       <p>Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous.</p>
       <Heading as="h2" mt="6w" text="Récapitulatif des écarts de représentation" />
 
-      <ValidationRecapRepEq />
+      <ValidationRecapRepEq session={session} />
     </>
   );
 };

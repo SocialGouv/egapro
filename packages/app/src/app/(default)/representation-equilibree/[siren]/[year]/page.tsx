@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
-const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
+const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: string }> }) => {  const { siren, year: strYear } = await params;
   const year = +strYear;
   const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
 
@@ -54,7 +54,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
   }
 
   const session = await getServerSession(authConfig);
-  const isOwner = session?.user.staff || session?.user.companies.some(company => company.siren === siren);
+  const isOwner = session?.user.staff || session?.user.entreprise?.siren === siren;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const olderThanOneYear = session?.data?.user.staff

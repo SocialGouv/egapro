@@ -43,7 +43,14 @@ ENV GENERATE_SOURCEMAP=true \
     NODE_ENV=production
 
 # Clean output directory and build with source maps
-RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token); \
+RUN --mount=type=secret,id=sentry \
+    if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "production" ]; then \
+        if [ ! -f /run/secrets/sentry ]; then \
+            echo "Sentry secret required for production build" >&2; \
+            exit 1; \
+        fi; \
+        export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_TOKEN=' /run/secrets/sentry | cut -d'=' -f2); \
+    fi; \
     export NODE_OPTIONS="--max-old-space-size=8192"; \
     export GENERATE_SOURCEMAP=true; \
     export SENTRY_ALLOW_FAILURE=true; \
