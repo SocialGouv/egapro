@@ -125,18 +125,19 @@ dbinit:
   envFrom:
     - secretRef:
         name: pg-app
-  command: ["/bin/bash", "-c"]
-  args:
-    - >
-      set -e &&
-      until pg_isready -h $PGHOST -U $PGUSER; do
-        echo "Waiting for database..." ;
-        sleep 2 ;
-      done &&
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f packages/app/docker/db/egapro.sql &&
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$PGUSER";' &&
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$PGUSER";' &&
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "$PGUSER";'
+  command:
+    - /bin/bash
+    - -ec
+    - |
+      until pg_isready -h "$PGHOST" -U "$PGUSER"; do
+        echo "Waiting for database..."
+        sleep 2
+      done
+
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -f packages/app/docker/db/egapro.sql
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PGUSER\";"
+      psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";"
   restartPolicy: Never
 
 files:
