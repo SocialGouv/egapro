@@ -19,7 +19,6 @@ app:
         name: github-oauth
     - configMapRef:
         name: egapro
-    - secretRef:
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
@@ -149,9 +148,9 @@ db-init:
         sleep 2
       done
       psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f packages/app/docker/db/egapro.sql
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PGUSER\";"
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PGUSER\";"
-      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";"
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$PGUSER";'
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$PGUSER";'
+      psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "$PGUSER";'
   restartPolicy: Never
 
 files:
