@@ -29,7 +29,7 @@ const RootLayout = ({ children }) => {
     <html lang="fr" className={style.app}>
       <head>
         <link rel="stylesheet" href="/dsfr/dsfr.min.css" />
-        <link rel="stylesheet" href="/dsfr/utility/icons/icons.min.css" />
+        <link rel="stylesheet" href="/dsfr/utility/icons/icons.main.min.css" />
       </head>
       <body>
         <DsfrClientInit />

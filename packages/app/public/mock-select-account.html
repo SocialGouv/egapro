@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sélection d'entreprise - Mock Proconnect</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            .enterprise {
+                border: 1px solid #ccc;
+                padding: 10px;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+            .enterprise:hover {
+                background-color: #f0f0f0;
+            }
+            .selected {
+                background-color: #e0f0e0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Sélectionnez une entreprise</h1>
+        <p>
+            Simule la page de sélection d'entreprise Proconnect avec
+            prompt=select_account
+        </p>
+
+        <div class="enterprise" onclick="selectEnterprise('123456789')">
+            <strong>Alpha Solutions</strong><br />
+            SIREN: 123 456 789
+        </div>
+
+        <div class="enterprise" onclick="selectEnterprise('987654321')">
+            <strong>Beta Corp</strong><br />
+            SIREN: 987 654 321
+        </div>
+
+        <script>
+            function selectEnterprise(siren) {
+                // Simule la redirection vers l'app avec l'entreprise sélectionnée
+                const callbackUrl = new URL(window.location);
+                callbackUrl.searchParams.set("selected_siren", siren);
+                callbackUrl.pathname = "/mon-espace"; // ou l'URL de callback appropriée
+                window.location.href = callbackUrl.toString();
+            }
+        </script>
+    </body>
+</html>
