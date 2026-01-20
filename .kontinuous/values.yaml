@@ -68,7 +68,8 @@ app:
           key: EGAPRO_SECRET
   vars:
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
-    NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+    NEXTAUTH_URL: "https://{{ .Values.global.host }}"
+    NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: "https://{{ .Values.global.host }}/api/auth/callback/proconnect"
     OTEL_SDK_DISABLED: "true"
     REDIS_HOST: ""
     REDIS_PORT: ""
