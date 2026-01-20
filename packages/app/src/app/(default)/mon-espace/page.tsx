@@ -4,23 +4,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Tile from "@codegouvfr/react-dsfr/Tile";
-import { useEffect } from "react";
 
 const MySpacePage = () => {
   const proconnectManageOrganisationsUrl =
-    "http://localhost:3000/mock-select-account.html";
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedSiren = urlParams.get("selected_siren");
-    if (selectedSiren) {
-      alert(`Entreprise sélectionnée: SIREN ${selectedSiren}`);
-      // Remove the param from URL
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("selected_siren");
-      window.history.replaceState({}, "", newUrl);
-    }
-  }, []);
+    process.env.NEXT_PUBLIC_EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
   return (
     <div className={fr.cx("fr-container", "fr-my-7w")}>
       <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
