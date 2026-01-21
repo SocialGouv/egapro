@@ -11,7 +11,7 @@ export const ProConnectLogin = ({ callbackUrl }: ProConnectLoginProps) => (
     <button
       onClick={(e) => {
         e.preventDefault();
-        signIn("proconnect", { callbackUrl: "/mon-espace" });
+        signIn("proconnect", { callbackUrl });
       }}
       className="fr-connect"
       role="link"
