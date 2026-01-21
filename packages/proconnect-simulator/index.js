@@ -96,7 +96,7 @@ app.get('/authorize', (req, res) => {
   kcAuthorize.searchParams.set('response_type', 'code');
   kcAuthorize.searchParams.set('scope', 'openid');
   kcAuthorize.searchParams.set('redirect_uri', `${SIMULATOR_PUBLIC_BASE}/callback`);
-  kcAuthorize.searchParams.set('state', state || '');
+  // kcAuthorize.searchParams.set('state', state || '');
   kcAuthorize.searchParams.set('login_hint', login_hint || '');
 
   res.redirect(kcAuthorize.toString());
@@ -107,7 +107,7 @@ app.get('/authorize', (req, res) => {
  * L'utilisateur est authentifié → affichage page ProConnect-like
  */
 app.get('/callback', (req, res) => {
-  const { state, login_hint } = req.query;
+  const { login_hint } = req.query;
 
   res.send(`
     <html>
@@ -115,7 +115,6 @@ app.get('/callback', (req, res) => {
         <h1>ProConnect – Choisissez votre entreprise</h1>
 
         <form method="POST" action="/select">
-          <input type="hidden" name="state" value="${state || ''}">
           <input type="hidden" name="username" value="${login_hint || 'testuser'}">
 
           <button name="siret" value="83525644700011">
@@ -162,7 +161,7 @@ app.post('/select', async (req, res) => {
   finalAuthorize.searchParams.set('response_type', 'code');
   finalAuthorize.searchParams.set('scope', 'openid');
   finalAuthorize.searchParams.set('redirect_uri', APP_PUBLIC_REDIRECT_URI);
-  finalAuthorize.searchParams.set('state', state || '');
+  // finalAuthorize.searchParams.set('state', state || '');
 
 
   res.redirect(finalAuthorize.toString());

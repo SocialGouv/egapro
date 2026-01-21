@@ -4,10 +4,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Tile from "@codegouvfr/react-dsfr/Tile";
+import { useSession } from "next-auth/react";
 
 const MySpacePage = () => {
   const proconnectManageOrganisationsUrl =
     process.env.NEXT_PUBLIC_EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+  const session = useSession();
   return (
     <div className={fr.cx("fr-container", "fr-my-7w")}>
       <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
@@ -85,6 +87,7 @@ const MySpacePage = () => {
           }
         />
       </div>
+      <span>{JSON.stringify(session)}</span>
     </div>
   );
 };

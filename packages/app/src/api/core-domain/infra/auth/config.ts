@@ -93,6 +93,17 @@ export const authConfig: AuthOptions = {
     strategy: "jwt",
     maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60,
   },
+  cookies: {
+    state: {
+      name: "next-auth.state",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: config.env === "prod",
+      },
+    },
+  },
   providers: [
     GithubProvider({
       ...config.api.security.github,
@@ -137,7 +148,12 @@ export const authConfig: AuthOptions = {
 
     async jwt({ token, profile, trigger, account, session }) {
       logger.info(
-        { trigger, provider: account?.provider },
+        {
+          trigger,
+          provider: account?.provider,
+          profileSiret: profile?.siret,
+          tokenUserSiret: token.user?.siret,
+        },
         "NextAuth JWT callback triggered",
       );
 
@@ -224,8 +240,10 @@ export const authConfig: AuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.includes("/api/v2/logout")) return url;
-      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+      if (url.includes("/api/v2/logout")) {
+        return url;
+      }
+      return `${baseUrl}/mon-espace`;
     },
 
     async session({ session, token }) {
