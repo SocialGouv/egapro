@@ -1,26 +1,6 @@
 version: "3.8"
 
 services:
-  files:
-    image: egapro_files
-    build:
-      context: .
-      dockerfile: packages/files/Dockerfile
-    volumes:
-      - ./packages/files:/app
-      - ./mnt:/mnt
-    environment:
-      ROOT_PATH: /mnt
-      TRUSTED_PROXY_IP: "172.17.0.1"
-      AUTH_PASSWD_FILE: "/app/.htpasswd"
-      WHITELIST_IP: "127.0.0.1"
-      FILES_PUBLIC: "dgt.xlsx,dgt-representation.xlsx,index-egalite-fh.xlsx,indexes.csv,full.ndjson,dgt-export-representation.xlsx"
-      FILES_RESTRICTED: ""
-    ports:
-      - 8080:8080
-    restart: always
-
-
   maildev:
     image: djfarrelly/maildev
     command: bin/maildev --hide-extensions STARTTLS
@@ -83,6 +63,19 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     restart: always
+
+  proconnect-simulator:
+    build: ./packages/proconnect-simulator
+    container_name: proconnect-simulator
+    environment:
+      KEYCLOAK_PUBLIC_BASE: "http://localhost:8081"
+      KEYCLOAK_INTERNAL_BASE: "http://keycloak:8080"
+      SIMULATOR_PUBLIC_BASE: "http://localhost:4000"
+      APP_PUBLIC_REDIRECT_URI: "http://localhost:3000/api/auth/callback/proconnect"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - keycloak
 
   # TODO handle redirect with nginx (https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#configuring-for-use-with-the-nginx-auth_request-directive)
   oauth2-proxy-github:

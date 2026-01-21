@@ -9,14 +9,15 @@ export interface ProConnectLoginProps {
 export const ProConnectLogin = ({ callbackUrl }: ProConnectLoginProps) => (
   <div className="fr-connect-group">
     <button
-      onClick={e => {
+      onClick={(e) => {
         e.preventDefault();
-        signIn("proconnect", { callbackUrl });
+        signIn("proconnect", { callbackUrl: "/mon-espace" });
       }}
       className="fr-connect"
       role="link"
     >
-      <span className="fr-connect__login">S’identifier avec</span> <span className="fr-connect__brand">ProConnect</span>
+      <span className="fr-connect__login">S’identifier avec</span>{" "}
+      <span className="fr-connect__brand">ProConnect</span>
     </button>
   </div>
 );

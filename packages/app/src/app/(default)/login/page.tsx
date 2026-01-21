@@ -4,6 +4,7 @@ import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer, Link } from "@design-system";
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
@@ -34,18 +35,30 @@ const signinErrors: Record<string, string> = {
   default: "Impossible de se connecter.",
 };
 
-const LoginPage = async ({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; error?: string }> }) => {
+const LoginPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+}) => {
   const session = await getServerSession(authConfig);
   const params = await searchParams;
-  const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "";
+  const callbackUrl =
+    typeof params.callbackUrl === "string" ? params.callbackUrl : "";
   const error = typeof params.error === "string" ? params.error : "";
-  const isEmailLogin = config.api.security.auth.isEmailLogin;
+
+  if (session?.user) {
+    redirect("/mon-espace");
+  }
 
   return (
     <CenteredContainer py="6w">
       <h1>{title}</h1>
       {session?.user ? (
-        <Alert severity="success" title={session?.user.email} description="Vous êtes déjà connecté·e." />
+        <Alert
+          severity="success"
+          title={session?.user.email}
+          description="Vous êtes déjà connecté·e."
+        />
       ) : (
         <>
           {error && (
@@ -58,61 +71,61 @@ const LoginPage = async ({ searchParams }: { searchParams: Promise<{ callbackUrl
               <br />
             </>
           )}
-          {!isEmailLogin && (
-            <Alert
-              severity="info"
-              small
-              description={
-                <>
-                  <p>
-                    Egapro utilise le service d’identification ProConnect (anciennement MonComptePro) afin de garantir
-                    l’appartenance de ses utilisateurs aux entreprises déclarantes.
-                  </p>
-                  <br />
-                  <p>
-                    Pour s'identifier avec ProConnect, il convient d'utiliser une <b>adresse email professionnelle</b>,
-                    celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
-                    cas de besoin.
-                  </p>
-                  <br />
-                  <p>
-                    <strong>
-                      Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
-                      entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur
-                      Egapro.
-                    </strong>
-                  </p>
-                  <br />
-                  <p className={"text-dsfr-error"}>
-                    Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
-                    service informatique pour qu'il autorise les mails en provenance de ProConnect.
-                  </p>
-                  <br />
-                  <p className={"text-dsfr-error"}>
-                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le centre d'aide{" "}
-                    <Link href="https://proconnect.crisp.help/fr/" target={"_blank"}>
-                      https://proconnect.crisp.help/fr/
-                    </Link>
-                  </p>
-                  <br />
-                  <p>
-                    Pour consulter l'aide,{" "}
-                    <Link href={"/aide-proconnect"} target={"_blank"}>
-                      cliquez ici
-                    </Link>
-                  </p>
-                </>
-              }
-            />
-          )}
-          <Box className="text-center" mt="2w">
-            {isEmailLogin ? (
-              <EmailLogin callbackUrl={callbackUrl} />
-            ) : (
+          <Alert
+            severity="info"
+            small
+            description={
               <>
-                <ProConnectLogin callbackUrl={callbackUrl} />
+                <p>
+                  Egapro utilise le service d’identification ProConnect
+                  (anciennement MonComptePro) afin de garantir l’appartenance de
+                  ses utilisateurs aux entreprises déclarantes.
+                </p>
+                <br />
+                <p>
+                  Pour s'identifier avec ProConnect, il convient d'utiliser une{" "}
+                  <b>adresse email professionnelle</b>, celle-ci doit
+                  correspondre à la personne à contacter par les services de
+                  l'inspection du travail en cas de besoin.
+                </p>
+                <br />
+                <p>
+                  <strong>
+                    Les tiers déclarants (comptables...) ne sont pas autorisés à
+                    déclarer pour le compte de leur entreprise cliente. Cette
+                    dernière doit créer son propre compte ProConnect pour
+                    déclarer sur Egapro.
+                  </strong>
+                </p>
+                <br />
+                <p className={"text-dsfr-error"}>
+                  Si vous utilisez une protection contre les spams (ex.
+                  MailInBlack), vous devez contacter votre service informatique
+                  pour qu'il autorise les mails en provenance de ProConnect.
+                </p>
+                <br />
+                <p className={"text-dsfr-error"}>
+                  Pour tout problème lié à ProConnect, vous devez contacter le
+                  support dédié via le centre d'aide{" "}
+                  <Link
+                    href="https://proconnect.crisp.help/fr/"
+                    target={"_blank"}
+                  >
+                    https://proconnect.crisp.help/fr/
+                  </Link>
+                </p>
+                <br />
+                <p>
+                  Pour consulter l'aide,{" "}
+                  <Link href={"/aide-proconnect"} target={"_blank"}>
+                    cliquez ici
+                  </Link>
+                </p>
               </>
-            )}
+            }
+          />
+          <Box className="text-center" mt="2w">
+            <ProConnectLogin callbackUrl={callbackUrl} />
             <GithubLogin callbackUrl={callbackUrl} />
           </Box>
         </>

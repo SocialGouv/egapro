@@ -12,6 +12,12 @@
   "clients": [
     {
       "clientId": "egapro-dev",
+      "redirectUris": [
+        "http://proconnect-simulator:4000/callback",
+        "http://localhost:4000/callback",
+        "http://app:3000/api/auth/callback/proconnect",
+        "http://localhost:3000/api/auth/callback/proconnect"
+      ],
       "name": "Egapro",
       "description": "Egapro Application",
       "enabled": true,
@@ -127,11 +133,7 @@
         "offline_access",
         "microprofile-jwt"
       ],
-      "webOrigins": ["http://localhost:3000", "http://localhost:3001"],
-      "redirectUris": [
-        "http://localhost:3000/api/auth/callback/proconnect",
-        "http://localhost:3001/api/auth/callback/proconnect"
-      ]
+      "webOrigins": ["+"]
     }
   ],
   "identityProviders": [
