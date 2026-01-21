@@ -89,7 +89,9 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         return JSON.parse(rawBody);
       },
     },
-    checks: config.env === "dev" ? [] : ["pkce", "state"],
+    checks: config.proconnect.issuer.includes("localhost")
+      ? []
+      : ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
       logger.info({ profile, siret: profile.siret }, "ProConnect profile reçu");
 
