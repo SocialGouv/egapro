@@ -1,3 +1,12 @@
+## [3.15.1](https://github.com/SocialGouv/egapro/compare/v3.15.0...v3.15.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* Code NAF non diffusible ([c94bf27](https://github.com/SocialGouv/egapro/commit/c94bf27306d005f8eee2377faab2e7bb62f5a77a))
+* erreur non diffusible ([5e1e400](https://github.com/SocialGouv/egapro/commit/5e1e40007e9ad5ee06b22273e914416c0f2c6171))
+* repeq non diffusible naf ([#2739](https://github.com/SocialGouv/egapro/issues/2739)) ([60c31ab](https://github.com/SocialGouv/egapro/commit/60c31ab0af39163b6ca0c274f42320f6b031e2fc))
+
 # [3.15.0](https://github.com/SocialGouv/egapro/compare/v3.14.0...v3.15.0) (2026-01-08)
 
 
