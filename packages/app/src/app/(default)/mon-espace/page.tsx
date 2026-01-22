@@ -5,10 +5,11 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 import { useSession } from "next-auth/react";
+import { config } from "@common/config";
 
 const MySpacePage = () => {
   const proconnectManageOrganisationsUrl =
-    process.env.NEXT_PUBLIC_EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+    config.proconnect.manageOrganisationUrl;
   const session = useSession();
   return (
     <div className={fr.cx("fr-container", "fr-my-7w")}>
