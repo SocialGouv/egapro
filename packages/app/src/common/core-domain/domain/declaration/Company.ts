@@ -97,7 +97,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
       city: json.city,
     };
 
-    if (json.nafCode && json.nafCode !== "[NON-DIFFUSIBLE]") {
+    if (json.nafCode && (json.nafCode as any) !== "[NON-DIFFUSIBLE]") {
       props.nafCode = new NafCode(json.nafCode);
     }
 
