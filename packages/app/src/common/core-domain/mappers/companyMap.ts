@@ -8,17 +8,20 @@ import { getAdditionalMeta } from "../helpers/entreprise";
 export const companyMap: Mapper<Company, Entreprise, Entreprise> = {
   toDomain(raw) {
     const { address, countryCodeCOG, countyCode, postalCode, regionCode } = getAdditionalMeta(raw);
-    return Company.fromJson({
+    const companyJson: Record<string, unknown> = {
       siren: raw.siren,
       address,
       city: raw.firstMatchingEtablissement.libelleCommuneEtablissement,
       countryCode: COUNTRIES_COG_TO_ISO[countryCodeCOG],
       county: countyCode ?? void 0,
-      nafCode: raw.activitePrincipaleUniteLegale,
       name: raw.simpleLabel,
       postalCode,
       region: regionCode ?? void 0,
-    });
+    };
+    if (raw.activitePrincipaleUniteLegale) {
+      companyJson.nafCode = raw.activitePrincipaleUniteLegale;
+    }
+    return Company.fromJson(companyJson as any);
   },
 
   toDTO() {

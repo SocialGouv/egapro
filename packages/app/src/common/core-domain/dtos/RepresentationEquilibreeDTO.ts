@@ -12,7 +12,7 @@ export type RepresentationEquilibreeDTO = ClearObject<
       city: string;
       countryCode: CountryIsoCode;
       county?: keyof COUNTIES;
-      nafCode: keyof NAF;
+      nafCode: keyof NAF | "[NON-DIFFUSIBLE]";
       name: string;
       postalCode: string;
       region?: keyof REGIONS;

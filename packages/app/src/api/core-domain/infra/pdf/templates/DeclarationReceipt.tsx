@@ -43,7 +43,7 @@ const cleanAddress = (city: string | undefined, postalCode: string | undefined, 
 export const DeclarationReceipt = (input: DeclarationOpmc) => {
   const declaration = input.declaration;
 
-  const nafCode = declaration.company.nafCode.getValue();
+  const nafCode = declaration.company.nafCode?.getValue();
 
   const { address, postalCode, city } = declaration.company;
   let addressValue = "Information non diffusible";
@@ -90,7 +90,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         },
         {
           key: "Code NAF",
-          value: `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`,
+          value: nafCode ? `${nafCode} - ${NAF[nafCode].description}` : "Non diffusible",
         },
         {
           key: "Adresse",

@@ -1,4 +1,5 @@
-import { type DeclarationSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import type { DeclarationSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import { NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
@@ -67,7 +68,10 @@ export const declarationSearchResultMap: Mapper<
                 range: value.entreprise.effectif?.tranche ?? "50:250",
                 total: value.entreprise.effectif?.total ?? 0,
               },
-              nafCode: value.entreprise.code_naf,
+              nafCode:
+                (value.entreprise.code_naf as any) === "[NON-DIFFUSIBLE]"
+                  ? undefined
+                  : (value.entreprise.code_naf as keyof NAF),
             },
             declarant: {
               email: value.déclarant.email,
@@ -142,7 +146,7 @@ export const declarationSearchResultMap: Mapper<
 function representationEquilibreePublicDataToDTO(data: DeclarationData): PublicCompanyDTO {
   return {
     countryIsoCode: data.company.countryCode?.getValue(),
-    nafCode: data.company.nafCode!.getValue(),
+    nafCode: data.company.nafCode?.getValue(),
     county: data.company.county?.getValue(),
     ...(data.company.total || data.company.range
       ? {

@@ -16,7 +16,7 @@ export interface CompanyProps {
   countryCode?: CountryCode;
   county?: County;
   hasRecoveryPlan?: boolean;
-  nafCode: NafCode;
+  nafCode?: NafCode;
   name: string;
   postalCode?: FrenchPostalCode;
   range?: CompanyWorkforceRange;
@@ -54,7 +54,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
   }
 
   /** `code_naf` */
-  get nafCode(): NafCode {
+  get nafCode(): NafCode | undefined {
     return this.props.nafCode;
   }
 
@@ -95,8 +95,11 @@ export class Company extends JsonEntity<CompanyProps, never> {
       siren: new Siren(json.siren),
       address: json.address,
       city: json.city,
-      nafCode: new NafCode(json.nafCode),
     };
+
+    if (json.nafCode && json.nafCode !== "[NON-DIFFUSIBLE]") {
+      props.nafCode = new NafCode(json.nafCode);
+    }
 
     if (typeof json.hasRecoveryPlan === "boolean") {
       props.hasRecoveryPlan = json.hasRecoveryPlan;

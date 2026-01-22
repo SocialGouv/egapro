@@ -56,7 +56,8 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
       company: {
         address: raw.data.entreprise.adresse,
         city: raw.data.entreprise.commune,
-        nafCode: raw.data.entreprise.code_naf,
+        nafCode:
+          (raw.data.entreprise.code_naf as any) === "[NON-DIFFUSIBLE]" ? undefined : raw.data.entreprise.code_naf,
         name: raw.data.entreprise.raison_sociale,
         siren: raw.data.entreprise.siren,
         countryCode: raw.data.entreprise.code_pays,
@@ -195,7 +196,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
         entrepriseDéclarante: {
           siren: obj.siren.getValue(),
           adresse: obj.company.address || "",
-          codeNaf: obj.company.nafCode.getValue(),
+          codeNaf: obj.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]",
           raisonSociale: obj.company.name,
           codePays: obj.company.countryCode?.getValue(),
           codePostal: obj.company.postalCode?.getValue(),
@@ -494,7 +495,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
     entreprise: {
       siren: data.company.siren.getValue(),
       adresse: data.company.address,
-      code_naf: data.company.nafCode.getValue(),
+      code_naf: (data.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]") as any,
       code_pays: data.company.countryCode?.getValue() as CodePays,
       code_postal: data.company.postalCode?.getValue(),
       commune: data.company.city,

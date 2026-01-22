@@ -31,7 +31,7 @@ export interface RepresentationEquilibreeDataRaw {
   };
   entreprise: {
     adresse?: string;
-    code_naf: CodeNaf;
+    code_naf: CodeNaf | "[NON-DIFFUSIBLE]";
     code_pays?: CodePays;
     code_postal?: string;
     commune?: string;

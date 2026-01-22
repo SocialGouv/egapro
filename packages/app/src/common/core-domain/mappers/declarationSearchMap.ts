@@ -20,7 +20,7 @@ export const declarationSearchMap: Required<Mapper<Declaration, null, Declaratio
       departement: obj.company.county?.getValue() ?? null,
       ft: extractFt(obj),
       region: obj.company.region?.getValue() ?? null,
-      section_naf: NAF[obj.company.nafCode.getValue()].section.code,
+      section_naf: obj.company.nafCode ? NAF[obj.company.nafCode.getValue()].section.code : "",
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
       note: obj.index?.getValue() ?? null,

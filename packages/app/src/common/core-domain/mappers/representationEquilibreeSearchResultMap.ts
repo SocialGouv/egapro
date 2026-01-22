@@ -1,4 +1,5 @@
-import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import type { RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import { NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
@@ -38,7 +39,7 @@ export const representationEquilibreeSearchResultMap: Mapper<
         postalCode: raw.company.code_postal,
         region: raw.company.région,
         siren: raw.company.siren,
-        nafCode: raw.company.code_naf,
+        nafCode: raw.company.code_naf === "[NON-DIFFUSIBLE]" ? undefined : (raw.company.code_naf as keyof NAF),
       }),
     });
   },
@@ -68,7 +69,7 @@ export const representationEquilibreeSearchResultMap: Mapper<
 function representationEquilibreePublicDataToDTO(company: Company): PublicCompanyDTO {
   return {
     countryIsoCode: company.countryCode?.getValue(),
-    nafCode: company.nafCode!.getValue(),
+    nafCode: company.nafCode?.getValue(),
     county: company.county?.getValue(),
     name: company.name!,
     region: company.region?.getValue(),

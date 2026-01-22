@@ -21,7 +21,7 @@ export const representationEquilibreeSearchMap: Required<
       departement: obj.company.county?.getValue() ?? null,
       ft: obj.company.name,
       region: obj.company.region?.getValue() ?? null,
-      section_naf: NAF[obj.company.nafCode.getValue()].section.code,
+      section_naf: obj.company.nafCode ? NAF[obj.company.nafCode.getValue()].section.code : "",
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
     };
