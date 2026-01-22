@@ -26,6 +26,7 @@ const MySpacePage = () => {
                   { callbackUrl: "/mon-espace" },
                   {
                     prompt: "select_account",
+                    max_age: "0",
                   },
                 ),
             },
