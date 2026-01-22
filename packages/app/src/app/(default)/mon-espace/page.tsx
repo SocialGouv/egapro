@@ -4,10 +4,19 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Tile from "@codegouvfr/react-dsfr/Tile";
+import { config } from "@common/config";
 import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
+const proconnectManageOrganisationsUrl =
+  config.proconnect.manageOrganisationUrl;
 const MySpacePage = () => {
-  const session = useSession();
+  const { data: session, status } = useSession();
+  useEffect(() => {
+    if (status === "authenticated" && !session?.user.entreprise) {
+      signIn("proconnect", { callbackUrl: "/mon-espace" });
+    }
+  }, [status]);
   return (
     <div className={fr.cx("fr-container", "fr-my-7w")}>
       <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
@@ -20,15 +29,11 @@ const MySpacePage = () => {
             {
               children: "Ajouter une entreprise sur Proconnect",
               priority: "secondary",
-              onClick: () =>
-                signIn(
-                  "proconnect",
-                  { callbackUrl: "/mon-espace" },
-                  {
-                    prompt: "select_account",
-                    max_age: "0",
-                  },
-                ),
+              linkProps: {
+                href: proconnectManageOrganisationsUrl,
+                target: "_blank",
+                rel: "noopener noreferrer",
+              },
             },
           ]}
         />
