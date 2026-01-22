@@ -95,6 +95,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
           etat_administratif: "A",
           nombre_etablissements: 0,
           matching_etablissements: [],
+          activite_principale: "01.11Z",
           siege: {
             adresse: "[NON-DIFFUSIBLE]",
           },
@@ -149,7 +150,6 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       }
 
       const data = await response.json();
-      console.log(JSON.stringify(data.results));
       if (!data.results || data.results.length === 0) {
         return this.mapToEntreprise({
           nom_raison_sociale: "[NON-DIFFUSIBLE]",
@@ -157,6 +157,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
           etat_administratif: "A",
           nombre_etablissements: 0,
           matching_etablissements: [],
+          activite_principale: "01.11Z",
           siege: {
             adresse: "[NON-DIFFUSIBLE]",
           },
