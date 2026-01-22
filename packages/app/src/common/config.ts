@@ -161,7 +161,9 @@ export const config = {
     ),
     manageOrganisationUrl: ensureNextEnvVar(
       process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL,
-      "https://app.proconnect.gouv.fr/manage-organizations",
+      ensureNextEnvVar(process.env.NEXT_PUBLIC_EGAPRO_ENV, "dev") === "dev"
+        ? "https://app-fca.integ01.dev-agentconnect.fr/manage-organizations"
+        : "https://app.proconnect.gouv.fr/manage-organizations",
     ),
     get scope() {
       return "openid email given_name usual_name siret";
@@ -197,7 +199,6 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
-
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
