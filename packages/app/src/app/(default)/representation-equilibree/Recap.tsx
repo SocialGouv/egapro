@@ -26,7 +26,7 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
 
   const companyDTO: CompanyDTO = {
     countryIsoCode: countryCode,
-    nafCode: nafCode,
+    nafCode: nafCode === "[NON-DIFFUSIBLE]" ? undefined : (nafCode as any),
     name,
     siren,
     county,

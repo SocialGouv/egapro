@@ -30,7 +30,7 @@ export type IndicatorKey = keyof Pick<
 
 export type Entreprise = {
   adresse: string;
-  codeNaf: CodeNaf;
+  codeNaf?: CodeNaf;
   codePays?: CodePays;
   codePostal?: string;
   commune?: string;

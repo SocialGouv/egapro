@@ -34,7 +34,7 @@ export const RecapDeclaration = ({ déclaration, edit, displayTitle }: Props) =>
     county: entreprise?.département,
     region: entreprise?.région,
     siren: entreprise?.siren || "",
-    nafCode: entreprise?.codeNaf as CodeNaf,
+    nafCode: entreprise?.codeNaf,
     workforce: {
       range: déclaration.entreprise?.tranche,
     },
