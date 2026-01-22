@@ -6,7 +6,7 @@ import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 export function DsfrClientInit() {
   useEffect(() => {
     startReactDsfr({
-        defaultColorScheme: "system",
+      defaultColorScheme: "system",
     });
   }, []);
 
