@@ -21,9 +21,13 @@ const MySpacePage = () => {
               children: "Ajouter une entreprise sur Proconnect",
               priority: "secondary",
               onClick: () =>
-                signIn("proconnect", {
-                  prompt: "select_account",
-                }),
+                signIn(
+                  "proconnect",
+                  { callbackUrl: "/mon-espace" },
+                  {
+                    prompt: "select_account",
+                  },
+                ),
             },
           ]}
         />
