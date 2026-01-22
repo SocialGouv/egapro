@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 import "./global.css";
 import style from "./root.module.scss";
 import { Providers } from "./providers";

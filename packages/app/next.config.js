@@ -2,7 +2,9 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  turbopack: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {},
   webpack: (config, { dev, isServer }) => {
     // Handle font files

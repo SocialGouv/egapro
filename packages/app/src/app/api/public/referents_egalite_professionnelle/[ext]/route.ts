@@ -13,7 +13,6 @@ import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
 export const revalidate = 86400; // 24h
-export const dynamic = "force-dynamic";
 
 export const GET: NextRouteHandler<"ext"> = async (_, { params }) => {
   const { ext } = await params;
@@ -40,12 +39,14 @@ export const GET: NextRouteHandler<"ext"> = async (_, { params }) => {
       return new NextResponse(
         error
           .appErrorList()
-          .map(e => e.message)
+          .map((e) => e.message)
           .join("\n"),
         { status: StatusCodes.BAD_REQUEST },
       );
     } else {
-      return new NextResponse(null, { status: StatusCodes.INTERNAL_SERVER_ERROR });
+      return new NextResponse(null, {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 };
