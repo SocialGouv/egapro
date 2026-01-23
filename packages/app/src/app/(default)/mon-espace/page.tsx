@@ -29,11 +29,12 @@ const MySpacePage = () => {
             {
               children: "Ajouter une entreprise sur Proconnect",
               priority: "secondary",
-              linkProps: {
-                href: proconnectManageOrganisationsUrl,
-                target: "_blank",
-                rel: "noopener noreferrer",
-              },
+              onClick: () =>
+                signIn(
+                  "proconnect",
+                  { callbackUrl: "/mon-espace" },
+                  { prompt: "select_organization" },
+                ),
             },
           ]}
         />
