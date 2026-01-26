@@ -3,6 +3,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Archive from "@codegouvfr/react-dsfr/picto/Archive";
+import Question from "@codegouvfr/react-dsfr/picto/Question";
+import Article from "@codegouvfr/react-dsfr/picto/Article";
+import CustomerService from "@codegouvfr/react-dsfr/picto/CustomerService";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMemo, useState } from "react";
