@@ -81,8 +81,8 @@ const CompaniesHelp = () => {
                 </div>
                 <div className={fr.cx("fr-card__header")}>
                   <div className={fr.cx("fr-card__img")}>
-                    <span
-                      className={fr.cx("fr-icon-question-line", "fr-icon--lg")}
+                    <Question
+                      className={fr.cx("fr-picto", "fr-picto--lg")}
                       aria-hidden="true"
                     />
                   </div>
@@ -105,8 +105,8 @@ const CompaniesHelp = () => {
                 </div>
                 <div className={fr.cx("fr-card__header")}>
                   <div className={fr.cx("fr-card__img")}>
-                    <span
-                      className={fr.cx("fr-icon-article-line", "fr-icon--lg")}
+                    <Article
+                      className={fr.cx("fr-picto", "fr-picto--lg")}
                       aria-hidden="true"
                     />
                   </div>
@@ -129,11 +129,8 @@ const CompaniesHelp = () => {
                 </div>
                 <div className={fr.cx("fr-card__header")}>
                   <div className={fr.cx("fr-card__img")}>
-                    <span
-                      className={fr.cx(
-                        "fr-icon-customer-service-line",
-                        "fr-icon--lg",
-                      )}
+                    <CustomerService
+                      className={fr.cx("fr-picto", "fr-picto--lg")}
                       aria-hidden="true"
                     />
                   </div>
