@@ -200,7 +200,7 @@ const MySpacePage = () => {
 
       {/* Bandeau gris : breadcrumb + déclarant */}
       <div className={fr.cx("fr-background-alt--grey")}>
-        <div className={fr.cx("fr-container", "fr-pt-2w", "fr-pb-3w")}>
+        <div className={fr.cx("fr-container", "fr-pt-1w", "fr-pb-3w")}>
           <nav
             role="navigation"
             className={fr.cx("fr-breadcrumb")}
