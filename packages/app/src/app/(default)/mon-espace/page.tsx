@@ -59,13 +59,11 @@ const getStatusSeverity = (status: "EN COURS" | "EFFECTUÉ") =>
 
 const CompaniesHelp = () => {
   return (
-    <div className={fr.cx("fr-mt-6w")}>
-      <div
-        className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-py-4w")}
-        style={{
-          borderBottom: "2px solid var(--border-active-blue-france)",
-        }}
-      >
+    <div
+      className={fr.cx("fr-mt-6w")}
+      style={{ backgroundColor: "var(--background-alt-blue-france, #e3e3fd)" }}
+    >
+      <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-py-4w")}>
         <div className={fr.cx("fr-col-12", "fr-col-md-9")}>
           <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
