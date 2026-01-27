@@ -20,52 +20,7 @@ model archive {
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
-model declaration {
-  siren       String
-  year        Int
-  modified_at DateTime?                @db.Timestamptz(6)
-  declared_at DateTime?                @db.Timestamptz(6)
-  declarant   String?
-  data        Json?
-  draft       Json?
-  legacy      Json?
-  ft          Unsupported("tsvector")?
-  search      search?
-
-  @@id([siren, year])
-  @@index([siren], map: "idx_declaration_siren")
-  @@index([year], map: "idx_declaration_year")
-}
-
-model ownership {
-  siren String
-  email String
-
-  @@id([siren, email])
-}
-
-model ownership_request {
-  id           String    @id(map: "ownership_request_pk") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  modified_at  DateTime? @default(now()) @db.Timestamptz(6)
-  siren        String?
-  email        String?
-  asker_email  String
-  status       String
-  error_detail Json?
-}
-
-model referent {
-  id               String  @id(map: "referent_pk") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  county           String?
-  name             String
-  principal        Boolean @default(false)
-  region           String
-  type             String
-  value            String
-  substitute_name  String?
-  substitute_email String?
-}
+// Keeping only the representation_equilibree related models
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model representation_equilibree {
@@ -80,27 +35,6 @@ model representation_equilibree {
   @@id([siren, year])
   @@index([year], map: "idx_representation_equilibree_year")
   @@index([siren], map: "idx_siren")
-}
-
-model search {
-  siren       String
-  year        Int
-  declared_at DateTime?                @db.Timestamptz(6)
-  ft          Unsupported("tsvector")?
-  region      String?                  @db.VarChar(2)
-  departement String?                  @db.VarChar(3)
-  section_naf String?                  @db.Char(1)
-  note        Int?
-  declaration declaration              @relation(fields: [siren, year], references: [siren, year], onDelete: Cascade, map: "declaration_exists")
-
-  @@id([siren, year])
-  @@index([declared_at], map: "idx_declared_at")
-  @@index([departement], map: "idx_departement")
-  @@index([ft], map: "idx_ft", type: Gin)
-  @@index([section_naf], map: "idx_naf")
-  @@index([region], map: "idx_region")
-  @@index([siren], map: "idx_search_siren")
-  @@index([year], map: "idx_search_year")
 }
 
 model search_representation_equilibree {
@@ -123,8 +57,4 @@ model search_representation_equilibree {
   @@index([year], map: "idx_search_representation_equilibree_year")
 }
 
-model simulation {
-  id          String    @id @db.Uuid
-  modified_at DateTime? @db.Timestamptz(6)
-  data        Json?
-}
+// simulation and others are omitted from Prisma model to keep the client focused

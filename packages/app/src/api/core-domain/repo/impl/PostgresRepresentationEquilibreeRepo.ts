@@ -6,11 +6,15 @@ import {
 } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
-import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
+import {
+  type SQLCount,
+  UnexpectedRepositoryError,
+} from "@common/shared-domain";
 import { type Any } from "@common/utils/types";
 
 import { type IRepresentationEquilibreeRepo } from "../IRepresentationEquilibreeRepo";
 import { PostgresRepresentationEquilibreeSearchRepo } from "./PostgresRepresentationEquilibreeSearchRepo";
+import prisma from "../../../../lib/prisma";
 
 export class PostgresRepresentationEquilibreeRepo implements IRepresentationEquilibreeRepo {
   private table = sql("representation_equilibree");
@@ -28,69 +32,125 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     return this;
   }
 
-  public async getAllBySiren(siren: Siren): Promise<RepresentationEquilibree[]> {
+  public async getAllBySiren(
+    siren: Siren,
+  ): Promise<RepresentationEquilibree[]> {
     try {
-      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${this.postgresLimit}`;
+      const raws = await prisma.representation_equilibree.findMany({
+        where: { siren: siren.getValue() },
+        take: this.requestLimit || undefined,
+      });
 
-      return raws.map(representationEquilibreeMap.toDomain);
+      return raws.map((r) =>
+        representationEquilibreeMap.toDomain(
+          r as unknown as RepresentationEquilibreeRaw,
+        ),
+      );
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
       if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
   }
 
-  public async delete([siren, year]: RepresentationEquilibreePK): Promise<void> {
-    await this.sql`delete from ${this.table} where siren=${siren.getValue()} and year=${year.getValue()}`;
+  public async delete([
+    siren,
+    year,
+  ]: RepresentationEquilibreePK): Promise<void> {
+    await prisma.representation_equilibree.deleteMany({
+      where: { siren: siren.getValue(), year: year.getValue() },
+    });
   }
   public exists(_id: RepresentationEquilibreePK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<RepresentationEquilibree[]> {
-    const raw = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
+    const raws = await prisma.representation_equilibree.findMany({
+      take: this.requestLimit || undefined,
+    });
 
-    return raw.map(representationEquilibreeMap.toDomain) as unknown as RepresentationEquilibree[];
+    return raws.map((r) =>
+      representationEquilibreeMap.toDomain(
+        r as unknown as RepresentationEquilibreeRaw,
+      ),
+    ) as unknown as RepresentationEquilibree[];
   }
-  public async getOne([siren, year]: RepresentationEquilibreePK): Promise<RepresentationEquilibree | null> {
+  public async getOne([
+    siren,
+    year,
+  ]: RepresentationEquilibreePK): Promise<RepresentationEquilibree | null> {
     try {
-      const [raw] = await this.sql`select * from ${
-        this.table
-      } where siren=${siren.getValue()} and year=${year.getValue()} limit 1`;
-
+      const raw = await prisma.representation_equilibree.findUnique({
+        where: {
+          siren_year: { siren: siren.getValue(), year: year.getValue() },
+        } as any,
+      });
       if (!raw) return null;
-      return representationEquilibreeMap.toDomain(raw);
+      return representationEquilibreeMap.toDomain(
+        raw as unknown as RepresentationEquilibreeRaw,
+      );
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
       if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
   }
 
   public async saveWithIndex(item: RepresentationEquilibree): Promise<void> {
-    await this.sql.begin(async transac => {
-      const thisRepo = new PostgresRepresentationEquilibreeRepo(transac as unknown as typeof sql);
-      const searchRepo = new PostgresRepresentationEquilibreeSearchRepo(transac as unknown as typeof sql);
-      await thisRepo.save(item);
-      await searchRepo.index(item);
-    });
+    // Note: original implementation used a SQL transaction for both save and indexing.
+    // Here we perform save via Prisma and then call the search repo index.
+    // This is not fully atomic across different client implementations; consider
+    // revisiting if strict transactional atomicity is required.
+    await this.save(item);
+    const searchRepo = new PostgresRepresentationEquilibreeSearchRepo();
+    await searchRepo.index(item);
   }
 
-  public async save(item: RepresentationEquilibree): Promise<RepresentationEquilibreePK> {
+  public async save(
+    item: RepresentationEquilibree,
+  ): Promise<RepresentationEquilibreePK> {
     const raw = representationEquilibreeMap.toPersistence(item);
-
-    const ftRaw: Any = {
-      ...raw,
-      ft: sql`to_tsvector('ftdict', ${raw.ft})`,
+    // Use Prisma upsert for create/update
+    const createData: any = {
+      siren: raw.siren,
+      year: raw.year,
+      data: raw.data,
+      modified_at: raw.modified_at ?? new Date(),
+      declared_at: raw.declared_at ?? null,
     };
-    const insert = sql(ftRaw);
-    const update = sql(ftRaw, "data", "modified_at", "ft");
-    await this.sql`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
+    const updateData: any = {
+      data: raw.data,
+      modified_at: raw.modified_at ?? new Date(),
+      declared_at: raw.declared_at ?? null,
+    };
+
+    await prisma.representation_equilibree.upsert({
+      where: { siren_year: { siren: raw.siren, year: raw.year } } as any,
+      create: createData,
+      update: updateData,
+    });
+
+    // Update tsvector column using raw SQL if ft data is provided
+    if (raw.ft) {
+      await prisma.$executeRawUnsafe(
+        `UPDATE representation_equilibree SET ft = to_tsvector('ftdict', $1) WHERE siren = $2 AND year = $3`,
+        raw.ft,
+        raw.siren,
+        raw.year,
+      );
+    }
 
     return [item.siren, item.year];
   }
