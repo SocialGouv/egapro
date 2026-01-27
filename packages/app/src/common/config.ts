@@ -198,7 +198,6 @@ export const config = {
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
 
-
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
         clientSecret: ensureApiEnvVar(

@@ -30,8 +30,6 @@ export interface ProConnectProfile {
   exp?: number;
 }
 
-
-
 export function ProConnectProvider<P extends ProConnectProfile>(
   options?: OAuthUserConfig<P>,
 ): OAuthConfig<P> {
@@ -101,22 +99,26 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         id: profile.sub,
         email: profile.email,
         emailVerified: profile.email_verified ?? false,
-        name: `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() || null,
+        name:
+          `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() ||
+          null,
         given_name: profile.given_name ?? null,
         family_name: profile.usual_name ?? null,
         phone_number: profile.phone_number
           ? profile.phone_number.replace(/[.\-\s]/g, "")
           : null,
         siret: profile.siret || null,
-        organization: profile.siret ? {
-          id: parseInt(profile.siret, 10),
-          label: null,
-          siren: profile.siret.substring(0, 9),
-          siret: profile.siret,
-          is_collectivite_territoriale: false,
-          is_external: false,
-          is_service_public: false,
-        } : undefined,
+        organization: profile.siret
+          ? {
+              id: parseInt(profile.siret, 10),
+              label: null,
+              siren: profile.siret.substring(0, 9),
+              siret: profile.siret,
+              is_collectivite_territoriale: false,
+              is_external: false,
+              is_service_public: false,
+            }
+          : undefined,
         raw: profile,
       };
     },
