@@ -4,10 +4,16 @@ services:
   files:
     image: egapro_files
     build:
-      context: .
-      dockerfile: packages/files/Dockerfile
+      # Use the package's directory as build context so COPY in the Dockerfile
+      # can find index.js and .htpasswd which live in packages/files
+      context: ./packages/files
+      # Dockerfile path is relative to the build context above
+      dockerfile: Dockerfile
+    # Do not mount the whole package into /app: it would hide node_modules
+    # installed at image build time and cause MODULE_NOT_FOUND at runtime.
+    # Mount only the passwd file and the mnt directory.
     volumes:
-      - ./packages/files:/app
+      - ./packages/files/.htpasswd:/app/.htpasswd:ro
       - ./mnt:/mnt
     environment:
       ROOT_PATH: /mnt
