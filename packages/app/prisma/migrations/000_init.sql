@@ -1,0 +1,2 @@
+-- Initial migration placeholder. The schema was introspected from the existing DB.
+-- Review and split into proper migrations before applying to staging/prod.

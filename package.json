@@ -21,13 +21,17 @@
     "test:app": "pnpm --filter app test",
     "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app test:e2e",
     "build:app": "pnpm --filter app build",
-    "build": "pnpm build:app"
+    "build": "pnpm build:app",
+    "prisma:generate": "pnpm --filter app prisma generate",
+    "prisma:pull": "pnpm --filter app prisma db pull"
   },
   "devDependencies": {
+    "@prisma/client": "^5.22.0",
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/git": "^10.0.1",
     "@socialgouv/releaserc": "^1.1.1",
     "concurrently": "^8.2.0",
+    "prisma": "^5.22.0",
     "semantic-release": "^19"
   },
   "dependencies": {
