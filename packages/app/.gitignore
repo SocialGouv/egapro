@@ -7,4 +7,5 @@
 .env
 .env.local
 .env.*.local
+public/dsfr/*.env
 public/dsfr/*
