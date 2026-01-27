@@ -9,3 +9,6 @@
 .env.*.local
 public/dsfr/*.env
 public/dsfr/*
+
+# pnpm store artifacts
+.pnpm-store

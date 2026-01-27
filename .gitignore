@@ -60,3 +60,6 @@ venv/
 !.yarn/sdks
 !.yarn/versions
 mnt/dgt.xlsx
+
+# pnpm store artifacts (not useful in git)
+.pnpm-store

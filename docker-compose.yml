@@ -20,7 +20,6 @@ services:
       - 8080:8080
     restart: always
 
-
   maildev:
     image: djfarrelly/maildev
     command: bin/maildev --hide-extensions STARTTLS
@@ -43,6 +42,25 @@ services:
       - 5438:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # Migrate helper: run Prisma migrations against the `db` service.
+  # Use this in dev to ensure Prisma migrations are applied instead of raw SQL init.
+  db-migrate:
+    image: node:20-bullseye
+    # Mount repository root so pnpm can use pnpm-lock.yaml at project root
+    working_dir: /work
+    volumes:
+      - ./:/work
+    depends_on:
+      - db
+    entrypoint: >
+      sh -c "apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl ca-certificates libssl-dev > /dev/null 2>&1 || true; \
+             until pg_isready -h db -p 5432; do sleep 1; done; \
+             npm install -g pnpm && pnpm install --frozen-lockfile --filter app && \
+             DATABASE_URL='postgresql://postgres:postgres@db:5432/egapro' pnpm --filter app exec prisma migrate deploy"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/egapro"
+    restart: "no"
 
   test_db:
     restart: always
