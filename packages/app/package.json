@@ -5,8 +5,8 @@
   "inject-workspace-packages": true,
   "scripts": {
     "prebuild": "node scripts/prebuild-dsfr.js",
-    "dev": "npm run prebuild && npx next dev",
-    "build": "npm run prebuild && npx next build --webpack",
+    "dev": "npm run prebuild && npx prisma generate && npx next dev",
+    "build": "npm run prebuild && npx prisma generate && npx next build --webpack",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",
@@ -121,6 +121,7 @@
     "next-router-mock": "^0.9.13",
     "prettier": "^3.0.0",
     "prisma": "^5.22.0",
+    "react-is": "^19.2.4",
     "sass": "^1.68.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",

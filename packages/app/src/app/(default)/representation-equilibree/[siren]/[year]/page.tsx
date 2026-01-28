@@ -11,7 +11,14 @@ import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, CenteredContainer, DownloadCard, Grid, GridCol, Link } from "@design-system";
+import {
+  Box,
+  CenteredContainer,
+  DownloadCard,
+  Grid,
+  GridCol,
+  Link,
+} from "@design-system";
 import { ClientAnimate } from "@design-system/utils/client/ClientAnimate";
 import { add, isAfter } from "date-fns";
 import { notFound } from "next/navigation";
@@ -24,11 +31,19 @@ import { EditButton } from "./EditButton";
 // export const revalidate = 86400; // 24h
 export const dynamic = "force-dynamic";
 
-const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
+const proconnectManageOrganisationsUrl =
+  process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
-const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: string }> }) => {  const { siren, year: strYear } = await params;
+const RepEqPage = async ({
+  params,
+}: {
+  params: Promise<{ siren: string; year: string }>;
+}) => {
+  const { siren, year: strYear } = await params;
   const year = +strYear;
-  const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
+  const useCase = new GetRepresentationEquilibreeBySirenAndYear(
+    representationEquilibreeRepo,
+  );
 
   let repEq: RepresentationEquilibreeDTO | null = null;
   try {
@@ -44,7 +59,11 @@ const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: st
     }
     return (
       <CenteredContainer pb="6w">
-        <Alert severity="error" title="Erreur inattendue" description="Une erreur inattendue est survenue." />
+        <Alert
+          severity="error"
+          title="Erreur inattendue"
+          description="Une erreur inattendue est survenue."
+        />
       </CenteredContainer>
     );
   }
@@ -54,12 +73,14 @@ const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: st
   }
 
   const session = await getServerSession(authConfig);
-  const isOwner = session?.user.staff || session?.user.entreprise?.siren === siren;
+  const isOwner =
+    session?.user.staff || session?.user.entreprise?.siren === siren;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const olderThanOneYear = session?.data?.user.staff
     ? false
-    : repEq.declaredAt === undefined || isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
+    : repEq.declaredAt === undefined ||
+      isAfter(new Date(), add(new Date(repEq.declaredAt), { years: 1 }));
 
   return (
     <CenteredContainer pb="6w">
@@ -72,17 +93,22 @@ const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: st
             closable
             description={
               <>
-                Votre compte "<strong>{session.user.email}</strong>" n'est pas rattaché au Siren{" "}
-                <strong>{siren}</strong>, vous ne pouvez donc pas modifier cette déclaration.
+                Votre compte "<strong>{session.user.email}</strong>" n'est pas
+                rattaché au Siren <strong>{siren}</strong>, vous ne pouvez donc
+                pas modifier cette déclaration.
                 <br />
-                Si vous pensez qu'il s'agit d'une erreur, vous pouvez faire une demande de rattachement directement
-                depuis{" "}
-                <Link href={`${proconnectManageOrganisationsUrl}`} target="_blank">
+                Si vous pensez qu'il s'agit d'une erreur, vous pouvez faire une
+                demande de rattachement directement depuis{" "}
+                <Link
+                  href={`${proconnectManageOrganisationsUrl}`}
+                  target="_blank"
+                >
                   votre espace ProConnect
                 </Link>
                 .
                 <br />
-                Une fois la demande validée par ProConnect, vous pourez modifier cette déclaration.
+                Une fois la demande validée par ProConnect, vous pourez modifier
+                cette déclaration.
               </>
             }
             className={fr.cx("fr-mb-4w")}
@@ -103,11 +129,15 @@ const RepEqPage = async ({ params }: { params: Promise<{ siren: string; year: st
         )}
       </ClientAnimate>
 
-      <h1>Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation Équilibrée</h1>
+      <h1>
+        Récapitulatif {isOwner ? "" : "en accès libre "}de la Représentation
+        Équilibrée
+      </h1>
 
       <Highlight>
-        Déclaration des écarts de représentation Femmes‑Hommes pour l'année <strong>{year + 1}</strong> au titre des
-        données <strong>{year}</strong>.
+        Déclaration des écarts de représentation Femmes‑Hommes pour l'année{" "}
+        <strong>{year + 1}</strong> au titre des données <strong>{year}</strong>
+        .
       </Highlight>
 
       {isOwner && (
