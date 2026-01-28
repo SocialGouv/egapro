@@ -54,8 +54,6 @@ RUN pnpm --filter app --prod deploy ./prod --legacy && pnpm store prune
 COPY packages/app/prisma ./prod/prisma
 RUN cd prod && npx prisma generate
 
-
-# Runner
 FROM node:$NODE_VERSION AS runner
 
 WORKDIR /app
