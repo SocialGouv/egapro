@@ -69,12 +69,12 @@ COPY --from=builder /app/prod/.env.production .
 COPY --from=builder /app/prod/.env.development .
 COPY --from=builder /app/prod/public ./public
 COPY --from=builder /app/prod/node_modules ./node_modules
-COPY --from=builder /app/prod/sentry.*.ts .
+COPY --from=builder /app/prod/sentry.*.ts ./
 COPY --from=builder --chown=node:node /app/prod/.next ./.next
 
 USER 1000
 
-CMD ["node_modules/.bin/next", "start"]
+CMD ["npx", "next", "start"]
 
 ARG SENTRY_URL
 ARG SENTRY_ORG
