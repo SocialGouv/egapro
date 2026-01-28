@@ -71,22 +71,6 @@ export const proConnectProvider = ProConnectProvider({
 
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
-  // DEBUG: Log providers to diagnose proconnect OAuth 404
-  logger: {
-    error: (code, ...message) => {
-      logger.error({ ...message, code }, "NextAuth Error");
-      console.error("NextAuth ERROR:", code, ...message); // Also to stdout
-    },
-    warn: (code, ...message) =>
-      logger.warn({ ...message, code }, "NextAuth Warning"),
-    info: (code: string, ...message: string[]) =>
-      logger.info({ ...message, code }, "NextAuth Info"),
-    debug: (code, ...message) => {
-      logger.debug({ ...message, code }, "NextAuth Debug");
-      if (config.env === "dev")
-        console.log("NextAuth DEBUG:", code, ...message);
-    },
-  },
   logger: {
     error: (code, ...message) => logger.error({ ...message, code }, "Error"),
     warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
