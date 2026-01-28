@@ -12,3 +12,6 @@ public/dsfr/*
 
 # pnpm store artifacts
 .pnpm-store
+
+# Prisma generated client
+.prisma
