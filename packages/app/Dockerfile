@@ -43,20 +43,16 @@ ENV GENERATE_SOURCEMAP=true \
     NODE_ENV=production
 
 # Clean output directory and build with source maps
-RUN --mount=type=secret,id=sentry \
-    if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "production" ]; then \
-        if [ ! -f /run/secrets/sentry ]; then \
-            echo "Sentry secret required for production build" >&2; \
-            exit 1; \
-        fi; \
-        export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_TOKEN=' /run/secrets/sentry | cut -d'=' -f2); \
-    fi; \
+RUN \
     export NODE_OPTIONS="--max-old-space-size=8192"; \
     export GENERATE_SOURCEMAP=true; \
     export SENTRY_ALLOW_FAILURE=true; \
     pnpm --filter app build
 
 RUN pnpm --filter app --prod deploy ./prod --legacy && pnpm store prune
+
+COPY packages/app/prisma ./prod/prisma
+RUN cd prod && npx prisma generate
 
 
 # Runner
@@ -73,7 +69,6 @@ COPY --from=builder /app/prod/.env.production .
 COPY --from=builder /app/prod/.env.development .
 COPY --from=builder /app/prod/public ./public
 COPY --from=builder /app/prod/node_modules ./node_modules
-COPY --from=builder /app/.prisma ./.prisma
 COPY --from=builder /app/prod/sentry.*.ts .
 COPY --from=builder --chown=node:node /app/prod/.next ./.next
 
