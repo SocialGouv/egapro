@@ -14,14 +14,6 @@ app:
 keycloak:
   ~chart: app
   imagePackage: keycloak
-  command: start-dev --import-realm
-  ports:
-    - 8081:8080
-  environment:
-    KEYCLOAK_ADMIN: admin
-    KEYCLOAK_ADMIN_PASSWORD: admin
-    KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
-  restart: always
 
 maildev: {}
 pgweb: {}
