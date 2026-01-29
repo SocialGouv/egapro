@@ -15,7 +15,7 @@ keycloak:
   ~chart: app
   imagePackage: keycloak
   containerPort: 8080
-  probesPath: /index.html
+  probesPath: /
   resources:
     requests:
       cpu: 200m
