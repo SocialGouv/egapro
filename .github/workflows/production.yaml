@@ -48,6 +48,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           pull: true
+          fallback-enabled: true
           build-args: |
             NEXT_PUBLIC_API_URL=https://egapro.travail.gouv.fr/api
             NEXT_PUBLIC_API_V2_URL=https://egapro.travail.gouv.fr/apiv2
