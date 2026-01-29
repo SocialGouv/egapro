@@ -185,7 +185,8 @@ jobs:
       - name: 📦 Build and push Docker image for keycloak
         uses: socialgouv/workflows/actions/buildkit@v1
         with:
-          context: "packages/keycloak"
+          context: "."
+          dockerfile: "packages/keycloak/Dockerfile"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           registry: "${{ vars.REGISTRY_URL }}"
