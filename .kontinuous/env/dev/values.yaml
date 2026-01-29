@@ -14,7 +14,19 @@ app:
 keycloak:
   ~chart: app
   imagePackage: keycloak
-  command: start-dev --http-port=3000
+  command: start-dev
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 30
 
 maildev: {}
 pgweb: {}
