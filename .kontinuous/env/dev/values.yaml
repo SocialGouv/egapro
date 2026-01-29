@@ -14,6 +14,7 @@ app:
 keycloak:
   ~chart: app
   imagePackage: keycloak
+  command: start-dev --import-realm
 
 maildev: {}
 pgweb: {}
