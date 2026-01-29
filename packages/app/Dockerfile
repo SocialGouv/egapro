@@ -6,11 +6,13 @@ FROM node:$NODE_VERSION AS builder
 
 WORKDIR /app
 
+ENV PNPM_STORE_PATH /pnpm-store
+
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN npm install -g pnpm
 RUN mkdir -p packages/app
 COPY packages/app/package.json packages/app/package.json
-RUN pnpm install --frozen-lockfile --filter app
+RUN --mount=type=cache,target=/pnpm-store pnpm install --frozen-lockfile --filter app
 
 COPY packages/app/ ./packages/app/
 
