@@ -40,11 +40,11 @@ ENV SENTRY_PROJECT=$SENTRY_PROJECT
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
-# Enable source map generation during build
-ENV GENERATE_SOURCEMAP=true \
+# Disable source maps for faster builds in CI
+ENV GENERATE_SOURCEMAP=false \
     NODE_ENV=production
 
-# Clean output directory and build with source maps
+# Clean output directory and build
 RUN --mount=type=secret,id=sentry \
     if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "production" ]; then \
         if [ ! -f /run/secrets/sentry ]; then \

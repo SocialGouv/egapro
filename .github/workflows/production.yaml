@@ -44,6 +44,7 @@ jobs:
           buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
           buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
           buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+          cache-enabled: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
           pull: true
