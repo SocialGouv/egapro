@@ -14,7 +14,6 @@ concurrency:
 
 jobs:
   build-app:
-    if: false
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -47,6 +46,7 @@ jobs:
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+
       - name: 📦 Build and push Docker image for app
         uses: socialgouv/workflows/actions/buildkit@v1
         with:
@@ -77,7 +77,6 @@ jobs:
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
 
   build-nginx:
-    if: false
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -118,7 +117,6 @@ jobs:
           buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
 
   build-files:
-    if: false
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -159,6 +157,7 @@ jobs:
           buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
 
   kontinuous:
+    needs: [build-app, build-nginx, build-files]
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
