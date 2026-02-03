@@ -3,14 +3,18 @@ import { COUNTY_TO_REGION, DEFAULT_COUNTRY_COG, inseeCodeToCounty } from "@commo
 
 export const getAdditionalMeta = (company: Entreprise) => {
   // postalCode and city may be undefined for foreign companies.
-  const countyCode = company.firstMatchingEtablissement.codeCommuneEtablissement
-    ? inseeCodeToCounty(company.firstMatchingEtablissement.codeCommuneEtablissement)
-    : undefined;
+  const codeCommuneEtablissement = company.firstMatchingEtablissement.codeCommuneEtablissement;
+  const countyCode =
+    codeCommuneEtablissement && !codeCommuneEtablissement.includes("[NON-DIFFUSIBLE]")
+      ? inseeCodeToCounty(codeCommuneEtablissement)
+      : undefined;
   const regionCode = countyCode ? COUNTY_TO_REGION[countyCode] : null;
+  const codePostalEtablissement = company.firstMatchingEtablissement.codePostalEtablissement;
   const postalCode =
-    company.firstMatchingEtablissement.codePostalEtablissement &&
-    !company.firstMatchingEtablissement.codePostalEtablissement.includes("[ND]")
-      ? company.firstMatchingEtablissement.codePostalEtablissement
+    codePostalEtablissement &&
+    !codePostalEtablissement.includes("[ND]") &&
+    !codePostalEtablissement.includes("[NON-DIFFUSIBLE]")
+      ? codePostalEtablissement
       : undefined;
   const address = postalCode
     ? company.firstMatchingEtablissement.address.split(postalCode)[0].trim()
