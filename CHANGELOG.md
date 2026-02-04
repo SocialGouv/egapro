@@ -1,3 +1,10 @@
+## [3.15.2](https://github.com/SocialGouv/egapro/compare/v3.15.1...v3.15.2) (2026-02-04)
+
+
+### Bug Fixes
+
+* non diffusible prod ([#2774](https://github.com/SocialGouv/egapro/issues/2774)) ([7bbac50](https://github.com/SocialGouv/egapro/commit/7bbac500453fd0cc0bdbaaf04908b66fb862ae8c))
+
 ## [3.15.1](https://github.com/SocialGouv/egapro/compare/v3.15.0...v3.15.1) (2026-01-22)
 
 
