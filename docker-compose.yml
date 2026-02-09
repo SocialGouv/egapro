@@ -1,37 +1,4 @@
-version: "3.8"
-
 services:
-  files:
-    image: egapro_files
-    build:
-      context: .
-      dockerfile: packages/files/Dockerfile
-    volumes:
-      - ./packages/files:/app
-      - ./mnt:/mnt
-    environment:
-      ROOT_PATH: /mnt
-      TRUSTED_PROXY_IP: "172.17.0.1"
-      AUTH_PASSWD_FILE: "/app/.htpasswd"
-      WHITELIST_IP: "127.0.0.1"
-      FILES_PUBLIC: "dgt.xlsx,dgt-representation.xlsx,index-egalite-fh.xlsx,indexes.csv,full.ndjson,dgt-export-representation.xlsx"
-      FILES_RESTRICTED: ""
-    ports:
-      - 8080:8080
-    restart: always
-
-
-  maildev:
-    image: djfarrelly/maildev
-    command: bin/maildev --hide-extensions STARTTLS
-    ports:
-      - "${MAILDEV_SMTP_PORT:-1025}:${MAILDEV_SMTP_PORT:-1025}"
-      - "${MAILDEV_WEB_PORT:-1080}:${MAILDEV_WEB_PORT:-1080}"
-    environment:
-      MAILDEV_WEB_PORT: ${MAILDEV_WEB_PORT:-1080}
-      MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT:-1025}
-    restart: always
-
   db:
     restart: always
     image: postgres
@@ -42,34 +9,7 @@ services:
     ports:
       - 5438:5432
     volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  test_db:
-    restart: always
-    image: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: test_egapro
-    ports:
-      - 5436:5432
-
-  pgadmin:
-    image: dcagatay/pwless-pgadmin4
-    ports:
-      - 5050:80
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-
-      POSTGRES_USER_2: postgres
-      POSTGRES_PASSWORD_2: postgres
-      POSTGRES_HOST_2: test_db
-      POSTGRES_PORT_2: 5432
-    volumes:
-      - pgadmin:/var/lib/pgadmin
+      - pgdata:/var/lib/postgresql
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.1.1
@@ -83,38 +23,5 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     restart: always
-
-  # TODO handle redirect with nginx (https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#configuring-for-use-with-the-nginx-auth_request-directive)
-  oauth2-proxy-github:
-    image: bitnami/oauth2-proxy
-    command:
-      # - --redirect-url=https://oauth-egapro.preprod.ovh.fabrique.social.gouv.fr/callback
-      - --redirect-url=http://localhost:4180/oauth2/callback
-      - --upstream=file:///dev/null
-      - --whitelist-domain=.ovh.fabrique.social.gouv.fr
-      - --whitelist-domain=localhost:3000
-    ports:
-      - 4180:4180
-    environment:
-      OAUTH2_PROXY_COOKIE_SECRET: ""
-      OAUTH2_PROXY_CLIENT_ID: ""
-      OAUTH2_PROXY_CLIENT_SECRET: ""
-      OAUTH2_PROXY_SCOPE: "user:email read:org"
-      OAUTH2_PROXY_COOKIE_SECURE: "false"
-      OAUTH2_PROXY_PASS_USER_HEADERS: "true"
-      OAUTH2_PROXY_PASS_ACCESS_TOKEN: "true"
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: "true"
-      OAUTH2_PROXY_SHOW_DEBUG_ON_ERROR: "true"
-      OAUTH2_PROXY_ERRORS_TO_INFO_LOG: "true"
-      OAUTH2_PROXY_PROVIDER: github
-      OAUTH2_PROXY_GITHUB_ORG: SocialGouv
-      OAUTH2_PROXY_GITHUB_TEAM: egapro
-      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
-      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
-      OAUTH2_PROXY_FOOTER: "-"
-      OAUTH2_PROXY_BANNER: "-"
-      OAUTH2_PROXY_REVERSE_PROXY: "true"
-
 volumes:
   pgdata:
-  pgadmin:
