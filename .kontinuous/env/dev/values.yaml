@@ -13,7 +13,9 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "http://keycloak/realms/atlas/.well-known/openid-configuration"
+    # Note: EGAPRO_PROCONNECT_ISSUER sera surchargé par le ConfigMap avec l'URL externe
+    # L'URL interne est gardée ici comme fallback pour les tests locaux
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "http://localhost:8080/realms/atlas/.well-known/openid-configuration"
 
 keycloak:
   ~chart: app

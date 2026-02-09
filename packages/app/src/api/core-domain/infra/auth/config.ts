@@ -109,10 +109,31 @@ export const authConfig: AuthOptions = {
   ],
   callbacks: {
     async signIn({ account, profile }) {
-      if (account?.provider !== "github") return true;
+      logger.info({
+        provider: account?.provider,
+        hasAccount: !!account,
+        hasProfile: !!profile,
+      }, "🔐 SignIn callback déclenché");
+
+      if (account?.provider === "proconnect") {
+        logger.info({
+          profile,
+          accountType: account.type,
+          accountProvider: account.provider,
+        }, "✅ SignIn ProConnect - validation réussie");
+        return true;
+      }
+
+      if (account?.provider !== "github") {
+        logger.info({ provider: account?.provider }, "✅ SignIn non-GitHub accepté");
+        return true;
+      }
 
       const githubProfile = profile as unknown as GithubProfile;
-      if (!account.access_token || !githubProfile?.login) return false;
+      if (!account.access_token || !githubProfile?.login) {
+        logger.warn("❌ SignIn GitHub - token ou login manquant");
+        return false;
+      }
 
       const octokit = new Octokit({ auth: account.access_token });
       try {
@@ -121,19 +142,37 @@ export const authConfig: AuthOptions = {
           team_slug: "egapro",
           username: githubProfile.login,
         });
-        return membership.data.state === "active";
-      } catch {
+        const isActive = membership.data.state === "active";
+        logger.info({
+          username: githubProfile.login,
+          isActive,
+        }, isActive ? "✅ SignIn GitHub - membre actif" : "❌ SignIn GitHub - membre inactif");
+        return isActive;
+      } catch (error) {
+        logger.error({
+          error: error instanceof Error ? error.message : String(error),
+          username: githubProfile.login,
+        }, "❌ SignIn GitHub - erreur vérification membership");
         return false;
       }
     },
 
     async jwt({ token, profile, trigger, account, session }) {
+        logger.info({
+          trigger,
+          provider: account?.provider,
+          hasProfile: !!profile,
+          hasAccount: !!account,
+          hasSession: !!session,
+        }, "🔄 JWT callback déclenché");
+
         const isStaff =
           token.user?.staff || token.staff?.impersonating || false;
 
         // Store ID token for logout (available during initial sign in)
         if (account?.id_token) {
           token.idToken = account.id_token;
+          logger.info("💾 ID token stocké pour logout");
         }
 
         // === IMPERSONATION ===
@@ -148,13 +187,20 @@ export const authConfig: AuthOptions = {
                   session.user.companies as Company[],
                 );
             }
+            logger.info("👤 Impersonation activée");
           } else if (session.staff.impersonating === false) {
             token.user.staff = true;
             token.staff.impersonating = false;
+            logger.info("👤 Impersonation désactivée");
           }
         }
 
-        if (trigger !== "signUp") return token;
+        if (trigger !== "signUp") {
+          logger.info({ trigger }, "⏭️  JWT callback - pas de signUp, token retourné tel quel");
+          return token;
+        }
+
+        logger.info("🆕 JWT callback - signUp détecté, initialisation du token");
 
         // === INITIALISATION COMPLÈTE ===
         token.user = {
@@ -179,18 +225,35 @@ export const authConfig: AuthOptions = {
           const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
           token.user.firstname = firstname || undefined;
           token.user.lastname = lastname || undefined;
+          logger.info({ email: token.email }, "✅ GitHub profile traité");
 
         } else {
           const proConnectProfile = profile as ProConnectProfile;
-          logger.info({ proConnectProfile }, "ProConnect profile reçu → enrichissement Weez");
+          logger.info({
+            email: proConnectProfile.email,
+            siret: proConnectProfile.siret,
+            given_name: proConnectProfile.given_name,
+            usual_name: proConnectProfile.usual_name,
+          }, "📋 ProConnect profile reçu → enrichissement");
 
           if (proConnectProfile.siret) {
+            logger.info({ siret: proConnectProfile.siret }, "🔍 Recherche établissement via Weez");
             try {
               const etablissement = await entrepriseService.siret(new Siret(proConnectProfile.siret));
               token.user.entreprise = etablissement;
+              logger.info({
+                siret: proConnectProfile.siret,
+                siren: etablissement.siren,
+                raisonSociale: etablissement.raisonSociale,
+              }, "✅ Établissement trouvé");
             } catch (error) {
-              logger.warn({ siret: proConnectProfile.siret, error }, "Failed to fetch organization for siret");
+              logger.warn({
+                siret: proConnectProfile.siret,
+                error: error instanceof Error ? error.message : String(error),
+              }, "⚠️  Échec récupération établissement");
             }
+          } else {
+            logger.info("ℹ️  Pas de SIRET dans le profile ProConnect");
           }
 
           token.user.staff = config.api.staff.includes(proConnectProfile.email ?? "");
@@ -198,13 +261,32 @@ export const authConfig: AuthOptions = {
           token.user.lastname = proConnectProfile.usual_name ?? undefined;
           token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
           token.user.siret = proConnectProfile.siret ?? undefined;
+
+          logger.info({
+            email: proConnectProfile.email,
+            isStaff: token.user.staff,
+            hasEntreprise: !!token.user.entreprise,
+          }, "✅ ProConnect profile traité et enrichi");
         }
         return token;
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.includes("/api/v2/logout")) return url;
-      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+      logger.info({
+        url,
+        baseUrl,
+        isLogout: url.includes("/api/v2/logout"),
+        isRelative: url.startsWith("/"),
+      }, "🔀 Redirect callback");
+
+      if (url.includes("/api/v2/logout")) {
+        logger.info({ url }, "🚪 Redirect vers logout");
+        return url;
+      }
+
+      const finalUrl = url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+      logger.info({ finalUrl }, "➡️  Redirect final");
+      return finalUrl;
     },
 
     async session({ session, token }) {

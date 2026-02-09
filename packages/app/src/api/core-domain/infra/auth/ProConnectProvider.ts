@@ -37,6 +37,17 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 ): OAuthConfig<P> {
   const { proconnect } = config;
 
+  // Log la configuration OAuth au démarrage
+  logger.info({
+    issuer: proconnect.issuer,
+    well_known: proconnect.well_known,
+    authorization_endpoint: proconnect.authorization_endpoint,
+    token_endpoint: proconnect.token_endpoint,
+    userinfo_endpoint: proconnect.userinfo_endpoint,
+    clientId: proconnect.clientId,
+    scope: proconnect.scope,
+  }, "🔧 Configuration ProConnect OAuth initialisée");
+
   return {
     id: "proconnect",
     name: "ProConnect",
@@ -52,50 +63,119 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     token: {
       url: proconnect.token_endpoint,
+      async request(context) {
+        logger.info({
+          url: proconnect.token_endpoint,
+          params: context.params,
+        }, "📤 Token request envoyée");
+
+        try {
+          const response = await fetch(proconnect.token_endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams(context.params as Record<string, string>),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            logger.error({
+              status: response.status,
+              statusText: response.statusText,
+              url: proconnect.token_endpoint,
+              responseData: data,
+            }, "❌ Token request failed");
+            throw new Error(`Token request failed: ${response.status} ${response.statusText}`);
+          }
+
+          logger.info({
+            status: response.status,
+            hasAccessToken: !!data.access_token,
+            hasIdToken: !!data.id_token,
+            hasRefreshToken: !!data.refresh_token,
+            tokenType: data.token_type,
+            expiresIn: data.expires_in,
+          }, "✅ Token reçu avec succès");
+
+          return { tokens: data };
+        } catch (error) {
+          logger.error({
+            error: error instanceof Error ? error.message : String(error),
+            url: proconnect.token_endpoint,
+          }, "❌ Erreur lors de la requête token");
+          throw error;
+        }
+      },
     },
     userinfo: {
       url: proconnect.userinfo_endpoint,
       async request({ tokens }) {
-        if (!tokens.access_token) throw new Error("No access token");
-
-        const response = await fetch(proconnect.userinfo_endpoint, {
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`,
-            Accept: "application/json",
-          },
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          const text = await response.text();
-          logger.error(
-            { status: response.status, body: text },
-            "ProConnect userinfo error",
-          );
-          throw new Error(`ProConnect userinfo failed: ${response.status}`);
+        if (!tokens.access_token) {
+          logger.error("❌ Pas d'access_token disponible pour userinfo");
+          throw new Error("No access token");
         }
 
-        const contentType = response.headers.get("content-type") || "";
-        const rawBody = await response.text();
+        logger.info({
+          url: proconnect.userinfo_endpoint,
+          hasAccessToken: !!tokens.access_token,
+        }, "📤 Userinfo request envoyée");
 
-        if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
-          const parts = rawBody.trim().split(".");
-          if (parts.length !== 3) throw new Error("Invalid JWT format");
+        try {
+          const response = await fetch(proconnect.userinfo_endpoint, {
+            headers: {
+              Authorization: `Bearer ${tokens.access_token}`,
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          });
 
-          let payload = parts[1];
-          payload += "=".repeat((4 - (payload.length % 4)) % 4);
-          const decoded = JSON.parse(
-            Buffer.from(payload, "base64url").toString("utf-8"),
-          );
-          return decoded;
+          if (!response.ok) {
+            const text = await response.text();
+            logger.error({
+              status: response.status,
+              statusText: response.statusText,
+              url: proconnect.userinfo_endpoint,
+              body: text,
+            }, "❌ Userinfo request failed");
+            throw new Error(`ProConnect userinfo failed: ${response.status}`);
+          }
+
+          const contentType = response.headers.get("content-type") || "";
+          const rawBody = await response.text();
+
+          logger.info({
+            status: response.status,
+            contentType,
+            bodyPreview: rawBody.substring(0, 100),
+          }, "✅ Userinfo reçue avec succès");
+
+          if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
+            const parts = rawBody.trim().split(".");
+            if (parts.length !== 3) throw new Error("Invalid JWT format");
+
+            let payload = parts[1];
+            payload += "=".repeat((4 - (payload.length % 4)) % 4);
+            const decoded = JSON.parse(
+              Buffer.from(payload, "base64url").toString("utf-8"),
+            );
+            return decoded;
+          }
+
+          return JSON.parse(rawBody);
+        } catch (error) {
+          logger.error({
+            error: error instanceof Error ? error.message : String(error),
+            url: proconnect.userinfo_endpoint,
+          }, "❌ Erreur lors de la requête userinfo");
+          throw error;
         }
-
-        return JSON.parse(rawBody);
       },
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
-      logger.info({ profile }, "ProConnect profile reçu");
+      logger.info({ profile }, "✅ ProConnect profile reçu et traité");
 
       return {
         id: profile.sub,
