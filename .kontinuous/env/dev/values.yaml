@@ -9,13 +9,14 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr/realms/atlas/.well-known/openid-connect-configuration"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://{{ .Values.keycloak.host }}/realms/atlas/.well-known/openid-connect-configuration"
 
 keycloak:
   ~chart: app
   imagePackage: keycloak
   containerPort: 8080
   probesPath: /
+  host: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
   resources:
     requests:
       cpu: 200m
