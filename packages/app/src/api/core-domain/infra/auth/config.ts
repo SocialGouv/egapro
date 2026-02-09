@@ -244,7 +244,7 @@ export const authConfig: AuthOptions = {
               logger.info({
                 siret: proConnectProfile.siret,
                 siren: etablissement.siren,
-                raisonSociale: etablissement.raisonSociale,
+                label: etablissement.simpleLabel,
               }, "✅ Établissement trouvé");
             } catch (error) {
               logger.warn({
