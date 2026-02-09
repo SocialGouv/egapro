@@ -16,7 +16,6 @@ keycloak:
   imagePackage: keycloak
   containerPort: 8080
   probesPath: /
-  host: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
   resources:
     requests:
       cpu: 200m
@@ -29,7 +28,6 @@ keycloak:
     KEYCLOAK_ADMIN_PASSWORD: admin
     KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
     KC_PROXY: edge
-    KC_HOSTNAME: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
     KC_HOSTNAME_STRICT: "false"
 
 maildev: {}
