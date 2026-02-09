@@ -49,7 +49,6 @@ export const config = {
     return {};
   },
 
-  // PROCONNECT CONFIGURATION
   proconnect: {
     get issuer() {
       if (process.env.EGAPRO_PROCONNECT_ISSUER) {
@@ -63,7 +62,8 @@ export const config = {
         : "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/auth`;
       }
@@ -74,7 +74,8 @@ export const config = {
       return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
       }
@@ -85,7 +86,8 @@ export const config = {
       return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
       }
@@ -96,7 +98,8 @@ export const config = {
       return `${baseUrl}/userinfo`;
     },
     get jwks_uri() {
-      const isKeycloak = this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/certs`;
       }
@@ -110,7 +113,8 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
-      const isKeycloak = this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/.well-known/openid-configuration`;
       }
@@ -199,7 +203,6 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
-
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
