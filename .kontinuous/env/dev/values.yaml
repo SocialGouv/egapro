@@ -9,7 +9,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "http://keycloak:8080/realms/atlas/.well-known/openid-connect-configuration"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr/realms/atlas/.well-known/openid-connect-configuration"
 
 keycloak:
   ~chart: app
@@ -27,6 +27,9 @@ keycloak:
     KEYCLOAK_ADMIN: admin
     KEYCLOAK_ADMIN_PASSWORD: admin
     KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
+    KC_PROXY: edge
+    KC_HOSTNAME: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
+    KC_HOSTNAME_STRICT: "false"
 
 maildev: {}
 pgweb: {}
