@@ -2,8 +2,12 @@ app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
   envFrom:
+    - configMapRef:
+        name: "proconnect"
+        optional: true
     - secretRef:
         name: "proconnect"
+        optional: true
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
