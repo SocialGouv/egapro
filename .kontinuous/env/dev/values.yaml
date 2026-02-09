@@ -1,3 +1,6 @@
+global:
+  keycloakHost: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
+
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
@@ -9,14 +12,14 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://{{ .Values.keycloak.host }}/realms/atlas/.well-known/openid-connect-configuration"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://{{ .Values.global.keycloakHost }}/realms/atlas/.well-known/openid-connect-configuration"
 
 keycloak:
   ~chart: app
   imagePackage: keycloak
   containerPort: 8080
   probesPath: /
-  host: "keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
+  host: "{{ .Values.global.keycloakHost }}"
   resources:
     requests:
       cpu: 200m

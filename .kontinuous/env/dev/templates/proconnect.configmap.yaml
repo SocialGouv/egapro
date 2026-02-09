@@ -4,7 +4,7 @@ metadata:
   name: proconnect
 data:
   NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: https://app.proconnect.gouv.fr
-  PROCONNECT_AUTHORIZATION_ENDPOINT: https://{{ .Values.keycloak.host }}/realms/atlas/protocol/openid-connect/auth
+  PROCONNECT_AUTHORIZATION_ENDPOINT: https://{{ .Values.global.keycloakHost }}/realms/atlas/protocol/openid-connect/auth
   PROCONNECT_TOKEN_ENDPOINT: http://keycloak/realms/atlas/protocol/openid-connect/token
   PROCONNECT_USERINFO_ENDPOINT: http://keycloak/realms/atlas/protocol/openid-connect/userinfo
   PROCONNECT_SCOPE: "openid email given_name usual_name phone_number organizations"
