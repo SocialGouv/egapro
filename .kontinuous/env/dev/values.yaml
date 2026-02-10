@@ -29,23 +29,10 @@ keycloak:
     limits:
       cpu: 1000m
       memory: 1Gi
-  volumes:
-    - name: realm-import
-      configMap:
-        name: realm-export
-  volumeMounts:
-    - name: realm-import
-      mountPath: /opt/keycloak/data/import
   vars:
     KEYCLOAK_ADMIN: admin
     KEYCLOAK_ADMIN_PASSWORD: admin
     KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
-    KC_PROXY: internal
-    KC_HOSTNAME_STRICT: "false"
-    KC_HTTP_ENABLED: "true"
-  command:
-    - start-dev
-    - --import-realm
     KC_PROXY: edge
     KC_HOSTNAME_STRICT: "false"
 
