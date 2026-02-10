@@ -7,6 +7,12 @@ data:
   SECURITY_PROCONNECT_CLIENT_ID: "egapro-dev"
   SECURITY_PROCONNECT_CLIENT_SECRET: "dev-secret-key-for-local-development-only"
 
-  # IMPORTANT: Issuer doit pointer vers l'URL externe Keycloak pour que les redirects OAuth fonctionnent
-  # Le code dans config.ts construira automatiquement tous les endpoints (authorization, token, userinfo)
+  # Configuration des endpoints OAuth
+  # Note: authorization_endpoint doit être externe (accessible depuis le navigateur)
+  # tandis que token_endpoint et userinfo_endpoint utilisent l'URL interne du service Kubernetes
+  EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT: "https://keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth"
+  EGAPRO_PROCONNECT_TOKEN_ENDPOINT: "http://keycloak:8080/realms/atlas/protocol/openid-connect/token"
+  EGAPRO_PROCONNECT_USERINFO_ENDPOINT: "http://keycloak:8080/realms/atlas/protocol/openid-connect/userinfo"
+
+  # Issuer pour référence (utilisé par le code si les endpoints ci-dessus ne sont pas définis)
   EGAPRO_PROCONNECT_ISSUER: "https://keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
