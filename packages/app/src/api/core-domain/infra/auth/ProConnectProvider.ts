@@ -82,6 +82,14 @@ export function ProConnectProvider<P extends ProConnectProfile>(
             client_secret: proconnect.clientSecret,
             redirect_uri: (options as any)?.callbackUrl,
           };
+          logger.info(
+            {
+              fullParams: Object.fromEntries(
+                new URLSearchParams(params as Record<string, string>),
+              ),
+            },
+            "🔍 Full token request params",
+          );
           const response = await fetch(proconnect.token_endpoint, {
             method: "POST",
             headers: {
