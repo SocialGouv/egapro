@@ -15,4 +15,5 @@ data:
   EGAPRO_PROCONNECT_USERINFO_ENDPOINT: "http://keycloak/realms/atlas/protocol/openid-connect/userinfo"
 
   # Issuer pour référence (utilisé par le code si les endpoints ci-dessus ne sont pas définis)
-  EGAPRO_PROCONNECT_ISSUER: "https://keycloak-{{ .Release.Namespace }}.ovh.fabrique.social.gouv.fr"
+  # Use internal Keycloak service for dev environment to avoid external DNS issues
+  EGAPRO_PROCONNECT_ISSUER: "http://keycloak"

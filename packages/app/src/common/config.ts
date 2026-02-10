@@ -57,7 +57,6 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
-      // Default to production ProConnect. For local dev and test environments, set EGAPRO_PROCONNECT_ISSUER to the appropriate Keycloak URL (e.g., "http://localhost:8081" for local or "https://keycloak-default.ovh.fabrique.social.gouv.fr" for kube test).
       return "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
