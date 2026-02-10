@@ -1,8 +1,8 @@
-import { sql } from "../postgres";
+import { db } from "../drizzle";
+import { representationEquilibree } from "../schema";
 
 export const seed = async function () {
-  const table = "representation_equilibree";
-  await sql`delete from ${sql(table)}`;
+  await db.delete(representationEquilibree);
 
   // const randomDatas = new Array(random(50))
   //   .fill(null)

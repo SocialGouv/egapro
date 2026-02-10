@@ -1,70 +1,76 @@
 import { type AdminDeclarationRaw } from "@api/core-domain/infra/db/raw";
-import { sql } from "@api/shared-domain/infra/db/postgres";
+import { db } from "@api/shared-domain/infra/db/drizzle";
+import {
+  declaration,
+  representationEquilibree,
+  search,
+  searchRepresentationEquilibree,
+} from "@api/shared-domain/infra/db/schema";
 import { type AdminDeclarationDTO } from "@common/core-domain/dtos/AdminDeclarationDTO";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
-import { isFinite } from "lodash";
-import { type Helper } from "postgres";
+import { isFinite as isFiniteNumber } from "lodash";
+import { sql } from "drizzle-orm";
 
-import { type AdminDeclarationSearchCriteria, type IAdminDeclarationRepo, orderByMap } from "../IAdminDeclarationRepo";
+import {
+  type AdminDeclarationSearchCriteria,
+  type IAdminDeclarationRepo,
+  orderByMap,
+} from "../IAdminDeclarationRepo";
 
 export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
-  private declarationTable = sql("declaration");
-  private representationEquilibreeTable = sql("representation_equilibree");
-  private searchTable = sql("search");
-  private searchRepresentationEquilibreeTable = sql("search_representation_equilibree");
+  constructor(private drizzle: typeof db = db) {}
 
-  public async search(criteria: AdminDeclarationSearchCriteria): Promise<AdminDeclarationDTO[]> {
-    const cteCombined = sql("cte_combined");
+  public async search(
+    criteria: AdminDeclarationSearchCriteria,
+  ): Promise<AdminDeclarationDTO[]> {
+    const cteCombined = sql.identifier("cte_combined");
 
-    const raws = await sql<AdminDeclarationRaw[]>`
+    const raws = (await this.drizzle.execute(sql`
       WITH ${cteCombined} AS (
-          SELECT ${this.declarationTable}.declared_at AS created_at,
-              ${this.declarationTable}.data->'déclarant'->>'email' AS declarant_email,
-              ${this.declarationTable}.data->'déclarant'->>'prénom' AS declarant_firstname,
-              ${this.declarationTable}.data->'déclarant'->>'nom' AS declarant_lastname,
-              ${this.declarationTable}.data->'entreprise'->>'raison_sociale' AS name,
-              ${this.declarationTable}.data->'entreprise'->>'siren' AS siren,
-              'index' AS type,
-              ${this.declarationTable}.year AS year,
-              (${this.declarationTable}.data->'déclaration'->>'index')::int AS index,
-              ${this.declarationTable}.data->'entreprise'->'ues' AS ues
-          FROM ${this.declarationTable}
-              JOIN ${this.searchTable} ON ${this.declarationTable}.siren = ${this.searchTable}.siren
-              AND ${this.searchTable}.year = ${this.declarationTable}.year
-          ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
-          UNION ALL
-          SELECT ${this.representationEquilibreeTable}.declared_at AS created_at,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'email' AS declarant_email,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'prénom' AS declarant_firstname,
-              ${this.representationEquilibreeTable}.data->'déclarant'->>'nom' AS declarant_lastname,
-              ${this.representationEquilibreeTable}.data->'entreprise'->>'raison_sociale' AS name,
-              ${this.representationEquilibreeTable}.data->'entreprise'->>'siren' AS siren,
-              'repeq' AS type,
-              ${this.representationEquilibreeTable}.year,
-              NULL AS index,
-              NULL AS ues
-          FROM ${this.representationEquilibreeTable}
-              JOIN ${this.searchRepresentationEquilibreeTable} ON ${this.representationEquilibreeTable}.siren = ${
-                this.searchRepresentationEquilibreeTable
-              }.siren
-              AND ${this.searchRepresentationEquilibreeTable}.year = ${this.representationEquilibreeTable}.year
-          ${this.buildSearchWhereClause(
-            criteria,
-            this.searchRepresentationEquilibreeTable,
-            this.representationEquilibreeTable,
-          )}
+        SELECT ${declaration}.declared_at AS created_at,
+               ${declaration}.data->'déclarant'->>'email' AS declarant_email,
+               ${declaration}.data->'déclarant'->>'prénom' AS declarant_firstname,
+               ${declaration}.data->'déclarant'->>'nom' AS declarant_lastname,
+               ${declaration}.data->'entreprise'->>'raison_sociale' AS name,
+               ${declaration}.data->'entreprise'->>'siren' AS siren,
+               'index' AS type,
+               ${declaration}.year AS year,
+               (${declaration}.data->'déclaration'->>'index')::int AS index,
+               ${declaration}.data->'entreprise'->'ues' AS ues
+        FROM ${declaration}
+        JOIN ${search} ON ${declaration}.siren = ${search}.siren
+                     AND ${search}.year = ${declaration}.year
+        ${this.buildSearchWhereClause(criteria, { searchTable: search, dataTable: declaration })}
+
+        UNION ALL
+
+        SELECT ${representationEquilibree}.declared_at AS created_at,
+               ${representationEquilibree}.data->'déclarant'->>'email' AS declarant_email,
+               ${representationEquilibree}.data->'déclarant'->>'prénom' AS declarant_firstname,
+               ${representationEquilibree}.data->'déclarant'->>'nom' AS declarant_lastname,
+               ${representationEquilibree}.data->'entreprise'->>'raison_sociale' AS name,
+               ${representationEquilibree}.data->'entreprise'->>'siren' AS siren,
+               'repeq' AS type,
+               ${representationEquilibree}.year,
+               NULL AS index,
+               NULL AS ues
+        FROM ${representationEquilibree}
+        JOIN ${searchRepresentationEquilibree} ON ${representationEquilibree}.siren = ${searchRepresentationEquilibree}.siren
+                                              AND ${searchRepresentationEquilibree}.year = ${representationEquilibree}.year
+        ${this.buildSearchWhereClause(criteria, { searchTable: searchRepresentationEquilibree, dataTable: representationEquilibree })}
       )
       SELECT *
       FROM ${cteCombined}
-      ORDER BY ${sql(criteria.orderBy ? orderByMap[criteria.orderBy] : sql("created_at"))} ${
+      ORDER BY ${sql.identifier(criteria.orderBy ? orderByMap[criteria.orderBy] : "created_at")} ${
         criteria.orderDirection === "asc" ? sql`asc` : sql`desc`
       }
       LIMIT ${criteria.limit ?? 100}
-      OFFSET ${criteria.offset ?? 0};`;
+      OFFSET ${criteria.offset ?? 0};
+    `)) as unknown as AdminDeclarationRaw[];
 
     return raws.map(
-      raw =>
+      (raw) =>
         ({
           createdAt: raw.created_at,
           declarantEmail: raw.declarant_email,
@@ -80,7 +86,7 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
                 ues: raw.ues
                   ? {
                       name: raw.ues.nom!,
-                      companies: raw.ues.entreprises?.map(entreprise => ({
+                      companies: raw.ues.entreprises?.map((entreprise) => ({
                         name: entreprise.raison_sociale,
                         siren: entreprise.siren,
                       })),
@@ -92,63 +98,69 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
     );
   }
 
-  public async count(criteria: AdminDeclarationSearchCriteria): Promise<number> {
-    const cteCountDeclaration = sql("cte_count_declaration");
-    const cteCountRepresentationEquilibree = sql("cte_count_representation_equilibree");
+  public async count(
+    criteria: AdminDeclarationSearchCriteria,
+  ): Promise<number> {
+    const cteCountDeclaration = sql.identifier("cte_count_declaration");
+    const cteCountRepresentationEquilibree = sql.identifier(
+      "cte_count_representation_equilibree",
+    );
 
-    const [{ count }] = await sql<SQLCount>`
-    WITH 
+    const [{ count }] = (await this.drizzle.execute(sql`
+      WITH 
         ${cteCountDeclaration} AS (
-            SELECT COUNT(distinct(${this.searchTable}.siren)) AS count1
-            FROM ${this.searchTable}
-            JOIN ${this.declarationTable} ON ${this.searchTable}.siren = ${this.declarationTable}.siren
-              AND ${this.declarationTable}.year = ${this.searchTable}.year
-            ${this.buildSearchWhereClause(criteria, this.searchTable, this.declarationTable)}
+          SELECT COUNT(distinct(${search}.siren)) AS count1
+          FROM ${search}
+          JOIN ${declaration} ON ${search}.siren = ${declaration}.siren
+                             AND ${declaration}.year = ${search}.year
+          ${this.buildSearchWhereClause(criteria, { searchTable: search, dataTable: declaration })}
         ),
         ${cteCountRepresentationEquilibree} AS (
-            SELECT COUNT(distinct(${this.searchRepresentationEquilibreeTable}.siren)) AS count2
-            FROM ${this.searchRepresentationEquilibreeTable}
-            JOIN ${this.representationEquilibreeTable} ON ${this.searchRepresentationEquilibreeTable}.siren = ${
-              this.representationEquilibreeTable
-            }.siren
-              AND ${this.representationEquilibreeTable}.year = ${this.searchRepresentationEquilibreeTable}.year
-            ${this.buildSearchWhereClause(
-              criteria,
-              this.searchRepresentationEquilibreeTable,
-              this.representationEquilibreeTable,
-            )}
+          SELECT COUNT(distinct(${searchRepresentationEquilibree}.siren)) AS count2
+          FROM ${searchRepresentationEquilibree}
+          JOIN ${representationEquilibree} ON ${searchRepresentationEquilibree}.siren = ${representationEquilibree}.siren
+                                          AND ${representationEquilibree}.year = ${searchRepresentationEquilibree}.year
+          ${this.buildSearchWhereClause(criteria, { searchTable: searchRepresentationEquilibree, dataTable: representationEquilibree })}
         )
-    SELECT 
-        (count1 + count2) AS count
-    FROM 
-        ${cteCountDeclaration}, ${cteCountRepresentationEquilibree};`;
+      SELECT (count1 + count2) AS count
+      FROM ${cteCountDeclaration}, ${cteCountRepresentationEquilibree};
+    `)) as unknown as SQLCount;
+
     return +count;
   }
 
   private buildSearchWhereClause(
     criteria: AdminDeclarationSearchCriteria,
-    searchTable: Helper<string>,
-    table: Helper<string>,
+    {
+      searchTable,
+      dataTable,
+    }: {
+      searchTable: typeof search | typeof searchRepresentationEquilibree;
+      dataTable: typeof declaration | typeof representationEquilibree;
+    },
   ) {
     let hasWhere = false;
 
     let sqlYear = sql``;
     if (typeof criteria.year === "number") {
-      // no sql`and` here because it's the first condition
       sqlYear = sql`${searchTable}.year=${criteria.year}`;
       hasWhere = true;
     }
 
     let sqlEmail = sql``;
     if (criteria.email) {
-      sqlEmail = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'déclarant'->>'email' like ${`%${criteria.email}%`}`;
+      sqlEmail = sql`${hasWhere ? sql`and` : sql``} ${dataTable}.data->'déclarant'->>'email' like ${`%${criteria.email}%`}`;
       hasWhere = true;
     }
 
     let sqlIndexComparison = sql``;
     if (typeof criteria.index === "number" && criteria.indexComparison) {
-      sqlIndexComparison = sql`${hasWhere ? sql`and` : sql``} (${table}.data->'déclaration'->>'index')::int ${
-        criteria.indexComparison === "gt" ? sql`>` : criteria.indexComparison === "lt" ? sql`<` : sql`=`
+      sqlIndexComparison = sql`${hasWhere ? sql`and` : sql``} (${dataTable}.data->'déclaration'->>'index')::int ${
+        criteria.indexComparison === "gt"
+          ? sql`>`
+          : criteria.indexComparison === "lt"
+            ? sql`<`
+            : sql`=`
       } ${criteria.index}`;
       hasWhere = true;
     }
@@ -167,18 +179,16 @@ export class PostgresAdminDeclarationRepo implements IAdminDeclarationRepo {
 
     let sqlUes = sql``;
     if (criteria.ues) {
-      sqlUes = sql`${hasWhere ? sql`and` : sql``} ${table}.data->'entreprise'->'ues' IS NOT NULL`;
+      sqlUes = sql`${hasWhere ? sql`and` : sql``} ${dataTable}.data->'entreprise'->'ues' IS NOT NULL`;
       hasWhere = true;
     }
 
     let sqlQuery = sql``;
     if (criteria.query) {
-      if (criteria.query.length === 9 && isFinite(+criteria.query)) {
+      if (criteria.query.length === 9 && isFiniteNumber(+criteria.query)) {
         sqlQuery = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.siren=${criteria.query}`;
       } else {
-        sqlQuery = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(
-          criteria.query,
-        )})`;
+        sqlQuery = sql`${hasWhere ? sql`and` : sql``} ${searchTable}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
       }
       hasWhere = true;
     }

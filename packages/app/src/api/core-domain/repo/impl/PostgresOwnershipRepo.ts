@@ -1,27 +1,48 @@
 import { type OwnershipRaw } from "@api/core-domain/infra/db/raw";
-import { auditRepo } from "@api/core-domain/repo";
-import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
-import { type Ownership, type OwnershipPK } from "@common/core-domain/domain/Ownership";
+import { db } from "@api/shared-domain/infra/db/drizzle";
+import { ownership } from "@api/shared-domain/infra/db/schema";
+import {
+  type Ownership,
+  type OwnershipPK,
+} from "@common/core-domain/domain/Ownership";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { ownershipMap } from "@common/core-domain/mappers/ownershipMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import { type Email } from "@common/shared-domain/domain/valueObjects";
-import { type Any } from "@common/utils/types";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
+import { type IAuditRepo } from "../IAuditRepo";
 import { type IOwnershipRepo } from "../IOwnershipRepo";
+import { PostgresAuditRepo } from "./PostgresAuditRepo";
 
 export class PostgresOwnershipRepo implements IOwnershipRepo {
-  private table = _sql("ownership");
+  constructor(
+    private drizzle: typeof db = db,
+    private audit: IAuditRepo = new PostgresAuditRepo(drizzle),
+  ) {}
 
-  constructor(private sql = _sql<OwnershipRaw[]>) {}
+  private isConnRefused(error: unknown): boolean {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: unknown }).code === "ECONNREFUSED"
+    );
+  }
 
-  public async getAllEmailsBySiren(siren: Siren, username?: string): Promise<string[]> {
+  public async getAllEmailsBySiren(
+    siren: Siren,
+    username?: string,
+  ): Promise<string[]> {
     try {
       const sirenValue = siren.getValue();
 
-      const raws = await this.sql`select * from ${this.table} where siren=${sirenValue}`;
+      const raws = await this.drizzle
+        .select({ siren: ownership.siren, email: ownership.email })
+        .from(ownership)
+        .where(eq(ownership.siren, sirenValue));
 
-      auditRepo.logQuery(
+      this.audit.logQuery(
         "PostgresOwnershipRepo.getAllEmailsBySiren",
         "ownership",
         `select * from ownership where siren=$1`,
@@ -30,24 +51,33 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
         username,
       );
 
-      return raws.map(owner => owner.email);
+      return raws.map((owner) => owner.email);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
-      if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      if (this.isConnRefused(error)) {
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
   }
 
-  public async getAllSirenByEmail(email: Email, username?: string): Promise<string[]> {
+  public async getAllSirenByEmail(
+    email: Email,
+    username?: string,
+  ): Promise<string[]> {
     try {
       const emailValue = email.getValue();
 
-      const raws = await this.sql`select * from ${this.table} where email=${emailValue}`;
+      const raws = await this.drizzle
+        .select({ siren: ownership.siren, email: ownership.email })
+        .from(ownership)
+        .where(eq(ownership.email, emailValue));
 
-      auditRepo.logQuery(
+      this.audit.logQuery(
         "PostgresOwnershipRepo.getAllSirenByEmail",
         "ownership",
         `select * from ownership where email=$1`,
@@ -56,29 +86,36 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
         username,
       );
 
-      return raws.map(owner => owner.siren);
+      return raws.map((owner) => owner.siren);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
-      if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      if (this.isConnRefused(error)) {
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
   }
 
-  public async addSirens(email: Email, sirensToAdd: string[], username?: string): Promise<void> {
+  public async addSirens(
+    email: Email,
+    sirensToAdd: string[],
+    username?: string,
+  ): Promise<void> {
     try {
       const emailValue = email.getValue();
-      const values = sirensToAdd.map(siren => ({ siren, email: emailValue }));
+      const values = sirensToAdd.map((siren) => ({ siren, email: emailValue }));
 
-      await this.sql`INSERT INTO ${this.table} ${_sql(values)} ON CONFLICT DO NOTHING`;
+      await this.drizzle.insert(ownership).values(values).onConflictDoNothing();
 
-      auditRepo.logQuery(
+      this.audit.logQuery(
         "PostgresOwnershipRepo.addSirens",
         "ownership",
         `INSERT INTO ownership VALUES (${sirensToAdd
-          .map(siren => `('${siren}', '${emailValue}')`)
+          .map((siren) => `('${siren}', '${emailValue}')`)
           .join(", ")}) ON CONFLICT DO NOTHING`,
         [emailValue, sirensToAdd],
         undefined,
@@ -90,13 +127,24 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
-  public async removeSirens(email: Email, sirensToRemove: string[], username?: string): Promise<void> {
+  public async removeSirens(
+    email: Email,
+    sirensToRemove: string[],
+    username?: string,
+  ): Promise<void> {
     try {
       const emailValue = email.getValue();
 
-      await this.sql`DELETE FROM ${this.table} WHERE email = ${emailValue} AND siren = ANY(${sirensToRemove})`;
+      await this.drizzle
+        .delete(ownership)
+        .where(
+          and(
+            eq(ownership.email, emailValue),
+            inArray(ownership.siren, sirensToRemove),
+          ),
+        );
 
-      auditRepo.logQuery(
+      this.audit.logQuery(
         "PostgresOwnershipRepo.removeSirens",
         "ownership",
         `DELETE FROM ownership WHERE email = $1 AND siren = ANY($2)`,
@@ -112,9 +160,11 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   public async getAll(username?: string): Promise<Ownership[]> {
     try {
-      const raws = await this.sql`select * from ${this.table}`;
+      const raws = await this.drizzle
+        .select({ siren: ownership.siren, email: ownership.email })
+        .from(ownership);
 
-      auditRepo.logQuery(
+      this.audit.logQuery(
         "PostgresOwnershipRepo.getAll",
         "ownership",
         `select * from ownership`,
@@ -127,8 +177,11 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
-      if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      if (this.isConnRefused(error)) {
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
@@ -140,19 +193,23 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   // TODO use before creating new ownership request
   public async existsMultiple(...ids: OwnershipPK[]): Promise<boolean[]> {
-    const sql = _sql<Array<OwnershipRaw & { exists: boolean }>>;
-    const values = ids.map(([siren, email]) => [siren.getValue(), email.getValue()]);
+    type ExistsRow = { exists: boolean };
 
-    const raws = await sql`
-select siren, email, exists (
-  select 1
-  from ${this.table}
-  where ${this.table}.siren = exists_data.siren
-  and ${this.table}.email = exists_data.email
-) from (values ${_sql(values)}) as exists_data (siren, email)
-`;
+    const valuesTuples = ids.map(
+      ([siren, email]) => sql`(${siren.getValue()}, ${email.getValue()})`,
+    );
 
-    return raws.map(raw => raw.exists);
+    const raws = await this.drizzle.execute<ExistsRow>(sql`
+      select siren, email, exists (
+        select 1
+        from ${ownership}
+        where ${ownership}.siren = exists_data.siren
+          and ${ownership}.email = exists_data.email
+      ) as exists
+      from (values ${sql.join(valuesTuples, sql`, `)}) as exists_data (siren, email)
+    `);
+
+    return raws.map((raw) => raw.exists);
   }
 
   public getMultiple(..._ids: OwnershipPK[]): Promise<Ownership[]> {
@@ -162,20 +219,25 @@ select siren, email, exists (
   public async saveBulk(...items: Ownership[]): Promise<OwnershipPK[]> {
     const raws = items.map(ownershipMap.toPersistence);
 
-    await this.sql`insert into ${this.table} ${_sql(raws)} on conflict do nothing returning true`;
+    await this.drizzle.insert(ownership).values(raws).onConflictDoNothing();
 
-    auditRepo.logQuery(
+    this.audit.logQuery(
       "PostgresOwnershipRepo.saveBulk",
       "ownership",
       `INSERT INTO ownership VALUES ${items
-        .map(item => `('${item.siren.getValue()}', '${item.email.getValue()}')`)
+        .map(
+          (item) => `('${item.siren.getValue()}', '${item.email.getValue()}')`,
+        )
         .join(", ")} ON CONFLICT DO NOTHING`,
-      items.map(item => ({ siren: item.siren.getValue(), email: item.email.getValue() })),
+      items.map((item) => ({
+        siren: item.siren.getValue(),
+        email: item.email.getValue(),
+      })),
       undefined,
       undefined,
     );
 
-    return items.map(item => [item.siren, item.email]);
+    return items.map((item) => [item.siren, item.email]);
   }
 
   public updateBulk(..._items: Ownership[]): Promise<void> {
@@ -199,9 +261,9 @@ select siren, email, exists (
     const sirenValue = item.siren.getValue();
     const emailValue = item.email.getValue();
 
-    await this.sql`insert into ${this.table} ${_sql(raw)} on conflict do nothing returning true`;
+    await this.drizzle.insert(ownership).values(raw).onConflictDoNothing();
 
-    auditRepo.logQuery(
+    this.audit.logQuery(
       "PostgresOwnershipRepo.save",
       "ownership",
       `INSERT INTO ownership VALUES ('${sirenValue}', '${emailValue}') ON CONFLICT DO NOTHING`,

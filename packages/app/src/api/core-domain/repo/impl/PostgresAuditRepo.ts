@@ -1,4 +1,5 @@
-import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
+import { db } from "@api/shared-domain/infra/db/drizzle";
+import { auditQueryLog } from "@api/shared-domain/infra/db/schema";
 
 import { type IAuditRepo, type SqlOperation } from "../IAuditRepo";
 
@@ -6,7 +7,7 @@ import { type IAuditRepo, type SqlOperation } from "../IAuditRepo";
  * PostgreSQL implementation of the audit repository
  */
 export class PostgresAuditRepo implements IAuditRepo {
-  constructor(private sql = _sql) {}
+  constructor(private drizzle = db) {}
 
   /**
    * Log a SQL query on a table that contains email information
@@ -25,24 +26,17 @@ export class PostgresAuditRepo implements IAuditRepo {
     resultCount?: number,
     username?: string,
   ): Promise<void> {
-    await this.sql`
-        INSERT INTO audit.query_log (
-          username, 
-          operation, 
-          table_name, 
-          query, 
-          params, 
-          result_count
-        )
-        VALUES (
-          ${username || null},
-          ${operation},
-          ${tableName},
-          ${query},
-          ${JSON.stringify(params)},
-          ${operation === "SELECT" && resultCount !== undefined ? resultCount : null}
-        )
-      `;
+    await this.drizzle.insert(auditQueryLog).values({
+      username: username || null,
+      operation,
+      table_name: tableName,
+      query,
+      params,
+      result_count:
+        operation === "SELECT" && resultCount !== undefined
+          ? resultCount
+          : null,
+    });
   }
 
   public async logSelectQuery(
@@ -52,18 +46,61 @@ export class PostgresAuditRepo implements IAuditRepo {
     resultCount: number,
     username?: string,
   ): Promise<void> {
-    return this.logQuery("SELECT", tableName, query, params, resultCount, username);
+    return this.logQuery(
+      "SELECT",
+      tableName,
+      query,
+      params,
+      resultCount,
+      username,
+    );
   }
 
-  public async logInsertQuery(tableName: string, query: string, params: unknown[], username?: string): Promise<void> {
-    return this.logQuery("INSERT", tableName, query, params, undefined, username);
+  public async logInsertQuery(
+    tableName: string,
+    query: string,
+    params: unknown[],
+    username?: string,
+  ): Promise<void> {
+    return this.logQuery(
+      "INSERT",
+      tableName,
+      query,
+      params,
+      undefined,
+      username,
+    );
   }
 
-  public async logUpdateQuery(tableName: string, query: string, params: unknown[], username?: string): Promise<void> {
-    return this.logQuery("UPDATE", tableName, query, params, undefined, username);
+  public async logUpdateQuery(
+    tableName: string,
+    query: string,
+    params: unknown[],
+    username?: string,
+  ): Promise<void> {
+    return this.logQuery(
+      "UPDATE",
+      tableName,
+      query,
+      params,
+      undefined,
+      username,
+    );
   }
 
-  public async logDeleteQuery(tableName: string, query: string, params: unknown[], username?: string): Promise<void> {
-    return this.logQuery("DELETE", tableName, query, params, undefined, username);
+  public async logDeleteQuery(
+    tableName: string,
+    query: string,
+    params: unknown[],
+    username?: string,
+  ): Promise<void> {
+    return this.logQuery(
+      "DELETE",
+      tableName,
+      query,
+      params,
+      undefined,
+      username,
+    );
   }
 }

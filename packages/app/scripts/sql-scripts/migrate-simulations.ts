@@ -2,13 +2,16 @@ import { loadEnvConfig } from "@next/env";
 
 loadEnvConfig(process.cwd(), true);
 
-import { sql } from "@api/shared-domain/infra/db/postgres";
+import { db } from "@api/shared-domain/infra/db/drizzle";
+import { simulation } from "@api/shared-domain/infra/db/schema";
 import { type Any } from "@common/utils/types";
+import { eq, sql } from "drizzle-orm";
 import { inspect } from "util";
 
-import { type Simulation, updateIndicateurUn } from "./migrate-simulations-helpers";
-
-const table = sql("simulation");
+import {
+  type Simulation,
+  updateIndicateurUn,
+} from "./migrate-simulations-helpers";
 
 /*
 select * from ${table}
@@ -19,9 +22,10 @@ and not(data->'indicateurUn' ? 'modaliteCalculformValidated')`)
 
 export async function migrateSimulations() {
   // On ne s'occupe que des données qui n'ont pas encore la propriété data.indicateurUn.modaliteCalculformValidated, qui sont donc celles avant la migration.
-  const rows = (await sql`
-        select * from ${table}
-        where (data->'indicateurUn' ? 'coefficient')`) as Simulation[];
+  const rows = (await db.execute(sql`
+    select * from ${simulation}
+    where (data->'indicateurUn' ? 'coefficient')
+  `)) as unknown as Simulation[];
 
   console.log("nb rows", rows?.length ?? "no rows");
 
@@ -31,14 +35,19 @@ export async function migrateSimulations() {
     const newIndicateurUn = updateIndicateurUn(row.data.indicateurUn);
 
     if ((newIndicateurUn as Any)["coefficient"]) {
-      console.log("newIndicateurUn:", row.id, inspect(newIndicateurUn, false, Infinity, true));
+      console.log(
+        "newIndicateurUn:",
+        row.id,
+        inspect(newIndicateurUn, false, Infinity, true),
+      );
       throw new Error("should not have coefficient");
     }
     const newData = { ...row.data, indicateurUn: newIndicateurUn };
 
-    const updateData = sql({ data: newData }, "data");
-
-    await sql`update ${table} set ${updateData} where id = ${row.id}`;
+    await db
+      .update(simulation)
+      .set({ data: newData } as Any)
+      .where(eq(simulation.id, row.id as Any));
   }
 
   console.log("nb rows", rows?.length ?? "no rows");

@@ -1,38 +1,43 @@
 import { type OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import { auditRepo } from "@api/core-domain/repo";
-import { sql } from "@api/shared-domain/infra/db/postgres";
+import { db } from "@api/shared-domain/infra/db/drizzle";
+import { ownershipRequest } from "@api/shared-domain/infra/db/schema";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import { type OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { type GetOwnershipRequestDbOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
-import { type SQLCount, UnexpectedRepositoryError } from "@common/shared-domain";
+import { UnexpectedRepositoryError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import { type Any, ensureRequired } from "@common/utils/types";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
-import { type IOwnershipRequestRepo, type OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
+import {
+  type IOwnershipRequestRepo,
+  type OwnershipSearchCriteria,
+} from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
-const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestDbOrderBy, keyof OwnershipRequestRaw> = {
-  createdAt: "created_at",
-  siren: "siren",
-  askerEmail: "asker_email",
-  email: "email",
-  status: "status",
-  modifiedAt: "modified_at",
+const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<
+  GetOwnershipRequestDbOrderBy,
+  (typeof ownershipRequest)[keyof typeof ownershipRequest]
+> = {
+  createdAt: ownershipRequest.created_at,
+  siren: ownershipRequest.siren,
+  askerEmail: ownershipRequest.asker_email,
+  email: ownershipRequest.email,
+  status: ownershipRequest.status,
+  modifiedAt: ownershipRequest.modified_at,
 };
 
-const QUERYABLE_COLS: Array<keyof OwnershipRequestRaw> = ["asker_email", "siren", "email"];
+const QUERYABLE_COLS = [
+  ownershipRequest.asker_email,
+  ownershipRequest.siren,
+  ownershipRequest.email,
+] as const;
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
-  private table = sql("ownership_request");
-  private sql = sql<OwnershipRequestRaw[]>;
-
-  constructor(sqlInstance?: typeof sql) {
-    if (sqlInstance) {
-      this.sql = sqlInstance;
-    }
-  }
+  constructor(private drizzle: typeof db = db) {}
 
   private nextRequestLimit = 0;
   public limit(limit = 10) {
@@ -46,19 +51,19 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return ret;
   }
 
-  private get postgresLimit() {
-    const limit = this.requestLimit;
-    return limit > 0 ? sql`limit ${limit}` : sql``;
-  }
-
   public delete(_id: UniqueID): Promise<void> {
     throw new Error("Method not implemented.");
   }
   public exists(_id: UniqueID): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
+
   public async getAll(): Promise<OwnershipRequest[]> {
-    const raws = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
+    const limit = this.requestLimit;
+    const query = this.drizzle.select().from(ownershipRequest);
+    const raws = (limit > 0
+      ? await query.limit(limit)
+      : await query) as unknown as OwnershipRequestRaw[];
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.getAll",
@@ -76,7 +81,11 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     try {
       const idValue = id.getValue();
 
-      const [raw] = await this.sql`select * from ${this.table} where id = ${idValue} limit 1`;
+      const [raw] = (await this.drizzle
+        .select()
+        .from(ownershipRequest)
+        .where(eq(ownershipRequest.id, idValue))
+        .limit(1)) as unknown as OwnershipRequestRaw[];
 
       auditRepo.logQuery(
         "PostgresOwnershipRequestRepo.getOne",
@@ -93,7 +102,10 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       console.error(error);
       // TODO better error handling
       if ((error as Any).code === "ECONNREFUSED") {
-        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+        throw new UnexpectedRepositoryError(
+          "Database unreachable. Please verify connection.",
+          error as Error,
+        );
       }
       throw error;
     }
@@ -102,8 +114,21 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async save(item: OwnershipRequest): Promise<UniqueID> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    const insert = sql(raw, "siren", "email", "asker_email", "status", "error_detail");
-    const [rawReturn] = await this.sql`insert into ${this.table} ${insert} returning *`;
+    // Insert only the writable columns (the raw type also contains DB-managed columns).
+    const insertValues = {
+      siren: raw.siren,
+      email: raw.email,
+      asker_email: raw.asker_email,
+      status: raw.status,
+      error_detail: raw.error_detail,
+    };
+
+    const [rawReturn] = (await this.drizzle
+      .insert(ownershipRequest)
+      .values(insertValues)
+      .returning({ id: ownershipRequest.id })) as unknown as Array<{
+      id: string;
+    }>;
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.save",
@@ -121,7 +146,10 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const raw = ownershipRequestMap.toPersistence(item);
     const idValue = ensureRequired(item).id.getValue();
 
-    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${idValue}`;
+    await this.drizzle
+      .update(ownershipRequest)
+      .set({ status: raw.status, error_detail: raw.error_detail })
+      .where(eq(ownershipRequest.id, idValue));
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.update",
@@ -134,31 +162,44 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async updateWithOwnership(item: OwnershipRequest): Promise<void> {
-    await this.sql.begin(async transac => {
+    await this.drizzle.transaction(async (transac) => {
       const ownership = new Ownership({
         email: item.email!,
         siren: item.siren!,
       });
-      const ownershipRepo = new PostgresOwnershipRepo(transac as unknown as typeof sql);
-      const thisRepo = new PostgresOwnershipRequestRepo(transac as unknown as typeof sql);
+      const ownershipRepo = new PostgresOwnershipRepo(
+        transac as unknown as typeof db,
+      );
+      const thisRepo = new PostgresOwnershipRequestRepo(
+        transac as unknown as typeof db,
+      );
       await ownershipRepo.save(ownership);
       await thisRepo.update(item);
     });
   }
 
-  public async updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void> {
-    await this.sql.begin(async transac => {
+  public async updateWithOwnershipBulk(
+    ...items: OwnershipRequest[]
+  ): Promise<void> {
+    await this.drizzle.transaction(async (transac) => {
       const ownerships = items
-        .filter(element => element.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED)
+        .filter(
+          (element) =>
+            element.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED,
+        )
         .map(
-          item =>
+          (item) =>
             new Ownership({
               email: item.email!,
               siren: item.siren!,
             }),
         );
-      const ownershipRepo = new PostgresOwnershipRepo(transac as unknown as typeof sql);
-      const thisRepo = new PostgresOwnershipRequestRepo(transac as unknown as typeof sql);
+      const ownershipRepo = new PostgresOwnershipRepo(
+        transac as unknown as typeof db,
+      );
+      const thisRepo = new PostgresOwnershipRequestRepo(
+        transac as unknown as typeof db,
+      );
 
       if (ownerships.length) await ownershipRepo.saveBulk(...ownerships);
       await thisRepo.updateBulk(...items);
@@ -174,9 +215,14 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const idValues = ids.map(id => id.getValue());
+    const idValues = ids.map((id) => id.getValue());
 
-    const raws = await this.sql`select * from ${this.table} where id in ${sql(idValues)}`;
+    const raws = (await this.drizzle
+      .select()
+      .from(ownershipRequest)
+      .where(
+        inArray(ownershipRequest.id, idValues),
+      )) as unknown as OwnershipRequestRaw[];
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.getMultiple",
@@ -197,27 +243,34 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   // TODO: better handle column casting/coercing in "values" because temp table switch everything to text
   public async updateBulk(...items: OwnershipRequest[]): Promise<void> {
     const raws = items.map(ownershipRequestMap.toPersistence);
-    const values = raws.map((raw, idx) => [
-      ensureRequired(items[idx]).id.getValue(),
-      raw.status,
-      raw.error_detail,
-    ]) as Any;
 
-    await this.sql`update ${
-      this.table
-    } set status = update_data.status, error_detail = cast(update_data.error_detail as jsonb)
-      from (values ${sql(values)}) as update_data (id, status, error_detail)
-      where ${this.table}.id = cast(update_data.id as uuid)
-    `;
+    const valuesTuples = raws.map((raw, idx) => {
+      const id = ensureRequired(items[idx]).id.getValue();
+      const errorDetailJson = raw.error_detail
+        ? JSON.stringify(raw.error_detail)
+        : null;
+      return sql`(${id}, ${raw.status}, ${errorDetailJson})`;
+    });
+
+    await this.drizzle.execute(sql`
+      update ${ownershipRequest}
+      set
+        status = update_data.status,
+        error_detail = cast(update_data.error_detail as jsonb)
+      from (values ${sql.join(valuesTuples, sql`, `)}) as update_data (id, status, error_detail)
+      where ${ownershipRequest}.id = cast(update_data.id as uuid)
+    `);
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.updateBulk",
       "ownership_request",
       `UPDATE ownership_request SET status = update_data.status, error_detail = update_data.error_detail
-       FROM (VALUES ${items.map((_, idx) => `($${idx * 3 + 1}, $${idx * 3 + 2}, $${idx * 3 + 3})`).join(", ")}) 
+       FROM (VALUES ${items
+         .map((_, idx) => `($${idx * 3 + 1}, $${idx * 3 + 2}, $${idx * 3 + 3})`)
+         .join(", ")}) 
        AS update_data (id, status, error_detail)
        WHERE ownership_request.id = update_data.id`,
-      values.flat(),
+      valuesTuples as unknown as unknown[],
       undefined,
       undefined,
     );
@@ -231,22 +284,32 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     orderBy,
     orderDirection,
   }: OwnershipSearchCriteria): Promise<OwnershipRequest[]> {
-    const sqlOrderBy =
+    const where = this.buildSearchWhereClause({ query, status });
+
+    let q: Any = this.drizzle.select().from(ownershipRequest).where(where);
+
+    if (orderBy && orderDirection) {
+      const col = OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy];
+      q = q.orderBy(
+        orderDirection === "desc" ? desc(col as Any) : asc(col as Any),
+      );
+    }
+
+    if (limit) q = q.limit(limit);
+    if (offset) q = q.offset(offset);
+
+    const rows = (await q) as unknown as OwnershipRequestRaw[];
+
+    const queryString = `select * from ownership_request where (${[
+      "asker_email",
+      "siren",
+      "email",
+    ].join(" ilike '%" + query + "%'")} ilike '%${query}%') ${
+      status ? `and status='${status}'` : ""
+    } ${
       orderBy && orderDirection
-        ? sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy])} ${
-            orderDirection === "desc" ? sql`desc` : sql`asc`
-          }`
-        : sql``;
-    const sqlLimit = limit ? sql`limit ${limit}` : sql``;
-    const sqlOffset = offset ? sql`offset ${offset}` : sql``;
-    const sqlWhereClause = this.buildSearchWhereClause({ query, status });
-
-    const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
-
-    const queryString = `select * from ownership_request where (${QUERYABLE_COLS.join(
-      " ilike '%" + query + "%' or ",
-    )} ilike '%${query}%') ${status ? `and status='${status}'` : ""} ${
-      orderBy && orderDirection ? `order by ${OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy]} ${orderDirection}` : ""
+        ? `order by ${String(orderBy)} ${orderDirection}`
+        : ""
     } ${limit ? `limit ${limit}` : ""} ${offset ? `offset ${offset}` : ""}`;
 
     auditRepo.logQuery(
@@ -261,20 +324,24 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return rows.map(ownershipRequestMap.toDomain);
   }
 
-  public async countSearch({ query, status }: OwnershipSearchCriteria): Promise<number> {
-    // Paramètres de la requête
-    const searchParams = { query, status };
+  public async countSearch({
+    query,
+    status,
+  }: OwnershipSearchCriteria): Promise<number> {
+    const where = this.buildSearchWhereClause({ query, status });
 
-    // Construire la clause WHERE
-    const sqlWhereClause = this.buildSearchWhereClause(searchParams);
+    const [{ count }] = (await this.drizzle
+      .select({ count: sql<number>`count(*)::int` })
+      .from(ownershipRequest)
+      .where(where)) as unknown as Array<{ count: number }>;
 
-    // Exécuter la requête
-    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
-
-    // Construct the query string for audit logging
-    const queryString = `select count(*) from ownership_request where (${QUERYABLE_COLS.join(
-      " ilike '%" + query + "%' or ",
-    )} ilike '%${query}%') ${status ? `and status='${status}'` : ""}`;
+    const queryString = `select count(*) from ownership_request where (${[
+      "asker_email",
+      "siren",
+      "email",
+    ].join(" ilike '%" + query + "%' or ")} ilike '%${query}%') ${
+      status ? `and status='${status}'` : ""
+    }`;
 
     auditRepo.logQuery(
       "PostgresOwnershipRequestRepo.countSearch",
@@ -288,13 +355,16 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return Number(count);
   }
 
-  private buildSearchWhereClause({ query = "", status }: OwnershipSearchCriteria) {
-    const sqlQuery = sql`(${QUERYABLE_COLS.reduce(
-      (prev, col, idx) => sql`${prev} ${idx === 0 ? sql`` : sql`or`} ${sql(col)} ilike ${"%" + query + "%"}`,
-      sql``,
-    )})`;
-    const sqlStatus = status ? sql`and status=${status}` : sql``;
-
-    return sql`where ${sqlQuery} ${sqlStatus}`;
+  private buildSearchWhereClause({
+    query = "",
+    status,
+  }: OwnershipSearchCriteria) {
+    const q = `%${query}%`;
+    const queryCondition = or(
+      ...QUERYABLE_COLS.map((col) => ilike(col as Any, q)),
+    );
+    return status
+      ? and(queryCondition, eq(ownershipRequest.status, status))
+      : queryCondition;
   }
 }

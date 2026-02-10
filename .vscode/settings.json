@@ -51,5 +51,6 @@
   "python.defaultInterpreterPath": "packages/api/venv/bin/python",
   "python.analysis.typeCheckingMode": "off",
   "python.analysis.extraPaths": ["packages/api/"],
-  "githubPullRequests.ignoredPullRequestBranches": ["master"]
+  "githubPullRequests.ignoredPullRequestBranches": ["master"],
+  "biome.enabled": false
 }

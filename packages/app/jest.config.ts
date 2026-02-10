@@ -11,18 +11,12 @@ const config = {
   testEnvironment: "jest-environment-jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testMatch: ["**/__tests__/**/*?(*.)+(test|spec).[jt]s?(x)"],
-  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/cypress/"],
+  testPathIgnorePatterns: [
+    "<rootDir>/.next/",
+    "<rootDir>/node_modules/",
+    "<rootDir>/cypress/",
+  ],
   testTimeout: 20000,
-  extensionsToTreatAsEsm: [".ts", ".tsx"],
-  globals: {
-    "ts-jest": {
-      useESM: true,
-      tsconfig: {
-        allowSyntheticDefaultImports: true,
-        esModuleInterop: true,
-      },
-    },
-  },
   // Add transformIgnorePatterns to handle ESM modules in node_modules
   transformIgnorePatterns: [
     "/node_modules/(?!(.pnpm/)?(@codegouvfr[^/]*|react-dsfr|next|next-auth|@next|jose|openid-client|uuid|@panva|preact|@babel|@swc)/)",
@@ -39,7 +33,8 @@ const config = {
   ],
   coverageDirectory: "coverage",
   moduleNameMapper: {
-    "(../){0,}design-system/@design-system": "<rootDir>/src/design-system/server.ts",
+    "(../){0,}design-system/@design-system":
+      "<rootDir>/src/design-system/server.ts",
     "@components/utils/(.*)$": "<rootDir>/src/components/utils/$1",
     "@components/RHF/(.*)$": "<rootDir>/src/components/RHF/$1",
     "@common/(.*)$": "<rootDir>/src/common/$1",

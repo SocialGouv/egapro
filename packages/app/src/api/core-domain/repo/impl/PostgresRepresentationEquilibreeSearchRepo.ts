@@ -1,8 +1,9 @@
+import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import { db } from "@api/shared-domain/infra/db/drizzle";
 import {
-  type RepresentationEquilibreeSearchRaw,
-  type RepresentationEquilibreeSearchResultRaw,
-} from "@api/core-domain/infra/db/raw";
-import { sql } from "@api/shared-domain/infra/db/postgres";
+  representationEquilibree,
+  searchRepresentationEquilibree,
+} from "@api/shared-domain/infra/db/schema";
 import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
 import { type RepresentationEquilibreeSearchResult } from "@common/core-domain/domain/RepresentationEquilibreeSearchResult";
 import { representationEquilibreeSearchMap } from "@common/core-domain/mappers/representationEquilibreeSearchMap";
@@ -11,8 +12,8 @@ import { PUBLIC_YEARS_REPEQ } from "@common/dict";
 import { type SQLCount } from "@common/shared-domain";
 import { cleanFullTextSearch } from "@common/utils/postgres";
 import { type Any } from "@common/utils/types";
-import { isFinite } from "lodash";
-import { type PostgresError } from "postgres";
+import { isFinite as isFiniteNumber } from "lodash";
+import { sql } from "drizzle-orm";
 
 import {
   type IRepresentationEquilibreeSearchRepo,
@@ -20,102 +21,104 @@ import {
 } from "../IRepresentationEquilibreeSearchRepo";
 
 export class PostgresRepresentationEquilibreeSearchRepo implements IRepresentationEquilibreeSearchRepo {
-  private repEqTable = sql("representation_equilibree");
-  private table = sql("search_representation_equilibree");
-  private sql = sql;
-
-  constructor(sqlInstance?: typeof sql) {
-    if (sqlInstance) {
-      this.sql = sqlInstance;
-    }
-  }
+  constructor(private drizzle: typeof db = db) {}
 
   public async index(item: RepresentationEquilibree): Promise<void> {
     const raw = representationEquilibreeSearchMap.toPersistence(item);
 
-    const ftRaw: Any = {
+    const values: Any = {
       ...raw,
       ft: sql`to_tsvector('ftdict', ${raw.ft})`,
     };
-    const insert = sql(ftRaw);
-    const update = sql(ftRaw, "declared_at", "ft", "region", "departement", "section_naf");
 
-    await this.sql<
-      RepresentationEquilibreeSearchRaw[]
-    >`insert into ${this.table} ${insert} on conflict (siren, year) do update set ${update}`;
+    await this.drizzle
+      .insert(searchRepresentationEquilibree)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [
+          searchRepresentationEquilibree.siren,
+          searchRepresentationEquilibree.year,
+        ],
+        set: {
+          declared_at: values.declared_at,
+          ft: values.ft,
+          region: values.region,
+          departement: values.departement,
+          section_naf: values.section_naf,
+        },
+      });
   }
 
   public async search(
     criteria: RepresentationEquilibreeSearchCriteria,
   ): Promise<RepresentationEquilibreeSearchResult[]> {
-    const sqlWhereClause = this.buildSearchWhereClause(criteria);
-    const raws = await this.sql<RepresentationEquilibreeSearchResultRaw[]>`
-        SELECT
-            (jsonb_agg(${this.repEqTable}.data->'entreprise' ORDER BY ${this.repEqTable}.year DESC) -> 0) as company,
-            jsonb_object_agg(${this.repEqTable}.year::text, json_build_object(
-                'executiveMenPercent', replace((${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_hommes_cadres')::text, ',', '.')::real,
-                'executiveWomenPercent', replace((${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_femmes_cadres')::text, ',', '.')::real,
-                'memberMenPercent', replace((${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_hommes_membres')::text, ',', '.')::real,
-                'memberWomenPercent', replace((${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_femmes_membres')::text, ',', '.')::real,
-                'notComputableReasonExecutives', (${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'motif_non_calculabilité_cadres')::text,
-                'notComputableReasonMembers', (${
-                  this.repEqTable
-                }.data->'indicateurs'->'représentation_équilibrée'->>'motif_non_calculabilité_membres')::text
-            )) as results
-        FROM ${this.repEqTable}
-        JOIN ${this.table} ON ${this.repEqTable}.siren=${this.table}.siren AND ${this.repEqTable}.year=${
-          this.table
-        }.year
-            ${sqlWhereClause}
-        GROUP BY ${this.repEqTable}.siren
-        ORDER BY max(${this.repEqTable}.year) DESC
-        LIMIT ${criteria.limit ?? 10}
-        OFFSET ${criteria.offset ?? 0}`;
+    const where = this.buildSearchWhereClause(criteria);
+
+    const raws = (await this.drizzle.execute(sql`
+      SELECT
+        (jsonb_agg(${representationEquilibree}.data->'entreprise' ORDER BY ${representationEquilibree}.year DESC) -> 0) as company,
+        jsonb_object_agg(${representationEquilibree}.year::text, json_build_object(
+          'executiveMenPercent', replace((${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_hommes_cadres')::text, ',', '.')::real,
+          'executiveWomenPercent', replace((${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_femmes_cadres')::text, ',', '.')::real,
+          'memberMenPercent', replace((${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_hommes_membres')::text, ',', '.')::real,
+          'memberWomenPercent', replace((${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'pourcentage_femmes_membres')::text, ',', '.')::real,
+          'notComputableReasonExecutives', (${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'motif_non_calculabilité_cadres')::text,
+          'notComputableReasonMembers', (${representationEquilibree}.data->'indicateurs'->'représentation_équilibrée'->>'motif_non_calculabilité_membres')::text
+        )) as results
+      FROM ${representationEquilibree}
+      JOIN ${searchRepresentationEquilibree} ON ${representationEquilibree}.siren=${searchRepresentationEquilibree}.siren
+        AND ${representationEquilibree}.year=${searchRepresentationEquilibree}.year
+      ${where}
+      GROUP BY ${representationEquilibree}.siren
+      ORDER BY max(${representationEquilibree}.year) DESC
+      LIMIT ${criteria.limit ?? 10}
+      OFFSET ${criteria.offset ?? 0}
+    `)) as unknown as RepresentationEquilibreeSearchResultRaw[];
 
     return raws.map(representationEquilibreeSearchResultMap.toDomain);
   }
 
-  public async count(criteria: RepresentationEquilibreeSearchCriteria): Promise<number> {
-    const sqlWhereClause = this.buildSearchWhereClause(criteria);
+  public async count(
+    criteria: RepresentationEquilibreeSearchCriteria,
+  ): Promise<number> {
+    const where = this.buildSearchWhereClause(criteria);
 
-    try {
-      const [{ count }] = await this
-        .sql<SQLCount>`select count(distinct(siren)) as count from ${this.table} ${sqlWhereClause}`;
-      return +count;
-    } catch (e: unknown) {
-      const postgreError = e as PostgresError;
-      console.log("!!!!PostgresError!!!!!!!!!", postgreError.cause, postgreError.query);
-      throw e;
-    }
+    const [{ count }] = (await this.drizzle
+      .select({
+        count: sql<string>`count(distinct(${searchRepresentationEquilibree.siren})) as count`,
+      })
+      .from(searchRepresentationEquilibree)
+      .where(where)) as unknown as SQLCount;
+    return +count;
   }
 
-  private buildSearchWhereClause(criteria: RepresentationEquilibreeSearchCriteria) {
-    let sqlQuery = sql``;
+  private buildSearchWhereClause(
+    criteria: RepresentationEquilibreeSearchCriteria,
+  ) {
+    let querySql = sql``;
     if (criteria.query) {
-      if (criteria.query.length === 9 && isFinite(+criteria.query)) {
-        sqlQuery = sql`and ${this.table}.siren=${criteria.query}`;
+      if (criteria.query.length === 9 && isFiniteNumber(+criteria.query)) {
+        querySql = sql`and ${searchRepresentationEquilibree}.siren=${criteria.query}`;
       } else {
-        sqlQuery = sql`and ${this.table}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
+        querySql = sql`and ${searchRepresentationEquilibree}.ft @@ to_tsquery('ftdict', ${cleanFullTextSearch(criteria.query)})`;
       }
     }
 
-    // no "and" clause because will be first
-    const sqlYear = sql`${this.table}.year in ${sql(PUBLIC_YEARS_REPEQ)}`;
-    const sqlDepartement = criteria.countyCode ? sql`and ${this.table}.departement=${criteria.countyCode}` : sql``;
-    const sqlSectionNaf = criteria.nafSection ? sql`and ${this.table}.section_naf=${criteria.nafSection}` : sql``;
-    const sqlRegion = criteria.regionCode ? sql`and ${this.table}.region=${criteria.regionCode}` : sql``;
+    const years = sql.join(
+      (PUBLIC_YEARS_REPEQ as unknown as number[]).map((y) => sql`${y}`),
+      sql`, `,
+    );
+    const sqlYear = sql`${searchRepresentationEquilibree}.year in (${years})`;
+    const sqlDepartement = criteria.countyCode
+      ? sql`and ${searchRepresentationEquilibree}.departement=${criteria.countyCode}`
+      : sql``;
+    const sqlSectionNaf = criteria.nafSection
+      ? sql`and ${searchRepresentationEquilibree}.section_naf=${criteria.nafSection}`
+      : sql``;
+    const sqlRegion = criteria.regionCode
+      ? sql`and ${searchRepresentationEquilibree}.region=${criteria.regionCode}`
+      : sql``;
 
-    const where = sql`where ${sqlYear} ${sqlDepartement} ${sqlSectionNaf} ${sqlRegion} ${sqlQuery}`;
-    return where;
+    return sql`where ${sqlYear} ${sqlDepartement} ${sqlSectionNaf} ${sqlRegion} ${querySql}`;
   }
 }

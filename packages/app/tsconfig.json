@@ -21,7 +21,8 @@
     "downlevelIteration": true,
     "types": [
       "node",
-      "jest"
+      "jest",
+      "testing-library__jest-dom"
     ],
     "plugins": [
       {

@@ -21,8 +21,7 @@ jest.mock("next/navigation", () => ({
 jest.mock("@common/config", () => ({
   config: {
     api: {
-      security: {
-      },
+      security: {},
     },
   },
 }));
@@ -39,16 +38,27 @@ const mockExecute = jest.fn();
 jest.mock("@api/core-domain/repo", () => ({
   representationEquilibreeRepo: {},
 }));
-jest.mock("@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear", () => ({
-  GetRepresentationEquilibreeBySirenAndYear: jest.fn().mockImplementation(() => ({
-    execute: mockExecute,
-  })),
-  GetRepresentationEquilibreeBySirenAndYearError: class extends Error {},
-}));
+jest.mock(
+  "@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear",
+  () => ({
+    GetRepresentationEquilibreeBySirenAndYear: jest
+      .fn()
+      .mockImplementation(() => ({
+        execute: mockExecute,
+      })),
+    GetRepresentationEquilibreeBySirenAndYearError: class extends Error {},
+  }),
+);
 
 // Mock DetailRepEq component
 jest.mock("../../../Recap", () => ({
-  DetailRepEq: ({ repEq, publicMode }: { publicMode: boolean; repEq: RepresentationEquilibreeDTO }) => (
+  DetailRepEq: ({
+    repEq,
+    publicMode,
+  }: {
+    publicMode: boolean;
+    repEq: RepresentationEquilibreeDTO;
+  }) => (
     <div data-testid="detail-rep-eq">
       Detail Mock - Public: {publicMode.toString()} - Siren: {repEq.siren}
     </div>
@@ -58,7 +68,9 @@ jest.mock("../../../Recap", () => ({
 // Mock EditButton component
 jest.mock("../EditButton", () => ({
   EditButton: ({ repEq }: { repEq: RepresentationEquilibreeDTO }) => (
-    <button data-testid="edit-button">Edit Mock - Siren: {repEq.siren}</button>
+    <button type="button" data-testid="edit-button">
+      Edit Mock - Siren: {repEq.siren}
+    </button>
   ),
 }));
 
@@ -98,7 +110,7 @@ describe("RepEqPage", () => {
   };
 
   const defaultProps: NextServerPageProps<"siren" | "year"> = {
-    params: { siren: "123456789", year: "2024" },
+    params: Promise.resolve({ siren: "123456789", year: "2024" }),
     searchParams: {},
   };
 
@@ -119,8 +131,12 @@ describe("RepEqPage", () => {
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
-    expect(screen.getByRole("heading", { name: "Erreur inattendue" })).toBeInTheDocument();
-    expect(screen.getByText("Une erreur inattendue est survenue.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Erreur inattendue" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Une erreur inattendue est survenue."),
+    ).toBeInTheDocument();
   });
 
   it("should show public view when no session", async () => {
@@ -129,8 +145,12 @@ describe("RepEqPage", () => {
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
-    expect(screen.getByText(/Récapitulatif en accès libre/)).toBeInTheDocument();
-    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent("Public: true");
+    expect(
+      screen.getByText(/Récapitulatif en accès libre/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent(
+      "Public: true",
+    );
     expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
   });
 
@@ -145,13 +165,20 @@ describe("RepEqPage", () => {
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
-    expect(screen.getByText(/Cette déclaration a été validée et transmise/)).toBeInTheDocument();
-    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent("Public: false");
+    expect(
+      screen.getByText(/Cette déclaration a été validée et transmise/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent(
+      "Public: false",
+    );
     expect(screen.getByTestId("edit-button")).toBeInTheDocument();
   });
 
   it("should show warning when user has no matching siren", async () => {
-    mockExecute.mockResolvedValue({ ...mockRepEq, declaredAt: "2050-01-01T00:00:00.000Z" });
+    mockExecute.mockResolvedValue({
+      ...mockRepEq,
+      declaredAt: "2050-01-01T00:00:00.000Z",
+    });
     (getServerSession as jest.Mock).mockResolvedValue({
       user: {
         email: "user@example.com",
@@ -162,7 +189,9 @@ describe("RepEqPage", () => {
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
-    expect(screen.getByText(/Compte non rattaché au Siren/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compte non rattaché au Siren/),
+    ).toBeInTheDocument();
     expect(screen.getByText(/votre espace ProConnect/)).toBeInTheDocument();
     expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
   });
@@ -178,8 +207,12 @@ describe("RepEqPage", () => {
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
-    expect(screen.getByText(/Cette déclaration a été validée et transmise/)).toBeInTheDocument();
-    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent("Public: false");
+    expect(
+      screen.getByText(/Cette déclaration a été validée et transmise/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent(
+      "Public: false",
+    );
     expect(screen.getByTestId("edit-button")).toBeInTheDocument();
   });
 });
