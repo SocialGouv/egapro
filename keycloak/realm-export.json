@@ -130,12 +130,12 @@
       "webOrigins": [
         "http://localhost:3000",
         "http://localhost:3001",
-        "https://*.ovh.fabrique.social.gouv.fr"
+        "https://egapro-alpha.ovh.fabrique.social.gouv.fr"
       ],
       "redirectUris": [
         "http://localhost:3000/api/auth/callback/proconnect",
         "http://localhost:3001/api/auth/callback/proconnect",
-        "https://*.ovh.fabrique.social.gouv.fr/api/auth/callback/proconnect"
+        "https://egapro-alpha.ovh.fabrique.social.gouv.fr/api/auth/callback/proconnect"
       ]
     }
   ],

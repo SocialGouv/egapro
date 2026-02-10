@@ -16,3 +16,4 @@ data:
 
   # Issuer pour référence (utilisé par le code si les endpoints ci-dessus ne sont pas définis)
   EGAPRO_PROCONNECT_ISSUER: "https://keycloak-egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
+  NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: "https://egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr/api/auth/callback/proconnect"
