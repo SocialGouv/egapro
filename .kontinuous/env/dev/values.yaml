@@ -9,7 +9,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://fca.integ01.dev-agentconnect.fr/api/v2"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://identite.proconnect.gouv.fr"
 
 maildev: {}
 pgweb: {}
@@ -21,4 +21,3 @@ nginx:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-
