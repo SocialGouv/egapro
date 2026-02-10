@@ -80,7 +80,10 @@ export const config = {
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
-        return `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
+        // Use internal service name for server-side calls in containerized environments
+        return this.env === "dev" || this.env === "preprod"
+          ? "http://keycloak/realms/atlas/protocol/openid-connect/token"
+          : `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
       }
       // Allow explicit override via env var (useful for internal URLs)
       if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
@@ -96,7 +99,10 @@ export const config = {
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
-        return `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
+        // Use internal service name for server-side calls in containerized environments
+        return this.env === "dev" || this.env === "preprod"
+          ? "http://keycloak/realms/atlas/protocol/openid-connect/userinfo"
+          : `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
       }
       // Allow explicit override via env var (useful for internal URLs)
       if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
