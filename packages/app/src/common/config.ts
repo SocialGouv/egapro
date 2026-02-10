@@ -60,14 +60,14 @@ export const config = {
       return "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
+      // Allow explicit override via env var first for client-facing endpoint
+      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
+      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/auth`;
-      }
-      // Allow explicit override via env var
-      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
-        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
