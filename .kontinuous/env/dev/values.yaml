@@ -46,8 +46,6 @@ keycloak:
   command:
     - start-dev
     - --import-realm
-    KC_PROXY: edge
-    KC_HOSTNAME_STRICT: "false"
 
 maildev: {}
 pgweb: {}
