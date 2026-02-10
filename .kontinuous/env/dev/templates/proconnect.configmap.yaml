@@ -10,9 +10,9 @@ data:
   # Configuration des endpoints OAuth
   # Note: authorization_endpoint doit être externe (accessible depuis le navigateur)
   # tandis que token_endpoint et userinfo_endpoint utilisent l'URL interne du service Kubernetes (port 80 par défaut)
-  EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT: "https://keycloak-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth"
+  EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT: "https://keycloak-egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr/realms/atlas/protocol/openid-connect/auth"
   EGAPRO_PROCONNECT_TOKEN_ENDPOINT: "http://keycloak/realms/atlas/protocol/openid-connect/token"
   EGAPRO_PROCONNECT_USERINFO_ENDPOINT: "http://keycloak/realms/atlas/protocol/openid-connect/userinfo"
 
   # Issuer pour référence (utilisé par le code si les endpoints ci-dessus ne sont pas définis)
-  EGAPRO_PROCONNECT_ISSUER: "https://keycloak-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
+  EGAPRO_PROCONNECT_ISSUER: "https://keycloak-egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
