@@ -58,9 +58,7 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
-      return this.env === "dev"
-        ? "https://fca.integ01.dev-agentconnect.fr/api/v2"
-        : "https://proconnect.gouv.fr/api/v2";
+      return "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
       const isKeycloak = this.issuer.includes("localhost");
@@ -197,7 +195,6 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
-
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),
