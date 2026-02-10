@@ -30,23 +30,24 @@ export interface ProConnectProfile {
   exp?: number;
 }
 
-
-
 export function ProConnectProvider<P extends ProConnectProfile>(
   options?: OAuthUserConfig<P>,
 ): OAuthConfig<P> {
   const { proconnect } = config;
 
   // Log la configuration OAuth au démarrage
-  logger.info({
-    issuer: proconnect.issuer,
-    well_known: proconnect.well_known,
-    authorization_endpoint: proconnect.authorization_endpoint,
-    token_endpoint: proconnect.token_endpoint,
-    userinfo_endpoint: proconnect.userinfo_endpoint,
-    clientId: proconnect.clientId,
-    scope: proconnect.scope,
-  }, "🔧 Configuration ProConnect OAuth initialisée");
+  logger.info(
+    {
+      issuer: proconnect.issuer,
+      well_known: proconnect.well_known,
+      authorization_endpoint: proconnect.authorization_endpoint,
+      token_endpoint: proconnect.token_endpoint,
+      userinfo_endpoint: proconnect.userinfo_endpoint,
+      clientId: proconnect.clientId,
+      scope: proconnect.scope,
+    },
+    "🔧 Configuration ProConnect OAuth initialisée",
+  );
 
   return {
     id: "proconnect",
@@ -64,10 +65,13 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     token: {
       url: proconnect.token_endpoint,
       async request(context) {
-        logger.info({
-          url: proconnect.token_endpoint,
-          params: context.params,
-        }, "📤 Token request envoyée");
+        logger.info(
+          {
+            url: proconnect.token_endpoint,
+            params: context.params,
+          },
+          "📤 Token request envoyée",
+        );
 
         try {
           const response = await fetch(proconnect.token_endpoint, {
@@ -81,30 +85,41 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           const data = await response.json();
 
           if (!response.ok) {
-            logger.error({
-              status: response.status,
-              statusText: response.statusText,
-              url: proconnect.token_endpoint,
-              responseData: data,
-            }, "❌ Token request failed");
-            throw new Error(`Token request failed: ${response.status} ${response.statusText}`);
+            logger.error(
+              {
+                status: response.status,
+                statusText: response.statusText,
+                url: proconnect.token_endpoint,
+                responseData: data,
+              },
+              "❌ Token request failed",
+            );
+            throw new Error(
+              `Token request failed: ${response.status} ${response.statusText}`,
+            );
           }
 
-          logger.info({
-            status: response.status,
-            hasAccessToken: !!data.access_token,
-            hasIdToken: !!data.id_token,
-            hasRefreshToken: !!data.refresh_token,
-            tokenType: data.token_type,
-            expiresIn: data.expires_in,
-          }, "✅ Token reçu avec succès");
+          logger.info(
+            {
+              status: response.status,
+              hasAccessToken: !!data.access_token,
+              hasIdToken: !!data.id_token,
+              hasRefreshToken: !!data.refresh_token,
+              tokenType: data.token_type,
+              expiresIn: data.expires_in,
+            },
+            "✅ Token reçu avec succès",
+          );
 
           return { tokens: data };
         } catch (error) {
-          logger.error({
-            error: error instanceof Error ? error.message : String(error),
-            url: proconnect.token_endpoint,
-          }, "❌ Erreur lors de la requête token");
+          logger.error(
+            {
+              error: error instanceof Error ? error.message : String(error),
+              url: proconnect.token_endpoint,
+            },
+            "❌ Erreur lors de la requête token",
+          );
           throw error;
         }
       },
@@ -117,10 +132,13 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           throw new Error("No access token");
         }
 
-        logger.info({
-          url: proconnect.userinfo_endpoint,
-          hasAccessToken: !!tokens.access_token,
-        }, "📤 Userinfo request envoyée");
+        logger.info(
+          {
+            url: proconnect.userinfo_endpoint,
+            hasAccessToken: !!tokens.access_token,
+          },
+          "📤 Userinfo request envoyée",
+        );
 
         try {
           const response = await fetch(proconnect.userinfo_endpoint, {
@@ -133,23 +151,29 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 
           if (!response.ok) {
             const text = await response.text();
-            logger.error({
-              status: response.status,
-              statusText: response.statusText,
-              url: proconnect.userinfo_endpoint,
-              body: text,
-            }, "❌ Userinfo request failed");
+            logger.error(
+              {
+                status: response.status,
+                statusText: response.statusText,
+                url: proconnect.userinfo_endpoint,
+                body: text,
+              },
+              "❌ Userinfo request failed",
+            );
             throw new Error(`ProConnect userinfo failed: ${response.status}`);
           }
 
           const contentType = response.headers.get("content-type") || "";
           const rawBody = await response.text();
 
-          logger.info({
-            status: response.status,
-            contentType,
-            bodyPreview: rawBody.substring(0, 100),
-          }, "✅ Userinfo reçue avec succès");
+          logger.info(
+            {
+              status: response.status,
+              contentType,
+              bodyPreview: rawBody.substring(0, 100),
+            },
+            "✅ Userinfo reçue avec succès",
+          );
 
           if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
             const parts = rawBody.trim().split(".");
@@ -165,10 +189,13 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 
           return JSON.parse(rawBody);
         } catch (error) {
-          logger.error({
-            error: error instanceof Error ? error.message : String(error),
-            url: proconnect.userinfo_endpoint,
-          }, "❌ Erreur lors de la requête userinfo");
+          logger.error(
+            {
+              error: error instanceof Error ? error.message : String(error),
+              url: proconnect.userinfo_endpoint,
+            },
+            "❌ Erreur lors de la requête userinfo",
+          );
           throw error;
         }
       },
@@ -181,22 +208,26 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         id: profile.sub,
         email: profile.email,
         emailVerified: profile.email_verified ?? false,
-        name: `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() || null,
+        name:
+          `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() ||
+          null,
         given_name: profile.given_name ?? null,
         family_name: profile.usual_name ?? null,
         phone_number: profile.phone_number
           ? profile.phone_number.replace(/[.\-\s]/g, "")
           : null,
         siret: profile.siret || null,
-        organization: profile.siret ? {
-          id: parseInt(profile.siret, 10),
-          label: null,
-          siren: profile.siret.substring(0, 9),
-          siret: profile.siret,
-          is_collectivite_territoriale: false,
-          is_external: false,
-          is_service_public: false,
-        } : undefined,
+        organization: profile.siret
+          ? {
+              id: parseInt(profile.siret, 10),
+              label: null,
+              siren: profile.siret.substring(0, 9),
+              siret: profile.siret,
+              is_collectivite_territoriale: false,
+              is_external: false,
+              is_service_public: false,
+            }
+          : undefined,
         raw: profile,
       };
     },
