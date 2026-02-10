@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app-to-keycloak
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: keycloak
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: app
+      ports:
+        - protocol: TCP
+          port: 80
