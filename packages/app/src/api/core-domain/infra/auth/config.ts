@@ -71,12 +71,26 @@ export const proConnectProvider = ProConnectProvider({
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   logger: {
-    error: (code, ...message) => logger.error({ ...message, code }, "Error"),
-    warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
+    error: (code, ...message) => {
+      // Log l'erreur complète avec stack trace si disponible
+      const errorDetails = message.map(m => {
+        if (m instanceof Error) {
+          return {
+            message: m.message,
+            stack: m.stack,
+            cause: m.cause,
+            name: m.name,
+          };
+        }
+        return m;
+      });
+      logger.error({ code, details: errorDetails }, "❌ NextAuth Error");
+    },
+    warn: (code, ...message) => logger.warn({ ...message, code }, "⚠️  NextAuth Warning"),
     info: (code: string, ...message: string[]) =>
-      logger.info({ ...message, code }, "Info"),
+      logger.info({ ...message, code }, "ℹ️  NextAuth Info"),
     debug: (code, ...message) => {
-      if (config.env === "dev") logger.info({ ...message, code }, "Debug");
+      if (config.env === "dev") logger.info({ ...message, code }, "🐛 NextAuth Debug");
       else logger.debug({ ...message, code }, "Debug");
     },
   },
@@ -89,6 +103,23 @@ export const authConfig: AuthOptions = {
   debug: config.env === "dev",
   adapter: egaproNextAuthAdapter,
   session: { strategy: "jwt", maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60 },
+  events: {
+    async signIn(message) {
+      logger.info({ user: message.user, account: message.account }, "📥 Event: signIn réussi");
+    },
+    async signOut(message) {
+      logger.info({ token: message.token }, "📤 Event: signOut");
+    },
+    async createUser(message) {
+      logger.info({ user: message.user }, "👤 Event: createUser");
+    },
+    async updateUser(message) {
+      logger.info({ user: message.user }, "🔄 Event: updateUser");
+    },
+    async session(message) {
+      logger.debug({ session: message.session }, "🔐 Event: session");
+    },
+  },
   providers: [
     GithubProvider({
       ...config.api.security.github,
