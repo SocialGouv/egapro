@@ -74,12 +74,17 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         );
 
         try {
+          // Ensure grant_type is set for OAuth token request
+          const params = {
+            ...context.params,
+            grant_type: "authorization_code",
+          };
           const response = await fetch(proconnect.token_endpoint, {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams(context.params as Record<string, string>),
+            body: new URLSearchParams(params as Record<string, string>),
           });
 
           const data = await response.json();
