@@ -62,14 +62,14 @@ export const config = {
         : "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
-      // Allow explicit override via env var
-      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
-        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
-      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/auth`;
+      }
+      // Allow explicit override via env var
+      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -78,14 +78,14 @@ export const config = {
       return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
-      // Allow explicit override via env var (useful for internal URLs)
-      if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
-        return process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT;
-      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
+      }
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -94,14 +94,14 @@ export const config = {
       return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
-      // Allow explicit override via env var (useful for internal URLs)
-      if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
-        return process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT;
-      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
+      }
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -118,17 +118,17 @@ export const config = {
       return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
+      if (isKeycloak) {
+        return `${this.issuer}/realms/atlas/.well-known/openid-configuration`;
+      }
       if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
         return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
       }
       // If EGAPRO_PROCONNECT_DISCOVERY_URL is set, use it directly (it already contains the full path)
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
-      }
-      const isKeycloak =
-        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
-      if (isKeycloak) {
-        return `${this.issuer}/realms/atlas/.well-known/openid-configuration`;
       }
       return `${this.issuer}/.well-known/openid-configuration`;
     },
