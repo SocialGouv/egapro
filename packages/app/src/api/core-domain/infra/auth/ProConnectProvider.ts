@@ -80,6 +80,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
             grant_type: "authorization_code",
             client_id: proconnect.clientId,
             client_secret: proconnect.clientSecret,
+            redirect_uri: (options as any)?.callbackUrl,
           };
           const response = await fetch(proconnect.token_endpoint, {
             method: "POST",

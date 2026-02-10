@@ -67,7 +67,8 @@ const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
-});
+  callbackUrl: config.proconnect.callbackUrl,
+} as any);
 
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
