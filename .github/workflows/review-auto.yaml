@@ -92,7 +92,11 @@ jobs:
           images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/nginx
           tags: |
             type=sha,prefix=persist-,format=long,enable=${{
-              github.ref_name != 'prod'
+              github.ref_name == 'dev' ||
+              github.ref_name == 'develop' ||
+              github.ref_name == 'preprod' ||
+              github.ref_name == 'main' ||
+              github.ref_name == 'master'
             }},priority=840
             type=sha,prefix=sha-,format=long,priority=890
             type=ref,event=branch,priority=600

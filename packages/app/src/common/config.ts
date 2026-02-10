@@ -62,6 +62,10 @@ export const config = {
         : "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
+      // Allow explicit override via env var
+      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
+      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
@@ -74,6 +78,10 @@ export const config = {
       return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT;
+      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
@@ -86,6 +94,10 @@ export const config = {
       return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT;
+      }
       const isKeycloak =
         this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
