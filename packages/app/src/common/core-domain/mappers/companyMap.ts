@@ -21,7 +21,7 @@ export const companyMap: Mapper<Company, Entreprise, Entreprise> = {
     if (raw.activitePrincipaleUniteLegale) {
       companyJson.nafCode = raw.activitePrincipaleUniteLegale;
     }
-    return Company.fromJson(companyJson as any);
+    return Company.fromJson(companyJson as Parameters<typeof Company.fromJson>[0]);
   },
 
   toDTO() {

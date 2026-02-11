@@ -97,7 +97,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
       city: json.city,
     };
 
-    if (json.nafCode && (json.nafCode as any) !== "[NON-DIFFUSIBLE]") {
+    if (json.nafCode && (json.nafCode as string) !== "[NON-DIFFUSIBLE]") {
       props.nafCode = new NafCode(json.nafCode);
     }
 
@@ -109,7 +109,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
       props.countryCode = new CountryCode(json.countryCode);
     }
 
-    if (json.county && (json.county as any) !== "[NON-DIFFUSIBLE]") {
+    if (json.county && (json.county as string) !== "[NON-DIFFUSIBLE]") {
       props.county = new County(json.county);
     }
 
@@ -117,7 +117,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
       props.postalCode = new FrenchPostalCode(json.postalCode, json.countryCode);
     }
 
-    if (json.region && (json.region as any) !== "[NON-DIFFUSIBLE]") {
+    if (json.region && (json.region as string) !== "[NON-DIFFUSIBLE]") {
       props.region = new Region(json.region);
     }
 

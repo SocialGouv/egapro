@@ -1,5 +1,5 @@
-import type { RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
-import { NAF } from "@common/dict";
+import { type RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
+import { type NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { dateObjectToDateISOString } from "@common/utils/date";
 
@@ -93,7 +93,7 @@ export const representationEquilibreeMap: Required<
         entreprise: {
           siren: data.siren,
           adresse: obj.company.address,
-          code_naf: (obj.company.nafCode?.getValue() as any) || "[NON-DIFFUSIBLE]",
+          code_naf: (obj.company.nafCode?.getValue() as string) || "[NON-DIFFUSIBLE]",
           code_pays: obj.company.countryCode?.getValue(),
           code_postal: obj.company.postalCode?.getValue(),
           commune: obj.company.city,
