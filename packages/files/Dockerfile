@@ -2,12 +2,9 @@ FROM node:20
 RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 WORKDIR /app
 COPY pnpm-lock.yaml ./
-COPY patches/ ./patches/
 RUN pnpm fetch
-COPY package.json pnpm-workspace.yaml ./
-COPY packages/files/package.json ./packages/files/
+COPY package.json ./
 RUN pnpm install --offline --frozen-lockfile
-COPY packages/files/index.js packages/files/.htpasswd ./packages/files/
-WORKDIR /app/packages/files
+COPY index.js .htpasswd ./
 CMD [ "node", "index.js" ]
 USER 1000
