@@ -15,6 +15,7 @@ RUN pnpm fetch
 # Now copy package files and install from store
 COPY package.json pnpm-workspace.yaml ./
 COPY packages/app/package.json ./packages/app/
+ENV CI=true
 RUN pnpm install --offline --frozen-lockfile
 
 COPY packages/app/ ./packages/app/
