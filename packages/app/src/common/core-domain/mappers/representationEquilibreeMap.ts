@@ -93,7 +93,8 @@ export const representationEquilibreeMap: Required<
         entreprise: {
           siren: data.siren,
           adresse: obj.company.address,
-          code_naf: (obj.company.nafCode?.getValue() as string) || "[NON-DIFFUSIBLE]",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- "[NON-DIFFUSIBLE]" sentinel not in CodeNaf type
+          code_naf: (obj.company.nafCode?.getValue() as any) || "[NON-DIFFUSIBLE]",
           code_pays: obj.company.countryCode?.getValue(),
           code_postal: obj.company.postalCode?.getValue(),
           commune: obj.company.city,
