@@ -55,7 +55,7 @@ RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run
     export SENTRY_ALLOW_FAILURE=true; \
     pnpm --filter app build
 
-RUN pnpm --filter app deploy --prod /prod/app
+RUN pnpm --filter app deploy --legacy --prod /prod/app
 
 
 # Runner
