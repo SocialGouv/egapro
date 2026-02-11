@@ -495,7 +495,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
     entreprise: {
       siren: data.company.siren.getValue(),
       adresse: data.company.address,
-      code_naf: (data.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]") as string,
+      code_naf: data.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]",
       code_pays: data.company.countryCode?.getValue() as CodePays,
       code_postal: data.company.postalCode?.getValue(),
       commune: data.company.city,
