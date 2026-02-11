@@ -9,7 +9,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://identite.proconnect.gouv.fr"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "auth.agentconnect.gouv.fr"
 
 maildev: {}
 pgweb: {}
