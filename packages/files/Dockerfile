@@ -2,6 +2,7 @@ FROM node:20
 RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 WORKDIR /app
 COPY pnpm-lock.yaml ./
+COPY patches/ ./patches/
 RUN pnpm fetch
 COPY package.json pnpm-workspace.yaml ./
 COPY packages/files/package.json ./packages/files/

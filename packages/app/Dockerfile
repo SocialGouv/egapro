@@ -7,14 +7,14 @@ RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 
 WORKDIR /app
 
-# Copy only lockfile first for pnpm fetch (cache-friendly)
+# Copy lockfile and patches for pnpm fetch (cache-friendly)
 COPY pnpm-lock.yaml ./
+COPY patches/ ./patches/
 RUN pnpm fetch
 
 # Now copy package files and install from store
 COPY package.json pnpm-workspace.yaml ./
 COPY packages/app/package.json ./packages/app/
-COPY patches/ ./patches/
 RUN pnpm install --offline --frozen-lockfile
 
 COPY packages/app/ ./packages/app/
