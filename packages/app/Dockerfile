@@ -7,8 +7,8 @@ RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 
 WORKDIR /app
 
-# Copy lockfile and patches for pnpm fetch (cache-friendly)
-COPY pnpm-lock.yaml ./
+# Copy lockfile, config and patches for pnpm fetch (cache-friendly)
+COPY .npmrc pnpm-lock.yaml ./
 COPY patches/ ./patches/
 RUN pnpm fetch
 
