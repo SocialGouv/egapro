@@ -34,10 +34,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: "yarn"
+
+    - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+      with:
+        run_install: false
 
     - name: Install dependencies
-      run: yarn --immutable
+      run: pnpm install --frozen-lockfile
 
     - name: Import GPG key
       uses: crazy-max/ghaction-import-gpg@v5
@@ -54,4 +57,4 @@ jobs:
         GITHUB_TOKEN: ${{ steps.token.outputs.token }}
       run: |
         export PATH="$(pwd)/.github/bin/:$PATH"
-        yarn semantic-release
+        pnpm semantic-release
