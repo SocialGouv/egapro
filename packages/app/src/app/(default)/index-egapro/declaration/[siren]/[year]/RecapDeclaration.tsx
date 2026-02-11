@@ -1,6 +1,5 @@
 "use client";
 
-import { type CodeNaf } from "@api/core-domain/infra/db/CodeNaf";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
