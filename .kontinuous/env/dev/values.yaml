@@ -22,6 +22,9 @@ keycloak:
   imagePackage: keycloak
   containerPort: 8080
   probesPath: /
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
   resources:
     requests:
       cpu: 200m
@@ -35,6 +38,10 @@ keycloak:
     KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
     KC_PROXY: edge
     KC_HOSTNAME_STRICT: "false"
+    KC_DB: postgres
+    KC_DB_URL: jdbc:postgresql://$(PGHOST):$(PGPORT)/$(PGDATABASE)
+    KC_DB_USERNAME: $(PGUSER)
+    KC_DB_PASSWORD: $(PGPASSWORD)
     EGAPRO_ORIGIN: "https://egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
 
 maildev: {}
