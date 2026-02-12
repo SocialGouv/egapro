@@ -1,17 +1,15 @@
 FROM quay.io/keycloak/keycloak:21.1.1 AS builder
-
-ENV KC_HTTP_PORT=8080
-
-COPY keycloak/realm-export.json /opt/keycloak/data/import/realm-export.json
-
-# Build Keycloak
+COPY realm-export.json /opt/keycloak/data/import/realm-export.json
 RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:21.1.1
-
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
-ENV KC_HTTP_PORT=8080
+USER root
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod 0755 /docker-entrypoint.sh
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-CMD ["start-dev", "--import-realm"]
+USER 1000
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["start-dev"]

@@ -37,7 +37,7 @@
         "saml.authnstatement": "false",
         "display.on.consent.screen": "false",
         "saml.onetimeuse.condition": "false",
-        "post.logout.redirect.uris": "http://localhost:3000\nhttp://localhost:3001\nhttp://localhost:3000/\nhttp://localhost:3001/\nhttps://*.ovh.fabrique.social.gouv.fr\nhttps://*.ovh.fabrique.social.gouv.fr/"
+        "post.logout.redirect.uris": "__EGAPRO_ORIGIN__/"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
@@ -127,16 +127,8 @@
         "offline_access",
         "microprofile-jwt"
       ],
-      "webOrigins": [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://egapro-alpha.ovh.fabrique.social.gouv.fr"
-      ],
-      "redirectUris": [
-        "http://localhost:3000/api/auth/callback/proconnect",
-        "http://localhost:3001/api/auth/callback/proconnect",
-        "https://egapro-alpha.ovh.fabrique.social.gouv.fr/api/auth/callback/proconnect"
-      ]
+      "webOrigins": ["__EGAPRO_ORIGIN__"],
+      "redirectUris": ["__EGAPRO_ORIGIN__/api/auth/callback/proconnect"]
     }
   ],
   "identityProviders": [
