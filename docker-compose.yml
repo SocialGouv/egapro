@@ -53,8 +53,8 @@ services:
 
   keycloak:
     build:
-      context: ./packages/keycloak
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/keycloak/Dockerfile
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
