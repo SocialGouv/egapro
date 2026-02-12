@@ -30,8 +30,6 @@ export interface ProConnectProfile {
   exp?: number;
 }
 
-
-
 export function ProConnectProvider<P extends ProConnectProfile>(
   options?: OAuthUserConfig<P>,
 ): OAuthConfig<P> {
@@ -56,67 +54,88 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     userinfo: {
       url: proconnect.userinfo_endpoint,
       async request({ tokens }) {
-        if (!tokens.access_token) throw new Error("No access token");
+        if (!tokens.access_token) {
+          logger.error("❌ Pas d'access_token disponible pour userinfo");
+          throw new Error("No access token");
+        }
 
-        const response = await fetch(proconnect.userinfo_endpoint, {
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`,
-            Accept: "application/json",
-          },
-          cache: "no-store",
-        });
+        try {
+          const response = await fetch(proconnect.userinfo_endpoint, {
+            headers: {
+              Authorization: `Bearer ${tokens.access_token}`,
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          });
 
-        if (!response.ok) {
-          const text = await response.text();
+          if (!response.ok) {
+            const text = await response.text();
+            logger.error(
+              {
+                status: response.status,
+                statusText: response.statusText,
+                url: proconnect.userinfo_endpoint,
+                body: text,
+              },
+              "❌ Userinfo request failed",
+            );
+            throw new Error(`ProConnect userinfo failed: ${response.status}`);
+          }
+
+          const contentType = response.headers.get("content-type") || "";
+          const rawBody = await response.text();
+
+          if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
+            const parts = rawBody.trim().split(".");
+            if (parts.length !== 3) throw new Error("Invalid JWT format");
+
+            let payload = parts[1];
+            payload += "=".repeat((4 - (payload.length % 4)) % 4);
+            const decoded = JSON.parse(
+              Buffer.from(payload, "base64url").toString("utf-8"),
+            );
+            return decoded;
+          }
+
+          return JSON.parse(rawBody);
+        } catch (error) {
           logger.error(
-            { status: response.status, body: text },
-            "ProConnect userinfo error",
+            {
+              error: error instanceof Error ? error.message : String(error),
+              url: proconnect.userinfo_endpoint,
+            },
+            "❌ Erreur lors de la requête userinfo",
           );
-          throw new Error(`ProConnect userinfo failed: ${response.status}`);
+          throw error;
         }
-
-        const contentType = response.headers.get("content-type") || "";
-        const rawBody = await response.text();
-
-        if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
-          const parts = rawBody.trim().split(".");
-          if (parts.length !== 3) throw new Error("Invalid JWT format");
-
-          let payload = parts[1];
-          payload += "=".repeat((4 - (payload.length % 4)) % 4);
-          const decoded = JSON.parse(
-            Buffer.from(payload, "base64url").toString("utf-8"),
-          );
-          return decoded;
-        }
-
-        return JSON.parse(rawBody);
       },
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
-      logger.info({ profile }, "ProConnect profile reçu");
-
       return {
         id: profile.sub,
         email: profile.email,
         emailVerified: profile.email_verified ?? false,
-        name: `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() || null,
+        name:
+          `${profile.given_name ?? ""} ${profile.usual_name ?? ""}`.trim() ||
+          null,
         given_name: profile.given_name ?? null,
         family_name: profile.usual_name ?? null,
         phone_number: profile.phone_number
           ? profile.phone_number.replace(/[.\-\s]/g, "")
           : null,
         siret: profile.siret || null,
-        organization: profile.siret ? {
-          id: parseInt(profile.siret, 10),
-          label: null,
-          siren: profile.siret.substring(0, 9),
-          siret: profile.siret,
-          is_collectivite_territoriale: false,
-          is_external: false,
-          is_service_public: false,
-        } : undefined,
+        organization: profile.siret
+          ? {
+              id: parseInt(profile.siret, 10),
+              label: null,
+              siren: profile.siret.substring(0, 9),
+              siret: profile.siret,
+              is_collectivite_territoriale: false,
+              is_external: false,
+              is_service_public: false,
+            }
+          : undefined,
         raw: profile,
       };
     },
