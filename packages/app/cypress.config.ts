@@ -1,4 +1,5 @@
 import { defineConfig } from "cypress";
+import postgres from "postgres";
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
@@ -24,5 +25,49 @@ export default defineConfig({
     requestTimeout: 90000,
     viewportWidth: 1600,
     viewportHeight: 1400,
+    setupNodeEvents(on, config) {
+      on("task", {
+        async deleteTestDeclaration({
+          siren,
+          year,
+        }: {
+          siren: string;
+          year: number;
+        }) {
+          const sql = postgres({
+            host: "localhost",
+            port: 5438,
+            database: "egapro",
+            username: "postgres",
+            password: "postgres",
+          });
+
+          try {
+            // Vérifier si la ligne existe
+            const existingRows =
+              await sql`SELECT 1 FROM representation_equilibree WHERE siren = ${siren} AND year = ${year} LIMIT 1`;
+
+            if (existingRows.length === 0) {
+              throw new Error(
+                `Aucune déclaration trouvée pour le SIREN ${siren} et l'année ${year}`,
+              );
+            }
+
+            // Supprimer la ligne
+            await sql`DELETE FROM representation_equilibree WHERE siren = ${siren} AND year = ${year}`;
+            return true;
+          } catch (error) {
+            console.error(
+              "Erreur lors de la suppression de la déclaration:",
+              error,
+            );
+            throw error; // Remonter l'erreur pour que Cypress la capture
+          } finally {
+            await sql.end();
+          }
+        },
+      });
+      return config;
+    },
   },
 });

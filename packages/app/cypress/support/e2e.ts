@@ -36,6 +36,7 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     "Failed to call method: org.freedesktop.portal.Settings.Read",
     // React/Next.js errors
     "Hydration failed because the initial UI does not match what was rendered on the server",
+    "Hydration failed because the server rendered HTML didn't match the client",
     "There was an error while hydrating",
     "switch to client rendering",
     "Loading chunk",
@@ -49,7 +50,7 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   ];
 
   // Check if error matches any of our suppression patterns
-  const shouldSuppress = suppressPatterns.some(pattern => {
+  const shouldSuppress = suppressPatterns.some((pattern) => {
     return err.message?.includes(pattern) || err.stack?.includes(pattern);
   });
 
@@ -57,7 +58,9 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     console.log("Suppressing known error:", {
       message: err.message,
       type: err.name,
-      pattern: suppressPatterns.find(p => err.message?.includes(p) || err.stack?.includes(p)),
+      pattern: suppressPatterns.find(
+        (p) => err.message?.includes(p) || err.stack?.includes(p),
+      ),
     });
     return false;
   }

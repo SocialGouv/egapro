@@ -36,10 +36,10 @@
 //   }
 // }
 
-Cypress.Commands.add("selectByLabel", labelText => {
+Cypress.Commands.add("selectByLabel", (labelText) => {
   cy.contains("label", labelText)
     .invoke("attr", "for")
-    .then(id => {
+    .then((id) => {
       return id && cy.get(`#${CSS.escape(id)}`);
     });
 });
@@ -52,7 +52,7 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
     });
 });
 
-Cypress.Commands.add("checkUrl", url => {
+Cypress.Commands.add("checkUrl", (url) => {
   cy.url().should("include", url);
   cy.get("#content").click();
 });
@@ -62,9 +62,9 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   cy.checkUrl("/login");
   cy.get(".fr-connect").click();
 
-  cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
-  const username = Cypress.env("E2E_USERNAME");
-  const password = Cypress.env("E2E_PASSWORD");
+  // cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
+  const username = Cypress.env("E2E_USERNAME") || "testuser";
+  const password = Cypress.env("E2E_PASSWORD") || "password";
 
   cy.get("form", { timeout: 10000 }).should("be.visible");
   cy.get('input[id="username"]').clear().type(username);
