@@ -43,11 +43,12 @@ jobs:
           echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
       - name: Run test e2e
+        working-directory: ./packages/app
         run: |
           pnpm run test:e2e
         env:
-          working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          E2E_CLEANUP_TOKEN: ${{ secrets.E2E_CLEANUP_TOKEN }}
           TEST_BASEURL: ${{ env.SITE_URL }}
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
