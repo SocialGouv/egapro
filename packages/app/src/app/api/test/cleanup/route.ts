@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (isProductionHost) {
       return NextResponse.json(
-        { error: "Endpoint non disponible" },
+        { error: "Prod - Endpoint non disponible" },
         { status: 404 },
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Si le token n'est pas configuré, l'endpoint est désactivé (sécurité)
     if (!expectedToken) {
       return NextResponse.json(
-        { error: "Endpoint non disponible" },
+        { error: "Token - Endpoint non disponible" },
         { status: 404 },
       );
     }
