@@ -35,20 +35,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 ): OAuthConfig<P> {
   const { proconnect } = config;
 
-  // Log la configuration OAuth au démarrage
-  logger.info(
-    {
-      issuer: proconnect.issuer,
-      well_known: proconnect.well_known,
-      authorization_endpoint: proconnect.authorization_endpoint,
-      token_endpoint: proconnect.token_endpoint,
-      userinfo_endpoint: proconnect.userinfo_endpoint,
-      clientId: proconnect.clientId,
-      scope: proconnect.scope,
-    },
-    "🔧 Configuration ProConnect OAuth initialisée",
-  );
-
   return {
     id: "proconnect",
     name: "ProConnect",
@@ -72,14 +58,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           logger.error("❌ Pas d'access_token disponible pour userinfo");
           throw new Error("No access token");
         }
-
-        logger.info(
-          {
-            url: proconnect.userinfo_endpoint,
-            hasAccessToken: !!tokens.access_token,
-          },
-          "📤 Userinfo request envoyée",
-        );
 
         try {
           const response = await fetch(proconnect.userinfo_endpoint, {
@@ -106,15 +84,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 
           const contentType = response.headers.get("content-type") || "";
           const rawBody = await response.text();
-
-          logger.info(
-            {
-              status: response.status,
-              contentType,
-              bodyPreview: rawBody.substring(0, 100),
-            },
-            "✅ Userinfo reçue avec succès",
-          );
 
           if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
             const parts = rawBody.trim().split(".");
@@ -143,8 +112,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
-      logger.info({ profile }, "✅ ProConnect profile reçu et traité");
-
       return {
         id: profile.sub,
         email: profile.email,
