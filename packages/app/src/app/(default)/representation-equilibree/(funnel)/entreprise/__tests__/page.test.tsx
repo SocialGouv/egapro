@@ -2,32 +2,45 @@
 import "../../__test-utils__/setup-repeq-mocks";
 
 // Import dependencies
-import { type ServerActionResponse } from "@common/utils/next";
-import { getCompany } from "@globalActions/company";
-import { type CompanyErrorCodes } from "@globalActions/companyErrorCodes";
+import { getServerSession } from "next-auth";
 import { render, screen, waitFor } from "@testing-library/react";
+import { type Mock, vi } from "vitest";
 
 import {
   foreignCompanyMockData,
   frenchCompanyMockData,
-  setupCompanyMock,
   setupFunnelStoreMock,
 } from "../../__test-utils__/repeq-mocks";
+import { useRepeqFunnelStore } from "../../useRepeqFunnelStore";
 import Entreprise from "../page";
 
 describe("Entreprise Page", () => {
-  const useRepeqFunnelStoreMock = jest.requireMock("../../useRepeqFunnelStore").useRepeqFunnelStore;
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-  it("should render correctly when company is french", async () => {
-    // Use helper functions to set up mocks with explicit options
-    setupFunnelStoreMock(useRepeqFunnelStoreMock, { isForeignCompany: false });
+  const useRepeqFunnelStoreMock = vi.mocked(useRepeqFunnelStore);
+  const getServerSessionMock = vi.mocked(getServerSession);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const getCompanyMock = getCompany as jest.Mock<Promise<ServerActionResponse<any, CompanyErrorCodes>>, [string]>;
-    setupCompanyMock(getCompanyMock, { isForeignCompany: false });
-    render(<Entreprise />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should render correctly when company is french", async () => {
+    // Setup funnel store with matching siren
+    setupFunnelStoreMock(useRepeqFunnelStoreMock as unknown as Mock, { isForeignCompany: false });
+
+    // Override getServerSession to return session with entreprise matching funnel siren
+    getServerSessionMock.mockResolvedValue({
+      expires: "",
+      user: {
+        email: "test@test.com",
+        staff: false,
+        entreprise: {
+          ...frenchCompanyMockData,
+          siren: frenchCompanyMockData.siren,
+        },
+      },
+    } as any);
+
+    const result = await Entreprise();
+    render(result);
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
       expect(screen.getByText(frenchCompanyMockData.siren)).toBeInTheDocument();
@@ -35,13 +48,24 @@ describe("Entreprise Page", () => {
   });
 
   it("should render correctly when company is foreign", async () => {
-    // Use helper functions to set up mocks with explicit options
-    setupFunnelStoreMock(useRepeqFunnelStoreMock, { isForeignCompany: true });
+    // Setup funnel store with matching siren
+    setupFunnelStoreMock(useRepeqFunnelStoreMock as unknown as Mock, { isForeignCompany: true });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const getCompanyMock = getCompany as jest.Mock<Promise<ServerActionResponse<any, CompanyErrorCodes>>, [string]>;
-    setupCompanyMock(getCompanyMock, { isForeignCompany: true });
-    render(<Entreprise />);
+    // Override getServerSession to return session with entreprise matching funnel siren
+    getServerSessionMock.mockResolvedValue({
+      expires: "",
+      user: {
+        email: "test@test.com",
+        staff: false,
+        entreprise: {
+          ...foreignCompanyMockData,
+          siren: foreignCompanyMockData.siren,
+        },
+      },
+    } as any);
+
+    const result = await Entreprise();
+    render(result);
 
     await waitFor(() => {
       expect(screen.getByText(/Informations de l'entreprise déclarante/, { exact: false })).toBeInTheDocument();
