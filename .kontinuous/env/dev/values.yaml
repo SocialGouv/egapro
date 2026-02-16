@@ -20,6 +20,9 @@ app:
 keycloak:
   ~chart: app
   imagePackage: keycloak
+  annotations:
+    oblik.socialgouv.io/min-request-memory: "512Mi"
+    oblik.socialgouv.io/min-limit-memory: "1Gi"
   containerPort: 8080
   probesPath: /
   resources:
