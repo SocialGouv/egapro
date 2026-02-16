@@ -8,15 +8,11 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Bloquer l'accès en production (multi-critères pour plus de sécurité)
+    // Bloquer l'accès en production (uniquement sur le domaine de prod pour permettre les tests e2e)
     const hostname = request.headers.get("host") || "";
     const isProductionHost = hostname.includes("egapro.travail.gouv.fr");
-    const environment =
-      process.env.NEXT_PUBLIC_EGAPRO_ENV || process.env.EGAPRO_ENV;
-    const isProductionEnv =
-      environment === "production" || environment === "prod";
 
-    if (isProductionHost || isProductionEnv) {
+    if (isProductionHost) {
       return NextResponse.json(
         { error: "Endpoint non disponible" },
         { status: 404 },
