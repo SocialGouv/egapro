@@ -1,4 +1,4 @@
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION=24-alpine
 
 # Builder
 FROM node:$NODE_VERSION AS builder
@@ -47,11 +47,11 @@ ENV GENERATE_SOURCEMAP=true \
 # Clean output directory and build with source maps
 RUN --mount=type=secret,id=sentry \
     if [ "$NEXT_PUBLIC_EGAPRO_ENV" = "production" ]; then \
-        if [ ! -f /run/secrets/sentry ]; then \
-            echo "Sentry secret required for production build" >&2; \
-            exit 1; \
-        fi; \
-        export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_TOKEN=' /run/secrets/sentry | cut -d'=' -f2); \
+    if [ ! -f /run/secrets/sentry ]; then \
+    echo "Sentry secret required for production build" >&2; \
+    exit 1; \
+    fi; \
+    export SENTRY_AUTH_TOKEN=$(grep '^SENTRY_AUTH_TOKEN=' /run/secrets/sentry | cut -d'=' -f2); \
     fi; \
     export NODE_OPTIONS="--max-old-space-size=8192"; \
     export GENERATE_SOURCEMAP=true; \
