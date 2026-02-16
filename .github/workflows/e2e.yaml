@@ -18,7 +18,7 @@ jobs:
           version: latest
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
         run: |
@@ -30,11 +30,9 @@ jobs:
           key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Cypress
         run: pnpm --filter app exec cypress install
-
       - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
-
       - name: Set env
         run: |
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
@@ -46,7 +44,7 @@ jobs:
 
       - name: Run test e2e
         run: |
-          yarn test:e2e:app
+          pnpm run test:e2e
         env:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"

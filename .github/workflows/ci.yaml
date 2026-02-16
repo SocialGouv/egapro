@@ -25,14 +25,13 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
           cache: pnpm
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-      - name: Build code
-        run: |
-          yarn build:app
+      - name: Build
+        run: pnpm build
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -59,14 +58,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
           cache: pnpm
-      - name: Test App
-        run: |
-          yarn test:app
-          # Debug - check if coverage file exists
-          ls -la packages/app/coverage/
-          cat packages/app/coverage/lcov.info | head -n 20
+      - name: Test
+        run: pnpm test
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
