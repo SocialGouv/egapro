@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-rm -rf node_modules
-rm -rf packages/app/node_modules packages/app/build
-
-pnpm install

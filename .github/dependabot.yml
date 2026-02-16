@@ -8,7 +8,7 @@ updates:
     labels:
       - bot
       - dependencies
-    target-branch: master
+    target-branch: alpha
     directory: "/"
     schedule:
       interval: weekly
@@ -24,6 +24,3 @@ updates:
         update-types:
           - "version-update:semver-patch"
           - "version-update:semver-minor"
-      - dependency-name: "@types/node"
-        versions:
-          - ">=17"

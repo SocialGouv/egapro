@@ -2,11 +2,9 @@ name: 👓 Review Auto
 on:
   push:
     branches:
-      - "feat/**"
-      - "feature/**"
-      - "fix/**"
-      - "hotfix/**"
-      - "**/review/**"
+      - "**"
+      - "!dependabot/**"
+      - "!master"
 
 concurrency:
   cancel-in-progress: true

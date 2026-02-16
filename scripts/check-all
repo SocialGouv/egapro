@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-pnpm -r run lint
-pnpm -r run build --no-lint
-
-# Tests API
-pnpm test:api
