@@ -35,6 +35,7 @@ keycloak:
     KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
     KC_PROXY: edge
     KC_HOSTNAME_STRICT: "false"
+    EGAPRO_ORIGIN: "https://egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
 
 maildev: {}
 pgweb: {}
