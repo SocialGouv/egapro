@@ -1,7 +1,7 @@
 services:
   db:
     restart: always
-    image: postgres
+    image: postgres:14.17
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
