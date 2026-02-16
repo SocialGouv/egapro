@@ -9,30 +9,20 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "scripts/dev",
-    "pgadmin": "docker-compose up --build --force-recreate --remove-orphans pgadmin",
-    "dev:app": "pnpm --filter app run dev",
-    "dev:maildev": "docker-compose up --build maildev",
-    "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "lint": "pnpm -r run lint",
-    "fresh-install": "scripts/fresh-install",
-    "check-all": "scripts/check-all",
-    "setup-python": "scripts/postinstall",
-    "test:app": "pnpm --filter app test",
-    "test:e2e:app": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app test:e2e",
-    "build:app": "pnpm --filter app build",
-    "build": "pnpm build:app"
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "test": "pnpm -r run test",
+    "dev:app": "pnpm --filter app run dev",
+    "lint:app": "pnpm --filter app run lint",
+    "build:app": "pnpm --filter app run build",
+    "test:app": "pnpm --filter app run test",
+    "test:e2e": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app test:e2e"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.2",
+    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@socialgouv/releaserc": "^1.1.1",
-    "concurrently": "^8.2.0",
-    "semantic-release": "^19"
-  },
-  "dependencies": {
-    "@codegouvfr/react-dsfr": "^1.31.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "semantic-release": "^25.0.3"
   }
 }

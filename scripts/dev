@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-exec pnpm concurrently \
-  "docker-compose up --build" \
-  "pnpm --filter app run dev"

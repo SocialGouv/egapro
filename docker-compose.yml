@@ -9,7 +9,7 @@ services:
     ports:
       - 5438:5432
     volumes:
-      - pgdata:/var/lib/postgresql
+      - pgdata:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.1.1

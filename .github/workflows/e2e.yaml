@@ -46,7 +46,7 @@ jobs:
 
       - name: Run test e2e
         run: |
-          yarn test:e2e:app
+          pnpm run test:e2e
         env:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
