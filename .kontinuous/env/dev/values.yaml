@@ -1,6 +1,13 @@
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
+  env:
+    - name: E2E_CLEANUP_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: E2E_CLEANUP_TOKEN
+          optional: true
   envFrom:
     - configMapRef:
         name: "proconnect"
