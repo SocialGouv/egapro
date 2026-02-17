@@ -12,20 +12,13 @@ ENV PATH=$PNPM_HOME:$PATH
 
 RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
 
-# Copy lockfile first for better layer caching (pnpm fetch only needs these)
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
-
-# Fetch all dependencies into the store (cached unless lockfile changes)
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm fetch --frozen-lockfile --store-dir=/pnpm/store
-
-# Copy package.json files (needed for workspace resolution)
-COPY package.json ./
+# Copy workspace config + lockfile + package.jsons for install
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/app/package.json ./packages/app/
 
-# Install from local store (offline = no network calls, fast)
+# Install only app's dependencies (not the entire lockfile like pnpm fetch does)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --filter app --frozen-lockfile --offline --store-dir=/pnpm/store
+    pnpm install --filter app --frozen-lockfile --store-dir=/pnpm/store
 
 # Copy source code (after install to maximize cache efficiency)
 COPY packages/app/ ./packages/app/
@@ -60,6 +53,7 @@ ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
 # Build with Next.js cache persisted across builds
+# output: 'standalone' traces imports and produces a minimal server.js + node_modules
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry \
     sh -ce ' \
@@ -70,11 +64,6 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     pnpm --filter app build \
     '
 
-# Deploy: creates a standalone production bundle (no dev dependencies, no symlinks)
-RUN pnpm --filter app --prod deploy --legacy /app/deploy && \
-    cp -r /app/packages/app/.next /app/deploy/.next && \
-    cp -r /app/packages/app/public/* /app/deploy/public/
-
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
 FROM node:$NODE_VERSION AS runner
@@ -83,8 +72,8 @@ RUN apk --update --no-cache add ca-certificates && apk upgrade
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-WORKDIR /app
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 # Sentry runtime env vars
 ARG SENTRY_URL
@@ -98,15 +87,14 @@ ENV SENTRY_PROJECT=$SENTRY_PROJECT
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
-# Copy deployed standalone files (real node_modules, not symlinks)
-COPY --from=builder --chown=1000:1000 /app/deploy /app
+WORKDIR /app
 
-# Make the tree read-only, then re-enable write only where Next.js runtime needs it
-RUN chmod -R a-w /app && \
-    mkdir -p /app/.next/cache/images && \
-    chown -R 1000:1000 /app/.next/cache && \
-    chmod -R u+rwX,go+rX /app/.next/cache
+# Copy standalone server (traced node_modules included, monorepo structure preserved)
+COPY --from=builder --chown=1000:1000 /app/packages/app/.next/standalone ./
+# Copy static assets and public files (not included in standalone output)
+COPY --from=builder --chown=1000:1000 /app/packages/app/.next/static ./packages/app/.next/static
+COPY --from=builder --chown=1000:1000 /app/packages/app/public ./packages/app/public
 
 USER 1000
 
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+CMD ["node", "packages/app/server.js"]
