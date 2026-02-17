@@ -1,14 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { vi } from "vitest";
 
 import { RepEqBreadcrumb } from "../Breadcrumb";
 
 // Mock the Next.js navigation hook
-jest.mock("next/navigation", () => ({
-  useSelectedLayoutSegment: jest.fn(),
+vi.mock("next/navigation", () => ({
+  useSelectedLayoutSegment: vi.fn(),
 }));
 
-const mockUseSelectedLayoutSegment = jest.mocked(useSelectedLayoutSegment);
+const mockUseSelectedLayoutSegment = vi.mocked(useSelectedLayoutSegment);
 
 describe("RepEqBreadcrumb", () => {
   beforeEach(() => {

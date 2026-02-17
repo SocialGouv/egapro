@@ -1,18 +1,33 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
 import EcartsMembres from "../page";
 
-// Mock the store
-jest.mock("../../useRepeqFunnelStore", () => ({
-  useRepeqFunnelStore: jest.fn(() => ({
-    funnel: { year: 2024 },
-    saveFunnel: jest.fn(),
-    resetFunnel: jest.fn(),
-    isEdit: false,
-    setIsEdit: jest.fn(),
-  })),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+// Create stable state objects using vi.hoisted so they are the same reference across re-renders
+const stableState = vi.hoisted(() => ({
+  funnel: { year: 2024 },
+  saveFunnel: vi.fn(),
+  resetFunnel: vi.fn(),
+  isEdit: false,
+  setIsEdit: vi.fn(),
+}));
+
+// Mock the store - must handle selector functions from storePicker
+vi.mock("../../useRepeqFunnelStore", () => ({
+  useRepeqFunnelStore: vi.fn((selector?: (state: Record<string, unknown>) => unknown) => {
+    if (typeof selector === "function") {
+      return selector(stableState);
+    }
+    return stableState;
+  }),
+  useRepeqFunnelClientStore: vi.fn((selector?: (state: Record<string, unknown>) => unknown) => {
+    if (typeof selector === "function") {
+      return selector(stableState);
+    }
+    return stableState;
+  }),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 }));
 
 describe("EcartsMembres", () => {

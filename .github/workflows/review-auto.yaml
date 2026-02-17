@@ -2,11 +2,9 @@ name: 👓 Review Auto
 on:
   push:
     branches:
-      - "feat/**"
-      - "feature/**"
-      - "fix/**"
-      - "hotfix/**"
-      - "**/review/**"
+      - "**"
+      - "!dependabot/**"
+      - "!master"
 
 concurrency:
   cancel-in-progress: true
@@ -61,10 +59,7 @@ jobs:
           buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
           buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
           buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
-          cache-enabled: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          pull: true
+          cache-enabled: true
           fallback-enabled: true
           build-args: |
             NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api

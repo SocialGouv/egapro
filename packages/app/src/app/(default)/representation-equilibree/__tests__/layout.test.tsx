@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react";
+import { vi } from "vitest";
 
 import RepEqLayout from "../layout";
 
 // Mock the navigation hook used by Breadcrumb
-jest.mock("next/navigation", () => ({
-  useSelectedLayoutSegment: jest.fn(),
+vi.mock("next/navigation", () => ({
+  useSelectedLayoutSegment: vi.fn(),
 }));
 
 describe("RepEqLayout", () => {

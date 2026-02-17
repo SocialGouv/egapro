@@ -1,29 +1,34 @@
 import { render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { type Mock, vi } from "vitest";
 
 import PeriodeReference from "../page";
 
 // Mock only the router functionality, not the Form component
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  redirect: jest.fn(),
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+  redirect: vi.fn(),
 }));
 
 // Mock the zustand store
-jest.mock("../../useRepeqFunnelStore", () => ({
-  useRepeqFunnelStore: jest.fn(() => ({
+vi.mock("../../useRepeqFunnelStore", () => ({
+  useRepeqFunnelStore: vi.fn(() => ({
     funnel: { year: 2023 },
-    saveFunnel: jest.fn(),
+    saveFunnel: vi.fn(),
   })),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+  useRepeqFunnelClientStore: vi.fn(() => ({
+    funnel: { year: 2023 },
+    saveFunnel: vi.fn(),
+  })),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 }));
 
 describe("PeriodeReference", () => {
-  const mockRouter = { push: jest.fn() };
+  const mockRouter = { push: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    vi.clearAllMocks();
+    (useRouter as Mock).mockReturnValue(mockRouter);
   });
 
   it("should render correctly", () => {

@@ -1,53 +1,52 @@
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
-import { type NextServerPageProps } from "@common/utils/next";
 import { render, screen } from "@testing-library/react";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { type ReactElement } from "react";
+import { type Mock, vi } from "vitest";
 
 import RepEqPage from "../page";
 
 // Mock next-auth
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+vi.mock("next-auth", () => ({
+  getServerSession: vi.fn(),
 }));
 
 // Mock next/navigation
-jest.mock("next/navigation", () => ({
-  notFound: jest.fn(),
+vi.mock("next/navigation", () => ({
+  notFound: vi.fn(),
 }));
 
 // Mock config
-jest.mock("@common/config", () => ({
+vi.mock("@common/config", () => ({
   config: {
     api: {
-      security: {
-      },
+      security: {},
     },
   },
 }));
 
 // Mock auth config
-jest.mock("@api/core-domain/infra/auth/config", () => ({
+vi.mock("@api/core-domain/infra/auth/config", () => ({
   authConfig: {
     providers: [],
   },
 }));
 
 // Mock repo and useCase
-const mockExecute = jest.fn();
-jest.mock("@api/core-domain/repo", () => ({
+const mockExecute = vi.fn();
+vi.mock("@api/core-domain/repo", () => ({
   representationEquilibreeRepo: {},
 }));
-jest.mock("@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear", () => ({
-  GetRepresentationEquilibreeBySirenAndYear: jest.fn().mockImplementation(() => ({
+vi.mock("@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear", () => ({
+  GetRepresentationEquilibreeBySirenAndYear: vi.fn().mockImplementation(() => ({
     execute: mockExecute,
   })),
   GetRepresentationEquilibreeBySirenAndYearError: class extends Error {},
 }));
 
 // Mock DetailRepEq component
-jest.mock("../../../Recap", () => ({
+vi.mock("../../../Recap", () => ({
   DetailRepEq: ({ repEq, publicMode }: { publicMode: boolean; repEq: RepresentationEquilibreeDTO }) => (
     <div data-testid="detail-rep-eq">
       Detail Mock - Public: {publicMode.toString()} - Siren: {repEq.siren}
@@ -56,7 +55,7 @@ jest.mock("../../../Recap", () => ({
 }));
 
 // Mock EditButton component
-jest.mock("../EditButton", () => ({
+vi.mock("../EditButton", () => ({
   EditButton: ({ repEq }: { repEq: RepresentationEquilibreeDTO }) => (
     <button data-testid="edit-button">Edit Mock - Siren: {repEq.siren}</button>
   ),
@@ -97,13 +96,13 @@ describe("RepEqPage", () => {
     },
   };
 
-  const defaultProps: NextServerPageProps<"siren" | "year"> = {
-    params: { siren: "123456789", year: "2024" },
+  const defaultProps = {
+    params: Promise.resolve({ siren: "123456789", year: "2024" }),
     searchParams: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should call notFound when no data is found", async () => {
@@ -125,7 +124,7 @@ describe("RepEqPage", () => {
 
   it("should show public view when no session", async () => {
     mockExecute.mockResolvedValue(mockRepEq);
-    (getServerSession as jest.Mock).mockResolvedValue(null);
+    (getServerSession as Mock).mockResolvedValue(null);
 
     render((await RepEqPage(defaultProps)) as ReactElement);
 
@@ -136,10 +135,10 @@ describe("RepEqPage", () => {
 
   it("should show owner view when user has matching siren", async () => {
     mockExecute.mockResolvedValue(mockRepEq);
-    (getServerSession as jest.Mock).mockResolvedValue({
+    (getServerSession as Mock).mockResolvedValue({
       user: {
         ...mockSession.user,
-        companies: [{ siren: "123456789" }],
+        entreprise: { siren: "123456789" },
       },
     });
 
@@ -152,10 +151,10 @@ describe("RepEqPage", () => {
 
   it("should show warning when user has no matching siren", async () => {
     mockExecute.mockResolvedValue({ ...mockRepEq, declaredAt: "2050-01-01T00:00:00.000Z" });
-    (getServerSession as jest.Mock).mockResolvedValue({
+    (getServerSession as Mock).mockResolvedValue({
       user: {
         email: "user@example.com",
-        companies: [{ siren: "123456788" }],
+        entreprise: { siren: "123456788" },
         staff: false,
       },
     });
@@ -169,7 +168,7 @@ describe("RepEqPage", () => {
 
   it("should show staff view when user is staff", async () => {
     mockExecute.mockResolvedValue(mockRepEq);
-    (getServerSession as jest.Mock).mockResolvedValue({
+    (getServerSession as Mock).mockResolvedValue({
       user: {
         ...mockSession.user,
         staff: true,
