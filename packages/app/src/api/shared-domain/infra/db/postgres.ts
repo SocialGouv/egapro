@@ -2,7 +2,6 @@ import { config } from "@common/config";
 import postgres from "postgres";
 
 export const sql = postgres({
-  debug: true,
   host: config.api.postgres.host,
   port: config.api.postgres.port,
   database: config.api.postgres.db,

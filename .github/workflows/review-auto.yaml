@@ -197,3 +197,39 @@ jobs:
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
+
+  e2e:
+    name: "Test e2e"
+    runs-on: ubuntu-latest
+    needs: [kontinuous]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Cypress binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Cypress
+        run: pnpm --filter app exec cypress install
+      - name: Load SocialGouv variables
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+      - name: Set env
+        run: |
+          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
+      - name: Run test e2e
+        working-directory: ./packages/app
+        run: pnpm run test:e2e
+        env:
+          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          E2E_CLEANUP_TOKEN: ${{ secrets.E2E_CLEANUP_TOKEN }}
+          TEST_BASEURL: ${{ env.SITE_URL }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}

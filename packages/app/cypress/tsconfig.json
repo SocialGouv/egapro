@@ -3,7 +3,12 @@
   "compilerOptions": {
     "noEmit": true,
     "isolatedModules": false,
-    "types": ["cypress", "@testing-library/cypress", "cypress-real-events"]
+    "types": [
+      "cypress",
+      "@testing-library/cypress",
+      "cypress-real-events",
+      "node"
+    ]
   },
   "include": ["../node_modules/cypress", "./**/*.ts"],
   "exclude": ["node_modules"],

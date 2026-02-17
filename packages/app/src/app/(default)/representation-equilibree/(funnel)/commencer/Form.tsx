@@ -23,7 +23,13 @@ import {
 
 type CommencerFormType = z.infer<typeof createSteps.commencer>;
 
-const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =>
+const buildConfirmMessage = ({
+  siren,
+  year,
+}: {
+  siren: string;
+  year: number;
+}) =>
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
@@ -105,7 +111,9 @@ export const CommencerForm = ({ session }: { session: Session }) => {
     }
 
     // ✅ Nouvelle déclaration → confirmation
-    if (confirm(buildConfirmMessage({ siren: funnelSiren, year: funnelYear }))) {
+    if (
+      confirm(buildConfirmMessage({ siren: funnelSiren, year: funnelYear }))
+    ) {
       resetFunnel();
       await saveAndGoNext(siren, year);
     } else {
@@ -115,7 +123,11 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   /** ---------------- Reset ---------------- */
   const confirmReset = () => {
-    if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le parcours ?")) {
+    if (
+      confirm(
+        "Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le parcours ?",
+      )
+    ) {
       resetFunnel();
       resetForm();
       if (session.user.staff) setValue("siren", "");
@@ -133,10 +145,16 @@ export const CommencerForm = ({ session }: { session: Session }) => {
 
   /** ---------------- Sync store siren with session for non-staff ---------------- */
   useEffect(() => {
-    if (hasHydrated && !session.user.staff && session.user.entreprise?.siren && funnel?.siren !== session.user.entreprise.siren) {
+    if (
+      hasHydrated &&
+      !session.user.staff &&
+      session.user.entreprise?.siren &&
+      funnel &&
+      funnel.siren !== session.user.entreprise.siren
+    ) {
       saveFunnel({ siren: session.user.entreprise.siren });
     }
-  }, [hasHydrated, session.user, funnel?.siren, saveFunnel]);
+  }, [hasHydrated, session.user, funnel, saveFunnel]);
 
   /** ---------------- Render ---------------- */
   return (
@@ -156,7 +174,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
           {(session.user.staff ? REPEQ_ADMIN_YEARS : YEARS)
             .slice()
             .reverse()
-            .map(year => (
+            .map((year) => (
               <option key={year} value={year}>
                 {year}
               </option>
@@ -173,7 +191,11 @@ export const CommencerForm = ({ session }: { session: Session }) => {
         ) : (
           <>
             {/* 🔑 champ requis pour RHF */}
-            <input type="hidden" {...register("siren")} value={session.user.entreprise?.siren} />
+            <input
+              type="hidden"
+              {...register("siren")}
+              value={session.user.entreprise?.siren}
+            />
 
             <label className={fr.cx("fr-label")}>Siren entreprise</label>
             <p className={fr.cx("fr-mt-1w")}>
