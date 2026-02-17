@@ -13,6 +13,8 @@ export async function initDb() {
     // En environnement CNPG, elles sont déjà installées par le superuser.
     // On tente de les créer mais on ignore les erreurs de permissions.
     try {
+      // Suppress NOTICE messages (e.g. "relation already exists, skipping")
+      await sql.unsafe(`SET client_min_messages TO WARNING`);
       await sql.unsafe(`CREATE EXTENSION IF NOT EXISTS unaccent`);
       await sql.unsafe(`
         DO
