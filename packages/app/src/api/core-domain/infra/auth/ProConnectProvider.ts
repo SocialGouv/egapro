@@ -73,14 +73,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           throw new Error("No access token");
         }
 
-        logger.info(
-          {
-            url: proconnect.userinfo_endpoint,
-            hasAccessToken: !!tokens.access_token,
-          },
-          "📤 Userinfo request envoyée",
-        );
-
         try {
           const response = await fetch(proconnect.userinfo_endpoint, {
             headers: {
@@ -106,15 +98,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
 
           const contentType = response.headers.get("content-type") || "";
           const rawBody = await response.text();
-
-          logger.info(
-            {
-              status: response.status,
-              contentType,
-              bodyPreview: rawBody.substring(0, 100),
-            },
-            "✅ Userinfo reçue avec succès",
-          );
 
           if (contentType.includes("jwt") || rawBody.startsWith("ey")) {
             const parts = rawBody.trim().split(".");
@@ -143,8 +126,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
-      logger.info({ profile }, "✅ ProConnect profile reçu et traité");
-
       return {
         id: profile.sub,
         email: profile.email,

@@ -37,7 +37,7 @@
         "saml.authnstatement": "false",
         "display.on.consent.screen": "false",
         "saml.onetimeuse.condition": "false",
-        "post.logout.redirect.uris": "http://localhost:3000\nhttp://localhost:3001\nhttp://localhost:3000/\nhttp://localhost:3001/"
+        "post.logout.redirect.uris": "__EGAPRO_ORIGIN__/"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
@@ -127,11 +127,8 @@
         "offline_access",
         "microprofile-jwt"
       ],
-      "webOrigins": ["http://localhost:3000", "http://localhost:3001"],
-      "redirectUris": [
-        "http://localhost:3000/api/auth/callback/proconnect",
-        "http://localhost:3001/api/auth/callback/proconnect"
-      ]
+      "webOrigins": ["__EGAPRO_ORIGIN__"],
+      "redirectUris": ["__EGAPRO_ORIGIN__/api/auth/callback/proconnect"]
     }
   ],
   "identityProviders": [
@@ -475,6 +472,24 @@
       "firstName": "Test",
       "lastName": "User",
       "email": "test@example.com",
+      "attributes": {
+        "siret": ["83525644700011"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "egapro-e2e@fabrique.social.gouv.fr",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "egapro-e2e@fabrique.social.gouv.fr",
       "attributes": {
         "siret": ["83525644700011"]
       },

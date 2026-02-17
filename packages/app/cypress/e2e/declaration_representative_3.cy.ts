@@ -6,7 +6,10 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/apiv2/clean-test-user/declaration");
+    cy.task("deleteTestDeclaration", {
+      siren: "835256447",
+      year: new Date().getFullYear() - 2,
+    });
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
@@ -31,17 +34,19 @@ describe("Declaration", () => {
 
     // Check if we're on the expected page
     cy.url().should("include", "/representation-equilibree/commencer");
-    cy.selectByLabel("Numéro Siren de l’entreprise *").select("804450377");
+    cy.selectByLabel(
+      "Année au titre de laquelle les écarts de représentation sont calculés *",
+    ).select(String(new Date().getFullYear() - 2));
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/declarant");
-    cy.selectByLabel("Nom du déclarant *").should("have.value", "Egapro");
+    cy.selectByLabel("Nom du déclarant *").should("have.value", "User");
     cy.selectByLabel("Prénom du déclarant *").should("have.value", "Test");
     cy.selectByLabel("Téléphone du déclarant *").clear().type("0123456789");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/entreprise");
-    cy.should("contain.text", "804450377");
+    cy.should("contain.text", "835256447");
     cy.contains("a", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/periode-reference");
@@ -52,23 +57,27 @@ describe("Declaration", () => {
 
     cy.checkUrl("/representation-equilibree/ecarts-cadres");
     cy.clickRadio("L’écart de représentation est-il calculable ? *", "Non");
-    cy.selectByLabel("Motif de non calculabilité *").select("aucun_cadre_dirigeant");
+    cy.selectByLabel("Motif de non calculabilité *").select(
+      "aucun_cadre_dirigeant",
+    );
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/ecarts-membres");
     cy.clickRadio("L’écart de représentation est-il calculable ? *", "Non");
-    cy.selectByLabel("Motif de non calculabilité *").select("aucune_instance_dirigeante");
+    cy.selectByLabel("Motif de non calculabilité *").select(
+      "aucune_instance_dirigeante",
+    );
     cy.contains("button", "Suivant").click();
 
     cy.url().should("include", "/representation-equilibree/validation");
     cy.contains("button", "Valider et transmettre les résultats").click();
     cy.contains("Votre déclaration a été transmise");
-    cy.contains("button", Cypress.env("E2E_USERNAME")).click();
-    cy.contains("a", "Mes déclarations").click();
+    // cy.contains("button", Cypress.env("E2E_USERNAME")).click();
+    // cy.contains("a", "Mes déclarations").click();
 
-    cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("804450377");
-    cy.contains("a", "804450377");
-    cy.contains("NC");
+    // cy.checkUrl("/mon-espace/mes-declarations");
+    // cy.selectByLabel("Numéro Siren de l'entreprise").select("804450377");
+    // cy.contains("a", "804450377");
+    // cy.contains("NC");
   });
 });

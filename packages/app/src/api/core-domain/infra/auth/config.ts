@@ -9,7 +9,10 @@ import {
   type Company,
 } from "@api/core-domain/infra/companies-store";
 import { entrepriseService } from "@api/core-domain/infra/services";
-import { type Etablissement, type Entreprise } from "@api/core-domain/infra/services/IEntrepriseService";
+import {
+  type Etablissement,
+  type Entreprise,
+} from "@api/core-domain/infra/services/IEntrepriseService";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { Siret } from "@common/core-domain/domain/valueObjects/Siret";
 import { logger } from "@api/utils/pino";
@@ -64,19 +67,34 @@ const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
 export const proConnectProvider = ProConnectProvider({
   clientId: config.proconnect.clientId,
   clientSecret: config.proconnect.clientSecret,
-});
-
-
+  callbackUrl: config.proconnect.callbackUrl,
+} as any);
 
 // === CONFIGURATION NEXTAUTH ===
 export const authConfig: AuthOptions = {
   logger: {
-    error: (code, ...message) => logger.error({ ...message, code }, "Error"),
-    warn: (code, ...message) => logger.warn({ ...message, code }, "Warning"),
+    error: (code, ...message) => {
+      // Log l'erreur complète avec stack trace si disponible
+      const errorDetails = message.map((m) => {
+        if (m instanceof Error) {
+          return {
+            message: m.message,
+            stack: m.stack,
+            cause: m.cause,
+            name: m.name,
+          };
+        }
+        return m;
+      });
+      logger.error({ code, details: errorDetails }, "❌ NextAuth Error");
+    },
+    warn: (code, ...message) =>
+      logger.warn({ ...message, code }, "⚠️  NextAuth Warning"),
     info: (code: string, ...message: string[]) =>
-      logger.info({ ...message, code }, "Info"),
+      logger.info({ ...message, code }, "ℹ️  NextAuth Info"),
     debug: (code, ...message) => {
-      if (config.env === "dev") logger.info({ ...message, code }, "Debug");
+      if (config.env === "dev")
+        logger.info({ ...message, code }, "🐛 NextAuth Debug");
       else logger.debug({ ...message, code }, "Debug");
     },
   },
@@ -88,7 +106,30 @@ export const authConfig: AuthOptions = {
   },
   debug: config.env === "dev",
   adapter: egaproNextAuthAdapter,
-  session: { strategy: "jwt", maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60 },
+  session: {
+    strategy: "jwt",
+    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60,
+  },
+  events: {
+    async signIn(message) {
+      logger.info(
+        { user: message.user, account: message.account },
+        "📥 Event: signIn réussi",
+      );
+    },
+    async signOut(message) {
+      logger.info({ token: message.token }, "📤 Event: signOut");
+    },
+    async createUser(message) {
+      logger.info({ user: message.user }, "👤 Event: createUser");
+    },
+    async updateUser(message) {
+      logger.info({ user: message.user }, "🔄 Event: updateUser");
+    },
+    async session(message) {
+      logger.debug({ session: message.session }, "🔐 Event: session");
+    },
+  },
   providers: [
     GithubProvider({
       ...config.api.security.github,
@@ -103,16 +144,50 @@ export const authConfig: AuthOptions = {
               charonGithubUrl,
             ).toString(),
           }
-        : { authorization: { params: { scope: "user:email read:user read:org" } } }),
+        : {
+            authorization: {
+              params: { scope: "user:email read:user read:org" },
+            },
+          }),
     }),
     proConnectProvider,
   ],
   callbacks: {
     async signIn({ account, profile }) {
-      if (account?.provider !== "github") return true;
+      logger.info(
+        {
+          provider: account?.provider,
+          hasAccount: !!account,
+          hasProfile: !!profile,
+        },
+        "🔐 SignIn callback déclenché",
+      );
+
+      if (account?.provider === "proconnect") {
+        logger.info(
+          {
+            profile,
+            accountType: account.type,
+            accountProvider: account.provider,
+          },
+          "✅ SignIn ProConnect - validation réussie",
+        );
+        return true;
+      }
+
+      if (account?.provider !== "github") {
+        logger.info(
+          { provider: account?.provider },
+          "✅ SignIn non-GitHub accepté",
+        );
+        return true;
+      }
 
       const githubProfile = profile as unknown as GithubProfile;
-      if (!account.access_token || !githubProfile?.login) return false;
+      if (!account.access_token || !githubProfile?.login) {
+        logger.warn("❌ SignIn GitHub - token ou login manquant");
+        return false;
+      }
 
       const octokit = new Octokit({ auth: account.access_token });
       try {
@@ -121,90 +196,187 @@ export const authConfig: AuthOptions = {
           team_slug: "egapro",
           username: githubProfile.login,
         });
-        return membership.data.state === "active";
-      } catch {
+        const isActive = membership.data.state === "active";
+        logger.info(
+          {
+            username: githubProfile.login,
+            isActive,
+          },
+          isActive
+            ? "✅ SignIn GitHub - membre actif"
+            : "❌ SignIn GitHub - membre inactif",
+        );
+        return isActive;
+      } catch (error) {
+        logger.error(
+          {
+            error: error instanceof Error ? error.message : String(error),
+            username: githubProfile.login,
+          },
+          "❌ SignIn GitHub - erreur vérification membership",
+        );
         return false;
       }
     },
 
     async jwt({ token, profile, trigger, account, session }) {
-        const isStaff =
-          token.user?.staff || token.staff?.impersonating || false;
+      logger.info(
+        {
+          trigger,
+          provider: account?.provider,
+          hasProfile: !!profile,
+          hasAccount: !!account,
+          hasSession: !!session,
+        },
+        "🔄 JWT callback déclenché",
+      );
 
-        // Store ID token for logout (available during initial sign in)
-        if (account?.id_token) {
-          token.idToken = account.id_token;
-        }
+      const isStaff = token.user?.staff || token.staff?.impersonating || false;
 
-        // === IMPERSONATION ===
-        if (trigger === "update" && session && isStaff) {
-          if (session.staff.impersonating === true) {
-            assertImpersonatedSession(session);
-            token.user.staff = session.user.staff;
-            token.staff.impersonating = true;
-            if (session.user.companies) {
-              token.staff.lastImpersonatedHash =
-                await companiesUtils.hashCompanies(
-                  session.user.companies as Company[],
-                );
-            }
-          } else if (session.staff.impersonating === false) {
-            token.user.staff = true;
-            token.staff.impersonating = false;
+      // Store ID token for logout (available during initial sign in)
+      if (account?.id_token) {
+        token.idToken = account.id_token;
+        logger.info("💾 ID token stocké pour logout");
+      }
+
+      // === IMPERSONATION ===
+      if (trigger === "update" && session && isStaff) {
+        if (session.staff.impersonating === true) {
+          assertImpersonatedSession(session);
+          token.user.staff = session.user.staff;
+          token.staff.impersonating = true;
+          if (session.user.companies) {
+            token.staff.lastImpersonatedHash =
+              await companiesUtils.hashCompanies(
+                session.user.companies as Company[],
+              );
           }
-        }
-
-        if (trigger !== "signUp") return token;
-
-        // === INITIALISATION COMPLÈTE ===
-        token.user = {
-          company: undefined,
-          email: token.email,
-          staff: false,
-          tokenApiV1: "",
-          firstname: undefined,
-          lastname: undefined,
-          phoneNumber: undefined,
-        } as Session["user"];
-
-        token.staff = {
-          impersonating: false,
-          lastImpersonatedHash: "",
-        } as Session["staff"];
-
-        // === GITHUB ===
-        if (account?.provider === "github") {
-          const githubProfile = profile as unknown as GithubProfile;
+          logger.info("👤 Impersonation activée");
+        } else if (session.staff.impersonating === false) {
           token.user.staff = true;
-          const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
-          token.user.firstname = firstname || undefined;
-          token.user.lastname = lastname || undefined;
-
-        } else {
-          const proConnectProfile = profile as ProConnectProfile;
-          logger.info({ proConnectProfile }, "ProConnect profile reçu → enrichissement Weez");
-
-          if (proConnectProfile.siret) {
-            try {
-              const etablissement = await entrepriseService.siret(new Siret(proConnectProfile.siret));
-              token.user.entreprise = etablissement;
-            } catch (error) {
-              logger.warn({ siret: proConnectProfile.siret, error }, "Failed to fetch organization for siret");
-            }
-          }
-
-          token.user.staff = config.api.staff.includes(proConnectProfile.email ?? "");
-          token.user.firstname = proConnectProfile.given_name ?? undefined;
-          token.user.lastname = proConnectProfile.usual_name ?? undefined;
-          token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
-          token.user.siret = proConnectProfile.siret ?? undefined;
+          token.staff.impersonating = false;
+          logger.info("👤 Impersonation désactivée");
         }
+      }
+
+      if (trigger !== "signUp") {
+        logger.info(
+          { trigger },
+          "⏭️  JWT callback - pas de signUp, token retourné tel quel",
+        );
         return token;
+      }
+
+      logger.info("🆕 JWT callback - signUp détecté, initialisation du token");
+
+      // === INITIALISATION COMPLÈTE ===
+      token.user = {
+        company: undefined,
+        email: token.email,
+        staff: false,
+        tokenApiV1: "",
+        firstname: undefined,
+        lastname: undefined,
+        phoneNumber: undefined,
+      } as Session["user"];
+
+      token.staff = {
+        impersonating: false,
+        lastImpersonatedHash: "",
+      } as Session["staff"];
+
+      // === GITHUB ===
+      if (account?.provider === "github") {
+        const githubProfile = profile as unknown as GithubProfile;
+        token.user.staff = true;
+        const [firstname, lastname] = githubProfile.name?.split(" ") ?? [];
+        token.user.firstname = firstname || undefined;
+        token.user.lastname = lastname || undefined;
+        logger.info({ email: token.email }, "✅ GitHub profile traité");
+      } else {
+        const proConnectProfile = profile as ProConnectProfile;
+        logger.info(
+          {
+            email: proConnectProfile.email,
+            siret: proConnectProfile.siret,
+            given_name: proConnectProfile.given_name,
+            usual_name: proConnectProfile.usual_name,
+          },
+          "📋 ProConnect profile reçu → enrichissement",
+        );
+
+        if (proConnectProfile.siret) {
+          logger.info(
+            { siret: proConnectProfile.siret },
+            "🔍 Recherche établissement via Weez",
+          );
+          try {
+            const etablissement = await entrepriseService.siret(
+              new Siret(proConnectProfile.siret),
+            );
+            token.user.entreprise = etablissement;
+            logger.info(
+              {
+                siret: proConnectProfile.siret,
+                siren: etablissement.siren,
+                label: etablissement.simpleLabel,
+              },
+              "✅ Établissement trouvé",
+            );
+          } catch (error) {
+            logger.warn(
+              {
+                siret: proConnectProfile.siret,
+                error: error instanceof Error ? error.message : String(error),
+              },
+              "⚠️  Échec récupération établissement",
+            );
+          }
+        } else {
+          logger.info("ℹ️  Pas de SIRET dans le profile ProConnect");
+        }
+
+        token.user.staff = config.api.staff.includes(
+          proConnectProfile.email ?? "",
+        );
+        token.user.firstname = proConnectProfile.given_name ?? undefined;
+        token.user.lastname = proConnectProfile.usual_name ?? undefined;
+        token.user.phoneNumber = proConnectProfile.phone_number ?? undefined;
+        token.user.siret = proConnectProfile.siret ?? undefined;
+
+        logger.info(
+          {
+            email: proConnectProfile.email,
+            isStaff: token.user.staff,
+            hasEntreprise: !!token.user.entreprise,
+          },
+          "✅ ProConnect profile traité et enrichi",
+        );
+      }
+      return token;
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.includes("/api/v2/logout")) return url;
-      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+      logger.info(
+        {
+          url,
+          baseUrl,
+          isLogout: url.includes("/api/v2/logout"),
+          isRelative: url.startsWith("/"),
+        },
+        "🔀 Redirect callback",
+      );
+
+      if (url.includes("/api/v2/logout")) {
+        logger.info({ url }, "🚪 Redirect vers logout");
+        return url;
+      }
+
+      const finalUrl = url.startsWith("/")
+        ? new URL(url, baseUrl).toString()
+        : url;
+      logger.info({ finalUrl }, "➡️  Redirect final");
+      return finalUrl;
     },
 
     async session({ session, token }) {
@@ -218,19 +390,21 @@ export const authConfig: AuthOptions = {
     },
   },
 
-
-
   jwt: {
     async encode({ token, secret, maxAge }) {
       const secretAsKey = new TextEncoder().encode(secret as string);
-      const jwt = new SignJWT(token ?? {}).setProtectedHeader({ alg: "HS256" }).setIssuedAt();
+      const jwt = new SignJWT(token ?? {})
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt();
       if (maxAge) jwt.setExpirationTime(Math.floor(Date.now() / 1000) + maxAge);
       return await jwt.sign(secretAsKey);
     },
     async decode({ token, secret }) {
       try {
         const secretAsKey = new TextEncoder().encode(secret as string);
-        const { payload } = await jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] });
+        const { payload } = await jwtVerify(token as string, secretAsKey, {
+          algorithms: ["HS256"],
+        });
         return payload as JWT;
       } catch (error) {
         logger.error({ error }, "Erreur décodage token");
@@ -239,3 +413,29 @@ export const authConfig: AuthOptions = {
     },
   },
 };
+
+logger.info(
+  {
+    environment: config.env,
+    charonGithubUrl: charonGithubUrl.toString(),
+    proconnect: {
+      clientIdSet: !!config.proconnect.clientId,
+      clientSecretSet: !!config.proconnect.clientSecret,
+      issuer: config.proconnect.issuer,
+      wellKnown: config.proconnect.well_known,
+      authorizationEndpoint: config.proconnect.authorization_endpoint,
+      tokenEndpoint: config.proconnect.token_endpoint,
+      userinfoEndpoint: config.proconnect.userinfo_endpoint,
+      scope: config.proconnect.scope,
+    },
+    github: {
+      clientIdSet: !!config.api.security.github.clientId,
+      clientSecretSet: !!config.api.security.github.clientSecret,
+    },
+    auth: {
+      secretSet: !!config.api.security.auth.secret,
+      staffCount: config.api.staff.length,
+    },
+  },
+  "NextAuth configurations from env variables",
+);
