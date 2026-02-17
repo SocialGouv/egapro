@@ -1,32 +1,50 @@
 import { render, screen } from "@testing-library/react";
 import { getServerSession } from "next-auth";
+import { vi } from "vitest";
 
 import DeclarantPage from "../page";
 
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+vi.mock("next-auth", () => ({
+  getServerSession: vi.fn(),
 }));
 
-const mockGetServerSession = jest.mocked(getServerSession);
+const mockGetServerSession = vi.mocked(getServerSession);
 
 // Mock auth config
-jest.mock("@api/core-domain/infra/auth/config", () => ({
+vi.mock("@api/core-domain/infra/auth/config", () => ({
   authConfig: {},
 }));
 
-// Mock the store for the Form
-jest.mock("../../useRepeqFunnelStore", () => ({
-  useRepeqFunnelStore: jest.fn(() => ({
+// Create stable mock state to avoid infinite re-renders with storePicker
+const stableStoreState = vi.hoisted(() => {
+  const saveFunnel = () => {};
+  const resetFunnel = () => {};
+  const setIsEdit = () => {};
+  return {
     funnel: { year: 2024 },
-    saveFunnel: jest.fn(),
+    saveFunnel,
+    resetFunnel,
     isEdit: false,
-  })),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+    setIsEdit,
+  };
+});
+
+// Mock the store for the Form — must handle selectors (storePicker calls store(selector))
+vi.mock("../../useRepeqFunnelStore", () => ({
+  useRepeqFunnelStore: vi.fn((selector?: (state: typeof stableStoreState) => unknown) => {
+    if (typeof selector === "function") return selector(stableStoreState);
+    return stableStoreState;
+  }),
+  useRepeqFunnelClientStore: vi.fn((selector?: (state: typeof stableStoreState) => unknown) => {
+    if (typeof selector === "function") return selector(stableStoreState);
+    return stableStoreState;
+  }),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 }));
 
 describe("DeclarantPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return null when no session", async () => {

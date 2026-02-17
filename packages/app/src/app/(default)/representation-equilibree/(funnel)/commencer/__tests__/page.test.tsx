@@ -1,20 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { getServerSession } from "next-auth";
+import { vi } from "vitest";
 
 import CommencerPage from "../page";
 
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+vi.mock("next-auth", () => ({
+  getServerSession: vi.fn(),
 }));
 
-const mockGetServerSession = jest.mocked(getServerSession);
+const mockGetServerSession = vi.mocked(getServerSession);
 
 // Mock auth config
-jest.mock("@api/core-domain/infra/auth/config", () => ({
+vi.mock("@api/core-domain/infra/auth/config", () => ({
   authConfig: {},
 }));
 
-jest.mock("@common/config", () => {
+vi.mock("@common/config", () => {
   const config = {
     api: {
       security: {
@@ -32,32 +33,39 @@ jest.mock("@common/config", () => {
   };
 });
 // Mock the store for the Form
-jest.mock("../../useRepeqFunnelStore", () => ({
-  useRepeqFunnelStore: jest.fn(() => ({
+vi.mock("../../useRepeqFunnelStore", () => ({
+  useRepeqFunnelStore: vi.fn(() => ({
     funnel: null,
-    saveFunnel: jest.fn(),
-    resetFunnel: jest.fn(),
+    saveFunnel: vi.fn(),
+    resetFunnel: vi.fn(),
     isEdit: false,
-    setIsEdit: jest.fn(),
+    setIsEdit: vi.fn(),
   })),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+  useRepeqFunnelClientStore: vi.fn(() => ({
+    funnel: null,
+    saveFunnel: vi.fn(),
+    resetFunnel: vi.fn(),
+    isEdit: false,
+    setIsEdit: vi.fn(),
+  })),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 }));
 
 // Mock actions
-jest.mock("../../../actions", () => ({
-  getRepresentationEquilibree: jest.fn(),
+vi.mock("../../../actions", () => ({
+  getRepresentationEquilibree: vi.fn(),
 }));
 
 // Mock global actions
-jest.mock("@globalActions/company", () => ({
-  getCompany: jest.fn(),
+vi.mock("@globalActions/company", () => ({
+  getCompany: vi.fn(),
 }));
 
 import { config } from "@common/config";
 
 describe("CommencerPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return null when no session", async () => {
@@ -128,6 +136,8 @@ describe("CommencerPage", () => {
       user: {
         email: "test@example.com",
         staff: false,
+        siret: "12345678900001",
+        entreprise: { siren: "123456789", label: "Test Company" },
         companies: [
           {
             siren: "123456789",
@@ -149,9 +159,9 @@ describe("CommencerPage", () => {
       screen.getByText(/Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise/, { exact: false }),
     ).toBeInTheDocument();
 
-    // Test Form conditions: should show Select for siren
-    expect(screen.getByLabelText("Numéro Siren de l’entreprise *")).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "123456789 (Test Company)" })).toBeInTheDocument();
+    // Test Form conditions: for non-staff, siren is displayed as text (not a Select)
+    expect(screen.getByText("Siren entreprise")).toBeInTheDocument();
+    expect(screen.getByText("Test Company")).toBeInTheDocument();
 
     // Should show YEARS, not REPEQ_ADMIN_YEARS
     expect(
@@ -181,7 +191,7 @@ describe("CommencerPage", () => {
     ).toBeInTheDocument();
 
     // Test Form conditions: should show Input for siren
-    expect(screen.getByLabelText("Siren entreprise (staff) *")).toBeInTheDocument();
+    expect(screen.getByLabelText("Siren entreprise *")).toBeInTheDocument();
 
     // Should show REPEQ_ADMIN_YEARS
     expect(

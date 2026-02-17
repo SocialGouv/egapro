@@ -1,25 +1,27 @@
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import { vi } from "vitest";
 
 import { RecapCardCompany } from "../RecapCardCompany";
 
 // Mock des dépendances externes
-jest.mock("next-auth/react", () => ({
-  useSession: jest.fn(() => ({ data: { user: { staff: true } } })),
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(() => ({ data: { user: { staff: true } } })),
 }));
 
 // Mock du portail client pour éviter les erreurs de rendu
-jest.mock("@components/utils/ClientBodyPortal", () => ({
+vi.mock("@components/utils/ClientBodyPortal", () => ({
   ClientBodyPortal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 // Mock des modales
-jest.mock("@codegouvfr/react-dsfr/Modal", () => ({
+vi.mock("@codegouvfr/react-dsfr/Modal", () => ({
   createModal: () => ({
     Component: ({ children }: { children: React.ReactNode }) => <div data-testid="modal">{children}</div>,
     buttonProps: {},
-    close: jest.fn(),
+    close: vi.fn(),
   }),
 }));
 
@@ -57,7 +59,7 @@ describe("RecapCardCompany", () => {
   };
 
   // Fonction de soumission mock
-  const mockOnSubmit = jest.fn();
+  const mockOnSubmit = vi.fn();
 
   describe("Mode d'affichage (view)", () => {
     it("devrait afficher les informations d'adresse pour une entreprise française", () => {
