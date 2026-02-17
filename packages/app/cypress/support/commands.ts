@@ -62,11 +62,9 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   cy.checkUrl("/login");
   cy.get(".fr-connect").click();
 
-  const username = Cypress.env("E2E_USERNAME");
-  const password = Cypress.env("E2E_PASSWORD");
-  if (!username || !password) {
-    throw new Error("E2E_USERNAME and E2E_PASSWORD environment variables must be set");
-  }
+  // cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
+  const username = "testuser";
+  const password = "password";
 
   cy.get("form", { timeout: 10000 }).should("be.visible");
   cy.get('input[id="username"]').clear().type(username);
