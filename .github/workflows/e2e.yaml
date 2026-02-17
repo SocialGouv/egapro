@@ -42,6 +42,23 @@ jobs:
         run: |
           echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
+      - name: Wait for deployment to be ready
+        run: |
+          echo "Waiting for $SITE_URL to be ready..."
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Site is ready (HTTP $STATUS)"
+              break
+            fi
+            echo "Attempt $i/30 - HTTP $STATUS, retrying in 10s..."
+            sleep 10
+          done
+          if [ "$STATUS" != "200" ]; then
+            echo "Site not ready after 5 minutes"
+            exit 1
+          fi
+
       - name: Run test e2e
         working-directory: ./packages/app
         run: |
