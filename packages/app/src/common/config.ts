@@ -49,7 +49,6 @@ export const config = {
     return {};
   },
 
-  // PROCONNECT CONFIGURATION
   proconnect: {
     get issuer() {
       if (process.env.EGAPRO_PROCONNECT_ISSUER) {
@@ -58,12 +57,15 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
         return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
       }
-      return this.env === "dev"
-        ? "https://fca.integ01.dev-agentconnect.fr/api/v2"
-        : "https://proconnect.gouv.fr/api/v2";
+      return "https://proconnect.gouv.fr/api/v2";
     },
     get authorization_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost");
+      // Allow explicit override via env var first for client-facing endpoint
+      if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
+      }
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/auth`;
       }
@@ -74,9 +76,15 @@ export const config = {
       return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
+        // Use external URL for consistency with authorization endpoint
         return `${this.issuer}/realms/atlas/protocol/openid-connect/token`;
+      }
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -85,9 +93,15 @@ export const config = {
       return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
-      const isKeycloak = this.issuer.includes("localhost");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
+        // Use external URL for consistency with authorization endpoint
         return `${this.issuer}/realms/atlas/protocol/openid-connect/userinfo`;
+      }
+      // Allow explicit override via env var (useful for internal URLs)
+      if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
+        return process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT;
       }
       // If issuer already includes /api/v2, don't add it again
       const baseUrl = this.issuer.endsWith("/api/v2")
@@ -96,23 +110,27 @@ export const config = {
       return `${baseUrl}/userinfo`;
     },
     get jwks_uri() {
-      const isKeycloak = this.issuer.includes("localhost");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/protocol/openid-connect/certs`;
       }
       return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
-      if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
-        return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
-      }
-      const isKeycloak = this.issuer.includes("localhost");
+      const isKeycloak =
+        this.issuer.includes("localhost") || this.issuer.includes("keycloak");
       if (isKeycloak) {
         return `${this.issuer}/realms/atlas/.well-known/openid-configuration`;
       }
-      return this.env !== "prod" && process.env.EGAPRO_PROCONNECT_DISCOVERY_URL
-        ? `${process.env.EGAPRO_PROCONNECT_DISCOVERY_URL}/.well-known/openid-configuration`
-        : `${this.issuer}/.well-known/openid-configuration`;
+      if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
+        return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
+      }
+      // If EGAPRO_PROCONNECT_DISCOVERY_URL is set, use it directly (it already contains the full path)
+      if (process.env.EGAPRO_PROCONNECT_DISCOVERY_URL) {
+        return process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
+      }
+      return `${this.issuer}/.well-known/openid-configuration`;
     },
 
     get clientId() {
@@ -197,7 +215,6 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         algorithm: ensureApiEnvVar(process.env.SECURITY_JWT_ALGORITHM, "algo"),
       },
-
 
       github: {
         clientId: ensureApiEnvVar(process.env.SECURITY_GITHUB_CLIENT_ID, ""),

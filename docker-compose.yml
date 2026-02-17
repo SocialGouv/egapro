@@ -12,16 +12,16 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1.1
-    command: start-dev --import-realm
-    ports:
-      - 8081:8080
+    build:
+      context: .
+      dockerfile: ./packages/keycloak/Dockerfile
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_CLIENT_SECRET: dev-secret-key-for-local-development-only
+      EGAPRO_ORIGIN: "http://localhost:3000"
+    ports:
+      - "8081:8080"
     volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-    restart: always
+      - ./packages/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
 volumes:
   pgdata:
