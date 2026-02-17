@@ -63,8 +63,8 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   cy.get(".fr-connect").click();
 
   // cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
-  const username = Cypress.env("E2E_USERNAME") || "testuser";
-  const password = Cypress.env("E2E_PASSWORD") || "password";
+  const username = "testuser";
+  const password = "password";
 
   cy.get("form", { timeout: 10000 }).should("be.visible");
   cy.get('input[id="username"]').clear().type(username);
