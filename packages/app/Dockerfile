@@ -10,10 +10,10 @@ WORKDIR /app
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-RUN corepack enable && corepack prepare pnpm@10 --activate
+RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
 
-# Copy lockfile first for better layer caching (pnpm fetch only needs this)
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy lockfile and config first for better layer caching (pnpm fetch only needs these)
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 # Fetch all dependencies into the store (cached unless lockfile changes)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \

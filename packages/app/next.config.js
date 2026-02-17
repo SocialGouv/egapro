@@ -2,7 +2,6 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  turbopack: false,
   experimental: {},
   webpack: (config, { dev, isServer }) => {
     // Handle font files
@@ -13,7 +12,7 @@ const nextConfig = {
 
     if (isServer) {
       config.externals = config.externals || [];
-      config.externals.push(({ context, request }, callback) => {
+      config.externals.push(({ request }, callback) => {
         // Keep heavy server-only packages external to avoid bundling them into the server build.
         const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
         if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {

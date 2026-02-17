@@ -1,15 +1,38 @@
-**/Dockerfile
-**/node_modules
-**/.gitignore
+# VCS & CI
 .git
 .github
+.gitignore
 .kontinuous
 .socialgouv.yaml
 .releaserc.json
+
+# Documentation
 *.md
 LICENSE
-node_modules
+
+# Dependencies (rebuilt in Docker)
+**/node_modules
+
+# Build artifacts
 /packages/app/.next
 /packages/app/out
 /packages/app/build
 
+# Docker files themselves
+**/Dockerfile
+**/.dockerignore
+
+# Test & dev tooling
+**/coverage
+**/.nyc_output
+**/cypress/videos
+**/cypress/screenshots
+**/.env.local
+**/.env.*.local
+**/.eslintcache
+**/.turbo
+
+# IDE & OS
+**/.vscode
+**/.idea
+**/.DS_Store
