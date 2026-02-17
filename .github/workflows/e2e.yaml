@@ -1,18 +1,22 @@
 name: 🧪 E2E Tests
 
 on:
-  deployment_status:
+  workflow_run:
+    workflows: ["👓 Review Auto"]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   e2e:
-    if: ${{ github.event.deployment_status.state == 'success'}}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     name: "Test e2e"
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v4
         with:
           version: latest
@@ -38,13 +42,13 @@ jobs:
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
       - name: Override subdomain for master branch
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.event.workflow_run.head_branch == 'master' }}
         run: |
           echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
       - name: Wait for deployment to be ready
         run: |
-          EXPECTED_SHA="${{ github.sha }}"
+          EXPECTED_SHA="${{ github.event.workflow_run.head_sha }}"
           SHORT_SHA="${EXPECTED_SHA:0:7}"
           echo "Waiting for $SITE_URL to serve commit $SHORT_SHA..."
           for i in $(seq 1 60); do
