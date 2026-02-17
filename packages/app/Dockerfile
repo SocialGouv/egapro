@@ -12,8 +12,8 @@ ENV PATH=$PNPM_HOME:$PATH
 
 RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
 
-# Copy lockfile and config first for better layer caching (pnpm fetch only needs these)
-COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+# Copy lockfile first for better layer caching (pnpm fetch only needs these)
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Fetch all dependencies into the store (cached unless lockfile changes)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
@@ -71,7 +71,7 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     '
 
 # Deploy: creates a standalone production bundle (no dev dependencies, no symlinks)
-RUN pnpm --filter app --prod deploy /app/deploy && \
+RUN pnpm --filter app --prod deploy --legacy /app/deploy && \
     cp -r /app/packages/app/.next /app/deploy/.next && \
     cp -r /app/packages/app/public/* /app/deploy/public/
 
