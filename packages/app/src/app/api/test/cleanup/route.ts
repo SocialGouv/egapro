@@ -49,32 +49,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier si la déclaration existe
-    const existingRows = await sql`
-      SELECT 1 FROM representation_equilibree
-      WHERE siren = ${siren} AND year = ${year}
-      LIMIT 1
-    `;
-
-    if (existingRows.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Aucune déclaration trouvée pour le SIREN ${siren} et l'année ${year}`,
-        },
-        { status: 404 },
-      );
-    }
-
-    // Supprimer la déclaration
-    await sql`
+    // Supprimer la déclaration (idempotent : pas d'erreur si elle n'existe pas)
+    const result = await sql`
       DELETE FROM representation_equilibree
       WHERE siren = ${siren} AND year = ${year}
     `;
 
     return NextResponse.json({
       success: true,
-      message: `Déclaration supprimée: SIREN ${siren}, année ${year}`,
+      message:
+        result.count > 0
+          ? `Déclaration supprimée: SIREN ${siren}, année ${year}`
+          : `Aucune déclaration à supprimer pour le SIREN ${siren} et l'année ${year}`,
     });
   } catch (error) {
     console.error("Erreur lors de la suppression de la déclaration:", error);
