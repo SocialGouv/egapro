@@ -20,8 +20,6 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
       - uses: pnpm/action-setup@v4
-        with:
-          version: latest
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -53,8 +51,6 @@ jobs:
           path: ./*
           key: "${{ github.sha }}"
       - uses: pnpm/action-setup@v4
-        with:
-          version: latest
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

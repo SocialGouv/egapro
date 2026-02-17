@@ -1,43 +1,58 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
+import { type Mock, vi } from "vitest";
 
 import Publication from "../page";
 
 // Mock only the router functionality, not the Form component
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  redirect: jest.fn(),
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+  redirect: vi.fn(),
 }));
 
-// Mock the zustand store
+// Create stable state objects using vi.hoisted so they are the same reference across re-renders
 const mockEndOfPeriod = "2023-12-31";
-jest.mock("../../useRepeqFunnelStore", () => ({
-  useRepeqFunnelStore: jest.fn(() => ({
-    funnel: {
-      year: 2023,
-      endOfPeriod: mockEndOfPeriod,
-    },
-    saveFunnel: jest.fn(),
-    resetFunnel: jest.fn(),
-  })),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+const stableState = vi.hoisted(() => ({
+  funnel: {
+    year: 2023,
+    endOfPeriod: "2023-12-31",
+  },
+  saveFunnel: vi.fn(),
+  resetFunnel: vi.fn(),
+}));
+
+// Mock the zustand store - must handle selector functions from storePicker
+vi.mock("../../useRepeqFunnelStore", () => ({
+  useRepeqFunnelStore: vi.fn((selector?: (state: Record<string, unknown>) => unknown) => {
+    if (typeof selector === "function") {
+      return selector(stableState);
+    }
+    return stableState;
+  }),
+  useRepeqFunnelClientStore: vi.fn((selector?: (state: Record<string, unknown>) => unknown) => {
+    if (typeof selector === "function") {
+      return selector(stableState);
+    }
+    return stableState;
+  }),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 }));
 
 // Mock formatIsoToFr to ensure consistent output in tests
-jest.mock("@common/utils/date", () => ({
-  formatIsoToFr: jest.fn(date => {
+vi.mock("@common/utils/date", () => ({
+  formatIsoToFr: vi.fn((date: string) => {
     if (date === mockEndOfPeriod) return "31/12/2023";
     return "Date formatée";
   }),
 }));
 
 describe("Publication", () => {
-  const mockRouter = { push: jest.fn() };
+  const mockRouter = { push: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    vi.clearAllMocks();
+    (useRouter as Mock).mockReturnValue(mockRouter);
   });
 
   it("should render correctly", () => {
