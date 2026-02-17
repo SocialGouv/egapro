@@ -5,19 +5,21 @@
   "workspaces": [
     "packages/*"
   ],
+  "packageManager": "pnpm@10.8.1",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=24"
   },
   "scripts": {
-    "lint": "pnpm -r run lint",
-    "build": "pnpm -r run build",
-    "dev": "pnpm -r run dev",
-    "test": "pnpm -r run test",
+    "lint": "pnpm -r --if-present run lint",
+    "build": "pnpm -r --if-present run build",
+    "dev": "pnpm -r --if-present run dev",
+    "test": "pnpm -r --if-present run test",
     "dev:app": "pnpm --filter app run dev",
     "lint:app": "pnpm --filter app run lint",
     "build:app": "pnpm --filter app run build",
     "test:app": "pnpm --filter app run test",
-    "test:e2e": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e"
+    "test:e2e": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
+    "release": "semantic-release"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

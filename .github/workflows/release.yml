@@ -59,4 +59,4 @@ jobs:
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
-        run: pnpm semantic-release
+        run: pnpm release

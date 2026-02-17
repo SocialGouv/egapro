@@ -1,4 +1,5 @@
 // Common mocks for representation-equilibree tests
+import { type Mock, vi } from "vitest";
 
 // Mock data for French company
 export const frenchCompanyMockData = {
@@ -83,7 +84,7 @@ export const foreignCompanyMockData = {
 export const frenchCompanyFunnelState = {
   funnel: {
     year: 2024,
-    siren: "351630371",
+    siren: "384964508",
     lastname: "Egapro",
     firstname: "Test",
     phoneNumber: "0666666666",
@@ -95,9 +96,9 @@ export const frenchCompanyFunnelState = {
   },
   isEdit: false,
   _hasHydrated: true,
-  setIsEdit: jest.fn(),
-  saveFunnel: jest.fn(),
-  resetFunnel: jest.fn(),
+  setIsEdit: vi.fn(),
+  saveFunnel: vi.fn(),
+  resetFunnel: vi.fn(),
 };
 
 // Mock data for foreign company funnel state
@@ -116,9 +117,9 @@ export const foreignCompanyFunnelState = {
   },
   isEdit: false,
   _hasHydrated: true,
-  setIsEdit: jest.fn(),
-  saveFunnel: jest.fn(),
-  resetFunnel: jest.fn(),
+  setIsEdit: vi.fn(),
+  saveFunnel: vi.fn(),
+  resetFunnel: vi.fn(),
 };
 
 // Options interface for setup functions
@@ -127,7 +128,7 @@ export interface SetupOptions {
 }
 
 // Helper function to setup company mock
-export const setupCompanyMock = (mock: jest.Mock, options: SetupOptions = {}) => {
+export const setupCompanyMock = (mock: Mock, options: SetupOptions = {}) => {
   const { isForeignCompany = false } = options;
   mock.mockImplementation(async () => ({
     ok: true,
@@ -136,9 +137,9 @@ export const setupCompanyMock = (mock: jest.Mock, options: SetupOptions = {}) =>
 };
 
 // Helper function to setup funnel store mock
-export const setupFunnelStoreMock = (mock: jest.Mock, options: SetupOptions = {}) => {
+export const setupFunnelStoreMock = (mock: Mock, options: SetupOptions = {}) => {
   const { isForeignCompany = false } = options;
-  mock.mockImplementation(selector => {
+  mock.mockImplementation((selector: ((state: unknown) => unknown) | undefined) => {
     const state = isForeignCompany ? foreignCompanyFunnelState : frenchCompanyFunnelState;
     return selector ? selector(state) : state;
   });
@@ -146,7 +147,7 @@ export const setupFunnelStoreMock = (mock: jest.Mock, options: SetupOptions = {}
 
 // Common mock implementations
 export const nextAuthReactMock = {
-  useSession: jest.fn(() => ({
+  useSession: vi.fn(() => ({
     data: {
       user: {
         staff: false,
@@ -165,7 +166,7 @@ export const nextAuthReactMock = {
 };
 
 export const nextAuthMock = {
-  getServerSession: jest.fn(async () => ({
+  getServerSession: vi.fn(async () => ({
     expires: "",
     staff: {
       impersonating: false,
@@ -185,19 +186,24 @@ export const nextAuthMock = {
   })),
 };
 
+const defaultFunnelState = {
+  funnel: { siren: "123456789", year: 2022 },
+  isEdit: false,
+  _hasHydrated: true,
+  setIsEdit: vi.fn(),
+  saveFunnel: vi.fn(),
+  resetFunnel: vi.fn(),
+};
+
 export const repeqFunnelStoreMock = {
-  useRepeqFunnelStore: jest.fn((selector?: (state: unknown) => unknown) => {
+  useRepeqFunnelStore: vi.fn((selector?: (state: unknown) => unknown) => {
     // Simuler le comportement de Zustand qui appelle le sélecteur avec l'état
-    const state = {
-      funnel: { siren: "123456789", year: 2022 },
-      isEdit: false,
-      _hasHydrated: true,
-      setIsEdit: jest.fn(),
-      saveFunnel: jest.fn(),
-      resetFunnel: jest.fn(),
-    };
     // Si un sélecteur est fourni, l'appliquer, sinon retourner tout l'état
-    return selector ? selector(state) : state;
+    return selector ? selector(defaultFunnelState) : defaultFunnelState;
   }),
-  useRepeqFunnelStoreHasHydrated: jest.fn(() => true),
+  useRepeqFunnelClientStore: vi.fn((selector?: (state: unknown) => unknown) => {
+    // Same behavior as useRepeqFunnelStore (client-safe version)
+    return selector ? selector(defaultFunnelState) : defaultFunnelState;
+  }),
+  useRepeqFunnelStoreHasHydrated: vi.fn(() => true),
 };

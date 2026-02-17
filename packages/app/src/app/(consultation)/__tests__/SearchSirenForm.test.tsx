@@ -1,20 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { type Mock, vi } from "vitest";
 
 import { SearchSirenForm } from "../SearchSirenForm";
 
 // Mock the next/navigation module
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
 }));
 
 describe("SearchSirenForm", () => {
   // Setup mock for useRouter
-  const mockReplace = jest.fn();
+  const mockReplace = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRouter as Mock).mockReturnValue({
       replace: mockReplace,
     });
   });

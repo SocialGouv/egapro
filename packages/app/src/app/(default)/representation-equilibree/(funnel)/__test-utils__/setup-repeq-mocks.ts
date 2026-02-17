@@ -1,17 +1,19 @@
 // Setup file for common mocks in representation-equilibree tests
+import { vi } from "vitest";
+
 import { nextAuthMock, nextAuthReactMock, repeqFunnelStoreMock } from "./repeq-mocks";
 
 // Configure all common mocks directly
 // Mock company action
-jest.mock("@globalActions/company", () => ({
-  getCompany: jest.fn(),
+vi.mock("@globalActions/company", () => ({
+  getCompany: vi.fn(),
 }));
 
 // Mock next-auth/react
-jest.mock("next-auth/react", () => nextAuthReactMock);
+vi.mock("next-auth/react", () => nextAuthReactMock);
 
 // Mock next-auth
-jest.mock("next-auth", () => nextAuthMock);
+vi.mock("next-auth", () => nextAuthMock);
 
 // Mock useRepeqFunnelStore
-jest.mock("../useRepeqFunnelStore", () => repeqFunnelStoreMock);
+vi.mock("../useRepeqFunnelStore", () => repeqFunnelStoreMock);
