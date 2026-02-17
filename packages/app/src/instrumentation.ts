@@ -46,6 +46,18 @@ export async function register() {
     const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
     const IS_PRODUCTION = ENVIRONMENT === "production";
 
+    // Auto-initialize database schema (idempotent, safe to run on every startup)
+    if (!IS_PRODUCTION) {
+      try {
+        const { initDb } = await import(
+          "@api/shared-domain/infra/db/initDb"
+        );
+        await initDb();
+      } catch (error) {
+        console.error("[instrumentation] Database initialization failed:", error);
+      }
+    }
+
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       environment: ENVIRONMENT,

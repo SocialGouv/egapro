@@ -10,6 +10,7 @@ services:
       - 5438:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./packages/app/docker/db/egapro.sql:/docker-entrypoint-initdb.d/egapro.sql
 
   keycloak:
     build:
