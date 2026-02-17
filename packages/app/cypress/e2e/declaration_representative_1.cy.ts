@@ -33,6 +33,9 @@ describe("Declaration", () => {
 
     // Check if we're on the expected page
     cy.url().should("include", "/representation-equilibree/commencer");
+    cy.selectByLabel(
+      "Année au titre de laquelle les écarts de représentation sont calculés *",
+    ).select(String(new Date().getFullYear() - 2));
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/declarant");
