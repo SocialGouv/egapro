@@ -9,12 +9,12 @@ import { sql } from "./postgres";
  */
 export async function initDb() {
   try {
+    // Suppress NOTICE messages (e.g. "relation already exists, skipping")
+    await sql.unsafe(`SET client_min_messages TO WARNING`);
+
     // Extensions et text search config nécessitent des privilèges élevés.
     // En environnement CNPG, elles sont déjà installées par le superuser.
-    // On tente de les créer mais on ignore les erreurs de permissions.
     try {
-      // Suppress NOTICE messages (e.g. "relation already exists, skipping")
-      await sql.unsafe(`SET client_min_messages TO WARNING`);
       await sql.unsafe(`CREATE EXTENSION IF NOT EXISTS unaccent`);
       await sql.unsafe(`
         DO
@@ -27,9 +27,10 @@ export async function initDb() {
         END;$$
       `);
     } catch {
-      console.log("[initDb] Extensions/text search config already exist or insufficient privileges (OK).");
+      // OK: insufficient privileges, extensions already installed by superuser
     }
 
+    // Tables principales
     await sql.unsafe(`
       CREATE TABLE IF NOT EXISTS representation_equilibree
       (siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, data JSONB, ft TSVECTOR,
@@ -38,12 +39,21 @@ export async function initDb() {
       CREATE TABLE IF NOT EXISTS search_representation_equilibree
       (siren TEXT, year INT, declared_at TIMESTAMP WITH TIME ZONE, ft TSVECTOR, region VARCHAR(2), departement VARCHAR(3), section_naf CHAR,
       PRIMARY KEY (siren, year));
-      ALTER TABLE search_representation_equilibree DROP CONSTRAINT IF EXISTS representation_equilibree_exists;
-      ALTER TABLE search_representation_equilibree ADD CONSTRAINT representation_equilibree_exists FOREIGN KEY (siren,year) REFERENCES representation_equilibree(siren,year) ON DELETE CASCADE ON UPDATE CASCADE;
 
       CREATE INDEX IF NOT EXISTS idx_email ON representation_equilibree((data->'déclarant'->>'email'));
       CREATE INDEX IF NOT EXISTS idx_siren ON representation_equilibree(siren);
     `);
+
+    // FK constraint (peut échouer si l'utilisateur n'est pas propriétaire de la table)
+    try {
+      await sql.unsafe(`
+        ALTER TABLE search_representation_equilibree DROP CONSTRAINT IF EXISTS representation_equilibree_exists;
+        ALTER TABLE search_representation_equilibree ADD CONSTRAINT representation_equilibree_exists FOREIGN KEY (siren,year) REFERENCES representation_equilibree(siren,year) ON DELETE CASCADE ON UPDATE CASCADE;
+      `);
+    } catch {
+      // OK: constraint already exists or insufficient privileges
+    }
+
     console.log("[initDb] Database schema initialized successfully.");
   } catch (error) {
     console.error("[initDb] Failed to initialize database schema:", error);
