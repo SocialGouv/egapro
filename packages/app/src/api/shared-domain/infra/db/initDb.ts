@@ -9,18 +9,26 @@ import { sql } from "./postgres";
  */
 export async function initDb() {
   try {
+    // Extensions et text search config nécessitent des privilèges élevés.
+    // En environnement CNPG, elles sont déjà installées par le superuser.
+    // On tente de les créer mais on ignore les erreurs de permissions.
+    try {
+      await sql.unsafe(`CREATE EXTENSION IF NOT EXISTS unaccent`);
+      await sql.unsafe(`
+        DO
+        $$BEGIN
+            CREATE TEXT SEARCH CONFIGURATION ftdict (COPY=simple);
+            ALTER TEXT SEARCH CONFIGURATION ftdict ALTER MAPPING FOR hword, hword_part, word WITH unaccent, simple;
+        EXCEPTION
+          WHEN unique_violation THEN
+              NULL;
+        END;$$
+      `);
+    } catch {
+      console.log("[initDb] Extensions/text search config already exist or insufficient privileges (OK).");
+    }
+
     await sql.unsafe(`
-      CREATE EXTENSION IF NOT EXISTS unaccent;
-
-      DO
-      $$BEGIN
-          CREATE TEXT SEARCH CONFIGURATION ftdict (COPY=simple);
-          ALTER TEXT SEARCH CONFIGURATION ftdict ALTER MAPPING FOR hword, hword_part, word WITH unaccent, simple;
-      EXCEPTION
-        WHEN unique_violation THEN
-            NULL;
-      END;$$;
-
       CREATE TABLE IF NOT EXISTS representation_equilibree
       (siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, data JSONB, ft TSVECTOR,
       PRIMARY KEY (siren, year));
