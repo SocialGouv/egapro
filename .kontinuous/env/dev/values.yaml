@@ -9,7 +9,7 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://auth.agentconnect.gouv.fr"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://auth.agentconnect.gouv.fr/api/v2"
     NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: "https://{{ .Values.global.host }}/api/auth/callback/proconnect"
     NEXT_PUBLIC_PROCONNECT_ISSUER: "https://auth.agentconnect.gouv.fr/api/v2"
     NEXT_PUBLIC_HOST: "https://{{ .Values.global.host }}"
