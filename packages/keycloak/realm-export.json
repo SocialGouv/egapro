@@ -466,37 +466,19 @@
   ],
   "users": [
     {
-      "username": "testuser",
+      "username": "__E2E_USERNAME__",
       "enabled": true,
       "emailVerified": true,
       "firstName": "Test",
       "lastName": "User",
-      "email": "test@example.com",
+      "email": "__E2E_USERNAME__",
       "attributes": {
         "siret": ["83525644700011"]
       },
       "credentials": [
         {
           "type": "password",
-          "value": "password",
-          "temporary": false
-        }
-      ]
-    },
-    {
-      "username": "egapro-e2e@fabrique.social.gouv.fr",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "User",
-      "email": "egapro-e2e@fabrique.social.gouv.fr",
-      "attributes": {
-        "siret": ["83525644700011"]
-      },
-      "credentials": [
-        {
-          "type": "password",
-          "value": "password",
+          "value": "__E2E_PASSWORD__",
           "temporary": false
         }
       ]

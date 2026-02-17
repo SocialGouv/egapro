@@ -39,6 +39,19 @@ keycloak:
     limits:
       cpu: 1000m
       memory: 1Gi
+  env:
+    - name: E2E_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: E2E_USERNAME
+          optional: true
+    - name: E2E_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: E2E_PASSWORD
+          optional: true
   vars:
     KEYCLOAK_ADMIN: admin
     KEYCLOAK_ADMIN_PASSWORD: admin

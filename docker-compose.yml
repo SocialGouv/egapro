@@ -20,6 +20,8 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       EGAPRO_ORIGIN: "http://localhost:3000"
+      E2E_USERNAME: "${E2E_USERNAME:-testuser}"
+      E2E_PASSWORD: "${E2E_PASSWORD:-password}"
     ports:
       - "8081:8080"
     volumes:
