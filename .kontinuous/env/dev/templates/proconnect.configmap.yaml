@@ -3,6 +3,8 @@ apiVersion: v1
 metadata:
   name: proconnect
 data:
+  SECURITY_PROCONNECT_CLIENT_ID: "<client_id du bac à sable>"
+  SECURITY_PROCONNECT_CLIENT_SECRET: "<client_secret du bac à sable>"
   EGAPRO_PROCONNECT_DISCOVERY_URL: "https://fca.integ01.dev-agentconnect.fr"
   NEXT_PUBLIC_PROCONNECT_CALLBACK_URL: "https://egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr/api/auth/callback/proconnect"
   EGAPRO_ORIGIN: "https://egapro-{{ .Values.global.branchSlug }}.ovh.fabrique.social.gouv.fr"
