@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "next build",
+		"build": "node scripts/copy-dsfr.js && next build",
 		"check": "biome check .",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
@@ -12,7 +12,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "next dev --turbo",
+		"dev": "node scripts/copy-dsfr.js && next dev --turbo",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",
@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"@auth/drizzle-adapter": "^1.11.1",
+		"@gouvfr/dsfr": "^1.14.3",
 		"@t3-oss/env-nextjs": "^0.13.10",
 		"@tanstack/react-query": "^5.90.21",
 		"@trpc/client": "^11.0.0",

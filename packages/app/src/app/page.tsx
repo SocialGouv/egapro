@@ -1,9 +1,10 @@
+import { HomePage } from "~/modules/home";
 import { HydrateClient } from "~/trpc/server";
 
-export default async function Home() {
+export default async function Page() {
 	return (
 		<HydrateClient>
-			<main>hello world</main>
+			<HomePage />
 		</HydrateClient>
 	);
 }
