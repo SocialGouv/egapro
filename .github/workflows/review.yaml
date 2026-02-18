@@ -63,6 +63,7 @@ jobs:
             NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api
             NEXT_PUBLIC_API_V2_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/apiv2
             NEXTAUTH_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api/auth
+            NEXT_PUBLIC_HOST=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/login
             NEXT_PUBLIC_GITHUB_SHA=${{ steps.vars.outputs.sha_short }}
             NEXT_PUBLIC_EGAPRO_ENV=dev
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.APP_SENTRY_DSN }}
