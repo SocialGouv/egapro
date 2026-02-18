@@ -21,6 +21,10 @@ LICENSE
 **/Dockerfile
 **/.dockerignore
 
+# The build needs these Dockerfiles in the context when using `docker build -f ...`
+!Dockerfile
+!packages/keycloak/Dockerfile
+
 # Test & dev tooling
 **/coverage
 **/.nyc_output
