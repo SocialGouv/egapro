@@ -44,7 +44,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       url: proconnect.authorization_endpoint,
       params: {
         scope: "openid email given_name usual_name siret",
-        prompt: "login",
         max_age: 0,
       },
     },
