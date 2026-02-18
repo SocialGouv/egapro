@@ -5,7 +5,7 @@ import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
 import { config as appConfig } from "@common/config";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useContext } from "react";
 
 import { HeaderAccountMenu } from "./HeaderAccountMenu";
@@ -55,9 +55,9 @@ export const LoginLogoutHeaderItem = () => {
       <HeaderQuickAccessItem
         quickAccessItem={{
           iconId: "fr-icon-lock-unlock-line",
-          buttonProps: {
+          linkProps: {
             className: fr.cx("fr-btn--secondary"),
-            onClick: () => signOut({ callbackUrl: "/" }), // ← juste ça
+            href: "/api/auth/proconnect-logout",
           },
           text: "Se déconnecter",
         }}

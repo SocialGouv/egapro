@@ -17,6 +17,7 @@ export async function GET() {
     issuer.replace(/\/api\/v2$/, "") + "/api/v2/session/end",
   );
 
+  console.log("ID_TOKEN: ", session.user.idToken);
   endSessionUrl.searchParams.set("id_token_hint", session.user.idToken);
   endSessionUrl.searchParams.set(
     "post_logout_redirect_uri",
