@@ -63,28 +63,40 @@ export const config = {
       if (process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT) {
         return process.env.EGAPRO_PROCONNECT_AUTHORIZATION_ENDPOINT;
       }
-      return `${this.issuer}/oauth/authorize`;
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/authorize`;
     },
     get token_endpoint() {
       if (process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT) {
         return process.env.EGAPRO_PROCONNECT_TOKEN_ENDPOINT;
       }
-      return `${this.issuer}/oauth/token`;
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/token`;
     },
     get userinfo_endpoint() {
       if (process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT) {
         return process.env.EGAPRO_PROCONNECT_USERINFO_ENDPOINT;
       }
-      return `${this.issuer}/oauth/userinfo`;
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/userinfo`;
     },
     get jwks_uri() {
-      return `${this.issuer}/oauth/jwks`;
+      return `${this.issuer}/oidc/.well-known/jwks`;
     },
     get well_known() {
       if (process.env.EGAPRO_PROCONNECT_WELL_KNOWN) {
         return process.env.EGAPRO_PROCONNECT_WELL_KNOWN;
       }
-      return `${this.issuer}/.well-known/openid-configuration`;
+      const baseUrl = this.issuer.endsWith("/api/v2")
+        ? this.issuer
+        : `${this.issuer}/api/v2`;
+      return `${baseUrl}/.well-known/openid-configuration`;
     },
 
     get clientId() {
