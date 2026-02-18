@@ -14,7 +14,7 @@ export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<html data-fr-js="false" data-fr-scheme="system" lang="fr" suppressHydrationWarning>
+		<html data-fr-scheme="system" lang="fr">
 			<head>
 				{/* Restore user theme from cookie before render to avoid flash */}
 				<Script id="dsfr-theme-init" strategy="beforeInteractive">
@@ -51,7 +51,7 @@ export default function RootLayout({
 				</TRPCReactProvider>
 				<Script
 					src="/dsfr/dsfr.module.min.js"
-					strategy="beforeInteractive"
+					strategy="afterInteractive"
 					type="module"
 				/>
 			</body>
