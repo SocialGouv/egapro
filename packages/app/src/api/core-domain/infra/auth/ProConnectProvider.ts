@@ -44,7 +44,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
       url: proconnect.authorization_endpoint,
       params: {
         scope: "openid email given_name usual_name siret",
-        prompt: "login",
         max_age: 0,
       },
     },
@@ -109,6 +108,9 @@ export function ProConnectProvider<P extends ProConnectProfile>(
           throw error;
         }
       },
+    },
+    client: {
+      token_endpoint_auth_method: "client_secret_post",
     },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {

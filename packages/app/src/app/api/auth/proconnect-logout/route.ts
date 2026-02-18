@@ -13,12 +13,8 @@ export async function GET() {
   }
 
   const { issuer } = config.proconnect;
-  const isKeycloak =
-    issuer.includes("localhost") || issuer.includes("keycloak");
   const endSessionUrl = new URL(
-    isKeycloak
-      ? `${issuer}/realms/atlas/protocol/openid-connect/logout`
-      : issuer.replace(/\/api\/v2$/, "") + "/api/v2/session/end",
+    issuer.replace(/\/api\/v2$/, "") + "/api/v2/session/end",
   );
 
   endSessionUrl.searchParams.set("id_token_hint", session.user.idToken);
