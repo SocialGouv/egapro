@@ -8,10 +8,6 @@ app:
           name: "egapro-secret"
           key: E2E_CLEANUP_TOKEN
           optional: true
-  envFrom:
-    - configMapRef:
-        name: "proconnect"
-        optional: true
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
