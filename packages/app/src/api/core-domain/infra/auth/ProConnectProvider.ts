@@ -110,6 +110,9 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         }
       },
     },
+    client: {
+      token_endpoint_auth_method: "client_secret_post",
+    },
     checks: ["pkce", "state"],
     async profile(profile: ProConnectProfile) {
       return {

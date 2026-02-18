@@ -21,7 +21,7 @@ cp packages/app/.env.example packages/app/.env
 ## Lancer l'application
 
 ```bash
-# Démarrer la base de données et Keycloak
+# Démarrer la base de données
 docker compose up -d
 
 # Lancer le serveur de dev

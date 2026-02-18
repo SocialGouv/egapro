@@ -4,6 +4,7 @@ import { config } from "@common/config";
 import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system";
 
 import styles from "./index.module.css";
+import { SwitchOrganizationButton } from "./SwitchOrganizationButton";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,9 @@ const Home = async () => {
           </Grid>
         </Container>
       </Box>
+      <Container mt="4w">
+        <SwitchOrganizationButton />
+      </Container>
       <Container mt="8w">
         <Grid haveGutters mb="8w">
           <GridCol md={6}>
