@@ -1,83 +1,10 @@
-const path = require("path");
+/**
+ * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
+ * for Docker builds.
+ */
+import "./src/env.js";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: "standalone",
-  // Monorepo: trace dependencies from the workspace root (not just packages/app)
-  outputFileTracingRoot: path.join(__dirname, "../../"),
-  poweredByHeader: false,
-  reactStrictMode: true,
-  experimental: {},
-  webpack: (config, { dev, isServer }) => {
-    // Handle font files
-    config.module.rules.push({
-      test: /\\.woff2?$/,
-      type: "asset/resource",
-    });
+/** @type {import("next").NextConfig} */
+const config = {};
 
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push(({ request }, callback) => {
-        // Keep heavy server-only packages external to avoid bundling them into the server build.
-        const packages = ["@react-pdf/renderer", "xlsx", "js-xlsx", "@json2csv/node", "pino", "postgres"];
-        if (packages.some(pkg => request === pkg || request.startsWith(pkg + "/"))) {
-          return callback(null, `commonjs ${request}`);
-        }
-        callback();
-      });
-    }
-
-    // Configure source maps for production
-    if (!isServer && !dev) {
-      config.devtool = "source-map";
-      config.optimization = {
-        ...config.optimization,
-        minimize: true,
-        moduleIds: "deterministic",
-        chunkIds: "deterministic",
-      };
-    }
-
-    return config;
-  },
-  rewrites: async () => {
-    return [
-      {
-        source: "/healthz",
-        destination: "/api/health",
-      },
-      {
-        source: "/consulter-index",
-        destination: "/index-egapro/recherche",
-      },
-      // TODO: remove when api v2 is enabled
-      {
-        source: "/apiv2/:path*",
-        destination: "/api/:path*",
-      },
-      {
-        source: "/api/public/referents_egalite_professionnelle.:ext(json|xlsx|csv)",
-        destination: "/api/public/referents_egalite_professionnelle/:ext",
-      },
-      {
-        source: "/api/public/referents_egalite_professionnelle",
-        destination: "/api/public/referents_egalite_professionnelle/json",
-      },
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          {
-            key: "Content-type",
-            value: "application/json; charset=utf-8",
-          },
-        ],
-      },
-    ];
-  },
-};
-
-module.exports = nextConfig;
+export default config;

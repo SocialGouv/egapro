@@ -1,8 +1,0 @@
-{
-  "name": "files",
-  "dependencies": {
-    "basic-auth": "^2.0.1",
-    "bcryptjs": "^2.4.3",
-    "express": "^5.0.0-beta.3"
-  }
-}
