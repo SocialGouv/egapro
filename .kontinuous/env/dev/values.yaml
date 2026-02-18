@@ -12,9 +12,6 @@ app:
     - configMapRef:
         name: "proconnect"
         optional: true
-    - secretRef:
-        name: "proconnect"
-        optional: true
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev

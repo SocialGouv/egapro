@@ -20,6 +20,7 @@ app:
     - configMapRef:
         name: egapro
     - secretRef:
+        name: "proconnect-secret"
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:
