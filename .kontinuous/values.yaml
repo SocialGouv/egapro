@@ -1,0 +1,74 @@
+global:
+  pgSecretName: pg-app
+
+app:
+  ~chart: app
+  imagePackage: app
+  probesPath: /healthz
+  containerPort: 3000
+  ingress:
+    enabled: false
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+    - secretRef:
+        name: "egapro-secret"
+    - secretRef:
+        name: github-oauth
+    - configMapRef:
+        name: egapro
+    - secretRef:
+  env:
+    - name: SENTRY_AUTH_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: SENTRY_AUTH_TOKEN
+    - name: NEXT_PUBLIC_SENTRY_DSN
+      valueFrom:
+        secretKeyRef:
+          name: sentry
+          key: APP_SENTRY_DSN
+    - name: POSTGRES_HOST
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGHOST
+    - name: POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGDATABASE
+    - name: POSTGRES_PORT
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGPORT
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGUSER
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGPASSWORD
+    - name: POSTGRES_SSLMODE
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.pgSecretName }}"
+          key: PGSSLMODE
+    - name: SECURITY_JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: "egapro-secret"
+          key: EGAPRO_SECRET
+  vars:
+    NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
+    NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+
+pg:
+  ~chart: pg

@@ -1,0 +1,32 @@
+global:
+  host: egapro.travail.gouv.fr
+
+app:
+  vars:
+    MAILER_ENABLE: "True"
+  redirectFrom:
+    - "egapro.fabrique.social.gouv.fr"
+    - "index-egapro.travail.gouv.fr"
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+    - secretRef:
+        name: "egapro-secret"
+    - secretRef:
+        name: smtp-app
+    - secretRef:
+    - configMapRef:
+        name: egapro
+  autoscale:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1G
+    limits:
+      cpu: 1
+      memory: 2G

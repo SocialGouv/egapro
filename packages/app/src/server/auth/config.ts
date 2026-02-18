@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import type { DefaultSession, NextAuthOptions } from "next-auth";
 
 import { db } from "~/server/db";
 import {
@@ -54,7 +54,13 @@ export const authConfig = {
 		verificationTokensTable: verificationTokens,
 	}),
 	callbacks: {
-		session: ({ session, user }) => ({
+		session: ({
+			session,
+			user,
+		}: {
+			session: DefaultSession & { user?: { id?: string } };
+			user: { id: string };
+		}) => ({
 			...session,
 			user: {
 				...session.user,
@@ -62,4 +68,4 @@ export const authConfig = {
 			},
 		}),
 	},
-} satisfies NextAuthConfig;
+} satisfies NextAuthOptions;
