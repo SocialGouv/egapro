@@ -20,7 +20,7 @@ export const SwitchOrganizationButton = () => {
         // Pass a dummy siret_hint that won't match the currently selected
         // organization. This triggers ProConnect's choose_organization
         // prompt which redirects to /users/select-organization.
-        await signIn("proconnect", { callbackUrl: "/" }, { siret_hint: "_" });
+        await signIn("proconnect", { callbackUrl: "/" }, { siret_hint: "00000000000000" });
       }}
     >
       Changer d'organisation
