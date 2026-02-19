@@ -6,7 +6,7 @@ app:
   ~needs:
     - pg
   imagePackage: app
-  probesPath: /healthz
+  probesPath: /api/healthz
   containerPort: 3000
   ingress:
     enabled: false
