@@ -28,15 +28,12 @@ function clearSessionCookies(response: NextResponse) {
   return response;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   const session = await getServerSession(authConfig);
   const baseUrl = process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
-  const { searchParams } = new URL(request.url);
-  const switchOrg = searchParams.has("switchOrg");
 
   if (!session?.user?.idToken) {
-    const fallbackUrl = new URL(switchOrg ? "/login" : "/", baseUrl);
-    return clearSessionCookies(NextResponse.redirect(fallbackUrl));
+    return clearSessionCookies(NextResponse.redirect(new URL("/", baseUrl)));
   }
 
   const { issuer } = config.proconnect;
@@ -46,12 +43,6 @@ export async function GET(request: Request) {
 
   endSessionUrl.searchParams.set("id_token_hint", session.user.idToken);
   endSessionUrl.searchParams.set("post_logout_redirect_uri", baseUrl);
-
-  // OIDC RP-Initiated Logout: the state param is forwarded back to
-  // post_logout_redirect_uri as a query parameter by ProConnect.
-  if (switchOrg) {
-    endSessionUrl.searchParams.set("state", "switchOrg");
-  }
 
   return clearSessionCookies(NextResponse.redirect(endSessionUrl));
 }
