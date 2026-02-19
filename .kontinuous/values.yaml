@@ -8,8 +8,6 @@ app:
   imagePackage: app
   probesPath: /api/healthz
   containerPort: 3000
-  ingress:
-    enabled: false
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
