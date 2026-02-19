@@ -81,6 +81,12 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
     const { pathname } = req.nextUrl;
     const href = `${_config.host}${pathname}${req.nextUrl.search}`;
 
+    // After ProConnect logout with switchOrg, auto-redirect to login page
+    // so the user can re-authenticate and select a new organization.
+    if (req.nextUrl.searchParams.get("state") === "switchOrg" && pathname === "/") {
+      return NextResponse.redirect(`${_config.host}/login`);
+    }
+
     // handling authorization by ourselves (and not with authorize callback)
     const { token } = req.nextauth;
     if (!token?.email) {
