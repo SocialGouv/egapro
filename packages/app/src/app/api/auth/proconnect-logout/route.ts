@@ -4,17 +4,26 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 const NEXTAUTH_COOKIES = [
+  // Dev (HTTP) cookie names
   "next-auth.session-token",
-  "__Secure-next-auth.session-token",
   "next-auth.csrf-token",
-  "__Secure-next-auth.csrf-token",
   "next-auth.callback-url",
+  // Prod (HTTPS) cookie names — __Secure- and __Host- prefixes
+  "__Secure-next-auth.session-token",
   "__Secure-next-auth.callback-url",
+  "__Host-next-auth.csrf-token",
+  "__Secure-next-auth.csrf-token",
 ];
 
 function clearSessionCookies(response: NextResponse) {
   for (const name of NEXTAUTH_COOKIES) {
-    response.cookies.set(name, "", { maxAge: 0, path: "/" });
+    response.cookies.set(name, "", {
+      maxAge: 0,
+      path: "/",
+      secure: name.startsWith("__"),
+      httpOnly: true,
+      sameSite: "lax",
+    });
   }
   return response;
 }
