@@ -71,11 +71,6 @@ app:
         secretKeyRef:
           name: "egapro-secret"
           key: EGAPRO_SECRET
-    - name: AUTH_SECRET
-      valueFrom:
-        secretKeyRef:
-          name: "egapro-secret"
-          key: EGAPRO_SECRET
   vars:
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
