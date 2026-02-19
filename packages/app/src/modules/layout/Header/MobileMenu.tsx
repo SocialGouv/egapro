@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+import { auth } from "~/server/auth";
 import { Navigation } from "./Navigation";
 
 /**
@@ -6,7 +8,9 @@ import { Navigation } from "./Navigation";
  * Ouverte via le bouton #fr-btn-menu-mobile, gérée par le JS DSFR.
  * role="dialog" est requis pour que aria-label soit valide sur un <div>.
  */
-export function MobileMenu() {
+export async function MobileMenu() {
+	const session = await auth();
+
 	return (
 		<div
 			aria-label="Menu"
@@ -26,12 +30,21 @@ export function MobileMenu() {
 				<div className="fr-header__menu-links">
 					<ul className="fr-btns-group">
 						<li>
-							<Link
-								className="fr-btn fr-icon-account-circle-line"
-								href="/login"
-							>
-								Se connecter
-							</Link>
+							{session?.user ? (
+								<Link
+									className="fr-btn fr-icon-logout-box-r-line"
+									href="/api/auth/signout"
+								>
+									{session.user.name ?? "Se déconnecter"}
+								</Link>
+							) : (
+								<Link
+									className="fr-btn fr-icon-account-circle-line"
+									href="/login"
+								>
+									Se connecter
+								</Link>
+							)}
 						</li>
 					</ul>
 				</div>

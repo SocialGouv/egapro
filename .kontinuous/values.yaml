@@ -19,7 +19,10 @@ app:
         name: github-oauth
     - configMapRef:
         name: egapro
+    - configMapRef:
+        name: "proconnect"
     - secretRef:
+        name: "proconnect"
   env:
     - name: SENTRY_AUTH_TOKEN
       valueFrom:

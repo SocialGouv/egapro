@@ -11,17 +11,5 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  keycloak:
-    build:
-      context: .
-      dockerfile: ./packages/keycloak/Dockerfile
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      EGAPRO_ORIGIN: "http://localhost:3000"
-    ports:
-      - "8081:8080"
-    volumes:
-      - ./packages/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
 volumes:
   pgdata:

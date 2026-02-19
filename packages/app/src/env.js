@@ -15,6 +15,9 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
 	},
 
 	/**
@@ -36,6 +39,9 @@ export const env = createEnv({
 		AUTH_SECRET: process.env.AUTH_SECRET,
 		DATABASE_URL: process.env.DATABASE_URL,
 		NODE_ENV: process.env.NODE_ENV,
+		EGAPRO_PROCONNECT_CLIENT_ID: process.env.EGAPRO_PROCONNECT_CLIENT_ID,
+		EGAPRO_PROCONNECT_CLIENT_SECRET: process.env.EGAPRO_PROCONNECT_CLIENT_SECRET,
+		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_MATOMO_URL: process.env.NEXT_PUBLIC_MATOMO_URL,
 		NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID,
