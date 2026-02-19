@@ -15,7 +15,7 @@ export const SwitchOrganizationButton = () => {
       iconId="fr-icon-building-line"
       onClick={async () => {
         await signOut({ redirect: false });
-        await signIn("proconnect", { callbackUrl: "/" });
+        await signIn("proconnect", { callbackUrl: "/" }, { prompt: "select_organization" });
       }}
     >
       Changer d'organisation
