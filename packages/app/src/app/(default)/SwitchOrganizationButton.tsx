@@ -14,13 +14,8 @@ export const SwitchOrganizationButton = () => {
     <Button
       iconId="fr-icon-building-line"
       onClick={async () => {
-        // Clear NextAuth session only (keep ProConnect session alive so
-        // the user doesn't have to re-authenticate).
         await signOut({ redirect: false });
-        // Pass a dummy siret_hint that won't match the currently selected
-        // organization. This triggers ProConnect's choose_organization
-        // prompt which redirects to /users/select-organization.
-        await signIn("proconnect", { callbackUrl: "/" }, { siret_hint: "00000000000000" });
+        await signIn("proconnect", { callbackUrl: "/" }, { prompt: "login" });
       }}
     >
       Changer d'organisation
