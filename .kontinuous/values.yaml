@@ -3,6 +3,8 @@ global:
 
 app:
   ~chart: app
+  ~needs:
+    - pg
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
