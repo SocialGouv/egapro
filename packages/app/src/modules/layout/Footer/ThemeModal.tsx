@@ -1,8 +1,8 @@
 /**
- * Modale de paramètres d'affichage (thème clair / sombre / système).
- * Le JS DSFR gère le changement de thème et persiste le choix
- * dans le cookie `fr-theme` et l'attribut `data-fr-scheme` sur <html>.
- * role="dialog" est requis pour que aria-labelledby soit valide.
+ * Display settings modal (light / dark / system theme).
+ * The DSFR JS manages theme changes and persists the choice
+ * in the `fr-theme` cookie and the `data-fr-scheme` attribute on <html>.
+ * role="dialog" is required for aria-labelledby to be valid.
  */
 export function ThemeModal() {
 	return (
@@ -21,10 +21,10 @@ export function ThemeModal() {
 								<button
 									aria-controls="fr-theme-modal"
 									className="fr-btn--close fr-btn"
-									title="Fermer la fenêtre"
+									title="Close window"
 									type="button"
 								>
-									Fermer
+									Close
 								</button>
 							</div>
 							<div className="fr-modal__content">
@@ -33,7 +33,7 @@ export function ThemeModal() {
 										aria-hidden="true"
 										className="fr-icon-theme-fill fr-icon--lg"
 									/>
-									Paramètres d'affichage
+									Display settings
 								</h1>
 								<div className="fr-display" id="fr-display">
 									<fieldset className="fr-fieldset">
@@ -41,8 +41,7 @@ export function ThemeModal() {
 											className="fr-fieldset__legend"
 											id="fr-theme-fieldset-legend"
 										>
-											Choisissez un thème pour personnaliser l'apparence du
-											site.
+											Choose a theme to customize the appearance of the site.
 										</legend>
 										<div className="fr-fieldset__content">
 											<div className="fr-radio-group fr-radio-rich">
@@ -56,7 +55,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-light"
 												>
-													Thème clair
+													Light theme
 												</label>
 											</div>
 											<div className="fr-radio-group fr-radio-rich">
@@ -70,7 +69,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-dark"
 												>
-													Thème sombre
+													Dark theme
 												</label>
 											</div>
 											<div className="fr-radio-group fr-radio-rich">
@@ -84,7 +83,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-system"
 												>
-													Système (préférence du navigateur)
+													System (browser preference)
 												</label>
 											</div>
 										</div>

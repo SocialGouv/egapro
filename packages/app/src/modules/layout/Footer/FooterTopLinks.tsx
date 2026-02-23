@@ -1,28 +1,28 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Section liens du haut du footer : liens utiles et liens ministère. */
+/** Footer top links section: useful links and ministry links. */
 export function FooterTopLinks() {
 	return (
 		<div className="fr-footer__top">
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--start">
 					<div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
-						<h3 className="fr-footer__top-cat">Liens utiles</h3>
+						<h3 className="fr-footer__top-cat">Useful links</h3>
 						<ul className="fr-footer__top-list">
 							<li>
 								<Link className="fr-footer__top-link" href="/aide-index">
-									Aide pour l'index
+									Help for index
 								</Link>
 							</li>
 							<li>
 								<Link className="fr-footer__top-link" href="/aide-proconnect">
-									Aide pour ProConnect
+									Help for ProConnect
 								</Link>
 							</li>
 							<li>
 								<Link className="fr-footer__top-link" href="/stats">
-									Statistiques
+									Statistics
 								</Link>
 							</li>
 							<li>
@@ -32,14 +32,14 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Contribuer sur GitHub
+									Contribute on GitHub
 									<NewTabNotice />
 								</a>
 							</li>
 						</ul>
 					</div>
 					<div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
-						<h3 className="fr-footer__top-cat">Ministère du Travail</h3>
+						<h3 className="fr-footer__top-cat">Ministry of Labour</h3>
 						<ul className="fr-footer__top-list">
 							<li>
 								<a
@@ -48,7 +48,7 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Site du ministère (Index)
+									Ministry website (Index)
 									<NewTabNotice />
 								</a>
 							</li>
@@ -59,7 +59,7 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Site du ministère (Représentation)
+									Ministry website (Representation)
 									<NewTabNotice />
 								</a>
 							</li>

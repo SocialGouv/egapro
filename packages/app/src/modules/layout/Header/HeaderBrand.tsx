@@ -7,11 +7,11 @@ export function HeaderBrand() {
 			<div className="fr-header__brand-top">
 				<div className="fr-header__logo">
 					<p className="fr-logo">
-						Ministère
+						Ministry
 						<br />
-						du travail
+						of labour
 						<br />
-						et des solidarités
+						and solidarity
 					</p>
 				</div>
 				<div className="fr-header__navbar">
@@ -30,12 +30,12 @@ export function HeaderBrand() {
 			<div className="fr-header__service">
 				<Link
 					href="/"
-					title="Accueil - Egapro - Ministère du Travail et des Solidarités"
+					title="Home - Egapro - Ministry of Labour and Solidarity"
 				>
 					<p className="fr-header__service-title">Egapro</p>
 				</Link>
 				<p className="fr-header__service-tagline">
-					Indicateurs d&apos;égalité professionnelle femmes‑hommes
+					Professional equality indicators women‑men
 				</p>
 			</div>
 		</div>

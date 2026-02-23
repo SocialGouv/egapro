@@ -1,23 +1,22 @@
-/** Section de recherche d'entreprise par SIREN, région, département ou secteur. */
+/** Company search section by SIREN, region, department or sector. */
 export function HomeSearch() {
 	return (
 		<section className="fr-py-8w">
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters">
 					<div className="fr-col-12">
-						<h2>Rechercher une entreprise et consulter ses résultats</h2>
+						<h2>Search for a company and view its results</h2>
 						<p>
-							Accédez aux résultats d&apos;égalité professionnelle des
-							entreprises, comprenant :
+							Access the professional equality results of companies, including:
 						</p>
 						<ul>
 							<li>
-								les <strong>indicateurs de rémunération</strong> femmes-hommes
-								pour l&apos;ensemble des salariés
+								<strong>remuneration indicators</strong> women-men for all
+								employees
 							</li>
 							<li>
-								les <strong>indicateurs de représentation</strong> femmes-hommes
-								au sein des postes de direction
+								<strong>representation indicators</strong> women-men within
+								management positions
 							</li>
 						</ul>
 					</div>
@@ -55,16 +54,16 @@ export function HomeSearch() {
 						<form action="/index-egapro/recherche" method="GET">
 							<div className="fr-input-group">
 								<label className="fr-label" htmlFor="search-query">
-									Numéro Siren ou le nom de l&apos;entreprise
+									Siren number or company name
 									<span className="fr-hint-text">
-										Le numéro Siren se compose de 9 chiffres
+										The Siren number consists of 9 digits
 									</span>
 								</label>
 								<input
 									className="fr-input"
 									id="search-query"
 									name="query"
-									placeholder="[siren] [raison sociale]"
+									placeholder="[siren] [company name]"
 									type="search"
 								/>
 							</div>
@@ -73,7 +72,7 @@ export function HomeSearch() {
 								<div className="fr-col-12 fr-col-md-4">
 									<div className="fr-select-group">
 										<label className="fr-label" htmlFor="search-region">
-											Région
+											Region
 										</label>
 										<select
 											className="fr-select"
@@ -82,7 +81,7 @@ export function HomeSearch() {
 											name="region"
 										>
 											<option disabled hidden value="">
-												Sélectionner une option
+												Select an option
 											</option>
 											<option value="11">Île-de-France</option>
 											<option value="24">Centre-Val de Loire</option>
@@ -109,7 +108,7 @@ export function HomeSearch() {
 								<div className="fr-col-12 fr-col-md-4">
 									<div className="fr-select-group">
 										<label className="fr-label" htmlFor="search-departement">
-											Département
+											Department
 										</label>
 										<select
 											className="fr-select"
@@ -118,7 +117,7 @@ export function HomeSearch() {
 											name="departement"
 										>
 											<option disabled hidden value="">
-												Sélectionner une option
+												Select an option
 											</option>
 										</select>
 									</div>
@@ -127,7 +126,7 @@ export function HomeSearch() {
 								<div className="fr-col-12 fr-col-md-4">
 									<div className="fr-select-group">
 										<label className="fr-label" htmlFor="search-secteur">
-											Secteur d&apos;activité
+											Activity sector
 										</label>
 										<select
 											className="fr-select"
@@ -136,7 +135,7 @@ export function HomeSearch() {
 											name="secteur"
 										>
 											<option disabled hidden value="">
-												Sélectionner une option
+												Select an option
 											</option>
 										</select>
 									</div>
@@ -147,7 +146,7 @@ export function HomeSearch() {
 								className="fr-btn fr-btn--secondary fr-icon-search-line fr-btn--icon-right fr-mt-2w"
 								type="submit"
 							>
-								Rechercher
+								Search
 							</button>
 						</form>
 					</div>

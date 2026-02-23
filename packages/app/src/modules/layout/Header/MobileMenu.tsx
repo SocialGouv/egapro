@@ -4,9 +4,9 @@ import { auth } from "~/server/auth";
 import { Navigation } from "./Navigation";
 
 /**
- * Modale de navigation mobile.
- * Ouverte via le bouton #fr-btn-menu-mobile, gérée par le JS DSFR.
- * role="dialog" est requis pour que aria-label soit valide sur un <div>.
+ * Mobile navigation modal.
+ * Opened via the #fr-btn-menu-mobile button, managed by DSFR JS.
+ * role="dialog" is required for aria-label to be valid on a <div>.
  */
 export async function MobileMenu() {
 	const session = await auth();
@@ -25,7 +25,7 @@ export async function MobileMenu() {
 					className="fr-link--close fr-link"
 					type="button"
 				>
-					Fermer
+					Close
 				</button>
 				<div className="fr-header__menu-links">
 					<ul className="fr-btns-group">
@@ -34,7 +34,7 @@ export async function MobileMenu() {
 								className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
 								href="/faq"
 							>
-								Aide
+								Help
 							</Link>
 						</li>
 						<li>
@@ -43,14 +43,14 @@ export async function MobileMenu() {
 									className="fr-btn fr-icon-logout-box-r-line"
 									href="/api/auth/signout"
 								>
-									{session.user.name ?? "Se déconnecter"}
+									{session.user.name ?? "Sign out"}
 								</Link>
 							) : (
 								<Link
 									className="fr-btn fr-icon-account-circle-line"
 									href="/login"
 								>
-									Se connecter
+									Sign in
 								</Link>
 							)}
 						</li>

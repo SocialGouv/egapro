@@ -8,21 +8,21 @@ export function FooterBody() {
 			<div className="fr-footer__brand fr-enlarge-link">
 				<Link
 					href="/"
-					title="Accueil - Egapro - Ministère du Travail et des Solidarités"
+					title="Home - Egapro - Ministry of Labour and Solidarity"
 				>
 					<p className="fr-logo">
-						Ministère
+						Ministry
 						<br />
-						du travail
+						of labour
 						<br />
-						et des solidarités
+						and solidarity
 					</p>
 				</Link>
 			</div>
 			<div className="fr-footer__content">
 				<p className="fr-footer__content-desc">
-					Egapro permet aux entreprises de déclarer leurs indicateurs de
-					rémunération et de représentation entre les femmes et les hommes.
+					Egapro allows companies to declare their remuneration and
+					representation indicators between women and men.
 				</p>
 				<ul className="fr-footer__content-list">
 					<li className="fr-footer__content-item">

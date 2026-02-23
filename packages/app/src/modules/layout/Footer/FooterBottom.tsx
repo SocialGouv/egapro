@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Barre de bas de footer : liens légaux, paramètres d'affichage, licence. */
+/** Footer bottom bar: legal links, display settings, license. */
 export function FooterBottom() {
 	return (
 		<div className="fr-footer__bottom">
@@ -11,27 +11,27 @@ export function FooterBottom() {
 						className="fr-footer__bottom-link"
 						href="/declaration-accessibilite"
 					>
-						Accessibilité : partiellement conforme
+						Accessibility: partially compliant
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/mentions-legales">
-						Mentions légales
+						Legal notices
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/donnees-personnelles">
-						Données personnelles
+						Personal data
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/gestion-des-cookies">
-						Gestion des cookies
+						Cookie management
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/plan-du-site">
-						Plan du site
+						Site map
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
@@ -41,19 +41,19 @@ export function FooterBottom() {
 						data-fr-opened="false"
 						type="button"
 					>
-						Paramètres d'affichage
+						Display settings
 					</button>
 				</li>
 			</ul>
 			<div className="fr-footer__bottom-copy">
 				<p>
-					Sauf mention contraire, tout le contenu de ce site est sous{" "}
+					Unless otherwise stated, all content on this site is under{" "}
 					<a
 						href="https://github.com/etalab/licence-ouverte/blob/master/LO.md"
 						rel="noopener noreferrer"
 						target="_blank"
 					>
-						licence etalab-2.0
+						etalab-2.0 license
 						<NewTabNotice />
 					</a>
 				</p>

@@ -15,8 +15,8 @@ export default function GlobalError({
 	return (
 		<html lang="fr">
 			<body>
-				<h1>Une erreur est survenue</h1>
-				<p>Une erreur inattendue s&apos;est produite. Veuillez réessayer.</p>
+				<h1>An error occurred</h1>
+				<p>An unexpected error occurred. Please try again.</p>
 			</body>
 		</html>
 	);

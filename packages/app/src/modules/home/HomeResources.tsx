@@ -49,7 +49,7 @@ function ResourceTile({
 	);
 }
 
-/** Section ressources : FAQ, textes de référence et contact. */
+/** Resources section: FAQ, reference texts and contact. */
 export function HomeResources() {
 	return (
 		<section style={{ background: "var(--background-alt-blue-france)" }}>
@@ -57,28 +57,28 @@ export function HomeResources() {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Réponses aux questions les plus courantes"
+							detail="Answers to the most common questions"
 							href="/faq"
 							pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-							title="Questions fréquentes (FAQ)"
+							title="Frequently Asked Questions (FAQ)"
 						/>
 					</div>
 
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Consultez les textes législatifs et réglementaires"
+							detail="Consult the legislative and regulatory texts"
 							href="/textes-reference"
 							pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-							title="Textes de référence"
+							title="Reference texts"
 						/>
 					</div>
 
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Besoin d'aide ? Contactez nos services d'assistance"
+							detail="Need help? Contact our support services"
 							href="/contact"
 							pictogramPath="/dsfr/artwork/pictograms/people/avatar.svg"
-							title="Nous contacter"
+							title="Contact us"
 						/>
 					</div>
 				</div>

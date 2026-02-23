@@ -3,7 +3,7 @@ import { HomeNotice } from "./HomeNotice";
 import { HomeResources } from "./HomeResources";
 import { HomeSearch } from "./HomeSearch";
 
-/** Page d'accueil — compose les sections Hero, Recherche et Ressources. */
+/** Home page — composes Hero, Search and Resources sections. */
 export function HomePage() {
 	return (
 		<main id="content" tabIndex={-1}>

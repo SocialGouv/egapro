@@ -15,7 +15,7 @@ export async function HeaderQuickAccess() {
 							className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
 							href="/faq"
 						>
-							Aide
+							Help
 						</Link>
 					</li>
 					<li>
@@ -24,14 +24,14 @@ export async function HeaderQuickAccess() {
 								className="fr-btn fr-icon-logout-box-r-line"
 								href="/api/auth/signout"
 							>
-								{session.user.name ?? "Se déconnecter"}
+								{session.user.name ?? "Sign out"}
 							</Link>
 						) : (
 							<Link
 								className="fr-btn fr-icon-account-circle-line"
 								href="/login"
 							>
-								Se connecter
+								Sign in
 							</Link>
 						)}
 					</li>

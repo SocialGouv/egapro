@@ -1,4 +1,4 @@
-/** Annonce aux lecteurs d'écran qu'un lien ouvre dans un nouvel onglet. */
+/** Announces to screen readers that a link opens in a new tab. */
 export function NewTabNotice() {
-	return <span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>;
+	return <span className="fr-sr-only"> (opens in a new window)</span>;
 }

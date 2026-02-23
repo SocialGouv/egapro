@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** Bandeau d'information importante refermable (fr-notice--info). */
+/** Important information banner, dismissable (fr-notice--info). */
 export function HomeNotice() {
 	const [dismissed, setDismissed] = useState(false);
 
@@ -13,27 +13,27 @@ export function HomeNotice() {
 			<div className="fr-container">
 				<div className="fr-notice__body">
 					<p>
-						<span className="fr-notice__title">Egapro évolue&nbsp;:</span>
+						<span className="fr-notice__title">Egapro evolves&nbsp;:</span>
 						<span className="fr-notice__desc">
-							Le portail intègre désormais les nouvelles directives européennes
-							sur l&apos;égalité salariale.
+							The portal now integrates the new European directives on pay
+							equality.
 						</span>
 						<a
 							className="fr-notice__link"
 							href="/actualites"
 							rel="noopener noreferrer"
-							title="En savoir plus - nouvelle fenêtre"
+							title="Learn more - new window"
 						>
-							En savoir plus
+							Learn more
 						</a>
 					</p>
 					<button
 						className="fr-btn--close fr-btn"
 						onClick={() => setDismissed(true)}
-						title="Masquer le message"
+						title="Hide message"
 						type="button"
 					>
-						Masquer le message
+						Hide message
 					</button>
 				</div>
 			</div>
