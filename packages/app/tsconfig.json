@@ -32,7 +32,7 @@
 		}
 	},
 	"include": [
-		"next-env.d.ts.backup",
+		"next-env.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
 		"**/*.cjs",
