@@ -1,4 +1,10 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -17,49 +23,12 @@ function getDatabaseUrl() {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
-const sql = postgres(getDatabaseUrl(), { max: 1 });
+const url = getDatabaseUrl();
+const conn = postgres(url, { max: 1 });
+const db = drizzle(conn);
 
-console.log("Running database migrations...");
+console.log("Running Drizzle migrations...");
+await migrate(db, { migrationsFolder: path.join(__dirname, "../drizzle") });
+console.log("Migrations completed.");
 
-await sql.unsafe(`
-	CREATE TABLE IF NOT EXISTS "app_user" (
-		"id" varchar(255) PRIMARY KEY NOT NULL,
-		"name" varchar(255),
-		"email" varchar(255) NOT NULL,
-		"emailVerified" timestamptz DEFAULT now(),
-		"image" varchar(255)
-	);
-
-	CREATE TABLE IF NOT EXISTS "app_account" (
-		"userId" varchar(255) NOT NULL REFERENCES "app_user"("id"),
-		"type" varchar(255) NOT NULL,
-		"provider" varchar(255) NOT NULL,
-		"providerAccountId" varchar(255) NOT NULL,
-		"refresh_token" text,
-		"access_token" text,
-		"expires_at" integer,
-		"token_type" varchar(255),
-		"scope" varchar(255),
-		"id_token" text,
-		"session_state" varchar(255),
-		CONSTRAINT "app_account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
-	);
-	CREATE INDEX IF NOT EXISTS "account_user_id_idx" ON "app_account" ("userId");
-
-	CREATE TABLE IF NOT EXISTS "app_session" (
-		"sessionToken" varchar(255) PRIMARY KEY NOT NULL,
-		"userId" varchar(255) NOT NULL REFERENCES "app_user"("id"),
-		"expires" timestamptz NOT NULL
-	);
-	CREATE INDEX IF NOT EXISTS "t_user_id_idx" ON "app_session" ("userId");
-
-	CREATE TABLE IF NOT EXISTS "app_verification_token" (
-		"identifier" varchar(255) NOT NULL,
-		"token" varchar(255) NOT NULL,
-		"expires" timestamptz NOT NULL,
-		CONSTRAINT "app_verification_token_identifier_token_pk" PRIMARY KEY("identifier","token")
-	);
-`);
-
-console.log("Database migrations completed.");
-await sql.end();
+await conn.end();
