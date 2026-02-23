@@ -1,0 +1,1 @@
+export { MatomoAnalytics } from "./MatomoAnalytics";

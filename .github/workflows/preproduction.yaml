@@ -59,74 +59,38 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
 
-  build-nginx:
-    environment: build-preproduction
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
-
-      - name: 📌 Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/nginx
-          tags: |
-            type=sha,prefix=preprod-,format=long,priority=850
-            type=sha,prefix=sha-,format=long,priority=890
-
-      - name: 📦 Build and push Docker image for nginx
-        uses: socialgouv/workflows/actions/buildkit@v1
-        with:
-          context: "packages/nginx"
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
-
-  build-files:
-    environment: build-preproduction
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
-
-      - name: 📌 Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/files
-          tags: |
-            type=sha,prefix=preprod-,format=long,priority=850
-            type=sha,prefix=sha-,format=long,priority=890
-
-      - name: 📦 Build and push Docker image for files
-        uses: socialgouv/workflows/actions/buildkit@v1
-        with:
-          context: "packages/files"
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
-
   kontinuous:
-    needs: [build-app, build-nginx, build-files]
+    needs: [build-app]
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-preproduction-atlas.yaml@v1
     secrets: inherit
+
+  e2e:
+    name: "Test e2e"
+    runs-on: ubuntu-latest
+    needs: [kontinuous]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm playwright:install
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          SITE_URL: https://egapro-preprod.ovh.fabrique.social.gouv.fr
+          E2E_CLEANUP_TOKEN: ${{ secrets.E2E_CLEANUP_TOKEN }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: packages/app/playwright-report/
+          retention-days: 7

@@ -30,17 +30,3 @@ app:
     limits:
       cpu: 1
       memory: 2G
-
-nginx:
-  autoscale:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 6
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1G
-    limits:
-      cpu: 1
-      memory: 2G
-

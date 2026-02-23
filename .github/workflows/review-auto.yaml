@@ -65,7 +65,6 @@ jobs:
             NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api
             NEXT_PUBLIC_API_V2_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/apiv2
             NEXTAUTH_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api/auth
-            NEXT_PUBLIC_HOST=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/login
             NEXT_PUBLIC_GITHUB_SHA=${{ steps.vars.outputs.sha_short }}
             NEXT_PUBLIC_EGAPRO_ENV=dev
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.APP_SENTRY_DSN }}
@@ -76,88 +75,8 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
 
-  build-nginx:
-    environment: build-review-auto
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
-
-      - name: 📌 Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/nginx
-          tags: |
-            type=sha,prefix=persist-,format=long,enable=${{
-              github.ref_name == 'dev' ||
-              github.ref_name == 'develop' ||
-              github.ref_name == 'preprod' ||
-              github.ref_name == 'main' ||
-              github.ref_name == 'master'
-            }},priority=840
-            type=sha,prefix=sha-,format=long,priority=890
-            type=ref,event=branch,priority=600
-
-      - name: 📦 Build and push Docker image for nginx
-        uses: socialgouv/workflows/actions/buildkit@v1
-        with:
-          context: "packages/nginx"
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
-
-  build-files:
-    environment: build-review-auto
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
-
-      - name: 📌 Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/files
-          tags: |
-            type=sha,prefix=persist-,format=long,enable=${{
-              github.ref_name == 'dev' ||
-              github.ref_name == 'develop' ||
-              github.ref_name == 'preprod' ||
-              github.ref_name == 'main' ||
-              github.ref_name == 'master'
-            }},priority=840
-            type=sha,prefix=sha-,format=long,priority=890
-            type=ref,event=branch,priority=600
-
-      - name: 📦 Build and push Docker image for files
-        uses: socialgouv/workflows/actions/buildkit@v1
-        with:
-          context: "packages/files"
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
-
   kontinuous:
-    needs: [build-app, build-nginx, build-files]
+    needs: [build-app]
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
@@ -175,25 +94,22 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Cypress binary cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-      - name: Install Cypress
-        run: pnpm --filter app exec cypress install
+      - name: Install Playwright browsers
+        run: pnpm playwright:install
       - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
-      - name: Set env
-        run: |
-          echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-      - name: Run test e2e
-        working-directory: ./packages/app
-        run: pnpm run test:e2e
+      - name: Run E2E tests
+        run: pnpm test:e2e
         env:
-          config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
+          SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
           E2E_CLEANUP_TOKEN: ${{ secrets.E2E_CLEANUP_TOKEN }}
-          TEST_BASEURL: ${{ env.SITE_URL }}
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: packages/app/playwright-report/
+          retention-days: 7

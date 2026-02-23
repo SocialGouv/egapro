@@ -3,7 +3,6 @@
 .github
 .gitignore
 .kontinuous
-.socialgouv.yaml
 .releaserc.json
 
 # Documentation
@@ -21,6 +20,9 @@ LICENSE
 # Docker files themselves
 **/Dockerfile
 **/.dockerignore
+
+# The build needs these Dockerfiles in the context when using `docker build -f ...`
+!Dockerfile
 
 # Test & dev tooling
 **/coverage

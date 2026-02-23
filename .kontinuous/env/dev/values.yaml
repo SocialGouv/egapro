@@ -13,15 +13,4 @@ app:
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://auth.agentconnect.gouv.fr"
-
-maildev: {}
-pgweb: {}
-
-nginx:
-  annotations:
-    oblik.socialgouv.io/min-limit-cpu: 2
-  ingress:
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    EGAPRO_PROCONNECT_ISSUER: "https://egapro-charon.ovh.fabrique.social.gouv.fr/proconnecttest"

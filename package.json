@@ -1,29 +1,37 @@
 {
-  "name": "egapro",
-  "version": "3.13.2",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "packageManager": "pnpm@10.8.1",
-  "engines": {
-    "node": ">=24"
-  },
-  "scripts": {
-    "lint": "pnpm -r --if-present run lint",
-    "build": "pnpm -r --if-present run build",
-    "dev": "pnpm -r --if-present run dev",
-    "test": "pnpm -r --if-present run test",
-    "dev:app": "pnpm --filter app run dev",
-    "lint:app": "pnpm --filter app run lint",
-    "build:app": "pnpm --filter app run build",
-    "test:app": "pnpm --filter app run test",
-    "test:e2e": "CYPRESS_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
-    "release": "semantic-release"
-  },
-  "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "semantic-release": "^25.0.3"
-  }
+	"name": "egapro",
+	"version": "3.13.2",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"packageManager": "pnpm@10.8.1",
+	"engines": {
+		"node": ">=24"
+	},
+	"scripts": {
+		"lint": "pnpm -r --if-present run lint",
+		"build": "pnpm -r --if-present run build",
+		"dev": "pnpm -r --if-present run dev",
+		"test": "pnpm -r --if-present run test",
+		"typecheck": "pnpm -r --if-present run typecheck",
+		"dev:app": "pnpm --filter app run dev",
+		"lint:app": "pnpm --filter app run lint",
+		"build:app": "pnpm --filter app run build",
+		"typecheck:app": "pnpm --filter app run typecheck",
+		"test:app": "pnpm --filter app run test",
+		"test:app:coverage": "pnpm --filter app run test:coverage",
+		"db:generate": "pnpm --filter app run db:generate",
+		"db:migrate": "pnpm --filter app run db:migrate",
+		"db:push": "pnpm --filter app run db:push",
+		"db:studio": "pnpm --filter app run db:studio",
+		"test:e2e": "PLAYWRIGHT_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
+		"playwright:install": "pnpm --filter app exec playwright install --with-deps chromium",
+		"release": "semantic-release"
+	},
+	"devDependencies": {
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"semantic-release": "^25.0.3"
+	}
 }

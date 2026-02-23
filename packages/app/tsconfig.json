@@ -1,79 +1,57 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
-    "downlevelIteration": true,
-    "types": [
-      "node",
-      "vitest/globals"
-    ],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "baseUrl": "../../",
-    "paths": {
-      "@common/*": [
-        "packages/app/src/common/*"
-      ],
-      "@components/*": [
-        "packages/app/src/components/*"
-      ],
-      "@api/*": [
-        "packages/app/src/api/*"
-      ],
-      "@services/*": [
-        "packages/app/src/services/*"
-      ],
-      "@design-system": [
-        "packages/app/src/design-system/server"
-      ],
-      "@design-system/client": [
-        "packages/app/src/design-system/client"
-      ],
-      "@design-system/utils/*": [
-        "packages/app/src/design-system/utils/*"
-      ],
-      "@design-system/hooks/*": [
-        "packages/app/src/design-system/hooks/*"
-      ],
-      "@public/*": [
-        "packages/app/public/*"
-      ],
-      "@globalActions/*": [
-        "packages/app/src/app/_globalActions/*"
-      ]
-    },
-    "target": "ES2017"
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "./global.d.ts",
-    ".next/dev/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "cypress.config.ts",
-    "cypress"
-  ]
+	"compilerOptions": {
+		/* Base Options: */
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "es2022",
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		/* Strictness */
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"checkJs": true,
+		/* Bundled projects */
+		"lib": ["dom", "dom.iterable", "ES2022"],
+		"noEmit": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"jsx": "react-jsx",
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"incremental": true,
+		/* Path Aliases */
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"]
+		}
+	},
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.cjs",
+		"**/*.js",
+		".next/types/**/*.ts",
+		".next/dev/types/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"public",
+		"generated",
+		"coverage",
+		"**/*.test.ts",
+		"**/*.test.tsx",
+		"**/*.spec.ts",
+		"**/*.spec.tsx",
+		"**/*.e2e.ts",
+		"**/*.e2e.tsx",
+		"src/test/**",
+		"src/e2e/**"
+	]
 }

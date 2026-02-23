@@ -1,34 +1,38 @@
 # syntax=docker/dockerfile:1.7
-ARG NODE_VERSION=24-alpine
 
-# Builder stage: install dependencies and build
-FROM node:$NODE_VERSION AS builder
+ARG NODE_VERSION=24-alpine
+ARG PNPM_VERSION=10.8.1
+
+# Builder stage: install deps + build Next.js (standalone)
+FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /app
 
-# Enable pnpm via corepack (no global npm install needed)
+# Enable pnpm via corepack (no global npm install)
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-# Copy workspace config + lockfile + package.jsons for install
+# Copy minimal files first for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/app/package.json ./packages/app/
 
-# Install only app's dependencies (not the entire lockfile like pnpm fetch does)
+# Install only the workspace subtree needed to build the app
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --filter app --frozen-lockfile --store-dir=/pnpm/store
 
-# Copy source code (after install to maximize cache efficiency)
+# Copy source code (after install to maximize cache hits)
 COPY packages/app/ ./packages/app/
 
+# Build-time env handling
 ENV HUSKY=0
-ENV NODE_OPTIONS="--max-old-space-size=8192"
-ENV GENERATE_SOURCEMAP=true
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+# Avoid failing the image build because runtime env vars are not provided at build time.
+ENV SKIP_ENV_VALIDATION=1
 
-# App build args
+# Optional build args (kept for CI parity)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_API_V2_URL
@@ -40,33 +44,13 @@ ENV NEXT_PUBLIC_EGAPRO_ENV=$NEXT_PUBLIC_EGAPRO_ENV
 ARG NEXTAUTH_URL
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 
-# Sentry build args
-ARG SENTRY_URL
-ARG SENTRY_ORG
-ARG SENTRY_PROJECT
-ARG SENTRY_RELEASE
-ARG NEXT_PUBLIC_SENTRY_DSN
-ENV SENTRY_URL=$SENTRY_URL
-ENV SENTRY_ORG=$SENTRY_ORG
-ENV SENTRY_PROJECT=$SENTRY_PROJECT
-ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
-ENV SENTRY_RELEASE=$SENTRY_RELEASE
-
 # Build with Next.js cache persisted across builds
-# output: 'standalone' traces imports and produces a minimal server.js + node_modules
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
-    --mount=type=secret,id=sentry \
-    sh -ce ' \
-    if [ -f /run/secrets/sentry ]; then \
-      export SENTRY_AUTH_TOKEN="$(grep "^SENTRY_AUTH_TOKEN=" /run/secrets/sentry | cut -d= -f2)"; \
-    fi; \
-    export SENTRY_ALLOW_FAILURE=true; \
-    pnpm --filter app build \
-    '
+    pnpm --filter app build
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
-FROM node:$NODE_VERSION AS runner
+FROM node:${NODE_VERSION} AS runner
 
 RUN apk --update --no-cache add ca-certificates && apk upgrade
 
@@ -74,18 +58,6 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-
-# Sentry runtime env vars
-ARG SENTRY_URL
-ARG SENTRY_ORG
-ARG SENTRY_PROJECT
-ARG SENTRY_RELEASE
-ARG NEXT_PUBLIC_SENTRY_DSN
-ENV SENTRY_URL=$SENTRY_URL
-ENV SENTRY_ORG=$SENTRY_ORG
-ENV SENTRY_PROJECT=$SENTRY_PROJECT
-ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
-ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
 WORKDIR /app
 
