@@ -138,9 +138,73 @@ export function NavLink({ href }: { href: string }) {
 
 Ne pas remonter `"use client"` inutilement vers les parents. Isoler la partie interactive au niveau le plus bas possible.
 
+### Granularité des composants
+
+**Règle : un composant = une responsabilité.** Préférer beaucoup de petits composants à quelques gros.
+
+- Un composant ne doit faire qu'une seule chose lisible en une phrase
+- Dès qu'un composant dépasse ~50 lignes de JSX, extraire des sous-composants
+- Nommer les composants d'après ce qu'ils affichent, pas d'après leur position dans l'arbre
+
+```tsx
+// INTERDIT — composant fourre-tout
+export function Dashboard() {
+  // 200 lignes de JSX : header, tableau, filtres, pagination…
+}
+
+// CORRECT — décomposé
+export function Dashboard() {
+  return (
+    <>
+      <DashboardHeader />
+      <DashboardFilters />
+      <DashboardTable />
+      <DashboardPagination />
+    </>
+  );
+}
+```
+
+Chaque sous-composant extrait est **testable indépendamment** — c'est l'objectif.
+
 ---
 
 ## DSFR — Règles d'usage
+
+### MCP DSFR (obligatoire)
+
+Le serveur MCP [`dsfr-mcp`](https://github.com/SocialGouv/dsfr-mcp) expose toute la documentation DSFR directement dans l'assistant IA (structure HTML, classes CSS, variantes, accessibilité, tokens couleur, icônes).
+
+**Installation une seule fois (scope utilisateur) :**
+
+```bash
+claude mcp add dsfr --scope user -- npx dsfr-mcp
+```
+
+Ou via `.mcp.json` à la racine du projet pour le partager en équipe :
+
+```json
+{
+  "mcpServers": {
+    "dsfr": {
+      "command": "npx",
+      "args": ["dsfr-mcp"]
+    }
+  }
+}
+```
+
+**Outils disponibles une fois connecté :**
+
+| Outil | Usage |
+|---|---|
+| `list_components` | Lister tous les composants DSFR disponibles |
+| `get_component_doc` | Doc d'un composant : HTML, classes CSS, variantes, accessibilité |
+| `search_components` | Recherche plein texte dans la documentation |
+| `search_icons` | Trouver une icône par nom/catégorie → classe CSS `fr-icon-*` |
+| `get_color_tokens` | Tokens couleur par contexte/usage, thèmes clair/sombre |
+
+**Règle :** avant d'écrire du HTML DSFR, utiliser `get_component_doc` ou `search_components` pour vérifier la structure correcte. Ne jamais deviner les classes CSS DSFR de mémoire.
 
 ### Assets
 Les assets DSFR (CSS, fonts, icônes) sont copiés dans `public/dsfr/` par `scripts/copy-dsfr.js`. Ce dossier est **ignoré par git** et regénéré à chaque `dev` / `build`.
@@ -304,12 +368,24 @@ src/modules/layout/shared/
 
 Ne jamais placer des tests dans `src/app/` — les routes sont des thin wrappers sans logique propre.
 
+### Politique de test : couverture 100 %
+
+**Tout code écrit doit être testé. Sans exception.**
+
+- Chaque composant React → test de rendu + comportements observables
+- Chaque hook → test de tous les états et effets de bord
+- Chaque utilitaire / fonction serveur → test de tous les cas (nominal + erreurs + edge cases)
+- Chaque route tRPC → test d'intégration (input valide, input invalide, erreurs)
+
+Un fichier sans tests est **incomplet**. Ne pas considérer une tâche comme terminée si des fichiers de logique ne sont pas couverts à 100 %.
+
+> **Exception unique** : les thin wrappers de routes `src/app/*/page.tsx` qui ne contiennent aucune logique propre (uniquement import + return d'un composant).
+
 ### Outils
 
 - **Vitest** pour les tests unitaires et d'intégration
 - **Playwright** pour les tests E2E dans `src/e2e/`
-- Couverture minimale : **80%** sur les fichiers avec de la logique (utils, hooks, server)
-- Les composants DSFR purement statiques (markup sans logique) n'ont pas besoin de tests unitaires
+- Couverture cible : **100 %** sur tous les fichiers avec de la logique
 
 ### Ce qu'il faut tester
 
