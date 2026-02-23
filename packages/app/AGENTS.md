@@ -5,6 +5,20 @@
 
 ---
 
+## Règle obligatoire après chaque tâche
+
+**Après chaque modification de code, sans exception, lancer dans cet ordre :**
+
+```bash
+pnpm lint        # corrige les erreurs lint
+pnpm format      # formate le code
+pnpm typecheck   # vérifie les types TypeScript
+```
+
+Ne pas considérer une tâche comme terminée tant que ces trois commandes passent sans erreur.
+
+---
+
 ## Stack technique
 
 | Couche | Outil | Version |
@@ -337,12 +351,80 @@ vi.mock("~/trpc/server", () => ({
 ```bash
 pnpm dev          # copie DSFR assets + démarre Next.js en mode dev
 pnpm build        # copie DSFR assets + build production
-pnpm check        # lint Biome
-pnpm check:write  # lint Biome + auto-fix
-pnpm typecheck    # vérification TypeScript
+pnpm typecheck    # vérification TypeScript (tsc --noEmit)
 pnpm test         # tests Vitest
 pnpm test:e2e     # tests Playwright
 ```
+
+### Lint & Format (Biome)
+
+| Commande | Effet | Quand l'utiliser |
+|---|---|---|
+| `pnpm lint` | corrige les erreurs lint (`--write`) | en local, avant commit |
+| `pnpm lint:check` | vérifie sans modifier, exit 1 si erreur | CI |
+| `pnpm format` | formate les fichiers (`--write`) | en local, avant commit |
+| `pnpm format:check` | vérifie sans modifier, exit 1 si erreur | CI |
+| `pnpm check` | lint + format check (les deux) | vérification rapide |
+| `pnpm check:write` | lint + format auto-fix (les deux) | correction globale |
+
+> En CI, toujours utiliser les variantes `:check`. En local, préférer `pnpm lint` et `pnpm format` (ou `pnpm check:write` pour tout corriger d'un coup).
+
+### Variables d'environnement
+
+Les variables sont déclarées et validées dans `src/env.js` via [`@t3-oss/env-nextjs`](https://env.t3.gg/) + Zod. La validation s'exécute au démarrage du serveur et au build.
+
+**Règle : ne jamais lire `process.env` directement dans le code. Toujours importer `env` depuis `~/env.js`.**
+
+```ts
+// INTERDIT
+const secret = process.env.AUTH_SECRET;
+
+// CORRECT
+import { env } from "~/env.js";
+const secret = env.AUTH_SECRET; // typé, validé
+```
+
+**Ajouter une variable :**
+
+1. La déclarer dans `src/env.js` dans la section appropriée :
+   - `server` — variables serveur uniquement (jamais exposées au client)
+   - `client` — variables publiques, **doivent** avoir le préfixe `NEXT_PUBLIC_`
+
+2. L'ajouter dans `runtimeEnv` (mapping `process.env`) :
+
+```ts
+// src/env.js
+server: {
+  MA_VARIABLE: z.string(),                  // obligatoire
+  MA_VARIABLE_OPT: z.string().optional(),   // optionnelle
+  MA_URL: z.string().url(),                 // URL validée
+},
+runtimeEnv: {
+  MA_VARIABLE: process.env.MA_VARIABLE,
+},
+```
+
+3. L'ajouter au `.env` local (ne jamais commiter `.env`) et documenter dans `.env.example`.
+
+**Variables requises au runtime :**
+
+| Variable | Type | Usage |
+|---|---|---|
+| `AUTH_SECRET` | `string` | Secret NextAuth (JWT signing) |
+| `DATABASE_URL` | `string` (URL) | Connexion PostgreSQL |
+| `EGAPRO_PROCONNECT_CLIENT_ID` | `string` | OAuth ProConnect |
+| `EGAPRO_PROCONNECT_CLIENT_SECRET` | `string` | OAuth ProConnect |
+| `EGAPRO_PROCONNECT_ISSUER` | `string` (URL) | OIDC issuer ProConnect |
+
+**Variables optionnelles :**
+
+| Variable | Type | Usage |
+|---|---|---|
+| `NEXT_PUBLIC_SENTRY_DSN` | `string` (URL) | Monitoring Sentry |
+| `NEXT_PUBLIC_MATOMO_URL` | `string` (URL) | Analytics Matomo |
+| `NEXT_PUBLIC_MATOMO_SITE_ID` | `string` | Analytics Matomo |
+
+> Passer `SKIP_ENV_VALIDATION=1` pour bypasser la validation (Docker build, CI build sans secrets).
 
 ### Base de données (Drizzle Kit)
 

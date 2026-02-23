@@ -57,9 +57,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: pnpm
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint:check
       - name: Format check
-        run: pnpm format
+        run: pnpm format:check
 
   unit-tests:
     name: Unit Tests
