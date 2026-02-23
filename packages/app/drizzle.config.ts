@@ -3,8 +3,14 @@ import type { Config } from "drizzle-kit";
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 
-	const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_SSLMODE } =
-		process.env;
+	const {
+		POSTGRES_USER,
+		POSTGRES_PASSWORD,
+		POSTGRES_HOST,
+		POSTGRES_PORT,
+		POSTGRES_DB,
+		POSTGRES_SSLMODE,
+	} = process.env;
 
 	if (POSTGRES_HOST && POSTGRES_DB) {
 		const user = POSTGRES_USER ?? "postgres";
