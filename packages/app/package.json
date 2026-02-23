@@ -100,7 +100,7 @@
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.2",
     "@vitest/coverage-v8": "^3.0.5",
-    "concurrently": "^8.2.0",
+    "concurrently": "^9.2.1",
     "cypress": "^13.6.6",
     "dotenv": "^16.5.0",
     "eslint": "^8.50.0",
