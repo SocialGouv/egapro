@@ -48,10 +48,6 @@ ENV NEXTAUTH_URL=$NEXTAUTH_URL
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     pnpm --filter app build
 
-# Generate Drizzle migration SQL files from the schema (no DB connection needed)
-RUN DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder" \
-    pnpm --filter app db:generate
-
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
 FROM node:${NODE_VERSION} AS runner
@@ -71,9 +67,7 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/.next/standalone ./
 COPY --from=builder --chown=1000:1000 /app/packages/app/.next/static ./packages/app/.next/static
 COPY --from=builder --chown=1000:1000 /app/packages/app/public ./packages/app/public
 
-# Copy Drizzle migrations, runtime deps, and entrypoint for automatic migration at startup
-COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle ./packages/app/drizzle
-COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm ./packages/app/node_modules/drizzle-orm
+# Copy migration script, postgres client, and entrypoint for automatic migration at startup
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs

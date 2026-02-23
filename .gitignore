@@ -33,4 +33,7 @@ build/
 *.tsbuildinfo
 
 # vscode
-.vscode/
+.vscode/.mcp.json
+
+# mcp
+.mcp.json
