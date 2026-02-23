@@ -66,8 +66,6 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/.next/standalone ./
 # Copy static assets and public files (not included in standalone output)
 COPY --from=builder --chown=1000:1000 /app/packages/app/.next/static ./packages/app/.next/static
 COPY --from=builder --chown=1000:1000 /app/packages/app/public ./packages/app/public
-# Copy Drizzle migration files (applied at server startup via instrumentation.ts)
-COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle ./packages/app/drizzle
 
 USER 1000
 
