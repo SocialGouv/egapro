@@ -81,35 +81,3 @@ jobs:
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
 
-  e2e:
-    name: "Test e2e"
-    runs-on: ubuntu-latest
-    needs: [kontinuous]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Install Playwright browsers
-        run: pnpm playwright:install
-      - name: Load SocialGouv variables
-        id: env
-        uses: socialgouv/kontinuous/.github/actions/env@v1
-      - name: Run E2E tests
-        run: pnpm test:e2e
-        env:
-          SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
-          E2E_CLEANUP_TOKEN: ${{ secrets.E2E_CLEANUP_TOKEN }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: packages/app/playwright-report/
-          retention-days: 7

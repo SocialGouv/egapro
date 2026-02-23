@@ -24,6 +24,7 @@
 		"test:coverage": "vitest run --coverage",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
+		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -48,6 +49,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.2",
+		"@lhci/cli": "^0.15.1",
 		"@playwright/test": "^1.58.2",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/jest-dom": "^6.9.1",

@@ -32,6 +32,12 @@ règles React/TypeScript, DSFR, accessibilité, tests, variables d'environnement
 
 ---
 
+## Règle absolue
+
+Ne **jamais** créer de commit git, sauf si l'utilisateur le demande explicitement.
+
+---
+
 ## Scripts racine utiles
 
 ```bash
