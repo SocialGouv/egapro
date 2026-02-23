@@ -21,6 +21,10 @@
 		"typecheck:app": "pnpm --filter app run typecheck",
 		"test:app": "pnpm --filter app run test",
 		"test:app:coverage": "pnpm --filter app run test:coverage",
+		"db:generate": "pnpm --filter app run db:generate",
+		"db:migrate": "pnpm --filter app run db:migrate",
+		"db:push": "pnpm --filter app run db:push",
+		"db:studio": "pnpm --filter app run db:studio",
 		"test:e2e": "PLAYWRIGHT_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
 		"playwright:install": "pnpm --filter app exec playwright install --with-deps chromium",
 		"release": "semantic-release"

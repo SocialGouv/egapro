@@ -31,9 +31,15 @@ src/
   app/                     ← Routes Next.js (App Router) — thin wrappers uniquement
     layout.tsx             ← Root layout : <html>, DSFR CSS/JS, SkipLinks, Header, Footer
     page.tsx               ← Importe HomePage + wrap HydrateClient
+    global-error.tsx       ← Error boundary global (Sentry)
     api/                   ← Route handlers (tRPC, NextAuth)
+    login/
+      page.tsx             ← Page de connexion ProConnect (redirige si déjà connecté)
 
   modules/                 ← Logique métier et composants par domaine
+    analytics/             ← Tracking Matomo
+      index.ts             ← Barrel : exporte MatomoAnalytics
+      MatomoAnalytics.tsx  ← Composant client de tracking Matomo (NEXT_PUBLIC_MATOMO_*)
     layout/                ← Composants de mise en page globale
       index.ts             ← Barrel : exporte Header, Footer, SkipLinks
       shared/
@@ -68,7 +74,8 @@ src/
     db/                    ← Schéma Drizzle + connexion Postgres
 
   trpc/                    ← Client tRPC (react, server, query-client)
-  styles/                  ← CSS global (DSFR s'auto-configure)
+  env.js                   ← Variables d'environnement typées (@t3-oss/env-nextjs)
+  instrumentation.ts       ← Setup Sentry (serveur + edge)
   test/                    ← Setup Vitest (setup.ts)
   e2e/                     ← Tests Playwright
 ```
@@ -336,3 +343,20 @@ pnpm typecheck    # vérification TypeScript
 pnpm test         # tests Vitest
 pnpm test:e2e     # tests Playwright
 ```
+
+### Base de données (Drizzle Kit)
+
+> À lancer depuis la racine du monorepo via `pnpm db:*`, ou depuis `packages/app/` directement.
+
+```bash
+pnpm db:generate  # génère les fichiers de migration après un changement de schéma
+pnpm db:migrate   # applique les migrations en attente sur la base de données
+pnpm db:push      # applique le schéma directement sans migration (dev uniquement)
+pnpm db:studio    # ouvre Drizzle Studio (UI pour inspecter la base)
+```
+
+**Workflow standard :**
+1. Modifier le schéma dans `src/server/db/`
+2. `pnpm db:generate` — crée le fichier SQL de migration
+3. `pnpm db:migrate` — applique la migration
+4. `pnpm dev` — relancer le serveur si nécessaire
