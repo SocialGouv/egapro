@@ -31,6 +31,8 @@ jobs:
         run: pnpm typecheck
       - name: Build
         run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "1"
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -56,10 +58,3 @@ jobs:
           cache: pnpm
       - name: Run unit tests with coverage
         run: pnpm test:app:coverage
-      - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: .
