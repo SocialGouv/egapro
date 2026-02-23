@@ -130,8 +130,30 @@ jobs:
         uses: socialgouv/kontinuous/.github/actions/env@v1
       - name: Run Lighthouse CI
         run: pnpm test:lighthouse
+        continue-on-error: true
+        id: lighthouse
         env:
           LIGHTHOUSE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+      - name: Show Lighthouse scores
+        if: always()
+        working-directory: packages/app
+        run: |
+          echo "=== Lighthouse scores ==="
+          find .lighthouseci -name "*.report.json" 2>/dev/null | while read f; do
+            echo "Report: $f"
+            node -e "
+              const r = require(require('path').resolve(process.argv[1]));
+              const c = r.categories;
+              Object.entries(c).forEach(([k, v]) => {
+                const score = Math.round(v.score * 100);
+                const icon = score >= 90 ? 'OK' : score >= 50 ? 'WARN' : 'FAIL';
+                console.log('[' + icon + '] ' + k + ': ' + score + '/100');
+              });
+            " "$f"
+            echo ""
+          done || echo "No report files found"
+          echo "=== Files in .lighthouseci ==="
+          ls -lh .lighthouseci/ 2>/dev/null || echo "Directory empty or missing"
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
         if: always()
@@ -139,3 +161,6 @@ jobs:
           name: lighthouse-report
           path: packages/app/.lighthouseci/
           retention-days: 7
+      - name: Fail if Lighthouse asserted errors
+        if: steps.lighthouse.outcome == 'failure'
+        run: exit 1
