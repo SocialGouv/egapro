@@ -1,5 +1,4 @@
-import NextAuth from "next-auth";
-import { getServerSession } from "next-auth";
+import NextAuth, { getServerSession } from "next-auth";
 
 import { authConfig } from "./config";
 

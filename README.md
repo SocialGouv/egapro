@@ -4,7 +4,7 @@ Index de l'égalité professionnelle femmes-hommes.
 
 ## Prérequis
 
-- Node.js >= 20.9 (voir [`.nvmrc`](.nvmrc))
+- Node.js >= 24 (voir [`.nvmrc`](.nvmrc))
 - [pnpm](https://pnpm.io/)
 - [Docker](https://www.docker.com/) & Docker Compose
 
