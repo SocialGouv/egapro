@@ -7,17 +7,14 @@ export const env = createEnv({
 	 * isn't built with invalid env vars.
 	 */
 	server: {
-		AUTH_SECRET:
-			process.env.NODE_ENV === "production"
-				? z.string()
-				: z.string().optional(),
-		DATABASE_URL: z.string().url(),
+		AUTH_SECRET: z.string().optional(),
+		DATABASE_URL: z.string().url().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		EGAPRO_PROCONNECT_CLIENT_ID: z.string(),
-		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
-		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
 	},
 
 	/**
@@ -26,9 +23,9 @@ export const env = createEnv({
 	 * `NEXT_PUBLIC_`.
 	 */
 	client: {
-		NEXT_PUBLIC_SENTRY_DSN: z.string().url(),
-		NEXT_PUBLIC_MATOMO_URL: z.string().url(),
-		NEXT_PUBLIC_MATOMO_SITE_ID: z.string(),
+		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+		NEXT_PUBLIC_MATOMO_URL: z.string().url().optional(),
+		NEXT_PUBLIC_MATOMO_SITE_ID: z.string().optional(),
 	},
 
 	/**
