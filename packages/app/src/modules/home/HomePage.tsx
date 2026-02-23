@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Page d'accueil — contenu visuel pur, sans provider tRPC. */
+/** Home page — visual content only, without tRPC provider. */
 export function HomePage() {
 	return (
 		<main id="content" tabIndex={-1}>

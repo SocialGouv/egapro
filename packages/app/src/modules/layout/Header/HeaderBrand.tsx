@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Bloc marque : logo Marianne, nom de service et tagline. */
+/** Brand block: Marianne logo, service name and tagline. */
 export function HeaderBrand() {
 	return (
 		<div className="fr-header__brand fr-enlarge-link">
