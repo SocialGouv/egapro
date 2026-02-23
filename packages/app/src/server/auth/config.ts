@@ -1,7 +1,7 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
-
+import { env } from "~/env";
 import { db } from "~/server/db";
 import {
 	accounts,
@@ -9,7 +9,6 @@ import {
 	users,
 	verificationTokens,
 } from "~/server/db/schema";
-import { env } from "~/env";
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -46,7 +45,9 @@ function getProviders(): Provider[] {
 					name:
 						[profile.given_name, profile.usual_name]
 							.filter(Boolean)
-							.join(" ") || profile.email || "",
+							.join(" ") ||
+						profile.email ||
+						"",
 					email: profile.email ?? "",
 				};
 			},

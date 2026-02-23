@@ -10,17 +10,14 @@ export default async function LoginPage() {
 	}
 
 	return (
-		<main id="content" className="fr-container fr-my-4w">
+		<main className="fr-container fr-my-4w" id="content">
 			<div className="fr-grid-row fr-grid-row--center">
 				<div className="fr-col-12 fr-col-md-6">
 					<h1>Connexion</h1>
 					<p>
 						Connectez-vous avec votre compte ProConnect pour accéder à Egapro.
 					</p>
-					<a
-						className="fr-btn"
-						href="/api/auth/signin/proconnect"
-					>
+					<a className="fr-btn" href="/api/auth/signin/proconnect">
 						Se connecter avec ProConnect
 					</a>
 				</div>
