@@ -7,14 +7,14 @@ export const env = createEnv({
 	 * isn't built with invalid env vars.
 	 */
 	server: {
-		AUTH_SECRET: z.string().optional(),
-		DATABASE_URL: z.string().url().optional(),
+		AUTH_SECRET: z.string(),
+		DATABASE_URL: z.string().url(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
-		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
-		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 	},
 
 	/**
