@@ -67,6 +67,12 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/.next/standalone ./
 COPY --from=builder --chown=1000:1000 /app/packages/app/.next/static ./packages/app/.next/static
 COPY --from=builder --chown=1000:1000 /app/packages/app/public ./packages/app/public
 
+# Copy drizzle-kit + schema for db:push at startup
+COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-kit ./packages/app/node_modules/drizzle-kit
+COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle.config.ts ./packages/app/drizzle.config.ts
+COPY --from=builder --chown=1000:1000 /app/packages/app/src/server/db/schema.ts ./packages/app/src/server/db/schema.ts
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
+
 USER 1000
 
-CMD ["node", "packages/app/server.js"]
+CMD ["sh", "packages/app/scripts/entrypoint.sh"]
