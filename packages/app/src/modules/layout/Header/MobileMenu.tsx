@@ -30,6 +30,14 @@ export async function MobileMenu() {
 				<div className="fr-header__menu-links">
 					<ul className="fr-btns-group">
 						<li>
+							<Link
+								className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
+								href="/faq"
+							>
+								Aide
+							</Link>
+						</li>
+						<li>
 							{session?.user ? (
 								<Link
 									className="fr-btn fr-icon-logout-box-r-line"

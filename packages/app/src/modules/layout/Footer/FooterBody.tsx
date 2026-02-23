@@ -1,28 +1,28 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Corps du footer : logo Marianne, description, liens gouvernementaux. */
+/** Footer body: Marianne logo, description, government links. */
 export function FooterBody() {
 	return (
 		<div className="fr-footer__body">
 			<div className="fr-footer__brand fr-enlarge-link">
 				<Link
 					href="/"
-					title="Accueil - Egapro - Ministère du Travail, de l'Emploi et de l'Insertion"
+					title="Accueil - Egapro - Ministère du Travail et des Solidarités"
 				>
 					<p className="fr-logo">
 						Ministère
 						<br />
-						du travail,
+						du travail
 						<br />
-						et de l'emploi
+						et des solidarités
 					</p>
 				</Link>
 			</div>
 			<div className="fr-footer__content">
 				<p className="fr-footer__content-desc">
-					Egapro est développé et maintenu par les équipes de la fabrique
-					numérique des ministères sociaux.
+					Egapro permet aux entreprises de déclarer leurs indicateurs de
+					rémunération et de représentation entre les femmes et les hommes.
 				</p>
 				<ul className="fr-footer__content-list">
 					<li className="fr-footer__content-item">

@@ -346,6 +346,40 @@ const schema = z.object({
 | Constante | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
 | Dossier module | camelCase | `modules/layout/` |
 
+### Langue : Anglais obligatoire
+
+**Règle absolue : tous les commentaires et les noms de composants doivent être en anglais.**
+
+```tsx
+// CORRECT
+export function HeaderBrand() {
+  // Render the brand logo and tagline
+  return (
+    <div className="fr-header__brand">
+      <Logo />
+      <h1>Service Name</h1>
+    </div>
+  );
+}
+
+// INTERDIT
+export function MarqueEnTete() {
+  // Affiche le logo et la devise
+  return (
+    <div className="fr-header__brand">
+      <Logo />
+      <h1>Nom du service</h1>
+    </div>
+  );
+}
+```
+
+Cette règle s'applique à :
+- Tous les noms de composants React
+- Tous les noms de fonctions et variables
+- Tous les commentaires dans le code
+- Tous les noms de fichiers (sauf exceptions documentées comme les routes Next.js)
+
 ---
 
 ## Tests

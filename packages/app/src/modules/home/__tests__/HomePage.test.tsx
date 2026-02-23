@@ -18,8 +18,25 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+// HomeNotice is a client component using useState — mock it to avoid issues in jsdom
+vi.mock("../HomeNotice", () => ({
+	HomeNotice: () => (
+		<div data-testid="home-notice">Bandeau d&apos;information</div>
+	),
+}));
+
 describe("HomePage", () => {
-	it("affiche le titre principal", () => {
+	it("le contenu principal a l'id #content pour les skip links", () => {
+		render(<HomePage />);
+		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
+	});
+
+	it("affiche le bandeau d'information", () => {
+		render(<HomePage />);
+		expect(screen.getByTestId("home-notice")).toBeInTheDocument();
+	});
+
+	it("affiche le titre principal de la section hero", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -29,43 +46,23 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche la section Index avec ses liens d'action", () => {
+	it("affiche la section de recherche", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
-				name: /index de l'égalité professionnelle/i,
+				level: 2,
+				name: /rechercher une entreprise/i,
 			}),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /calculer - déclarer mon index/i }),
-		).toHaveAttribute("href", "/index-egapro");
-		expect(
-			screen.getByRole("link", { name: /consulter l'index/i }),
-		).toHaveAttribute("href", "/index-egapro/recherche");
 	});
 
-	it("affiche la section Représentation équilibrée avec ses liens d'action", () => {
+	it("affiche la section ressources", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
-				name: /représentation équilibrée/i,
+				level: 3,
+				name: /questions fréquentes/i,
 			}),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /déclarer mes écarts/i }),
-		).toHaveAttribute("href", "/representation-equilibree");
-		expect(
-			screen.getByRole("link", { name: /consulter les écarts/i }),
-		).toHaveAttribute("href", "/representation-equilibree/recherche");
-	});
-
-	it("le contenu principal a l'id #content pour les skip links", () => {
-		render(<HomePage />);
-		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
-	});
-
-	it("la section hero mentionne l'obligation des 50 salariés", () => {
-		render(<HomePage />);
-		expect(screen.getByText(/au moins 50 salariés/i)).toBeInTheDocument();
 	});
 });
