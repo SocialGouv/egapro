@@ -89,8 +89,16 @@ export const authConfig = {
 	callbacks: {
 		redirect({ url, baseUrl }) {
 			// After sign-in, always redirect to /declaration
-			if (url.startsWith(baseUrl)) return url;
-			if (url.startsWith("/")) return `${baseUrl}${url}`;
+			if (url.startsWith(baseUrl)) {
+				const path = url.slice(baseUrl.length);
+				// Redirect root or empty path to /declaration
+				if (!path || path === "/") return `${baseUrl}/declaration`;
+				return url;
+			}
+			if (url.startsWith("/")) {
+				if (url === "/") return `${baseUrl}/declaration`;
+				return `${baseUrl}${url}`;
+			}
 			return `${baseUrl}/declaration`;
 		},
 		session: ({

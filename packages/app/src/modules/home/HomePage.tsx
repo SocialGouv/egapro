@@ -97,13 +97,11 @@ export function HomePage() {
 				<div className="fr-container">
 					<div className="fr-grid-row fr-grid-row--gutters">
 						<div className="fr-col-12 fr-col-md-6">
-							<div className="fr-card fr-card--horizontal fr-enlarge-link">
+							<div className="fr-card fr-card--horizontal">
 								<div className="fr-card__body">
 									<div className="fr-card__content">
 										<h2 className="fr-card__title">
-											<Link className="fr-card__link" href="/index-egapro">
-												Index de l'égalité professionnelle femmes‑hommes
-											</Link>
+											Index de l'égalité professionnelle femmes‑hommes
 										</h2>
 										<p className="fr-card__desc">
 											Calculer et/ou déclarer votre index de l'égalité
@@ -115,7 +113,7 @@ export function HomePage() {
 											<li>
 												<Link
 													className="fr-btn fr-btn--primary"
-													href="/index-egapro"
+													href="/declaration"
 												>
 													Calculer - Déclarer mon Index
 												</Link>
