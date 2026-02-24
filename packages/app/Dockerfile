@@ -48,10 +48,6 @@ ENV NEXTAUTH_URL=$NEXTAUTH_URL
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     pnpm --filter app build
 
-# Generate Drizzle migration SQL files from the schema (no DB connection needed)
-RUN DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder" \
-    pnpm --filter app db:generate
-
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
 FROM node:${NODE_VERSION} AS runner
