@@ -2,12 +2,6 @@
 
 Index de l'égalité professionnelle femmes-hommes.
 
-## Prérequis
-
-- Node.js >= 24 (voir [`.nvmrc`](.nvmrc))
-- [pnpm](https://pnpm.io/)
-- [Docker](https://www.docker.com/) & Docker Compose
-
 ## Installation
 
 ```bash
@@ -32,12 +26,3 @@ pnpm dev:app
 ```
 
 L'application est accessible sur [http://localhost:3000](http://localhost:3000).
-
-## Autres commandes
-
-```bash
-pnpm build:app   # Build de production
-pnpm lint:app    # Linter
-pnpm test:app    # Tests
-pnpm test:e2e    # Tests end-to-end (Playwright)
-```

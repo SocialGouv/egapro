@@ -1,0 +1,43 @@
+name: 🧪 E2E Tests
+
+on:
+  deployment_status:
+
+concurrency:
+  group: e2e-${{ github.event.deployment.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: "Test e2e"
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      !startsWith(github.event.deployment.environment, 'build-')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm playwright:install
+      - name: Load SocialGouv variables
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: packages/app/playwright-report/
+          retention-days: 7
