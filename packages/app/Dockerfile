@@ -67,6 +67,13 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/.next/standalone ./
 COPY --from=builder --chown=1000:1000 /app/packages/app/.next/static ./packages/app/.next/static
 COPY --from=builder --chown=1000:1000 /app/packages/app/public ./packages/app/public
 
+# Copy Drizzle migrations, runtime deps, and entrypoint for automatic migration at startup
+COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle ./packages/app/drizzle
+COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm ./packages/app/node_modules/drizzle-orm
+COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
+
 USER 1000
 
-CMD ["node", "packages/app/server.js"]
+CMD ["sh", "packages/app/scripts/entrypoint.sh"]

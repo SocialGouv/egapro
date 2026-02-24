@@ -1,0 +1,35 @@
+name: Claude Question
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  cancel-in-progress: false
+  group: claude-issue-${{ github.event.issue.number }}
+
+jobs:
+  claude:
+    if: github.event.label.name == 'question'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          label_trigger: question
+          show_full_output: true
+          claude_args: >-
+            --max-turns 50
+            --mcp-config '{"mcpServers":{"dsfr":{"command":"npx","args":["-y","dsfr-mcp"]}}}'
+            --allowedTools "mcp__dsfr__list_components,mcp__dsfr__get_component_doc,mcp__dsfr__search_components,mcp__dsfr__search_icons,mcp__dsfr__get_color_tokens"
+            

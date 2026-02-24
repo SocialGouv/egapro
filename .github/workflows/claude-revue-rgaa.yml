@@ -1,0 +1,117 @@
+name: Revue RGAA
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  cancel-in-progress: true
+  group: claude-rgaa-${{ github.event.pull_request.number }}
+
+jobs:
+  revue-rgaa:
+    if: github.event.label.name == 'revue-rgaa'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm playwright:install
+
+      - name: Compute review URL
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+
+      - name: Wait for app to be ready
+        id: health
+        env:
+          REVIEW_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+        run: |
+          echo "review_url=$REVIEW_URL" >> "$GITHUB_OUTPUT"
+          for i in $(seq 1 20); do
+            HTTP_CODE=$(curl -sL -o /dev/null -w "%{http_code}" "$REVIEW_URL" 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "App is ready!"
+              exit 0
+            fi
+            echo "Health check returned $HTTP_CODE (attempt $i/20). Waiting 15s..."
+            sleep 15
+          done
+          echo "::error::App not ready after 5 minutes"
+          exit 1
+
+      - name: Run Claude Code — Revue RGAA
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          direct_prompt: |
+            Tu es un expert accessibilité RGAA (Référentiel Général d'Amélioration de l'Accessibilité).
+
+            L'application est déployée ici : ${{ steps.health.outputs.review_url }}
+
+            Ta mission : effectuer une revue d'accessibilité RGAA de cette application en utilisant Playwright.
+
+            ## Méthodologie
+
+            1. **Navigue sur les pages principales** de l'application avec Playwright
+            2. **Pour chaque page**, vérifie les critères RGAA suivants :
+               - **Images** (thématique 1) : alternatives textuelles, images décoratives
+               - **Cadres** (thématique 2) : titres des iframes
+               - **Couleurs** (thématique 3) : contrastes suffisants, information non véhiculée uniquement par la couleur
+               - **Multimédia** (thématique 4) : sous-titres, audiodescription
+               - **Tableaux** (thématique 5) : en-têtes, légendes
+               - **Liens** (thématique 6) : intitulés explicites
+               - **Scripts** (thématique 7) : composants interactifs accessibles au clavier
+               - **Éléments obligatoires** (thématique 8) : langue de la page, titre, doctype
+               - **Structuration** (thématique 9) : titres hiérarchiques, landmarks, listes
+               - **Présentation** (thématique 10) : CSS, zoom, orientation
+               - **Formulaires** (thématique 11) : labels, messages d'erreur, regroupements
+               - **Navigation** (thématique 12) : fil d'Ariane, liens d'évitement, plan du site
+               - **Consultation** (thématique 13) : rafraîchissement, documents en téléchargement
+
+            3. **Utilise le MCP `a11y`** (axe-core + Playwright) pour :
+               - `scan_page` : audit WCAG complet d'une page (contrastes, ARIA, alt, labels, landmarks…)
+               - `audit_site` : crawl multi-pages avec violations agrégées
+               - `audit_keyboard` : vérification du focus clavier réel (Tab, Entrée, Échap)
+               - `scan_page_matrix` : test multi-viewports et zoom (200%)
+
+            4. **Utilise Playwright directement** pour les vérifications manuelles complémentaires :
+               - Récupérer le HTML et analyser la structure (landmarks, headings, aria-*)
+               - Vérifier les liens d'évitement (skip links)
+               - Tester des interactions spécifiques (modales, menus déroulants)
+
+            ## Format du rapport
+
+            Produis un rapport structuré en commentaire de PR avec :
+            - Un résumé global (score estimé de conformité)
+            - Les résultats axe-core (violations critiques, sérieuses, modérées, mineures)
+            - Pour chaque thématique RGAA testée : critères vérifiés, non-conformités trouvées, recommandations
+            - Priorisation : critique / majeur / mineur
+            - Extraits de code problématiques quand pertinent
+
+            Commence par lancer `audit_site` sur ${{ steps.health.outputs.review_url }} pour un scan global, puis approfondis page par page avec `scan_page`, `audit_keyboard` et `scan_page_matrix`.
+          claude_args: >-
+            --max-turns 80
+            --mcp-config '{"mcpServers":{"dsfr":{"command":"npx","args":["-y","dsfr-mcp"]},"a11y":{"command":"npx","args":["-y","mcp-accessibility-scanner"]}}}'
+            --allowedTools "Bash(npx playwright *),Bash(node *),Bash(curl *),mcp__dsfr__list_components,mcp__dsfr__get_component_doc,mcp__dsfr__search_components,mcp__dsfr__search_icons,mcp__dsfr__get_color_tokens,mcp__a11y__scan_page,mcp__a11y__audit_site,mcp__a11y__scan_page_matrix,mcp__a11y__audit_keyboard,mcp__a11y__browser_navigate,mcp__a11y__browser_take_screenshot,mcp__a11y__browser_snapshot,mcp__a11y__browser_click,mcp__a11y__browser_type,mcp__a11y__browser_press_key"

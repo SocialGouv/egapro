@@ -1,34 +1,34 @@
 # AGENTS.md — Monorepo egapro
 
-> Référence pour tout agent IA ou développeur travaillant sur ce dépôt.
+> Reference for all AI agents or developers working on this repository.
 
 ---
 
-## Structure du monorepo
+## Monorepo structure
 
 ```
 egapro/
   packages/
-    app/        ← Application Next.js (tout le code actif)
-    api/        ← Placeholder vide
+    app/        ← Next.js application (all active code)
+    api/        ← Empty placeholder
   .github/
     workflows/  ← CI/CD GitHub Actions
 ```
 
-Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
+Package manager: **pnpm workspaces** (`pnpm@10`).
 
 ---
 
-## Règle de chargement des conventions
+## Convention loading rule
 
-**Si tu travailles dans `packages/app/` ou sur un fichier qui en dépend, charge et respecte impérativement :**
+**If you work in `packages/app/` or on a file that depends on it, you must load and strictly follow:**
 
 ```
 packages/app/AGENTS.MD
 ```
 
-Ce fichier contient toutes les conventions du package : stack, structure des modules,
-règles React/TypeScript, DSFR, accessibilité, tests, variables d'environnement, scripts.
+This file contains all package conventions: stack, module structure,
+React/TypeScript rules, DSFR, accessibility, tests, environment variables, scripts.
 
 ---
 
@@ -39,29 +39,46 @@ Ne **jamais** créer de commit git, sauf si l'utilisateur le demande expliciteme
 ---
 
 ## Scripts racine utiles
+## Absolute rule
+
+Never create a git commit, unless the user explicitly requests it.
+
+---
+
+## Language policy
+
+**The site is in French**, but all code must be in English:
+- All comments must be in English
+- All component names must be in English
+- All function and variable names must be in English
+- User-facing text (content, labels, buttons, links) remains in French
+
+---
+
+## Useful root scripts
 
 ```bash
-pnpm dev:app              # démarre l'app en mode dev
-pnpm build                # build tous les packages
-pnpm lint:check           # vérifie le lint (CI)
-pnpm format:check         # vérifie le format (CI)
-pnpm typecheck            # vérifie les types TypeScript
-pnpm test                 # lance tous les tests unitaires
-pnpm test:e2e             # lance les tests Playwright
-pnpm db:migrate           # applique les migrations Drizzle
-pnpm db:studio            # ouvre Drizzle Studio
+pnpm dev:app              # starts the app in dev mode
+pnpm build                # builds all packages
+pnpm lint:check           # checks lint (CI)
+pnpm format:check         # checks format (CI)
+pnpm typecheck            # checks TypeScript types
+pnpm test                 # runs all unit tests
+pnpm test:e2e             # runs Playwright tests
+pnpm db:migrate           # applies Drizzle migrations
+pnpm db:studio            # opens Drizzle Studio
 ```
 
 ---
 
 ## CI
 
-Les workflows GitHub Actions sont dans `.github/workflows/` :
+GitHub Actions workflows are in `.github/workflows/` :
 
-| Fichier | Déclencheur | Rôle |
+| File | Trigger | Role |
 |---|---|---|
-| `ci.yaml` | chaque push | build · lint · format · typecheck · tests |
-| `release.yml` | manuel (branche `beta`) | semantic-release |
-| `review.yaml` | PR | déploiement review app |
-| `preproduction.yaml` | push `beta` | déploiement préprod |
-| `production.yaml` | push `master` | déploiement prod |
+| `ci.yaml` | each push | build · lint · format · typecheck · tests |
+| `release.yml` | manual (branch `beta`) | semantic-release |
+| `review.yaml` | PR | review app deployment |
+| `preproduction.yaml` | push `beta` | preprod deployment |
+| `production.yaml` | push `master` | prod deployment |

@@ -1,4 +1,10 @@
-import type { Config } from "drizzle-kit";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import postgres from "postgres";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -25,11 +31,12 @@ function getDatabaseUrl() {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
-export default {
-	schema: "./src/server/db/schema.ts",
-	dialect: "postgresql",
-	dbCredentials: {
-		url: getDatabaseUrl(),
-	},
-	tablesFilter: ["app_*"],
-} satisfies Config;
+const url = getDatabaseUrl();
+const conn = postgres(url, { max: 1 });
+const db = drizzle(conn);
+
+console.log("Running Drizzle migrations...");
+await migrate(db, { migrationsFolder: path.join(__dirname, "../drizzle") });
+console.log("Migrations completed.");
+
+await conn.end();

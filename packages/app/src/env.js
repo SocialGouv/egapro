@@ -1,6 +1,35 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+/**
+ * Build DATABASE_URL from individual POSTGRES_* env vars when not provided directly.
+ * This is needed because Kubernetes provides individual PG connection parameters via the pg-app secret.
+ */
+function buildDatabaseUrl() {
+	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+
+	const {
+		POSTGRES_USER,
+		POSTGRES_PASSWORD,
+		POSTGRES_HOST,
+		POSTGRES_PORT,
+		POSTGRES_DB,
+		POSTGRES_SSLMODE,
+	} = process.env;
+
+	if (POSTGRES_HOST && POSTGRES_DB) {
+		const user = encodeURIComponent(POSTGRES_USER ?? "postgres");
+		const password = POSTGRES_PASSWORD
+			? `:${encodeURIComponent(POSTGRES_PASSWORD)}`
+			: "";
+		const port = POSTGRES_PORT ?? "5432";
+		const sslmode = POSTGRES_SSLMODE ? `?sslmode=${POSTGRES_SSLMODE}` : "";
+		return `postgresql://${user}${password}@${POSTGRES_HOST}:${port}/${POSTGRES_DB}${sslmode}`;
+	}
+
+	return undefined;
+}
+
 export const env = createEnv({
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -34,7 +63,7 @@ export const env = createEnv({
 	 */
 	runtimeEnv: {
 		AUTH_SECRET: process.env.AUTH_SECRET,
-		DATABASE_URL: process.env.DATABASE_URL,
+		DATABASE_URL: buildDatabaseUrl(),
 		NODE_ENV: process.env.NODE_ENV,
 		EGAPRO_PROCONNECT_CLIENT_ID: process.env.EGAPRO_PROCONNECT_CLIENT_ID,
 		EGAPRO_PROCONNECT_CLIENT_SECRET:
