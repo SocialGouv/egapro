@@ -1,5 +1,10 @@
 import { relations } from "drizzle-orm";
-import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
+import {
+	index,
+	numeric,
+	pgTableCreator,
+	primaryKey,
+} from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
 /**
@@ -25,6 +30,7 @@ export const users = createTable("user", (d) => ({
 		})
 		.$defaultFn(() => /* @__PURE__ */ new Date()),
 	image: d.varchar({ length: 255 }),
+	siret: d.varchar({ length: 14 }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -84,4 +90,75 @@ export const verificationTokens = createTable(
 		expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
 	}),
 	(t) => [primaryKey({ columns: [t.identifier, t.token] })],
+);
+
+export const declarations = createTable(
+	"declaration",
+	(d) => ({
+		siren: d.varchar({ length: 9 }).notNull(),
+		year: d.integer().notNull(),
+		declarantId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		totalWomen: d.integer(),
+		totalMen: d.integer(),
+		remunerationScore: d.integer(),
+		variableRemunerationScore: d.integer(),
+		quartileScore: d.integer(),
+		categoryScore: d.integer(),
+		currentStep: d.integer().default(0),
+		status: d.varchar({ length: 20 }).default("draft"),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		primaryKey({ columns: [t.siren, t.year] }),
+		index("declaration_declarant_idx").on(t.declarantId),
+	],
+);
+
+export const declarationsRelations = relations(
+	declarations,
+	({ one, many }) => ({
+		declarant: one(users, {
+			fields: [declarations.declarantId],
+			references: [users.id],
+		}),
+		categories: many(declarationCategories),
+	}),
+);
+
+export const declarationCategories = createTable(
+	"declaration_category",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d.varchar({ length: 9 }).notNull(),
+		year: d.integer().notNull(),
+		step: d.integer().notNull(),
+		categoryName: d.varchar({ length: 255 }).notNull(),
+		womenCount: d.integer(),
+		menCount: d.integer(),
+		womenValue: numeric("women_value"),
+		menValue: numeric("men_value"),
+		womenMedianValue: numeric("women_median_value"),
+		menMedianValue: numeric("men_median_value"),
+	}),
+	(t) => [
+		index("declaration_cat_siren_year_step_idx").on(t.siren, t.year, t.step),
+	],
+);
+
+export const declarationCategoriesRelations = relations(
+	declarationCategories,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [declarationCategories.siren, declarationCategories.year],
+			references: [declarations.siren, declarations.year],
+		}),
+	}),
 );

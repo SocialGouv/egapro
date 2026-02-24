@@ -8,6 +8,13 @@
 			"when": 1771922842861,
 			"tag": "0000_fuzzy_romulus",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1771928448125,
+			"tag": "0001_worthless_dragon_lord",
+			"breakpoints": true
 		}
 	]
 }
