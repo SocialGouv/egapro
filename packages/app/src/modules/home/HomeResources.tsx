@@ -55,30 +55,47 @@ export function HomeResources() {
 		<section style={{ background: "var(--background-alt-blue-france)" }}>
 			<div className="fr-container fr-py-6w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Réponses aux questions les plus courantes"
-							href="/faq"
-							pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-							title="Questions fréquentes"
-						/>
+					<div className="fr-col-12 fr-col-md-9">
+						<div className="fr-grid-row fr-grid-row--gutters">
+							<div className="fr-col-12 fr-col-md-4">
+								<ResourceTile
+									detail="Réponses aux questions les plus courantes"
+									href="/faq"
+									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
+									title="Questions fréquentes"
+								/>
+							</div>
+
+							<div className="fr-col-12 fr-col-md-4">
+								<ResourceTile
+									detail="Consultez les textes législatifs et réglementaires"
+									href="/textes-reference"
+									pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
+									title="Textes de référence"
+								/>
+							</div>
+
+							<div className="fr-col-12 fr-col-md-4">
+								<ResourceTile
+									detail="Besoin d&apos;aide ? Contactez nos services d&apos;assistance"
+									href="/contact"
+									pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
+									title="Nous contacter"
+								/>
+							</div>
+						</div>
 					</div>
 
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Consultez les textes législatifs et réglementaires"
-							href="/textes-reference"
-							pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-							title="Textes de référence"
-						/>
-					</div>
-
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Besoin d&apos;aide ? Contactez nos services d&apos;assistance"
-							href="/contact"
-							pictogramPath="/dsfr/artwork/pictograms/people/avatar.svg"
-							title="Nous contacter"
+					<div
+						aria-hidden="true"
+						className="fr-col-3 fr-unhidden-md"
+						style={{ display: "flex", justifyContent: "flex-end" }}
+					>
+						<img
+							alt=""
+							height="147"
+							src="/assets/images/home/help-illustration.svg"
+							width="210"
 						/>
 					</div>
 				</div>

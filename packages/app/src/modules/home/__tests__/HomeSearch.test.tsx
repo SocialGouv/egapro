@@ -30,7 +30,7 @@ describe("HomeSearch", () => {
 	it("affiche le champ de saisie SIREN/nom", () => {
 		render(<HomeSearch />);
 		expect(
-			screen.getByLabelText(/numéro siren ou le nom de l'entreprise/i),
+			screen.getByLabelText(/numéro siren ou nom de l'entreprise/i),
 		).toBeInTheDocument();
 	});
 

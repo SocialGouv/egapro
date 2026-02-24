@@ -28,7 +28,10 @@ function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 					width: "4rem",
 				}}
 			>
-				<span className={`${iconClass} fr-icon--lg`} />
+				<span
+					className={`${iconClass} fr-icon--lg`}
+					style={{ color: "var(--artwork-minor-blue-france)" }}
+				/>
 			</div>
 			<div>
 				<p className="fr-text--bold fr-mb-0">{title}</p>
@@ -52,12 +55,12 @@ export function HomeHero() {
 					<div className="fr-col-12 fr-col-md-7">
 						<h1>Bienvenue sur Egapro</h1>
 						<p className="fr-text--lg fr-mb-4w">
-							Les entreprises d&apos;au moins 50 salariés ont l&apos;obligation
-							de calculer et de publier chaque année leur index de
-							l&apos;égalité professionnelle, avant le 1er mars.
+							L&apos;espace dédié aux entreprises pour déclarer leurs
+							indicateurs de rémunération et de représentation entre les femmes
+							et les hommes.
 						</p>
 						<Link
-							className="fr-btn fr-icon-draft-fill fr-btn--icon-left"
+							className="fr-btn fr-icon-file-text-line fr-btn--icon-left"
 							href="/index-egapro"
 						>
 							Déclarer mes indicateurs
@@ -75,12 +78,12 @@ export function HomeHero() {
 						>
 							<HeroInfoItem
 								description="Plus de 35 000 entreprises déclarantes"
-								iconClass="fr-icon-group-fill"
+								iconClass="fr-icon-team-line"
 								title="Entreprises de plus de 50 salariés"
 							/>
 							<HeroInfoItem
 								description="Déclaration annuelle obligatoire"
-								iconClass="fr-icon-calendar-fill"
+								iconClass="fr-icon-calendar-line"
 								title="Échéance : 1er mars"
 							/>
 						</div>

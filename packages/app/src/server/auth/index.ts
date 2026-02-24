@@ -5,7 +5,11 @@ import { authConfig } from "./config";
 const handler = NextAuth(authConfig);
 
 async function auth() {
-	return getServerSession(authConfig);
+	try {
+		return await getServerSession(authConfig);
+	} catch {
+		return null;
+	}
 }
 
 export { auth, handler };

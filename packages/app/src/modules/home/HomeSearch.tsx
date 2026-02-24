@@ -29,26 +29,12 @@ export function HomeSearch() {
 						className="fr-col-3 fr-unhidden-md"
 						style={{ display: "flex", justifyContent: "center" }}
 					>
-						<svg
-							aria-hidden="true"
-							className="fr-artwork"
-							height="160px"
-							viewBox="0 0 80 80"
-							width="160px"
-						>
-							<use
-								className="fr-artwork-decorative"
-								href="/dsfr/artwork/pictograms/digital/search.svg#artwork-decorative"
-							/>
-							<use
-								className="fr-artwork-minor"
-								href="/dsfr/artwork/pictograms/digital/search.svg#artwork-minor"
-							/>
-							<use
-								className="fr-artwork-major"
-								href="/dsfr/artwork/pictograms/digital/search.svg#artwork-major"
-							/>
-						</svg>
+						<img
+							alt=""
+							height="240"
+							src="/assets/images/home/search-illustration.svg"
+							width="223"
+						/>
 					</div>
 
 					<div className="fr-col-12 fr-col-md-9">

@@ -12,7 +12,7 @@ export async function HeaderQuickAccess() {
 				<ul className="fr-btns-group">
 					<li>
 						<Link
-							className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
+							className="fr-btn fr-btn--tertiary-no-outline fr-icon-information-line fr-btn--icon-left"
 							href="/faq"
 						>
 							Aide
@@ -28,7 +28,7 @@ export async function HeaderQuickAccess() {
 							</Link>
 						) : (
 							<Link
-								className="fr-btn fr-icon-account-circle-line"
+								className="fr-btn fr-icon-account-circle-fill"
 								href="/login"
 							>
 								Se connecter

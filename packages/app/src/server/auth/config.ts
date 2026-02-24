@@ -65,6 +65,11 @@ export const authConfig = {
 		sessionsTable: sessions,
 		verificationTokensTable: verificationTokens,
 	}),
+	logger: {
+		error: () => {},
+		warn: () => {},
+		debug: () => {},
+	},
 	callbacks: {
 		session: ({
 			session,
