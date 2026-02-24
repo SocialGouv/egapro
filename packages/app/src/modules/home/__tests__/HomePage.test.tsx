@@ -19,7 +19,7 @@ vi.mock("next/link", () => ({
 }));
 
 describe("HomePage", () => {
-	it("affiche le titre principal", () => {
+	it("displays the main heading", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -29,7 +29,7 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche la section Index avec ses liens d'action", () => {
+	it("displays the Index section with its action links", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -44,7 +44,7 @@ describe("HomePage", () => {
 		).toHaveAttribute("href", "/index-egapro/recherche");
 	});
 
-	it("affiche la section Représentation équilibrée avec ses liens d'action", () => {
+	it("displays the Balanced Representation section with its action links", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -59,12 +59,12 @@ describe("HomePage", () => {
 		).toHaveAttribute("href", "/representation-equilibree/recherche");
 	});
 
-	it("le contenu principal a l'id #content pour les skip links", () => {
+	it("main content has id #content for skip links", () => {
 		render(<HomePage />);
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
 	});
 
-	it("la section hero mentionne l'obligation des 50 salariés", () => {
+	it("hero section mentions the 50 employees requirement", () => {
 		render(<HomePage />);
 		expect(screen.getByText(/au moins 50 salariés/i)).toBeInTheDocument();
 	});

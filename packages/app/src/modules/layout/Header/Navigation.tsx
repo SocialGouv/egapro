@@ -1,6 +1,6 @@
 import { NavLink } from "../shared/NavLink";
 
-/** Navigation principale avec sous-menus déroulants (gérés par le JS DSFR). */
+/** Main navigation with dropdown menus (managed by DSFR JS). */
 export function Navigation() {
 	return (
 		<nav aria-label="Menu principal" className="fr-nav" id="navigation-main">

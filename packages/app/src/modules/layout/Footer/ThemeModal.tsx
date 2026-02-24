@@ -1,8 +1,8 @@
 /**
- * Modale de paramètres d'affichage (thème clair / sombre / système).
- * Le JS DSFR gère le changement de thème et persiste le choix
- * dans le cookie `fr-theme` et l'attribut `data-fr-scheme` sur <html>.
- * role="dialog" est requis pour que aria-labelledby soit valide.
+ * Display settings modal (light / dark / system theme).
+ * The DSFR JS manages theme changes and persists the choice
+ * in the `fr-theme` cookie and the `data-fr-scheme` attribute on <html>.
+ * role="dialog" is required for aria-labelledby to be valid.
  */
 export function ThemeModal() {
 	return (

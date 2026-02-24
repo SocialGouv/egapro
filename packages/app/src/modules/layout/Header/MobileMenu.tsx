@@ -4,9 +4,9 @@ import { auth } from "~/server/auth";
 import { Navigation } from "./Navigation";
 
 /**
- * Modale de navigation mobile.
- * Ouverte via le bouton #fr-btn-menu-mobile, gérée par le JS DSFR.
- * role="dialog" est requis pour que aria-label soit valide sur un <div>.
+ * Mobile navigation modal.
+ * Opened via the #fr-btn-menu-mobile button, managed by DSFR JS.
+ * role="dialog" is required for aria-label to be valid on a <div>.
  */
 export async function MobileMenu() {
 	const session = await auth();

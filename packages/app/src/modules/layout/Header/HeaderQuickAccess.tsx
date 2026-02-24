@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { auth } from "~/server/auth";
 
-/** Accès rapide desktop : bouton "Se connecter" / "Se déconnecter". */
+/** Desktop quick access: "Sign in" / "Sign out" button. */
 export async function HeaderQuickAccess() {
 	const session = await auth();
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-// Mocks hoistés avant l'import du composant
+// Mocks hoisted before component import
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
 }));
@@ -26,28 +26,28 @@ import { usePathname } from "next/navigation";
 import { NavLink } from "../NavLink";
 
 describe("NavLink", () => {
-	describe("aria-current sur correspondance exacte", () => {
-		it("est défini à 'page' quand le path correspond exactement", () => {
+	describe("aria-current on exact match", () => {
+		it("is set to 'page' when path matches exactly", () => {
 			vi.mocked(usePathname).mockReturnValue("/index-egapro");
 			render(<NavLink href="/index-egapro">Index</NavLink>);
 			expect(screen.getByRole("link")).toHaveAttribute("aria-current", "page");
 		});
 
-		it("est défini à 'page' sur la racine /", () => {
+		it("is set to 'page' on root /", () => {
 			vi.mocked(usePathname).mockReturnValue("/");
 			render(<NavLink href="/">Accueil</NavLink>);
 			expect(screen.getByRole("link")).toHaveAttribute("aria-current", "page");
 		});
 	});
 
-	describe("aria-current sur correspondance par préfixe (sous-pages)", () => {
-		it("est défini à 'page' pour une sous-page d'un segment non-racine", () => {
+	describe("aria-current on prefix match (sub-pages)", () => {
+		it("is set to 'page' for a sub-page of a non-root segment", () => {
 			vi.mocked(usePathname).mockReturnValue("/index-egapro/recherche");
 			render(<NavLink href="/index-egapro">Index</NavLink>);
 			expect(screen.getByRole("link")).toHaveAttribute("aria-current", "page");
 		});
 
-		it("est défini à 'page' pour une sous-page profonde", () => {
+		it("is set to 'page' for a deep sub-page", () => {
 			vi.mocked(usePathname).mockReturnValue(
 				"/index-egapro/declaration/assujetti",
 			);
@@ -56,27 +56,27 @@ describe("NavLink", () => {
 		});
 	});
 
-	describe("aria-current absent quand pas de correspondance", () => {
-		it("est absent quand le path ne correspond pas", () => {
+	describe("aria-current absent when no match", () => {
+		it("is absent when path does not match", () => {
 			vi.mocked(usePathname).mockReturnValue("/stats");
 			render(<NavLink href="/index-egapro">Index</NavLink>);
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-current");
 		});
 
-		it("n'utilise pas / comme préfixe de tous les paths", () => {
+		it("does not use / as prefix for all paths", () => {
 			vi.mocked(usePathname).mockReturnValue("/index-egapro");
 			render(<NavLink href="/">Accueil</NavLink>);
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-current");
 		});
 
-		it("est absent quand le path est une autre section", () => {
+		it("is absent when path is another section", () => {
 			vi.mocked(usePathname).mockReturnValue("/representation-equilibree");
 			render(<NavLink href="/index-egapro">Index</NavLink>);
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-current");
 		});
 	});
 
-	it("transmet le className au lien rendu", () => {
+	it("passes className to rendered link", () => {
 		vi.mocked(usePathname).mockReturnValue("/autre");
 		render(
 			<NavLink className="fr-nav__link" href="/index-egapro">
@@ -86,7 +86,7 @@ describe("NavLink", () => {
 		expect(screen.getByRole("link")).toHaveClass("fr-nav__link");
 	});
 
-	it("rend le href correct", () => {
+	it("renders correct href", () => {
 		vi.mocked(usePathname).mockReturnValue("/autre");
 		render(<NavLink href="/index-egapro">Index</NavLink>);
 		expect(screen.getByRole("link")).toHaveAttribute("href", "/index-egapro");

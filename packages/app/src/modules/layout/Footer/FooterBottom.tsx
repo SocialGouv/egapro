@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Barre de bas de footer : liens légaux, paramètres d'affichage, licence. */
+/** Footer bottom bar: legal links, display settings, license. */
 export function FooterBottom() {
 	return (
 		<div className="fr-footer__bottom">

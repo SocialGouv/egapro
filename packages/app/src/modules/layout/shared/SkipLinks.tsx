@@ -1,7 +1,7 @@
 /**
- * Liens d'évitement (skip links) — obligatoires RGAA critère 12.7.
- * Permettent aux utilisateurs clavier/lecteur d'écran de sauter
- * directement au contenu principal ou au pied de page.
+ * Skip links — mandatory RGAA criterion 12.7.
+ * Allow keyboard/screen reader users to skip directly
+ * to the main content or the footer.
  */
 export function SkipLinks() {
 	return (

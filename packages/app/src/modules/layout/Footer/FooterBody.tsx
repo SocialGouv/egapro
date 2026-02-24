@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Corps du footer : logo Marianne, description, liens gouvernementaux. */
+/** Footer body: Marianne logo, description, government links. */
 export function FooterBody() {
 	return (
 		<div className="fr-footer__body">

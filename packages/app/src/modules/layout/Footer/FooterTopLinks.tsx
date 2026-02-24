@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
-/** Section liens du haut du footer : liens utiles et liens ministère. */
+/** Footer top links section: useful links and ministry links. */
 export function FooterTopLinks() {
 	return (
 		<div className="fr-footer__top">

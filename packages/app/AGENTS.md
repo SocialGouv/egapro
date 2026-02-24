@@ -1,158 +1,158 @@
 # AGENTS.md — Conventions & Architecture · `packages/app`
 
-> Référence pour tout agent IA ou développeur travaillant sur ce package.
-> Lire en entier avant de toucher au code.
+> Reference for all AI agents or developers working on this package.
+> Read in full before touching the code.
 
 ---
 
-## Règle obligatoire après chaque tâche
+## Mandatory rule after each task
 
-**Après chaque modification de code, sans exception, lancer dans cet ordre :**
+**After each code modification, without exception, run in this order:**
 
 ```bash
-pnpm lint        # corrige les erreurs lint
-pnpm format      # formate le code
-pnpm typecheck   # vérifie les types TypeScript
+pnpm lint        # fixes linting errors
+pnpm format      # formats code
+pnpm typecheck   # verifies TypeScript types
 ```
 
-Ne pas considérer une tâche comme terminée tant que ces trois commandes passent sans erreur.
+Do not consider a task as complete until these three commands pass without error.
 
 ---
 
-## Stack technique
+## Tech Stack
 
-| Couche | Outil | Version |
+| Layer | Tool | Version |
 |---|---|---|
 | Framework | Next.js (App Router) | ^16 |
 | UI | React | ^19 |
-| Typage | TypeScript | ^5 — strict mode |
-| Design system | @gouvfr/dsfr | ^1.14 (natif, sans react-dsfr) |
+| Typing | TypeScript | ^5 — strict mode |
+| Design system | @gouvfr/dsfr | ^1.14 (native, without react-dsfr) |
 | API | tRPC | ^11 |
 | ORM | Drizzle ORM | ^0.45 |
 | Auth | NextAuth | 4.x |
 | Validation | Zod | ^4 |
 | Lint / Format | Biome | ^2 |
-| Tests unitaires | Vitest | ^4 |
-| Tests E2E | Playwright | ^1.58 |
-| Gestionnaire de paquets | pnpm (workspace) | ^10 |
+| Unit tests | Vitest | ^4 |
+| E2E tests | Playwright | ^1.58 |
+| Package manager | pnpm (workspace) | ^10 |
 
 ---
 
-## Structure des modules
+## Module structure
 
 ```
 src/
-  app/                     ← Routes Next.js (App Router) — thin wrappers uniquement
-    layout.tsx             ← Root layout : <html>, DSFR CSS/JS, SkipLinks, Header, Footer
-    page.tsx               ← Importe HomePage + wrap HydrateClient
-    global-error.tsx       ← Error boundary global (Sentry)
+  app/                     ← Next.js routes (App Router) — thin wrappers only
+    layout.tsx             ← Root layout: <html>, DSFR CSS/JS, SkipLinks, Header, Footer
+    page.tsx               ← Imports HomePage + wrap HydrateClient
+    global-error.tsx       ← Global error boundary (Sentry)
     api/                   ← Route handlers (tRPC, NextAuth)
     login/
-      page.tsx             ← Page de connexion ProConnect (redirige si déjà connecté)
+      page.tsx             ← ProConnect login page (redirects if already logged in)
 
-  modules/                 ← Logique métier et composants par domaine
-    analytics/             ← Tracking Matomo
-      index.ts             ← Barrel : exporte MatomoAnalytics
-      MatomoAnalytics.tsx  ← Composant client de tracking Matomo (NEXT_PUBLIC_MATOMO_*)
-    layout/                ← Composants de mise en page globale
-      index.ts             ← Barrel : exporte Header, Footer, SkipLinks
+  modules/                 ← Business logic and components by domain
+    analytics/             ← Matomo tracking
+      index.ts             ← Barrel: exports MatomoAnalytics
+      MatomoAnalytics.tsx  ← Client component for Matomo tracking (NEXT_PUBLIC_MATOMO_*)
+    layout/                ← Global layout components
+      index.ts             ← Barrel: exports Header, Footer, SkipLinks
       shared/
-        NavLink.tsx        ← Lien actif avec aria-current dynamique ("use client")
-        NewTabNotice.tsx   ← Texte sr-only pour les liens target="_blank"
-        SkipLinks.tsx      ← Navigation d'évitement (RGAA 12.7)
+        NavLink.tsx        ← Active link with dynamic aria-current ("use client")
+        NewTabNotice.tsx   ← Screen reader only text for target="_blank" links
+        SkipLinks.tsx      ← Skip links (RGAA 12.7)
         __tests__/
           NavLink.test.tsx
           NewTabNotice.test.tsx
           SkipLinks.test.tsx
       Header/
-        index.tsx          ← Orchestrateur
-        HeaderBrand.tsx    ← Logo Marianne + nom de service + tagline
-        HeaderQuickAccess.tsx ← Bouton "Se connecter" (desktop)
-        Navigation.tsx     ← <nav> avec sous-menus déroulants (JS DSFR)
-        MobileMenu.tsx     ← Dialog modale de navigation mobile
+        index.tsx          ← Orchestrator
+        HeaderBrand.tsx    ← Marianne logo + service name + tagline
+        HeaderQuickAccess.tsx ← "Sign in" button (desktop)
+        Navigation.tsx     ← <nav> with dropdown menus (DSFR JS)
+        MobileMenu.tsx     ← Mobile navigation modal dialog
       Footer/
-        index.tsx          ← Orchestrateur
-        FooterTopLinks.tsx ← Liens utiles + liens ministère
-        FooterBody.tsx     ← Logo + description + liens gouvernementaux
-        FooterBottom.tsx   ← Mentions légales + paramètres d'affichage + licence
-        ThemeModal.tsx     ← Dialog modale dark mode (thème clair/sombre/système)
+        index.tsx          ← Orchestrator
+        FooterTopLinks.tsx ← Useful links + ministry links
+        FooterBody.tsx     ← Logo + description + government links
+        FooterBottom.tsx   ← Legal notices + display settings + license
+        ThemeModal.tsx     ← Dark mode dialog modal (light/dark/system theme)
     home/
-      index.ts             ← Barrel : exporte HomePage
-      HomePage.tsx         ← Contenu visuel de la page d'accueil
+      index.ts             ← Barrel: exports HomePage
+      HomePage.tsx         ← Visual content of the home page
       __tests__/
         HomePage.test.tsx
 
-  server/                  ← Code serveur uniquement
-    auth/                  ← Configuration NextAuth
-    api/                   ← Routeur tRPC
-    db/                    ← Schéma Drizzle + connexion Postgres
+  server/                  ← Server-only code
+    auth/                  ← NextAuth configuration
+    api/                   ← tRPC router
+    db/                    ← Drizzle schema + PostgreSQL connection
 
-  trpc/                    ← Client tRPC (react, server, query-client)
-  env.js                   ← Variables d'environnement typées (@t3-oss/env-nextjs)
-  instrumentation.ts       ← Setup Sentry (serveur + edge)
-  test/                    ← Setup Vitest (setup.ts)
-  e2e/                     ← Tests Playwright
+  trpc/                    ← tRPC client (react, server, query-client)
+  env.js                   ← Typed environment variables (@t3-oss/env-nextjs)
+  instrumentation.ts       ← Sentry setup (server + edge)
+  test/                    ← Vitest setup (setup.ts)
+  e2e/                     ← Playwright tests
 ```
 
-### Règle fondamentale : organisation par domaine
+### Fundamental rule: domain organization
 
 ```
-# CORRECT — cohésion par fonctionnalité
+# CORRECT — cohesion by functionality
 src/modules/layout/Header/HeaderBrand.tsx
 
-# INTERDIT — organisation par type de fichier
+# FORBIDDEN — organization by file type
 src/components/HeaderBrand.tsx
 src/hooks/useNavigation.ts
 ```
 
-Chaque module expose un `index.ts` barrel. Les consommateurs importent toujours depuis le barrel, jamais depuis les sous-fichiers internes.
+Each module exposes an `index.ts` barrel. Consumers always import from the barrel, never from internal sub-files.
 
 ```ts
 // CORRECT
 import { Header, Footer } from "~/modules/layout";
 
-// INTERDIT
+// FORBIDDEN
 import { Header } from "~/modules/layout/Header/index";
 ```
 
 ---
 
-## Composants React : Server vs Client
+## React Components: Server vs Client
 
-Défaut : **Server Component**. Ajouter `"use client"` uniquement si le composant a besoin de :
+Default: **Server Component**. Add `"use client"` only if the component needs:
 - hooks (`useState`, `useEffect`, `usePathname`, `useRouter`…)
-- event listeners navigateur
+- browser event listeners
 - Web APIs (`localStorage`, `document`…)
 
 ```tsx
-// Server Component — pas de directive (défaut)
+// Server Component — no directive (default)
 export function FooterBody() { ... }
 
-// Client Component — directive obligatoire en première ligne
+// Client Component — mandatory directive on first line
 "use client";
 export function NavLink({ href }: { href: string }) {
-  const pathname = usePathname(); // hook Next.js
+  const pathname = usePathname(); // Next.js hook
   ...
 }
 ```
 
-Ne pas remonter `"use client"` inutilement vers les parents. Isoler la partie interactive au niveau le plus bas possible.
+Do not unnecessarily push `"use client"` up to parents. Isolate the interactive part at the lowest possible level.
 
-### Granularité des composants
+### Component granularity
 
-**Règle : un composant = une responsabilité.** Préférer beaucoup de petits composants à quelques gros.
+**Rule: one component = one responsibility.** Prefer many small components over a few large ones.
 
-- Un composant ne doit faire qu'une seule chose lisible en une phrase
-- Dès qu'un composant dépasse ~50 lignes de JSX, extraire des sous-composants
-- Nommer les composants d'après ce qu'ils affichent, pas d'après leur position dans l'arbre
+- A component should only do one thing readable in one sentence
+- As soon as a component exceeds ~50 lines of JSX, extract sub-components
+- Name components based on what they display, not based on their position in the tree
 
 ```tsx
-// INTERDIT — composant fourre-tout
+// FORBIDDEN — catch-all component
 export function Dashboard() {
-  // 200 lignes de JSX : header, tableau, filtres, pagination…
+  // 200 lines of JSX: header, table, filters, pagination…
 }
 
-// CORRECT — décomposé
+// CORRECT — decomposed
 export function Dashboard() {
   return (
     <>
@@ -165,23 +165,23 @@ export function Dashboard() {
 }
 ```
 
-Chaque sous-composant extrait est **testable indépendamment** — c'est l'objectif.
+Each extracted sub-component is **testable independently** — this is the objective.
 
 ---
 
-## DSFR — Règles d'usage
+## DSFR — Usage rules
 
-### MCP DSFR (obligatoire)
+### MCP DSFR (mandatory)
 
-Le serveur MCP [`dsfr-mcp`](https://github.com/SocialGouv/dsfr-mcp) expose toute la documentation DSFR directement dans l'assistant IA (structure HTML, classes CSS, variantes, accessibilité, tokens couleur, icônes).
+The MCP server [`dsfr-mcp`](https://github.com/SocialGouv/dsfr-mcp) exposes all DSFR documentation directly in the AI assistant (HTML structure, CSS classes, variants, accessibility, color tokens, icons).
 
-**Installation une seule fois (scope utilisateur) :**
+**One-time installation (user scope):**
 
 ```bash
 claude mcp add dsfr --scope user -- npx dsfr-mcp
 ```
 
-Ou via `.mcp.json` à la racine du projet pour le partager en équipe :
+Or via `.mcp.json` at the project root to share with the team:
 
 ```json
 {
@@ -194,77 +194,77 @@ Ou via `.mcp.json` à la racine du projet pour le partager en équipe :
 }
 ```
 
-**Outils disponibles une fois connecté :**
+**Available tools once connected:**
 
-| Outil | Usage |
+| Tool | Usage |
 |---|---|
-| `list_components` | Lister tous les composants DSFR disponibles |
-| `get_component_doc` | Doc d'un composant : HTML, classes CSS, variantes, accessibilité |
-| `search_components` | Recherche plein texte dans la documentation |
-| `search_icons` | Trouver une icône par nom/catégorie → classe CSS `fr-icon-*` |
-| `get_color_tokens` | Tokens couleur par contexte/usage, thèmes clair/sombre |
+| `list_components` | List all available DSFR components |
+| `get_component_doc` | Component documentation: HTML, CSS classes, variants, accessibility |
+| `search_components` | Full-text search in the documentation |
+| `search_icons` | Find an icon by name/category → CSS class `fr-icon-*` |
+| `get_color_tokens` | Color tokens by context/usage, light/dark themes |
 
-**Règle :** avant d'écrire du HTML DSFR, utiliser `get_component_doc` ou `search_components` pour vérifier la structure correcte. Ne jamais deviner les classes CSS DSFR de mémoire.
+**Rule:** before writing DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR CSS classes from memory.
 
 ### Assets
-Les assets DSFR (CSS, fonts, icônes) sont copiés dans `public/dsfr/` par `scripts/copy-dsfr.js`. Ce dossier est **ignoré par git** et regénéré à chaque `dev` / `build`.
+DSFR assets (CSS, fonts, icons) are copied to `public/dsfr/` by `scripts/copy-dsfr.js`. This folder is **ignored by git** and regenerated on each `dev` / `build`.
 
-Ne jamais importer le CSS DSFR via webpack/node_modules. Toujours via `<link href="/dsfr/...">` dans le layout.
+Never import DSFR CSS via webpack/node_modules. Always via `<link href="/dsfr/...">` in the layout.
 
 ### JavaScript DSFR
-Le JS DSFR (`dsfr.module.min.js`) est chargé via `<Script type="module" strategy="beforeInteractive">`. Il gère :
-- Ouverture/fermeture des modales et menus déroulants
-- Bascule de thème (dark/light/system) via `data-fr-scheme`
-- Navigation clavier des composants interactifs
+The DSFR JS (`dsfr.module.min.js`) is loaded via `<Script type="module" strategy="beforeInteractive">`. It handles:
+- Opening/closing modals and dropdown menus
+- Theme toggle (dark/light/system) via `data-fr-scheme`
+- Keyboard navigation of interactive components
 
-Ne **jamais** dupliquer la logique JS DSFR en React. S'appuyer sur les attributs `data-fr-*` et laisser le JS DSFR faire son travail.
+Never duplicate DSFR JS logic in React. Rely on the `data-fr-*` attributes and let the DSFR JS do its work.
 
 ### Dark mode
-- Attribut `data-fr-scheme="system"` sur `<html>` par défaut
-- Script inline dans `<head>` lit le cookie `fr-theme` avant render pour éviter le flash
-- La modale `ThemeModal` gère le changement ; le JS DSFR persiste dans le cookie et met à jour l'attribut
+- Attribute `data-fr-scheme="system"` on `<html>` by default
+- Inline script in `<head>` reads the `fr-theme` cookie before render to avoid flash
+- The `ThemeModal` modal handles the change; the DSFR JS persists in the cookie and updates the attribute
 
-### Icônes
-Utiliser les classes utilitaires DSFR : `fr-icon-{nom}-{fill|line}`.
-L'ensemble des icônes est disponible dans `/dsfr/utility/icons/`.
-Toujours ajouter `aria-hidden="true"` sur les icônes décoratives.
+### Icons
+Use DSFR utility classes: `fr-icon-{name}-{fill|line}`.
+The full icon set is available in `/dsfr/utility/icons/`.
+Always add `aria-hidden="true"` on decorative icons.
 
 ---
 
-## Accessibilité (RGAA / WCAG 2.1 AA)
+## Accessibility (RGAA / WCAG 2.1 AA)
 
-### Checklist obligatoire
+### Mandatory checklist
 
-- **Skip links** : `SkipLinks` en premier enfant de `<body>` (RGAA 12.7)
-- **Landmarks** : utiliser `<header>`, `<nav>`, `<main>`, `<footer>` sémantiques. Ne pas ajouter de `role` redondant (`role="navigation"` sur `<nav>` est interdit)
-- **Modales** : tout `<div>` avec `aria-labelledby` ou `aria-describedby` doit avoir `role="dialog"` + `aria-modal="true"`
-- **Liens externes** : tout `target="_blank"` doit contenir un `<NewTabNotice />` (texte `fr-sr-only`)
-- **aria-current** : utiliser `NavLink` pour les liens de navigation — `aria-current="page"` est calculé dynamiquement via `usePathname()`
-- **Icônes** : `aria-hidden="true"` sur les éléments purement décoratifs
-- **Images** : `alt` descriptif obligatoire, `alt=""` pour les images décoratives
-- **Formulaires** : chaque `<input>` doit avoir un `<label>` associé via `htmlFor`/`id`
+- **Skip links**: `SkipLinks` as first child of `<body>` (RGAA 12.7)
+- **Landmarks**: use semantic `<header>`, `<nav>`, `<main>`, `<footer>`. Do not add redundant `role` (`role="navigation"` on `<nav>` is forbidden)
+- **Modals**: any `<div>` with `aria-labelledby` or `aria-describedby` must have `role="dialog"` + `aria-modal="true"`
+- **External links**: any `target="_blank"` must contain a `<NewTabNotice />` (text `fr-sr-only`)
+- **aria-current**: use `NavLink` for navigation links — `aria-current="page"` is calculated dynamically via `usePathname()`
+- **Icons**: `aria-hidden="true"` on purely decorative elements
+- **Images**: descriptive `alt` required, `alt=""` for decorative images
+- **Forms**: each `<input>` must have an associated `<label>` via `htmlFor`/`id`
 
-### Éléments sémantiques vs ARIA
+### Semantic elements vs ARIA
 
 ```tsx
-// CORRECT — élément natif, role implicite
-<nav aria-label="Menu principal">...</nav>
+// CORRECT — native element, implicit role
+<nav aria-label="Main menu">...</nav>
 
-// INTERDIT — role redondant
-<nav role="navigation" aria-label="Menu principal">...</nav>
+// FORBIDDEN — redundant role
+<nav role="navigation" aria-label="Main menu">...</nav>
 
-// CORRECT — div sans rôle implicite, role="dialog" requis
+// CORRECT — div without implicit role, role="dialog" required
 <div role="dialog" aria-modal="true" aria-labelledby="modal-title">...</div>
 ```
 
 ---
 
-## Typage TypeScript
+## TypeScript typing
 
-- `strict: true` activé, `noUncheckedIndexedAccess: true`
-- Pas de `any` explicite — utiliser `unknown` et narrowing
-- Types d'objets partagés dans des fichiers `types.ts` au niveau du module
-- Toujours typer les props des composants avec un `type Props = { ... }`
+- `strict: true` enabled, `noUncheckedIndexedAccess: true`
+- No explicit `any` — use `unknown` and narrowing
+- Shared object types in `types.ts` files at the module level
+- Always type component props with a `type Props = { ... }`
 
 ```ts
 // CORRECT
@@ -274,18 +274,18 @@ type Props = {
   className?: string;
 };
 
-// INTERDIT
+// FORBIDDEN
 const MyComponent = (props: any) => { ... }
 ```
 
 ---
 
-## Immutabilité
+## Immutability
 
-Ne jamais muter un objet ou un tableau. Toujours créer de nouvelles instances.
+Never mutate an object or array. Always create new instances.
 
 ```ts
-// INTERDIT
+// FORBIDDEN
 user.name = "Jean";
 
 // CORRECT
@@ -294,114 +294,152 @@ const updatedUser = { ...user, name: "Jean" };
 
 ---
 
-## Gestion des erreurs
+## Error handling
 
 ```ts
-// CORRECT — avec message utilisateur explicite
+// CORRECT — with explicit user message
 try {
   const data = await fetchData();
   return data;
 } catch (error) {
   console.error("fetchData failed:", error);
-  throw new Error("Impossible de charger les données. Réessayez plus tard.");
+  throw new Error("Impossible to load data. Please try again later.");
 }
 ```
 
 ---
 
-## Validation des entrées
+## Input validation
 
-Toujours valider avec Zod aux frontières du système (formulaires, paramètres de route, body API).
+Always validate with Zod at system boundaries (forms, route parameters, API body).
 
 ```ts
 import { z } from "zod";
 
 const schema = z.object({
-  siren: z.string().regex(/^\d{9}$/, "SIREN invalide"),
+  siren: z.string().regex(/^\d{9}$/, "Invalid SIREN"),
   annee: z.number().int().min(2018).max(new Date().getFullYear()),
 });
 ```
 
 ---
 
-## Taille des fichiers
+## File size
 
-| Taille | Statut |
+| Size | Status |
 |---|---|
-| < 200 lignes | Idéal |
-| 200–400 lignes | Acceptable |
-| 400–800 lignes | À découper |
-| > 800 lignes | **Interdit** — extraire des sous-composants |
+| < 200 lines | Ideal |
+| 200–400 lines | Acceptable |
+| 400–800 lines | To split |
+| > 800 lines | **Forbidden** — extract sub-components |
 
 ---
 
-## Conventions de nommage
+## Naming conventions
 
-| Type | Convention | Exemple |
+| Type | Convention | Example |
 |---|---|---|
-| Composant React | PascalCase | `HeaderBrand.tsx` |
+| React component | PascalCase | `HeaderBrand.tsx` |
 | Hook | camelCase + `use` | `useNavigation.ts` |
-| Utilitaire | camelCase | `formatDate.ts` |
+| Utility | camelCase | `formatDate.ts` |
 | Type / Interface | PascalCase | `type UserProfile = ...` |
-| Constante | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
-| Dossier module | camelCase | `modules/layout/` |
+| Constant | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
+| Module folder | camelCase | `modules/layout/` |
+
+### Language: English mandatory
+
+**The site is in French**, but all code must be in English:
+- All comments must be in English
+- All component names must be in English
+- All function and variable names must be in English
+- User-facing text (content, labels, buttons, links) remains in French
+
+```tsx
+// CORRECT
+export function HeaderBrand() {
+  // Render the brand logo and tagline
+  return (
+    <div className="fr-header__brand">
+      <Logo />
+      <h1>Service Name</h1>
+    </div>
+  );
+}
+
+// FORBIDDEN
+export function MarqueEnTete() {
+  // Affiche le logo et la devise
+  return (
+    <div className="fr-header__brand">
+      <Logo />
+      <h1>Nom du service</h1>
+    </div>
+  );
+}
+```
+
+This rule applies to:
+- All React component names
+- All function and variable names
+- All comments in the code
+- All file names (except documented exceptions like Next.js routes)
 
 ---
 
 ## Tests
 
-### Localisation : règle `__tests__`
+### Localization: `__tests__` rule
 
-Les tests vivent **dans le module qu'ils testent**, dans un sous-dossier `__tests__/` :
+Tests live **in the module they test**, in a `__tests__/` subfolder:
 
 ```
 src/modules/home/
   HomePage.tsx
   __tests__/
-    HomePage.test.tsx       ← tests de HomePage
+    HomePage.test.tsx       ← tests of HomePage
 
 src/modules/layout/shared/
   NavLink.tsx
   __tests__/
-    NavLink.test.tsx        ← tests de NavLink
+    NavLink.test.tsx        ← tests of NavLink
 ```
 
-Ne jamais placer des tests dans `src/app/` — les routes sont des thin wrappers sans logique propre.
+Never place tests in `src/app/` — routes are thin wrappers without their own logic.
 
-### Politique de test : couverture 100 %
+### Test policy: 100% coverage
 
-**Tout code écrit doit être testé. Sans exception.**
+**All written code must be tested. Without exception.**
 
-- Chaque composant React → test de rendu + comportements observables
-- Chaque hook → test de tous les états et effets de bord
-- Chaque utilitaire / fonction serveur → test de tous les cas (nominal + erreurs + edge cases)
-- Chaque route tRPC → test d'intégration (input valide, input invalide, erreurs)
+- Each React component → render test + observable behaviors
+- Each hook → test of all states and side effects
+- Each utility / server function → test of all cases (nominal + errors + edge cases)
+- Each tRPC route → integration test (valid input, invalid input, errors)
 
-Un fichier sans tests est **incomplet**. Ne pas considérer une tâche comme terminée si des fichiers de logique ne sont pas couverts à 100 %.
+A file without tests is **incomplete**. Do not consider a task as complete if logic files are not covered at 100%.
 
-> **Exception unique** : les thin wrappers de routes `src/app/*/page.tsx` qui ne contiennent aucune logique propre (uniquement import + return d'un composant).
+> **Unique exception**: thin wrappers of routes `src/app/*/page.tsx` that contain no logic of their own (only import + return of a component).
 
-### Outils
+### Tools
 
-- **Vitest** pour les tests unitaires et d'intégration
-- **Playwright** pour les tests E2E dans `src/e2e/`
-- Couverture cible : **100 %** sur tous les fichiers avec de la logique
+- **Vitest** for unit and integration tests
+- **Playwright** for E2E tests in `src/e2e/`
+- Target coverage: **100%** on all files with logic
 
-### Ce qu'il faut tester
+### What to test
 
 ```ts
-// CORRECT — teste le comportement observable
-it("affiche aria-current=page sur le lien actif", () => { ... });
-it("rend le lien vers #content", () => { ... });
+// CORRECT — tests observable behavior
+it("displays aria-current=page on the active link", () => { ... });
+it("renders the link to #content", () => { ... });
 
-// INUTILE — teste l'implémentation interne
-it("appelle usePathname une fois", () => { ... });
+// INUTILE — tests internal implementation
+it("calls usePathname once", () => { ... });
 ```
 
-### Mocks standard
+### Standard mocks
 
 ```ts
-// next/link → ancre HTML simple
+// next/link → simple HTML anchor
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
     <a href={href} {...props}>{children}</a>
@@ -411,7 +449,7 @@ vi.mock("next/link", () => ({
 // next/navigation → mock usePathname
 vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
 
-// server-only → vide (évite l'erreur dans jsdom)
+// server-only → empty (avoids error in jsdom)
 vi.mock("server-only", () => ({}));
 
 // tRPC server → HydrateClient passthrough
@@ -422,99 +460,99 @@ vi.mock("~/trpc/server", () => ({
 
 ---
 
-## Scripts utiles
+## Useful scripts
 
 ```bash
-pnpm dev          # copie DSFR assets + démarre Next.js en mode dev
-pnpm build        # copie DSFR assets + build production
-pnpm typecheck    # vérification TypeScript (tsc --noEmit)
-pnpm test         # tests Vitest
-pnpm test:e2e     # tests Playwright
+pnpm dev          # copies DSFR assets + starts Next.js in dev mode
+pnpm build        # copies DSFR assets + build production
+pnpm typecheck    # TypeScript verification (tsc --noEmit)
+pnpm test         # Vitest tests
+pnpm test:e2e     # Playwright tests
 ```
 
 ### Lint & Format (Biome)
 
-| Commande | Effet | Quand l'utiliser |
+| Command | Effect | When to use |
 |---|---|---|
-| `pnpm lint` | corrige les erreurs lint (`--write`) | en local, avant commit |
-| `pnpm lint:check` | vérifie sans modifier, exit 1 si erreur | CI |
-| `pnpm format` | formate les fichiers (`--write`) | en local, avant commit |
-| `pnpm format:check` | vérifie sans modifier, exit 1 si erreur | CI |
-| `pnpm check` | lint + format check (les deux) | vérification rapide |
-| `pnpm check:write` | lint + format auto-fix (les deux) | correction globale |
+| `pnpm lint` | fixes linting errors (`--write`) | locally, before commit |
+| `pnpm lint:check` | checks without modifying, exit 1 if error | CI |
+| `pnpm format` | formats files (`--write`) | locally, before commit |
+| `pnpm format:check` | checks without modifying, exit 1 if error | CI |
+| `pnpm check` | lint + format check (both) | quick verification |
+| `pnpm check:write` | lint + format auto-fix (both) | global correction |
 
-> En CI, toujours utiliser les variantes `:check`. En local, préférer `pnpm lint` et `pnpm format` (ou `pnpm check:write` pour tout corriger d'un coup).
+> In CI, always use `:check` variants. Locally, prefer `pnpm lint` and `pnpm format` (or `pnpm check:write` to fix everything at once).
 
-### Variables d'environnement
+### Environment variables
 
-Les variables sont déclarées et validées dans `src/env.js` via [`@t3-oss/env-nextjs`](https://env.t3.gg/) + Zod. La validation s'exécute au démarrage du serveur et au build.
+Variables are declared and validated in `src/env.js` via [`@t3-oss/env-nextjs`](https://env.t3.gg/) + Zod. Validation runs at server startup and at build.
 
-**Règle : ne jamais lire `process.env` directement dans le code. Toujours importer `env` depuis `~/env.js`.**
+**Rule: never read `process.env` directly in the code. Always import `env` from `~/env.js`.**
 
 ```ts
-// INTERDIT
+// FORBIDDEN
 const secret = process.env.AUTH_SECRET;
 
 // CORRECT
 import { env } from "~/env.js";
-const secret = env.AUTH_SECRET; // typé, validé
+const secret = env.AUTH_SECRET; // typed, validated
 ```
 
-**Ajouter une variable :**
+**Add a variable:**
 
-1. La déclarer dans `src/env.js` dans la section appropriée :
-   - `server` — variables serveur uniquement (jamais exposées au client)
-   - `client` — variables publiques, **doivent** avoir le préfixe `NEXT_PUBLIC_`
+1. Declare it in `src/env.js` in the appropriate section:
+   - `server` — server-only variables (never exposed to client)
+   - `client` — public variables, **must** have the `NEXT_PUBLIC_` prefix
 
-2. L'ajouter dans `runtimeEnv` (mapping `process.env`) :
+2. Add it to `runtimeEnv` (mapping `process.env`):
 
 ```ts
 // src/env.js
 server: {
-  MA_VARIABLE: z.string(),                  // obligatoire
-  MA_VARIABLE_OPT: z.string().optional(),   // optionnelle
-  MA_URL: z.string().url(),                 // URL validée
+  MA_VARIABLE: z.string(),                  // mandatory
+  MA_VARIABLE_OPT: z.string().optional(),   // optional
+  MA_URL: z.string().url(),                 // validated URL
 },
 runtimeEnv: {
   MA_VARIABLE: process.env.MA_VARIABLE,
 },
 ```
 
-3. L'ajouter au `.env` local (ne jamais commiter `.env`) et documenter dans `.env.example`.
+3. Add it to the `.env` local (never commit `.env`) and document in `.env.example`.
 
-**Variables requises au runtime :**
+**Required runtime variables:**
 
 | Variable | Type | Usage |
 |---|---|---|
-| `AUTH_SECRET` | `string` | Secret NextAuth (JWT signing) |
-| `DATABASE_URL` | `string` (URL) | Connexion PostgreSQL |
+| `AUTH_SECRET` | `string` | NextAuth secret (JWT signing) |
+| `DATABASE_URL` | `string` (URL) | PostgreSQL connection |
 | `EGAPRO_PROCONNECT_CLIENT_ID` | `string` | OAuth ProConnect |
 | `EGAPRO_PROCONNECT_CLIENT_SECRET` | `string` | OAuth ProConnect |
 | `EGAPRO_PROCONNECT_ISSUER` | `string` (URL) | OIDC issuer ProConnect |
 
-**Variables optionnelles :**
+**Optional variables:**
 
 | Variable | Type | Usage |
 |---|---|---|
-| `NEXT_PUBLIC_SENTRY_DSN` | `string` (URL) | Monitoring Sentry |
-| `NEXT_PUBLIC_MATOMO_URL` | `string` (URL) | Analytics Matomo |
-| `NEXT_PUBLIC_MATOMO_SITE_ID` | `string` | Analytics Matomo |
+| `NEXT_PUBLIC_SENTRY_DSN` | `string` (URL) | Sentry monitoring |
+| `NEXT_PUBLIC_MATOMO_URL` | `string` (URL) | Matomo analytics |
+| `NEXT_PUBLIC_MATOMO_SITE_ID` | `string` | Matomo analytics |
 
-> Passer `SKIP_ENV_VALIDATION=1` pour bypasser la validation (Docker build, CI build sans secrets).
+> Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI build without secrets).
 
-### Base de données (Drizzle Kit)
+### Database (Drizzle Kit)
 
-> À lancer depuis la racine du monorepo via `pnpm db:*`, ou depuis `packages/app/` directement.
+> Run from the monorepo root via `pnpm db:*`, or from `packages/app/` directly.
 
 ```bash
-pnpm db:generate  # génère les fichiers de migration après un changement de schéma
-pnpm db:migrate   # applique les migrations en attente sur la base de données
-pnpm db:push      # applique le schéma directement sans migration (dev uniquement)
-pnpm db:studio    # ouvre Drizzle Studio (UI pour inspecter la base)
+pnpm db:generate  # generates migration files after a schema change
+pnpm db:migrate   # applies pending migrations to the database
+pnpm db:push      # applies the schema directly without migration (dev only)
+pnpm db:studio    # opens Drizzle Studio (UI to inspect the database)
 ```
 
-**Workflow standard :**
-1. Modifier le schéma dans `src/server/db/`
-2. `pnpm db:generate` — crée le fichier SQL de migration
-3. `pnpm db:migrate` — applique la migration
-4. `pnpm dev` — relancer le serveur si nécessaire
+**Standard workflow:**
+1. Modify the schema in `src/server/db/`
+2. `pnpm db:generate` — creates the SQL migration file
+3. `pnpm db:migrate` — applies the migration
+4. `pnpm dev` — restart the server if necessary
