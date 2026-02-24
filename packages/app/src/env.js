@@ -18,8 +18,10 @@ function buildDatabaseUrl() {
 	} = process.env;
 
 	if (POSTGRES_HOST && POSTGRES_DB) {
-		const user = POSTGRES_USER ?? "postgres";
-		const password = POSTGRES_PASSWORD ? `:${POSTGRES_PASSWORD}` : "";
+		const user = encodeURIComponent(POSTGRES_USER ?? "postgres");
+		const password = POSTGRES_PASSWORD
+			? `:${encodeURIComponent(POSTGRES_PASSWORD)}`
+			: "";
 		const port = POSTGRES_PORT ?? "5432";
 		const sslmode = POSTGRES_SSLMODE ? `?sslmode=${POSTGRES_SSLMODE}` : "";
 		return `postgresql://${user}${password}@${POSTGRES_HOST}:${port}/${POSTGRES_DB}${sslmode}`;
