@@ -348,7 +348,11 @@ const schema = z.object({
 
 ### Language: English mandatory
 
-**Absolute rule: all comments and component names must be in English.**
+**The site is in French**, but all code must be in English:
+- All comments must be in English
+- All component names must be in English
+- All function and variable names must be in English
+- User-facing text (content, labels, buttons, links) remains in French
 
 ```tsx
 // CORRECT
