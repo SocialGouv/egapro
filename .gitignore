@@ -35,4 +35,7 @@ build/
 # vscode
 .vscode/
 
+# mcp
+.mcp.json
+
 .claude
