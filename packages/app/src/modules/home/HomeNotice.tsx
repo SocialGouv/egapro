@@ -18,12 +18,7 @@ export function HomeNotice() {
 							Le portail intègre désormais les nouvelles directives européennes
 							sur l&apos;égalité salariale.
 						</span>
-						<a
-							className="fr-notice__link"
-							href="/actualites"
-							rel="noopener noreferrer"
-							title="En savoir plus - nouvelle fenêtre"
-						>
+						<a className="fr-notice__link" href="/actualites">
 							En savoir plus
 						</a>
 					</p>

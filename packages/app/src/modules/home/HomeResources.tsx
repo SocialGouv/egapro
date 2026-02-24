@@ -52,7 +52,10 @@ function ResourceTile({
 /** Resources section: FAQ, reference texts and contact. */
 export function HomeResources() {
 	return (
-		<section style={{ background: "var(--background-alt-blue-france)" }}>
+		<section
+			aria-label="Ressources utiles"
+			style={{ background: "var(--background-alt-blue-france)" }}
+		>
 			<div className="fr-container fr-py-6w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-9">

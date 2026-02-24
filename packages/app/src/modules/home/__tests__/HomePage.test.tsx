@@ -26,17 +26,17 @@ vi.mock("../HomeNotice", () => ({
 }));
 
 describe("HomePage", () => {
-	it("le contenu principal a l'id #content pour les skip links", () => {
+	it("has #content id on main for skip links", () => {
 		render(<HomePage />);
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
 	});
 
-	it("affiche le bandeau d'information", () => {
+	it("renders the notice banner", () => {
 		render(<HomePage />);
 		expect(screen.getByTestId("home-notice")).toBeInTheDocument();
 	});
 
-	it("affiche le titre principal de la section hero", () => {
+	it("renders the hero section heading", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -46,7 +46,7 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche la section de recherche", () => {
+	it("renders the search section", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -56,7 +56,7 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche la section ressources", () => {
+	it("renders the resources section", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -66,9 +66,9 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche les trois sections placeholder", () => {
+	it("renders the three placeholder sections", () => {
 		render(<HomePage />);
-		const placeholders = screen.getAllByText("Section not finalized");
+		const placeholders = screen.getAllByText("Section non finalisée");
 		expect(placeholders).toHaveLength(3);
 	});
 });

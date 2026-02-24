@@ -54,6 +54,7 @@ function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 export function HomeHero() {
 	return (
 		<section
+			aria-labelledby="hero-heading"
 			style={{
 				background:
 					"linear-gradient(-33deg, var(--background-alt-blue-france) 39%, #e7d3ff 113%)",
@@ -69,7 +70,7 @@ export function HomeHero() {
 							gap: "1.5rem",
 						}}
 					>
-						<h1>Bienvenue sur Egapro</h1>
+						<h1 id="hero-heading">Bienvenue sur Egapro</h1>
 						<p className="fr-mb-0">
 							L&apos;espace dédié aux entreprises pour déclarer leurs
 							indicateurs de rémunération et de représentation entre les femmes

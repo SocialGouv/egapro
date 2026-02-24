@@ -1,11 +1,13 @@
 /** Company search section by SIREN, region, department or sector. */
 export function HomeSearch() {
 	return (
-		<section className="fr-py-8w">
+		<section aria-labelledby="search-heading" className="fr-py-8w">
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters">
 					<div className="fr-col-12">
-						<h2>Rechercher une entreprise et consulter ses résultats</h2>
+						<h2 id="search-heading">
+							Rechercher une entreprise et consulter ses résultats
+						</h2>
 						<p>
 							Accédez aux résultats d&apos;égalité professionnelle des
 							entreprises, comprenant :
@@ -37,8 +39,12 @@ export function HomeSearch() {
 						/>
 					</div>
 
-					<div className="fr-col-12 fr-col-md-9">
-						<form action="/index-egapro/recherche" method="GET">
+					<search className="fr-col-12 fr-col-md-9">
+						<form
+							action="/index-egapro/recherche"
+							aria-label="Rechercher une entreprise"
+							method="GET"
+						>
 							<div className="fr-input-group">
 								<label className="fr-label" htmlFor="search-query">
 									Numéro Siren ou le nom de l&apos;entreprise
@@ -136,7 +142,7 @@ export function HomeSearch() {
 								Rechercher
 							</button>
 						</form>
-					</div>
+					</search>
 				</div>
 			</div>
 		</section>

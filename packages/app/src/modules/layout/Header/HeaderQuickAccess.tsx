@@ -25,6 +25,9 @@ export async function HeaderQuickAccess() {
 								href="/api/auth/signout"
 							>
 								{session.user.name ?? "Se déconnecter"}
+								{session.user.name && (
+									<span className="fr-sr-only"> - Se déconnecter</span>
+								)}
 							</Link>
 						) : (
 							<Link

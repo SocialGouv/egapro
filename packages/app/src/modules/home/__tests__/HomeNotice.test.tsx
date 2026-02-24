@@ -4,33 +4,33 @@ import { describe, expect, it } from "vitest";
 import { HomeNotice } from "../HomeNotice";
 
 describe("HomeNotice", () => {
-	it("affiche le titre du bandeau", () => {
+	it("renders the banner title", () => {
 		render(<HomeNotice />);
 		expect(screen.getByText(/egapro évolue/i)).toBeInTheDocument();
 	});
 
-	it("affiche le texte descriptif", () => {
+	it("renders the description text", () => {
 		render(<HomeNotice />);
 		expect(
 			screen.getByText(/nouvelles directives européennes/i),
 		).toBeInTheDocument();
 	});
 
-	it("affiche le lien 'En savoir plus'", () => {
+	it("renders the 'En savoir plus' link", () => {
 		render(<HomeNotice />);
 		const link = screen.getByRole("link", { name: /en savoir plus/i });
 		expect(link).toBeInTheDocument();
 		expect(link).toHaveAttribute("href", "/actualites");
 	});
 
-	it("affiche le bouton de fermeture", () => {
+	it("renders the dismiss button", () => {
 		render(<HomeNotice />);
 		expect(
 			screen.getByRole("button", { name: /masquer le message/i }),
 		).toBeInTheDocument();
 	});
 
-	it("masque le bandeau quand on clique sur le bouton de fermeture", async () => {
+	it("hides the banner when the dismiss button is clicked", async () => {
 		const user = userEvent.setup();
 		render(<HomeNotice />);
 
@@ -41,7 +41,7 @@ describe("HomeNotice", () => {
 		expect(screen.queryByText(/egapro évolue/i)).not.toBeInTheDocument();
 	});
 
-	it("a la classe fr-notice--info", () => {
+	it("has the fr-notice--info class", () => {
 		const { container } = render(<HomeNotice />);
 		expect(container.querySelector(".fr-notice--info")).toBeInTheDocument();
 	});

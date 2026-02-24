@@ -19,7 +19,7 @@ vi.mock("next/link", () => ({
 }));
 
 describe("HomeHero", () => {
-	it("affiche le titre principal", () => {
+	it("renders the main heading", () => {
 		render(<HomeHero />);
 		expect(
 			screen.getByRole("heading", {
@@ -29,14 +29,14 @@ describe("HomeHero", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche la description de la plateforme", () => {
+	it("renders the platform description", () => {
 		render(<HomeHero />);
 		expect(
 			screen.getByText(/indicateurs de rémunération et de représentation/i),
 		).toBeInTheDocument();
 	});
 
-	it("affiche le lien CTA de déclaration", () => {
+	it("renders the declaration CTA link", () => {
 		render(<HomeHero />);
 		const link = screen.getByRole("link", {
 			name: /déclarer mes indicateurs/i,
@@ -45,7 +45,7 @@ describe("HomeHero", () => {
 		expect(link).toHaveAttribute("href", "/index-egapro");
 	});
 
-	it("affiche l'info sur les entreprises de plus de 50 salariés", () => {
+	it("renders the info about companies with 50+ employees", () => {
 		render(<HomeHero />);
 		expect(
 			screen.getByText(/entreprises de plus de 50 salariés/i),
@@ -55,7 +55,7 @@ describe("HomeHero", () => {
 		).toBeInTheDocument();
 	});
 
-	it("affiche l'info sur l'échéance", () => {
+	it("renders the deadline info", () => {
 		render(<HomeHero />);
 		expect(screen.getByText(/échéance : 1er mars/i)).toBeInTheDocument();
 		expect(
@@ -63,7 +63,7 @@ describe("HomeHero", () => {
 		).toBeInTheDocument();
 	});
 
-	it("est bien une section HTML sémantique", () => {
+	it("uses a semantic section element", () => {
 		const { container } = render(<HomeHero />);
 		expect(container.querySelector("section")).toBeInTheDocument();
 	});

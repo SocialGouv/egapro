@@ -20,10 +20,11 @@ export function HomePlaceholder() {
 					lineHeight: "2.5rem",
 				}}
 			>
-				Section not finalized
+				Section non finalisée
 			</p>
 			<p className="fr-mb-0" style={{ color: "var(--border-contrast-grey)" }}>
-				This section is still under design and not ready for development.
+				Cette section est encore en cours de conception et n'est pas prête pour
+				le développement.
 			</p>
 		</div>
 	);

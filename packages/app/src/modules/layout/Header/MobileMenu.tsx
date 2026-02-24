@@ -4,21 +4,14 @@ import { auth } from "~/server/auth";
 import { Navigation } from "./Navigation";
 
 /**
- * Mobile navigation modal.
- * Opened via the #fr-btn-menu-mobile button, managed by DSFR JS.
- * role="dialog" is required for aria-label to be valid on a <div>.
+ * Header menu: visible as nav bar on desktop, modal dialog on mobile.
+ * DSFR JS manages role="dialog" and aria-modal dynamically on mobile open.
  */
 export async function MobileMenu() {
 	const session = await auth();
 
 	return (
-		<div
-			aria-label="Menu principal"
-			aria-modal="true"
-			className="fr-header__menu fr-modal"
-			id="modal-menu"
-			role="dialog"
-		>
+		<div className="fr-header__menu fr-modal" id="modal-menu">
 			<div className="fr-container">
 				<button
 					aria-controls="modal-menu"
@@ -44,6 +37,9 @@ export async function MobileMenu() {
 									href="/api/auth/signout"
 								>
 									{session.user.name ?? "Se déconnecter"}
+									{session.user.name && (
+										<span className="fr-sr-only"> - Se déconnecter</span>
+									)}
 								</Link>
 							) : (
 								<Link

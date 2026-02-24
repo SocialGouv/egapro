@@ -10,7 +10,7 @@ export function HomePage() {
 		<main id="content" tabIndex={-1}>
 			<HomeNotice />
 			<HomeHero />
-			<section>
+			<section aria-label="Contenu en cours de conception">
 				<div
 					className="fr-container"
 					style={{
