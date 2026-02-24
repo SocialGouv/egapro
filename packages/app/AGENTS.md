@@ -138,114 +138,10 @@ export function NavLink({ href }: { href: string }) {
 
 Do not unnecessarily push `"use client"` up to parents. Isolate the interactive part at the lowest possible level.
 
-### Granularité des composants
-
-**Règle : un composant = une responsabilité.** Préférer beaucoup de petits composants à quelques gros.
-
-- Un composant ne doit faire qu'une seule chose lisible en une phrase
-- Dès qu'un composant dépasse ~50 lignes de JSX, extraire des sous-composants
-- Nommer les composants d'après ce qu'ils affichent, pas d'après leur position dans l'arbre
-
-```tsx
-// INTERDIT — composant fourre-tout
-export function Dashboard() {
-  // 200 lignes de JSX : header, tableau, filtres, pagination…
-}
-
-// CORRECT — décomposé
-export function Dashboard() {
-  return (
-    <>
-      <DashboardHeader />
-      <DashboardFilters />
-      <DashboardTable />
-      <DashboardPagination />
-    </>
-  );
-}
-```
-
-Chaque sous-composant extrait est **testable indépendamment** — c'est l'objectif.
-
----
 ### Component granularity
 
 **Rule: one component = one responsibility.** Prefer many small components over a few large ones.
 
-### MCP DSFR (obligatoire)
-
-Le serveur MCP [`dsfr-mcp`](https://github.com/SocialGouv/dsfr-mcp) expose toute la documentation DSFR directement dans l'assistant IA (structure HTML, classes CSS, variantes, accessibilité, tokens couleur, icônes).
-
-**Installation une seule fois (scope utilisateur) :**
-
-```bash
-claude mcp add dsfr --scope user -- npx dsfr-mcp
-```
-
-Ou via `.mcp.json` à la racine du projet pour le partager en équipe :
-
-```json
-{
-  "mcpServers": {
-    "dsfr": {
-      "command": "npx",
-      "args": ["dsfr-mcp"]
-    }
-  }
-}
-```
-
-**Outils disponibles une fois connecté :**
-
-| Outil | Usage |
-|---|---|
-| `list_components` | Lister tous les composants DSFR disponibles |
-| `get_component_doc` | Doc d'un composant : HTML, classes CSS, variantes, accessibilité |
-| `search_components` | Recherche plein texte dans la documentation |
-| `search_icons` | Trouver une icône par nom/catégorie → classe CSS `fr-icon-*` |
-| `get_color_tokens` | Tokens couleur par contexte/usage, thèmes clair/sombre |
-
-**Règle :** avant d'écrire du HTML DSFR, utiliser `get_component_doc` ou `search_components` pour vérifier la structure correcte. Ne jamais deviner les classes CSS DSFR de mémoire.
-
-### Assets
-Les assets DSFR (CSS, fonts, icônes) sont copiés dans `public/dsfr/` par `scripts/copy-dsfr.js`. Ce dossier est **ignoré par git** et regénéré à chaque `dev` / `build`.
-
-Ne jamais importer le CSS DSFR via webpack/node_modules. Toujours via `<link href="/dsfr/...">` dans le layout.
-
-### JavaScript DSFR
-Le JS DSFR (`dsfr.module.min.js`) est chargé via `<Script type="module" strategy="beforeInteractive">`. Il gère :
-- Ouverture/fermeture des modales et menus déroulants
-- Bascule de thème (dark/light/system) via `data-fr-scheme`
-- Navigation clavier des composants interactifs
-
-Ne **jamais** dupliquer la logique JS DSFR en React. S'appuyer sur les attributs `data-fr-*` et laisser le JS DSFR faire son travail.
-
-### Dark mode
-- Attribut `data-fr-scheme="system"` sur `<html>` par défaut
-- Script inline dans `<head>` lit le cookie `fr-theme` avant render pour éviter le flash
-- La modale `ThemeModal` gère le changement ; le JS DSFR persiste dans le cookie et met à jour l'attribut
-
-### Icônes
-Utiliser les classes utilitaires DSFR : `fr-icon-{nom}-{fill|line}`.
-L'ensemble des icônes est disponible dans `/dsfr/utility/icons/`.
-Toujours ajouter `aria-hidden="true"` sur les icônes décoratives.
-
----
-
-## Accessibilité (RGAA / WCAG 2.1 AA)
-
-### Checklist obligatoire
-
-- **Skip links** : `SkipLinks` en premier enfant de `<body>` (RGAA 12.7)
-- **Landmarks** : utiliser `<header>`, `<nav>`, `<main>`, `<footer>` sémantiques. Ne pas ajouter de `role` redondant (`role="navigation"` sur `<nav>` est interdit)
-- **Modales** : tout `<div>` avec `aria-labelledby` ou `aria-describedby` doit avoir `role="dialog"` + `aria-modal="true"`
-- **Liens externes** : tout `target="_blank"` doit contenir un `<NewTabNotice />` (texte `fr-sr-only`)
-- **aria-current** : utiliser `NavLink` pour les liens de navigation — `aria-current="page"` est calculé dynamiquement via `usePathname()`
-- **Icônes** : `aria-hidden="true"` sur les éléments purement décoratifs
-- **Images** : `alt` descriptif obligatoire, `alt=""` pour les images décoratives
-- **Formulaires** : chaque `<input>` doit avoir un `<label>` associé via `htmlFor`/`id`
-
-### Éléments sémantiques vs ARIA
 - A component should only do one thing readable in one sentence
 - As soon as a component exceeds ~50 lines of JSX, extract sub-components
 - Name components based on what they display, not based on their position in the tree
@@ -488,40 +384,6 @@ This rule applies to:
 - All comments in the code
 - All file names (except documented exceptions like Next.js routes)
 
-### Langue : Anglais obligatoire
-
-**Règle absolue : tous les commentaires et les noms de composants doivent être en anglais.**
-
-```tsx
-// CORRECT
-export function HeaderBrand() {
-  // Render the brand logo and tagline
-  return (
-    <div className="fr-header__brand">
-      <Logo />
-      <h1>Service Name</h1>
-    </div>
-  );
-}
-
-// INTERDIT
-export function MarqueEnTete() {
-  // Affiche le logo et la devise
-  return (
-    <div className="fr-header__brand">
-      <Logo />
-      <h1>Nom du service</h1>
-    </div>
-  );
-}
-```
-
-Cette règle s'applique à :
-- Tous les noms de composants React
-- Tous les noms de fonctions et variables
-- Tous les commentaires dans le code
-- Tous les noms de fichiers (sauf exceptions documentées comme les routes Next.js)
-
 ---
 
 ## Tests
@@ -544,25 +406,8 @@ src/modules/layout/shared/
 
 Never place tests in `src/app/` — routes are thin wrappers without their own logic.
 
-### Politique de test : couverture 100 %
-
-**Tout code écrit doit être testé. Sans exception.**
-
-- Chaque composant React → test de rendu + comportements observables
-- Chaque hook → test de tous les états et effets de bord
-- Chaque utilitaire / fonction serveur → test de tous les cas (nominal + erreurs + edge cases)
-- Chaque route tRPC → test d'intégration (input valide, input invalide, erreurs)
-
-Un fichier sans tests est **incomplet**. Ne pas considérer une tâche comme terminée si des fichiers de logique ne sont pas couverts à 100 %.
-
-> **Exception unique** : les thin wrappers de routes `src/app/*/page.tsx` qui ne contiennent aucune logique propre (uniquement import + return d'un composant).
-
-### Outils
 ### Test policy: 100% coverage
 
-- **Vitest** pour les tests unitaires et d'intégration
-- **Playwright** pour les tests E2E dans `src/e2e/`
-- Couverture cible : **100 %** sur tous les fichiers avec de la logique
 **All written code must be tested. Without exception.**
 
 - Each React component → render test + observable behaviors
@@ -587,7 +432,7 @@ A file without tests is **incomplete**. Do not consider a task as complete if lo
 it("displays aria-current=page on the active link", () => { ... });
 it("renders the link to #content", () => { ... });
 
-// INUTILE — tests internal implementation
+// USELESS — tests internal implementation
 it("calls usePathname once", () => { ... });
 ```
 

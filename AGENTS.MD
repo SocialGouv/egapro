@@ -32,13 +32,6 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 ---
 
-## Règle absolue
-
-Ne **jamais** créer de commit git, sauf si l'utilisateur le demande explicitement.
-
----
-
-## Scripts racine utiles
 ## Absolute rule
 
 Never create a git commit, unless the user explicitly requests it.
