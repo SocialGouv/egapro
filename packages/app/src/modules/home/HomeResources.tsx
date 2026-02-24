@@ -62,7 +62,7 @@ export function HomeResources() {
 									detail="Réponses aux questions les plus courantes"
 									href="/faq"
 									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-									title="Questions fréquentes"
+									title="Questions fréquentes (FAQ)"
 								/>
 							</div>
 

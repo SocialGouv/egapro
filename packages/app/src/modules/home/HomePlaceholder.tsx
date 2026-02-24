@@ -1,0 +1,30 @@
+/** Placeholder for sections still under design. */
+export function HomePlaceholder() {
+	return (
+		<div
+			style={{
+				alignItems: "center",
+				border: "1px solid var(--border-default-grey)",
+				display: "flex",
+				flexDirection: "column",
+				gap: "1rem",
+				padding: "7.5rem 0",
+			}}
+		>
+			<p
+				className="fr-mb-0"
+				style={{
+					color: "var(--border-contrast-grey)",
+					fontSize: "2rem",
+					fontWeight: 700,
+					lineHeight: "2.5rem",
+				}}
+			>
+				Section not finalized
+			</p>
+			<p className="fr-mb-0" style={{ color: "var(--border-contrast-grey)" }}>
+				This section is still under design and not ready for development.
+			</p>
+		</div>
+	);
+}

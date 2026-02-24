@@ -65,4 +65,10 @@ describe("HomePage", () => {
 			}),
 		).toBeInTheDocument();
 	});
+
+	it("affiche les trois sections placeholder", () => {
+		render(<HomePage />);
+		const placeholders = screen.getAllByText("Section not finalized");
+		expect(placeholders).toHaveLength(3);
+	});
 });

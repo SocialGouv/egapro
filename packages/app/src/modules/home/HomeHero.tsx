@@ -33,8 +33,17 @@ function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 					style={{ color: "var(--artwork-minor-blue-france)" }}
 				/>
 			</div>
-			<div>
-				<p className="fr-text--bold fr-mb-0">{title}</p>
+			<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+				<p
+					className="fr-mb-0"
+					style={{
+						fontSize: "1.25rem",
+						fontWeight: 700,
+						lineHeight: "1.75rem",
+					}}
+				>
+					{title}
+				</p>
 				<p className="fr-text--sm fr-mb-0">{description}</p>
 			</div>
 		</div>
@@ -52,9 +61,16 @@ export function HomeHero() {
 		>
 			<div className="fr-container fr-py-8w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-12 fr-col-md-7">
+					<div
+						className="fr-col-12 fr-col-md-7"
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: "1.5rem",
+						}}
+					>
 						<h1>Bienvenue sur Egapro</h1>
-						<p className="fr-text--lg fr-mb-4w">
+						<p className="fr-mb-0">
 							L&apos;espace dédié aux entreprises pour déclarer leurs
 							indicateurs de rémunération et de représentation entre les femmes
 							et les hommes.

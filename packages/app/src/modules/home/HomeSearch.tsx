@@ -8,15 +8,15 @@ export function HomeSearch() {
 						<h2>Rechercher une entreprise et consulter ses résultats</h2>
 						<p>
 							Accédez aux résultats d&apos;égalité professionnelle des
-							entreprises, notamment :
+							entreprises, comprenant :
 						</p>
 						<ul>
 							<li>
-								<strong>les indicateurs de rémunération</strong> femmes-hommes
+								les <strong>indicateurs de rémunération</strong> femmes-hommes
 								pour l&apos;ensemble des salariés
 							</li>
 							<li>
-								<strong>les indicateurs de représentation</strong> femmes-hommes
+								les <strong>indicateurs de représentation</strong> femmes-hommes
 								au sein des postes de direction
 							</li>
 						</ul>
@@ -41,16 +41,16 @@ export function HomeSearch() {
 						<form action="/index-egapro/recherche" method="GET">
 							<div className="fr-input-group">
 								<label className="fr-label" htmlFor="search-query">
-									Numéro SIREN ou nom de l&apos;entreprise
+									Numéro Siren ou le nom de l&apos;entreprise
 									<span className="fr-hint-text">
-										Le numéro SIREN est composé de 9 chiffres
+										Le numéro Siren se compose de 9 chiffres
 									</span>
 								</label>
 								<input
 									className="fr-input"
 									id="search-query"
 									name="query"
-									placeholder="[siren] [nom de l'entreprise]"
+									placeholder="[siren] [raison sociale]"
 									type="search"
 								/>
 							</div>
@@ -68,7 +68,7 @@ export function HomeSearch() {
 											name="region"
 										>
 											<option disabled hidden value="">
-												Sélectionnez une option
+												Sélectionner une option
 											</option>
 											<option value="11">Île-de-France</option>
 											<option value="24">Centre-Val de Loire</option>
@@ -104,7 +104,7 @@ export function HomeSearch() {
 											name="departement"
 										>
 											<option disabled hidden value="">
-												Sélectionnez une option
+												Sélectionner une option
 											</option>
 										</select>
 									</div>
@@ -122,7 +122,7 @@ export function HomeSearch() {
 											name="secteur"
 										>
 											<option disabled hidden value="">
-												Sélectionnez une option
+												Sélectionner une option
 											</option>
 										</select>
 									</div>
