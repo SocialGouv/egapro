@@ -1,4 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
@@ -14,6 +15,7 @@ declare module "next-auth" {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;
+			siret?: string | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -49,6 +51,7 @@ function getProviders(): Provider[] {
 						profile.email ||
 						"",
 					email: profile.email ?? "",
+					siret: profile.siret ?? null,
 				};
 			},
 		});
@@ -58,6 +61,9 @@ function getProviders(): Provider[] {
 }
 
 export const authConfig = {
+	pages: {
+		signIn: "/login",
+	},
 	providers: getProviders(),
 	adapter: DrizzleAdapter(db, {
 		usersTable: users,
@@ -65,18 +71,42 @@ export const authConfig = {
 		sessionsTable: sessions,
 		verificationTokensTable: verificationTokens,
 	}),
+	events: {
+		async signIn({ user, profile }) {
+			const siret =
+				profile &&
+				"siret" in profile &&
+				(profile as Record<string, unknown>).siret
+					? ((profile as Record<string, unknown>).siret as string)
+					: env.NODE_ENV === "development"
+						? "53284719600042"
+						: null;
+			if (siret && user.id) {
+				await db.update(users).set({ siret }).where(eq(users.id, user.id));
+			}
+		},
+	},
 	callbacks: {
+		redirect({ url, baseUrl }) {
+			// After sign-in, always redirect to /declaration
+			if (url.startsWith(baseUrl)) return url;
+			if (url.startsWith("/")) return `${baseUrl}${url}`;
+			return `${baseUrl}/declaration`;
+		},
 		session: ({
 			session,
 			user,
 		}: {
-			session: DefaultSession & { user?: { id?: string } };
-			user: { id: string };
+			session: DefaultSession & {
+				user?: { id?: string; siret?: string | null };
+			};
+			user: { id: string; siret?: string | null };
 		}) => ({
 			...session,
 			user: {
 				...session.user,
 				id: user.id,
+				siret: user.siret,
 			},
 		}),
 	},
