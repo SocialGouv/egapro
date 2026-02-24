@@ -51,16 +51,20 @@ Never create a git commit, unless the user explicitly requests it.
 ## Useful root scripts
 
 ```bash
-pnpm dev:app              # starts the app in dev mode
+pnpm dev:app              # starts the app in dev mode (port 3000)
 pnpm build                # builds all packages
 pnpm lint:check           # checks lint (CI)
 pnpm format:check         # checks format (CI)
 pnpm typecheck            # checks TypeScript types
 pnpm test                 # runs all unit tests
-pnpm test:e2e             # runs Playwright tests
+pnpm test:e2e             # runs Playwright E2E tests (requires dev server on port 3000)
+pnpm test:lighthouse      # runs Lighthouse CI audit (requires dev server on port 3000)
 pnpm db:migrate           # applies Drizzle migrations
 pnpm db:studio            # opens Drizzle Studio
 ```
+
+> **Note:** `pnpm test:e2e` and `pnpm test:lighthouse` require the dev server running on port 3000 (`pnpm dev:app`).
+> Lighthouse accessibility must score **100%** — it is configured as an error threshold in `.lighthouserc.json`.
 
 ---
 

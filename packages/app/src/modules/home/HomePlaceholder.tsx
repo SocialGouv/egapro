@@ -14,7 +14,7 @@ export function HomePlaceholder() {
 			<p
 				className="fr-mb-0"
 				style={{
-					color: "var(--border-contrast-grey)",
+					color: "var(--text-mention-grey)",
 					fontSize: "2rem",
 					fontWeight: 700,
 					lineHeight: "2.5rem",
@@ -22,7 +22,7 @@ export function HomePlaceholder() {
 			>
 				Section non finalisée
 			</p>
-			<p className="fr-mb-0" style={{ color: "var(--border-contrast-grey)" }}>
+			<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 				Cette section est encore en cours de conception et n'est pas prête pour
 				le développement.
 			</p>

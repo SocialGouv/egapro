@@ -463,12 +463,32 @@ vi.mock("~/trpc/server", () => ({
 ## Useful scripts
 
 ```bash
-pnpm dev          # copies DSFR assets + starts Next.js in dev mode
+pnpm dev          # copies DSFR assets + starts Next.js in dev mode (port 3000)
 pnpm build        # copies DSFR assets + build production
 pnpm typecheck    # TypeScript verification (tsc --noEmit)
-pnpm test         # Vitest tests
-pnpm test:e2e     # Playwright tests
+pnpm test         # Vitest unit tests
+pnpm test:e2e     # Playwright E2E tests (requires dev server on port 3000)
+pnpm test:lighthouse  # Lighthouse CI audit (requires dev server on port 3000)
 ```
+
+### E2E & Lighthouse tests (require a running dev server)
+
+Both `pnpm test:e2e` and `pnpm test:lighthouse` need the app running on **port 3000**.
+
+**Before running:**
+```bash
+# In a separate terminal (or background)
+pnpm dev          # starts on http://localhost:3000
+```
+
+**Lighthouse CI** (config in `.lighthouserc.json`):
+- Accessibility score must be **100%** (`error` if < 1)
+- Performance score warns if < 70%
+- Override URL: `LIGHTHOUSE_URL=http://localhost:4000 pnpm test:lighthouse`
+
+**Playwright** (config in `playwright.config.ts`):
+- Override URL: `PLAYWRIGHT_BASE_URL=http://localhost:4000 pnpm test:e2e`
+- Install browsers: `pnpm playwright:install`
 
 ### Lint & Format (Biome)
 
