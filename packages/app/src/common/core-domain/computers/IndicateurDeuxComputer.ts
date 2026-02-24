@@ -103,6 +103,7 @@ export class IndicateurDeuxComputer extends AbstractGroupComputer<Percentages, o
     const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
+      this.indicateurUnComputer.canCompute() &&
       resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 &&
       resultIndicateurUn.favorablePopulation !== result.favorablePopulation;
 
