@@ -8,21 +8,21 @@ export function FooterTopLinks() {
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--start">
 					<div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
-						<h3 className="fr-footer__top-cat">Useful links</h3>
+						<h3 className="fr-footer__top-cat">Liens utiles</h3>
 						<ul className="fr-footer__top-list">
 							<li>
 								<Link className="fr-footer__top-link" href="/aide-index">
-									Help for index
+									Aide pour l'index
 								</Link>
 							</li>
 							<li>
 								<Link className="fr-footer__top-link" href="/aide-proconnect">
-									Help for ProConnect
+									Aide pour ProConnect
 								</Link>
 							</li>
 							<li>
 								<Link className="fr-footer__top-link" href="/stats">
-									Statistics
+									Statistiques
 								</Link>
 							</li>
 							<li>
@@ -32,14 +32,14 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Contribute on GitHub
+									Contribuer sur GitHub
 									<NewTabNotice />
 								</a>
 							</li>
 						</ul>
 					</div>
 					<div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
-						<h3 className="fr-footer__top-cat">Ministry of Labour</h3>
+						<h3 className="fr-footer__top-cat">Ministère du Travail</h3>
 						<ul className="fr-footer__top-list">
 							<li>
 								<a
@@ -48,7 +48,7 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Ministry website (Index)
+									Site du ministère (Index)
 									<NewTabNotice />
 								</a>
 							</li>
@@ -59,7 +59,7 @@ export function FooterTopLinks() {
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Ministry website (Representation)
+									Site du ministère (Représentation)
 									<NewTabNotice />
 								</a>
 							</li>

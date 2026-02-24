@@ -50,16 +50,17 @@ export function HomeHero() {
 			<div className="fr-container fr-py-8w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-7">
-						<h1>Welcome to Egapro</h1>
+						<h1>Bienvenue sur Egapro</h1>
 						<p className="fr-text--lg fr-mb-4w">
-							The dedicated space for companies to declare their remuneration
-							and representation indicators between women and men.
+							Les entreprises d&apos;au moins 50 salariés ont l&apos;obligation
+							de calculer et de publier chaque année leur index de
+							l&apos;égalité professionnelle, avant le 1er mars.
 						</p>
 						<Link
 							className="fr-btn fr-icon-draft-fill fr-btn--icon-left"
 							href="/index-egapro"
 						>
-							Declare my indicators
+							Déclarer mes indicateurs
 						</Link>
 					</div>
 
@@ -73,14 +74,14 @@ export function HomeHero() {
 							}}
 						>
 							<HeroInfoItem
-								description="More than 35,000 declaring companies"
+								description="Plus de 35 000 entreprises déclarantes"
 								iconClass="fr-icon-group-fill"
-								title="Companies with more than 50 employees"
+								title="Entreprises de plus de 50 salariés"
 							/>
 							<HeroInfoItem
-								description="Mandatory annual declaration"
+								description="Déclaration annuelle obligatoire"
 								iconClass="fr-icon-calendar-fill"
-								title="Deadline: March 1st"
+								title="Échéance : 1er mars"
 							/>
 						</div>
 					</div>

@@ -11,27 +11,27 @@ export function FooterBottom() {
 						className="fr-footer__bottom-link"
 						href="/declaration-accessibilite"
 					>
-						Accessibility: partially compliant
+						Accessibilité : partiellement conforme
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/mentions-legales">
-						Legal notices
+						Mentions légales
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link className="fr-footer__bottom-link" href="/donnees-personnelles">
-						Personal data
+					<Link className="fr-footer__bottom-link" href="/cgu">
+						CGU
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/gestion-des-cookies">
-						Cookie management
+						Gestion des cookies
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
 					<Link className="fr-footer__bottom-link" href="/plan-du-site">
-						Site map
+						Plan du site
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
@@ -41,19 +41,19 @@ export function FooterBottom() {
 						data-fr-opened="false"
 						type="button"
 					>
-						Display settings
+						Paramètres d'affichage
 					</button>
 				</li>
 			</ul>
 			<div className="fr-footer__bottom-copy">
 				<p>
-					Unless otherwise stated, all content on this site is under{" "}
+					Sauf mention contraire, tout le contenu de ce site est sous{" "}
 					<a
 						href="https://github.com/etalab/licence-ouverte/blob/master/LO.md"
 						rel="noopener noreferrer"
 						target="_blank"
 					>
-						etalab-2.0 license
+						licence etalab-2.0
 						<NewTabNotice />
 					</a>
 				</p>

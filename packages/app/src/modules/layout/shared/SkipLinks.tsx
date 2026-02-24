@@ -6,16 +6,16 @@
 export function SkipLinks() {
 	return (
 		<div className="fr-skiplinks">
-			<nav aria-label="Quick access" className="fr-container">
+			<nav aria-label="Accès rapide" className="fr-container">
 				<ul className="fr-skiplinks__list">
 					<li>
 						<a className="fr-link" href="#content">
-							Content
+							Contenu
 						</a>
 					</li>
 					<li>
 						<a className="fr-link" href="#footer">
-							Footer
+							Pied de page
 						</a>
 					</li>
 				</ul>

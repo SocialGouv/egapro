@@ -25,7 +25,7 @@ export async function MobileMenu() {
 					className="fr-link--close fr-link"
 					type="button"
 				>
-					Close
+					Fermer
 				</button>
 				<div className="fr-header__menu-links">
 					<ul className="fr-btns-group">
@@ -34,7 +34,7 @@ export async function MobileMenu() {
 								className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
 								href="/faq"
 							>
-								Help
+								Aide
 							</Link>
 						</li>
 						<li>
@@ -43,14 +43,14 @@ export async function MobileMenu() {
 									className="fr-btn fr-icon-logout-box-r-line"
 									href="/api/auth/signout"
 								>
-									{session.user.name ?? "Sign out"}
+									{session.user.name ?? "Se déconnecter"}
 								</Link>
 							) : (
 								<Link
 									className="fr-btn fr-icon-account-circle-line"
 									href="/login"
 								>
-									Sign in
+									Se connecter
 								</Link>
 							)}
 						</li>

@@ -13,27 +13,27 @@ export function HomeNotice() {
 			<div className="fr-container">
 				<div className="fr-notice__body">
 					<p>
-						<span className="fr-notice__title">Egapro evolves&nbsp;:</span>
+						<span className="fr-notice__title">Egapro évolue&nbsp;:</span>
 						<span className="fr-notice__desc">
-							The portal now integrates the new European directives on pay
-							equality.
+							Le portail intègre désormais les nouvelles directives européennes
+							sur l&apos;égalité salariale.
 						</span>
 						<a
 							className="fr-notice__link"
 							href="/actualites"
 							rel="noopener noreferrer"
-							title="Learn more - new window"
+							title="En savoir plus - nouvelle fenêtre"
 						>
-							Learn more
+							En savoir plus
 						</a>
 					</p>
 					<button
 						className="fr-btn--close fr-btn"
 						onClick={() => setDismissed(true)}
-						title="Hide message"
+						title="Masquer le message"
 						type="button"
 					>
-						Hide message
+						Masquer le message
 					</button>
 				</div>
 			</div>

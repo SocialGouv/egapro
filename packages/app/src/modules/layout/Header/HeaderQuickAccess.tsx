@@ -2,13 +2,7 @@ import Link from "next/link";
 
 import { auth } from "~/server/auth";
 
-<<<<<<< HEAD
 /** Desktop quick access: help link and login/logout button. */
-||||||| 231b3558
-/** Accès rapide desktop : bouton "Se connecter" / "Se déconnecter". */
-=======
-/** Desktop quick access: "Sign in" / "Sign out" button. */
->>>>>>> alpha
 export async function HeaderQuickAccess() {
 	const session = await auth();
 
@@ -21,7 +15,7 @@ export async function HeaderQuickAccess() {
 							className="fr-btn fr-btn--tertiary-no-outline fr-icon-question-fill fr-btn--icon-left"
 							href="/faq"
 						>
-							Help
+							Aide
 						</Link>
 					</li>
 					<li>
@@ -30,14 +24,14 @@ export async function HeaderQuickAccess() {
 								className="fr-btn fr-icon-logout-box-r-line"
 								href="/api/auth/signout"
 							>
-								{session.user.name ?? "Sign out"}
+								{session.user.name ?? "Se déconnecter"}
 							</Link>
 						) : (
 							<Link
 								className="fr-btn fr-icon-account-circle-line"
 								href="/login"
 							>
-								Sign in
+								Se connecter
 							</Link>
 						)}
 					</li>

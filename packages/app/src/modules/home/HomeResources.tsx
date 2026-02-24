@@ -57,28 +57,28 @@ export function HomeResources() {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Answers to the most common questions"
+							detail="Réponses aux questions les plus courantes"
 							href="/faq"
 							pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-							title="Frequently Asked Questions (FAQ)"
+							title="Questions fréquentes"
 						/>
 					</div>
 
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Consult the legislative and regulatory texts"
+							detail="Consultez les textes législatifs et réglementaires"
 							href="/textes-reference"
 							pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-							title="Reference texts"
+							title="Textes de référence"
 						/>
 					</div>
 
 					<div className="fr-col-12 fr-col-md-4">
 						<ResourceTile
-							detail="Need help? Contact our support services"
+							detail="Besoin d&apos;aide ? Contactez nos services d&apos;assistance"
 							href="/contact"
 							pictogramPath="/dsfr/artwork/pictograms/people/avatar.svg"
-							title="Contact us"
+							title="Nous contacter"
 						/>
 					</div>
 				</div>
