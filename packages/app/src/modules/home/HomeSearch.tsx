@@ -28,13 +28,14 @@ export function HomeSearch() {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div
 						aria-hidden="true"
-						className="fr-col-3 fr-unhidden-md"
+						className="fr-col-12 fr-col-md-3"
 						style={{ display: "flex", justifyContent: "center" }}
 					>
 						<img
 							alt=""
 							height="240"
 							src="/assets/images/home/search-illustration.svg"
+							style={{ height: "auto", maxWidth: "100%", width: "auto" }}
 							width="223"
 						/>
 					</div>

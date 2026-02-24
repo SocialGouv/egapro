@@ -91,13 +91,14 @@ export function HomeResources() {
 
 					<div
 						aria-hidden="true"
-						className="fr-col-3 fr-unhidden-md"
-						style={{ display: "flex", justifyContent: "flex-end" }}
+						className="fr-col-12 fr-col-md-3"
+						style={{ display: "flex", justifyContent: "center" }}
 					>
 						<img
 							alt=""
 							height="147"
 							src="/assets/images/home/help-illustration.svg"
+							style={{ height: "auto", maxWidth: "100%", width: "auto" }}
 							width="210"
 						/>
 					</div>

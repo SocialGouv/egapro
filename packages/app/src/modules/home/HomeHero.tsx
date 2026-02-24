@@ -84,7 +84,7 @@ export function HomeHero() {
 						</Link>
 					</div>
 
-					<div className="fr-col-12 fr-col-md-5 fr-unhidden-md">
+					<div className="fr-col-12 fr-col-md-5">
 						<div
 							style={{
 								display: "flex",
