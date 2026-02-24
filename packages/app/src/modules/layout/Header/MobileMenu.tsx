@@ -13,7 +13,7 @@ export async function MobileMenu() {
 
 	return (
 		<div
-			aria-label="Menu"
+			aria-label="Menu principal"
 			aria-modal="true"
 			className="fr-header__menu fr-modal"
 			id="modal-menu"

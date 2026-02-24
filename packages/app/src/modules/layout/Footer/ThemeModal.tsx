@@ -21,10 +21,10 @@ export function ThemeModal() {
 								<button
 									aria-controls="fr-theme-modal"
 									className="fr-btn--close fr-btn"
-									title="Close window"
+									title="Fermer la fenêtre"
 									type="button"
 								>
-									Close
+									Fermer
 								</button>
 							</div>
 							<div className="fr-modal__content">
@@ -33,7 +33,7 @@ export function ThemeModal() {
 										aria-hidden="true"
 										className="fr-icon-theme-fill fr-icon--lg"
 									/>
-									Display settings
+									Paramètres d'affichage
 								</h1>
 								<div className="fr-display" id="fr-display">
 									<fieldset className="fr-fieldset">
@@ -41,7 +41,8 @@ export function ThemeModal() {
 											className="fr-fieldset__legend"
 											id="fr-theme-fieldset-legend"
 										>
-											Choose a theme to customize the appearance of the site.
+											Choisissez un thème pour personnaliser l'apparence du
+											site.
 										</legend>
 										<div className="fr-fieldset__content">
 											<div className="fr-radio-group fr-radio-rich">
@@ -55,7 +56,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-light"
 												>
-													Light theme
+													Thème clair
 												</label>
 											</div>
 											<div className="fr-radio-group fr-radio-rich">
@@ -69,7 +70,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-dark"
 												>
-													Dark theme
+													Thème sombre
 												</label>
 											</div>
 											<div className="fr-radio-group fr-radio-rich">
@@ -83,7 +84,7 @@ export function ThemeModal() {
 													className="fr-label"
 													htmlFor="fr-radio-theme-system"
 												>
-													System (browser preference)
+													Système (préférence du navigateur)
 												</label>
 											</div>
 										</div>
