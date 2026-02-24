@@ -1,0 +1,31 @@
+import { NewTabNotice } from "~/modules/layout";
+
+// ProConnect logo as inline SVG data URI (adapted from FranceConnect branding)
+const PROCONNECT_LOGO = `url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 48'%3E%3Cpath fill='%232a2f82' d='M34.965 15.1 19.971 6.423 4.977 15.184a.606.606 0 0 0-.306.524v16.948a.666.666 0 0 0 .306.524l14.992 8.6 14.994-8.706a.665.665 0 0 0 .306-.524V15.628a.605.605 0 0 0-.304-.528Z'/%3E%3Cpath fill='%23df1f26' d='m14.614 15.6-5.029 8.628-4.557-9.175 5.39-3.113 4.489 3.16ZM35.27 32.58V15.622a.6.6 0 0 0-.306-.523L19.971 6.423'/%3E%3Cpath fill='%232e65b0' d='m4.673 32.58 15.3-26.157v35.362L4.977 33.18a.666.666 0 0 1-.306-.524V15.708Zm24.669-20.735L34.8 15l-4.489 9.15-5.387-9.236Z'/%3E%3Crect x='8' y='18' width='24' height='14' rx='3' fill='%23fff'/%3E%3Ctext x='20' y='29' font-family='Marianne,Arial,sans-serif' font-size='10' font-weight='700' fill='%23000091' text-anchor='middle'%3EPRO%3C/text%3E%3C/svg%3E")`;
+
+/** ProConnect authentication button with official branding and info link. */
+export function ProConnectButton() {
+	return (
+		<div className="fr-connect-group">
+			<style>{`.fr-connect--proconnect::before { background-image: ${PROCONNECT_LOGO}; }`}</style>
+			<a
+				className="fr-connect fr-connect--proconnect"
+				href="/api/auth/signin/proconnect"
+			>
+				<span className="fr-connect__login">S'identifier avec</span>
+				<span className="fr-connect__brand">ProConnect</span>
+			</a>
+			<p>
+				<a
+					href="https://www.proconnect.gouv.fr/"
+					rel="noopener"
+					target="_blank"
+					title="Qu'est-ce que ProConnect ? - nouvelle fenêtre"
+				>
+					Qu'est-ce que ProConnect ?
+					<NewTabNotice />
+				</a>
+			</p>
+		</div>
+	);
+}
