@@ -63,6 +63,7 @@ jobs:
           exit 1
 
       - name: Run Claude Code — Revue RGAA
+        id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -118,3 +119,16 @@ jobs:
             --max-turns 80
             --mcp-config '{"mcpServers":{"dsfr":{"command":"npx","args":["-y","dsfr-mcp"]},"a11y":{"command":"npx","args":["-y","mcp-accessibility-scanner"]}}}'
             --allowedTools "Bash(npx playwright *),Bash(node *),Bash(curl *),mcp__dsfr__list_components,mcp__dsfr__get_component_doc,mcp__dsfr__search_components,mcp__dsfr__search_icons,mcp__dsfr__get_color_tokens,mcp__a11y__scan_page,mcp__a11y__audit_site,mcp__a11y__scan_page_matrix,mcp__a11y__audit_keyboard,mcp__a11y__browser_navigate,mcp__a11y__browser_take_screenshot,mcp__a11y__browser_snapshot,mcp__a11y__browser_click,mcp__a11y__browser_type,mcp__a11y__browser_press_key"
+
+      - name: Post report as PR comment
+        if: always() && steps.claude.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f "$GITHUB_STEP_SUMMARY" ] && [ -s "$GITHUB_STEP_SUMMARY" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --body-file "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report content found in step summary"
+          fi
