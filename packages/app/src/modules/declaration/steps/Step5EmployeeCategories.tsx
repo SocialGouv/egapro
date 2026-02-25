@@ -13,7 +13,10 @@ import type { StepCategoryData } from "../types";
 
 // -- Local types --
 
+let nextCategoryId = 0;
+
 interface EmployeeCategory {
+	id: number;
 	name: string;
 	detail: string;
 	womenCount: string;
@@ -32,6 +35,7 @@ interface EmployeeCategory {
 
 function createEmptyCategory(): EmployeeCategory {
 	return {
+		id: nextCategoryId++,
 		name: "",
 		detail: "",
 		womenCount: "",
@@ -809,7 +813,7 @@ export function Step5EmployeeCategories({
 			{/* Category blocks */}
 			{categories.map((cat, index) => (
 				<div
-					key={index}
+					key={cat.id}
 					style={{
 						display: "flex",
 						flexDirection: "column",
