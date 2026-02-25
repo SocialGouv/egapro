@@ -29,7 +29,7 @@ export function LoginPage() {
 							alt=""
 							className={styles.illustration}
 							height={220}
-							src="/img/login-illustration.svg"
+							src="/assets/images/login-illustration.svg"
 							width={362}
 						/>
 					</div>

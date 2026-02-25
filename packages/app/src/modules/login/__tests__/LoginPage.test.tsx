@@ -49,7 +49,7 @@ describe("LoginPage", () => {
 		const illustration = screen.getByTestId("next-image");
 		expect(illustration).toHaveAttribute(
 			"data-src",
-			"/img/login-illustration.svg",
+			"/assets/images/login-illustration.svg",
 		);
 	});
 
