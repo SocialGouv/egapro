@@ -9,9 +9,9 @@ export function HeaderBrand() {
 					<p className="fr-logo">
 						Ministère
 						<br />
-						du travail,
+						du travail
 						<br />
-						et de l'emploi
+						et des solidarités
 					</p>
 				</div>
 				<div className="fr-header__navbar">
@@ -30,7 +30,7 @@ export function HeaderBrand() {
 			<div className="fr-header__service">
 				<Link
 					href="/"
-					title="Accueil - Egapro - Ministère du Travail, de l'Emploi et de l'Insertion"
+					title="Accueil - Egapro - Ministère du Travail et des Solidarités"
 				>
 					<p className="fr-header__service-title">Egapro</p>
 				</Link>

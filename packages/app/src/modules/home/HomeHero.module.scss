@@ -5,7 +5,7 @@
 .heroContent {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
+	gap: 2rem;
 }
 
 .cta.cta {
@@ -32,7 +32,7 @@
 	align-items: center;
 	background: var(--background-default-grey);
 	border-radius: 50%;
-	color: var(--artwork-minor-blue-france);
+	color: #7996e6; 
 	display: flex;
 	flex-shrink: 0;
 	height: 4rem;
