@@ -5,7 +5,7 @@ test.describe("Declaration workflow", () => {
 		// Login via ProConnect with test account
 		await page.goto("/login");
 		await page
-			.getByRole("link", { name: "Se connecter avec ProConnect" })
+			.getByRole("button", { name: "Se connecter avec ProConnect" })
 			.click();
 
 		// Fill ProConnect login form (test@fia1.fr)
