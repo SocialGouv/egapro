@@ -269,7 +269,7 @@ export function Step5EmployeeCategories({
 	}, []);
 
 	const mutation = api.declaration.updateStepCategories.useMutation({
-		onSuccess: () => router.push("/declaration/etape/6"),
+		onSuccess: () => router.push("/declaration-remuneration/etape/6"),
 	});
 
 	function updateCategory(
@@ -913,7 +913,7 @@ export function Step5EmployeeCategories({
 
 			<FormActions
 				isSubmitting={mutation.isPending}
-				previousHref="/declaration/etape/4"
+				previousHref="/declaration-remuneration/etape/4"
 			/>
 
 			{/* Delete confirmation dialog */}

@@ -13,7 +13,7 @@ test.describe("Declaration workflow", () => {
 		await page.getByRole("button", { name: /continuer|connexion/i }).click();
 
 		// Wait for redirect to declaration intro
-		await page.waitForURL("/declaration");
+		await page.waitForURL("/declaration-remuneration");
 	});
 
 	test("displays introduction page after login", async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe("Declaration workflow", () => {
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
 		await page.getByRole("link", { name: "Commencer" }).click();
-		await page.waitForURL("/declaration/etape/1");
+		await page.waitForURL("/declaration-remuneration/etape/1");
 
 		// Verify stepper
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
@@ -59,11 +59,11 @@ test.describe("Declaration workflow", () => {
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/2");
+		await page.waitForURL("/declaration-remuneration/etape/2");
 	});
 
 	test("navigates through step 2 - Écart de rémunération", async ({ page }) => {
-		await page.goto("/declaration/etape/2");
+		await page.goto("/declaration-remuneration/etape/2");
 
 		await expect(page.getByText("Étape 2 sur 6")).toBeVisible();
 		await expect(
@@ -77,11 +77,11 @@ test.describe("Declaration workflow", () => {
 		}
 
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/3");
+		await page.waitForURL("/declaration-remuneration/etape/3");
 	});
 
 	test("navigates through step 3 - Rémunération variable", async ({ page }) => {
-		await page.goto("/declaration/etape/3");
+		await page.goto("/declaration-remuneration/etape/3");
 
 		await expect(page.getByText("Étape 3 sur 6")).toBeVisible();
 
@@ -91,11 +91,11 @@ test.describe("Declaration workflow", () => {
 		}
 
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/4");
+		await page.waitForURL("/declaration-remuneration/etape/4");
 	});
 
 	test("navigates through step 4 - Proportion quartiles", async ({ page }) => {
-		await page.goto("/declaration/etape/4");
+		await page.goto("/declaration-remuneration/etape/4");
 
 		await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
 
@@ -105,13 +105,13 @@ test.describe("Declaration workflow", () => {
 		}
 
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/5");
+		await page.waitForURL("/declaration-remuneration/etape/5");
 	});
 
 	test("navigates through step 5 - Catégories de salariés", async ({
 		page,
 	}) => {
-		await page.goto("/declaration/etape/5");
+		await page.goto("/declaration-remuneration/etape/5");
 
 		await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 
@@ -133,11 +133,11 @@ test.describe("Declaration workflow", () => {
 		await page.locator("input[type='number']").nth(3).fill("2900");
 
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/6");
+		await page.waitForURL("/declaration-remuneration/etape/6");
 	});
 
 	test("step 6 - Review and submit", async ({ page }) => {
-		await page.goto("/declaration/etape/6");
+		await page.goto("/declaration-remuneration/etape/6");
 
 		await expect(page.getByText("Étape 6 sur 6")).toBeVisible();
 		await expect(
@@ -173,11 +173,11 @@ test.describe("Declaration workflow", () => {
 		await page.getByRole("button", { name: "Confirmer" }).click();
 
 		// Should redirect back to intro after submission
-		await page.waitForURL("/declaration");
+		await page.waitForURL("/declaration-remuneration");
 	});
 
 	test("accordion displays definitions", async ({ page }) => {
-		await page.goto("/declaration/etape/1");
+		await page.goto("/declaration-remuneration/etape/1");
 
 		const accordion = page.getByRole("button", {
 			name: /Définitions et méthode de calcul/i,
@@ -189,16 +189,16 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration/etape/2");
+		await page.goto("/declaration-remuneration/etape/2");
 
 		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("/declaration/etape/1");
+		await page.waitForURL("/declaration-remuneration/etape/1");
 	});
 
 	test("complete flow end-to-end", async ({ page }) => {
 		// Step 0: Introduction
 		await page.getByRole("link", { name: "Commencer" }).click();
-		await page.waitForURL("/declaration/etape/1");
+		await page.waitForURL("/declaration-remuneration/etape/1");
 
 		// Step 1: Effectifs
 		const womenInputs = page.getByLabel(/Femmes/);
@@ -212,7 +212,7 @@ test.describe("Declaration workflow", () => {
 		await womenInputs.nth(3).fill("5");
 		await menInputs.nth(3).fill("10");
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/2");
+		await page.waitForURL("/declaration-remuneration/etape/2");
 
 		// Step 2: Écart de rémunération
 		let inputs = page.locator("input[type='number']");
@@ -220,7 +220,7 @@ test.describe("Declaration workflow", () => {
 			await inputs.nth(i).fill(String(2000 + i * 100));
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/3");
+		await page.waitForURL("/declaration-remuneration/etape/3");
 
 		// Step 3: Rémunération variable
 		inputs = page.locator("input[type='number']");
@@ -228,7 +228,7 @@ test.describe("Declaration workflow", () => {
 			await inputs.nth(i).fill(String(500 + i * 50));
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/4");
+		await page.waitForURL("/declaration-remuneration/etape/4");
 
 		// Step 4: Proportion quartiles
 		inputs = page.locator("input[type='number']");
@@ -236,7 +236,7 @@ test.describe("Declaration workflow", () => {
 			await inputs.nth(i).fill(String(10 + i));
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/5");
+		await page.waitForURL("/declaration-remuneration/etape/5");
 
 		// Step 5: Catégories de salariés
 		await page
@@ -246,7 +246,7 @@ test.describe("Declaration workflow", () => {
 		await page.locator("input[type='number']").nth(0).fill("4000");
 		await page.locator("input[type='number']").nth(1).fill("4200");
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("/declaration/etape/6");
+		await page.waitForURL("/declaration-remuneration/etape/6");
 
 		// Step 6: Review and submit
 		await expect(
@@ -256,6 +256,6 @@ test.describe("Declaration workflow", () => {
 			.getByRole("button", { name: "Soumettre la déclaration" })
 			.click();
 		await page.getByRole("button", { name: "Confirmer" }).click();
-		await page.waitForURL("/declaration");
+		await page.waitForURL("/declaration-remuneration");
 	});
 });

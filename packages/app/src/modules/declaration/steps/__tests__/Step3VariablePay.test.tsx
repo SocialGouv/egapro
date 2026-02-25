@@ -235,7 +235,7 @@ describe("Step3VariablePay", () => {
 		render(<Step3VariablePay />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/declaration/etape/2",
+			"/declaration-remuneration/etape/2",
 		);
 	});
 });

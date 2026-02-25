@@ -90,7 +90,7 @@ export function Step3VariablePay({
 	const currentYear = new Date().getFullYear();
 
 	const mutation = api.declaration.updateStepCategories.useMutation({
-		onSuccess: () => router.push("/declaration/etape/4"),
+		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
 	});
 
 	function handlePositiveChange(setter: (v: string) => void) {
@@ -381,7 +381,7 @@ export function Step3VariablePay({
 
 			<FormActions
 				isSubmitting={mutation.isPending}
-				previousHref="/declaration/etape/2"
+				previousHref="/declaration-remuneration/etape/2"
 			/>
 
 			{/* Pay gap edit modal */}

@@ -85,7 +85,7 @@ export function Step4QuartileDistribution({
 	const currentYear = new Date().getFullYear();
 
 	const mutation = api.declaration.updateStepCategories.useMutation({
-		onSuccess: () => router.push("/declaration/etape/5"),
+		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
 	});
 
 	function getCategories(tableType: "annual" | "hourly") {
@@ -448,7 +448,7 @@ export function Step4QuartileDistribution({
 
 			<FormActions
 				isSubmitting={mutation.isPending}
-				previousHref="/declaration/etape/3"
+				previousHref="/declaration-remuneration/etape/3"
 			/>
 
 			{/* Edit dialog */}

@@ -41,17 +41,39 @@ function getProviders(): Provider[] {
 				},
 			},
 			idToken: true,
-			profile(profile: Record<string, string>) {
+			async profile(_profile, tokens) {
+				const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
+				const configResponse = await fetch(wellKnownUrl);
+				const config = (await configResponse.json()) as {
+					userinfo_endpoint: string;
+				};
+				const response = await fetch(config.userinfo_endpoint, {
+					headers: {
+						Authorization: `Bearer ${tokens.access_token}`,
+					},
+				});
+				const body = await response.text();
+				// ProConnect returns userinfo as a signed JWT, decode the payload
+				let userinfo: Record<string, string>;
+				if (body.startsWith("{")) {
+					userinfo = JSON.parse(body) as Record<string, string>;
+				} else {
+					const payload = body.split(".")[1];
+					if (!payload) throw new Error("Invalid JWT from userinfo");
+					userinfo = JSON.parse(
+						Buffer.from(payload, "base64url").toString("utf-8"),
+					) as Record<string, string>;
+				}
 				return {
-					id: profile.sub ?? "",
+					id: userinfo.sub ?? "",
 					name:
-						[profile.given_name, profile.usual_name]
+						[userinfo.given_name, userinfo.usual_name]
 							.filter(Boolean)
 							.join(" ") ||
-						profile.email ||
+						userinfo.email ||
 						"",
-					email: profile.email ?? "",
-					siret: profile.siret ?? null,
+					email: userinfo.email ?? "",
+					siret: userinfo.siret ?? null,
 				};
 			},
 		});
@@ -78,9 +100,7 @@ export const authConfig = {
 				"siret" in profile &&
 				(profile as Record<string, unknown>).siret
 					? ((profile as Record<string, unknown>).siret as string)
-					: env.NODE_ENV === "development"
-						? "53284719600042"
-						: null;
+					: null;
 			if (siret && user.id) {
 				await db.update(users).set({ siret }).where(eq(users.id, user.id));
 			}
@@ -88,18 +108,18 @@ export const authConfig = {
 	},
 	callbacks: {
 		redirect({ url, baseUrl }) {
-			// After sign-in, always redirect to /declaration
+			// After sign-in, always redirect to /declaration-remuneration
 			if (url.startsWith(baseUrl)) {
 				const path = url.slice(baseUrl.length);
-				// Redirect root or empty path to /declaration
-				if (!path || path === "/") return `${baseUrl}/declaration`;
+				// Redirect root or empty path to /declaration-remuneration
+				if (!path || path === "/") return `${baseUrl}/declaration-remuneration`;
 				return url;
 			}
 			if (url.startsWith("/")) {
-				if (url === "/") return `${baseUrl}/declaration`;
+				if (url === "/") return `${baseUrl}/declaration-remuneration`;
 				return `${baseUrl}${url}`;
 			}
-			return `${baseUrl}/declaration`;
+			return `${baseUrl}/declaration-remuneration`;
 		},
 		session: ({
 			session,

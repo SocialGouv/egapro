@@ -370,7 +370,7 @@ describe("Step4QuartileDistribution", () => {
 		render(<Step4QuartileDistribution />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/declaration/etape/3",
+			"/declaration-remuneration/etape/3",
 		);
 	});
 });

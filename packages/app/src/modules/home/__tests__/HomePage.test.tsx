@@ -38,7 +38,7 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /calculer - déclarer mon index/i }),
-		).toHaveAttribute("href", "/declaration");
+		).toHaveAttribute("href", "/declaration-remuneration");
 		expect(
 			screen.getByRole("link", { name: /consulter l'index/i }),
 		).toHaveAttribute("href", "/index-egapro/recherche");

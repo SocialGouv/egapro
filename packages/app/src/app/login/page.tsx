@@ -7,7 +7,7 @@ export default async function LoginPage() {
 	const session = await auth();
 
 	if (session?.user) {
-		redirect("/declaration");
+		redirect("/declaration-remuneration");
 	}
 
 	return (

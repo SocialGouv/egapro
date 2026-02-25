@@ -113,7 +113,7 @@ export function HomePage() {
 											<li>
 												<Link
 													className="fr-btn fr-btn--primary"
-													href="/declaration"
+													href="/declaration-remuneration"
 												>
 													Calculer - Déclarer mon Index
 												</Link>

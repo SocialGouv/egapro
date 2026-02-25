@@ -39,7 +39,7 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 	const [saved, setSaved] = useState(hasInitialData);
 
 	const mutation = api.declaration.updateStep1.useMutation({
-		onSuccess: () => router.push("/declaration/etape/2"),
+		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
 	});
 
 	function openEditModal() {
@@ -155,7 +155,7 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 
 			<FormActions
 				isSubmitting={mutation.isPending}
-				previousHref="/declaration"
+				previousHref="/declaration-remuneration"
 			/>
 
 			{/* Edit modal */}
