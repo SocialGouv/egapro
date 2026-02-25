@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
-import { DeclarationLayout } from "~/modules/declaration";
+import { DeclarationLayout, MissingSiret } from "~/modules/declaration";
 
 export default async function DeclarationRootLayout({
 	children,
@@ -16,7 +16,7 @@ export default async function DeclarationRootLayout({
 
 	const siret = session.user.siret;
 	if (!siret) {
-		redirect("/");
+		return <MissingSiret />;
 	}
 
 	const siren = siret.slice(0, 9);

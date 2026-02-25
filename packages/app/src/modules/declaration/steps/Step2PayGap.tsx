@@ -61,7 +61,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 	const currentYear = new Date().getFullYear();
 
 	const mutation = api.declaration.updateStepCategories.useMutation({
-		onSuccess: () => router.push("/declaration/etape/3"),
+		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
 	});
 
 	function handlePositiveChange(setter: (v: string) => void) {
@@ -271,7 +271,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 
 			<FormActions
 				isSubmitting={mutation.isPending}
-				previousHref="/declaration/etape/1"
+				previousHref="/declaration-remuneration/etape/1"
 			/>
 
 			{/* Edit modal */}

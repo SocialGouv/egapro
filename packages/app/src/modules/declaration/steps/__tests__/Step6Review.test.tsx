@@ -258,7 +258,7 @@ describe("Step6Review", () => {
 		render(<Step6Review />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/declaration/etape/5",
+			"/declaration-remuneration/etape/5",
 		);
 	});
 

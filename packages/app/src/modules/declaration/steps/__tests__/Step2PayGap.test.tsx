@@ -190,7 +190,7 @@ describe("Step2PayGap", () => {
 		render(<Step2PayGap />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/declaration/etape/1",
+			"/declaration-remuneration/etape/1",
 		);
 	});
 });

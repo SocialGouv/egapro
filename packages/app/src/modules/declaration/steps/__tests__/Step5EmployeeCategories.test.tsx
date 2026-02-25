@@ -353,7 +353,7 @@ describe("Step5EmployeeCategories", () => {
 		render(<Step5EmployeeCategories />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/declaration/etape/4",
+			"/declaration-remuneration/etape/4",
 		);
 	});
 

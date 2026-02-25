@@ -615,7 +615,7 @@ export function Step6Review({
 			{isSubmitted ? (
 				<FormActions nextHref="/" nextLabel="Suivant" previousHref="/" />
 			) : (
-				<FormActions nextLabel="Suivant" previousHref="/declaration/etape/5" />
+				<FormActions nextLabel="Suivant" previousHref="/declaration-remuneration/etape/5" />
 			)}
 
 			{!isSubmitted && (

@@ -1,5 +1,6 @@
 export { DeclarationIntro } from "./DeclarationIntro";
 export { DeclarationLayout } from "./DeclarationLayout";
+export { MissingSiret } from "./MissingSiret";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
 export { Step3VariablePay } from "./steps/Step3VariablePay";
