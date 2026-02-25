@@ -5,10 +5,17 @@ import { LoginForm } from "./LoginForm";
 /**
  * Login page with two-column layout: form on the left, illustration on the right.
  *
- * The columns span the full viewport width (not fr-container) so the illustration
- * gets 50 % of the viewport, matching the Figma design. The form column's inner
- * wrapper uses max-width: 39rem (half of fr-container) + justify-content: flex-end
- * to align its content with the header's fr-container.
+ * Both columns span the full viewport width (not fr-container). Each column uses
+ * an inner wrapper with `max-width: 39rem` (half of fr-container) to align its
+ * content with the header's fr-container:
+ *
+ * - **Form column**: inner wrapper is RIGHT-aligned (justify-content: flex-end)
+ *   so its left padding matches the container's left content edge.
+ * - **Illustration column**: inner wrapper is LEFT-aligned (default) so its right
+ *   padding matches the container's right content edge. The image is pushed to
+ *   the right within that wrapper (justify-content: flex-end), creating a
+ *   right-aligned appearance on wide viewports that transitions to centered
+ *   as the viewport narrows toward the container width.
  */
 export function LoginPage() {
 	return (
@@ -68,21 +75,36 @@ export function LoginPage() {
 					<div
 						aria-hidden="true"
 						className="fr-hidden fr-unhidden-md"
-						style={{
-							alignItems: "center",
-							display: "flex",
-							flex: "0 0 50%",
-							justifyContent: "center",
-							padding: "4.5rem 6rem",
-						}}
+						style={{ display: "flex", flex: "0 0 50%" }}
 					>
-						<Image
-							alt=""
-							height={220}
-							src="/img/login-illustration.svg"
-							style={{ height: "auto", width: "100%" }}
-							width={362}
-						/>
+						{/*
+						 * Inner wrapper mirrors the form column's approach:
+						 * - max-width: 39rem = half of fr-container (624px)
+						 * - left-aligned in the column (default)
+						 * - paddingInlineEnd: 1.5rem matches fr-container padding
+						 *   → right edge of content = container content right edge
+						 * - justify-content: flex-end → image is right-aligned
+						 */}
+						<div
+							style={{
+								alignItems: "center",
+								boxSizing: "border-box",
+								display: "flex",
+								justifyContent: "flex-end",
+								maxWidth: "39rem",
+								paddingBlock: "4.5rem",
+								paddingInlineEnd: "1.5rem",
+								width: "100%",
+							}}
+						>
+							<Image
+								alt=""
+								height={220}
+								src="/img/login-illustration.svg"
+								style={{ height: "auto", maxWidth: "100%" }}
+								width={362}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
