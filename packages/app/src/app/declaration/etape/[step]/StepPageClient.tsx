@@ -20,6 +20,7 @@ interface StepPageClientProps {
 	declaration: {
 		totalWomen: number | null;
 		totalMen: number | null;
+		status: string | null;
 	};
 	step1Categories: CategoryData[];
 	step2Rows: PayGapRow[];
@@ -77,6 +78,7 @@ export function StepPageClient({
 		case 6:
 			return (
 				<Step6Review
+					isSubmitted={declaration.status === "submitted"}
 					step2Rows={step2Rows}
 					step3Data={step3Data}
 					step4Categories={step4Categories}

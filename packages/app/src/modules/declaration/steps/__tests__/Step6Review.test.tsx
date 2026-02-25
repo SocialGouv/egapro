@@ -2,8 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Step6Review } from "../Step6Review";
 
+const mockPush = vi.fn();
+
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: vi.fn() }),
+	useRouter: () => ({ push: mockPush }),
 }));
 
 vi.mock("next/link", () => ({
@@ -20,6 +22,22 @@ vi.mock("next/link", () => ({
 			{children}
 		</a>
 	),
+}));
+
+const mockSubmitMutate = vi.fn();
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declaration: {
+			submit: {
+				useMutation: () => ({
+					mutate: mockSubmitMutate,
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
 }));
 
 describe("Step6Review", () => {
@@ -40,18 +58,25 @@ describe("Step6Review", () => {
 
 	it("renders all 4 recap card titles", () => {
 		render(<Step6Review />);
-		expect(screen.getByText("Écart de rémunération")).toBeInTheDocument();
+		// "Écart de rémunération" also appears in the submit modal list, so use getAllByText
 		expect(
-			screen.getByText("Écart de rémunération variable ou complémentaire"),
-		).toBeInTheDocument();
+			screen.getAllByText("Écart de rémunération").length,
+		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getByText(
-				/Proportion de femmes et d.*hommes dans chaque quartile salarial/,
-			),
-		).toBeInTheDocument();
+			screen.getAllByText(
+				"Écart de rémunération variable ou complémentaire",
+			).length,
+		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getByText("Écart de rémunération par catégories de salariés"),
-		).toBeInTheDocument();
+			screen.getAllByText(
+				/Proportion de femmes et d.*hommes dans chaque quartile/,
+			).length,
+		).toBeGreaterThanOrEqual(1);
+		expect(
+			screen.getAllByText(
+				"Écart de rémunération par catégories de salariés",
+			).length,
+		).toBeGreaterThanOrEqual(1);
 	});
 
 	it("does not render Modifier buttons", () => {
@@ -239,8 +264,27 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders next link pointing to home", () => {
+	it("renders next as a submit button when not submitted", () => {
 		render(<Step6Review />);
+		expect(
+			screen.getByRole("button", { name: /suivant/i }),
+		).toBeInTheDocument();
+	});
+
+	it("renders next link pointing to home when already submitted", () => {
+		render(<Step6Review isSubmitted />);
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/",
+		);
+	});
+
+	it("renders both links pointing to home when already submitted", () => {
+		render(<Step6Review isSubmitted />);
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/",
+		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
 			"/",
