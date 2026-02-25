@@ -15,9 +15,9 @@ describe("HomePlaceholder", () => {
 		).toBeInTheDocument();
 	});
 
-	it("has a visible border", () => {
+	it("applies the placeholder style class", () => {
 		const { container } = render(<HomePlaceholder />);
 		const wrapper = container.firstElementChild as HTMLElement;
-		expect(wrapper.style.border).toBe("1px solid var(--border-default-grey)");
+		expect(wrapper.className).toMatch(/placeholder/);
 	});
 });
