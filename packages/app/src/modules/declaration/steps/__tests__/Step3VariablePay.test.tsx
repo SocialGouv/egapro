@@ -117,7 +117,7 @@ describe("Step3VariablePay", () => {
 		render(<Step3VariablePay />);
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -141,7 +141,7 @@ describe("Step3VariablePay", () => {
 		render(<Step3VariablePay />);
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -163,7 +163,7 @@ describe("Step3VariablePay", () => {
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -174,7 +174,7 @@ describe("Step3VariablePay", () => {
 		await user.type(menInput, "200");
 
 		const dialogs = document.querySelectorAll("dialog");
-		const payDialog = dialogs[0]!;
+		const payDialog = dialogs[0] as HTMLElement;
 		const dialogScope = within(payDialog);
 		await user.click(dialogScope.getByText("Enregistrer"));
 
@@ -203,7 +203,7 @@ describe("Step3VariablePay", () => {
 		await user.type(menInput, "20");
 
 		const dialogs = document.querySelectorAll("dialog");
-		const benefDialog = dialogs[1]!;
+		const benefDialog = dialogs[1] as HTMLElement;
 		const dialogScope = within(benefDialog);
 		await user.click(dialogScope.getByText("Enregistrer"));
 

@@ -96,7 +96,7 @@ describe("Step2PayGap", () => {
 		render(<Step2PayGap />);
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -122,7 +122,7 @@ describe("Step2PayGap", () => {
 		render(<Step2PayGap />);
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -142,7 +142,7 @@ describe("Step2PayGap", () => {
 		render(<Step2PayGap />);
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -164,7 +164,7 @@ describe("Step2PayGap", () => {
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 
 		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0]!);
+		await user.click(editButtons[0] as HTMLElement);
 
 		const womenInput = screen.getByLabelText("Rémunération Femmes");
 		const menInput = screen.getByLabelText("Rémunération Hommes");
@@ -176,7 +176,7 @@ describe("Step2PayGap", () => {
 
 		// The dialog is in the DOM but not visually open in jsdom,
 		// so query within the dialog element directly
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		const dialogScope = within(dialog);
 		await user.click(dialogScope.getByText("Enregistrer"));
 

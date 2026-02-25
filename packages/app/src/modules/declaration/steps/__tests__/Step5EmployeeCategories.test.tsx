@@ -140,10 +140,10 @@ describe("Step5EmployeeCategories", () => {
 		const deleteButtons = screen.getAllByRole("button", {
 			name: /supprimer/i,
 		});
-		await user.click(deleteButtons[0]!);
+		await user.click(deleteButtons[0] as HTMLElement);
 
 		// Confirm deletion in dialog
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		expect(dialog).toBeInTheDocument();
 		const dialogScope = within(dialog);
 		await user.click(dialogScope.getByText("Supprimer"));
@@ -297,7 +297,7 @@ describe("Step5EmployeeCategories", () => {
 		render(<Step5EmployeeCategories maxMen={20} maxWomen={10} />);
 
 		// Fill required name first
-		const nameInput = document.getElementById("cat-0-name")!;
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
 		await user.type(nameInput, "Cadres");
 
 		const womenInput = screen.getByLabelText("Effectif femmes, catégorie 1");
@@ -331,14 +331,14 @@ describe("Step5EmployeeCategories", () => {
 		render(<Step5EmployeeCategories />);
 
 		// Fill first category name
-		const nameInput = document.getElementById("cat-0-name")!;
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
 		await user.type(nameInput, "Cadres");
 
 		// Add second category and give same name
 		await user.click(
 			screen.getByRole("button", { name: /ajouter une catégorie/i }),
 		);
-		const nameInput2 = document.getElementById("cat-1-name")!;
+		const nameInput2 = document.getElementById("cat-1-name") as HTMLElement;
 		await user.type(nameInput2, "Cadres");
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));

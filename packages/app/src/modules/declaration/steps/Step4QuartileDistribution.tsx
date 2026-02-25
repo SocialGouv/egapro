@@ -158,14 +158,14 @@ export function Step4QuartileDistribution({
 					return {
 						...c,
 						womenCount: editValues[i]
-							? Number.parseInt(editValues[i]!, 10)
+							? Number.parseInt(editValues[i] as string, 10)
 							: undefined,
 					};
 				}
 				return {
 					...c,
 					menCount: editValues[i]
-						? Number.parseInt(editValues[i]!, 10)
+						? Number.parseInt(editValues[i] as string, 10)
 						: undefined,
 				};
 			}),
@@ -510,9 +510,9 @@ export function Step4QuartileDistribution({
 						<p className="fr-label" id="edit-total-label">
 							Total
 						</p>
-						<p className="fr-text--bold" aria-labelledby="edit-total-label">
+						<output className="fr-text--bold">
 							{editTotal}
-						</p>
+						</output>
 					</div>
 				)}
 
