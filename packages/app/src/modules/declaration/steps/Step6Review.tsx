@@ -566,7 +566,7 @@ export function Step6Review({
 				</CardTitle>
 
 				{step5Parsed.length > 0 ? (
-					step5Parsed.map((cat, i) => (
+					step5Parsed.map((cat) => (
 						<div key={cat.index}>
 							<p className="fr-text--bold fr-mb-0">
 								{cat.name}
