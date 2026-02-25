@@ -67,7 +67,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
-          direct_prompt: |
+          label_trigger: revue-rgaa
+          prompt: |
             Tu es un expert accessibilité RGAA (Référentiel Général d'Amélioration de l'Accessibilité).
 
             L'application est déployée ici : ${{ steps.health.outputs.review_url }}
