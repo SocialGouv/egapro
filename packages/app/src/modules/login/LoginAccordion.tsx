@@ -1,7 +1,10 @@
 /** Expandable section for users who don't have an account yet. */
 export function LoginAccordion() {
 	return (
-		<section className="fr-accordion">
+		<section
+			className="fr-accordion"
+			style={{ background: "var(--background-contrast-grey)" }}
+		>
 			<h2 className="fr-accordion__title">
 				<button
 					aria-controls="accordion-no-account"
