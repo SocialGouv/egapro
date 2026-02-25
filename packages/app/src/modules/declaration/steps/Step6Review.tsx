@@ -255,7 +255,7 @@ function parseStep5Categories(
 	const catIndices = new Set<number>();
 	for (const c of step5Categories) {
 		const match = c.name.match(/^cat:(\d+):/);
-		if (match) catIndices.add(Number.parseInt(match[1]!, 10));
+		if (match) catIndices.add(Number.parseInt(match[1] as string, 10));
 	}
 
 	const result: ParsedCategory[] = [];

@@ -73,7 +73,7 @@ function serializeCategories(
 	result.push({ name: `meta:source:${source}` });
 
 	for (let i = 0; i < categories.length; i++) {
-		const cat = categories[i]!;
+		const cat = categories[i] as EmployeeCategory;
 		const p = `cat:${i}`;
 
 		// Store text data (name/detail) in categoryName, not in numeric columns
@@ -124,17 +124,17 @@ function deserializeCategories(data: StepCategoryData[]): {
 		// Parse text fields encoded in categoryName
 		const nameMatch = row.name.match(/^cat:(\d+):name:(.*)$/);
 		if (nameMatch) {
-			const index = Number.parseInt(nameMatch[1]!, 10);
+			const index = Number.parseInt(nameMatch[1] as string, 10);
 			if (!catMap.has(index)) catMap.set(index, createEmptyCategory());
-			catMap.get(index)!.name = nameMatch[2]!;
+			(catMap.get(index) as EmployeeCategory).name = nameMatch[2] as string;
 			continue;
 		}
 
 		const detailMatch = row.name.match(/^cat:(\d+):detail:(.*)$/);
 		if (detailMatch) {
-			const index = Number.parseInt(detailMatch[1]!, 10);
+			const index = Number.parseInt(detailMatch[1] as string, 10);
 			if (!catMap.has(index)) catMap.set(index, createEmptyCategory());
-			catMap.get(index)!.detail = detailMatch[2]!;
+			(catMap.get(index) as EmployeeCategory).detail = detailMatch[2] as string;
 			continue;
 		}
 
@@ -142,13 +142,13 @@ function deserializeCategories(data: StepCategoryData[]): {
 		const match = row.name.match(/^cat:(\d+):(.+)$/);
 		if (!match) continue;
 
-		const index = Number.parseInt(match[1]!, 10);
-		const field = match[2]!;
+		const index = Number.parseInt(match[1] as string, 10);
+		const field = match[2] as string;
 
 		if (!catMap.has(index)) {
 			catMap.set(index, createEmptyCategory());
 		}
-		const cat = catMap.get(index)!;
+		const cat = catMap.get(index) as EmployeeCategory;
 
 		switch (field) {
 			case "effectif":

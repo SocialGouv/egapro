@@ -231,7 +231,7 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getByText("Modifier les données")).toBeInTheDocument();
 
 		// Dialog subtitle matches table title but in a <p> element
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		const dialogScope = within(dialog);
 		expect(
 			dialogScope.getByText("Rémunération annuelle brute moyenne"),
@@ -258,7 +258,7 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getByText("Modifier les effectifs")).toBeInTheDocument();
 
 		// Subtitle in dialog
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		const dialogScope = within(dialog);
 		expect(dialogScope.getByText("Nombre de femmes")).toBeInTheDocument();
 
@@ -282,7 +282,7 @@ describe("Step4QuartileDistribution", () => {
 		await user.clear(q1Input);
 		await user.type(q1Input, "980");
 
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		const dialogScope = within(dialog);
 		await user.click(dialogScope.getByText("Enregistrer"));
 
@@ -335,7 +335,7 @@ describe("Step4QuartileDistribution", () => {
 		);
 
 		expect(screen.getByText("Modifier les données")).toBeInTheDocument();
-		const dialog = document.querySelector("dialog")!;
+		const dialog = document.querySelector("dialog") as HTMLElement;
 		const dialogScope = within(dialog);
 		expect(
 			dialogScope.getByText("Rémunération horaire brute moyenne"),
