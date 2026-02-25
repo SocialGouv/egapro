@@ -67,9 +67,7 @@ describe("Step6Review", () => {
 
 	it("renders tooltip buttons on cards 3 and 4 only", () => {
 		const { container } = render(<Step6Review />);
-		const tooltipButtons = container.querySelectorAll(
-			".fr-icon-question-line",
-		);
+		const tooltipButtons = container.querySelectorAll(".fr-icon-question-line");
 		expect(tooltipButtons).toHaveLength(2);
 	});
 
@@ -101,12 +99,12 @@ describe("Step6Review", () => {
 			/>,
 		);
 		// Side-by-side headers
-		expect(
-			screen.getAllByText("Annuelle brute").length,
-		).toBeGreaterThanOrEqual(1);
-		expect(
-			screen.getAllByText("Horaire brute").length,
-		).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
+			1,
+		);
+		expect(screen.getAllByText("Horaire brute").length).toBeGreaterThanOrEqual(
+			1,
+		);
 		// Row labels
 		expect(screen.getAllByText("Moyenne").length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByText("Médiane").length).toBeGreaterThanOrEqual(2);
@@ -183,12 +181,8 @@ describe("Step6Review", () => {
 			screen.getByText("Rémunération horaire brute moyenne"),
 		).toBeInTheDocument();
 		expect(screen.getAllByText("1er quartile").length).toBe(4);
-		expect(
-			screen.getAllByText("Pourcentage de femmes").length,
-		).toBe(2);
-		expect(
-			screen.getAllByText(/Pourcentage d.*hommes/).length,
-		).toBe(2);
+		expect(screen.getAllByText("Pourcentage de femmes").length).toBe(2);
+		expect(screen.getAllByText(/Pourcentage d.*hommes/).length).toBe(2);
 	});
 
 	it("renders step 5 category gaps side-by-side", () => {
@@ -224,19 +218,15 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getByText("Ingénieurs")).toBeInTheDocument();
 		// Side-by-side headers
-		expect(
-			screen.getAllByText("Annuelle brute").length,
-		).toBeGreaterThanOrEqual(1);
-		expect(
-			screen.getAllByText("Horaire brute").length,
-		).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
+			1,
+		);
+		expect(screen.getAllByText("Horaire brute").length).toBeGreaterThanOrEqual(
+			1,
+		);
 		// Row labels (2 per column = 4 total)
-		expect(
-			screen.getAllByText("Salaire de base").length,
-		).toBe(2);
-		expect(
-			screen.getAllByText("Composantes variables").length,
-		).toBe(2);
+		expect(screen.getAllByText("Salaire de base").length).toBe(2);
+		expect(screen.getAllByText("Composantes variables").length).toBe(2);
 		// Badges present
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});

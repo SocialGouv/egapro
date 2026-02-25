@@ -3,11 +3,7 @@
 import { FormActions } from "../shared/FormActions";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
-import type {
-	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
-} from "../types";
+import type { PayGapRow, StepCategoryData, VariablePayData } from "../types";
 
 // -- Helpers --
 
@@ -109,9 +105,7 @@ function CardTitle({
 				}}
 			/>
 			<p className="fr-text--bold fr-text--lg fr-mb-0">{children}</p>
-			{tooltipId && (
-				<TooltipButton id={tooltipId} label="Aide" />
-			)}
+			{tooltipId && <TooltipButton id={tooltipId} label="Aide" />}
 		</div>
 	);
 }
@@ -291,10 +285,7 @@ function parseStep5Categories(
 					: null,
 			annualVariableGap:
 				annualVariable?.womenValue && annualVariable?.menValue
-					? computeGap(
-							annualVariable.womenValue,
-							annualVariable.menValue,
-						)
+					? computeGap(annualVariable.womenValue, annualVariable.menValue)
 					: null,
 			hourlyBaseGap:
 				hourlyBase?.womenValue && hourlyBase?.menValue
@@ -302,10 +293,7 @@ function parseStep5Categories(
 					: null,
 			hourlyVariableGap:
 				hourlyVariable?.womenValue && hourlyVariable?.menValue
-					? computeGap(
-							hourlyVariable.womenValue,
-							hourlyVariable.menValue,
-						)
+					? computeGap(hourlyVariable.womenValue, hourlyVariable.menValue)
 					: null,
 		});
 	}
@@ -377,16 +365,10 @@ export function Step6Review({
 		? computeGap(step3MedianRow.womenValue, step3MedianRow.menValue)
 		: null;
 	const step3HourlyMeanGap = step3HourlyMeanRow
-		? computeGap(
-				step3HourlyMeanRow.womenValue,
-				step3HourlyMeanRow.menValue,
-			)
+		? computeGap(step3HourlyMeanRow.womenValue, step3HourlyMeanRow.menValue)
 		: null;
 	const step3HourlyMedianGap = step3HourlyMedianRow
-		? computeGap(
-				step3HourlyMedianRow.womenValue,
-				step3HourlyMedianRow.menValue,
-			)
+		? computeGap(step3HourlyMedianRow.womenValue, step3HourlyMedianRow.menValue)
 		: null;
 
 	// Parse step 4 quartile data
@@ -417,13 +399,9 @@ export function Step6Review({
 			<StepIndicator currentStep={6} />
 
 			{/* Description */}
-			<p
-				className="fr-mb-0"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
+			<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre déclaration aux services du ministère chargé du
-				travail.
+				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>
 
 			{/* Card 1: Écart de rémunération (Step 2) */}
@@ -438,10 +416,7 @@ export function Step6Review({
 						hourlyMedianGap={hourlyMedianGap}
 					/>
 				) : (
-					<p
-						className="fr-mb-0"
-						style={{ color: "var(--text-mention-grey)" }}
-					>
+					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 						Aucune donnée renseignée.
 					</p>
 				)}
@@ -449,9 +424,7 @@ export function Step6Review({
 
 			{/* Card 2: Rémunération variable (Step 3) */}
 			<div style={cardStyle}>
-				<CardTitle>
-					Écart de rémunération variable ou complémentaire
-				</CardTitle>
+				<CardTitle>Écart de rémunération variable ou complémentaire</CardTitle>
 
 				{step3Data?.rows && step3Data.rows.length > 0 ? (
 					<>
@@ -464,9 +437,7 @@ export function Step6Review({
 
 						<div style={sideBySideStyle}>
 							<div style={columnStyle}>
-								<p className="fr-text--bold fr-text--sm fr-mb-0">
-									Proportion
-								</p>
+								<p className="fr-text--bold fr-text--sm fr-mb-0">Proportion</p>
 								<div
 									style={{
 										display: "flex",
@@ -510,10 +481,7 @@ export function Step6Review({
 						</div>
 					</>
 				) : (
-					<p
-						className="fr-mb-0"
-						style={{ color: "var(--text-mention-grey)" }}
-					>
+					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 						Aucune donnée renseignée.
 					</p>
 				)}
@@ -522,8 +490,7 @@ export function Step6Review({
 			{/* Card 3: Proportion par quartile (Step 4) */}
 			<div style={cardStyle}>
 				<CardTitle tooltipId="tooltip-quartile">
-					Proportion de femmes et d&apos;hommes dans chaque quartile
-					salarial
+					Proportion de femmes et d&apos;hommes dans chaque quartile salarial
 				</CardTitle>
 
 				{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
@@ -550,10 +517,7 @@ export function Step6Review({
 						)}
 					</>
 				) : (
-					<p
-						className="fr-mb-0"
-						style={{ color: "var(--text-mention-grey)" }}
-					>
+					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 						Aucune donnée renseignée.
 					</p>
 				)}
@@ -568,9 +532,7 @@ export function Step6Review({
 				{step5Parsed.length > 0 ? (
 					step5Parsed.map((cat) => (
 						<div key={cat.index}>
-							<p className="fr-text--bold fr-mb-0">
-								{cat.name}
-							</p>
+							<p className="fr-text--bold fr-mb-0">{cat.name}</p>
 
 							<div style={sideBySideStyle}>
 								<GapColumn
@@ -604,10 +566,7 @@ export function Step6Review({
 						</div>
 					))
 				) : (
-					<p
-						className="fr-mb-0"
-						style={{ color: "var(--text-mention-grey)" }}
-					>
+					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
 						Aucune donnée renseignée.
 					</p>
 				)}
