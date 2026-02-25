@@ -507,10 +507,10 @@ export function Step4QuartileDistribution({
 				{/* Computed total for count dialogs */}
 				{editMode?.field !== "remuneration" && (
 					<div className="fr-input-group fr-mb-3w">
-						<label className="fr-label" htmlFor="edit-total">
+						<p className="fr-label" id="edit-total-label">
 							Total
-						</label>
-						<p className="fr-text--bold" id="edit-total">
+						</p>
+						<p className="fr-text--bold" aria-labelledby="edit-total-label">
 							{editTotal}
 						</p>
 					</div>
