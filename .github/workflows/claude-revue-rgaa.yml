@@ -41,6 +41,8 @@ jobs:
       - name: Compute review URL
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
+        with:
+          branch: ${{ github.event.pull_request.head.ref }}
 
       - name: Wait for app to be ready
         id: health
