@@ -14,7 +14,7 @@ const config = {
 			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/setting/breakpoint";
 			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/tool/breakpoint";
 		`,
-		silenceDeprecations: ["legacy-js-api", "import"],
+		silenceDeprecations: ["legacy-js-api", "import", "global-builtin"],
 	},
 };
 
