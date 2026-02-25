@@ -172,7 +172,7 @@ async def public_data_as_xlsx(debug=False):
     bar = ProgressBar(prefix="Computing", total=len(records))
     for record in bar.iter(records):
         data: models.Data = record.data
-        if not data:
+        if not data or data.year not in constants.PUBLIC_YEARS:
             continue
         ues = ",".join(
             [
