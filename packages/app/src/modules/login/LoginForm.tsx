@@ -1,3 +1,4 @@
+import styles from "./LoginForm.module.scss";
 import { LoginAccordion } from "./LoginAccordion";
 import { ProConnectButton } from "./ProConnectButton";
 
@@ -10,20 +11,8 @@ import { ProConnectButton } from "./ProConnectButton";
  */
 export function LoginForm() {
 	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				gap: "2rem",
-			}}
-		>
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					gap: "1.5rem",
-				}}
-			>
+		<div className={styles.form}>
+			<div className={styles.content}>
 				<h1>Connectez-vous avec ProConnect</h1>
 				<p>
 					Accédez à votre espace de déclaration Egapro avec la solution

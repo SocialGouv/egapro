@@ -1,14 +1,11 @@
 import { NewTabNotice } from "~/modules/layout";
 
+import styles from "./ProConnectButton.module.scss";
+
 /** ProConnect authentication button with official branding and info link. */
 export function ProConnectButton() {
 	return (
-		<div className="fr-connect-group">
-			<style>
-				{
-					".fr-connect--proconnect::before { background-image: url(/img/proconnect-logo.svg); }"
-				}
-			</style>
+		<div className={`fr-connect-group ${styles.proConnectGroup}`}>
 			<a
 				className="fr-connect fr-connect--proconnect"
 				href="/api/auth/signin/proconnect"

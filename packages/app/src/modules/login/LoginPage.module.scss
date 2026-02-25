@@ -1,0 +1,63 @@
+.columns {
+	display: flex;
+	flex-direction: column;
+
+	@include respond-from(md) {
+		flex-direction: row;
+		min-height: 60vh;
+	}
+}
+
+.formColumn {
+	display: flex;
+
+	@include respond-from(md) {
+		flex: 1;
+		justify-content: flex-end;
+	}
+}
+
+.formInner {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	max-width: 39rem;
+	padding: 2rem 1.5rem;
+	width: 100%;
+
+	@include respond-from(md) {
+		padding: 3.5rem 7.5rem 3.5rem 1.5rem;
+	}
+}
+
+.illustrationColumn {
+	background: var(--background-alt-blue-france);
+	display: flex;
+	justify-content: center;
+
+	@include respond-from(md) {
+		flex: 0 0 50%;
+		justify-content: flex-start;
+	}
+}
+
+.illustrationInner {
+	align-items: center;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	padding: 2rem 1.5rem;
+	width: 100%;
+
+	@include respond-from(md) {
+		justify-content: flex-end;
+		max-width: 39rem;
+		padding-block: 4.5rem;
+		padding-inline: 0 1.5rem;
+	}
+}
+
+.illustration {
+	height: auto;
+	max-width: 100%;
+}
