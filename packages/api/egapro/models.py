@@ -70,8 +70,8 @@ class Data(dict):
     @property
     def naf(self):
         code = self.path("entreprise.code_naf")
-        if not code:
-            return None
+        if not code or code not in NAF:
+            return code
         return f"{code} - {NAF[code]}"
 
     @property

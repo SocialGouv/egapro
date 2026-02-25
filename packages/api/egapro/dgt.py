@@ -42,8 +42,8 @@ def isodate(val):
 
 
 def code_naf(code):
-    if not code:
-        return None
+    if not code or code not in NAF:
+        return code
     return f"{code} - {NAF[code]}"
 
 
