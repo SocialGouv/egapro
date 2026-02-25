@@ -63,9 +63,8 @@ describe("Step6Review", () => {
 			screen.getAllByText("Écart de rémunération").length,
 		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getAllByText(
-				"Écart de rémunération variable ou complémentaire",
-			).length,
+			screen.getAllByText("Écart de rémunération variable ou complémentaire")
+				.length,
 		).toBeGreaterThanOrEqual(1);
 		expect(
 			screen.getAllByText(
@@ -73,9 +72,8 @@ describe("Step6Review", () => {
 			).length,
 		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getAllByText(
-				"Écart de rémunération par catégories de salariés",
-			).length,
+			screen.getAllByText("Écart de rémunération par catégories de salariés")
+				.length,
 		).toBeGreaterThanOrEqual(1);
 	});
 

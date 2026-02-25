@@ -510,9 +510,7 @@ export function Step4QuartileDistribution({
 						<p className="fr-label" id="edit-total-label">
 							Total
 						</p>
-						<output className="fr-text--bold">
-							{editTotal}
-						</output>
+						<output className="fr-text--bold">{editTotal}</output>
 					</div>
 				)}
 
