@@ -114,6 +114,8 @@ jobs:
             - Priorisation : critique / majeur / mineur
             - Extraits de code problématiques quand pertinent
 
+            IMPORTANT : Une fois toutes les analyses terminées, ta DERNIÈRE réponse textuelle doit contenir l'INTÉGRALITÉ du rapport structuré. Ne fragmente pas le rapport en plusieurs messages — produis-le en un seul bloc dans ta réponse finale.
+
             Commence par lancer `audit_site` sur ${{ steps.health.outputs.review_url }} pour un scan global, puis approfondis page par page avec `scan_page`, `audit_keyboard` et `scan_page_matrix`.
           claude_args: >-
             --max-turns 80
@@ -126,15 +128,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           EXECUTION_FILE="${RUNNER_TEMP}/claude-execution-output.json"
-          if [ -f "$EXECUTION_FILE" ]; then
-            jq -r 'last | .result // empty' "$EXECUTION_FILE" > /tmp/report.md
-            if [ -s /tmp/report.md ]; then
-              gh pr comment ${{ github.event.pull_request.number }} \
-                --repo ${{ github.repository }} \
-                --body-file /tmp/report.md
-            else
-              echo "No result text found in execution output"
-            fi
-          else
+          if [ ! -f "$EXECUTION_FILE" ]; then
             echo "Execution file not found at $EXECUTION_FILE"
+            exit 1
+          fi
+
+          # Extract the result field from the result message
+          jq -r '.[] | select(.type == "result") | .result // empty' "$EXECUTION_FILE" > /tmp/report.md
+
+          # If result is empty or too short (<500 chars), fallback to the longest
+          # assistant text block (which contains the full report)
+          if [ ! -s /tmp/report.md ] || [ "$(wc -c < /tmp/report.md)" -lt 500 ]; then
+            echo "Result field too short, extracting longest assistant text block..."
+            jq -r '
+              [.[] | select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text]
+              | sort_by(length) | last // empty
+            ' "$EXECUTION_FILE" > /tmp/report.md
+          fi
+
+          if [ -s /tmp/report.md ]; then
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --body-file /tmp/report.md
+          else
+            echo "No report content found in execution output"
+            exit 1
           fi
