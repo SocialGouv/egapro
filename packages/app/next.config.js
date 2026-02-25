@@ -9,6 +9,13 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	sassOptions: {
+		additionalData: `
+			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/setting/breakpoint";
+			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/tool/breakpoint";
+		`,
+		silenceDeprecations: ["legacy-js-api", "import", "global-builtin"],
+	},
 };
 
 export default withSentryConfig(config, {

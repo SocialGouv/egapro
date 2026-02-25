@@ -13,6 +13,7 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"checkJs": true,
+		"types": ["vitest/globals", "@testing-library/jest-dom/vitest"],
 		/* Bundled projects */
 		"lib": ["dom", "dom.iterable", "ES2022"],
 		"noEmit": true,
@@ -40,18 +41,5 @@
 		".next/types/**/*.ts",
 		".next/dev/types/**/*.ts"
 	],
-	"exclude": [
-		"node_modules",
-		"public",
-		"generated",
-		"coverage",
-		"**/*.test.ts",
-		"**/*.test.tsx",
-		"**/*.spec.ts",
-		"**/*.spec.tsx",
-		"**/*.e2e.ts",
-		"**/*.e2e.tsx",
-		"src/test/**",
-		"src/e2e/**"
-	]
+	"exclude": ["node_modules", "public", "generated", "coverage"]
 }

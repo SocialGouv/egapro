@@ -25,11 +25,13 @@ export function FooterBottom() {
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link
-						className="fr-footer__bottom-link"
-						href="/politique-de-confidentialite-v2"
-					>
-						Politique de confidentialité
+					<Link className="fr-footer__bottom-link" href="/gestion-des-cookies">
+						Gestion des cookies
+					</Link>
+				</li>
+				<li className="fr-footer__bottom-item">
+					<Link className="fr-footer__bottom-link" href="/plan-du-site">
+						Plan du site
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
@@ -51,7 +53,7 @@ export function FooterBottom() {
 						rel="noopener noreferrer"
 						target="_blank"
 					>
-						licence Apache 2.0
+						licence etalab-2.0
 						<NewTabNotice />
 					</a>
 				</p>

@@ -117,6 +117,9 @@ importers:
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
+      sass:
+        specifier: ^1.97.3
+        version: 1.97.3
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -7261,7 +7264,6 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
-    optional: true
 
   chrome-launcher@0.13.4:
     dependencies:
@@ -8120,8 +8122,7 @@ snapshots:
 
   immediate@3.0.6: {}
 
-  immutable@5.1.4:
-    optional: true
+  immutable@5.1.4: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -9009,7 +9010,7 @@ snapshots:
 
   randombytes@2.1.0:
     dependencies:
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
 
   range-parser@1.2.1: {}
 
@@ -9080,8 +9081,7 @@ snapshots:
     dependencies:
       picomatch: 2.3.1
 
-  readdirp@4.1.2:
-    optional: true
+  readdirp@4.1.2: {}
 
   redent@3.0.0:
     dependencies:
@@ -9176,7 +9176,6 @@ snapshots:
       source-map-js: 1.2.1
     optionalDependencies:
       '@parcel/watcher': 2.5.6
-    optional: true
 
   saxes@6.0.0:
     dependencies:

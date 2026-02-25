@@ -18,8 +18,25 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+// HomeNotice is a client component using useState — mock it to avoid issues in jsdom
+vi.mock("../HomeNotice", () => ({
+	HomeNotice: () => (
+		<div data-testid="home-notice">Bandeau d&apos;information</div>
+	),
+}));
+
 describe("HomePage", () => {
-	it("displays the main heading", () => {
+	it("has #content id on main for skip links", () => {
+		render(<HomePage />);
+		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
+	});
+
+	it("renders the notice banner", () => {
+		render(<HomePage />);
+		expect(screen.getByTestId("home-notice")).toBeInTheDocument();
+	});
+
+	it("renders the hero section heading", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -29,43 +46,29 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays the Index section with its action links", () => {
+	it("renders the search section", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
-				name: /index de l'égalité professionnelle/i,
+				level: 2,
+				name: /rechercher une entreprise/i,
 			}),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /calculer - déclarer mon index/i }),
-		).toHaveAttribute("href", "/index-egapro");
-		expect(
-			screen.getByRole("link", { name: /consulter l'index/i }),
-		).toHaveAttribute("href", "/index-egapro/recherche");
 	});
 
-	it("displays the Balanced Representation section with its action links", () => {
+	it("renders the resources section", () => {
 		render(<HomePage />);
 		expect(
 			screen.getByRole("heading", {
-				name: /représentation équilibrée/i,
+				level: 3,
+				name: /questions fréquentes/i,
 			}),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /déclarer mes écarts/i }),
-		).toHaveAttribute("href", "/representation-equilibree");
-		expect(
-			screen.getByRole("link", { name: /consulter les écarts/i }),
-		).toHaveAttribute("href", "/representation-equilibree/recherche");
 	});
 
-	it("main content has id #content for skip links", () => {
+	it("renders the three placeholder sections", () => {
 		render(<HomePage />);
-		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
-	});
-
-	it("hero section mentions the 50 employees requirement", () => {
-		render(<HomePage />);
-		expect(screen.getByText(/au moins 50 salariés/i)).toBeInTheDocument();
+		const placeholders = screen.getAllByText("Section non finalisée");
+		expect(placeholders).toHaveLength(3);
 	});
 });
