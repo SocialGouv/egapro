@@ -239,7 +239,10 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 					<p className="fr-label" id="edit-total-label">
 						Total
 					</p>
-					<output className="fr-p-1w fr-text--bold" htmlFor="edit-women edit-men">
+					<output
+						className="fr-p-1w fr-text--bold"
+						htmlFor="edit-women edit-men"
+					>
 						{editWomen + editMen}
 					</output>
 				</div>

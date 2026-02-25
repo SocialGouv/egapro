@@ -613,16 +613,9 @@ export function Step6Review({
 			</div>
 
 			{isSubmitted ? (
-				<FormActions
-					nextHref="/"
-					nextLabel="Suivant"
-					previousHref="/"
-				/>
+				<FormActions nextHref="/" nextLabel="Suivant" previousHref="/" />
 			) : (
-				<FormActions
-					nextLabel="Suivant"
-					previousHref="/declaration/etape/5"
-				/>
+				<FormActions nextLabel="Suivant" previousHref="/declaration/etape/5" />
 			)}
 
 			{!isSubmitted && (
@@ -648,28 +641,21 @@ export function Step6Review({
 										</button>
 									</div>
 									<div className="fr-modal__content">
-										<h2
-											className="fr-modal__title"
-											id="submit-modal-title"
-										>
+										<h2 className="fr-modal__title" id="submit-modal-title">
 											Soumettre
 										</h2>
 										<p>
-											Vous allez soumettre les indicateurs suivants aux
-											services du ministère chargé du travail :
+											Vous allez soumettre les indicateurs suivants aux services
+											du ministère chargé du travail :
 										</p>
 										<ul>
 											<li>Écart de rémunération</li>
-											<li>
-												Écart de rémunération variable ou complémentaire
-											</li>
+											<li>Écart de rémunération variable ou complémentaire</li>
 											<li>
 												Proportion de femmes et d&apos;hommes dans chaque
 												quartile de rémunération
 											</li>
-											<li>
-												Écart de rémunération par catégories de salariés
-											</li>
+											<li>Écart de rémunération par catégories de salariés</li>
 										</ul>
 										<div className="fr-checkbox-group fr-mt-2w">
 											<input
@@ -680,9 +666,9 @@ export function Step6Review({
 											/>
 											<label className="fr-label" htmlFor="submit-certify">
 												Je certifie que les données saisies sont exactes et
-												conformes aux informations disponibles dans les
-												systèmes de paie et de gestion des ressources
-												humaines de l&apos;entreprise.
+												conformes aux informations disponibles dans les systèmes
+												de paie et de gestion des ressources humaines de
+												l&apos;entreprise.
 											</label>
 										</div>
 									</div>
