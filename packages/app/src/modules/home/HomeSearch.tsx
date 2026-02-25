@@ -1,3 +1,5 @@
+import styles from "./HomeSearch.module.scss";
+
 /** Company search section by SIREN, region, department or sector. */
 export function HomeSearch() {
 	return (
@@ -28,14 +30,13 @@ export function HomeSearch() {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div
 						aria-hidden="true"
-						className="fr-col-12 fr-col-md-3"
-						style={{ display: "flex", justifyContent: "center" }}
+						className={`fr-hidden fr-unhidden-md fr-col-md-3 ${styles.illustrationWrapper}`}
 					>
 						<img
 							alt=""
+							className={styles.illustration}
 							height="240"
 							src="/assets/images/home/search-illustration.svg"
-							style={{ height: "auto", maxWidth: "100%", width: "auto" }}
 							width="223"
 						/>
 					</div>

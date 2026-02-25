@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import styles from "./HomeHero.module.scss";
+
 type InfoItemProps = {
 	iconClass: string;
 	title: string;
@@ -8,42 +10,12 @@ type InfoItemProps = {
 
 function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 	return (
-		<div
-			style={{
-				alignItems: "center",
-				display: "flex",
-				gap: "2rem",
-			}}
-		>
-			<div
-				aria-hidden="true"
-				style={{
-					alignItems: "center",
-					background: "var(--background-default-grey)",
-					borderRadius: "50%",
-					display: "flex",
-					flexShrink: 0,
-					height: "4rem",
-					justifyContent: "center",
-					width: "4rem",
-				}}
-			>
-				<span
-					className={`${iconClass} fr-icon--lg`}
-					style={{ color: "var(--artwork-minor-blue-france)" }}
-				/>
+		<div className={styles.infoItem}>
+			<div aria-hidden="true" className={styles.infoItemIcon}>
+				<span className={`${iconClass} fr-icon--lg`} />
 			</div>
-			<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-				<p
-					className="fr-mb-0"
-					style={{
-						fontSize: "1.25rem",
-						fontWeight: 700,
-						lineHeight: "1.75rem",
-					}}
-				>
-					{title}
-				</p>
+			<div className={styles.infoItemContent}>
+				<p className={`fr-mb-0 ${styles.infoItemTitle}`}>{title}</p>
 				<p className="fr-text--sm fr-mb-0">{description}</p>
 			</div>
 		</div>
@@ -53,23 +25,10 @@ function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 /** Hero section of the home page: title, text, CTA button and key indicators. */
 export function HomeHero() {
 	return (
-		<section
-			aria-labelledby="hero-heading"
-			style={{
-				background:
-					"linear-gradient(-33deg, var(--background-alt-blue-france) 39%, #e7d3ff 113%)",
-			}}
-		>
+		<section aria-labelledby="hero-heading" className={styles.hero}>
 			<div className="fr-container fr-py-8w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div
-						className="fr-col-12 fr-col-md-7"
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "1.5rem",
-						}}
-					>
+					<div className={`fr-col-12 fr-col-md-7 ${styles.heroContent}`}>
 						<h1 id="hero-heading">Bienvenue sur Egapro</h1>
 						<p className="fr-mb-0">
 							L&apos;espace dédié aux entreprises pour déclarer leurs
@@ -77,7 +36,7 @@ export function HomeHero() {
 							et les hommes.
 						</p>
 						<Link
-							className="fr-btn fr-icon-file-text-line fr-btn--icon-left"
+							className={`fr-btn fr-icon-file-text-line fr-btn--icon-left ${styles.cta}`}
 							href="/index-egapro"
 						>
 							Déclarer mes indicateurs
@@ -85,14 +44,7 @@ export function HomeHero() {
 					</div>
 
 					<div className="fr-col-12 fr-col-md-5">
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								gap: "2rem",
-								padding: "1.5rem",
-							}}
-						>
+						<div className={styles.infoList}>
 							<HeroInfoItem
 								description="Plus de 35 000 entreprises déclarantes"
 								iconClass="fr-icon-team-line"

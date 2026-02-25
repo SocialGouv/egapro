@@ -27,6 +27,7 @@ Do not consider a task as complete until these three commands pass without error
 | UI | React | ^19 |
 | Typing | TypeScript | ^5 — strict mode |
 | Design system | @gouvfr/dsfr | ^1.14 (native, without react-dsfr) |
+| Styling | DSFR classes + SCSS Modules | sass (DSFR mixins auto-injected) |
 | API | tRPC | ^11 |
 | ORM | Drizzle ORM | ^0.45 |
 | Auth | NextAuth | 4.x |
@@ -204,6 +205,56 @@ Or via `.mcp.json` at the project root to share with the team:
 | `get_color_tokens` | Color tokens by context/usage, light/dark themes |
 
 **Rule:** before writing DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR CSS classes from memory.
+
+### Styling strategy (strict priority order)
+
+**Inline `style={}` is FORBIDDEN in `.tsx` files.** All styling must go through classes.
+
+Follow this cascade — use the first option that works:
+
+1. **DSFR classes only** (preferred) — The DSFR covers layout (`fr-grid-row`, `fr-col-*`), spacing (`fr-mt-*`, `fr-py-*`), typography (`fr-text--*`), colors (CSS custom properties), and all components. Always check the DSFR docs first — it has almost everything.
+
+2. **DSFR utility classes + DSFR CSS custom properties** — For colors, use `var(--background-default-grey)`, `var(--text-title-grey)`, etc. via `className`. Combine DSFR classes to avoid custom CSS.
+
+3. **Scoped SCSS Module** (last resort) — Only when the DSFR genuinely cannot handle the case (e.g. custom gradient, complex responsive override). Create a `Component.module.scss` next to the component. Never use `!important` — increase specificity with selector doubling (`.foo.foo`) if needed.
+
+```tsx
+// FORBIDDEN — inline style
+<div style={{ display: "flex", gap: "1.5rem" }}>
+
+// CORRECT — DSFR classes
+<div className="fr-grid-row fr-grid-row--gutters">
+
+// CORRECT — SCSS module (only if DSFR cannot do it)
+import styles from "./MyComponent.module.scss";
+<section className={styles.heroGradient}>
+```
+
+### SCSS Modules & DSFR SASS
+
+`next.config.js` auto-injects DSFR breakpoint settings and mixins into every `.scss` file via `sassOptions.additionalData`. No manual import needed.
+
+**Available mixins in any `.module.scss`:**
+
+| Mixin | Generated media query | Usage |
+|---|---|---|
+| `@include respond-from(md)` | `@media (min-width: 48em)` | Mobile-first (preferred) |
+| `@include respond-to(sm)` | `@media (max-width: 47.98em)` | Desktop-first (when no alternative) |
+
+**Breakpoint tokens:** `xs` (0), `sm` (36em), `md` (48em), `lg` (62em), `xl` (78em)
+
+```scss
+// CORRECT — uses DSFR mixin, no magic numbers
+.cta {
+  @include respond-to(sm) {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+// FORBIDDEN — hardcoded breakpoint
+@media (max-width: 768px) { ... }
+```
 
 ### Assets
 DSFR assets (CSS, fonts, icons) are copied to `public/dsfr/` by `scripts/copy-dsfr.js`. This folder is **ignored by git** and regenerated on each `dev` / `build`.

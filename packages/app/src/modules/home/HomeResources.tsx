@@ -1,3 +1,5 @@
+import styles from "./HomeResources.module.scss";
+
 type ResourceTileProps = {
 	href: string;
 	pictogramPath: string;
@@ -52,10 +54,7 @@ function ResourceTile({
 /** Resources section: FAQ, reference texts and contact. */
 export function HomeResources() {
 	return (
-		<section
-			aria-label="Ressources utiles"
-			style={{ background: "var(--background-alt-blue-france)" }}
-		>
+		<section aria-label="Ressources utiles" className={styles.section}>
 			<div className="fr-container fr-py-6w">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-9">
@@ -91,14 +90,13 @@ export function HomeResources() {
 
 					<div
 						aria-hidden="true"
-						className="fr-col-12 fr-col-md-3"
-						style={{ display: "flex", justifyContent: "center" }}
+						className={`fr-col-12 fr-col-md-3 ${styles.illustrationWrapper}`}
 					>
 						<img
 							alt=""
+							className={styles.illustration}
 							height="147"
 							src="/assets/images/home/help-illustration.svg"
-							style={{ height: "auto", maxWidth: "100%", width: "auto" }}
 							width="210"
 						/>
 					</div>
