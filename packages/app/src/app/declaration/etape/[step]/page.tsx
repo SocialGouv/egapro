@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { TOTAL_STEPS } from "~/modules/declaration/types";
@@ -17,6 +17,11 @@ export default async function StepPage({ params }: StepPageProps) {
 	}
 
 	const data = await api.declaration.getOrCreate();
+
+	// If declaration is already submitted, redirect non-recap steps to the recap
+	if (data.declaration.status === "submitted" && step !== 6) {
+		redirect("/declaration/etape/6");
+	}
 
 	const step1Categories = data.categories
 		.filter((c) => c.step === 1)
