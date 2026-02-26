@@ -23,6 +23,10 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          run_install: false
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -31,14 +35,14 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
-          yarn --immutable
-          yarn setup-python
+          pnpm install --frozen-lockfile
+          pnpm setup-python
 
       - name: Up for tests API
         run: docker compose up --build -d api db test_db
 
       - name: Check types
-        run: yarn check-all
+        run: pnpm check-all
 
       - name: Down for tests API
         run: docker compose down

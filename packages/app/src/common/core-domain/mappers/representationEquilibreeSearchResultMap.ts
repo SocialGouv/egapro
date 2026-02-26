@@ -1,5 +1,5 @@
-import type { RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
-import { NAF } from "@common/dict";
+import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
+import { type NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 

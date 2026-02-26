@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "predev": "only-include-used-icons",
-    "dev": "node --stack-size=2000 ../../node_modules/.bin/next dev",
+    "dev": "node --stack-size=2000 node_modules/next/dist/bin/next dev",
     "prebuild": "only-include-used-icons",
-    "build": "node --stack-size=2000 ../../node_modules/.bin/next build",
+    "build": "node --stack-size=2000 node_modules/next/dist/bin/next build",
     "export": "next export",
     "start": "next start",
     "lint": "next lint",
@@ -24,7 +24,7 @@
     "migrateSimulations": "ts-node --project scripts/tsconfig.json scripts/sql-scripts/migrate-simulations.ts"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "patch:@codegouvfr/react-dsfr@npm%3A0.78.2#~/.yarn/patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch",
+    "@codegouvfr/react-dsfr": "0.78.2",
     "@formkit/auto-animate": "^0.8.0",
     "@hookform/resolvers": "^3.1.1",
     "@json2csv/node": "^7.0.1",

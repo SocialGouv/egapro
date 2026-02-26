@@ -21,6 +21,7 @@ export const companyMap: Mapper<Company, Entreprise, Entreprise> = {
     if (raw.activitePrincipaleUniteLegale) {
       companyJson.nafCode = raw.activitePrincipaleUniteLegale;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Record<string, unknown> is built dynamically
     return Company.fromJson(companyJson as any);
   },
 

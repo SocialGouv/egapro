@@ -6,6 +6,7 @@ import { NotComputableReasonExecutiveRepEq } from "@common/core-domain/domain/va
 import { NotComputableReasonMemberRepEq } from "@common/core-domain/domain/valueObjects/declaration/indicators/NotComputableReasonMemberRepEq";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
+import { type NAF } from "@common/dict";
 import { formatIsoToFr } from "@common/utils/date";
 import { RecapCard, RecapCardCompany } from "@design-system";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,7 @@ const buildCompanyFromRepeq = (repEq: RepresentationEquilibreeDTO): CompanyDTO =
 
   const companyDTO: CompanyDTO = {
     countryIsoCode: countryCode,
-    nafCode: nafCode === "[NON-DIFFUSIBLE]" ? undefined : (nafCode as any),
+    nafCode: nafCode === "[NON-DIFFUSIBLE]" ? undefined : (nafCode as keyof NAF),
     name,
     siren,
     county,

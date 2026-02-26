@@ -3,6 +3,7 @@ global:
 
 app:
   ~chart: app
+  ~needs: [pg, redis]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
@@ -49,6 +50,7 @@ app:
 
 nginx:
   ~chart: app
+  ~needs: [app]
   imagePackage: nginx
   host: "{{ .Values.global.host }}"
   ingress:
@@ -92,6 +94,7 @@ nginx:
 
 api:
   ~chart: app
+  ~needs: [pg]
   imagePackage: api
   probesPath: /healthz
   containerPort: 2626
@@ -142,6 +145,7 @@ redis:
 
 files:
   ~chart: app
+  ~needs: [pg]
   # image: ghcr.io/socialgouv/docker/nginx:7.0.1
   imagePackage: files
   vars:
