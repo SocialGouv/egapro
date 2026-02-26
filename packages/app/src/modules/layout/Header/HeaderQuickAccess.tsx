@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 import { auth } from "~/server/auth";
+import { UserAccountMenu } from "./UserAccountMenu";
 
-/** Desktop quick access: help link and login/logout button. */
+/** Desktop quick access: help link and login/logout button or account menu. */
 export async function HeaderQuickAccess() {
 	const session = await auth();
 
@@ -20,15 +21,10 @@ export async function HeaderQuickAccess() {
 					</li>
 					<li>
 						{session?.user ? (
-							<Link
-								className="fr-btn fr-icon-logout-box-r-line"
-								href="/api/auth/signout"
-							>
-								{session.user.name ?? "Se déconnecter"}
-								{session.user.name && (
-									<span className="fr-sr-only"> - Se déconnecter</span>
-								)}
-							</Link>
+							<UserAccountMenu
+								userEmail={session.user.email ?? ""}
+								userName={session.user.name ?? "Utilisateur"}
+							/>
 						) : (
 							<Link
 								className="fr-btn fr-btn--secondary fr-icon-account-circle-fill"
