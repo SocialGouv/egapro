@@ -22,6 +22,10 @@ vi.mock("next/image", () => ({
 	),
 }));
 
+vi.mock("next-auth/react", () => ({
+	signIn: vi.fn(),
+}));
+
 vi.mock("~/modules/layout", () => ({
 	NewTabNotice: () => (
 		<span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>
@@ -53,12 +57,12 @@ describe("LoginPage", () => {
 		);
 	});
 
-	it("contains the ProConnect authentication link", () => {
+	it("contains the ProConnect authentication button", () => {
 		render(<LoginPage />);
 		expect(
-			screen.getByRole("link", {
+			screen.getByRole("button", {
 				name: /s'identifier avec\s*proconnect/i,
 			}),
-		).toHaveAttribute("href", "/api/auth/signin/proconnect");
+		).toBeInTheDocument();
 	});
 });

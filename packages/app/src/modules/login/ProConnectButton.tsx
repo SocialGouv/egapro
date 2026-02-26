@@ -1,3 +1,7 @@
+"use client";
+
+import { signIn } from "next-auth/react";
+
 import { NewTabNotice } from "~/modules/layout";
 
 import styles from "./ProConnectButton.module.scss";
@@ -6,13 +10,14 @@ import styles from "./ProConnectButton.module.scss";
 export function ProConnectButton() {
 	return (
 		<div className={`fr-connect-group ${styles.proConnectGroup}`}>
-			<a
+			<button
 				className="fr-connect fr-connect--proconnect"
-				href="/api/auth/signin/proconnect"
+				onClick={() => signIn("proconnect")}
+				type="button"
 			>
 				<span className="fr-connect__login">S'identifier avec</span>
 				<span className="fr-connect__brand">ProConnect</span>
-			</a>
+			</button>
 			<p>
 				<a
 					href="https://www.proconnect.gouv.fr/"

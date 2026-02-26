@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ProConnectButton } from "../ProConnectButton";
 
+vi.mock("next-auth/react", () => ({
+	signIn: vi.fn(),
+}));
+
 vi.mock("~/modules/layout", () => ({
 	NewTabNotice: () => (
 		<span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>
@@ -9,12 +13,12 @@ vi.mock("~/modules/layout", () => ({
 }));
 
 describe("ProConnectButton", () => {
-	it("renders a link to the ProConnect OAuth endpoint", () => {
+	it("renders a button to trigger ProConnect sign-in", () => {
 		render(<ProConnectButton />);
-		const link = screen.getByRole("link", {
+		const button = screen.getByRole("button", {
 			name: /s'identifier avec\s*proconnect/i,
 		});
-		expect(link).toHaveAttribute("href", "/api/auth/signin/proconnect");
+		expect(button).toHaveAttribute("type", "button");
 	});
 
 	it("displays the login and brand text", () => {
