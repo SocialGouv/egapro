@@ -12,8 +12,11 @@ test.describe("Declaration workflow", () => {
 		await page.getByLabel("Email").fill("test@fia1.fr");
 		await page.getByRole("button", { name: /continuer|connexion/i }).click();
 
+		// Handle FIA1V2 identity provider login page
+		await page.getByRole("button", { name: "Se connecter" }).click();
+
 		// Wait for redirect to declaration intro
-		await page.waitForURL("/declaration-remuneration");
+		await page.waitForURL("**/declaration-remuneration");
 	});
 
 	test("displays introduction page after login", async ({ page }) => {
