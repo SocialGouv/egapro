@@ -1,0 +1,15 @@
+.accordion {
+	&:global(.fr-accordion):has(:global(.fr-accordion__btn[aria-expanded="true"]))::before {
+		box-shadow: inset 0 1px 0 0 var(--border-default-grey);
+	}
+
+	:global(.fr-accordion__btn) {
+		&:hover {
+			background: rgb(0 0 0 / 4%);
+		}
+
+		&[aria-expanded="true"] {
+			background: var(--background-open-blue-france);
+		}
+	}
+}

@@ -1,0 +1,5 @@
+.proConnectGroup {
+	:global(.fr-connect--proconnect)::before {
+		background-image: url("/assets/images/proconnect-logo.svg");
+	}
+}
