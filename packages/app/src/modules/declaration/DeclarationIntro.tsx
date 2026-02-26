@@ -23,7 +23,10 @@ export function DeclarationIntro() {
 						<li>Indicateur par catégories de salariés</li>
 						<li>Vérification et soumission de la déclaration</li>
 					</ol>
-					<Link className="fr-btn fr-btn--lg" href="/declaration-remuneration/etape/1">
+					<Link
+						className="fr-btn fr-btn--lg"
+						href="/declaration-remuneration/etape/1"
+					>
 						Commencer
 					</Link>
 				</div>

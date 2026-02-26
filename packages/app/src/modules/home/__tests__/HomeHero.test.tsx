@@ -42,7 +42,7 @@ describe("HomeHero", () => {
 			name: /déclarer mes indicateurs/i,
 		});
 		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute("href", "/index-egapro");
+		expect(link).toHaveAttribute("href", "/declaration-remuneration");
 	});
 
 	it("renders the info about companies with 50+ employees", () => {

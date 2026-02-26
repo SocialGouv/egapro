@@ -17,9 +17,9 @@ export function MissingSiret() {
 					</div>
 					<div className="fr-mt-4w">
 						<p>
-							Pour résoudre ce problème, vérifiez que votre organisation est bien
-							associée à votre compte ProConnect avec un numéro SIRET valide,
-							puis reconnectez-vous.
+							Pour résoudre ce problème, vérifiez que votre organisation est
+							bien associée à votre compte ProConnect avec un numéro SIRET
+							valide, puis reconnectez-vous.
 						</p>
 						<Link className="fr-btn" href="/">
 							Retour à l'accueil

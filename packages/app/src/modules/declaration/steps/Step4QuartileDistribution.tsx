@@ -182,9 +182,7 @@ export function Step4QuartileDistribution({
 		const allCategories = [...annualCategories, ...hourlyCategories];
 		const incomplete = allCategories.some(
 			(c) =>
-				c.womenCount === undefined ||
-				c.menCount === undefined ||
-				!c.womenValue,
+				c.womenCount === undefined || c.menCount === undefined || !c.womenValue,
 		);
 		if (incomplete) {
 			setFormValidationError(

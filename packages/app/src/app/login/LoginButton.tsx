@@ -6,7 +6,9 @@ export function LoginButton() {
 	return (
 		<button
 			className="fr-btn"
-			onClick={() => signIn("proconnect", { callbackUrl: "/declaration-remuneration" })}
+			onClick={() =>
+				signIn("proconnect", { callbackUrl: "/declaration-remuneration" })
+			}
 			type="button"
 		>
 			Se connecter avec ProConnect
