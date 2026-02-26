@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { auth } from "~/server/auth";
 import { Navigation } from "./Navigation";
+import { UserAccountMenu } from "./UserAccountMenu";
 
 /**
  * Header menu: visible as nav bar on desktop, modal dialog on mobile.
@@ -32,15 +33,10 @@ export async function MobileMenu() {
 						</li>
 						<li>
 							{session?.user ? (
-								<Link
-									className="fr-btn fr-icon-logout-box-r-line"
-									href="/api/auth/signout"
-								>
-									{session.user.name ?? "Se déconnecter"}
-									{session.user.name && (
-										<span className="fr-sr-only"> - Se déconnecter</span>
-									)}
-								</Link>
+								<UserAccountMenu
+									userEmail={session.user.email ?? ""}
+									userName={session.user.name ?? "Utilisateur"}
+								/>
 							) : (
 								<Link
 									className="fr-btn fr-btn--secondary fr-icon-account-circle-fill"
