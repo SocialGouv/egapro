@@ -64,9 +64,7 @@ export function UserAccountMenu({
 					<div className={styles.userInfo}>
 						<p className={styles.userName}>{userName}</p>
 						<p className={styles.userEmail}>{userEmail}</p>
-						{userPhone && (
-							<p className={styles.userEmail}>{userPhone}</p>
-						)}
+						{userPhone && <p className={styles.userEmail}>{userPhone}</p>}
 					</div>
 
 					<div className={styles.links}>
