@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
 import styles from "./ProConnectButton.module.scss";
 
