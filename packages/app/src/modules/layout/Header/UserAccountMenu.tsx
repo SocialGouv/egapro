@@ -8,10 +8,15 @@ import styles from "./UserAccountMenu.module.scss";
 interface UserAccountMenuProps {
 	userName: string;
 	userEmail: string;
+	userPhone?: string;
 }
 
 /** Dropdown menu in the header for authenticated users. */
-export function UserAccountMenu({ userName, userEmail }: UserAccountMenuProps) {
+export function UserAccountMenu({
+	userName,
+	userEmail,
+	userPhone,
+}: UserAccountMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +64,9 @@ export function UserAccountMenu({ userName, userEmail }: UserAccountMenuProps) {
 					<div className={styles.userInfo}>
 						<p className={styles.userName}>{userName}</p>
 						<p className={styles.userEmail}>{userEmail}</p>
+						{userPhone && (
+							<p className={styles.userEmail}>{userPhone}</p>
+						)}
 					</div>
 
 					<div className={styles.links}>
@@ -68,7 +76,6 @@ export function UserAccountMenu({ userName, userEmail }: UserAccountMenuProps) {
 							onClick={() => setIsOpen(false)}
 							role="menuitem"
 						>
-							<span aria-hidden="true" className="fr-icon-edit-line" />
 							Mes entreprises
 						</Link>
 						<Link
@@ -77,7 +84,6 @@ export function UserAccountMenu({ userName, userEmail }: UserAccountMenuProps) {
 							onClick={() => setIsOpen(false)}
 							role="menuitem"
 						>
-							<span aria-hidden="true" className="fr-icon-edit-line" />
 							Voir mon profil
 						</Link>
 					</div>
@@ -88,10 +94,7 @@ export function UserAccountMenu({ userName, userEmail }: UserAccountMenuProps) {
 							href="/api/auth/signout"
 							role="menuitem"
 						>
-							<span
-								aria-hidden="true"
-								className="fr-icon-logout-box-r-line"
-							/>
+							<span aria-hidden="true" className="fr-icon-logout-box-r-line" />
 							Se déconnecter
 						</Link>
 					</div>
