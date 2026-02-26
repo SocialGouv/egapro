@@ -20,18 +20,27 @@ export function UserAccountMenu({
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
-	const firstItemRef = useRef<HTMLButtonElement>(null);
+	const menuRef = useRef<HTMLDivElement>(null);
 
 	const close = useCallback(() => {
 		setIsOpen(false);
 		buttonRef.current?.focus();
 	}, []);
 
+	const getMenuItems = useCallback(
+		() =>
+			Array.from(
+				menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ??
+					[],
+			),
+		[],
+	);
+
 	useEffect(() => {
 		if (!isOpen) return;
 
 		// Focus the first menu item when the dropdown opens
-		firstItemRef.current?.focus();
+		getMenuItems()[0]?.focus();
 
 		function handleClickOutside(event: MouseEvent) {
 			if (
@@ -42,20 +51,46 @@ export function UserAccountMenu({
 			}
 		}
 
-		function handleEscape(event: KeyboardEvent) {
-			if (event.key === "Escape") {
-				close();
+		function handleKeyDown(event: KeyboardEvent) {
+			switch (event.key) {
+				case "Escape":
+					close();
+					break;
+				case "ArrowDown": {
+					event.preventDefault();
+					const items = getMenuItems();
+					const idx = items.indexOf(document.activeElement as HTMLElement);
+					items[(idx + 1) % items.length]?.focus();
+					break;
+				}
+				case "ArrowUp": {
+					event.preventDefault();
+					const items = getMenuItems();
+					const idx = items.indexOf(document.activeElement as HTMLElement);
+					items[(idx - 1 + items.length) % items.length]?.focus();
+					break;
+				}
+				case "Home":
+					event.preventDefault();
+					getMenuItems()[0]?.focus();
+					break;
+				case "End": {
+					event.preventDefault();
+					const items = getMenuItems();
+					items[items.length - 1]?.focus();
+					break;
+				}
 			}
 		}
 
 		document.addEventListener("mousedown", handleClickOutside);
-		document.addEventListener("keydown", handleEscape);
+		document.addEventListener("keydown", handleKeyDown);
 
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
-			document.removeEventListener("keydown", handleEscape);
+			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [isOpen, close]);
+	}, [isOpen, close, getMenuItems]);
 
 	return (
 		<div className={styles.wrapper} ref={wrapperRef}>
@@ -71,7 +106,7 @@ export function UserAccountMenu({
 			</button>
 
 			{isOpen && (
-				<div className={styles.dropdown} role="menu">
+				<div className={styles.dropdown} ref={menuRef} role="menu">
 					<div className={styles.userInfo}>
 						<p className={styles.userName}>{userName}</p>
 						<p className={styles.userEmail}>{userEmail}</p>
@@ -82,7 +117,6 @@ export function UserAccountMenu({
 						<button
 							className={styles.menuLink}
 							onClick={close}
-							ref={firstItemRef}
 							role="menuitem"
 							type="button"
 						>

@@ -171,4 +171,64 @@ describe("UserAccountMenu", () => {
 			expect(toggle).toHaveFocus();
 		});
 	});
+
+	describe("arrow key navigation", () => {
+		it("moves focus to the next item on ArrowDown", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.keyDown(document, { key: "ArrowDown" });
+			expect(
+				screen.getByRole("menuitem", { name: "Voir mon profil" }),
+			).toHaveFocus();
+		});
+
+		it("wraps focus to the first item when pressing ArrowDown on the last item", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			// Navigate to last item (Se déconnecter)
+			fireEvent.keyDown(document, { key: "End" });
+			fireEvent.keyDown(document, { key: "ArrowDown" });
+			expect(
+				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+			).toHaveFocus();
+		});
+
+		it("moves focus to the previous item on ArrowUp", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.keyDown(document, { key: "ArrowDown" });
+			fireEvent.keyDown(document, { key: "ArrowUp" });
+			expect(
+				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+			).toHaveFocus();
+		});
+
+		it("wraps focus to the last item when pressing ArrowUp on the first item", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.keyDown(document, { key: "ArrowUp" });
+			expect(
+				screen.getByRole("menuitem", { name: "Se déconnecter" }),
+			).toHaveFocus();
+		});
+
+		it("moves focus to the first item on Home", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.keyDown(document, { key: "End" });
+			fireEvent.keyDown(document, { key: "Home" });
+			expect(
+				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+			).toHaveFocus();
+		});
+
+		it("moves focus to the last item on End", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.keyDown(document, { key: "End" });
+			expect(
+				screen.getByRole("menuitem", { name: "Se déconnecter" }),
+			).toHaveFocus();
+		});
+	});
 });
