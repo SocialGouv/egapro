@@ -1,0 +1,14 @@
+.container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.image {
+	width: 200px;
+	height: auto;
+
+	@include respond-from(md) {
+		width: 300px;
+	}
+}

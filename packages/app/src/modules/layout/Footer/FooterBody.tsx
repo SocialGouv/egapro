@@ -8,14 +8,14 @@ export function FooterBody() {
 			<div className="fr-footer__brand fr-enlarge-link">
 				<Link
 					href="/"
-					title="Accueil - Egapro - Ministère du Travail, de l'Emploi et de l'Insertion"
+					title="Accueil - Egapro - Ministère du Travail et des Solidarités"
 				>
 					<p className="fr-logo">
 						Ministère
 						<br />
-						du travail,
+						du travail
 						<br />
-						et de l'emploi
+						et des solidarités
 					</p>
 				</Link>
 			</div>
