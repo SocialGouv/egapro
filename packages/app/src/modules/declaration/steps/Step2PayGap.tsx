@@ -57,6 +57,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 	const hasInitialData =
 		initialRows?.some((r) => r.womenValue || r.menValue) ?? false;
 	const [saved, setSaved] = useState(hasInitialData);
+	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const currentYear = new Date().getFullYear();
 
@@ -99,6 +100,14 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
+		if (incomplete) {
+			setValidationError(
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+			);
+			return;
+		}
+		setValidationError(null);
 		mutation.mutate({
 			step: 2,
 			categories: rows.map((r) => ({
@@ -262,6 +271,12 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 					travaillées.
 				</p>
 			</div>
+
+			{validationError && (
+				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
+					<p>{validationError}</p>
+				</div>
+			)}
 
 			{mutation.error && (
 				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">

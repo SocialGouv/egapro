@@ -86,6 +86,7 @@ export function Step3VariablePay({
 			initialData?.beneficiaryMen) ??
 		false;
 	const [saved, setSaved] = useState(hasInitialData);
+	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const currentYear = new Date().getFullYear();
 
@@ -169,6 +170,15 @@ export function Step3VariablePay({
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		const incompleteRows = rows.some((r) => !r.womenValue || !r.menValue);
+		const incompleteBeneficiaries = !beneficiaryWomen || !beneficiaryMen;
+		if (incompleteRows || incompleteBeneficiaries) {
+			setValidationError(
+				"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
+			);
+			return;
+		}
+		setValidationError(null);
 		mutation.mutate({
 			step: 3,
 			categories: [
@@ -372,6 +382,12 @@ export function Step3VariablePay({
 			</div>
 
 			<DefinitionAccordion id="accordion-step3" />
+
+			{validationError && (
+				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
+					<p>{validationError}</p>
+				</div>
+			)}
 
 			{mutation.error && (
 				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">

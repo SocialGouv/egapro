@@ -37,6 +37,7 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 	const hasInitialData =
 		initialCategories?.some((c) => c.women > 0 || c.men > 0) ?? false;
 	const [saved, setSaved] = useState(hasInitialData);
+	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
@@ -67,6 +68,13 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		if (total === 0) {
+			setValidationError(
+				"Veuillez renseigner les effectifs avant de passer à l'étape suivante.",
+			);
+			return;
+		}
+		setValidationError(null);
 		mutation.mutate({ categories });
 	}
 
@@ -146,6 +154,12 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 			</p>
 
 			<DefinitionAccordion id="accordion-step1" />
+
+			{validationError && (
+				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
+					<p>{validationError}</p>
+				</div>
+			)}
 
 			{mutation.error && (
 				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">

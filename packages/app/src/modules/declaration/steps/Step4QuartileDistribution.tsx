@@ -81,6 +81,9 @@ export function Step4QuartileDistribution({
 			c.menValue !== undefined,
 	);
 	const [saved, setSaved] = useState(hasInitialData);
+	const [formValidationError, setFormValidationError] = useState<string | null>(
+		null,
+	);
 
 	const currentYear = new Date().getFullYear();
 
@@ -176,6 +179,20 @@ export function Step4QuartileDistribution({
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		const allCategories = [...annualCategories, ...hourlyCategories];
+		const incomplete = allCategories.some(
+			(c) =>
+				c.womenCount === undefined ||
+				c.menCount === undefined ||
+				!c.womenValue,
+		);
+		if (incomplete) {
+			setFormValidationError(
+				"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
+			);
+			return;
+		}
+		setFormValidationError(null);
 		mutation.mutate({
 			step: 4,
 			categories: [
@@ -439,6 +456,12 @@ export function Step4QuartileDistribution({
 					inégalité d&apos;accès aux niveaux de salaire les plus élevés.
 				</p>
 			</div>
+
+			{formValidationError && (
+				<div aria-live="polite" className="fr-alert fr-alert--error">
+					<p>{formValidationError}</p>
+				</div>
+			)}
 
 			{mutation.error && (
 				<div aria-live="polite" className="fr-alert fr-alert--error">
