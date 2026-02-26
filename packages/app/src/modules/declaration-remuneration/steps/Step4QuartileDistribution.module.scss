@@ -1,0 +1,17 @@
+.tableWrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.tableSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.formColumn {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
