@@ -135,9 +135,7 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
-	test("step 5 - Catégories de salariés page structure", async ({
-		page,
-	}) => {
+	test("step 5 - Catégories de salariés page structure", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/5");
 
 		await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
