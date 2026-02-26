@@ -43,7 +43,7 @@ export async function MobileMenu() {
 								</Link>
 							) : (
 								<Link
-									className="fr-btn fr-icon-account-circle-fill"
+									className="fr-btn fr-btn--secondary fr-icon-account-circle-fill"
 									href="/login"
 								>
 									Se connecter
