@@ -6,7 +6,7 @@
 	position: absolute;
 	right: 0;
 	top: calc(100% + 0.5rem);
-	width: 288px;
+	width: min(288px, calc(100vw - 2rem));
 	background: var(--background-default-grey);
 	box-shadow: 0 4px 12px rgb(0 0 18 / 16%);
 	display: flex;
@@ -59,7 +59,9 @@
 	color: var(--text-title-grey);
 	text-decoration: none;
 	background: none;
+	border: none;
 	border-top: 1px solid var(--border-default-grey);
+	cursor: pointer;
 
 	&:last-child {
 		border-bottom: 1px solid var(--border-default-grey);

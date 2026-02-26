@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./UserAccountMenu.module.scss";
 
@@ -19,22 +19,32 @@ export function UserAccountMenu({
 }: UserAccountMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const firstItemRef = useRef<HTMLButtonElement>(null);
+
+	const close = useCallback(() => {
+		setIsOpen(false);
+		buttonRef.current?.focus();
+	}, []);
 
 	useEffect(() => {
 		if (!isOpen) return;
+
+		// Focus the first menu item when the dropdown opens
+		firstItemRef.current?.focus();
 
 		function handleClickOutside(event: MouseEvent) {
 			if (
 				wrapperRef.current &&
 				!wrapperRef.current.contains(event.target as Node)
 			) {
-				setIsOpen(false);
+				close();
 			}
 		}
 
 		function handleEscape(event: KeyboardEvent) {
 			if (event.key === "Escape") {
-				setIsOpen(false);
+				close();
 			}
 		}
 
@@ -45,7 +55,7 @@ export function UserAccountMenu({
 			document.removeEventListener("mousedown", handleClickOutside);
 			document.removeEventListener("keydown", handleEscape);
 		};
-	}, [isOpen]);
+	}, [isOpen, close]);
 
 	return (
 		<div className={styles.wrapper} ref={wrapperRef}>
@@ -54,6 +64,7 @@ export function UserAccountMenu({
 				aria-haspopup="menu"
 				className="fr-btn fr-btn--tertiary-no-outline fr-icon-account-circle-line fr-btn--icon-left"
 				onClick={() => setIsOpen((prev) => !prev)}
+				ref={buttonRef}
 				type="button"
 			>
 				Mon espace
@@ -68,22 +79,23 @@ export function UserAccountMenu({
 					</div>
 
 					<div className={styles.links}>
-						<Link
+						<button
 							className={styles.menuLink}
-							href="#"
-							onClick={() => setIsOpen(false)}
+							onClick={close}
+							ref={firstItemRef}
 							role="menuitem"
+							type="button"
 						>
 							Mes entreprises
-						</Link>
-						<Link
+						</button>
+						<button
 							className={styles.menuLink}
-							href="#"
-							onClick={() => setIsOpen(false)}
+							onClick={close}
 							role="menuitem"
+							type="button"
 						>
 							Voir mon profil
-						</Link>
+						</button>
 					</div>
 
 					<div className={styles.logout}>

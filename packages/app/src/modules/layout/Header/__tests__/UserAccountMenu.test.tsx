@@ -130,13 +130,45 @@ describe("UserAccountMenu", () => {
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 		});
 
-		it("closes the menu when clicking a menu item link", () => {
+		it("closes the menu when clicking a menu item button", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
 			fireEvent.click(
 				screen.getByRole("menuitem", { name: "Mes entreprises" }),
 			);
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("optional userPhone", () => {
+		it("does not display a phone number when userPhone is not provided", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(screen.queryByText(/\+?\d{2}/)).not.toBeInTheDocument();
+		});
+
+		it("displays the phone number when userPhone is provided", () => {
+			render(<UserAccountMenu {...defaultProps} userPhone="01 23 45 67 89" />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(screen.getByText("01 23 45 67 89")).toBeInTheDocument();
+		});
+	});
+
+	describe("focus management", () => {
+		it("moves focus to the first menu item when the dropdown opens", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(
+				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+			).toHaveFocus();
+		});
+
+		it("returns focus to the toggle button when closing with Escape", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			const toggle = screen.getByRole("button", { name: "Mon espace" });
+			fireEvent.click(toggle);
+			fireEvent.keyDown(document, { key: "Escape" });
+			expect(toggle).toHaveFocus();
 		});
 	});
 });
