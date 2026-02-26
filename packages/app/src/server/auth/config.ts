@@ -1,4 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
@@ -14,6 +15,7 @@ declare module "next-auth" {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;
+			siret?: string | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -39,16 +41,39 @@ function getProviders(): Provider[] {
 				},
 			},
 			idToken: true,
-			profile(profile: Record<string, string>) {
+			async profile(_profile, tokens) {
+				const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
+				const configResponse = await fetch(wellKnownUrl);
+				const config = (await configResponse.json()) as {
+					userinfo_endpoint: string;
+				};
+				const response = await fetch(config.userinfo_endpoint, {
+					headers: {
+						Authorization: `Bearer ${tokens.access_token}`,
+					},
+				});
+				const body = await response.text();
+				// ProConnect returns userinfo as a signed JWT, decode the payload
+				let userinfo: Record<string, string>;
+				if (body.startsWith("{")) {
+					userinfo = JSON.parse(body) as Record<string, string>;
+				} else {
+					const payload = body.split(".")[1];
+					if (!payload) throw new Error("Invalid JWT from userinfo");
+					userinfo = JSON.parse(
+						Buffer.from(payload, "base64url").toString("utf-8"),
+					) as Record<string, string>;
+				}
 				return {
-					id: profile.sub ?? "",
+					id: userinfo.sub ?? "",
 					name:
-						[profile.given_name, profile.usual_name]
+						[userinfo.given_name, userinfo.usual_name]
 							.filter(Boolean)
 							.join(" ") ||
-						profile.email ||
+						userinfo.email ||
 						"",
-					email: profile.email ?? "",
+					email: userinfo.email ?? "",
+					siret: userinfo.siret ?? null,
 				};
 			},
 		});
@@ -58,6 +83,9 @@ function getProviders(): Provider[] {
 }
 
 export const authConfig = {
+	pages: {
+		signIn: "/login",
+	},
 	providers: getProviders(),
 	adapter: DrizzleAdapter(db, {
 		usersTable: users,
@@ -65,18 +93,48 @@ export const authConfig = {
 		sessionsTable: sessions,
 		verificationTokensTable: verificationTokens,
 	}),
+	events: {
+		async signIn({ user, profile }) {
+			const siret =
+				profile &&
+				"siret" in profile &&
+				(profile as Record<string, unknown>).siret
+					? ((profile as Record<string, unknown>).siret as string)
+					: null;
+			if (siret && user.id) {
+				await db.update(users).set({ siret }).where(eq(users.id, user.id));
+			}
+		},
+	},
 	callbacks: {
+		redirect({ url, baseUrl }) {
+			// After sign-in, always redirect to /declaration-remuneration
+			if (url.startsWith(baseUrl)) {
+				const path = url.slice(baseUrl.length);
+				// Redirect root or empty path to /declaration-remuneration
+				if (!path || path === "/") return `${baseUrl}/declaration-remuneration`;
+				return url;
+			}
+			if (url.startsWith("/")) {
+				if (url === "/") return `${baseUrl}/declaration-remuneration`;
+				return `${baseUrl}${url}`;
+			}
+			return `${baseUrl}/declaration-remuneration`;
+		},
 		session: ({
 			session,
 			user,
 		}: {
-			session: DefaultSession & { user?: { id?: string } };
-			user: { id: string };
+			session: DefaultSession & {
+				user?: { id?: string; siret?: string | null };
+			};
+			user: { id: string; siret?: string | null };
 		}) => ({
 			...session,
 			user: {
 				...session.user,
 				id: user.id,
+				siret: user.siret,
 			},
 		}),
 	},

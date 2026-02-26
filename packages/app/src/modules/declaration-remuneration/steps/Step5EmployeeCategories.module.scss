@@ -1,0 +1,64 @@
+.sectionHeader {
+	background-color: var(--background-default-grey-hover);
+}
+
+.inputCell {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+}
+
+.compactInput {
+	width: 100px;
+}
+
+.nameColumnHeader {
+	width: 230px;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.categoryBlock {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.categoryHeader {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.descriptionBlock {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.descriptionRow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.descriptionTitle {
+	font-size: 1.125rem;
+	font-weight: 500;
+}
+
+.instructionRow {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.categoryFooter {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}

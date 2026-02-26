@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
+import { LoginButton } from "./LoginButton";
 
 export default async function LoginPage() {
 	const session = await auth();
 
 	if (session?.user) {
-		redirect("/");
+		redirect("/declaration-remuneration");
 	}
 
 	return (
@@ -17,9 +18,7 @@ export default async function LoginPage() {
 					<p>
 						Connectez-vous avec votre compte ProConnect pour accéder à Egapro.
 					</p>
-					<a className="fr-btn" href="/api/auth/signin/proconnect">
-						Se connecter avec ProConnect
-					</a>
+					<LoginButton />
 				</div>
 			</div>
 		</main>
