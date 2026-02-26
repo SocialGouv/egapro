@@ -1,14 +1,8 @@
+import styles from "./SavedIndicator.module.scss";
+
 export function SavedIndicator() {
 	return (
-		<p
-			className="fr-mb-0 fr-text--lg"
-			style={{
-				color: "var(--text-mention-grey)",
-				display: "flex",
-				alignItems: "center",
-				gap: "0.5rem",
-			}}
-		>
+		<p className={`fr-mb-0 fr-text--lg ${styles.indicator}`}>
 			<svg
 				aria-hidden="true"
 				fill="none"

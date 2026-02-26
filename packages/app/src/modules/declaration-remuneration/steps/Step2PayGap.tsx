@@ -10,10 +10,20 @@ import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
+import {
+	GAP_LEVEL_LABELS,
+	computeGap,
+	formatGap,
+	gapBadgeClass,
+	gapLevel,
+} from "../shared/gapUtils";
+import common from "../shared/common.module.scss";
+import dialogStyles from "../shared/EditDialog.module.scss";
+import stepStyles from "./Step2PayGap.module.scss";
 
-interface Step2PayGapProps {
+type Step2PayGapProps = {
 	initialRows?: PayGapRow[];
-}
+};
 
 const DEFAULT_ROWS: PayGapRow[] = [
 	{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
@@ -21,27 +31,6 @@ const DEFAULT_ROWS: PayGapRow[] = [
 	{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
 	{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
 ];
-
-function parseNumber(value: string): number {
-	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
-}
-
-function computeGap(women: string, men: string): number | null {
-	const w = parseNumber(women);
-	const m = parseNumber(men);
-	if (!w || !m || m === 0) return null;
-	return Math.abs(((m - w) / m) * 100);
-}
-
-function formatGap(gap: number | null): string {
-	if (gap === null) return "-";
-	return `${gap.toFixed(1).replace(".", ",")} %`;
-}
-
-function gapLevel(gap: number | null): "faible" | "élevé" | null {
-	if (gap === null) return null;
-	return gap < 5 ? "faible" : "élevé";
-}
 
 export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 	const router = useRouter();
@@ -164,7 +153,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 				complémentaires.
 			</p>
 
-			<p className="fr-mb-3w" style={{ fontWeight: 500 }}>
+			<p className={`fr-mb-3w ${common.fontMedium}`}>
 				Vérifiez les informations préremplies et modifiez-les si elles sont
 				incorrectes avant de valider vos indicateurs.
 				<TooltipButton
@@ -185,14 +174,16 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 										<th scope="col">
 											<strong>Rémunération</strong>
 											<br />
-											<span style={{ fontWeight: 400 }}>Montant en euros</span>
+											<span className={common.fontRegular}>
+												Montant en euros
+											</span>
 										</th>
 										<th scope="col">Femmes</th>
 										<th scope="col">Hommes</th>
 										<th scope="col">
 											<strong>Écart</strong>
 											<br />
-											<span style={{ fontWeight: 400 }}>
+											<span className={common.fontRegular}>
 												Seuil réglementaire : 5%
 											</span>
 										</th>
@@ -215,10 +206,8 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 													{level && (
 														<>
 															{" "}
-															<span
-																className={`fr-badge fr-badge--sm fr-badge--no-icon ${level === "faible" ? "fr-badge--info" : "fr-badge--warning"}`}
-															>
-																{level}
+															<span className={gapBadgeClass(level)}>
+																{GAP_LEVEL_LABELS[level]}
 															</span>
 														</>
 													)}
@@ -242,10 +231,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 			</div>
 
 			{/* Source text */}
-			<p
-				className="fr-text--sm fr-mb-4w"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
+			<p className={`fr-text--sm fr-mb-4w ${common.mentionGrey}`}>
 				Source : déclarations sociales nominatives mise à jour le 27/01/2026.
 				<TooltipButton
 					id="tooltip-source-step2"
@@ -292,14 +278,8 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 			{/* Edit modal */}
 			<dialog
 				aria-labelledby="edit-pay-gap-title"
-				className="fr-p-4w"
+				className={`fr-p-4w ${dialogStyles.dialog}`}
 				ref={dialogRef}
-				style={{
-					maxWidth: "36rem",
-					borderRadius: "0.25rem",
-					border: "none",
-					boxShadow: "0 6px 18px 0 rgba(0, 0, 18, 0.16)",
-				}}
 			>
 				<div className="fr-grid-row fr-grid-row--right fr-mb-2w">
 					<button
@@ -317,10 +297,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 				{editIndex !== null && (
 					<p className="fr-text--bold fr-mb-1v">{rows[editIndex]?.label}</p>
 				)}
-				<p
-					className="fr-text--sm fr-mb-3w"
-					style={{ color: "var(--text-mention-grey)" }}
-				>
+				<p className={`fr-text--sm fr-mb-3w ${common.mentionGrey}`}>
 					Tous les champs sont obligatoires
 				</p>
 
@@ -357,18 +334,18 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 						Écart
 					</label>
 					<p
-						className="fr-mb-0 fr-mt-1w"
+						className={`fr-mb-0 fr-mt-1w ${stepStyles.gapDisplay}`}
 						id="edit-gap"
-						style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}
 					>
 						<span className="fr-text--bold">{formatGap(editGap)}</span>
-						{editGap !== null && (
-							<span
-								className={`fr-badge fr-badge--sm fr-badge--no-icon ${gapLevel(editGap) === "faible" ? "fr-badge--info" : "fr-badge--warning"}`}
-							>
-								{gapLevel(editGap)}
-							</span>
-						)}
+						{(() => {
+							const level = gapLevel(editGap);
+							return level ? (
+								<span className={gapBadgeClass(level)}>
+									{GAP_LEVEL_LABELS[level]}
+								</span>
+							) : null;
+						})()}
 					</p>
 				</div>
 

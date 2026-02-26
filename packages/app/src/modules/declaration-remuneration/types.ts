@@ -1,10 +1,10 @@
-export interface CategoryData {
+export type CategoryData = {
 	name: string;
 	women: number;
 	men: number;
-}
+};
 
-export interface StepCategoryData {
+export type StepCategoryData = {
 	name: string;
 	womenCount?: number;
 	menCount?: number;
@@ -12,19 +12,19 @@ export interface StepCategoryData {
 	menValue?: string;
 	womenMedianValue?: string;
 	menMedianValue?: string;
-}
+};
 
-export interface PayGapRow {
+export type PayGapRow = {
 	label: string;
 	womenValue: string;
 	menValue: string;
-}
+};
 
-export interface VariablePayData {
+export type VariablePayData = {
 	rows: PayGapRow[];
 	beneficiaryWomen: string;
 	beneficiaryMen: string;
-}
+};
 
 export const DEFAULT_CATEGORIES = [
 	"Ouvriers",

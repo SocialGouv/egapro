@@ -1,9 +1,11 @@
 "use client";
 
-interface TooltipButtonProps {
+import styles from "./TooltipButton.module.scss";
+
+type TooltipButtonProps = {
 	id: string;
 	label: string;
-}
+};
 
 export function TooltipButton({ id, label }: TooltipButtonProps) {
 	return (
@@ -11,8 +13,7 @@ export function TooltipButton({ id, label }: TooltipButtonProps) {
 			<button
 				aria-describedby={id}
 				aria-label={label}
-				className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line"
-				style={{ display: "inline-flex", verticalAlign: "middle" }}
+				className={`fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line ${styles.button}`}
 				type="button"
 			/>
 			<span

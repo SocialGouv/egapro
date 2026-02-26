@@ -11,10 +11,12 @@ import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
+import common from "../shared/common.module.scss";
+import dialogStyles from "../shared/EditDialog.module.scss";
 
-interface Step1WorkforceProps {
+type Step1WorkforceProps = {
 	initialCategories?: CategoryData[];
-}
+};
 
 export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 	const router = useRouter();
@@ -145,10 +147,7 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 				</div>
 			</div>
 
-			<p
-				className="fr-text--sm fr-mb-4w"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
+			<p className={`fr-text--sm fr-mb-4w ${common.mentionGrey}`}>
 				Source : déclarations sociales nominatives mise à jour le 27/01/2026.
 				<TooltipButton id="tooltip-source" label="Information sur la source" />
 			</p>
@@ -175,14 +174,8 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 			{/* Edit modal */}
 			<dialog
 				aria-labelledby="edit-effectifs-title"
-				className="fr-p-4w"
+				className={`fr-p-4w ${dialogStyles.dialog}`}
 				ref={dialogRef}
-				style={{
-					maxWidth: "36rem",
-					borderRadius: "0.25rem",
-					border: "none",
-					boxShadow: "0 6px 18px 0 rgba(0, 0, 18, 0.16)",
-				}}
 			>
 				<div className="fr-grid-row fr-grid-row--right fr-mb-2w">
 					<button
@@ -208,10 +201,7 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 				</div>
 
 				<p className="fr-text--bold fr-mb-1v">Nombre de salariées</p>
-				<p
-					className="fr-text--sm fr-mb-3w"
-					style={{ color: "var(--text-mention-grey)" }}
-				>
+				<p className={`fr-text--sm fr-mb-3w ${common.mentionGrey}`}>
 					Tous les champs sont obligatoires
 				</p>
 

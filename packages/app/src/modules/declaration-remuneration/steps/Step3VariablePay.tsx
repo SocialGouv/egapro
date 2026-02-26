@@ -4,18 +4,29 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
+import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
+import {
+	GAP_LEVEL_LABELS,
+	computeGap,
+	computeProportion,
+	formatGap,
+	gapBadgeClass,
+	gapLevel,
+} from "../shared/gapUtils";
 import type { PayGapRow, VariablePayData } from "../types";
+import { BeneficiaryEditDialog } from "./step3/BeneficiaryEditDialog";
+import { PayGapEditDialog } from "./step3/PayGapEditDialog";
 
-interface Step3VariablePayProps {
+type Step3VariablePayProps = {
 	initialData?: VariablePayData;
 	maxWomen?: number;
 	maxMen?: number;
-}
+};
 
 const DEFAULT_ROWS: PayGapRow[] = [
 	{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
@@ -23,33 +34,6 @@ const DEFAULT_ROWS: PayGapRow[] = [
 	{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
 	{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
 ];
-
-function parseNumber(value: string): number {
-	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
-}
-
-function computeGap(women: string, men: string): number | null {
-	const w = parseNumber(women);
-	const m = parseNumber(men);
-	if (!w || !m || m === 0) return null;
-	return Math.abs(((m - w) / m) * 100);
-}
-
-function formatGap(gap: number | null): string {
-	if (gap === null) return "-";
-	return `${gap.toFixed(1).replace(".", ",")} %`;
-}
-
-function gapLevel(gap: number | null): "faible" | "élevé" | null {
-	if (gap === null) return null;
-	return gap < 5 ? "faible" : "élevé";
-}
-
-function computeProportion(count: string, total?: number): string {
-	const n = Number.parseInt(count, 10);
-	if (Number.isNaN(n) || !total || total === 0) return "-";
-	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
-}
 
 export function Step3VariablePay({
 	initialData,
@@ -93,15 +77,6 @@ export function Step3VariablePay({
 	const mutation = api.declaration.updateStepCategories.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
 	});
-
-	function handlePositiveChange(setter: (v: string) => void) {
-		return (e: React.ChangeEvent<HTMLInputElement>) => {
-			const val = e.target.value;
-			if (val === "" || Number.parseFloat(val) >= 0) {
-				setter(val);
-			}
-		};
-	}
 
 	function handleIntegerChange(setter: (v: string) => void, max?: number) {
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,7 +202,7 @@ export function Step3VariablePay({
 				proportion de femmes et d&apos;hommes bénéficiant de ces rémunérations.
 			</p>
 
-			<p className="fr-mb-3w" style={{ fontWeight: 500 }}>
+			<p className={`fr-mb-3w ${common.fontMedium}`}>
 				Vérifiez les informations préremplies et modifiez-les si elles sont
 				incorrectes avant de valider vos indicateurs.
 				<TooltipButton
@@ -250,14 +225,16 @@ export function Step3VariablePay({
 										<th scope="col">
 											<strong>Rémunération variable ou complémentaire</strong>
 											<br />
-											<span style={{ fontWeight: 400 }}>Montant en euros</span>
+											<span className={common.fontRegular}>
+												Montant en euros
+											</span>
 										</th>
 										<th scope="col">Femmes</th>
 										<th scope="col">Hommes</th>
 										<th scope="col">
 											<strong>Écart</strong>
 											<br />
-											<span style={{ fontWeight: 400 }}>
+											<span className={common.fontRegular}>
 												Seuil réglementaire : 5%
 											</span>
 										</th>
@@ -280,10 +257,8 @@ export function Step3VariablePay({
 													{level && (
 														<>
 															{" "}
-															<span
-																className={`fr-badge fr-badge--sm fr-badge--no-icon ${level === "faible" ? "fr-badge--info" : "fr-badge--warning"}`}
-															>
-																{level}
+															<span className={gapBadgeClass(level)}>
+																{GAP_LEVEL_LABELS[level]}
 															</span>
 														</>
 													)}
@@ -307,10 +282,7 @@ export function Step3VariablePay({
 			</div>
 
 			{/* Source text */}
-			<p
-				className="fr-text--sm fr-mb-4w"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
+			<p className={`fr-text--sm fr-mb-4w ${common.mentionGrey}`}>
 				Source : déclarations sociales nominatives mise à jour le 27/01/2026.
 				<TooltipButton
 					id="tooltip-source-step3"
@@ -401,202 +373,31 @@ export function Step3VariablePay({
 			/>
 
 			{/* Pay gap edit modal */}
-			<dialog
-				aria-labelledby="edit-variable-pay-title"
-				className="fr-p-4w"
-				ref={payDialogRef}
-				style={{
-					maxWidth: "36rem",
-					borderRadius: "0.25rem",
-					border: "none",
-					boxShadow: "0 6px 18px 0 rgba(0, 0, 18, 0.16)",
-				}}
-			>
-				<div className="fr-grid-row fr-grid-row--right fr-mb-2w">
-					<button
-						aria-label="Fermer"
-						className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line"
-						onClick={closePayDialog}
-						type="button"
-					/>
-				</div>
-
-				<h2 className="fr-h4" id="edit-variable-pay-title">
-					Modifier les données
-				</h2>
-
-				{editIndex !== null && (
-					<p className="fr-text--bold fr-mb-1v">{rows[editIndex]?.label}</p>
-				)}
-				<p
-					className="fr-text--sm fr-mb-3w"
-					style={{ color: "var(--text-mention-grey)" }}
-				>
-					Tous les champs sont obligatoires
-				</p>
-
-				<div className="fr-input-group fr-mb-3w">
-					<label className="fr-label" htmlFor="edit-women-variable-pay">
-						Rémunération Femmes
-					</label>
-					<input
-						className="fr-input"
-						id="edit-women-variable-pay"
-						min="0"
-						onChange={handlePositiveChange(setEditWomenValue)}
-						type="number"
-						value={editWomenValue}
-					/>
-				</div>
-
-				<div className="fr-input-group fr-mb-3w">
-					<label className="fr-label" htmlFor="edit-men-variable-pay">
-						Rémunération Hommes
-					</label>
-					<input
-						className="fr-input"
-						id="edit-men-variable-pay"
-						min="0"
-						onChange={handlePositiveChange(setEditMenValue)}
-						type="number"
-						value={editMenValue}
-					/>
-				</div>
-
-				<div className="fr-mb-3w">
-					<label className="fr-label" htmlFor="edit-variable-gap">
-						Écart
-					</label>
-					<p
-						className="fr-mb-0 fr-mt-1w"
-						id="edit-variable-gap"
-						style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}
-					>
-						<span className="fr-text--bold">{formatGap(editGap)}</span>
-						{editGap !== null && (
-							<span
-								className={`fr-badge fr-badge--sm fr-badge--no-icon ${gapLevel(editGap) === "faible" ? "fr-badge--info" : "fr-badge--warning"}`}
-							>
-								{gapLevel(editGap)}
-							</span>
-						)}
-					</p>
-				</div>
-
-				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
-					<li>
-						<button
-							className="fr-btn fr-btn--secondary"
-							onClick={closePayDialog}
-							type="button"
-						>
-							Annuler
-						</button>
-					</li>
-					<li>
-						<button
-							className="fr-btn"
-							onClick={handleSavePayEdit}
-							type="button"
-						>
-							Enregistrer
-						</button>
-					</li>
-				</ul>
-			</dialog>
+			<PayGapEditDialog
+				dialogRef={payDialogRef}
+				editGap={editGap}
+				editMenValue={editMenValue}
+				editWomenValue={editWomenValue}
+				label={editIndex !== null ? rows[editIndex]?.label : undefined}
+				onClose={closePayDialog}
+				onMenChange={setEditMenValue}
+				onSave={handleSavePayEdit}
+				onWomenChange={setEditWomenValue}
+			/>
 
 			{/* Beneficiary edit modal */}
-			<dialog
-				aria-labelledby="edit-beneficiary-title"
-				className="fr-p-4w"
-				ref={benefDialogRef}
-				style={{
-					maxWidth: "36rem",
-					borderRadius: "0.25rem",
-					border: "none",
-					boxShadow: "0 6px 18px 0 rgba(0, 0, 18, 0.16)",
-				}}
-			>
-				<div className="fr-grid-row fr-grid-row--right fr-mb-2w">
-					<button
-						aria-label="Fermer"
-						className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line"
-						onClick={closeBenefDialog}
-						type="button"
-					/>
-				</div>
-
-				<h2 className="fr-h4" id="edit-beneficiary-title">
-					Modifier les bénéficiaires
-				</h2>
-
-				<p
-					className="fr-text--sm fr-mb-3w"
-					style={{ color: "var(--text-mention-grey)" }}
-				>
-					Tous les champs sont obligatoires
-				</p>
-
-				<div className="fr-input-group fr-mb-3w">
-					<label className="fr-label" htmlFor="edit-benef-women">
-						Nombre de bénéficiaires Femmes
-					</label>
-					<input
-						className="fr-input"
-						id="edit-benef-women"
-						max={maxWomen}
-						min="0"
-						onChange={handleIntegerChange(setEditBenefWomen, maxWomen)}
-						type="number"
-						value={editBenefWomen}
-					/>
-				</div>
-
-				<div className="fr-input-group fr-mb-3w">
-					<label className="fr-label" htmlFor="edit-benef-men">
-						Nombre de bénéficiaires Hommes
-					</label>
-					<input
-						className="fr-input"
-						id="edit-benef-men"
-						max={maxMen}
-						min="0"
-						onChange={handleIntegerChange(setEditBenefMen, maxMen)}
-						type="number"
-						value={editBenefMen}
-					/>
-				</div>
-
-				{benefValidationError && (
-					<div
-						aria-live="polite"
-						className="fr-alert fr-alert--error fr-alert--sm fr-mb-3w"
-					>
-						<p>{benefValidationError}</p>
-					</div>
-				)}
-
-				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
-					<li>
-						<button
-							className="fr-btn fr-btn--secondary"
-							onClick={closeBenefDialog}
-							type="button"
-						>
-							Annuler
-						</button>
-					</li>
-					<li>
-						<button
-							className="fr-btn"
-							onClick={handleSaveBenefEdit}
-							type="button"
-						>
-							Enregistrer
-						</button>
-					</li>
-				</ul>
-			</dialog>
+			<BeneficiaryEditDialog
+				benefValidationError={benefValidationError}
+				dialogRef={benefDialogRef}
+				editBenefMen={editBenefMen}
+				editBenefWomen={editBenefWomen}
+				maxMen={maxMen}
+				maxWomen={maxWomen}
+				onClose={closeBenefDialog}
+				onMenChange={handleIntegerChange(setEditBenefMen, maxMen)}
+				onSave={handleSaveBenefEdit}
+				onWomenChange={handleIntegerChange(setEditBenefWomen, maxWomen)}
+			/>
 		</form>
 	);
 }

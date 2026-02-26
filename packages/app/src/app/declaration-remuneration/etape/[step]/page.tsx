@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
-import { TOTAL_STEPS } from "~/modules/declaration-remuneration/types";
+import { TOTAL_STEPS } from "~/modules/declaration-remuneration";
 import { StepPageClient } from "./StepPageClient";
 
-interface StepPageProps {
+type StepPageProps = {
 	params: Promise<{ step: string }>;
-}
+};
 
 export default async function StepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;

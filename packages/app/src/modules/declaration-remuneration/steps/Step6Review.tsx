@@ -1,319 +1,38 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import { api } from "~/trpc/react";
 import { FormActions } from "../shared/FormActions";
 import { StepIndicator } from "../shared/StepIndicator";
-import { TooltipButton } from "../shared/TooltipButton";
+import common from "../shared/common.module.scss";
+import { computeGap } from "../shared/gapUtils";
 import type { PayGapRow, StepCategoryData, VariablePayData } from "../types";
+import stepStyles from "./Step6Review.module.scss";
+import { CardTitle } from "./step6/CardTitle";
+import { GapColumn } from "./step6/GapColumn";
+import { GapSideBySide } from "./step6/GapSideBySide";
+import { QuartileColumn } from "./step6/QuartileColumn";
+import { SubmitModal } from "./step6/SubmitModal";
+import { parseStep5Categories } from "./step6/parseStep5Categories";
 
-// -- Helpers --
+// -- Helper to extract gap from a row list --
 
-function computeGap(womenVal: string, menVal: string): number | null {
-	const w = Number.parseFloat(womenVal);
-	const m = Number.parseFloat(menVal);
-	if (Number.isNaN(w) || Number.isNaN(m) || m === 0) return null;
-	return ((m - w) / m) * 100;
-}
-
-function formatGap(gap: number | null): string {
-	if (gap === null) return "-";
-	return `${gap.toFixed(1).replace(".", ",")} %`;
-}
-
-function gapLevel(gap: number): "faible" | "élevé" {
-	return Math.abs(gap) < 5 ? "faible" : "élevé";
-}
-
-function gapBadgeClass(level: "faible" | "élevé"): string {
-	return level === "faible"
-		? "fr-badge fr-badge--sm fr-badge--no-icon fr-badge--info"
-		: "fr-badge fr-badge--sm fr-badge--no-icon fr-badge--warning";
-}
-
-// -- Styles --
-
-const cardStyle: React.CSSProperties = {
-	border: "1px solid var(--border-default-grey)",
-	borderRadius: "4px",
-	background: "var(--background-default-grey)",
-	padding: "1.5rem",
-	display: "flex",
-	flexDirection: "column",
-	gap: "1rem",
-};
-
-const sideBySideStyle: React.CSSProperties = {
-	display: "flex",
-	gap: "1.5rem",
-	alignItems: "stretch",
-};
-
-const columnStyle: React.CSSProperties = {
-	flex: 1,
-	display: "flex",
-	flexDirection: "column",
-	gap: "0.5rem",
-};
-
-const verticalSeparatorStyle: React.CSSProperties = {
-	width: "1px",
-	background: "var(--border-default-grey)",
-	alignSelf: "stretch",
-};
-
-// -- Sub-components --
-
-function GapBadge({ gap }: { gap: number | null }) {
-	if (gap === null) return <span>-</span>;
-	const level = gapLevel(gap);
-	return (
-		<span
-			style={{
-				display: "inline-flex",
-				alignItems: "center",
-				gap: "0.5rem",
-			}}
-		>
-			<strong>{formatGap(gap)}</strong>
-			<span className={gapBadgeClass(level)}>{level}</span>
-		</span>
-	);
-}
-
-/** Card title with check icon and optional tooltip */
-function CardTitle({
-	children,
-	tooltipId,
-}: {
-	children: React.ReactNode;
-	tooltipId?: string;
-}) {
-	return (
-		<div
-			style={{
-				display: "flex",
-				alignItems: "center",
-				gap: "0.5rem",
-			}}
-		>
-			<span
-				className="fr-icon-check-line"
-				aria-hidden="true"
-				style={{
-					color: "var(--background-flat-success)",
-					fontSize: "1.25rem",
-					flexShrink: 0,
-				}}
-			/>
-			<p className="fr-text--bold fr-text--lg fr-mb-0">{children}</p>
-			{tooltipId && <TooltipButton id={tooltipId} label="Aide" />}
-		</div>
-	);
-}
-
-/** Column within a side-by-side section: header row + value row */
-function GapColumn({
-	title,
-	columns,
-}: {
-	title: string;
-	columns: Array<{ label: string; gap: number | null }>;
-}) {
-	return (
-		<div style={columnStyle}>
-			<p className="fr-text--bold fr-text--sm fr-mb-0">{title}</p>
-			<div style={{ display: "flex", gap: "1.5rem" }}>
-				{columns.map((col) => (
-					<div key={col.label} style={{ flex: 1 }}>
-						<p
-							className="fr-text--xs fr-mb-0"
-							style={{ color: "var(--text-mention-grey)" }}
-						>
-							{col.label}
-						</p>
-						<GapBadge gap={col.gap} />
-					</div>
-				))}
-			</div>
-		</div>
-	);
-}
-
-/** Quartile column: title, then quartile names as columns with percentages below */
-function QuartileColumn({
-	title,
-	quartiles,
-}: {
-	title: string;
-	quartiles: Array<{ label: string; womenCount: number; menCount: number }>;
-}) {
-	return (
-		<div style={columnStyle}>
-			<p className="fr-text--bold fr-text--sm fr-mb-0">{title}</p>
-
-			<p
-				className="fr-text--xs fr-mb-0"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
-				Pourcentage de femmes
-			</p>
-			<div style={{ display: "flex", gap: "1.5rem" }}>
-				{quartiles.map((q) => {
-					const total = q.womenCount + q.menCount || 1;
-					const pct = ((q.womenCount / total) * 100).toFixed(1);
-					return (
-						<div key={`f-${q.label}`} style={{ flex: 1 }}>
-							<p
-								className="fr-text--xs fr-mb-0"
-								style={{ color: "var(--text-mention-grey)" }}
-							>
-								{q.label}
-							</p>
-							<strong>{pct} %</strong>
-						</div>
-					);
-				})}
-			</div>
-
-			<p
-				className="fr-text--xs fr-mb-0 fr-mt-1w"
-				style={{ color: "var(--text-mention-grey)" }}
-			>
-				Pourcentage d&apos;hommes
-			</p>
-			<div style={{ display: "flex", gap: "1.5rem" }}>
-				{quartiles.map((q) => {
-					const total = q.womenCount + q.menCount || 1;
-					const pct = ((q.menCount / total) * 100).toFixed(1);
-					return (
-						<div key={`m-${q.label}`} style={{ flex: 1 }}>
-							<p
-								className="fr-text--xs fr-mb-0"
-								style={{ color: "var(--text-mention-grey)" }}
-							>
-								{q.label}
-							</p>
-							<strong>{pct} %</strong>
-						</div>
-					);
-				})}
-			</div>
-		</div>
-	);
-}
-
-/** Side-by-side layout: Annuelle brute | separator | Horaire brute */
-function GapSideBySide({
-	annualMeanGap,
-	annualMedianGap,
-	hourlyMeanGap,
-	hourlyMedianGap,
-}: {
-	annualMeanGap: number | null;
-	annualMedianGap: number | null;
-	hourlyMeanGap: number | null;
-	hourlyMedianGap: number | null;
-}) {
-	return (
-		<div style={sideBySideStyle}>
-			<GapColumn
-				columns={[
-					{ label: "Moyenne", gap: annualMeanGap },
-					{ label: "Médiane", gap: annualMedianGap },
-				]}
-				title="Annuelle brute"
-			/>
-			<div style={verticalSeparatorStyle} />
-			<GapColumn
-				columns={[
-					{ label: "Moyenne", gap: hourlyMeanGap },
-					{ label: "Médiane", gap: hourlyMedianGap },
-				]}
-				title="Horaire brute"
-			/>
-		</div>
-	);
-}
-
-// -- Step 5 category parsing --
-
-interface ParsedCategory {
-	index: number;
-	name: string;
-	annualBaseGap: number | null;
-	annualVariableGap: number | null;
-	hourlyBaseGap: number | null;
-	hourlyVariableGap: number | null;
-}
-
-function parseStep5Categories(
-	step5Categories: StepCategoryData[],
-): ParsedCategory[] {
-	const catIndices = new Set<number>();
-	for (const c of step5Categories) {
-		const match = c.name.match(/^cat:(\d+):/);
-		if (match) catIndices.add(Number.parseInt(match[1] as string, 10));
-	}
-
-	const result: ParsedCategory[] = [];
-	for (const idx of [...catIndices].sort((a, b) => a - b)) {
-		const nameRow = step5Categories.find((c) =>
-			c.name.startsWith(`cat:${idx}:name:`),
-		);
-		const catName =
-			nameRow?.name.replace(`cat:${idx}:name:`, "") ||
-			`Catégorie d'emplois n°${idx + 1}`;
-
-		const annualBase = step5Categories.find(
-			(c) => c.name === `cat:${idx}:annual:base`,
-		);
-		const annualVariable = step5Categories.find(
-			(c) => c.name === `cat:${idx}:annual:variable`,
-		);
-		const hourlyBase = step5Categories.find(
-			(c) => c.name === `cat:${idx}:hourly:base`,
-		);
-		const hourlyVariable = step5Categories.find(
-			(c) => c.name === `cat:${idx}:hourly:variable`,
-		);
-
-		result.push({
-			index: idx,
-			name: catName,
-			annualBaseGap:
-				annualBase?.womenValue && annualBase?.menValue
-					? computeGap(annualBase.womenValue, annualBase.menValue)
-					: null,
-			annualVariableGap:
-				annualVariable?.womenValue && annualVariable?.menValue
-					? computeGap(annualVariable.womenValue, annualVariable.menValue)
-					: null,
-			hourlyBaseGap:
-				hourlyBase?.womenValue && hourlyBase?.menValue
-					? computeGap(hourlyBase.womenValue, hourlyBase.menValue)
-					: null,
-			hourlyVariableGap:
-				hourlyVariable?.womenValue && hourlyVariable?.menValue
-					? computeGap(hourlyVariable.womenValue, hourlyVariable.menValue)
-					: null,
-		});
-	}
-
-	return result;
+function findGap(rows: PayGapRow[], label: string): number | null {
+	const row = rows.find((r) => r.label === label);
+	return row ? computeGap(row.womenValue, row.menValue) : null;
 }
 
 // -- Component --
 
-interface Step6ReviewProps {
+type Props = {
 	step2Rows?: PayGapRow[];
 	step3Data?: VariablePayData;
 	step4Categories?: StepCategoryData[];
 	step5Categories?: StepCategoryData[];
 	isSubmitted?: boolean;
-}
+};
 
 export function Step6Review({
 	step2Rows = [],
@@ -321,11 +40,10 @@ export function Step6Review({
 	step4Categories = [],
 	step5Categories = [],
 	isSubmitted = false,
-}: Step6ReviewProps) {
+}: Props) {
 	const currentYear = new Date().getFullYear();
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const [certified, setCertified] = useState(false);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			router.push("/");
@@ -335,7 +53,6 @@ export function Step6Review({
 	const openModal = useCallback(() => {
 		const el = modalRef.current;
 		if (!el) return;
-		// Use DSFR JS API to open the modal
 		const w = window as unknown as Record<string, unknown>;
 		if (typeof w.dsfr === "function") {
 			(w.dsfr as (el: HTMLElement) => { modal: { disclose: () => void } })(
@@ -356,57 +73,17 @@ export function Step6Review({
 	}, []);
 
 	// Parse step 2 gaps
-	const annualMeanRow = step2Rows.find(
-		(r) => r.label === "Annuelle brute moyenne",
-	);
-	const hourlyMeanRow = step2Rows.find(
-		(r) => r.label === "Horaire brute moyenne",
-	);
-	const annualMedianRow = step2Rows.find(
-		(r) => r.label === "Annuelle brute médiane",
-	);
-	const hourlyMedianRow = step2Rows.find(
-		(r) => r.label === "Horaire brute médiane",
-	);
-
-	const annualMeanGap = annualMeanRow
-		? computeGap(annualMeanRow.womenValue, annualMeanRow.menValue)
-		: null;
-	const hourlyMeanGap = hourlyMeanRow
-		? computeGap(hourlyMeanRow.womenValue, hourlyMeanRow.menValue)
-		: null;
-	const annualMedianGap = annualMedianRow
-		? computeGap(annualMedianRow.womenValue, annualMedianRow.menValue)
-		: null;
-	const hourlyMedianGap = hourlyMedianRow
-		? computeGap(hourlyMedianRow.womenValue, hourlyMedianRow.menValue)
-		: null;
+	const annualMeanGap = findGap(step2Rows, "Annuelle brute moyenne");
+	const hourlyMeanGap = findGap(step2Rows, "Horaire brute moyenne");
+	const annualMedianGap = findGap(step2Rows, "Annuelle brute médiane");
+	const hourlyMedianGap = findGap(step2Rows, "Horaire brute médiane");
 
 	// Parse step 3 gaps
-	const step3MeanRow = step3Data?.rows?.find(
-		(r) => r.label === "Annuelle brute moyenne",
-	);
-	const step3MedianRow = step3Data?.rows?.find(
-		(r) => r.label === "Annuelle brute médiane",
-	);
-	const step3HourlyMeanRow = step3Data?.rows?.find(
-		(r) => r.label === "Horaire brute moyenne",
-	);
-	const step3HourlyMedianRow = step3Data?.rows?.find(
-		(r) => r.label === "Horaire brute médiane",
-	);
-	const step3AnnualMeanGap = step3MeanRow
-		? computeGap(step3MeanRow.womenValue, step3MeanRow.menValue)
-		: null;
-	const step3AnnualMedianGap = step3MedianRow
-		? computeGap(step3MedianRow.womenValue, step3MedianRow.menValue)
-		: null;
-	const step3HourlyMeanGap = step3HourlyMeanRow
-		? computeGap(step3HourlyMeanRow.womenValue, step3HourlyMeanRow.menValue)
-		: null;
-	const step3HourlyMedianGap = step3HourlyMedianRow
-		? computeGap(step3HourlyMedianRow.womenValue, step3HourlyMedianRow.menValue)
-		: null;
+	const step3Rows = step3Data?.rows ?? [];
+	const step3AnnualMeanGap = findGap(step3Rows, "Annuelle brute moyenne");
+	const step3AnnualMedianGap = findGap(step3Rows, "Annuelle brute médiane");
+	const step3HourlyMeanGap = findGap(step3Rows, "Horaire brute moyenne");
+	const step3HourlyMedianGap = findGap(step3Rows, "Horaire brute médiane");
 
 	// Parse step 4 quartile data
 	const annualQuartiles = step4Categories.filter((c) =>
@@ -427,27 +104,21 @@ export function Step6Review({
 	}
 
 	return (
-		<form
-			onSubmit={handleSubmit}
-			style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
-		>
-			{/* Title */}
+		<form onSubmit={handleSubmit} className={common.flexColumnGap2}>
 			<h1 className="fr-h4 fr-mb-0">
 				Déclaration des indicateurs de rémunération {currentYear}
 			</h1>
 
 			<StepIndicator currentStep={6} />
 
-			{/* Description */}
-			<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
+			<p className={`fr-mb-0 ${common.mentionGrey}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>
 
-			{/* Card 1: Écart de rémunération (Step 2) */}
-			<div style={cardStyle}>
+			{/* Card 1: Pay gap (Step 2) */}
+			<div className={stepStyles.card}>
 				<CardTitle>Écart de rémunération</CardTitle>
-
 				{step2Rows.length > 0 ? (
 					<GapSideBySide
 						annualMeanGap={annualMeanGap}
@@ -456,16 +127,15 @@ export function Step6Review({
 						hourlyMedianGap={hourlyMedianGap}
 					/>
 				) : (
-					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
+					<p className={`fr-mb-0 ${common.mentionGrey}`}>
 						Aucune donnée renseignée.
 					</p>
 				)}
 			</div>
 
-			{/* Card 2: Rémunération variable (Step 3) */}
-			<div style={cardStyle}>
+			{/* Card 2: Variable pay (Step 3) */}
+			<div className={stepStyles.card}>
 				<CardTitle>Écart de rémunération variable ou complémentaire</CardTitle>
-
 				{step3Data?.rows && step3Data.rows.length > 0 ? (
 					<>
 						<GapSideBySide
@@ -474,23 +144,12 @@ export function Step6Review({
 							hourlyMeanGap={step3HourlyMeanGap}
 							hourlyMedianGap={step3HourlyMedianGap}
 						/>
-
-						<div style={sideBySideStyle}>
-							<div style={columnStyle}>
+						<div className={stepStyles.sideBySide}>
+							<div className={stepStyles.column}>
 								<p className="fr-text--bold fr-text--sm fr-mb-0">Proportion</p>
-								<div
-									style={{
-										display: "flex",
-										gap: "1.5rem",
-									}}
-								>
-									<div style={{ flex: 1 }}>
-										<p
-											className="fr-text--xs fr-mb-0"
-											style={{
-												color: "var(--text-mention-grey)",
-											}}
-										>
+								<div className={stepStyles.subSection}>
+									<div className={stepStyles.flex1}>
+										<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
 											Femmes
 										</p>
 										<strong>
@@ -499,13 +158,8 @@ export function Step6Review({
 												: "-"}
 										</strong>
 									</div>
-									<div style={{ flex: 1 }}>
-										<p
-											className="fr-text--xs fr-mb-0"
-											style={{
-												color: "var(--text-mention-grey)",
-											}}
-										>
+									<div className={stepStyles.flex1}>
+										<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
 											Hommes
 										</p>
 										<strong>
@@ -516,23 +170,22 @@ export function Step6Review({
 									</div>
 								</div>
 							</div>
-							<div style={verticalSeparatorStyle} />
-							<div style={columnStyle} />
+							<div className={stepStyles.verticalSeparator} />
+							<div className={stepStyles.column} />
 						</div>
 					</>
 				) : (
-					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
+					<p className={`fr-mb-0 ${common.mentionGrey}`}>
 						Aucune donnée renseignée.
 					</p>
 				)}
 			</div>
 
-			{/* Card 3: Proportion par quartile (Step 4) */}
-			<div style={cardStyle}>
+			{/* Card 3: Quartile distribution (Step 4) */}
+			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-quartile">
 					Proportion de femmes et d&apos;hommes dans chaque quartile salarial
 				</CardTitle>
-
 				{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
 					<>
 						{annualQuartiles.length > 0 && (
@@ -557,30 +210,25 @@ export function Step6Review({
 						)}
 					</>
 				) : (
-					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
+					<p className={`fr-mb-0 ${common.mentionGrey}`}>
 						Aucune donnée renseignée.
 					</p>
 				)}
 			</div>
 
-			{/* Card 4: Catégories de salariés (Step 5) */}
-			<div style={cardStyle}>
+			{/* Card 4: Employee categories (Step 5) */}
+			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-categories">
 					Écart de rémunération par catégories de salariés
 				</CardTitle>
-
 				{step5Parsed.length > 0 ? (
 					step5Parsed.map((cat) => (
 						<div key={cat.index}>
 							<p className="fr-text--bold fr-mb-0">{cat.name}</p>
-
-							<div style={sideBySideStyle}>
+							<div className={stepStyles.sideBySide}>
 								<GapColumn
 									columns={[
-										{
-											label: "Salaire de base",
-											gap: cat.annualBaseGap,
-										},
+										{ label: "Salaire de base", gap: cat.annualBaseGap },
 										{
 											label: "Composantes variables",
 											gap: cat.annualVariableGap,
@@ -588,13 +236,10 @@ export function Step6Review({
 									]}
 									title="Annuelle brute"
 								/>
-								<div style={verticalSeparatorStyle} />
+								<div className={stepStyles.verticalSeparator} />
 								<GapColumn
 									columns={[
-										{
-											label: "Salaire de base",
-											gap: cat.hourlyBaseGap,
-										},
+										{ label: "Salaire de base", gap: cat.hourlyBaseGap },
 										{
 											label: "Composantes variables",
 											gap: cat.hourlyVariableGap,
@@ -606,7 +251,7 @@ export function Step6Review({
 						</div>
 					))
 				) : (
-					<p className="fr-mb-0" style={{ color: "var(--text-mention-grey)" }}>
+					<p className={`fr-mb-0 ${common.mentionGrey}`}>
 						Aucune donnée renseignée.
 					</p>
 				)}
@@ -622,89 +267,12 @@ export function Step6Review({
 			)}
 
 			{!isSubmitted && (
-				<dialog
-					aria-labelledby="submit-modal-title"
-					className="fr-modal"
-					id="submit-modal"
-					ref={modalRef}
-					data-fr-concealing-backdrop="false"
-				>
-					<div className="fr-container fr-container--fluid fr-container-md">
-						<div className="fr-grid-row fr-grid-row--center">
-							<div className="fr-col-12 fr-col-md-8 fr-col-lg-6">
-								<div className="fr-modal__body">
-									<div className="fr-modal__header">
-										<button
-											aria-controls="submit-modal"
-											className="fr-btn--close fr-btn"
-											title="Fermer"
-											type="button"
-										>
-											Fermer
-										</button>
-									</div>
-									<div className="fr-modal__content">
-										<h2 className="fr-modal__title" id="submit-modal-title">
-											Soumettre
-										</h2>
-										<p>
-											Vous allez soumettre les indicateurs suivants aux services
-											du ministère chargé du travail :
-										</p>
-										<ul>
-											<li>Écart de rémunération</li>
-											<li>Écart de rémunération variable ou complémentaire</li>
-											<li>
-												Proportion de femmes et d&apos;hommes dans chaque
-												quartile de rémunération
-											</li>
-											<li>Écart de rémunération par catégories de salariés</li>
-										</ul>
-										<div className="fr-checkbox-group fr-mt-2w">
-											<input
-												id="submit-certify"
-												type="checkbox"
-												checked={certified}
-												onChange={(e) => setCertified(e.target.checked)}
-											/>
-											<label className="fr-label" htmlFor="submit-certify">
-												Je certifie que les données saisies sont exactes et
-												conformes aux informations disponibles dans les systèmes
-												de paie et de gestion des ressources humaines de
-												l&apos;entreprise.
-											</label>
-										</div>
-									</div>
-									<div className="fr-modal__footer">
-										<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-											<li>
-												<button
-													className="fr-btn"
-													disabled={!certified || submitMutation.isPending}
-													onClick={() => submitMutation.mutate()}
-													type="button"
-												>
-													{submitMutation.isPending
-														? "Envoi en cours…"
-														: "Valider"}
-												</button>
-											</li>
-											<li>
-												<button
-													className="fr-btn fr-btn--secondary"
-													onClick={closeModal}
-													type="button"
-												>
-													Annuler
-												</button>
-											</li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</dialog>
+				<SubmitModal
+					modalRef={modalRef}
+					onClose={closeModal}
+					onSubmit={() => submitMutation.mutate()}
+					isPending={submitMutation.isPending}
+				/>
 			)}
 		</form>
 	);

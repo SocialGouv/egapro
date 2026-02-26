@@ -1,20 +1,20 @@
 "use client";
 
-export interface DataTableColumn {
+export type DataTableColumn = {
 	key: string;
 	label: string;
 	type?: "text" | "number";
 	readOnly?: boolean;
-}
+};
 
-interface DataTableProps {
+type DataTableProps = {
 	caption: string;
 	columns: DataTableColumn[];
 	rows: Record<string, string | number | null | undefined>[];
 	onCellChange?: (rowIndex: number, columnKey: string, value: string) => void;
 	showTotal?: boolean;
 	totalLabel?: string;
-}
+};
 
 export function DataTable({
 	caption,

@@ -1,8 +1,8 @@
 import { STEP_TITLES, TOTAL_STEPS } from "../types";
 
-interface StepIndicatorProps {
+type StepIndicatorProps = {
 	currentStep: number;
-}
+};
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
 	const title = STEP_TITLES[currentStep] ?? "";

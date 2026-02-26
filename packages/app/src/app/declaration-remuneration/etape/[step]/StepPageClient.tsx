@@ -13,9 +13,9 @@ import type {
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
-} from "~/modules/declaration-remuneration/types";
+} from "~/modules/declaration-remuneration";
 
-interface StepPageClientProps {
+type StepPageClientProps = {
 	step: number;
 	declaration: {
 		totalWomen: number | null;
@@ -27,7 +27,7 @@ interface StepPageClientProps {
 	step3Data: VariablePayData;
 	step4Categories: StepCategoryData[];
 	step5Categories: StepCategoryData[];
-}
+};
 
 export function StepPageClient({
 	step,

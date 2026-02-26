@@ -1,0 +1,55 @@
+.card {
+	border: 1px solid var(--border-default-grey);
+	border-radius: 4px;
+	background: var(--background-default-grey);
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.sideBySide {
+	display: flex;
+	gap: 1.5rem;
+	align-items: stretch;
+}
+
+.column {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.verticalSeparator {
+	width: 1px;
+	background: var(--border-default-grey);
+	align-self: stretch;
+}
+
+.inlineGap {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.cardTitleRow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.checkIcon {
+	color: var(--artwork-major-blue-france);
+	font-size: 1.25rem;
+	flex-shrink: 0;
+}
+
+.subSection {
+	display: flex;
+	gap: 1.5rem;
+}
+
+.flex1 {
+	flex: 1;
+}

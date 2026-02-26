@@ -1,9 +1,9 @@
 "use client";
 
-interface DefinitionAccordionProps {
+type DefinitionAccordionProps = {
 	id: string;
 	title?: string;
-}
+};
 
 export function DefinitionAccordion({
 	id,

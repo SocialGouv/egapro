@@ -1,9 +1,11 @@
 import Link from "next/link";
 
-interface CompanyBannerProps {
+import styles from "./CompanyBanner.module.scss";
+
+type CompanyBannerProps = {
 	siren: string;
 	currentPageLabel: string;
-}
+};
 
 const FAKE_COMPANY_NAME = "Mon entreprise";
 const FAKE_EFFECTIF = "45";
@@ -17,10 +19,7 @@ export function CompanyBanner({ siren, currentPageLabel }: CompanyBannerProps) {
 	const currentYear = new Date().getFullYear();
 
 	return (
-		<div
-			className="fr-py-3w"
-			style={{ background: "var(--background-alt-blue-france)" }}
-		>
+		<div className={`fr-py-3w ${styles.banner}`}>
 			<div className="fr-container">
 				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
 					<button
@@ -50,8 +49,7 @@ export function CompanyBanner({ siren, currentPageLabel }: CompanyBannerProps) {
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-auto">
 						<p
-							className="fr-text--bold fr-mb-0 fr-flex fr-flex--align-center"
-							style={{ gap: "0.5rem" }}
+							className={`fr-text--bold fr-mb-0 fr-flex fr-flex--align-center ${styles.companyInfo}`}
 						>
 							<span aria-hidden="true" className="fr-icon-building-line" />
 							{FAKE_COMPANY_NAME} - {formatSiren(siren)}

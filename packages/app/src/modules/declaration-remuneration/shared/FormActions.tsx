@@ -1,12 +1,14 @@
 import Link from "next/link";
 
-interface FormActionsProps {
+import styles from "./FormActions.module.scss";
+
+type FormActionsProps = {
 	previousHref?: string;
 	nextHref?: string;
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
-}
+};
 
 export function FormActions({
 	previousHref,
@@ -16,14 +18,7 @@ export function FormActions({
 	nextDisabled = false,
 }: FormActionsProps) {
 	return (
-		<div
-			className="fr-mt-4w"
-			style={{
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-			}}
-		>
+		<div className={`fr-mt-4w ${styles.actions}`}>
 			{previousHref ? (
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"

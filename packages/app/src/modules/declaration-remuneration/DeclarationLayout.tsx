@@ -1,9 +1,9 @@
 import { CompanyBanner } from "./shared/CompanyBanner";
 
-interface DeclarationLayoutProps {
+type DeclarationLayoutProps = {
 	siren: string;
 	children: React.ReactNode;
-}
+};
 
 export function DeclarationLayout({ siren, children }: DeclarationLayoutProps) {
 	const currentYear = new Date().getFullYear();
