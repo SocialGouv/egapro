@@ -36,8 +36,8 @@ export function HomeHero() {
 							et les hommes.
 						</p>
 						<Link
-							className={`fr-btn fr-icon-file-text-line fr-btn--icon-left fr-mt-2w ${styles.cta}`}
-							href="/index-egapro"
+							className={`fr-btn fr-icon-file-text-line fr-btn--icon-left ${styles.cta}`}
+							href="/declaration-remuneration"
 						>
 							Déclarer mes indicateurs
 						</Link>
