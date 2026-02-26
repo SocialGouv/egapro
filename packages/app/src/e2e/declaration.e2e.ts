@@ -62,7 +62,9 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
 
-	test("navigates through step 2 - Écart de rémunération", async ({ page }) => {
+	test("step 2 - Écart de rémunération page and modal editing", async ({
+		page,
+	}) => {
 		await page.goto("/declaration-remuneration/etape/2");
 
 		await expect(page.getByText("Étape 2 sur 6")).toBeVisible();
@@ -82,11 +84,18 @@ test.describe("Declaration workflow", () => {
 			.fill("32000");
 		await page.getByRole("button", { name: "Enregistrer" }).click();
 
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/3");
+		// Verify saved values appear in the table
+		await expect(
+			page.getByRole("cell", { name: "30 000" }).first(),
+		).toBeVisible();
+		await expect(
+			page.getByRole("cell", { name: "32 000" }).first(),
+		).toBeVisible();
 	});
 
-	test("navigates through step 3 - Rémunération variable", async ({ page }) => {
+	test("step 3 - Rémunération variable page and modal editing", async ({
+		page,
+	}) => {
 		await page.goto("/declaration-remuneration/etape/3");
 
 		await expect(page.getByText("Étape 3 sur 6")).toBeVisible();
@@ -103,21 +112,27 @@ test.describe("Declaration workflow", () => {
 			.fill("5500");
 		await page.getByRole("button", { name: "Enregistrer" }).click();
 
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/4");
+		// Verify saved values appear in the table
+		await expect(
+			page.getByRole("cell", { name: "5 000" }).first(),
+		).toBeVisible();
+		await expect(
+			page.getByRole("cell", { name: "5 500" }).first(),
+		).toBeVisible();
 	});
 
-	test("navigates through step 4 - Proportion quartiles", async ({ page }) => {
+	test("step 4 - Proportion quartiles page structure", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/4");
 
 		await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
 
-		// Verify quartile table structure
-		await expect(page.getByText("1er quartile")).toBeVisible();
-		await expect(page.getByText("4e quartile")).toBeVisible();
-
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/5");
+		// Verify quartile column headers exist in the table
+		await expect(
+			page.getByRole("columnheader", { name: "1er quartile" }).first(),
+		).toBeVisible();
+		await expect(
+			page.getByRole("columnheader", { name: "4e quartile" }).first(),
+		).toBeVisible();
 	});
 
 	test("navigates through step 5 - Catégories de salariés", async ({
