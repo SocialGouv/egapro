@@ -81,7 +81,9 @@ export class IndicateurDeuxTroisComputer extends AbstractComputer<RaisedCount, A
     const NOTE_MAX_INDICATEUR1 = this.indicateurUnComputer.getMaxNote();
     const resultIndicateurUn = this.indicateurUnComputer.compute();
     const remunerationsCompensated =
-      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 && resultIndicateurUn.favorablePopulation !== favorablePopulation;
+      this.indicateurUnComputer.canCompute() &&
+      resultIndicateurUn.note < NOTE_MAX_INDICATEUR1 &&
+      resultIndicateurUn.favorablePopulation !== favorablePopulation;
     const notePercent = this.computeNote(result);
     const noteEquivalentEmployeeCountGap = this.computeNote(equivalentEmployeeCountGap);
     const note = Math.max(notePercent, noteEquivalentEmployeeCountGap);

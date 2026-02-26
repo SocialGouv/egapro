@@ -40,7 +40,7 @@ async def get_headers_columns():
 WHITE_SPACES = re.compile(r"\s+")
 
 def code_naf(code):
-    return None if not code else f"{code} - {NAF[code]}"
+    return None if not code else (code if code not in NAF else f"{code} - {NAF[code]}")
 
 def clean_cell(value):
     if isinstance(value, str):
