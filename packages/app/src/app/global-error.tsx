@@ -20,7 +20,7 @@ export default function GlobalError({
 				<link href="/dsfr/dsfr.min.css" rel="stylesheet" />
 			</head>
 			<body>
-				<main id="content">
+				<main id="content" tabIndex={-1}>
 					<div className="fr-container">
 						<div className="fr-my-7w fr-mt-md-12w fr-mb-md-10w fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-grid-row--center">
 							<div className="fr-py-0 fr-col-12 fr-col-md-6">
