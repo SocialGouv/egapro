@@ -7,13 +7,13 @@ import {
 	Step4QuartileDistribution,
 	Step5EmployeeCategories,
 	Step6Review,
-} from "~/modules/declaration";
+} from "~/modules/declaration-remuneration";
 import type {
 	CategoryData,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
-} from "~/modules/declaration/types";
+} from "~/modules/declaration-remuneration/types";
 
 interface StepPageClientProps {
 	step: number;
