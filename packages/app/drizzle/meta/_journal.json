@@ -15,6 +15,13 @@
 			"when": 1771928448125,
 			"tag": "0001_worthless_dragon_lord",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1772154191182,
+			"tag": "0002_lean_khan",
+			"breakpoints": true
 		}
 	]
 }

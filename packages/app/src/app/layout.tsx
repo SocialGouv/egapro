@@ -3,6 +3,7 @@ import Script from "next/script";
 
 import { MatomoAnalytics } from "~/modules/analytics";
 import { Footer, Header, SkipLinks } from "~/modules/layout";
+import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({
 					<Header />
 					{children}
 					<Footer />
+					<ProfileModal />
 				</TRPCReactProvider>
 				<Script
 					src="/dsfr/dsfr.module.min.js"

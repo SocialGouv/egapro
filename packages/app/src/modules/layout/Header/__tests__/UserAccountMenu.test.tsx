@@ -140,6 +140,32 @@ describe("UserAccountMenu", () => {
 		});
 	});
 
+	describe("profile modal integration", () => {
+		it("closes the dropdown and opens the profile modal on 'Voir mon profil' click", () => {
+			const mockDisclose = vi.fn();
+			Object.defineProperty(window, "dsfr", {
+				value: () => ({ modal: { disclose: mockDisclose } }),
+				writable: true,
+				configurable: true,
+			});
+
+			const modalElement = document.createElement("dialog");
+			modalElement.id = "profile-modal";
+			document.body.appendChild(modalElement);
+
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(
+				screen.getByRole("menuitem", { name: "Voir mon profil" }),
+			);
+
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+			expect(mockDisclose).toHaveBeenCalled();
+
+			document.body.removeChild(modalElement);
+		});
+	});
+
 	describe("optional userPhone", () => {
 		it("does not display a phone number when userPhone is not provided", () => {
 			render(<UserAccountMenu {...defaultProps} />);

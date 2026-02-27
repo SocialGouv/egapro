@@ -27,6 +27,20 @@ export function UserAccountMenu({
 		buttonRef.current?.focus();
 	}, []);
 
+	const openProfileModal = useCallback(() => {
+		close();
+		const modal = document.getElementById("profile-modal");
+		if (modal && "dsfr" in window) {
+			(
+				window as unknown as {
+					dsfr: (el: HTMLElement) => { modal: { disclose: () => void } };
+				}
+			)
+				.dsfr(modal)
+				.modal.disclose();
+		}
+	}, [close]);
+
 	const getMenuItems = useCallback(
 		() =>
 			Array.from(
@@ -124,7 +138,7 @@ export function UserAccountMenu({
 						</button>
 						<button
 							className={styles.menuLink}
-							onClick={close}
+							onClick={openProfileModal}
 							role="menuitem"
 							type="button"
 						>

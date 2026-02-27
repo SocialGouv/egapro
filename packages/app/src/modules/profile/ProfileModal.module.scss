@@ -1,0 +1,28 @@
+.readonlyField {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.readonlyLabel {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 1rem;
+	line-height: 1.5;
+	color: var(--text-title-grey);
+}
+
+.readonlyValue {
+	padding: 0.5rem 1rem;
+	background-color: var(--background-contrast-grey);
+	border-radius: 0.25rem 0.25rem 0 0;
+	border-bottom: 2px solid var(--border-default-grey);
+	font-size: 1rem;
+	line-height: 1.5;
+	color: var(--text-mention-grey);
+}
+
+.narrowField {
+	max-width: 348px;
+}
