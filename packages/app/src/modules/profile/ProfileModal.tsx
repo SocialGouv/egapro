@@ -140,7 +140,7 @@ export function ProfileModal() {
 										/>
 									</div>
 									<div
-										className={`fr-input-group${phoneError ? " fr-input-group--error" : ""} ${styles.narrowField}`}
+										className={`fr-input-group${phoneError ? "fr-input-group--error" : ""} ${styles.narrowField}`}
 									>
 										<label className="fr-label" htmlFor="profile-phone">
 											Numéro de téléphone (obligatoire)

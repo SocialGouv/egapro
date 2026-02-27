@@ -72,12 +72,17 @@ describe("UserAccountMenu", () => {
 			expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		});
 
-		it("displays 'Mes entreprises' menu item", () => {
+		it("displays 'Mes entreprises' menu item linking to the companies page", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
-			).toBeInTheDocument();
+			const mesEntreprises = screen.getByRole("menuitem", {
+				name: "Mes entreprises",
+			});
+			expect(mesEntreprises).toBeInTheDocument();
+			expect(mesEntreprises).toHaveAttribute(
+				"href",
+				"/mon-espace/mes-entreprises",
+			);
 		});
 
 		it("displays 'Voir mon profil' menu item", () => {

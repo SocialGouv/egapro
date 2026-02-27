@@ -128,14 +128,14 @@ export function UserAccountMenu({
 					</div>
 
 					<div className={styles.links}>
-						<button
+						<Link
 							className={styles.menuLink}
+							href="/mon-espace/mes-entreprises"
 							onClick={close}
 							role="menuitem"
-							type="button"
 						>
 							Mes entreprises
-						</button>
+						</Link>
 						<button
 							className={styles.menuLink}
 							onClick={openProfileModal}

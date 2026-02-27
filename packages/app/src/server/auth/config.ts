@@ -6,10 +6,13 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import {
 	accounts,
+	companies,
 	sessions,
+	userCompanies,
 	users,
 	verificationTokens,
 } from "~/server/db/schema";
+import { fetchCompanyName } from "~/server/services/weez";
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -111,6 +114,25 @@ export const authConfig = {
 
 				if (Object.keys(updates).length > 0) {
 					await db.update(users).set(updates).where(eq(users.id, user.id));
+				}
+
+				// Associate user with company from ProConnect SIRET
+				if (siret) {
+					const siren = siret.slice(0, 9);
+					const companyName = await fetchCompanyName(siren);
+
+					await db
+						.insert(companies)
+						.values({ siren, name: companyName })
+						.onConflictDoUpdate({
+							target: companies.siren,
+							set: { name: companyName, updatedAt: new Date() },
+						});
+
+					await db
+						.insert(userCompanies)
+						.values({ userId: user.id, siren })
+						.onConflictDoNothing();
 				}
 			}
 		},
