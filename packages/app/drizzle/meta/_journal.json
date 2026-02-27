@@ -22,6 +22,13 @@
 			"when": 1772154191182,
 			"tag": "0002_lean_khan",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1772215461501,
+			"tag": "0003_absurd_komodo",
+			"breakpoints": true
 		}
 	]
 }

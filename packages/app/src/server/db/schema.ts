@@ -36,10 +36,6 @@ export const users = createTable("user", (d) => ({
 	siret: d.varchar({ length: 14 }),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
-	accounts: many(accounts),
-}));
-
 export const accounts = createTable(
 	"account",
 	(d) => ({
@@ -165,3 +161,50 @@ export const declarationCategoriesRelations = relations(
 		}),
 	}),
 );
+
+export const companies = createTable("company", (d) => ({
+	siren: d.varchar({ length: 9 }).notNull().primaryKey(),
+	name: d.varchar({ length: 255 }).notNull(),
+	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+}));
+
+export const userCompanies = createTable(
+	"user_company",
+	(d) => ({
+		userId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		primaryKey({ columns: [t.userId, t.siren] }),
+		index("user_company_user_id_idx").on(t.userId),
+	],
+);
+
+export const userCompaniesRelations = relations(userCompanies, ({ one }) => ({
+	user: one(users, {
+		fields: [userCompanies.userId],
+		references: [users.id],
+	}),
+	company: one(companies, {
+		fields: [userCompanies.siren],
+		references: [companies.siren],
+	}),
+}));
+
+export const companiesRelations = relations(companies, ({ many }) => ({
+	userCompanies: many(userCompanies),
+	declarations: many(declarations),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+	accounts: many(accounts),
+	userCompanies: many(userCompanies),
+}));
