@@ -23,10 +23,10 @@ test.describe("ProConnect authentication flow", () => {
 	test("redirects to declaration page after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
+		await page.waitForURL("**/declaration-remuneration");
+		// Authenticated state is confirmed by the user-menu button
 		await expect(
-			page.getByRole("heading", {
-				name: "Déclarer les indicateurs de rémunération",
-			}),
+			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
 	});
 
@@ -58,7 +58,9 @@ test.describe("ProConnect authentication flow", () => {
 		await page.getByRole("button", { name: "Mon espace" }).click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
-		// NextAuth shows a sign-out confirmation page with a CSRF form
+		// NextAuth shows a sign-out confirmation page with a CSRF form.
+		// The button label "Sign out" is NextAuth's default English copy;
+		// update this selector if the sign-out page is ever customised.
 		await page.waitForURL("**/api/auth/signout**");
 		await page.getByRole("button", { name: /sign out/i }).click();
 
