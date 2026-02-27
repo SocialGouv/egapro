@@ -13,7 +13,7 @@ export function CompanyCard({ company }: Props) {
 			<div className="fr-card__body">
 				<div className="fr-card__content">
 					<h3 className="fr-card__title">
-						<Link href={`/declaration-remuneration?siren=${company.siren}`}>
+						<Link href={`/mon-espace/mes-entreprises/${company.siren}`}>
 							{company.name}
 						</Link>
 					</h3>

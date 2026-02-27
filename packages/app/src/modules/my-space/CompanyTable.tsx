@@ -27,7 +27,7 @@ export function CompanyTable({ companies }: Props) {
 									<tr key={company.siren}>
 										<td>
 											<Link
-												href={`/declaration-remuneration?siren=${company.siren}`}
+												href={`/mon-espace/mes-entreprises/${company.siren}`}
 											>
 												{company.name}
 											</Link>

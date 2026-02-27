@@ -165,6 +165,10 @@ export const declarationCategoriesRelations = relations(
 export const companies = createTable("company", (d) => ({
 	siren: d.varchar({ length: 9 }).notNull().primaryKey(),
 	name: d.varchar({ length: 255 }).notNull(),
+	address: d.varchar({ length: 500 }),
+	nafCode: d.varchar("naf_code", { length: 10 }),
+	workforce: d.integer(),
+	hasCse: d.boolean("has_cse"),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 }));

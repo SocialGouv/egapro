@@ -24,5 +24,5 @@ const BADGE_CONFIG: Record<
 
 export function StatusBadge({ status }: Props) {
 	const config = BADGE_CONFIG[status];
-	return <p className={config.className}>{config.label}</p>;
+	return <span className={config.className}>{config.label}</span>;
 }
