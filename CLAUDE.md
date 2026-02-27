@@ -4,6 +4,20 @@
 
 ---
 
+## Business context
+
+EGAPRO is the French government platform for declaring gender pay equity indicators (7 indicators, detailed in [README.md](./README.md)).
+
+Key concepts for development:
+- **Indicators A–F**: pre-calculated by GIP-MDS from DSN data, available each March
+- **Indicator G**: company-calculated pay gap by job categories (base + variable compensation)
+- **Alert threshold**: gap >= 5% triggers additional obligations (second declaration, CSE opinion, joint assessment)
+- **CSE opinion**: PDF upload, companies >= 100 employees only, up to 3/year
+
+Full specs: <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
+
+---
+
 ## Monorepo structure
 
 ```
