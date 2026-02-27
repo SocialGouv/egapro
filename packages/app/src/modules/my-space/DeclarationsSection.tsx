@@ -47,11 +47,17 @@ export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
 	const previousDeclarations = declarations.filter((d) => d.year < currentYear);
 
 	const allRows = [
-		...currentYearDeclarations.map((d) => ({ kind: "row" as const, declaration: d })),
+		...currentYearDeclarations.map((d) => ({
+			kind: "row" as const,
+			declaration: d,
+		})),
 		...(previousDeclarations.length > 0
 			? [{ kind: "separator" as const, declaration: null }]
 			: []),
-		...previousDeclarations.map((d) => ({ kind: "row" as const, declaration: d })),
+		...previousDeclarations.map((d) => ({
+			kind: "row" as const,
+			declaration: d,
+		})),
 	];
 
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]!);

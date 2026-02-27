@@ -22,7 +22,11 @@ import { DeclarationLink } from "../DeclarationLink";
 describe("DeclarationLink", () => {
 	it("renders as a link when userPhone is provided", () => {
 		render(
-			<DeclarationLink siren="532847196" type="remuneration" userPhone="0122334455">
+			<DeclarationLink
+				siren="532847196"
+				type="remuneration"
+				userPhone="0122334455"
+			>
 				Rémunération
 			</DeclarationLink>,
 		);
