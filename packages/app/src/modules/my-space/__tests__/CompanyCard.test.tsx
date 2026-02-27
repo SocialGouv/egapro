@@ -33,7 +33,7 @@ describe("CompanyCard", () => {
 		expect(link).toBeInTheDocument();
 		expect(link).toHaveAttribute(
 			"href",
-			"/declaration-remuneration?siren=532847196",
+			"/mon-espace/mes-entreprises/532847196",
 		);
 	});
 

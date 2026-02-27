@@ -51,12 +51,12 @@ describe("CompanyTable", () => {
 		const linkA = screen.getByRole("link", { name: "Company A" });
 		expect(linkA).toHaveAttribute(
 			"href",
-			"/declaration-remuneration?siren=111111111",
+			"/mon-espace/mes-entreprises/111111111",
 		);
 		const linkB = screen.getByRole("link", { name: "Company B" });
 		expect(linkB).toHaveAttribute(
 			"href",
-			"/declaration-remuneration?siren=222222222",
+			"/mon-espace/mes-entreprises/222222222",
 		);
 	});
 
