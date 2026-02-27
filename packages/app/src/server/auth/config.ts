@@ -16,6 +16,7 @@ declare module "next-auth" {
 		user: {
 			id: string;
 			siret?: string | null;
+			phone?: string | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -74,6 +75,8 @@ function getProviders(): Provider[] {
 						"",
 					email: userinfo.email ?? "",
 					siret: userinfo.siret ?? null,
+					firstName: userinfo.given_name ?? null,
+					lastName: userinfo.usual_name ?? null,
 				};
 			},
 		});
@@ -95,14 +98,20 @@ export const authConfig = {
 	}),
 	events: {
 		async signIn({ user, profile }) {
-			const siret =
-				profile &&
-				"siret" in profile &&
-				(profile as Record<string, unknown>).siret
-					? ((profile as Record<string, unknown>).siret as string)
-					: null;
-			if (siret && user.id) {
-				await db.update(users).set({ siret }).where(eq(users.id, user.id));
+			const p = profile as Record<string, unknown> | undefined;
+			const siret = p?.siret ? (p.siret as string) : null;
+			const firstName = p?.firstName ? (p.firstName as string) : null;
+			const lastName = p?.lastName ? (p.lastName as string) : null;
+
+			if (user.id) {
+				const updates: Record<string, string | null> = {};
+				if (siret) updates.siret = siret;
+				if (firstName) updates.firstName = firstName;
+				if (lastName) updates.lastName = lastName;
+
+				if (Object.keys(updates).length > 0) {
+					await db.update(users).set(updates).where(eq(users.id, user.id));
+				}
 			}
 		},
 	},
@@ -126,15 +135,16 @@ export const authConfig = {
 			user,
 		}: {
 			session: DefaultSession & {
-				user?: { id?: string; siret?: string | null };
+				user?: { id?: string; siret?: string | null; phone?: string | null };
 			};
-			user: { id: string; siret?: string | null };
+			user: { id: string; siret?: string | null; phone?: string | null };
 		}) => ({
 			...session,
 			user: {
 				...session.user,
 				id: user.id,
 				siret: user.siret,
+				phone: user.phone,
 			},
 		}),
 	},

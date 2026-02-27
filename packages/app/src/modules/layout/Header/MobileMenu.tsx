@@ -36,6 +36,7 @@ export async function MobileMenu() {
 								<UserAccountMenu
 									userEmail={session.user.email ?? ""}
 									userName={session.user.name ?? "Utilisateur"}
+									userPhone={session.user.phone ?? undefined}
 								/>
 							) : (
 								<Link

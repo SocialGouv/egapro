@@ -22,6 +22,8 @@ export const users = createTable("user", (d) => ({
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	name: d.varchar({ length: 255 }),
+	firstName: d.varchar("first_name", { length: 255 }),
+	lastName: d.varchar("last_name", { length: 255 }),
 	email: d.varchar({ length: 255 }).notNull(),
 	emailVerified: d
 		.timestamp({
@@ -30,6 +32,7 @@ export const users = createTable("user", (d) => ({
 		})
 		.$defaultFn(() => /* @__PURE__ */ new Date()),
 	image: d.varchar({ length: 255 }),
+	phone: d.varchar({ length: 20 }),
 	siret: d.varchar({ length: 14 }),
 }));
 
