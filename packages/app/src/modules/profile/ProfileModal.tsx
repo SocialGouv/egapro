@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
+import { phoneRegex } from "./phone";
 import styles from "./ProfileModal.module.scss";
 
 const MODAL_ID = "profile-modal";
@@ -38,18 +39,40 @@ export function ProfileModal() {
 	}, []);
 
 	const handleDialogOpen = useCallback(() => {
-		profileQuery.refetch().then((result) => {
-			if (result.data) {
-				setPhone(result.data.phone ?? "");
-				setPhoneError(null);
+		profileQuery
+			.refetch()
+			.then((result) => {
+				if (result.data) {
+					setPhone(result.data.phone ?? "");
+					setPhoneError(null);
+				}
+			})
+			.catch(() => {
+				// Query error is already handled by React Query's error state
+			});
+	}, [profileQuery]);
+
+	// Detect when the DSFR modal opens by observing the dialog's `open` attribute.
+	useEffect(() => {
+		const dialog = dialogRef.current;
+		if (!dialog) return;
+
+		const observer = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === "open" && dialog.open) {
+					handleDialogOpen();
+					break;
+				}
 			}
 		});
-	}, [profileQuery]);
+
+		observer.observe(dialog, { attributes: true, attributeFilter: ["open"] });
+		return () => observer.disconnect();
+	}, [handleDialogOpen]);
 
 	const validatePhone = (value: string): string | null => {
 		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!/^\d{2}( \d{2}){4}$/.test(value))
-			return "Format attendu : 01 22 33 44 55";
+		if (!phoneRegex.test(value)) return "Format attendu : 01 22 33 44 55";
 		return null;
 	};
 
@@ -69,11 +92,6 @@ export function ProfileModal() {
 			aria-labelledby={MODAL_TITLE_ID}
 			className="fr-modal"
 			id={MODAL_ID}
-			onTransitionEnd={(e) => {
-				if (e.target === dialogRef.current && dialogRef.current?.open) {
-					handleDialogOpen();
-				}
-			}}
 			ref={dialogRef}
 		>
 			<div className="fr-container fr-container--fluid fr-container-md">
@@ -192,7 +210,11 @@ type ReadonlyFieldProps = {
 	value: string | null | undefined;
 };
 
-function ReadonlyField({ label, showEditIcon = true, value }: ReadonlyFieldProps) {
+function ReadonlyField({
+	label,
+	showEditIcon = true,
+	value,
+}: ReadonlyFieldProps) {
 	return (
 		<div className={styles.readonlyField}>
 			<div className={styles.readonlyLabel}>

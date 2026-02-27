@@ -1,12 +1,10 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { phoneSchema } from "~/modules/profile/phone";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { users } from "~/server/db/schema";
-
-const phoneSchema = z
-	.string()
-	.regex(/^\d{2}( \d{2}){4}$/, "Format attendu : 01 22 33 44 55");
 
 export const profileRouter = createTRPCRouter({
 	get: protectedProcedure.query(async ({ ctx }) => {
@@ -22,7 +20,11 @@ export const profileRouter = createTRPCRouter({
 			.limit(1);
 
 		const user = result[0];
-		if (!user) throw new Error("User not found");
+		if (!user)
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "User not found",
+			});
 
 		return user;
 	}),
