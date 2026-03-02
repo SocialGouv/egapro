@@ -626,3 +626,37 @@ pnpm db:studio    # opens Drizzle Studio (UI to inspect the database)
 2. `pnpm db:generate` — creates the SQL migration file
 3. `pnpm db:migrate` — applies the migration
 4. `pnpm dev` — restart the server if necessary
+
+### Drizzle casing convention (mandatory)
+
+**Rule: all schema properties are camelCase in TypeScript, automatically mapped to snake_case in the database.**
+
+The Drizzle client (`src/server/db/index.ts`) and Drizzle Kit config (`drizzle.config.ts`) both use `casing: "snake_case"`. This means:
+
+- `userId` in TypeScript → `user_id` column in PostgreSQL
+- `createdAt` in TypeScript → `created_at` column in PostgreSQL
+- `providerAccountId` in TypeScript → `provider_account_id` column in PostgreSQL
+
+**Never specify explicit column names** in the schema — the casing option handles it automatically.
+
+```ts
+// FORBIDDEN — explicit column name mapping
+firstName: d.varchar("first_name", { length: 255 }),
+hasCse: d.boolean("has_cse"),
+
+// CORRECT — camelCase only, casing option does the rest
+firstName: d.varchar({ length: 255 }),
+hasCse: d.boolean(),
+```
+
+**Never use snake_case for schema property names:**
+
+```ts
+// FORBIDDEN — snake_case property
+refresh_token: d.text(),
+
+// CORRECT — camelCase property
+refreshToken: d.text(),
+```
+
+**Exception:** the `accounts` table uses snake_case properties (`refresh_token`, `access_token`, `expires_at`, `token_type`, `id_token`, `session_state`) because the `@auth/drizzle-adapter` from NextAuth requires these exact names at the type level. This is the only allowed exception.

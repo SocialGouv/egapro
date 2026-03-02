@@ -36,6 +36,13 @@
 			"when": 1772223004236,
 			"tag": "0004_next_jack_murdock",
 			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1772611200000,
+			"tag": "0005_standardize_snake_case",
+			"breakpoints": true
 		}
 	]
 }

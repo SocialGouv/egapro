@@ -1,15 +1,9 @@
 import { relations } from "drizzle-orm";
-import {
-	index,
-	numeric,
-	pgTableCreator,
-	primaryKey,
-} from "drizzle-orm/pg-core";
+import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
 /**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
+ * Multi-project schema: all tables are prefixed with `app_`.
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
@@ -22,8 +16,8 @@ export const users = createTable("user", (d) => ({
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	name: d.varchar({ length: 255 }),
-	firstName: d.varchar("first_name", { length: 255 }),
-	lastName: d.varchar("last_name", { length: 255 }),
+	firstName: d.varchar({ length: 255 }),
+	lastName: d.varchar({ length: 255 }),
 	email: d.varchar({ length: 255 }).notNull(),
 	emailVerified: d
 		.timestamp({
@@ -46,6 +40,7 @@ export const accounts = createTable(
 		type: d.varchar({ length: 255 }).$type<AdapterAccount["type"]>().notNull(),
 		provider: d.varchar({ length: 255 }).notNull(),
 		providerAccountId: d.varchar({ length: 255 }).notNull(),
+		// NextAuth DrizzleAdapter requires these exact snake_case property names
 		refresh_token: d.text(),
 		access_token: d.text(),
 		expires_at: d.integer(),
@@ -142,10 +137,10 @@ export const declarationCategories = createTable(
 		categoryName: d.varchar({ length: 255 }).notNull(),
 		womenCount: d.integer(),
 		menCount: d.integer(),
-		womenValue: numeric("women_value"),
-		menValue: numeric("men_value"),
-		womenMedianValue: numeric("women_median_value"),
-		menMedianValue: numeric("men_median_value"),
+		womenValue: d.numeric(),
+		menValue: d.numeric(),
+		womenMedianValue: d.numeric(),
+		menMedianValue: d.numeric(),
 	}),
 	(t) => [
 		index("declaration_cat_siren_year_step_idx").on(t.siren, t.year, t.step),
@@ -166,9 +161,9 @@ export const companies = createTable("company", (d) => ({
 	siren: d.varchar({ length: 9 }).notNull().primaryKey(),
 	name: d.varchar({ length: 255 }).notNull(),
 	address: d.varchar({ length: 500 }),
-	nafCode: d.varchar("naf_code", { length: 10 }),
+	nafCode: d.varchar({ length: 10 }),
 	workforce: d.integer(),
-	hasCse: d.boolean("has_cse"),
+	hasCse: d.boolean(),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 }));

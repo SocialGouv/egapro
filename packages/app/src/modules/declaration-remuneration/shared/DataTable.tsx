@@ -57,7 +57,6 @@ export function DataTable({
 							</thead>
 							<tbody>
 								{rows.map((row, rowIndex) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: rows identified by position
 									<tr key={rowIndex}>
 										{columns.map((col) => (
 											<td key={col.key}>
