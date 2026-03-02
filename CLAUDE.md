@@ -123,6 +123,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 | `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
 | `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
+| `/process-issue` | Process a GitHub issue (parent + sub-issues) with mandatory quality gates |
 
 ---
 

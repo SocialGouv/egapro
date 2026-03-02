@@ -125,5 +125,6 @@ Skills in `.claude/skills/` can be triggered explicitly with `/command`:
 | `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report |
 | `/audit-secu` | Deep OWASP + RGS audit with detailed report |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
+| `/process-issue` | Process a GitHub issue end-to-end with mandatory RGAA + security gates |
 
 These produce detailed reports and are more thorough than the automatic inline gates.
