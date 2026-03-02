@@ -9,13 +9,17 @@ if [[ ! "$FILE_PATH" =~ \.(ts|tsx|js|jsx|json)$ ]]; then
   exit 0
 fi
 
-# Skip files outside packages/app/src
+# Skip files outside packages/app/
 if [[ ! "$FILE_PATH" =~ packages/app/ ]]; then
   exit 0
 fi
 
-# Run biome check --write on the file
-cd "$(echo "$INPUT" | jq -r '.cwd // empty')" 2>/dev/null || exit 0
-pnpm biome check --write "$FILE_PATH" 2>&1 | tail -5 >&2
+# Biome must run from packages/app/ to find the correct config
+PROJECT_DIR=$(echo "$INPUT" | jq -r '.cwd // empty')
+cd "$PROJECT_DIR/packages/app" 2>/dev/null || exit 0
+
+# Convert absolute path to relative path from packages/app/
+REL_PATH="${FILE_PATH#$PROJECT_DIR/packages/app/}"
+pnpm biome check --write "$REL_PATH" 2>&1 | tail -5 >&2
 
 exit 0

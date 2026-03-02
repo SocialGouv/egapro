@@ -13,8 +13,9 @@ The following rules are enforced automatically by hooks in `.claude/settings.jso
 
 If a hook blocks your edit, do NOT attempt to bypass it. Rethink the approach.
 
-## PostToolUse hook (auto-fix after edit)
+## PostToolUse hooks (auto-fix after edit/run)
 
-- **post-edit-lint.sh** — Runs `pnpm biome check --write` on every edited `.ts/.tsx/.js/.jsx/.json` file inside `packages/app/`. Formatting and lint fixes are applied automatically.
+- **post-edit-lint.sh** (matcher: `Edit|Write`) — Runs `pnpm biome check --write` on every edited `.ts/.tsx/.js/.jsx/.json` file inside `packages/app/`. Formatting and lint fixes are applied automatically.
+- **post-bash-lint.sh** (matcher: `Bash`) — After any `pnpm test|build|typecheck|lint|format|check` command, runs `pnpm biome check --write` on all git-modified `.ts/.tsx/.json` files. Acts as a safety net to catch formatting issues before CI.
 
-Because of this hook, you do NOT need to run `pnpm lint` or `pnpm format` after each edit. However, you still must run `pnpm typecheck` before considering a task complete.
+Because of these hooks, you do NOT need to run `pnpm lint` or `pnpm format` manually. However, you still must run `pnpm typecheck` before considering a task complete.

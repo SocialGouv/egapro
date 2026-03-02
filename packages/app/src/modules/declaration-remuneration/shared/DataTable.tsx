@@ -57,7 +57,7 @@ export function DataTable({
 							</thead>
 							<tbody>
 								{rows.map((row, rowIndex) => (
-									<tr key={rowIndex}>
+									<tr key={String(row[columns[0]?.key ?? ""] ?? rowIndex)}>
 										{columns.map((col) => (
 											<td key={col.key}>
 												{col.readOnly ? (
