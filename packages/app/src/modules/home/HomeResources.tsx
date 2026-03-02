@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { DsfrPictogram } from "./DsfrPictogram";
 import styles from "./HomeResources.module.scss";
 
@@ -74,12 +76,13 @@ export function HomeResources() {
 						aria-hidden="true"
 						className={`fr-col-12 fr-col-md-3 ${styles.illustrationWrapper}`}
 					>
-						<img
+						<Image
 							alt=""
 							className={styles.illustration}
-							height="147"
+							height={147}
 							src="/assets/images/home/help-illustration.svg"
-							width="210"
+							unoptimized
+							width={210}
 						/>
 					</div>
 				</div>

@@ -252,7 +252,10 @@ export const declarationRouter = createTRPCRouter({
 				updatedAt: new Date(),
 			})
 			.where(
-				and(eq(declarations.siren, siren), eq(declarations.year, getCurrentYear())),
+				and(
+					eq(declarations.siren, siren),
+					eq(declarations.year, getCurrentYear()),
+				),
 			);
 
 		return { success: true };
