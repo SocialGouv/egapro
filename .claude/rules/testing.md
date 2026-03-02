@@ -38,3 +38,15 @@ For each function/component, test:
 
 Mock external dependencies (next/navigation, next/link, server-only, tRPC, DB).
 Never mock the unit under test or its internal helpers.
+
+## Standard mocks (centralized in `src/test/setup.ts`)
+
+All common mocks are defined once in `setup.ts` and auto-loaded by Vitest. Never duplicate them in test files:
+- `next/link` → simple `<a>` tag
+- `next/navigation` → `usePathname` + `useRouter` stubs
+- `next/image` → `<div role="img">`
+- `next-auth/react` → `signIn` stub
+- `server-only` → empty module
+- `~/trpc/server` → `HydrateClient` passthrough
+
+Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.

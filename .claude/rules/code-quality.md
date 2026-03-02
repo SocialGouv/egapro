@@ -35,3 +35,33 @@ A constant used exactly once right below its definition adds noise, not clarity.
 ## File size
 
 Keep files under 200 lines. Split at 400. Files over 800 lines are forbidden.
+
+## TypeScript
+
+- `strict: true`, `noUncheckedIndexedAccess: true`
+- No explicit `any` — use `unknown` + narrowing
+- Shared object types in `types.ts` at module level
+- Component props: `type Props = { ... }` (never `any`)
+
+## Naming conventions
+
+| Type | Convention | Example |
+|---|---|---|
+| React component | PascalCase | `HeaderBrand.tsx` |
+| Hook | camelCase + `use` | `useNavigation.ts` |
+| Utility | camelCase | `formatDate.ts` |
+| Type / Interface | PascalCase | `type UserProfile = ...` |
+| Constant | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
+| Module folder | camelCase | `modules/layout/` |
+
+## General rules
+
+- **Immutability**: never mutate objects/arrays — always spread (`{ ...obj, key: val }`)
+- **Error handling**: always `try/catch` with explicit user-facing error message
+- **Input validation**: Zod at system boundaries (forms, route params, API body)
+
+## Environment variables
+
+Declared and validated in `src/env.js` via `@t3-oss/env-nextjs` + Zod. **Never read `process.env` directly** — always `import { env } from "~/env.js"`.
+
+To add a variable: declare in `src/env.js` (`server` or `client` section) + add to `runtimeEnv` + add to `.env` local. Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI without secrets).
