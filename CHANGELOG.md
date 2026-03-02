@@ -1,3 +1,12 @@
+## [3.15.3](https://github.com/SocialGouv/egapro/compare/v3.15.2...v3.15.3) (2026-03-02)
+
+
+### Bug Fixes
+
+* dgt file incomplete ([#2830](https://github.com/SocialGouv/egapro/issues/2830)) ([742aacf](https://github.com/SocialGouv/egapro/commit/742aacf7661822f7b05a943a15725c1fdab636b7))
+* pnpm migration ([#2785](https://github.com/SocialGouv/egapro/issues/2785)) ([85540d5](https://github.com/SocialGouv/egapro/commit/85540d58ffc2a3bcc6127788abad633d7736b468))
+* simulateur non calculable resultat ([#2824](https://github.com/SocialGouv/egapro/issues/2824)) ([b086a63](https://github.com/SocialGouv/egapro/commit/b086a63fd9f79e650735c6ab3cbf012bc92620d1))
+
 ## [3.15.2](https://github.com/SocialGouv/egapro/compare/v3.15.1...v3.15.2) (2026-02-04)
 
 
