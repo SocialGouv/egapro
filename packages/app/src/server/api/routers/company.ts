@@ -11,6 +11,45 @@ function getCurrentYear() {
 }
 
 export const companyRouter = createTRPCRouter({
+	get: protectedProcedure
+		.input(z.object({ siren: z.string().length(9) }))
+		.query(async ({ ctx, input }) => {
+			const userCompanyRow = await ctx.db
+				.select()
+				.from(userCompanies)
+				.where(
+					and(
+						eq(userCompanies.userId, ctx.session.user.id),
+						eq(userCompanies.siren, input.siren),
+					),
+				)
+				.limit(1);
+
+			if (userCompanyRow.length === 0) {
+				throw new Error("Company not found or access denied");
+			}
+
+			const companyRows = await ctx.db
+				.select({
+					siren: companies.siren,
+					name: companies.name,
+					address: companies.address,
+					nafCode: companies.nafCode,
+					workforce: companies.workforce,
+					hasCse: companies.hasCse,
+				})
+				.from(companies)
+				.where(eq(companies.siren, input.siren))
+				.limit(1);
+
+			const company = companyRows[0];
+			if (!company) {
+				throw new Error("Company not found");
+			}
+
+			return company;
+		}),
+
 	list: protectedProcedure.query(async ({ ctx }) => {
 		const year = getCurrentYear();
 
