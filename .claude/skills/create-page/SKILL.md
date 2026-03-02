@@ -27,30 +27,53 @@ After all agents complete, **synthesize**:
 - List common types
 - List DB schema changes needed
 - List tRPC procedures needed (new or existing)
+- **Classify each page/screen** using the activation rules below
 
 Present synthesis to user and wait for confirmation before Phase 2.
 
-### Phase 2 — Shared foundations (sequential)
+### Activation rules (conditional phases)
 
-Code the shared parts that all pages depend on. Order matters:
+After Phase 1 analysis, classify each page/screen and determine which actions apply.
+**Never launch an agent or phase for an action marked "skip".**
 
-1. **DB schema** changes in `src/server/db/schema.ts`:
+| Action | Activate when | Skip when |
+|---|---|---|
+| DB / Migration | Data must be persisted or read from PostgreSQL | Static content, no server data |
+| Zod schemas | Forms, API inputs, route parameters exist | Read-only display, static pages |
+| tRPC / API | Frontend needs server data or mutations | Static page, client-only logic |
+| UI components | Visual HTML is rendered | Pure backend (no `.tsx` produced) |
+| Unit tests | **Always** — only unconditional action | Never skip |
+| RGAA audit | HTML is produced (`.tsx` files created/modified) | Pure backend, DB migration only |
+| Security audit | Forms, API routes, auth, user data, file upload exist | Static page with no user input and no server code |
+| E2E tests | A user journey is created, modified, or its underlying API/data changes | Isolated component with no route, internal refacto with no behavior change, config-only change |
+
+**Examples of conditional skipping:**
+- Static info page (CGU, mentions légales) → skip DB, tRPC, Zod, security audit
+- Backend-only tRPC route → skip UI components, RGAA audit. **Keep E2E** if the route serves an existing user journey
+- Isolated UI component (no data) → skip DB, tRPC, security audit, E2E tests
+- Form page with API → all actions activated
+
+### Phase 2 — Shared foundations (sequential, conditional)
+
+**Skip this entire phase** if all pages are static with no shared code.
+Otherwise, code only the applicable parts in order:
+
+1. **DB schema** changes in `src/server/db/schema.ts` *(if DB activated)*:
    - camelCase properties (auto-mapped to snake_case)
    - Run `pnpm db:generate` → `pnpm db:migrate`
 
-2. **Zod schemas** in `src/server/api/routers/{domain}/schemas.ts`:
+2. **Zod schemas** in `src/server/api/routers/{domain}/schemas.ts` *(if Zod activated)*:
    - Shared input/output schemas for tRPC procedures
    - Reusable for client-side form validation
 
-3. **tRPC procedures** in `src/server/api/routers/{domain}/router.ts`:
+3. **tRPC procedures** in `src/server/api/routers/{domain}/router.ts` *(if tRPC activated)*:
    - `protectedProcedure` for authenticated endpoints
    - Ownership checks on all mutations
    - `db.transaction()` for multi-write operations
 
-4. **Shared types** in `src/modules/{domain}/types.ts`
+4. **Shared types** in `src/modules/{domain}/types.ts` *(if multiple pages share types)*
 
-5. **Shared components** in `src/modules/{domain}/shared/`:
-   - Extract components used across multiple pages
+5. **Shared components** in `src/modules/{domain}/shared/` *(if components used 2+ times)*:
    - Each component < 200 lines, `"use client"` only where needed
 
 6. Run `pnpm typecheck` to validate foundations compile.
@@ -85,18 +108,23 @@ Each agent MUST follow:
 - **Unit tests**: test observable behavior, mock boundaries only
 - **File size**: < 200 lines per file
 
-### Phase 4 — Quality (3 parallel agents)
+### Phase 4 — Quality (parallel agents, conditional)
 
-**Agent 1 — RGAA audit** (delegate to `rgaa-auditor`):
-Audit all new/modified `.tsx` files against the 13 RGAA themes.
+Launch only the applicable agents based on activation rules from Phase 1:
 
-**Agent 2 — Security audit** (delegate to `security-auditor`):
-Audit all new/modified server files and tRPC routers against OWASP Top 10.
-
-**Agent 3 — Validation**:
+**Agent: Validation** *(always)*:
 ```bash
 pnpm typecheck && pnpm test && pnpm lint:check && pnpm format:check
 ```
+
+**Agent: RGAA audit** *(only if HTML produced)* — delegate to `rgaa-auditor`:
+Audit all new/modified `.tsx` files against the 13 RGAA themes.
+
+**Agent: Security audit** *(only if forms, API, auth, user data, or upload)* — delegate to `security-auditor`:
+Audit all new/modified server files and tRPC routers against OWASP Top 10.
+
+**Agent: E2E tests** *(only if navigable user journey created/modified)*:
+Write Playwright tests in `src/e2e/` covering the new user flows.
 
 ### Phase 5 — Final report
 
