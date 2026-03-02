@@ -69,4 +69,15 @@ check_pattern '\.scss$' \
   '@media[[:space:]]+.*((min|max)-width|screen)' \
   'Raw @media queries are forbidden. Use DSFR mixins: @include respond-from(md) or @include respond-to(sm).'
 
+# dangerouslySetInnerHTML — XSS vector, forbidden in JSX
+check_pattern '\.(tsx|jsx)$' \
+  'dangerouslySetInnerHTML' \
+  'dangerouslySetInnerHTML is forbidden (XSS risk). Use safe rendering or DOMPurify if absolutely necessary.'
+
+# Explicit `any` type — kills TypeScript safety (allow test files)
+check_pattern '\.(ts|tsx)$' \
+  '(: any[^a-zA-Z]|as any[^a-zA-Z])' \
+  'Explicit `any` type is forbidden. Use `unknown` with type narrowing instead.' \
+  '(__tests__|\.test\.|\.spec\.)'
+
 exit 0
