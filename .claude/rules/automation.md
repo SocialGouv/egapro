@@ -33,11 +33,25 @@ Runs `pnpm biome check --write` automatically:
 
 ---
 
+## Activation rules (conditional gates)
+
+Not all gates apply to all tasks. After understanding the scope of a change, determine which gates are relevant. **Never run a gate that does not apply.**
+
+| Gate | Activate when | Skip when |
+|---|---|---|
+| Validation (typecheck + tests + lint) | **Always** | Never skip |
+| RGAA | `.tsx` files in `modules/` or `app/` are created/modified | Pure backend change (only `.ts` in `server/`, DB migration, config) |
+| Security | Forms, API routes, auth, user data, file upload, or server code modified | Static page with no user input and no server code |
+| E2E tests | A user journey is created, modified, or its underlying API/data changes | Isolated component with no route, internal refacto with no behavior change, config-only change |
+
+---
+
 ## Automatic quality gates (mandatory)
 
 These gates trigger **automatically** without user input. Do NOT wait to be asked.
+Apply only the gates that match the activation rules above.
 
-### Gate 1 — Validation (after every task)
+### Gate 1 — Validation (always, after every task)
 
 Before reporting ANY task as done, launch **3 parallel agents**:
 
@@ -47,7 +61,7 @@ Before reporting ANY task as done, launch **3 parallel agents**:
 
 If any fails → fix → re-run. Only report completion when all 3 pass.
 
-### Gate 2 — RGAA (after modifying `.tsx` in `modules/`)
+### Gate 2 — RGAA (only if `.tsx` produced in `modules/` or `app/`)
 
 When you create or modify UI components, verify **inline while writing**:
 - `<input>` → associated `<label>` via `htmlFor`/`id`
@@ -61,7 +75,7 @@ When you create or modify UI components, verify **inline while writing**:
 
 Full checklist (13 RGAA themes) in `.claude/agents/rgaa-auditor/AGENT.md`.
 
-### Gate 3 — Security (after modifying `server/` or tRPC)
+### Gate 3 — Security (only if forms, API, auth, user data, or upload)
 
 When you create or modify server code, verify **inline while writing**:
 - Queries → Drizzle ORM only (no raw SQL)
