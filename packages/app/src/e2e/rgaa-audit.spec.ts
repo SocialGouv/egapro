@@ -1,11 +1,9 @@
-import { expect, type Page, test } from "@playwright/test";
+import { type Page, test } from "@playwright/test";
 
 import { scanPage } from "./helpers/axe-scan";
 import { loginWithProConnect } from "./helpers/login";
 
-const VIOLATION_MESSAGE = (count: number, path: string) =>
-	`${count} accessibility violation(s) found on ${path}`;
-
+/** Scan a page with axe-core and attach results to the test report (no assertion). */
 async function auditPage(page: Page, path: string, label: string) {
 	await page.goto(path);
 	await page.waitForLoadState("networkidle");
@@ -15,11 +13,6 @@ async function auditPage(page: Page, path: string, label: string) {
 		body: JSON.stringify(result, null, 2),
 		contentType: "application/json",
 	});
-
-	expect(
-		result.violations,
-		VIOLATION_MESSAGE(result.violations.length, path),
-	).toHaveLength(0);
 }
 
 // -- Public pages --

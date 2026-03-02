@@ -21,11 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       site_url: ${{ steps.url.outputs.site_url }}
+      audit_date: ${{ steps.date.outputs.today }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: alpha
+
+      - name: Get current date
+        id: date
+        run: echo "today=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -51,11 +56,14 @@ jobs:
 
       - name: Set site URL
         id: url
+        env:
+          INPUT_SITE_URL: ${{ inputs.site_url }}
+          SUBDOMAIN: ${{ steps.env.outputs.subdomain }}
         run: |
-          if [ -n "${{ inputs.site_url }}" ]; then
-            echo "site_url=${{ inputs.site_url }}" >> "$GITHUB_OUTPUT"
+          if [ -n "$INPUT_SITE_URL" ]; then
+            echo "site_url=$INPUT_SITE_URL" >> "$GITHUB_OUTPUT"
           else
-            echo "site_url=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> "$GITHUB_OUTPUT"
+            echo "site_url=https://${SUBDOMAIN}.ovh.fabrique.social.gouv.fr" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Wait for app to be ready
@@ -63,7 +71,7 @@ jobs:
           SITE_URL: ${{ steps.url.outputs.site_url }}
         run: |
           for i in $(seq 1 10); do
-            HTTP_CODE=$(curl -sL -o /dev/null -w "%{http_code}" "$SITE_URL" 2>/dev/null || echo "000")
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" 2>/dev/null || echo "000")
             if [ "$HTTP_CODE" = "200" ]; then
               echo "App is ready!"
               exit 0
@@ -75,7 +83,6 @@ jobs:
           exit 1
 
       - name: Run RGAA audit
-        continue-on-error: true
         run: pnpm test:rgaa
         env:
           SITE_URL: ${{ steps.url.outputs.site_url }}
@@ -112,7 +119,7 @@ jobs:
 
       - name: Run Claude Code — Generate report & publish to wiki
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@9d86c9b0c946914e9c71ac5ee1c008959cbfa9af # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
@@ -123,7 +130,7 @@ jobs:
 
             - URL auditée : ${{ needs.scan.outputs.site_url }}
             - Commit : ${{ github.sha }}
-            - Date : $(date -u +%Y-%m-%d)
+            - Date : ${{ needs.scan.outputs.audit_date }}
             - Fichier de résultats : `rgaa-results.json` (à la racine du repo)
 
             ## Instructions
@@ -183,7 +190,7 @@ jobs:
                # Écris le rapport dans /tmp/wiki/RGAA-Audit-Report.md
                cd /tmp/wiki
                git add RGAA-Audit-Report.md
-               git diff --cached --quiet || git commit -m "Update RGAA audit report — $(date -u +%Y-%m-%d)"
+               git diff --cached --quiet || git commit -m "Update RGAA audit report — ${{ needs.scan.outputs.audit_date }}"
                git push
                ```
 
