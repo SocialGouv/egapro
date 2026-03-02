@@ -1,1 +1,56 @@
+import React from "react";
 import "@testing-library/jest-dom/vitest";
+
+// Global mock for next/link — renders a plain <a> tag in all tests.
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+		...props
+	}: {
+		href: string;
+		children: React.ReactNode;
+		[key: string]: unknown;
+	}) => React.createElement("a", { href, ...props }, children),
+}));
+
+// Global mock for next/navigation — avoids repeating in test files.
+vi.mock("next/navigation", () => ({
+	usePathname: vi.fn(),
+	useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
+// Global mock for next/image — renders a plain <div> with role="img".
+vi.mock("next/image", () => ({
+	default: ({
+		alt,
+		src,
+		...rest
+	}: {
+		alt: string;
+		src: string;
+		[key: string]: unknown;
+	}) =>
+		React.createElement("div", {
+			"aria-label": alt,
+			"data-src": src,
+			"data-testid": "next-image",
+			role: "img",
+			...rest,
+		}),
+}));
+
+// Global mock for next-auth/react — provides a default signIn stub.
+vi.mock("next-auth/react", () => ({
+	signIn: vi.fn(),
+}));
+
+// Global mock for server-only — avoids error in jsdom.
+vi.mock("server-only", () => ({}));
+
+// Global mock for ~/trpc/server — provides HydrateClient passthrough.
+// Tests needing specific API mocks can override with their own vi.mock.
+vi.mock("~/trpc/server", () => ({
+	HydrateClient: ({ children }: { children: React.ReactNode }) =>
+		React.createElement(React.Fragment, null, children),
+}));

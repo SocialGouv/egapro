@@ -148,7 +148,7 @@ describe("ProfileModal", () => {
 
 	it("shows validation error for invalid phone format", () => {
 		render(<ProfileModal />);
-		fireEvent.change(getPhoneInput(), { target: { value: "0122334455" } });
+		fireEvent.change(getPhoneInput(), { target: { value: "012233" } });
 		fireEvent.submit(getForm());
 		const errorMessage = document.querySelector(
 			"#profile-phone-messages .fr-message--error",

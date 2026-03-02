@@ -35,7 +35,5 @@ build/
 # vscode
 .vscode/
 
-# mcp
-.mcp.json
-
-.claude
+# claude code (local-only files)
+.claude/settings.local.json

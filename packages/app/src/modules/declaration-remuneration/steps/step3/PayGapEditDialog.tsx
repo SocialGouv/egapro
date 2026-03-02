@@ -5,10 +5,10 @@ import type { RefObject } from "react";
 import common from "../../shared/common.module.scss";
 import dialogStyles from "../../shared/EditDialog.module.scss";
 import {
+	formatGap,
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
-	formatGap,
 } from "../../shared/gapUtils";
 import stepStyles from "../Step3VariablePay.module.scss";
 

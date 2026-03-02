@@ -3,28 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step1Workforce } from "../Step1Workforce";
 
-const mockPush = vi.fn();
 const mockMutate = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
-}));
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -44,7 +23,6 @@ vi.mock("~/trpc/react", () => ({
 beforeEach(() => {
 	HTMLDialogElement.prototype.showModal = vi.fn();
 	HTMLDialogElement.prototype.close = vi.fn();
-	mockPush.mockClear();
 	mockMutate.mockClear();
 });
 

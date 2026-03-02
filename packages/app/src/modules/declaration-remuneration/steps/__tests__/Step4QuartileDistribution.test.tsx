@@ -3,28 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
-const mockPush = vi.fn();
 const mockMutate = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
-}));
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -309,7 +288,7 @@ describe("Step4QuartileDistribution", () => {
 
 	it("blocks count exceeding max workforce", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution maxWomen={15} maxMen={25} />);
+		render(<Step4QuartileDistribution maxMen={25} maxWomen={15} />);
 
 		await user.click(
 			screen.getByRole("button", {

@@ -7,7 +7,7 @@ export async function loginWithProConnect(page: Page) {
 		.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
 		.click();
 
-	// Fill ProConnect login form (test@fia1.fr)
+	// Fill ProConnect login form with the FIA1V2 test identity
 	await page.getByLabel("Email").fill("test@fia1.fr");
 	await page.getByRole("button", { name: /continuer|connexion/i }).click();
 
@@ -15,5 +15,5 @@ export async function loginWithProConnect(page: Page) {
 	await page.getByRole("button", { name: "Se connecter" }).click();
 
 	// Wait for redirect to declaration intro
-	await page.waitForURL("**/declaration-remuneration");
+	await page.waitForURL("**/declaration-remuneration", { timeout: 15_000 });
 }

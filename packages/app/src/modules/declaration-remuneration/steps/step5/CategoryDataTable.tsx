@@ -1,12 +1,12 @@
 "use client";
 
+import common from "../../shared/common.module.scss";
 import {
 	computeGap,
 	computeTotal,
 	formatGapCompact,
 	formatTotal,
 } from "../../shared/gapUtils";
-import common from "../../shared/common.module.scss";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import type { EmployeeCategory } from "./categorySerializer";
 

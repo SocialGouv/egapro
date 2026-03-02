@@ -7,17 +7,17 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { FormActions } from "../shared/FormActions";
-import { SavedIndicator } from "../shared/SavedIndicator";
-import { StepIndicator } from "../shared/StepIndicator";
-import { TooltipButton } from "../shared/TooltipButton";
 import {
-	GAP_LEVEL_LABELS,
 	computeGap,
 	computeProportion,
 	formatGap,
+	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
 } from "../shared/gapUtils";
+import { SavedIndicator } from "../shared/SavedIndicator";
+import { StepIndicator } from "../shared/StepIndicator";
+import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapRow, VariablePayData } from "../types";
 import { BeneficiaryEditDialog } from "./step3/BeneficiaryEditDialog";
 import { PayGapEditDialog } from "./step3/PayGapEditDialog";
@@ -353,7 +353,10 @@ export function Step3VariablePay({
 				</div>
 			</div>
 
-			<DefinitionAccordion id="accordion-step3" />
+			<DefinitionAccordion
+				id="accordion-step3"
+				title="Définitions et méthode de calcul"
+			/>
 
 			{validationError && (
 				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">

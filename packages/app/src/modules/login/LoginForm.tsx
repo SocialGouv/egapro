@@ -1,5 +1,5 @@
-import styles from "./LoginForm.module.scss";
 import { LoginAccordion } from "./LoginAccordion";
+import styles from "./LoginForm.module.scss";
 import { ProConnectButton } from "./ProConnectButton";
 
 /**

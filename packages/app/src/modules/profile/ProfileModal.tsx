@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
-import { phoneRegex } from "./phone";
 import styles from "./ProfileModal.module.scss";
+import { normalizePhone, phoneDigitsRegex } from "./phone";
 
 const MODAL_ID = "profile-modal";
 const MODAL_TITLE_ID = "profile-modal-title";
@@ -72,7 +72,8 @@ export function ProfileModal() {
 
 	const validatePhone = (value: string): string | null => {
 		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!phoneRegex.test(value)) return "Format attendu : 01 22 33 44 55";
+		if (!phoneDigitsRegex.test(normalizePhone(value)))
+			return "Format attendu : 01 22 33 44 55";
 		return null;
 	};
 
@@ -177,10 +178,10 @@ export function ProfileModal() {
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
 										<button
+											className="fr-btn"
 											disabled={updatePhoneMutation.isPending}
 											form="profile-form"
 											type="submit"
-											className="fr-btn"
 										>
 											Enregistrer
 										</button>

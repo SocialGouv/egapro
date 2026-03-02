@@ -2,10 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LoginForm } from "../LoginForm";
 
-vi.mock("next-auth/react", () => ({
-	signIn: vi.fn(),
-}));
-
 vi.mock("~/modules/layout", () => ({
 	NewTabNotice: () => (
 		<span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>

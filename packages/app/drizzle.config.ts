@@ -28,6 +28,7 @@ function getDatabaseUrl() {
 export default {
 	schema: "./src/server/db/schema.ts",
 	dialect: "postgresql",
+	casing: "snake_case",
 	dbCredentials: {
 		url: getDatabaseUrl(),
 	},

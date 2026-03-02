@@ -2,28 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Step6Review } from "../Step6Review";
 
-const mockPush = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
-}));
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
-
 const mockSubmitMutate = vi.fn();
 
 vi.mock("~/trpc/react", () => ({

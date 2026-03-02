@@ -82,6 +82,50 @@ pnpm db:studio            # opens Drizzle Studio
 
 ---
 
+## Automatic quality gates
+
+Quality checks run **automatically** after every code change — no command needed. See `.claude/rules/automation.md` for full details.
+
+| Gate | When | How |
+|---|---|---|
+| **Validation** | After every task | 3 parallel agents: `pnpm typecheck` + `pnpm test` + `pnpm lint:check && format:check` |
+| **RGAA** | After modifying `.tsx` in `modules/` | Inline check: labels, alt, aria, landmarks, headings |
+| **Security** | After modifying `server/` or tRPC | Inline check: Drizzle ORM, Zod inputs, ownership, env |
+| **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
+
+## Parallelized workflow for multi-page tasks
+
+When creating multiple pages/screens, follow this 4-phase approach:
+
+| Phase | Strategy | Details |
+|---|---|---|
+| 1. Analysis | **Parallel** | Launch one Explore agent per page (Figma analysis, DSFR components, data needs) |
+| 2. Shared code | **Sequential** | DB schema, shared types, shared components, tRPC procedures |
+| 3. Pages | **Parallel** | One agent per page (with `isolation: "worktree"` for git isolation) |
+| 4. Quality | **Parallel** | Automatic via quality gates above |
+
+## Agents and skills
+
+### Agents (`.claude/agents/`) — specialized sub-agents, delegated automatically
+
+| Agent | Role | Triggered by |
+|---|---|---|
+| `code-reviewer` | 15-point code quality checklist | `/review-pr`, PR gate |
+| `rgaa-auditor` | 13-theme RGAA accessibility audit | `/audit-rgaa`, RGAA gate |
+| `security-auditor` | OWASP Top 10 + RGS security review | `/audit-secu`, security gate |
+
+### Skills (`.claude/skills/`) — manual overrides via `/command`
+
+| Skill | Purpose |
+|---|---|
+| `/validate` | Force run all quality checks (3 parallel agents) |
+| `/review-pr` | Deep PR review: GH comments + code-reviewer agent + auto-fix |
+| `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
+| `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
+| `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
+
+---
+
 ## CI
 
 GitHub Actions workflows are in `.github/workflows/` :

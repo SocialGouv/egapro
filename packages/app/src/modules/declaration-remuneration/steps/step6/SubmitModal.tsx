@@ -17,9 +17,9 @@ export function SubmitModal({ modalRef, onClose, onSubmit, isPending }: Props) {
 		<dialog
 			aria-labelledby="submit-modal-title"
 			className="fr-modal"
+			data-fr-concealing-backdrop="false"
 			id="submit-modal"
 			ref={modalRef}
-			data-fr-concealing-backdrop="false"
 		>
 			<div className="fr-container fr-container--fluid fr-container-md">
 				<div className="fr-grid-row fr-grid-row--center">
@@ -54,10 +54,10 @@ export function SubmitModal({ modalRef, onClose, onSubmit, isPending }: Props) {
 								</ul>
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
-										id="submit-certify"
-										type="checkbox"
 										checked={certified}
+										id="submit-certify"
 										onChange={(e) => setCertified(e.target.checked)}
+										type="checkbox"
 									/>
 									<label className="fr-label" htmlFor="submit-certify">
 										Je certifie que les données saisies sont exactes et

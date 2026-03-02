@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-
-import { api, HydrateClient } from "~/trpc/server";
 import { TOTAL_STEPS } from "~/modules/declaration-remuneration";
+import { api, HydrateClient } from "~/trpc/server";
 import { StepPageClient } from "./StepPageClient";
 
 type StepPageProps = {
@@ -23,14 +22,6 @@ export default async function StepPage({ params }: StepPageProps) {
 		redirect("/declaration/etape/6");
 	}
 
-	const step1Categories = data.categories
-		.filter((c) => c.step === 1)
-		.map((c) => ({
-			name: c.categoryName,
-			women: c.womenCount ?? 0,
-			men: c.menCount ?? 0,
-		}));
-
 	const stepCategories = (s: number) =>
 		data.categories
 			.filter((c) => c.step === s)
@@ -44,36 +35,45 @@ export default async function StepPage({ params }: StepPageProps) {
 				menMedianValue: c.menMedianValue ?? undefined,
 			}));
 
+	const step1Categories = data.categories
+		.filter((c) => c.step === 1)
+		.map((c) => ({
+			name: c.categoryName,
+			women: c.womenCount ?? 0,
+			men: c.menCount ?? 0,
+		}));
+
+	const step2Rows = data.categories
+		.filter((c) => c.step === 2)
+		.map((c) => ({
+			label: c.categoryName,
+			womenValue: c.womenValue ?? "",
+			menValue: c.menValue ?? "",
+		}));
+
+	const beneficiaryRow = data.categories.find(
+		(c) => c.step === 3 && c.categoryName === "Bénéficiaires",
+	);
+	const step3Data = {
+		rows: data.categories
+			.filter((c) => c.step === 3 && c.categoryName !== "Bénéficiaires")
+			.map((c) => ({
+				label: c.categoryName,
+				womenValue: c.womenValue ?? "",
+				menValue: c.menValue ?? "",
+			})),
+		beneficiaryWomen: beneficiaryRow?.womenValue ?? "",
+		beneficiaryMen: beneficiaryRow?.menValue ?? "",
+	};
+
 	return (
 		<HydrateClient>
 			<StepPageClient
 				declaration={data.declaration}
 				step={step}
 				step1Categories={step1Categories}
-				step2Rows={data.categories
-					.filter((c) => c.step === 2)
-					.map((c) => ({
-						label: c.categoryName,
-						womenValue: c.womenValue ?? "",
-						menValue: c.menValue ?? "",
-					}))}
-				step3Data={{
-					rows: data.categories
-						.filter((c) => c.step === 3 && c.categoryName !== "Bénéficiaires")
-						.map((c) => ({
-							label: c.categoryName,
-							womenValue: c.womenValue ?? "",
-							menValue: c.menValue ?? "",
-						})),
-					beneficiaryWomen:
-						data.categories.find(
-							(c) => c.step === 3 && c.categoryName === "Bénéficiaires",
-						)?.womenValue ?? "",
-					beneficiaryMen:
-						data.categories.find(
-							(c) => c.step === 3 && c.categoryName === "Bénéficiaires",
-						)?.menValue ?? "",
-				}}
+				step2Rows={step2Rows}
+				step3Data={step3Data}
 				step4Categories={stepCategories(4)}
 				step5Categories={stepCategories(5)}
 			/>

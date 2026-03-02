@@ -4,21 +4,21 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
-import type { PayGapRow } from "../types";
+import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import dialogStyles from "../shared/EditDialog.module.scss";
 import { FormActions } from "../shared/FormActions";
-import { SavedIndicator } from "../shared/SavedIndicator";
-import { StepIndicator } from "../shared/StepIndicator";
-import { TooltipButton } from "../shared/TooltipButton";
 import {
-	GAP_LEVEL_LABELS,
 	computeGap,
 	formatGap,
+	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
 } from "../shared/gapUtils";
-import common from "../shared/common.module.scss";
-import dialogStyles from "../shared/EditDialog.module.scss";
+import { SavedIndicator } from "../shared/SavedIndicator";
+import { StepIndicator } from "../shared/StepIndicator";
+import { TooltipButton } from "../shared/TooltipButton";
+import type { PayGapRow } from "../types";
 import stepStyles from "./Step2PayGap.module.scss";
 
 type Step2PayGapProps = {
@@ -239,7 +239,10 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 				/>
 			</p>
 
-			<DefinitionAccordion id="accordion-step2" />
+			<DefinitionAccordion
+				id="accordion-step2"
+				title="Définitions et méthode de calcul"
+			/>
 
 			{/* Interpretation callout */}
 			<div className="fr-callout fr-callout--orange-terre-battue fr-mt-3w fr-mb-3w">

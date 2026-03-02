@@ -4,18 +4,18 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 
 import { api } from "~/trpc/react";
-import { FormActions } from "../shared/FormActions";
-import { StepIndicator } from "../shared/StepIndicator";
 import common from "../shared/common.module.scss";
+import { FormActions } from "../shared/FormActions";
 import { computeGap } from "../shared/gapUtils";
+import { StepIndicator } from "../shared/StepIndicator";
 import type { PayGapRow, StepCategoryData, VariablePayData } from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { CardTitle } from "./step6/CardTitle";
 import { GapColumn } from "./step6/GapColumn";
 import { GapSideBySide } from "./step6/GapSideBySide";
+import { parseStep5Categories } from "./step6/parseStep5Categories";
 import { QuartileColumn } from "./step6/QuartileColumn";
 import { SubmitModal } from "./step6/SubmitModal";
-import { parseStep5Categories } from "./step6/parseStep5Categories";
 
 // -- Helper to extract gap from a row list --
 
@@ -104,7 +104,7 @@ export function Step6Review({
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className={common.flexColumnGap2}>
+		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
 			<h1 className="fr-h4 fr-mb-0">
 				Déclaration des indicateurs de rémunération {currentYear}
 			</h1>
@@ -190,22 +190,22 @@ export function Step6Review({
 					<>
 						{annualQuartiles.length > 0 && (
 							<QuartileColumn
-								title="Rémunération annuelle brute moyenne"
 								quartiles={annualQuartiles.map((q) => ({
 									label: q.name.replace("annual:", ""),
 									womenCount: q.womenCount ?? 0,
 									menCount: q.menCount ?? 0,
 								}))}
+								title="Rémunération annuelle brute moyenne"
 							/>
 						)}
 						{hourlyQuartiles.length > 0 && (
 							<QuartileColumn
-								title="Rémunération horaire brute moyenne"
 								quartiles={hourlyQuartiles.map((q) => ({
 									label: q.name.replace("hourly:", ""),
 									womenCount: q.womenCount ?? 0,
 									menCount: q.menCount ?? 0,
 								}))}
+								title="Rémunération horaire brute moyenne"
 							/>
 						)}
 					</>
@@ -268,10 +268,10 @@ export function Step6Review({
 
 			{!isSubmitted && (
 				<SubmitModal
+					isPending={submitMutation.isPending}
 					modalRef={modalRef}
 					onClose={closeModal}
 					onSubmit={() => submitMutation.mutate()}
-					isPending={submitMutation.isPending}
 				/>
 			)}
 		</form>

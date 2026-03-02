@@ -12,13 +12,13 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { StepCategoryData } from "../types";
 import stepStyles from "./Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./step5/CategoryDataTable";
-import { DeleteCategoryDialog } from "./step5/DeleteCategoryDialog";
 import {
-	type EmployeeCategory,
 	createEmptyCategory,
 	deserializeCategories,
+	type EmployeeCategory,
 	serializeCategories,
 } from "./step5/categorySerializer";
+import { DeleteCategoryDialog } from "./step5/DeleteCategoryDialog";
 
 let nextCategoryId = 0;
 function nextId() {
@@ -316,7 +316,10 @@ export function Step5EmployeeCategories({
 				</button>
 			</div>
 
-			<DefinitionAccordion id="accordion-step5" />
+			<DefinitionAccordion
+				id="accordion-step5"
+				title="Définitions et méthode de calcul"
+			/>
 
 			{workforceError && (
 				<div aria-live="polite" className="fr-alert fr-alert--error">

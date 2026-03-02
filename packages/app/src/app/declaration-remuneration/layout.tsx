@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
-
-import { auth } from "~/server/auth";
 import {
 	DeclarationLayout,
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
+import { auth } from "~/server/auth";
 
 export default async function DeclarationRootLayout({
 	children,

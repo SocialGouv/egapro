@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-	GAP_LEVEL_LABELS,
 	computeGap,
 	computePercentage,
 	computeProportion,
@@ -9,6 +8,7 @@ import {
 	formatGap,
 	formatGapCompact,
 	formatTotal,
+	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
 	parseNumber,

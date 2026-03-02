@@ -1,6 +1,6 @@
 import {
-	GAP_LEVEL_LABELS,
 	formatGap,
+	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
 } from "../../shared/gapUtils";

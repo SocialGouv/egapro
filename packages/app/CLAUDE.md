@@ -7,15 +7,15 @@
 
 ## Mandatory rule after each task
 
-**After each code modification, without exception, run in this order:**
+All quality checks are **automatic** — no manual commands needed:
 
-```bash
-pnpm lint        # fixes linting errors
-pnpm format      # formats code
-pnpm typecheck   # verifies TypeScript types
-```
+- **Lint/format**: auto-applied by the `auto-lint` hook after each edit and Bash command
+- **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits
+- **Validation**: 3 parallel agents (typecheck + tests + lint) run automatically after every task
+- **RGAA**: accessibility checked inline when modifying UI components
+- **Security**: verified inline when modifying server/tRPC code
 
-Do not consider a task as complete until these three commands pass without error.
+See `.claude/rules/automation.md` for full details.
 
 ---
 
@@ -119,53 +119,13 @@ import { Header } from "~/modules/layout/Header/index";
 
 ## React Components: Server vs Client
 
-Default: **Server Component**. Add `"use client"` only if the component needs:
-- hooks (`useState`, `useEffect`, `usePathname`, `useRouter`...)
-- browser event listeners
-- Web APIs (`localStorage`, `document`...)
-
-```tsx
-// Server Component — no directive (default)
-export function FooterBody() { ... }
-
-// Client Component — mandatory directive on first line
-"use client";
-export function NavLink({ href }: { href: string }) {
-  const pathname = usePathname(); // Next.js hook
-  ...
-}
-```
-
-Do not unnecessarily push `"use client"` up to parents. Isolate the interactive part at the lowest possible level.
+Default: **Server Component**. Add `"use client"` only for hooks, browser events, or Web APIs. Isolate the interactive part at the lowest possible level — never push `"use client"` up to parents.
 
 ### Component granularity
 
-**Rule: one component = one responsibility.** Prefer many small components over a few large ones.
+One component = one responsibility. Extract sub-components at ~50 lines of JSX. Name them after what they display, not their position in the tree.
 
-- A component should only do one thing readable in one sentence
-- As soon as a component exceeds ~50 lines of JSX, extract sub-components
-- Name components based on what they display, not based on their position in the tree
-
-```tsx
-// FORBIDDEN — catch-all component
-export function Dashboard() {
-  // 200 lines of JSX: header, table, filters, pagination...
-}
-
-// CORRECT — decomposed
-export function Dashboard() {
-  return (
-    <>
-      <DashboardHeader />
-      <DashboardFilters />
-      <DashboardTable />
-      <DashboardPagination />
-    </>
-  );
-}
-```
-
-Each extracted sub-component is **testable independently** — this is the objective.
+> Detailed rules (no logic in JSX, no inline SVG, `.map()` limit) → `.claude/rules/react-components.md`
 
 ---
 
@@ -173,111 +133,33 @@ Each extracted sub-component is **testable independently** — this is the objec
 
 ### MCP DSFR (mandatory)
 
-The MCP server [`dsfr-mcp`](https://github.com/SocialGouv/dsfr-mcp) exposes all DSFR documentation directly in the AI assistant (HTML structure, CSS classes, variants, accessibility, color tokens, icons).
-
-**One-time installation (user scope):**
-
-```bash
-claude mcp add dsfr --scope user -- npx dsfr-mcp
-```
-
-Or via `.mcp.json` at the project root to share with the team:
-
-```json
-{
-  "mcpServers": {
-    "dsfr": {
-      "command": "npx",
-      "args": ["dsfr-mcp"]
-    }
-  }
-}
-```
-
-**Available tools once connected:**
-
-| Tool | Usage |
-|---|---|
-| `list_components` | List all available DSFR components |
-| `get_component_doc` | Component documentation: HTML, CSS classes, variants, accessibility |
-| `search_components` | Full-text search in the documentation |
-| `search_icons` | Find an icon by name/category -> CSS class `fr-icon-*` |
-| `get_color_tokens` | Color tokens by context/usage, light/dark themes |
-
-**Rule:** before writing DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR CSS classes from memory.
+The DSFR MCP server is configured in `.mcp.json`. Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
 
 ### Styling strategy (strict priority order)
 
-**Inline `style={}` is FORBIDDEN in `.tsx` files.** All styling must go through classes.
+Inline `style={}` is **blocked by hook** — the edit will be rejected.
 
-Follow this cascade — use the first option that works:
+Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Scoped SCSS module (last resort).
 
-1. **DSFR classes only** (preferred) — The DSFR covers layout (`fr-grid-row`, `fr-col-*`), spacing (`fr-mt-*`, `fr-py-*`), typography (`fr-text--*`), colors (CSS custom properties), and all components. Always check the DSFR docs first — it has almost everything.
-
-2. **DSFR utility classes + DSFR CSS custom properties** — For colors, use `var(--background-default-grey)`, `var(--text-title-grey)`, etc. via `className`. Combine DSFR classes to avoid custom CSS.
-
-3. **Scoped SCSS Module** (last resort) — Only when the DSFR genuinely cannot handle the case (e.g. custom gradient, complex responsive override). Create a `Component.module.scss` next to the component. Never use `!important` — increase specificity with selector doubling (`.foo.foo`) if needed.
-
-```tsx
-// FORBIDDEN — inline style
-<div style={{ display: "flex", gap: "1.5rem" }}>
-
-// CORRECT — DSFR classes
-<div className="fr-grid-row fr-grid-row--gutters">
-
-// CORRECT — SCSS module (only if DSFR cannot do it)
-import styles from "./MyComponent.module.scss";
-<section className={styles.heroGradient}>
-```
+> Full rules (no raw colors, no hardcoded breakpoints, one SCSS module per component) → `.claude/rules/styling-dsfr.md`
 
 ### SCSS Modules & DSFR SASS
 
-`next.config.js` auto-injects DSFR breakpoint settings and mixins into every `.scss` file via `sassOptions.additionalData`. No manual import needed.
+`next.config.js` auto-injects DSFR mixins via `sassOptions.additionalData`. No manual import needed.
 
-**Available mixins in any `.module.scss`:**
-
-| Mixin | Generated media query | Usage |
+| Mixin | Media query | Usage |
 |---|---|---|
-| `@include respond-from(md)` | `@media (min-width: 48em)` | Mobile-first (preferred) |
-| `@include respond-to(sm)` | `@media (max-width: 47.98em)` | Desktop-first (when no alternative) |
+| `@include respond-from(md)` | `min-width: 48em` | Mobile-first (preferred) |
+| `@include respond-to(sm)` | `max-width: 47.98em` | Desktop-first (fallback) |
 
 **Breakpoint tokens:** `xs` (0), `sm` (36em), `md` (48em), `lg` (62em), `xl` (78em)
 
-```scss
-// CORRECT — uses DSFR mixin, no magic numbers
-.cta {
-  @include respond-to(sm) {
-    justify-content: center;
-    width: 100%;
-  }
-}
+### DSFR runtime
 
-// FORBIDDEN — hardcoded breakpoint
-@media (max-width: 768px) { ... }
-```
-
-### Assets
-DSFR assets (CSS, fonts, icons) are copied to `public/dsfr/` by `scripts/copy-dsfr.js`. This folder is **ignored by git** and regenerated on each `dev` / `build`.
-
-Never import DSFR CSS via webpack/node_modules. Always via `<link href="/dsfr/...">` in the layout.
-
-### JavaScript DSFR
-The DSFR JS (`dsfr.module.min.js`) is loaded via `<Script type="module" strategy="beforeInteractive">`. It handles:
-- Opening/closing modals and dropdown menus
-- Theme toggle (dark/light/system) via `data-fr-scheme`
-- Keyboard navigation of interactive components
-
-Never duplicate DSFR JS logic in React. Rely on the `data-fr-*` attributes and let the DSFR JS do its work.
-
-### Dark mode
-- Attribute `data-fr-scheme="system"` on `<html>` by default
-- Inline script in `<head>` reads the `fr-theme` cookie before render to avoid flash
-- The `ThemeModal` modal handles the change; the DSFR JS persists in the cookie and updates the attribute
-
-### Icons
-Use DSFR utility classes: `fr-icon-{name}-{fill|line}`.
-The full icon set is available in `/dsfr/utility/icons/`.
-Always add `aria-hidden="true"` on decorative icons.
+- **Assets**: copied to `public/dsfr/` by `scripts/copy-dsfr.js` (git-ignored, regenerated on `dev`/`build`). Never import DSFR CSS via webpack.
+- **JS**: loaded via `<Script type="module" strategy="beforeInteractive">`. Handles modals, dropdowns, theme toggle, keyboard navigation. Never duplicate this logic in React — use `data-fr-*` attributes.
+- **Dark mode**: `data-fr-scheme="system"` on `<html>`, cookie `fr-theme` read by inline script to avoid flash, `ThemeModal` for user toggle.
+- **Icons**: `fr-icon-{name}-{fill|line}` classes. Always `aria-hidden="true"` on decorative icons.
 
 ---
 
@@ -294,94 +176,30 @@ Always add `aria-hidden="true"` on decorative icons.
 - **Images**: descriptive `alt` required, `alt=""` for decorative images
 - **Forms**: each `<input>` must have an associated `<label>` via `htmlFor`/`id`
 
-### Semantic elements vs ARIA
-
-```tsx
-// CORRECT — native element, implicit role
-<nav aria-label="Main menu">...</nav>
-
-// FORBIDDEN — redundant role
-<nav role="navigation" aria-label="Main menu">...</nav>
-
-// CORRECT — div without implicit role, role="dialog" required
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title">...</div>
-```
+Never add redundant `role` on semantic elements (`role="navigation"` on `<nav>` is forbidden). Use `role="dialog"` + `aria-modal="true"` only on `<div>` elements.
 
 ---
 
 ## TypeScript typing
 
-- `strict: true` enabled, `noUncheckedIndexedAccess: true`
-- No explicit `any` — use `unknown` and narrowing
-- Shared object types in `types.ts` files at the module level
-- Always type component props with a `type Props = { ... }`
-
-```ts
-// CORRECT
-type Props = {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-};
-
-// FORBIDDEN
-const MyComponent = (props: any) => { ... }
-```
+- `strict: true`, `noUncheckedIndexedAccess: true`
+- No explicit `any` — use `unknown` + narrowing
+- Shared object types in `types.ts` at module level
+- Component props: `type Props = { ... }` (never `any`)
 
 ---
 
-## Immutability
+## General rules
 
-Never mutate an object or array. Always create new instances.
-
-```ts
-// FORBIDDEN
-user.name = "Jean";
-
-// CORRECT
-const updatedUser = { ...user, name: "Jean" };
-```
-
----
-
-## Error handling
-
-```ts
-// CORRECT — with explicit user message
-try {
-  const data = await fetchData();
-  return data;
-} catch (error) {
-  console.error("fetchData failed:", error);
-  throw new Error("Impossible to load data. Please try again later.");
-}
-```
-
----
-
-## Input validation
-
-Always validate with Zod at system boundaries (forms, route parameters, API body).
-
-```ts
-import { z } from "zod";
-
-const schema = z.object({
-  siren: z.string().regex(/^\d{9}$/, "Invalid SIREN"),
-  annee: z.number().int().min(2018).max(new Date().getFullYear()),
-});
-```
+- **Immutability**: never mutate objects/arrays — always spread (`{ ...obj, key: val }`)
+- **Error handling**: always `try/catch` with explicit user-facing error message
+- **Input validation**: Zod at system boundaries (forms, route params, API body)
 
 ---
 
 ## File size
 
-| Size | Status |
-|---|---|
-| < 200 lines | Ideal |
-| 200-400 lines | Acceptable |
-| 400-800 lines | To split |
-| > 800 lines | **Forbidden** — extract sub-components |
+< 200 lines ideal, 200-400 acceptable, > 400 split, > 800 **forbidden**.
 
 ---
 
@@ -398,93 +216,16 @@ const schema = z.object({
 
 ### Language: English mandatory
 
-**The site is in French**, but all code must be in English:
-- All comments must be in English
-- All component names must be in English
-- All function and variable names must be in English
-- User-facing text (content, labels, buttons, links) remains in French
-
-```tsx
-// CORRECT
-export function HeaderBrand() {
-  // Render the brand logo and tagline
-  return (
-    <div className="fr-header__brand">
-      <Logo />
-      <h1>Service Name</h1>
-    </div>
-  );
-}
-
-// FORBIDDEN
-export function MarqueEnTete() {
-  // Affiche le logo et la devise
-  return (
-    <div className="fr-header__brand">
-      <Logo />
-      <h1>Nom du service</h1>
-    </div>
-  );
-}
-```
-
-This rule applies to:
-- All React component names
-- All function and variable names
-- All comments in the code
-- All file names (except documented exceptions like Next.js routes)
+All code (components, functions, variables, comments, file names) in English. User-facing text (labels, buttons, content) remains in French.
 
 ---
 
 ## Tests
 
-### Localization: `__tests__` rule
+Tests live in `__tests__/` subfolder next to the module they test. Never in `src/app/`.
+100% coverage on all logic files. Test observable behavior, not implementation details.
 
-Tests live **in the module they test**, in a `__tests__/` subfolder:
-
-```
-src/modules/home/
-  HomePage.tsx
-  __tests__/
-    HomePage.test.tsx       <- tests of HomePage
-
-src/modules/layout/shared/
-  NavLink.tsx
-  __tests__/
-    NavLink.test.tsx        <- tests of NavLink
-```
-
-Never place tests in `src/app/` — routes are thin wrappers without their own logic.
-
-### Test policy: 100% coverage
-
-**All written code must be tested. Without exception.**
-
-- Each React component -> render test + observable behaviors
-- Each hook -> test of all states and side effects
-- Each utility / server function -> test of all cases (nominal + errors + edge cases)
-- Each tRPC route -> integration test (valid input, invalid input, errors)
-
-A file without tests is **incomplete**. Do not consider a task as complete if logic files are not covered at 100%.
-
-> **Unique exception**: thin wrappers of routes `src/app/*/page.tsx` that contain no logic of their own (only import + return of a component).
-
-### Tools
-
-- **Vitest** for unit and integration tests
-- **Playwright** for E2E tests in `src/e2e/`
-- Target coverage: **100%** on all files with logic
-
-### What to test
-
-```ts
-// CORRECT — tests observable behavior
-it("displays aria-current=page on the active link", () => { ... });
-it("renders the link to #content", () => { ... });
-
-// USELESS — tests internal implementation
-it("calls usePathname once", () => { ... });
-```
+> Full policy (what to test, mock boundaries, coverage rules) → `.claude/rules/testing.md`
 
 ### Standard mocks
 
@@ -521,94 +262,24 @@ pnpm test:e2e     # Playwright E2E tests (requires dev server on port 3000)
 pnpm test:lighthouse  # Lighthouse CI audit (requires dev server on port 3000)
 ```
 
-### E2E & Lighthouse tests (require a running dev server)
-
-Both `pnpm test:e2e` and `pnpm test:lighthouse` need the app running on **port 3000**.
-
-**Before running:**
-```bash
-# In a separate terminal (or background)
-pnpm dev          # starts on http://localhost:3000
-```
-
-**Lighthouse CI** (config in `.lighthouserc.json`):
-- Accessibility score must be **100%** (`error` if < 1)
-- Performance score warns if < 70%
-- Override URL: `LIGHTHOUSE_URL=http://localhost:4000 pnpm test:lighthouse`
-
-**Playwright** (config in `playwright.config.ts`):
-- Override URL: `PLAYWRIGHT_BASE_URL=http://localhost:4000 pnpm test:e2e`
-- Install browsers: `pnpm playwright:install`
+Both `pnpm test:e2e` and `pnpm test:lighthouse` require `pnpm dev` running on port 3000. Lighthouse accessibility must score **100%**.
 
 ### Lint & Format (Biome)
 
-| Command | Effect | When to use |
-|---|---|---|
-| `pnpm lint` | fixes linting errors (`--write`) | locally, before commit |
-| `pnpm lint:check` | checks without modifying, exit 1 if error | CI |
-| `pnpm format` | formats files (`--write`) | locally, before commit |
-| `pnpm format:check` | checks without modifying, exit 1 if error | CI |
-| `pnpm check` | lint + format check (both) | quick verification |
-| `pnpm check:write` | lint + format auto-fix (both) | global correction |
+Auto-applied by the `auto-lint` hook after each file edit. Manual commands:
 
-> In CI, always use `:check` variants. Locally, prefer `pnpm lint` and `pnpm format` (or `pnpm check:write` to fix everything at once).
+| Command | When to use |
+|---|---|
+| `pnpm check:write` | Fix everything at once (lint + format) |
+| `pnpm lint:check` / `pnpm format:check` | CI (read-only, exit 1 on error) |
 
 ### Environment variables
 
-Variables are declared and validated in `src/env.js` via [`@t3-oss/env-nextjs`](https://env.t3.gg/) + Zod. Validation runs at server startup and at build.
+Declared and validated in `src/env.js` via `@t3-oss/env-nextjs` + Zod. **Never read `process.env` directly** — always `import { env } from "~/env.js"`.
 
-**Rule: never read `process.env` directly in the code. Always import `env` from `~/env.js`.**
+To add a variable: declare in `src/env.js` (`server` or `client` section) + add to `runtimeEnv` + add to `.env` local.
 
-```ts
-// FORBIDDEN
-const secret = process.env.AUTH_SECRET;
-
-// CORRECT
-import { env } from "~/env.js";
-const secret = env.AUTH_SECRET; // typed, validated
-```
-
-**Add a variable:**
-
-1. Declare it in `src/env.js` in the appropriate section:
-   - `server` — server-only variables (never exposed to client)
-   - `client` — public variables, **must** have the `NEXT_PUBLIC_` prefix
-
-2. Add it to `runtimeEnv` (mapping `process.env`):
-
-```ts
-// src/env.js
-server: {
-  MA_VARIABLE: z.string(),                  // mandatory
-  MA_VARIABLE_OPT: z.string().optional(),   // optional
-  MA_URL: z.string().url(),                 // validated URL
-},
-runtimeEnv: {
-  MA_VARIABLE: process.env.MA_VARIABLE,
-},
-```
-
-3. Add it to the `.env` local (never commit `.env`) and document in `.env.example`.
-
-**Required runtime variables:**
-
-| Variable | Type | Usage |
-|---|---|---|
-| `AUTH_SECRET` | `string` | NextAuth secret (JWT signing) |
-| `DATABASE_URL` | `string` (URL) | PostgreSQL connection |
-| `EGAPRO_PROCONNECT_CLIENT_ID` | `string` | OAuth ProConnect |
-| `EGAPRO_PROCONNECT_CLIENT_SECRET` | `string` | OAuth ProConnect |
-| `EGAPRO_PROCONNECT_ISSUER` | `string` (URL) | OIDC issuer ProConnect |
-
-**Optional variables:**
-
-| Variable | Type | Usage |
-|---|---|---|
-| `NEXT_PUBLIC_SENTRY_DSN` | `string` (URL) | Sentry monitoring |
-| `NEXT_PUBLIC_MATOMO_URL` | `string` (URL) | Matomo analytics |
-| `NEXT_PUBLIC_MATOMO_SITE_ID` | `string` | Matomo analytics |
-
-> Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI build without secrets).
+> Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI without secrets).
 
 ### Database (Drizzle Kit)
 
@@ -626,3 +297,11 @@ pnpm db:studio    # opens Drizzle Studio (UI to inspect the database)
 2. `pnpm db:generate` — creates the SQL migration file
 3. `pnpm db:migrate` — applies the migration
 4. `pnpm dev` — restart the server if necessary
+
+### Drizzle casing convention (mandatory)
+
+All schema properties are **camelCase** in TypeScript, automatically mapped to `snake_case` in the database via `casing: "snake_case"` in both `src/server/db/index.ts` and `drizzle.config.ts`. Never specify explicit column names.
+
+**Exception:** the `accounts` table uses snake_case properties (`refresh_token`, `access_token`, etc.) because `@auth/drizzle-adapter` requires these exact names.
+
+> Full DB rules (transactions, no module-scope Date) → `.claude/rules/database-drizzle.md`
