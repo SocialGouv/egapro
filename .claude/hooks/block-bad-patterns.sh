@@ -16,11 +16,18 @@ else
   exit 0
 fi
 
-# Block if CONTENT matches PATTERN and FILE_PATH matches FILE_FILTER
+# Block if CONTENT matches PATTERN and FILE_PATH matches FILE_FILTER.
+# Optional 4th arg: exclude filter (skip if FILE_PATH matches).
 check_pattern() {
   local file_filter="$1"
   local pattern="$2"
   local message="$3"
+  local exclude_filter="${4:-}"
+
+  # Skip if file matches exclusion
+  if [[ -n "$exclude_filter" ]] && [[ "$FILE_PATH" =~ $exclude_filter ]]; then
+    return
+  fi
 
   if [[ "$FILE_PATH" =~ $file_filter ]] && echo "$CONTENT" | grep -qE "$pattern"; then
     echo "Blocked: $message" >&2
@@ -40,9 +47,26 @@ check_pattern '\.(tsx|jsx)$' \
   'style=\{' \
   'Inline style={{}} is forbidden. Use DSFR classes or a scoped SCSS module.'
 
-# Inline SVG — JSX files only
+# Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
-  'Inline <svg> is forbidden. Use public/assets/*.svg + <img> or DSFR icon classes (fr-icon-*).'
+  'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <img>, or DSFR icon classes (fr-icon-*).' \
+  'DsfrPictogram\.tsx'
+
+# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config)
+check_pattern '\.(ts|tsx)$' \
+  'process\.env' \
+  'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
+  '(env\.js|instrumentation\.ts|next\.config|trpc/react\.tsx)'
+
+# Deep relative imports — use ~/ path alias
+check_pattern '\.(ts|tsx)$' \
+  '\.\./\.\.' \
+  'Deep relative imports (../../) are forbidden. Use the ~/ path alias.'
+
+# Raw @media queries in SCSS — use DSFR mixins
+check_pattern '\.scss$' \
+  '@media' \
+  'Raw @media queries are forbidden. Use DSFR mixins: @include respond-from(md) or @include respond-to(sm).'
 
 exit 0

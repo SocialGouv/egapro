@@ -15,57 +15,64 @@ function getSiren(siret: string | null | undefined): string {
 	return siret.slice(0, 9);
 }
 
-const currentYear = new Date().getFullYear();
+function getCurrentYear() {
+	return new Date().getFullYear();
+}
 
 export const declarationRouter = createTRPCRouter({
 	getOrCreate: protectedProcedure.query(async ({ ctx }) => {
 		const siren = getSiren(ctx.session.user.siret);
 
-		const existing = await ctx.db
-			.select()
-			.from(declarations)
-			.where(
-				and(eq(declarations.siren, siren), eq(declarations.year, currentYear)),
-			)
-			.limit(1);
-
-		if (existing.length > 0) {
-			const categories = await ctx.db
+		return ctx.db.transaction(async (tx) => {
+			const existing = await tx
 				.select()
-				.from(declarationCategories)
+				.from(declarations)
 				.where(
 					and(
-						eq(declarationCategories.siren, siren),
-						eq(declarationCategories.year, currentYear),
+						eq(declarations.siren, siren),
+						eq(declarations.year, getCurrentYear()),
 					),
-				);
-			const declaration = existing[0];
+				)
+				.limit(1);
+
+			if (existing.length > 0) {
+				const categories = await tx
+					.select()
+					.from(declarationCategories)
+					.where(
+						and(
+							eq(declarationCategories.siren, siren),
+							eq(declarationCategories.year, getCurrentYear()),
+						),
+					);
+				const declaration = existing[0];
+				if (!declaration)
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Declaration introuvable",
+					});
+				return { declaration, categories };
+			}
+
+			const newDeclaration = await tx
+				.insert(declarations)
+				.values({
+					siren,
+					year: getCurrentYear(),
+					declarantId: ctx.session.user.id,
+					currentStep: 0,
+					status: "draft",
+				})
+				.returning();
+
+			const declaration = newDeclaration[0];
 			if (!declaration)
 				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Declaration introuvable",
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Erreur lors de la création",
 				});
-			return { declaration, categories };
-		}
-
-		const newDeclaration = await ctx.db
-			.insert(declarations)
-			.values({
-				siren,
-				year: currentYear,
-				declarantId: ctx.session.user.id,
-				currentStep: 0,
-				status: "draft",
-			})
-			.returning();
-
-		const declaration = newDeclaration[0];
-		if (!declaration)
-			throw new TRPCError({
-				code: "INTERNAL_SERVER_ERROR",
-				message: "Erreur lors de la création",
-			});
-		return { declaration, categories: [] };
+			return { declaration, categories: [] };
+		});
 	}),
 
 	updateStep1: protectedProcedure
@@ -94,7 +101,7 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarations.siren, siren),
-							eq(declarations.year, currentYear),
+							eq(declarations.year, getCurrentYear()),
 						),
 					)
 					.limit(1);
@@ -110,7 +117,7 @@ export const declarationRouter = createTRPCRouter({
 						.where(
 							and(
 								eq(declarationCategories.siren, siren),
-								eq(declarationCategories.year, currentYear),
+								eq(declarationCategories.year, getCurrentYear()),
 							),
 						);
 				}
@@ -135,7 +142,7 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarations.siren, siren),
-							eq(declarations.year, currentYear),
+							eq(declarations.year, getCurrentYear()),
 						),
 					);
 
@@ -145,7 +152,7 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, currentYear),
+							eq(declarationCategories.year, getCurrentYear()),
 							eq(declarationCategories.step, 1),
 						),
 					);
@@ -154,7 +161,7 @@ export const declarationRouter = createTRPCRouter({
 					await tx.insert(declarationCategories).values(
 						input.categories.map((c) => ({
 							siren,
-							year: currentYear,
+							year: getCurrentYear(),
 							step: 1,
 							categoryName: c.name,
 							womenCount: c.women,
@@ -194,7 +201,7 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, currentYear),
+							eq(declarationCategories.year, getCurrentYear()),
 							eq(declarationCategories.step, input.step),
 						),
 					);
@@ -203,7 +210,7 @@ export const declarationRouter = createTRPCRouter({
 					await tx.insert(declarationCategories).values(
 						input.categories.map((c) => ({
 							siren,
-							year: currentYear,
+							year: getCurrentYear(),
 							step: input.step,
 							categoryName: c.name,
 							womenCount: c.womenCount ?? null,
@@ -226,7 +233,7 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarations.siren, siren),
-							eq(declarations.year, currentYear),
+							eq(declarations.year, getCurrentYear()),
 						),
 					);
 			});
@@ -245,7 +252,7 @@ export const declarationRouter = createTRPCRouter({
 				updatedAt: new Date(),
 			})
 			.where(
-				and(eq(declarations.siren, siren), eq(declarations.year, currentYear)),
+				and(eq(declarations.siren, siren), eq(declarations.year, getCurrentYear())),
 			);
 
 		return { success: true };

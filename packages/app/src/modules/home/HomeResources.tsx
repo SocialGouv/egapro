@@ -1,3 +1,4 @@
+import { DsfrPictogram } from "./DsfrPictogram";
 import styles from "./HomeResources.module.scss";
 
 type ResourceTileProps = {
@@ -25,26 +26,7 @@ function ResourceTile({
 			</div>
 			<div className="fr-tile__header">
 				<div className="fr-tile__pictogram">
-					<svg
-						aria-hidden="true"
-						className="fr-artwork"
-						height="40px"
-						viewBox="0 0 80 80"
-						width="40px"
-					>
-						<use
-							className="fr-artwork-decorative"
-							href={`${pictogramPath}#artwork-decorative`}
-						/>
-						<use
-							className="fr-artwork-minor"
-							href={`${pictogramPath}#artwork-minor`}
-						/>
-						<use
-							className="fr-artwork-major"
-							href={`${pictogramPath}#artwork-major`}
-						/>
-					</svg>
+					<DsfrPictogram path={pictogramPath} />
 				</div>
 			</div>
 		</div>

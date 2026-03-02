@@ -5,7 +5,9 @@ paths:
 
 # Database & Drizzle
 
-## Sequential DB writes = transaction (mandatory)
+## Transactions (mandatory)
+
+### Multi-write = transaction
 
 Any operation that runs 2+ sequential write queries (insert, update, delete) must use `db.transaction()`.
 This applies even when writes target the **same** table. If one query fails, partial state is rolled back.
@@ -24,7 +26,29 @@ await db.transaction(async (tx) => {
 });
 ```
 
-**Rule of thumb:** if a tRPC mutation has more than one `await db.` call that is not a read, wrap it in `db.transaction()`.
+### Read-then-write = transaction
+
+Any operation that reads data and then conditionally writes based on the result must also use a transaction.
+Without it, a concurrent request can read stale data and cause duplicates or conflicts.
+
+```ts
+// FORBIDDEN — read-then-write without transaction (race condition)
+const existing = await db.select().from(items).where(...);
+if (existing.length === 0) {
+  await db.insert(items).values(newItem);
+}
+
+// CORRECT — atomic read-then-write
+return db.transaction(async (tx) => {
+  const existing = await tx.select().from(items).where(...);
+  if (existing.length === 0) {
+    return tx.insert(items).values(newItem).returning();
+  }
+  return existing;
+});
+```
+
+**Rule of thumb:** if a procedure has more than one `await db.`/`await tx.` call where at least one is a write, wrap everything in `db.transaction()`.
 
 ## No Date computation at module scope
 

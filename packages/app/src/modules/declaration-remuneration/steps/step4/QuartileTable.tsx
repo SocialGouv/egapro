@@ -1,10 +1,13 @@
 "use client";
 
-import common from "../../shared/common.module.scss";
-import { QUARTILE_NAMES } from "../../shared/constants";
-import { computePercentage, formatCurrency } from "../../shared/gapUtils";
-import { TooltipButton } from "../../shared/TooltipButton";
-import type { StepCategoryData } from "../../types";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import {
+	computePercentage,
+	formatCurrency,
+} from "~/modules/declaration-remuneration/shared/gapUtils";
+import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
 type Props = {

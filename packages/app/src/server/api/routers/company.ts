@@ -6,7 +6,9 @@ import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
 
-const currentYear = new Date().getFullYear();
+function getCurrentYear() {
+	return new Date().getFullYear();
+}
 
 export const companyRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
@@ -36,7 +38,7 @@ export const companyRouter = createTRPCRouter({
 				.from(declarations)
 				.where(
 					and(
-						eq(declarations.year, currentYear),
+						eq(declarations.year, getCurrentYear()),
 						inArray(declarations.siren, sirens),
 					),
 				);
@@ -121,7 +123,7 @@ export const companyRouter = createTRPCRouter({
 					currentStep: d.currentStep ?? 0,
 					updatedAt: d.updatedAt,
 				})),
-				currentYear,
+				getCurrentYear(),
 			);
 
 			return { company, declarations: declarationItems };
