@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-
-import { api, HydrateClient } from "~/trpc/server";
 import { TOTAL_STEPS } from "~/modules/declaration-remuneration";
+import { api, HydrateClient } from "~/trpc/server";
 import { StepPageClient } from "./StepPageClient";
 
 type StepPageProps = {

@@ -17,10 +17,10 @@ export function TooltipButton({ id, label }: TooltipButtonProps) {
 				type="button"
 			/>
 			<span
+				aria-hidden="true"
 				className="fr-tooltip fr-placement"
 				id={id}
 				role="tooltip"
-				aria-hidden="true"
 			>
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua.

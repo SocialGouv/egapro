@@ -1,5 +1,11 @@
 "use client";
 
+import type {
+	CategoryData,
+	PayGapRow,
+	StepCategoryData,
+	VariablePayData,
+} from "~/modules/declaration-remuneration";
 import {
 	Step1Workforce,
 	Step2PayGap,
@@ -7,12 +13,6 @@ import {
 	Step4QuartileDistribution,
 	Step5EmployeeCategories,
 	Step6Review,
-} from "~/modules/declaration-remuneration";
-import type {
-	CategoryData,
-	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
 } from "~/modules/declaration-remuneration";
 
 type StepPageClientProps = {

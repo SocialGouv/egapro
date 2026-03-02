@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import styles from "./CompanyInfoBanner.module.scss";
-import { StatusBadge } from "./StatusBadge";
 import { formatSiren } from "./formatSiren";
+import { StatusBadge } from "./StatusBadge";
 import type { CompanyDetail } from "./types";
 
 type Props = {

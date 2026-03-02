@@ -2,13 +2,10 @@
 
 type DefinitionAccordionProps = {
 	id: string;
-	title?: string;
+	title: string;
 };
 
-export function DefinitionAccordion({
-	id,
-	title = "Définitions et méthode de calcul",
-}: DefinitionAccordionProps) {
+export function DefinitionAccordion({ id, title }: DefinitionAccordionProps) {
 	return (
 		<section className="fr-accordion fr-mt-4w">
 			<h3 className="fr-accordion__title">

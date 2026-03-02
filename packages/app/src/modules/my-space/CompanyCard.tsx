@@ -1,7 +1,6 @@
 import Link from "next/link";
-
-import type { CompanyItem } from "./types";
 import { StatusBadge } from "./StatusBadge";
+import type { CompanyItem } from "./types";
 
 type Props = {
 	company: CompanyItem;

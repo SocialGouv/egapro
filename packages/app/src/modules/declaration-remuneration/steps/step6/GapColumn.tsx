@@ -14,7 +14,7 @@ export function GapColumn({ title, columns }: Props) {
 			<p className="fr-text--bold fr-text--sm fr-mb-0">{title}</p>
 			<div className={stepStyles.subSection}>
 				{columns.map((col) => (
-					<div key={col.label} className={stepStyles.flex1}>
+					<div className={stepStyles.flex1} key={col.label}>
 						<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
 							{col.label}
 						</p>

@@ -121,17 +121,22 @@ cp packages/app/.env.example packages/app/.env
 ## Lancer l'application
 
 ```bash
-# Démarrer la base de données
+# Démarrer la base de données (avec migration automatique)
 docker compose up -d
-
-# Lancer les migrations
-pnpm db:migrate
 
 # Lancer le serveur de dev
 pnpm dev:app
 ```
 
 L'application est accessible sur [http://localhost:3000](http://localhost:3000).
+
+### Connexion ProConnect (environnement de test)
+
+En développement local, l'authentification utilise le fournisseur d'identité de test **FIA1V2** de ProConnect. Pour se connecter :
+
+1. Cliquer sur **S'identifier avec ProConnect**
+2. Saisir l'email : `test@fia1.fr`
+3. Cliquer sur **Se connecter**
 
 ## Scripts utiles
 
@@ -148,6 +153,50 @@ L'application est accessible sur [http://localhost:3000](http://localhost:3000).
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
 
-## Spécifications complètes
+## Configuration AI (Claude Code)
 
-Les spécifications détaillées sont disponibles sur le [wiki du projet](https://github.com/SocialGouv/egapro/wiki/Spec-V2).
+Le projet est configuré pour fonctionner avec [Claude Code](https://claude.com/claude-code). Les fichiers de configuration sont versionnés dans `.claude/` et `.mcp.json`.
+
+### Serveurs MCP
+
+Configurés dans `.mcp.json` :
+
+| Serveur | Rôle |
+|---|---|
+| `dsfr` | Documentation DSFR (composants, icones, couleurs) |
+| `next-devtools` | Outils de développement Next.js |
+| `figma` | Intégration Figma (design-to-code) |
+| `github` | Opérations GitHub (PRs, issues, reviews) |
+
+### Rules (`.claude/rules/`)
+
+Les rules sont chargées automatiquement selon le contexte du fichier édité :
+
+| Fichier | Scope | Contenu |
+|---|---|---|
+| `code-quality.md` | Global | Imports `~/`, DRY, taille des fichiers |
+| `automation.md` | Global | Hooks (lint auto, blocage inline styles/SVG) |
+| `database-drizzle.md` | `src/server/**` | Transactions, Drizzle Kit, snake_case |
+| `react-components.md` | `src/**/*.tsx` | Composants, JSX, accessibilite |
+| `styling-dsfr.md` | `src/**/*.tsx` | Classes DSFR, SCSS modules |
+| `testing.md` | `__tests__/**` | Couverture, mocks, bonnes pratiques |
+| `trpc-api.md` | `src/server/api/**` | TRPCError, validation Zod |
+
+### Commandes slash (`.claude/commands/`)
+
+| Commande | Description |
+|---|---|
+| `/review-pr <PR>` | Analyse les commentaires d'une PR et applique les corrections |
+| `/validate` | Lance lint, typecheck et tests |
+
+### Hooks (`.claude/hooks/`)
+
+| Hook | Declencheur | Action |
+|---|---|---|
+| `block-biome-ignore.sh` | Avant edit | Bloque les commentaires de suppression |
+| `block-inline-style.sh` | Avant edit | Bloque `style={}` et `<svg>` inline |
+| `post-edit-lint.sh` | Apres edit | Lance `biome check --write` automatiquement |
+
+## Specifications completes
+
+Les specifications detaillees sont disponibles sur le [wiki du projet](https://github.com/SocialGouv/egapro/wiki/Spec-V2).

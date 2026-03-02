@@ -20,7 +20,7 @@ export function QuartileColumn({ title, quartiles }: Props) {
 					const total = q.womenCount + q.menCount || 1;
 					const pct = ((q.womenCount / total) * 100).toFixed(1);
 					return (
-						<div key={`f-${q.label}`} className={stepStyles.flex1}>
+						<div className={stepStyles.flex1} key={`f-${q.label}`}>
 							<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
 								{q.label}
 							</p>
@@ -38,7 +38,7 @@ export function QuartileColumn({ title, quartiles }: Props) {
 					const total = q.womenCount + q.menCount || 1;
 					const pct = ((q.menCount / total) * 100).toFixed(1);
 					return (
-						<div key={`m-${q.label}`} className={stepStyles.flex1}>
+						<div className={stepStyles.flex1} key={`m-${q.label}`}>
 							<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
 								{q.label}
 							</p>

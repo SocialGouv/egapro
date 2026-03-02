@@ -1,17 +1,11 @@
 "use client";
 
 import common from "../../shared/common.module.scss";
-import { TooltipButton } from "../../shared/TooltipButton";
+import { QUARTILE_NAMES } from "../../shared/constants";
 import { computePercentage, formatCurrency } from "../../shared/gapUtils";
+import { TooltipButton } from "../../shared/TooltipButton";
 import type { StepCategoryData } from "../../types";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
-
-const QUARTILE_NAMES = [
-	"1er quartile",
-	"2e quartile",
-	"3e quartile",
-	"4e quartile",
-] as const;
 
 type Props = {
 	title: string;

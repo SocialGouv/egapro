@@ -1,16 +1,9 @@
 "use client";
 
 import type { RefObject } from "react";
-
 import common from "../../shared/common.module.scss";
+import { QUARTILE_NAMES } from "../../shared/constants";
 import dialogStyles from "../../shared/EditDialog.module.scss";
-
-const QUARTILE_NAMES = [
-	"1er quartile",
-	"2e quartile",
-	"3e quartile",
-	"4e quartile",
-] as const;
 
 type Props = {
 	dialogRef: RefObject<HTMLDialogElement | null>;

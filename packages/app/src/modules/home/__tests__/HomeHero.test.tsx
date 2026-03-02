@@ -1,22 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HomeHero } from "../HomeHero";
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
 
 describe("HomeHero", () => {
 	it("renders the main heading", () => {

@@ -1,28 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
-// Mocks hoisted before component import
-vi.mock("next/navigation", () => ({
-	usePathname: vi.fn(),
-}));
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
-
 import { usePathname } from "next/navigation";
+import { describe, expect, it, vi } from "vitest";
 import { NavLink } from "../NavLink";
 
 describe("NavLink", () => {

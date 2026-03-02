@@ -5,22 +5,16 @@ import { useCallback, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
+import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { StepCategoryData } from "../types";
+import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileEditDialog } from "./step4/QuartileEditDialog";
 import { QuartileTable } from "./step4/QuartileTable";
-
-const QUARTILE_NAMES = [
-	"1er quartile",
-	"2e quartile",
-	"3e quartile",
-	"4e quartile",
-] as const;
 
 type Step4QuartileDistributionProps = {
 	initialAnnualCategories?: StepCategoryData[];
@@ -233,7 +227,7 @@ export function Step4QuartileDistribution({
 		: "";
 
 	return (
-		<form onSubmit={handleSubmit} className={stepStyles.formColumn}>
+		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
 			{/* Title + save status */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
@@ -289,7 +283,10 @@ export function Step4QuartileDistribution({
 				title="Rémunération horaire brute moyenne"
 			/>
 
-			<DefinitionAccordion id="accordion-step4" />
+			<DefinitionAccordion
+				id="accordion-step4"
+				title="Définitions et méthode de calcul"
+			/>
 
 			{/* Interpretation callout */}
 			<div className="fr-callout fr-callout--orange-terre-battue">

@@ -1,10 +1,9 @@
 import { HomeHero } from "./HomeHero";
 import { HomeNotice } from "./HomeNotice";
+import styles from "./HomePage.module.scss";
 import { HomePlaceholder } from "./HomePlaceholder";
 import { HomeResources } from "./HomeResources";
 import { HomeSearch } from "./HomeSearch";
-
-import styles from "./HomePage.module.scss";
 
 /** Home page — visual content only, without tRPC provider. */
 export function HomePage() {

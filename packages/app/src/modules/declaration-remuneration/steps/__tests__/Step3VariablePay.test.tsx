@@ -3,28 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step3VariablePay } from "../Step3VariablePay";
 
-const mockPush = vi.fn();
 const mockMutate = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
-}));
-
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -57,7 +36,7 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("renders the beneficiaries table with workforce totals", () => {
-		render(<Step3VariablePay maxWomen={50} maxMen={60} />);
+		render(<Step3VariablePay maxMen={60} maxWomen={50} />);
 		expect(
 			screen.getByText(
 				"Bénéficiaires de composantes variables ou complémentaires",

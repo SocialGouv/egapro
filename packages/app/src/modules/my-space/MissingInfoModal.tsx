@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { phoneRegex } from "~/modules/profile/phone";
+import { normalizePhone, phoneDigitsRegex } from "~/modules/profile/phone";
 import { api } from "~/trpc/react";
 
 const MODAL_ID = "missing-info-modal";
@@ -58,7 +58,8 @@ export function MissingInfoModal({ siren }: Props) {
 
 	const validatePhone = (value: string): string | null => {
 		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!phoneRegex.test(value)) return "Format attendu : 01 22 33 44 55";
+		if (!phoneDigitsRegex.test(normalizePhone(value)))
+			return "Format attendu : 01 22 33 44 55";
 		return null;
 	};
 
@@ -141,10 +142,10 @@ export function MissingInfoModal({ siren }: Props) {
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
 										<button
+											className="fr-btn"
 											disabled={updatePhoneMutation.isPending}
 											form="missing-info-form"
 											type="submit"
-											className="fr-btn"
 										>
 											Commencer la déclaration
 										</button>

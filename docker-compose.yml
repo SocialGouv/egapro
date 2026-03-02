@@ -10,6 +10,25 @@ services:
       - 5438:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/egapro
+      SKIP_ENV_VALIDATION: 1
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "corepack enable && pnpm --filter app db:push"
 
 volumes:
   pgdata:

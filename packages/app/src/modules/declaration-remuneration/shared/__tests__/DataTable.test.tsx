@@ -1,9 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-
-import { DataTable } from "../DataTable";
 import type { DataTableColumn } from "../DataTable";
+import { DataTable } from "../DataTable";
 
 const columns: DataTableColumn[] = [
 	{ key: "label", label: "Catégorie", type: "text", readOnly: true },

@@ -4,15 +4,15 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
-import type { CategoryData } from "../types";
-import { DEFAULT_CATEGORIES } from "../types";
+import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import dialogStyles from "../shared/EditDialog.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
-import common from "../shared/common.module.scss";
-import dialogStyles from "../shared/EditDialog.module.scss";
+import type { CategoryData } from "../types";
+import { DEFAULT_CATEGORIES } from "../types";
 
 type Step1WorkforceProps = {
 	initialCategories?: CategoryData[];
@@ -152,7 +152,10 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 				<TooltipButton id="tooltip-source" label="Information sur la source" />
 			</p>
 
-			<DefinitionAccordion id="accordion-step1" />
+			<DefinitionAccordion
+				id="accordion-step1"
+				title="Définitions et méthode de calcul"
+			/>
 
 			{validationError && (
 				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
