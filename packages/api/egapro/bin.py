@@ -1,4 +1,6 @@
+import os
 import sys
+import traceback
 import urllib.request
 from collections import Counter
 from datetime import date
@@ -11,8 +13,8 @@ import progressist
 import yaml
 import ujson as json
 from openpyxl import load_workbook
+from openpyxl.worksheet._writer import ALL_TEMP_FILES
 import aioschedule as schedule
-import functools
 import asyncio
 
 from egapro import (
@@ -35,67 +37,117 @@ from egapro.exporter import dump  # pyright: ignore
 from egapro.utils import json_dumps
 
 
-def catch_exceptions(cancel_on_failure=False):
-    def catch_exceptions_decorator(job_func):
-        @functools.wraps(job_func)
-        def wrapper_function(*args, **kwargs):
+def cleanup_workbook(wb):
+    """Force cleanup of openpyxl temp files from a workbook that was never saved.
+
+    When openpyxl write_only worksheets are used, each WorksheetWriter creates
+    a temp file in /tmp with delete=False. Normally workbook.save() calls
+    writer.cleanup() which removes them. But if the export crashes before save(),
+    these temp files are leaked. The atexit handler only runs when the process
+    exits, which never happens for the long-running scheduler.
+    """
+    if wb is None:
+        return
+    for ws in wb.worksheets:
+        writer = getattr(ws, '_writer', None)
+        if writer and hasattr(writer, 'out') and isinstance(writer.out, str):
             try:
-                return job_func(*args, **kwargs)
-            except:
-                import traceback
-                print(traceback.format_exc())
-                if cancel_on_failure:
-                    return schedule.CancelJob
-
-        return wrapper_function
-
-    return catch_exceptions_decorator
+                if os.path.exists(writer.out):
+                    os.remove(writer.out)
+                if writer.out in ALL_TEMP_FILES:
+                    ALL_TEMP_FILES.remove(writer.out)
+            except OSError:
+                pass
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_export_representation(path: Path, max_rows: int = None):
-    wb = await csv_representation.as_xlsx(max_rows)
-    print("Writing the dgt XLSX to", path)
-    wb.save(path)
+    wb = None
+    try:
+        wb = await csv_representation.as_xlsx(max_rows)
+        print("Writing the dgt XLSX to", path)
+        wb.save(path)
+    except Exception:
+        print(traceback.format_exc())
+        cleanup_workbook(wb)
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_dump_dgt(path: Path, max_rows: int = None):
-    wb = await dgt.as_xlsx(max_rows)
-    print("Writing the dgt XLSX to", path)
-    wb.save(path)
+    wb = None
+    try:
+        wb = await dgt.as_xlsx(max_rows)
+        print("Writing the dgt XLSX to", path)
+        wb.save(path)
+    except Exception:
+        print(traceback.format_exc())
+        cleanup_workbook(wb)
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_dump_dgt_representation(path: Path, max_rows: int = None):
-    wb = await dgt_representation.as_xlsx(max_rows)
-    print("Writing the dgt_representation XLSX to", path)
-    wb.save(path)
+    wb = None
+    try:
+        wb = await dgt_representation.as_xlsx(max_rows)
+        print("Writing the dgt_representation XLSX to", path)
+        wb.save(path)
+    except Exception:
+        print(traceback.format_exc())
+        cleanup_workbook(wb)
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_export_public_data(path: Path):
-    wb = await exporter.public_data_as_xlsx()
-    print("Writing public_data XLSX to", path)
-    wb.save(path)
-    print("Done")
+    wb = None
+    try:
+        wb = await exporter.public_data_as_xlsx()
+        print("Writing public_data XLSX to", path)
+        wb.save(path)
+        print("Done")
+    except Exception:
+        print(traceback.format_exc())
+        cleanup_workbook(wb)
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_export_indexes(path: Path):
-    print("Writing the CSV to", path)
-    with path.open("w") as f:
-        await exporter.indexes(f)
-    print("Done")
+    try:
+        print("Writing the CSV to", path)
+        with path.open("w") as f:
+            await exporter.indexes(f)
+        print("Done")
+    except Exception:
+        print(traceback.format_exc())
 
 
-@catch_exceptions(cancel_on_failure=False)
 async def run_full(path: Path):
     """Create a full JSON export."""
-    print("Writing to", path)
-    with path.open("w") as f:
-        await exporter.full(f)
-    print("Done")
+    try:
+        print("Writing to", path)
+        with path.open("w") as f:
+            await exporter.full(f)
+        print("Done")
+    except Exception:
+        print(traceback.format_exc())
+
+
+async def run_all_exports():
+    """Run all exports sequentially to avoid memory spikes.
+
+    Lightest exports run first so they complete even if heavier ones fail.
+    Each export handles its own errors and temp file cleanup independently.
+    """
+    jobs = [
+        ("dgt-export-representation", run_export_representation, [Path("/mnt/files/dgt-export-representation.xlsx")]),
+        ("dgt-representation", run_dump_dgt_representation, [Path("/mnt/files/dgt-representation.xlsx")]),
+        ("indexes", run_export_indexes, [Path("/mnt/files/indexes.csv")]),
+        ("full", run_full, [Path("/mnt/files/full.ndjson")]),
+        ("public-data", run_export_public_data, [Path("/mnt/files/index-egalite-fh.xlsx")]),
+        ("dgt", run_dump_dgt, [Path("/mnt/files/dgt.xlsx")]),
+    ]
+    for name, job, args in jobs:
+        print(f"--- Starting export: {name} ---")
+        try:
+            await job(*args)
+            print(f"--- Finished export: {name} ---")
+        except Exception:
+            print(f"--- FAILED export: {name} ---")
+            print(traceback.format_exc())
 
 
 @minicli.cli
@@ -112,12 +164,7 @@ async def scheduler():
         print(f"CRITICAL: Database initialization failed: {err}")
         return
 
-    schedule.every().day.at("00:00").do(run_export_representation, Path("/mnt/files/dgt-export-representation.xlsx"))
-    schedule.every().day.at("00:00").do(run_dump_dgt, Path("/mnt/files/dgt.xlsx"))
-    schedule.every().day.at("00:00").do(run_dump_dgt_representation, Path("/mnt/files/dgt-representation.xlsx"))
-    schedule.every().day.at("00:00").do(run_export_public_data, Path("/mnt/files/index-egalite-fh.xlsx"))
-    schedule.every().day.at("00:00").do(run_export_indexes, Path("/mnt/files/indexes.csv"))
-    schedule.every().day.at("00:00").do(run_full, Path("/mnt/files/full.ndjson"))
+    schedule.every().day.at("00:00").do(run_all_exports)
 
     try:
         while True:
