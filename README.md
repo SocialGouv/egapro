@@ -182,20 +182,39 @@ Les rules sont chargées automatiquement selon le contexte du fichier édité :
 | `testing.md` | `__tests__/**` | Couverture, mocks, bonnes pratiques |
 | `trpc-api.md` | `src/server/api/**` | TRPCError, validation Zod |
 
-### Commandes slash (`.claude/commands/`)
+### Agents (`.claude/agents/`) — sous-agents specialises
+
+| Agent | Role | Modele |
+|---|---|---|
+| `code-reviewer` | Checklist qualite 15 points | sonnet |
+| `rgaa-auditor` | Audit accessibilite 13 themes RGAA | sonnet |
+| `security-auditor` | Revue securite OWASP Top 10 + RGS | sonnet |
+
+### Skills (`.claude/skills/`) — commandes manuelles via `/command`
 
 | Commande | Description |
 |---|---|
-| `/review-pr <PR>` | Analyse les commentaires d'une PR et applique les corrections |
-| `/validate` | Lance lint, typecheck et tests |
+| `/validate` | Lance lint, typecheck et tests (3 agents paralleles) |
+| `/review-pr` | Revue PR : commentaires GH + agent code-reviewer + auto-fix |
+| `/audit-rgaa` | Audit 13 themes RGAA avec rapport detaille + auto-fix |
+| `/audit-secu` | Audit OWASP + RGS avec rapport detaille + auto-fix |
+| `/create-page` | Creation de pages depuis Figma (workflow parallele 4 phases) |
 
 ### Hooks (`.claude/hooks/`)
 
 | Hook | Declencheur | Action |
 |---|---|---|
-| `block-biome-ignore.sh` | Avant edit | Bloque les commentaires de suppression |
-| `block-inline-style.sh` | Avant edit | Bloque `style={}` et `<svg>` inline |
-| `post-edit-lint.sh` | Apres edit | Lance `biome check --write` automatiquement |
+| `block-bad-patterns.sh` | Avant edit | Bloque les patterns interdits (suppression comments, `style={}`, `<svg>` inline) |
+| `auto-lint.sh` | Apres edit/bash | Lance `biome check --write` automatiquement |
+
+### Gates automatiques (`.claude/rules/automation.md`)
+
+| Gate | Declencheur | Action |
+|---|---|---|
+| Validation | Apres chaque tache | 3 agents paralleles : typecheck + tests + lint |
+| RGAA | Modification de `.tsx` | Verification inline (labels, alt, aria, landmarks) |
+| Securite | Modification de `server/` | Verification inline (Drizzle, Zod, ownership) |
+| PR review | Branche avec PR ouverte | Auto-fetch des commentaires non resolus |
 
 ## Specifications completes
 

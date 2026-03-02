@@ -7,9 +7,15 @@
 
 ## Mandatory rule after each task
 
-Lint and format are **auto-applied** by the `post-edit-lint` hook after each file edit (via `pnpm biome check --write`).
+All quality checks are **automatic** — no manual commands needed:
 
-You still must run `pnpm typecheck` before considering any task complete.
+- **Lint/format**: auto-applied by the `auto-lint` hook after each edit and Bash command
+- **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits
+- **Validation**: 3 parallel agents (typecheck + tests + lint) run automatically after every task
+- **RGAA**: accessibility checked inline when modifying UI components
+- **Security**: verified inline when modifying server/tRPC code
+
+See `.claude/rules/automation.md` for full details.
 
 ---
 
@@ -260,7 +266,7 @@ Both `pnpm test:e2e` and `pnpm test:lighthouse` require `pnpm dev` running on po
 
 ### Lint & Format (Biome)
 
-Auto-applied by the `post-edit-lint` hook after each file edit. Manual commands:
+Auto-applied by the `auto-lint` hook after each file edit. Manual commands:
 
 | Command | When to use |
 |---|---|
