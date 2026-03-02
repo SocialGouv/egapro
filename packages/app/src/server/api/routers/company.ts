@@ -12,6 +12,8 @@ function getCurrentYear() {
 
 export const companyRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
+		const year = getCurrentYear();
+
 		const userCompanyRows = await ctx.db
 			.select({
 				siren: companies.siren,
@@ -37,10 +39,7 @@ export const companyRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.where(
-					and(
-						eq(declarations.year, getCurrentYear()),
-						inArray(declarations.siren, sirens),
-					),
+					and(eq(declarations.year, year), inArray(declarations.siren, sirens)),
 				);
 
 			for (const d of decls) {
@@ -111,6 +110,7 @@ export const companyRouter = createTRPCRouter({
 				.where(eq(declarations.siren, input.siren))
 				.orderBy(desc(declarations.year));
 
+			const year = getCurrentYear();
 			const declarationItems = buildDeclarationList(
 				input.siren,
 				declarationRows.map((d) => ({
@@ -123,7 +123,7 @@ export const companyRouter = createTRPCRouter({
 					currentStep: d.currentStep ?? 0,
 					updatedAt: d.updatedAt,
 				})),
-				getCurrentYear(),
+				year,
 			);
 
 			return { company, declarations: declarationItems };

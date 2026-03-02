@@ -51,7 +51,7 @@ check_pattern '\.(tsx|jsx)$' \
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <img>, or DSFR icon classes (fr-icon-*).' \
-  'DsfrPictogram\.tsx'
+  'shared/DsfrPictogram\.tsx'
 
 # Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config)
 check_pattern '\.(ts|tsx)$' \
@@ -61,12 +61,12 @@ check_pattern '\.(ts|tsx)$' \
 
 # Deep relative imports — use ~/ path alias
 check_pattern '\.(ts|tsx)$' \
-  '\.\./\.\.' \
-  'Deep relative imports (../../) are forbidden. Use the ~/ path alias.'
+  '(\.\./){2,}' \
+  'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.'
 
-# Raw @media queries in SCSS — use DSFR mixins
+# Raw @media queries in SCSS — use DSFR mixins (allow @media print and comments)
 check_pattern '\.scss$' \
-  '@media' \
+  '@media[[:space:]]+.*((min|max)-width|screen)' \
   'Raw @media queries are forbidden. Use DSFR mixins: @include respond-from(md) or @include respond-to(sm).'
 
 exit 0

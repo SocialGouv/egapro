@@ -112,28 +112,31 @@ export const authConfig = {
 				if (firstName) updates.firstName = firstName;
 				if (lastName) updates.lastName = lastName;
 
-				if (Object.keys(updates).length > 0) {
-					await db.update(users).set(updates).where(eq(users.id, user.id));
-				}
+				// Fetch company name before the transaction to avoid long-running tx
+				const siren = siret ? siret.slice(0, 9) : null;
+				const companyName = siren ? await fetchCompanyName(siren) : null;
 
-				// Associate user with company from ProConnect SIRET
-				if (siret) {
-					const siren = siret.slice(0, 9);
-					const companyName = await fetchCompanyName(siren);
+				await db.transaction(async (tx) => {
+					if (Object.keys(updates).length > 0) {
+						await tx.update(users).set(updates).where(eq(users.id, user.id));
+					}
 
-					await db
-						.insert(companies)
-						.values({ siren, name: companyName })
-						.onConflictDoUpdate({
-							target: companies.siren,
-							set: { name: companyName, updatedAt: new Date() },
-						});
+					// Associate user with company from ProConnect SIRET
+					if (siren && companyName !== null) {
+						await tx
+							.insert(companies)
+							.values({ siren, name: companyName })
+							.onConflictDoUpdate({
+								target: companies.siren,
+								set: { name: companyName, updatedAt: new Date() },
+							});
 
-					await db
-						.insert(userCompanies)
-						.values({ userId: user.id, siren })
-						.onConflictDoNothing();
-				}
+						await tx
+							.insert(userCompanies)
+							.values({ userId: user.id, siren })
+							.onConflictDoNothing();
+					}
+				});
 			}
 		},
 	},

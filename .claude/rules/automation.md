@@ -20,10 +20,10 @@ Blocks edits containing forbidden patterns:
 |---|---|---|
 | `biome-ignore`, `eslint-disable`, `@ts-ignore`, `@ts-expect-error` | `.ts/.tsx/.js/.jsx` | Fix the underlying issue |
 | `style={` | `.tsx/.jsx` | Use DSFR classes or a scoped SCSS module |
-| `<svg>` | `.tsx/.jsx` | Use `public/assets/*.svg` + `<img>` or DSFR icon classes (`fr-icon-*`) |
+| `<svg>` | `.tsx/.jsx` | Use `DsfrPictogram` for DSFR artwork, `public/assets/*.svg` + `<img>`, or DSFR icon classes (`fr-icon-*`) |
 | `process.env` | `.ts/.tsx` (excl. `env.js`, `instrumentation.ts`, `next.config`, `trpc/react.tsx`) | `import { env } from "~/env.js"` |
-| `../../` | `.ts/.tsx` | Use `~/` path alias |
-| `@media` | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
+| `../../` (or deeper) | `.ts/.tsx` | Use `~/` path alias |
+| `@media` (width/screen) | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
 
 To add a new rule: append a `check_pattern` call in `block-bad-patterns.sh`.
 If a hook blocks your edit, do NOT attempt to bypass it. Rethink the approach.
