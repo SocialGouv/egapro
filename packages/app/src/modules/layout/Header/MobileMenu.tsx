@@ -26,7 +26,7 @@ export async function MobileMenu() {
 						<li>
 							<Link
 								className="fr-btn fr-btn--tertiary-no-outline fr-icon-information-line fr-btn--icon-left"
-								href="/faq"
+								href="/aide"
 							>
 								Aide
 							</Link>
