@@ -1,0 +1,15 @@
+.infoRow {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.sourceText {
+	color: var(--text-mention-grey);
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}

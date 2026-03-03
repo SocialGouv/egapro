@@ -66,7 +66,7 @@ export function AideResourceCards() {
 			<div className="fr-col-12 fr-col-md-6">
 				<ResourceCard
 					description="Tout savoir sur les indicateurs préremplis via votre DSN, les écarts de rémunération par catégorie et les modalités de calcul."
-					href="/aide/indicateurs-remuneration"
+					href="https://travail-emploi.gouv.fr/index-de-legalite-professionnelle-calcul-et-questionsreponses"
 					imageSrc="/assets/images/aide/indicateurs-remuneration.png"
 					title="Indicateurs de rémunération"
 				/>
@@ -74,7 +74,7 @@ export function AideResourceCards() {
 			<div className="fr-col-12 fr-col-md-6">
 				<ResourceCard
 					description="Comprendre vos obligations pour les entreprises dont l'effectif dépasse 1 000 salariés et les modalités de déclaration des indicateurs de représentation."
-					href="/aide/indicateurs-representation"
+					href="https://travail-emploi.gouv.fr/la-representation-equilibree-des-femmes-et-des-hommes-dans-les-postes-de-direction-des-grandes-entreprises#anchor-navigation-627"
 					imageSrc="/assets/images/aide/indicateurs-representation.png"
 					title="Indicateurs de représentation"
 				/>
