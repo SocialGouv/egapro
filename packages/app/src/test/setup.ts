@@ -53,7 +53,7 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
-// Global mock for ~/modules/layout — provides NewTabNotice passthrough.
+// Global mock for ~/modules/layout — provides NewTabNotice and Breadcrumb passthroughs.
 vi.mock("~/modules/layout", () => ({
 	NewTabNotice: () =>
 		React.createElement(
@@ -61,6 +61,44 @@ vi.mock("~/modules/layout", () => ({
 			{ className: "fr-sr-only" },
 			"Ouvre une nouvelle fenêtre",
 		),
+	Breadcrumb: ({
+		items,
+	}: {
+		items: Array<{ label: string; href?: string }>;
+	}) => {
+		const parentItems = items.slice(0, -1);
+		const currentItem = items.at(-1);
+		if (!currentItem) return null;
+		return React.createElement(
+			"nav",
+			{ "aria-label": "vous êtes ici :" },
+			React.createElement(
+				"button",
+				{ className: "fr-breadcrumb__button", type: "button" },
+				"Voir le fil d'Ariane",
+			),
+			React.createElement(
+				"ol",
+				null,
+				...parentItems.map((item) =>
+					React.createElement(
+						"li",
+						{ key: item.href },
+						React.createElement("a", { href: item.href }, item.label),
+					),
+				),
+				React.createElement(
+					"li",
+					null,
+					React.createElement(
+						"span",
+						{ "aria-current": "page" },
+						currentItem.label,
+					),
+				),
+			),
+		);
+	},
 }));
 
 // Global mock for ~/trpc/server — provides HydrateClient passthrough.

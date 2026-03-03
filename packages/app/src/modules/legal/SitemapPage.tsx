@@ -1,38 +1,15 @@
 import Link from "next/link";
 
+import { Breadcrumb } from "~/modules/layout";
+
 /** Plan du site page. */
 export function SitemapPage() {
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls="breadcrumb-sitemap"
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id="breadcrumb-sitemap">
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<a className="fr-breadcrumb__link" href="/">
-									Accueil
-								</a>
-							</li>
-							<li>
-								<a
-									aria-current="page"
-									className="fr-breadcrumb__link"
-									href="/plan-du-site"
-								>
-									Plan du site
-								</a>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<Breadcrumb
+					items={[{ label: "Accueil", href: "/" }, { label: "Plan du site" }]}
+				/>
 
 				<h1 className="fr-h1 fr-mt-4w">Plan du site</h1>
 
