@@ -19,6 +19,11 @@ const config = {
 };
 
 export default withSentryConfig(config, {
+	// Self-hosted Sentry instance configuration (required for sourcemap uploads)
+	org: "incubateur",
+	project: "egapro-v2",
+	sentryUrl: "https://sentry2.fabrique.social.gouv.fr",
+
 	// Upload a larger set of source maps for prettier stack traces (increases build time)
 	widenClientFileUpload: true,
 

@@ -12,6 +12,6 @@ Sentry.init({
 
 	integrations: [Sentry.replayIntegration()],
 
-	// Only send errors in production
-	enabled: process.env.NODE_ENV === "production",
+	// Enable Sentry whenever a DSN is configured (dev + prod)
+	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
