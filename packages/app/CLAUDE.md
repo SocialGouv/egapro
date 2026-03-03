@@ -294,7 +294,7 @@ Auto-applied by the `auto-lint` hook after each file edit. Manual commands:
 
 Declared and validated in `src/env.js` via `@t3-oss/env-nextjs` + Zod. **Never read `process.env` directly** — always `import { env } from "~/env.js"`.
 
-To add a variable: declare in `src/env.js` (`server` or `client` section) + add to `runtimeEnv` + add to `.env` local.
+To add a variable: declare in `src/env.js` (`server` or `client` section) + add to `runtimeEnv` + add to `.env` local + **add to `.kontinuous/` deployment config** (configmap for public values, sealed-secret for secrets). Base configmap: `.kontinuous/templates/egapro.configmap.yaml`. Environment-specific overrides: `.kontinuous/env/{dev,preprod,prod}/`.
 
 > Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI without secrets).
 
