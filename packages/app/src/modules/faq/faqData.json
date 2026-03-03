@@ -1,0 +1,386 @@
+[
+	{
+		"id": "indicateur-remuneration",
+		"title": "Calculez votre indicateur de rémunération",
+		"subsections": [
+			{
+				"title": "Les effectifs à prendre en compte",
+				"items": [
+					{
+						"question": "Quels salariés doivent être pris en compte dans le calcul ?",
+						"answer": "Sont pris en compte tous les salariés, à l'exception des apprentis, des titulaires d'un contrat de professionnalisation, des salariés mis à disposition, des expatriés, ainsi que des salariés absents plus de la moitié de la période de référence."
+					},
+					{
+						"question": "Comment déterminer la période de référence annuelle ?",
+						"answer": "La période de référence correspond à l'année civile précédant la date de publication, soit du 1er janvier au 31 décembre. L'employeur peut toutefois choisir une période de 12 mois consécutifs différente."
+					},
+					{
+						"question": "Les salariés à temps partiel sont-ils inclus ?",
+						"answer": "Oui, les salariés à temps partiel sont pris en compte. Leurs rémunérations sont reconstituées en équivalent temps plein sur la période de référence."
+					},
+					{
+						"question": "Quel est le seuil minimum d'effectifs par groupe ?",
+						"answer": "Chaque groupe (par catégorie socio-professionnelle et tranche d'âge) doit comporter au moins 3 femmes et 3 hommes pour être pris en compte dans le calcul."
+					}
+				]
+			},
+			{
+				"title": "Le calcul de l'indicateur",
+				"items": [
+					{
+						"question": "Comment calculer l'écart de rémunération ?",
+						"answer": "L'écart de rémunération est calculé en comparant la moyenne des rémunérations des femmes et des hommes par groupe de catégorie socio-professionnelle et tranche d'âge, puis en pondérant par les effectifs."
+					},
+					{
+						"question": "Quels éléments de rémunération sont pris en compte ?",
+						"answer": "La rémunération prise en compte comprend le salaire de base, les primes de performance, les bonus, les avantages en nature, et tout autre élément de rémunération lié au poste."
+					},
+					{
+						"question": "Comment est appliqué le seuil de pertinence ?",
+						"answer": "Un seuil de pertinence de 2 % ou 5 % (selon la méthode choisie) est appliqué à l'écart de rémunération. Si l'écart est inférieur au seuil, il est ramené à zéro."
+					},
+					{
+						"question": "Comment convertir l'écart en nombre de points ?",
+						"answer": "L'écart pondéré est converti en points selon un barème : 0 % d'écart = 40 points, jusqu'à un écart supérieur ou égal à 20 % = 0 point."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "indicateur-representation",
+		"title": "Calculez votre indicateur de représentation",
+		"subsections": [
+			{
+				"title": "Les obligations de représentation",
+				"items": [
+					{
+						"question": "Quelles entreprises sont concernées par cet indicateur ?",
+						"answer": "Les entreprises de plus de 1 000 salariés sont tenues de publier les écarts de représentation entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes."
+					},
+					{
+						"question": "Quels postes sont pris en compte ?",
+						"answer": "Sont concernés les cadres dirigeants au sens de l'article L.3111-2 du Code du travail et les membres des instances dirigeantes telles que définies à l'article L.23-12-1 du Code de commerce."
+					},
+					{
+						"question": "À quelle date les effectifs sont-ils appréciés ?",
+						"answer": "Les effectifs sont appréciés au dernier jour de la période de référence annuelle choisie par l'employeur."
+					},
+					{
+						"question": "Comment se calcule le pourcentage de représentation ?",
+						"answer": "Le pourcentage est calculé en divisant le nombre de personnes du sexe sous-représenté par le nombre total de personnes dans la catégorie concernée, multiplié par 100."
+					}
+				]
+			},
+			{
+				"title": "La publication et la déclaration",
+				"items": [
+					{
+						"question": "Où publier les écarts de représentation ?",
+						"answer": "Les écarts de représentation doivent être publiés sur le site internet de l'entreprise, de manière visible et lisible, au plus tard le 1er mars de chaque année."
+					},
+					{
+						"question": "Faut-il aussi déclarer sur Egapro ?",
+						"answer": "Oui, en complément de la publication, les écarts doivent être déclarés sur la plateforme Egapro via le formulaire de déclaration dédié."
+					},
+					{
+						"question": "Quelles sont les sanctions en cas de non-publication ?",
+						"answer": "Le non-respect de l'obligation de publication peut entraîner une pénalité financière pouvant aller jusqu'à 1 % de la masse salariale annuelle."
+					},
+					{
+						"question": "Existe-t-il un quota minimum à atteindre ?",
+						"answer": "Oui, la loi impose un quota minimum de 30 % de chaque sexe parmi les cadres dirigeants et les instances dirigeantes, applicable progressivement."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "ecart-augmentations",
+		"title": "Calculez votre indicateur d'écart de taux d'augmentations",
+		"subsections": [
+			{
+				"title": "Le périmètre des augmentations",
+				"items": [
+					{
+						"question": "Qu'entend-on par augmentation individuelle ?",
+						"answer": "Une augmentation individuelle correspond à une augmentation du salaire de base du salarié, qu'elle soit liée à une promotion ou non."
+					},
+					{
+						"question": "Les augmentations collectives sont-elles prises en compte ?",
+						"answer": "Non, seules les augmentations individuelles sont prises en compte. Les augmentations résultant d'accords collectifs ou de revalorisations générales sont exclues."
+					},
+					{
+						"question": "Comment traiter les augmentations liées à un retour de congé maternité ?",
+						"answer": "Les augmentations liées au rattrapage salarial suite à un congé maternité ne sont pas comptabilisées dans cet indicateur, car elles font l'objet d'un indicateur dédié."
+					},
+					{
+						"question": "Les changements de catégorie socio-professionnelle comptent-ils ?",
+						"answer": "Oui, si un changement de catégorie socio-professionnelle s'accompagne d'une augmentation de salaire, il est comptabilisé comme une augmentation individuelle."
+					}
+				]
+			},
+			{
+				"title": "Le calcul de l'indicateur",
+				"items": [
+					{
+						"question": "Comment est calculé l'écart de taux d'augmentations ?",
+						"answer": "L'écart est calculé en comparant le pourcentage de femmes augmentées au pourcentage d'hommes augmentés, par catégorie socio-professionnelle pour les entreprises de 250 salariés et plus."
+					},
+					{
+						"question": "Le calcul diffère-t-il selon la taille de l'entreprise ?",
+						"answer": "Oui, pour les entreprises de 50 à 249 salariés, le calcul se fait sur l'ensemble des salariés sans distinction de catégorie. Pour les entreprises de 250 salariés et plus, le calcul est fait par catégorie socio-professionnelle."
+					},
+					{
+						"question": "Quel est le barème de points pour cet indicateur ?",
+						"answer": "L'indicateur est noté sur 20 points pour les entreprises de 250 salariés et plus, et sur 35 points pour les entreprises de 50 à 249 salariés (augmentations et promotions combinées)."
+					},
+					{
+						"question": "Que se passe-t-il si un groupe ne comporte pas assez de salariés ?",
+						"answer": "Si un groupe comporte moins de 10 femmes ou 10 hommes, il n'est pas pris en compte dans le calcul. Si aucun groupe n'est valide, l'indicateur est considéré comme incalculable."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "ecart-promotions",
+		"title": "Calculez votre indicateur d'écart de taux de promotions",
+		"subsections": [
+			{
+				"title": "La définition des promotions",
+				"items": [
+					{
+						"question": "Qu'est-ce qu'une promotion au sens de l'index ?",
+						"answer": "Une promotion correspond à un changement de catégorie socio-professionnelle (CSP) ou de niveau/coefficient hiérarchique, accompagné ou non d'une augmentation de salaire."
+					},
+					{
+						"question": "Cet indicateur concerne-t-il toutes les entreprises ?",
+						"answer": "Non, cet indicateur ne concerne que les entreprises de 250 salariés et plus. Pour les entreprises de 50 à 249 salariés, les augmentations et promotions sont combinées dans un seul indicateur."
+					},
+					{
+						"question": "Les promotions internes et externes sont-elles distinguées ?",
+						"answer": "Seules les promotions internes (au sein de l'entreprise) sont prises en compte. Les promotions liées à un recrutement externe ne sont pas comptabilisées."
+					},
+					{
+						"question": "Les promotions en cours d'année sont-elles proratisées ?",
+						"answer": "Non, toute promotion intervenue au cours de la période de référence est comptabilisée, quelle que soit la date à laquelle elle a eu lieu."
+					}
+				]
+			},
+			{
+				"title": "Le calcul et le barème",
+				"items": [
+					{
+						"question": "Comment est calculé l'écart de taux de promotions ?",
+						"answer": "L'écart est calculé en comparant le pourcentage de femmes promues au pourcentage d'hommes promus, par catégorie socio-professionnelle."
+					},
+					{
+						"question": "Quel est le barème de points ?",
+						"answer": "L'indicateur est noté sur 15 points. Un écart nul ou en faveur du sexe sous-représenté donne 15 points. Le nombre de points diminue avec l'augmentation de l'écart."
+					},
+					{
+						"question": "Le seuil de pertinence s'applique-t-il aussi ?",
+						"answer": "Oui, un seuil de pertinence de 2 points de pourcentage est appliqué. Si l'écart est inférieur à ce seuil, il est ramené à zéro."
+					},
+					{
+						"question": "Que faire si l'indicateur est incalculable ?",
+						"answer": "Si l'indicateur est incalculable (pas assez d'effectifs dans les groupes valides), il n'entre pas dans le calcul de l'index global. Le total des points est alors recalculé sur la base des indicateurs calculables."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "retour-conge-maternite",
+		"title": "Calculez votre indicateur de retour de congé maternité",
+		"subsections": [
+			{
+				"title": "Les salariées concernées",
+				"items": [
+					{
+						"question": "Quelles salariées sont prises en compte ?",
+						"answer": "Sont prises en compte toutes les salariées revenues de congé maternité au cours de la période de référence, et pendant lequel des augmentations ont été accordées à d'autres salariés."
+					},
+					{
+						"question": "Le congé d'adoption est-il inclus ?",
+						"answer": "Oui, le congé d'adoption est traité de la même manière que le congé maternité pour le calcul de cet indicateur."
+					},
+					{
+						"question": "Quelle augmentation est due au retour de congé maternité ?",
+						"answer": "La salariée doit bénéficier, à son retour, des augmentations générales et de la moyenne des augmentations individuelles perçues par les salariés relevant de la même catégorie professionnelle."
+					},
+					{
+						"question": "Comment traiter un congé à cheval sur deux périodes de référence ?",
+						"answer": "C'est la date de retour effectif de la salariée qui détermine la période de référence à prendre en compte, indépendamment de la date de début du congé."
+					}
+				]
+			},
+			{
+				"title": "Le calcul de l'indicateur",
+				"items": [
+					{
+						"question": "Comment est calculé cet indicateur ?",
+						"answer": "L'indicateur vérifie si 100 % des salariées de retour de congé maternité ont bénéficié d'une augmentation à leur retour. Si oui, 15 points sont attribués."
+					},
+					{
+						"question": "Quel est le barème de points ?",
+						"answer": "C'est un indicateur binaire : 15 points si toutes les salariées concernées ont été augmentées, 0 point sinon."
+					},
+					{
+						"question": "Que se passe-t-il s'il n'y a aucun retour de congé maternité ?",
+						"answer": "Si aucune salariée n'est revenue de congé maternité pendant la période de référence, l'indicateur est considéré comme incalculable et n'entre pas dans le total de l'index."
+					},
+					{
+						"question": "L'augmentation doit-elle intervenir immédiatement au retour ?",
+						"answer": "L'augmentation doit être effective au retour de la salariée. Un retard dans l'application de l'augmentation constitue un manquement à l'obligation légale."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "hautes-remunerations",
+		"title": "Calculez votre indicateur de hautes rémunérations",
+		"subsections": [
+			{
+				"title": "L'identification des hautes rémunérations",
+				"items": [
+					{
+						"question": "Quels salariés sont considérés comme ayant les plus hautes rémunérations ?",
+						"answer": "Il s'agit des 10 salariés ayant perçu les rémunérations les plus élevées au cours de la période de référence, tous sexes confondus."
+					},
+					{
+						"question": "Comment départager des salariés à rémunération égale ?",
+						"answer": "En cas d'égalité de rémunération au 10e rang, tous les salariés concernés sont inclus dans le décompte. Le total peut donc dépasser 10 personnes."
+					},
+					{
+						"question": "Les dirigeants mandataires sociaux sont-ils inclus ?",
+						"answer": "Non, seuls les salariés au sens du droit du travail sont pris en compte. Les mandataires sociaux non titulaires d'un contrat de travail sont exclus."
+					},
+					{
+						"question": "La rémunération inclut-elle les avantages en nature ?",
+						"answer": "Oui, la rémunération prise en compte est la rémunération brute annuelle reconstituée en équivalent temps plein, incluant les primes et avantages en nature."
+					}
+				]
+			},
+			{
+				"title": "Le calcul de l'indicateur",
+				"items": [
+					{
+						"question": "Comment est calculé cet indicateur ?",
+						"answer": "On compte le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations. Le sexe le moins représenté détermine le nombre de points."
+					},
+					{
+						"question": "Quel est le barème de points ?",
+						"answer": "L'indicateur est noté sur 10 points : 4 ou 5 personnes de chaque sexe = 10 points, 3 personnes du sexe sous-représenté = 5 points, 2 = 5 points, 1 = 2.5 points, 0 = 0 point."
+					},
+					{
+						"question": "Cet indicateur peut-il être incalculable ?",
+						"answer": "Non, cet indicateur est toujours calculable dès lors que l'entreprise a au moins 10 salariés rémunérés sur la période de référence."
+					},
+					{
+						"question": "Y a-t-il un seuil de pertinence ?",
+						"answer": "Non, aucun seuil de pertinence ne s'applique à cet indicateur. Le décompte est purement factuel."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "declaration",
+		"title": "Déclarez vos résultats",
+		"subsections": [
+			{
+				"title": "Les modalités de déclaration",
+				"items": [
+					{
+						"question": "Quelle est la date limite de déclaration ?",
+						"answer": "La déclaration doit être effectuée au plus tard le 1er mars de chaque année, au titre de la période de référence précédente."
+					},
+					{
+						"question": "Qui peut effectuer la déclaration sur Egapro ?",
+						"answer": "La déclaration peut être effectuée par le représentant légal de l'entreprise ou toute personne disposant d'une habilitation via ProConnect."
+					},
+					{
+						"question": "Peut-on modifier une déclaration déjà transmise ?",
+						"answer": "Oui, il est possible de modifier et retransmettre une déclaration tant que la période de déclaration est ouverte. La nouvelle déclaration remplace la précédente."
+					},
+					{
+						"question": "La déclaration est-elle obligatoire même si l'index est incalculable ?",
+						"answer": "Oui, même si certains indicateurs sont incalculables, l'entreprise doit effectuer sa déclaration en indiquant les motifs d'incalculabilité."
+					}
+				]
+			},
+			{
+				"title": "La publication des résultats",
+				"items": [
+					{
+						"question": "Où publier l'index d'égalité professionnelle ?",
+						"answer": "L'index global et le résultat de chaque indicateur doivent être publiés sur le site internet de l'entreprise, de manière visible et lisible."
+					},
+					{
+						"question": "Faut-il informer le CSE ?",
+						"answer": "Oui, l'index et les résultats de chaque indicateur doivent être communiqués au Comité social et économique (CSE) via la Base de Données Économiques, Sociales et Environnementales (BDESE)."
+					},
+					{
+						"question": "Quelles sont les conséquences d'un index inférieur à 75 ?",
+						"answer": "Si l'index est inférieur à 75 points, l'entreprise doit définir et publier des mesures de correction et, le cas échéant, des objectifs de progression."
+					},
+					{
+						"question": "La DREETS est-elle automatiquement informée ?",
+						"answer": "Oui, la déclaration sur Egapro vaut transmission à la DREETS (Direction régionale de l'économie, de l'emploi, du travail et des solidarités) compétente."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "mesures-correction",
+		"title": "Mesures de correction et objectifs de progression",
+		"subsections": [
+			{
+				"title": "Les obligations en cas d'index insuffisant",
+				"items": [
+					{
+						"question": "Quand faut-il définir des mesures de correction ?",
+						"answer": "Des mesures de correction doivent être définies dès que l'index est inférieur à 75 points. Elles doivent être publiées sur le site internet de l'entreprise et transmises à la DREETS."
+					},
+					{
+						"question": "Quel est le délai pour atteindre le seuil de 75 points ?",
+						"answer": "L'entreprise dispose de 3 ans pour atteindre le seuil de 75 points. En cas de non-atteinte dans ce délai, une pénalité financière peut être appliquée."
+					},
+					{
+						"question": "Les objectifs de progression sont-ils obligatoires ?",
+						"answer": "Oui, pour les entreprises dont l'index est inférieur à 85 points, des objectifs de progression pour chaque indicateur doivent être définis et publiés."
+					},
+					{
+						"question": "Quelle est la pénalité maximale ?",
+						"answer": "La pénalité financière peut atteindre jusqu'à 1 % de la masse salariale annuelle brute. Son montant est fixé par la DREETS en tenant compte des efforts consentis par l'entreprise."
+					}
+				]
+			},
+			{
+				"title": "La mise en œuvre des mesures",
+				"items": [
+					{
+						"question": "Comment définir des mesures de correction efficaces ?",
+						"answer": "Les mesures doivent cibler les indicateurs défaillants : révision des politiques de rémunération, plans de rattrapage salarial, objectifs chiffrés d'augmentation et de promotion pour le sexe sous-représenté."
+					},
+					{
+						"question": "Faut-il négocier les mesures avec les partenaires sociaux ?",
+						"answer": "Les mesures de correction doivent être négociées dans le cadre de la négociation obligatoire sur l'égalité professionnelle, ou à défaut, décidées unilatéralement par l'employeur après consultation du CSE."
+					},
+					{
+						"question": "Comment suivre la progression de l'index ?",
+						"answer": "L'entreprise doit recalculer son index chaque année. L'évolution des indicateurs permet de mesurer l'efficacité des mesures mises en place et d'ajuster la stratégie si nécessaire."
+					},
+					{
+						"question": "Les mesures de correction doivent-elles être publiées ?",
+						"answer": "Oui, les mesures de correction et les objectifs de progression doivent être publiés sur le site internet de l'entreprise de manière visible et lisible."
+					}
+				]
+			}
+		]
+	}
+]
