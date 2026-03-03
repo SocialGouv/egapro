@@ -1,21 +1,5 @@
 import { NewTabNotice } from "~/modules/layout";
 
-type ReferenceLink = {
-	href: string;
-	label: string;
-};
-
-const REFERENCE_LINKS: ReferenceLink[] = [
-	{
-		href: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037396684",
-		label: "Article L. 1142-8 du Code du travail",
-	},
-	{
-		href: "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038234561",
-		label: "Décret n° 2019-15 du 8 janvier 2019",
-	},
-];
-
 /** Textes de référence section with external legislation links. */
 export function AideTextesReference() {
 	return (
@@ -33,7 +17,16 @@ export function AideTextesReference() {
 						Consultez les textes législatifs et réglementaires
 					</p>
 					<ul className="fr-links-group">
-						{REFERENCE_LINKS.map(({ href, label }) => (
+						{[
+							{
+								href: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037396684",
+								label: "Article L. 1142-8 du Code du travail",
+							},
+							{
+								href: "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038234561",
+								label: "Décret n° 2019-15 du 8 janvier 2019",
+							},
+						].map(({ href, label }) => (
 							<li key={href}>
 								<a
 									className="fr-link fr-icon-external-link-line fr-link--icon-right"

@@ -8,22 +8,6 @@ vi.mock("~/modules/layout", () => ({
 	),
 }));
 
-vi.mock("next/link", () => ({
-	default: ({
-		href,
-		children,
-		...props
-	}: {
-		href: string;
-		children: React.ReactNode;
-		[key: string]: unknown;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
-
 describe("AidePage", () => {
 	it("has #content id on main for skip links", () => {
 		render(<AidePage />);
@@ -64,7 +48,7 @@ describe("AidePage", () => {
 				name: /date limite de déclaration/i,
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText(/1er mars 2025/i)).toBeInTheDocument();
+		expect(screen.getByText(/1er mars 2026/i)).toBeInTheDocument();
 	});
 
 	it("renders the three resource cards", () => {
