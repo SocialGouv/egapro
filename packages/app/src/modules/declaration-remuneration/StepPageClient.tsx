@@ -1,17 +1,17 @@
 "use client";
 
-import { Step1Workforce } from "~/modules/declaration-remuneration/steps/Step1Workforce";
-import { Step2PayGap } from "~/modules/declaration-remuneration/steps/Step2PayGap";
-import { Step3VariablePay } from "~/modules/declaration-remuneration/steps/Step3VariablePay";
-import { Step4QuartileDistribution } from "~/modules/declaration-remuneration/steps/Step4QuartileDistribution";
-import { Step5EmployeeCategories } from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories";
-import { Step6Review } from "~/modules/declaration-remuneration/steps/Step6Review";
+import { Step1Workforce } from "./steps/Step1Workforce";
+import { Step2PayGap } from "./steps/Step2PayGap";
+import { Step3VariablePay } from "./steps/Step3VariablePay";
+import { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
+import { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
+import { Step6Review } from "./steps/Step6Review";
 import type {
 	CategoryData,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
-} from "~/modules/declaration-remuneration/types";
+} from "./types";
 
 type StepPageClientProps = {
 	step: number;
