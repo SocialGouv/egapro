@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { formatSiren } from "~/modules/my-space/formatSiren";
+import { formatSiren } from "~/modules/my-space";
 
 import styles from "./CompanyBanner.module.scss";
 

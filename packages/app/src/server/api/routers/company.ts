@@ -14,22 +14,7 @@ export const companyRouter = createTRPCRouter({
 	get: protectedProcedure
 		.input(z.object({ siren: z.string().length(9) }))
 		.query(async ({ ctx, input }) => {
-			const userCompanyRow = await ctx.db
-				.select()
-				.from(userCompanies)
-				.where(
-					and(
-						eq(userCompanies.userId, ctx.session.user.id),
-						eq(userCompanies.siren, input.siren),
-					),
-				)
-				.limit(1);
-
-			if (userCompanyRow.length === 0) {
-				throw new Error("Company not found or access denied");
-			}
-
-			const companyRows = await ctx.db
+			const rows = await ctx.db
 				.select({
 					siren: companies.siren,
 					name: companies.name,
@@ -38,13 +23,19 @@ export const companyRouter = createTRPCRouter({
 					workforce: companies.workforce,
 					hasCse: companies.hasCse,
 				})
-				.from(companies)
-				.where(eq(companies.siren, input.siren))
+				.from(userCompanies)
+				.innerJoin(companies, eq(userCompanies.siren, companies.siren))
+				.where(
+					and(
+						eq(userCompanies.userId, ctx.session.user.id),
+						eq(userCompanies.siren, input.siren),
+					),
+				)
 				.limit(1);
 
-			const company = companyRows[0];
+			const company = rows[0];
 			if (!company) {
-				throw new Error("Company not found");
+				throw new Error("Company not found or access denied");
 			}
 
 			return company;
@@ -101,23 +92,6 @@ export const companyRouter = createTRPCRouter({
 	getWithDeclarations: protectedProcedure
 		.input(z.object({ siren: z.string().length(9) }))
 		.query(async ({ ctx, input }) => {
-			// Verify the user has access to this company
-			const userCompanyRow = await ctx.db
-				.select()
-				.from(userCompanies)
-				.where(
-					and(
-						eq(userCompanies.userId, ctx.session.user.id),
-						eq(userCompanies.siren, input.siren),
-					),
-				)
-				.limit(1);
-
-			if (userCompanyRow.length === 0) {
-				throw new Error("Company not found or access denied");
-			}
-
-			// Fetch company details
 			const companyRows = await ctx.db
 				.select({
 					siren: companies.siren,
@@ -127,16 +101,21 @@ export const companyRouter = createTRPCRouter({
 					workforce: companies.workforce,
 					hasCse: companies.hasCse,
 				})
-				.from(companies)
-				.where(eq(companies.siren, input.siren))
+				.from(userCompanies)
+				.innerJoin(companies, eq(userCompanies.siren, companies.siren))
+				.where(
+					and(
+						eq(userCompanies.userId, ctx.session.user.id),
+						eq(userCompanies.siren, input.siren),
+					),
+				)
 				.limit(1);
 
 			const company = companyRows[0];
 			if (!company) {
-				throw new Error("Company not found");
+				throw new Error("Company not found or access denied");
 			}
 
-			// Fetch all declarations for this company, ordered by year desc
 			const declarationRows = await ctx.db
 				.select({
 					siren: declarations.siren,
