@@ -36,55 +36,58 @@ export function SitemapPage() {
 
 				<h1 className="fr-h1 fr-mt-4w">Plan du site</h1>
 
-				<nav aria-label="Plan du site">
-					<ul className="fr-raw-list">
-						<li className="fr-mb-2w">
-							<Link className="fr-link" href="/">
-								Accueil
-							</Link>
-						</li>
-						<li className="fr-mb-2w">
-							<Link className="fr-link" href="/aide">
-								Aide et ressources
-							</Link>
-						</li>
-						<li className="fr-mb-2w">
-							<Link className="fr-link" href="/faq">
-								Questions fréquentes (FAQ)
-							</Link>
-						</li>
-						<li className="fr-mb-2w">
-							<Link className="fr-link" href="/login">
-								Connexion
-							</Link>
-						</li>
-						<li className="fr-mb-2w">
-							<span className="fr-h6">Pages légales</span>
-							<ul className="fr-raw-list fr-ml-4w">
-								<li className="fr-mb-2w">
-									<Link className="fr-link" href="/mentions-legales">
-										Mentions légales
-									</Link>
-								</li>
-								<li className="fr-mb-2w">
-									<Link className="fr-link" href="/donnees-personnelles">
-										Données personnelles
-									</Link>
-								</li>
-								<li className="fr-mb-2w">
-									<Link className="fr-link" href="/gestion-des-cookies">
-										Gestion des cookies
-									</Link>
-								</li>
-								<li className="fr-mb-2w">
-									<Link className="fr-link" href="/declaration-accessibilite">
-										Déclaration d'accessibilité
-									</Link>
-								</li>
-							</ul>
-						</li>
-					</ul>
-				</nav>
+				<h2 className="fr-h4">Pages principales</h2>
+				<ul className="fr-raw-list fr-mb-4w">
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/">
+							Accueil
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/aide">
+							Aide et ressources
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/faq">
+							Questions fréquentes (FAQ)
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/login">
+							Connexion
+						</Link>
+					</li>
+				</ul>
+
+				<h2 className="fr-h4">Pages légales</h2>
+				<ul className="fr-raw-list">
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/mentions-legales">
+							Mentions légales
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/donnees-personnelles">
+							Données personnelles
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/gestion-des-cookies">
+							Gestion des cookies
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/declaration-accessibilite">
+							Déclaration d'accessibilité
+						</Link>
+					</li>
+					<li className="fr-mb-2w">
+						<Link className="fr-link" href="/plan-du-site">
+							Plan du site
+						</Link>
+					</li>
+				</ul>
 			</div>
 		</main>
 	);

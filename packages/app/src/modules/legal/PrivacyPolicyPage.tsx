@@ -235,11 +235,11 @@ function PrivacySubprocessors() {
 							<td>France</td>
 							<td>
 								<a
-									href="https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/9e74492-OVH_Data_Protection_Agreement-FR-6.0.pdf"
+									href="https://www.ovhcloud.com/fr/personal-data-protection/"
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									DPA OVH
+									Protection des données OVH
 									<NewTabNotice />
 								</a>
 							</td>

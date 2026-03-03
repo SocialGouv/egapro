@@ -117,8 +117,9 @@ function AccessibilityEstablishment() {
 		<>
 			<h2 className="fr-h4">Établissement de cette déclaration</h2>
 			<p>
-				Cette déclaration a été établie le 1er mars 2024. Elle a été mise à jour
-				le 1er mars 2025.
+				Cette déclaration a été établie le{" "}
+				<time dateTime="2024-03-01">1er mars 2024</time>. Elle a été mise à jour
+				le <time dateTime="2025-03-01">1er mars 2025</time>.
 			</p>
 			<p>Technologies utilisées pour la réalisation du site :</p>
 			<ul>

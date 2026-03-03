@@ -61,9 +61,10 @@ export function LegalNoticePage() {
 
 				<h2 className="fr-h4">Accessibilité</h2>
 				<p>
-					La conformité aux normes d'accessibilité numérique est un objectif
-					ultérieur mais nous tâchons de rendre ce site accessible à toutes et à
-					tous.
+					Index Egapro est partiellement conforme avec le référentiel général
+					d'amélioration de l'accessibilité (RGAA), version 4.1. Pour en savoir
+					plus, consultez notre{" "}
+					<a href="/declaration-accessibilite">déclaration d'accessibilité</a>.
 				</p>
 
 				<h3 className="fr-h6">Signaler un dysfonctionnement</h3>
