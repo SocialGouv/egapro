@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId } from "react";
 
 type BreadcrumbItem = {
@@ -34,10 +35,10 @@ export function Breadcrumb({ items }: Props) {
 			<div className="fr-collapse" id={collapseId}>
 				<ol className="fr-breadcrumb__list">
 					{parentItems.map((item) => (
-						<li key={item.href}>
-							<a className="fr-breadcrumb__link" href={item.href}>
+						<li key={item.href ?? item.label}>
+							<Link className="fr-breadcrumb__link" href={item.href ?? "/"}>
 								{item.label}
-							</a>
+							</Link>
 						</li>
 					))}
 					<li>

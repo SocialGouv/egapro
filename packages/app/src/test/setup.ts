@@ -75,7 +75,7 @@ vi.mock("~/modules/layout", () => ({
 			React.createElement(
 				"button",
 				{ className: "fr-breadcrumb__button", type: "button" },
-				"Voir le fil d\u2019Ariane",
+				"Voir le fil d'Ariane",
 			),
 			React.createElement(
 				"ol",
