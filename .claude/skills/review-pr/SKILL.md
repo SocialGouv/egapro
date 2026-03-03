@@ -72,8 +72,14 @@ Launch 3 parallel validation agents (same as `/validate`):
 [Validation results here]
 ```
 
-### Step 6 — Reply to comments (only if user asks)
+### Step 6 — Reply to comments (user-driven)
 
-```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="Fixed in latest commit."
-```
+**NEVER** reply to PR comments automatically. After Step 5, ask with `AskUserQuestion`:
+
+> "Do you want me to reply to the resolved PR comments on GitHub?"
+
+- If yes → reply to each resolved comment:
+  ```bash
+  gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="Fixed in latest commit."
+  ```
+- If no → do nothing, just keep the local report.

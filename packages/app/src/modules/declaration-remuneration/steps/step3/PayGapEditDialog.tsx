@@ -2,14 +2,14 @@
 
 import type { RefObject } from "react";
 
-import common from "../../shared/common.module.scss";
-import dialogStyles from "../../shared/EditDialog.module.scss";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import dialogStyles from "~/modules/declaration-remuneration/shared/EditDialog.module.scss";
 import {
 	formatGap,
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
-} from "../../shared/gapUtils";
+} from "~/modules/declaration-remuneration/shared/gapUtils";
 import stepStyles from "../Step3VariablePay.module.scss";
 
 type Props = {

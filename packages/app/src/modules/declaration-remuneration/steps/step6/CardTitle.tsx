@@ -1,4 +1,4 @@
-import { TooltipButton } from "../../shared/TooltipButton";
+import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import stepStyles from "../Step6Review.module.scss";
 
 type Props = {
