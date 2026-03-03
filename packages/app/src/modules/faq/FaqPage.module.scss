@@ -1,0 +1,22 @@
+.headerZone {
+	background: var(--background-alt-blue-france);
+	padding-bottom: 3.5rem;
+	padding-top: 1.5rem;
+}
+
+.contentCard {
+	background: var(--background-default-grey);
+	border: 1px solid var(--border-default-grey);
+	padding: 1.5rem;
+
+	@include respond-from(md) {
+		padding: 2rem;
+	}
+}
+
+.illustrationWrapper {
+	display: flex;
+	justify-content: center;
+	padding-bottom: 3.5rem;
+	padding-top: 2rem;
+}
