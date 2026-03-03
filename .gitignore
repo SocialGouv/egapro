@@ -35,5 +35,10 @@ build/
 # vscode
 .vscode/
 
-# claude code (local-only files)
-.claude/settings.local.json
+# claude code — ignore everything, then whitelist shared config
+.claude/*
+!.claude/agents/
+!.claude/hooks/
+!.claude/rules/
+!.claude/skills/
+!.claude/settings.json
