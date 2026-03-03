@@ -1,5 +1,5 @@
 import { FaqAccordionGroup } from "./FaqAccordionGroup";
-import styles from "./FaqPage.module.scss";
+import styles from "./FaqContent.module.scss";
 import type { FaqSection } from "./types";
 
 type Props = {
@@ -20,7 +20,7 @@ export function FaqContent({ sections }: Props) {
 						{section.title}
 					</h2>
 					{section.subsections.map((subsection, subIndex) => (
-						<div className="fr-mt-3w" key={`${section.id}-sub-${subIndex}`}>
+						<div className="fr-mt-3w" key={`${section.id}-${subsection.title}`}>
 							<h3 className="fr-h6">{subsection.title}</h3>
 							<FaqAccordionGroup
 								items={subsection.items}

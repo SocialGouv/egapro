@@ -45,8 +45,8 @@ export function FaqPage() {
 
 					<h1 className="fr-h1 fr-mt-4w">Questions fréquentes (FAQ)</h1>
 					<p className="fr-text--lg fr-mb-0">
-						Indicateurs sur l'égalité professionnelle calculs et
-						questions/réponses
+						Indicateurs sur l'égalité professionnelle : calculs et
+						questions/réponses.
 					</p>
 
 					<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">

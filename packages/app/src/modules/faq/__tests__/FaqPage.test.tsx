@@ -40,8 +40,9 @@ describe("FaqPage", () => {
 
 	it("renders the back link pointing to home", () => {
 		render(<FaqPage />);
-		const backLink = screen.getAllByRole("link", { name: /retour/i })[0];
-		expect(backLink).toHaveAttribute("href", "/");
+		const backLinks = screen.getAllByRole("link", { name: /retour/i });
+		expect(backLinks.length).toBeGreaterThanOrEqual(1);
+		expect(backLinks[0]).toHaveAttribute("href", "/");
 	});
 
 	it("renders the sommaire navigation with all sections", () => {
