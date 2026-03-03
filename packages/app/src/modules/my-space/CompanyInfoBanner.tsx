@@ -50,6 +50,16 @@ export function CompanyInfoBanner({ company }: Props) {
 						<div className="fr-col">
 							<h2 className="fr-mb-0">{company.name}</h2>
 						</div>
+						<div className="fr-col-auto">
+							<button
+								aria-controls="company-edit-modal"
+								className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line fr-btn--icon-left"
+								data-fr-opened="false"
+								type="button"
+							>
+								Modifier
+							</button>
+						</div>
 					</div>
 
 					<p className="fr-text--bold fr-mb-1w">{formatSiren(company.siren)}</p>
