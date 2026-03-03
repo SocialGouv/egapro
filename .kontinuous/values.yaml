@@ -72,6 +72,7 @@ app:
   vars:
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+    EGAPRO_WEEZ_API_URL: "https://dgt.rct01.kleegroup.com/weez/api"
 
 pg:
   ~chart: pg

@@ -4,6 +4,7 @@ import {
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
 import { auth } from "~/server/auth";
+import { api } from "~/trpc/server";
 
 export default async function DeclarationRootLayout({
 	children,
@@ -22,6 +23,7 @@ export default async function DeclarationRootLayout({
 	}
 
 	const siren = siret.slice(0, 9);
+	const company = await api.company.get({ siren });
 
-	return <DeclarationLayout siren={siren}>{children}</DeclarationLayout>;
+	return <DeclarationLayout company={company}>{children}</DeclarationLayout>;
 }
