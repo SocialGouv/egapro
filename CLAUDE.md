@@ -62,6 +62,22 @@ Never create a git commit, unless the user explicitly requests it.
 
 ---
 
+## MCP Servers (`.mcp.json`)
+
+Three MCP servers are configured and **must be used** in the relevant contexts:
+
+| Server | When to use | Key tools |
+|---|---|---|
+| `next-devtools` | Debugging, runtime errors, route inspection, Next.js docs | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
+| `dsfr` | Before writing any DSFR HTML | `get_component_doc`, `search_components`, `get_color_tokens` |
+| `figma` | When implementing from a Figma design | `get_design_context`, `get_screenshot` |
+
+**Next.js DevTools** is particularly important: use `nextjs_docs` to look up Next.js APIs (never guess from memory), and use `nextjs_call(get_errors)` to check runtime/compilation errors after changes.
+
+See `packages/app/CLAUDE.md` for detailed usage instructions per MCP server.
+
+---
+
 ## Useful root scripts
 
 ```bash
@@ -110,7 +126,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 
 | Agent | Role | Triggered by |
 |---|---|---|
-| `code-reviewer` | 15-point code quality checklist | `/review-pr`, PR gate |
+| `code-reviewer` | 21-point code quality checklist | `/review-pr`, PR gate |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit | `/audit-rgaa`, RGAA gate |
 | `security-auditor` | OWASP Top 10 + RGS security review | `/audit-secu`, security gate |
 
@@ -119,7 +135,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 | Skill | Purpose |
 |---|---|
 | `/validate` | Force run all quality checks (3 parallel agents) |
-| `/review-pr` | Deep PR review: GH comments + code-reviewer agent + auto-fix |
+| `/review-pr` | Deep PR review: GH comments + code-reviewer + RGAA + security + auto-fix |
 | `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
 | `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |

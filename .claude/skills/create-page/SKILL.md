@@ -85,6 +85,7 @@ Otherwise, code only the applicable parts in order:
    - Each component < 200 lines, `"use client"` only where needed
 
 6. Run `pnpm typecheck` to validate foundations compile.
+7. If dev server is running, use `nextjs_call(get_errors)` to verify no runtime errors.
 
 ### Phase 3 — Pages (parallel agents)
 
@@ -111,6 +112,8 @@ Each agent MUST follow:
 - **Server Components** by default, `"use client"` only for hooks/events/browser APIs
 - **DSFR classes** for all styling (no inline styles, no raw colors)
 - **DSFR MCP** to verify HTML structure before writing
+- **Figma assets as SVG**: export all illustrations/icons from Figma as SVG (never PNG/JPG). Store in `public/assets/{module}/`. Only accept raster for real photographs
+- **`next/image`**: all images use `import Image from "next/image"` (raw `<img>` blocked by hook)
 - **Accessibility**: labels, alt, aria attributes, semantic HTML, NewTabNotice
 - **English code**, French user-facing text
 - **Unit tests**: test observable behavior, mock boundaries only

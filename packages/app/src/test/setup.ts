@@ -48,6 +48,16 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
+// Global mock for ~/modules/layout — provides NewTabNotice passthrough.
+vi.mock("~/modules/layout", () => ({
+	NewTabNotice: () =>
+		React.createElement(
+			"span",
+			{ className: "fr-sr-only" },
+			"Ouvre une nouvelle fenêtre",
+		),
+}));
+
 // Global mock for ~/trpc/server — provides HydrateClient passthrough.
 // Tests needing specific API mocks can override with their own vi.mock.
 vi.mock("~/trpc/server", () => ({
