@@ -125,15 +125,40 @@ Default: **Server Component**. Add `"use client"` only for hooks, browser events
 
 One component = one responsibility. Extract sub-components at ~50 lines of JSX. Name them after what they display, not their position in the tree.
 
-> Detailed rules (no logic in JSX, no inline SVG, `.map()` limit) → `.claude/rules/react-components.md`
+> Detailed rules (no logic in JSX, no inline SVG, `next/image` mandatory, `.map()` limit) → `.claude/rules/react-components.md`
 
 ---
 
-## DSFR — Usage rules
+## MCP Servers (`.mcp.json`)
+
+Three MCP servers are configured and **must be used** in the relevant contexts:
+
+| MCP Server | When to use | Key tools |
+|---|---|---|
+| **next-devtools** | Debugging, error diagnostics, route inspection, docs lookup | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
+| **dsfr** | Before writing any DSFR HTML | `get_component_doc`, `search_components`, `get_color_tokens` |
+| **figma** | When implementing from a Figma design | `get_design_context`, `get_screenshot` |
+
+### MCP Next.js DevTools (mandatory when dev server is running)
+
+The `next-devtools` MCP provides runtime diagnostics directly from the Next.js dev server. **Use it proactively:**
+
+- **Before implementing changes**: call `nextjs_index` to discover the running dev server, then `nextjs_call` to inspect routes, component tree, and current errors
+- **After making changes**: call `nextjs_call` with `get_errors` to check for compilation/runtime errors instead of relying only on terminal output
+- **For Next.js documentation**: call `nextjs_docs` with the correct path (read the `nextjs-docs://llms-index` resource first to find paths). **Never guess Next.js APIs from memory** — always verify via `nextjs_docs`
+- **For browser testing**: use `browser_eval` to start a browser, navigate to pages, take screenshots, and read console messages
+
+```
+# Typical workflow
+1. nextjs_index              → discover servers + available tools
+2. nextjs_call(get_errors)   → check current state
+3. [make code changes]
+4. nextjs_call(get_errors)   → verify no regressions
+```
 
 ### MCP DSFR (mandatory)
 
-The DSFR MCP server is configured in `.mcp.json`. Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
+Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
 
 ### Styling strategy (strict priority order)
 
@@ -160,6 +185,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 - **JS**: loaded via `<Script type="module" strategy="beforeInteractive">`. Handles modals, dropdowns, theme toggle, keyboard navigation. Never duplicate this logic in React — use `data-fr-*` attributes.
 - **Dark mode**: `data-fr-scheme="system"` on `<html>`, cookie `fr-theme` read by inline script to avoid flash, `ThemeModal` for user toggle.
 - **Icons**: `fr-icon-{name}-{fill|line}` classes. Always `aria-hidden="true"` on decorative icons.
+- **Figma assets**: always export as **SVG** (never PNG/JPG for illustrations/icons). Store in `public/assets/{module}/`. Only accept raster (WebP) for real photographs.
 
 ---
 
@@ -173,7 +199,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 - **External links**: any `target="_blank"` must contain a `<NewTabNotice />` (text `fr-sr-only`)
 - **aria-current**: use `NavLink` for navigation links — `aria-current="page"` is calculated dynamically via `usePathname()`
 - **Icons**: `aria-hidden="true"` on purely decorative elements
-- **Images**: descriptive `alt` required, `alt=""` for decorative images
+- **Images**: always use `import Image from "next/image"` (raw `<img>` blocked by hook). Descriptive `alt` required, `alt=""` for decorative images
 - **Forms**: each `<input>` must have an associated `<label>` via `htmlFor`/`id`
 
 Never add redundant `role` on semantic elements (`role="navigation"` on `<nav>` is forbidden). Use `role="dialog"` + `aria-modal="true"` only on `<div>` elements.
@@ -229,25 +255,16 @@ Tests live in `__tests__/` subfolder next to the module they test. Never in `src
 
 ### Standard mocks
 
-```ts
-// next/link -> simple HTML anchor
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
-  ),
-}));
+All common mocks are defined once in `src/test/setup.ts` and auto-loaded by Vitest. Never duplicate them in test files:
 
-// next/navigation -> mock usePathname
-vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
+- `next/link` → simple `<a>` tag
+- `next/navigation` → `usePathname` + `useRouter` stubs
+- `next/image` → `<div role="img">` with `aria-label`, `data-src`, `data-testid="next-image"`
+- `next-auth/react` → `signIn` stub
+- `server-only` → empty module
+- `~/trpc/server` → `HydrateClient` passthrough
 
-// server-only -> empty (avoids error in jsdom)
-vi.mock("server-only", () => ({}));
-
-// tRPC server -> HydrateClient passthrough
-vi.mock("~/trpc/server", () => ({
-  HydrateClient: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-```
+Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.
 
 ---
 

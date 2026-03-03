@@ -1,5 +1,5 @@
-import { computeGap } from "../../shared/gapUtils";
-import type { StepCategoryData } from "../../types";
+import { computeGap } from "~/modules/declaration-remuneration/shared/gapUtils";
+import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
 
 export type ParsedCategory = {
 	index: number;

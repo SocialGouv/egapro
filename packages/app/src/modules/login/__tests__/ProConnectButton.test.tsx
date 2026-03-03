@@ -1,12 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ProConnectButton } from "../ProConnectButton";
-
-vi.mock("~/modules/layout", () => ({
-	NewTabNotice: () => (
-		<span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>
-	),
-}));
 
 describe("ProConnectButton", () => {
 	it("renders a button to trigger ProConnect sign-in", () => {

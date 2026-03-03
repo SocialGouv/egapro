@@ -62,6 +62,22 @@ Never create a git commit, unless the user explicitly requests it.
 
 ---
 
+## MCP Servers (`.mcp.json`)
+
+Three MCP servers are configured and **must be used** in the relevant contexts:
+
+| Server | When to use | Key tools |
+|---|---|---|
+| `next-devtools` | Debugging, runtime errors, route inspection, Next.js docs | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
+| `dsfr` | Before writing any DSFR HTML | `get_component_doc`, `search_components`, `get_color_tokens` |
+| `figma` | When implementing from a Figma design | `get_design_context`, `get_screenshot` |
+
+**Next.js DevTools** is particularly important: use `nextjs_docs` to look up Next.js APIs (never guess from memory), and use `nextjs_call(get_errors)` to check runtime/compilation errors after changes.
+
+See `packages/app/CLAUDE.md` for detailed usage instructions per MCP server.
+
+---
+
 ## Useful root scripts
 
 ```bash
@@ -89,8 +105,8 @@ Quality checks run **automatically** after every code change — no command need
 | Gate | When | How |
 |---|---|---|
 | **Validation** | After every task | 3 parallel agents: `pnpm typecheck` + `pnpm test` + `pnpm lint:check && format:check` |
-| **RGAA** | After modifying `.tsx` in `modules/` | Inline check: labels, alt, aria, landmarks, headings |
-| **Security** | After modifying `server/` or tRPC | Inline check: Drizzle ORM, Zod inputs, ownership, env |
+| **RGAA** | **After every task** | Delegate to `rgaa-auditor` agent on all created/modified files |
+| **Security** | **After every task** | Delegate to `security-auditor` agent on all created/modified files |
 | **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
 
 ## Parallelized workflow for multi-page tasks
@@ -110,7 +126,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 
 | Agent | Role | Triggered by |
 |---|---|---|
-| `code-reviewer` | 15-point code quality checklist | `/review-pr`, PR gate |
+| `code-reviewer` | 21-point code quality checklist | `/review-pr`, PR gate |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit | `/audit-rgaa`, RGAA gate |
 | `security-auditor` | OWASP Top 10 + RGS security review | `/audit-secu`, security gate |
 
@@ -119,10 +135,11 @@ When creating multiple pages/screens, follow this 4-phase approach:
 | Skill | Purpose |
 |---|---|
 | `/validate` | Force run all quality checks (3 parallel agents) |
-| `/review-pr` | Deep PR review: GH comments + code-reviewer agent + auto-fix |
+| `/review-pr` | Deep PR review: GH comments + code-reviewer + RGAA + security + auto-fix |
 | `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
 | `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
+| `/process-issue` | Process a GitHub issue (parent + sub-issues) with mandatory quality gates |
 
 ---
 

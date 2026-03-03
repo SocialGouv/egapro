@@ -207,7 +207,7 @@ Les hooks sont des scripts shell executes **automatiquement** a chaque action de
 
 | Hook | Quand | Ce qu'il fait |
 |---|---|---|
-| `block-bad-patterns.sh` | **Avant** chaque edit de fichier | Bloque les patterns interdits : `biome-ignore`, `@ts-ignore`, `style={}`, `<svg>` inline. L'edit est rejete, Claude doit trouver une autre approche. |
+| `block-bad-patterns.sh` | **Avant** chaque edit de fichier | Bloque 6 patterns interdits : `biome-ignore`, `@ts-ignore`, `style={}`, `<svg>` inline (utiliser `DsfrPictogram` pour les pictogrammes DSFR), `process.env` (→ `~/env.js`), `../../` ou plus profond (→ `~/`), `@media` width/screen en SCSS (→ mixins DSFR). L'edit est rejete, Claude doit trouver une autre approche. |
 | `auto-lint.sh` | **Apres** chaque edit ou commande bash | Lance `biome check --write` pour auto-corriger le formatage et le lint. Apres un edit : corrige le fichier edite. Apres `pnpm test/build/typecheck` : corrige tous les fichiers modifies. |
 
 ### Agents (`.claude/agents/`)

@@ -105,7 +105,11 @@ export function MissingInfoModal({ siren }: Props) {
 								</p>
 								<form id="missing-info-form" onSubmit={handleSubmit}>
 									<div
-										className={`fr-input-group${phoneError ? "fr-input-group--error" : ""}`}
+										className={
+											phoneError
+												? "fr-input-group fr-input-group--error"
+												: "fr-input-group"
+										}
 									>
 										<label className="fr-label" htmlFor="missing-info-phone">
 											Numéro de téléphone (obligatoire)
