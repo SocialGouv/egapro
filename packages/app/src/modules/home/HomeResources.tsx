@@ -1,3 +1,6 @@
+import Image from "next/image";
+
+import { DsfrPictogram } from "./DsfrPictogram";
 import styles from "./HomeResources.module.scss";
 
 type ResourceTileProps = {
@@ -25,26 +28,7 @@ function ResourceTile({
 			</div>
 			<div className="fr-tile__header">
 				<div className="fr-tile__pictogram">
-					<svg
-						aria-hidden="true"
-						className="fr-artwork"
-						height="40px"
-						viewBox="0 0 80 80"
-						width="40px"
-					>
-						<use
-							className="fr-artwork-decorative"
-							href={`${pictogramPath}#artwork-decorative`}
-						/>
-						<use
-							className="fr-artwork-minor"
-							href={`${pictogramPath}#artwork-minor`}
-						/>
-						<use
-							className="fr-artwork-major"
-							href={`${pictogramPath}#artwork-major`}
-						/>
-					</svg>
+					<DsfrPictogram path={pictogramPath} />
 				</div>
 			</div>
 		</div>
@@ -92,12 +76,13 @@ export function HomeResources() {
 						aria-hidden="true"
 						className={`fr-col-12 fr-col-md-3 ${styles.illustrationWrapper}`}
 					>
-						<img
+						<Image
 							alt=""
 							className={styles.illustration}
-							height="147"
+							height={147}
 							src="/assets/images/home/help-illustration.svg"
-							width="210"
+							unoptimized
+							width={210}
 						/>
 					</div>
 				</div>

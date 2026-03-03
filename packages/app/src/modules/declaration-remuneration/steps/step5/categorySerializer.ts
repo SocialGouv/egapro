@@ -1,4 +1,4 @@
-import type { StepCategoryData } from "../../types";
+import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
 
 export type EmployeeCategory = {
 	id: number;

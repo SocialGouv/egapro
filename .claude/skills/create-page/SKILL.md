@@ -9,7 +9,16 @@ Create one or more pages from Figma designs or specifications using maximum para
 
 ## Arguments
 
-$ARGUMENTS — Figma URLs, page descriptions, or feature specifications
+$ARGUMENTS — **required**: one or more Figma URLs (e.g. `https://figma.com/design/...?node-id=...`)
+
+## Prerequisites
+
+**A Figma URL is mandatory.** Before starting any work:
+
+1. Check that `$ARGUMENTS` contains at least one valid Figma URL (`figma.com/design/` or `figma.com/make/`)
+2. If no Figma URL is provided, **stop immediately** and ask the user:
+   > "This skill requires a Figma design URL. Please provide the Figma link(s) for the page(s) to create."
+3. Do NOT proceed to Phase 1 until a valid Figma URL is available.
 
 ## Instructions
 
@@ -17,7 +26,7 @@ $ARGUMENTS — Figma URLs, page descriptions, or feature specifications
 
 For each page/screen provided, launch a **parallel Explore agent**:
 
-1. **Figma analysis**: use `get_design_context` MCP tool to get code + screenshot
+1. **Figma analysis**: use `get_design_context` MCP tool with the provided Figma URL to get code + screenshot
 2. **DSFR components**: use `get_component_doc` / `search_components` MCP tools to verify correct HTML structure for each DSFR component identified
 3. **Data requirements**: identify tRPC procedures, DB schema changes, types needed
 4. **Existing code**: search the codebase for similar patterns to reuse
@@ -34,7 +43,6 @@ Present synthesis to user and wait for confirmation before Phase 2.
 ### Activation rules (conditional phases)
 
 After Phase 1 analysis, classify each page/screen and determine which actions apply.
-**Never launch an agent or phase for an action marked "skip".**
 
 | Action | Activate when | Skip when |
 |---|---|---|
@@ -42,15 +50,15 @@ After Phase 1 analysis, classify each page/screen and determine which actions ap
 | Zod schemas | Forms, API inputs, route parameters exist | Read-only display, static pages |
 | tRPC / API | Frontend needs server data or mutations | Static page, client-only logic |
 | UI components | Visual HTML is rendered | Pure backend (no `.tsx` produced) |
-| Unit tests | **Always** — only unconditional action | Never skip |
-| RGAA audit | HTML is produced (`.tsx` files created/modified) | Pure backend, DB migration only |
-| Security audit | Forms, API routes, auth, user data, file upload exist | Static page with no user input and no server code |
+| Unit tests | **Always** | Never skip |
+| RGAA audit | **Always** | Never skip |
+| Security audit | **Always** | Never skip |
 | E2E tests | A user journey is created, modified, or its underlying API/data changes | Isolated component with no route, internal refacto with no behavior change, config-only change |
 
 **Examples of conditional skipping:**
-- Static info page (CGU, mentions légales) → skip DB, tRPC, Zod, security audit
-- Backend-only tRPC route → skip UI components, RGAA audit. **Keep E2E** if the route serves an existing user journey
-- Isolated UI component (no data) → skip DB, tRPC, security audit, E2E tests
+- Static info page (CGU, mentions légales) → skip DB, tRPC, Zod. **Keep RGAA + Security**
+- Backend-only tRPC route → skip UI components. **Keep RGAA + Security + E2E** if it serves a user journey
+- Isolated UI component (no data) → skip DB, tRPC, E2E. **Keep RGAA + Security**
 - Form page with API → all actions activated
 
 ### Phase 2 — Shared foundations (sequential, conditional)
@@ -108,23 +116,27 @@ Each agent MUST follow:
 - **Unit tests**: test observable behavior, mock boundaries only
 - **File size**: < 200 lines per file
 
-### Phase 4 — Quality (parallel agents, conditional)
+### Phase 4 — Quality (parallel agents)
 
-Launch only the applicable agents based on activation rules from Phase 1:
+Launch **all 4 agents** (RGAA + Security are always mandatory):
 
 **Agent: Validation** *(always)*:
 ```bash
 pnpm typecheck && pnpm test && pnpm lint:check && pnpm format:check
 ```
 
-**Agent: RGAA audit** *(only if HTML produced)* — delegate to `rgaa-auditor`:
-Audit all new/modified `.tsx` files against the 13 RGAA themes.
+**Agent: RGAA audit** *(always)* — delegate to `rgaa-auditor`:
+Audit all new/modified files against the 13 RGAA themes.
+Auto-fix all `[ERROR]` findings.
 
-**Agent: Security audit** *(only if forms, API, auth, user data, or upload)* — delegate to `security-auditor`:
-Audit all new/modified server files and tRPC routers against OWASP Top 10.
+**Agent: Security audit** *(always)* — delegate to `security-auditor`:
+Audit all new/modified files against OWASP Top 10.
+Auto-fix all `[CRITICAL]` and `[HIGH]` findings.
 
 **Agent: E2E tests** *(only if navigable user journey created/modified)*:
 Write Playwright tests in `src/e2e/` covering the new user flows.
+
+If RGAA or Security auto-fixes are applied → re-run Validation agent.
 
 ### Phase 5 — Final report
 
