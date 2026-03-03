@@ -1,9 +1,12 @@
-import styles from "./FaqPage.module.scss";
+import { AideBreadcrumb } from "./AideBreadcrumb";
+import { AideIllustration } from "./AideIllustration";
+import styles from "./AideLayout.module.scss";
 
 type FaqItem = { id: string; question: string; answer: string };
 type FaqSubsection = { id: string; title: string; items: FaqItem[] };
 type FaqSection = { id: string; title: string; subsections: FaqSubsection[] };
 
+// TODO: Replace placeholder content with real FAQ entries before production release.
 const makeItems = (prefix: string, count: number): FaqItem[] =>
 	Array.from({ length: count }, (_, i) => ({
 		id: `${prefix}-${i + 1}`,
@@ -67,39 +70,14 @@ export function FaqPage() {
 	return (
 		<main className={styles.pageBackground} id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls="breadcrumb-faq"
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id="breadcrumb-faq">
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<a className="fr-breadcrumb__link" href="/">
-									Accueil
-								</a>
-							</li>
-							<li>
-								<a className="fr-breadcrumb__link" href="/aide">
-									Aide et ressources
-								</a>
-							</li>
-							<li>
-								<a
-									aria-current="page"
-									className="fr-breadcrumb__link"
-									href="/aide/faq"
-								>
-									Questions fréquentes (FAQ)
-								</a>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<AideBreadcrumb
+					collapseId="breadcrumb-faq"
+					current={{ label: "Questions fréquentes (FAQ)", href: "/aide/faq" }}
+					items={[
+						{ label: "Accueil", href: "/" },
+						{ label: "Aide et ressources", href: "/aide" },
+					]}
+				/>
 
 				<a
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
@@ -149,17 +127,7 @@ export function FaqPage() {
 					</div>
 				</div>
 
-				<div
-					aria-hidden="true"
-					className="fr-grid-row fr-grid-row--center fr-mt-6w"
-				>
-					<img
-						alt=""
-						height="147"
-						src="/assets/images/aide/help-illustration.svg"
-						width="210"
-					/>
-				</div>
+				<AideIllustration />
 			</div>
 		</main>
 	);

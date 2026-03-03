@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
 	email: string;
@@ -9,12 +9,19 @@ type Props = {
 /** Small button that copies an email address to the clipboard. */
 export function CopyEmailButton({ email }: Props) {
 	const [copied, setCopied] = useState(false);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		return () => {
+			if (timerRef.current) clearTimeout(timerRef.current);
+		};
+	}, []);
 
 	async function handleCopy() {
 		try {
 			await navigator.clipboard.writeText(email);
 			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			timerRef.current = setTimeout(() => setCopied(false), 2000);
 		} catch {
 			// Clipboard API unavailable (e.g. insecure context)
 		}

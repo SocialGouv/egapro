@@ -1,6 +1,7 @@
-import { NewTabNotice } from "~/modules/layout";
+import { AideBreadcrumb } from "./AideBreadcrumb";
+import { AideIllustration } from "./AideIllustration";
+import styles from "./AideLayout.module.scss";
 import { CopyEmailButton } from "./CopyEmailButton";
-import styles from "./FaqPage.module.scss";
 
 const CONTACT_EMAIL = "index@travail.gouv.fr";
 
@@ -9,39 +10,14 @@ export function ContactPage() {
 	return (
 		<main className={styles.pageBackground} id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls="breadcrumb-contact"
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id="breadcrumb-contact">
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<a className="fr-breadcrumb__link" href="/">
-									Accueil
-								</a>
-							</li>
-							<li>
-								<a className="fr-breadcrumb__link" href="/aide">
-									Aide et ressources
-								</a>
-							</li>
-							<li>
-								<a
-									aria-current="page"
-									className="fr-breadcrumb__link"
-									href="/aide/nous-contacter"
-								>
-									Nous contacter
-								</a>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<AideBreadcrumb
+					collapseId="breadcrumb-contact"
+					current={{ label: "Nous contacter", href: "/aide/nous-contacter" }}
+					items={[
+						{ label: "Accueil", href: "/" },
+						{ label: "Aide et ressources", href: "/aide" },
+					]}
+				/>
 
 				<a
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
@@ -66,7 +42,6 @@ export function ContactPage() {
 								href="/assets/documents/referents-egapro-dreets.xlsx"
 							>
 								Télécharger la liste des référents Egapro - Dreets
-								<NewTabNotice />
 								<span className="fr-link__detail">EXCEL – 61,88 Ko</span>
 							</a>
 						</div>
@@ -86,17 +61,7 @@ export function ContactPage() {
 							</div>
 						</div>
 
-						<div
-							aria-hidden="true"
-							className="fr-grid-row fr-grid-row--center fr-mt-6w"
-						>
-							<img
-								alt=""
-								height="147"
-								src="/assets/images/aide/help-illustration.svg"
-								width="210"
-							/>
-						</div>
+						<AideIllustration />
 					</div>
 				</div>
 			</div>

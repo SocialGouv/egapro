@@ -1,4 +1,6 @@
+import { AideBreadcrumb } from "./AideBreadcrumb";
 import { AideCallout } from "./AideCallout";
+import { AideIllustration } from "./AideIllustration";
 import { AideResourceCards } from "./AideResourceCards";
 import { AideTextesReference } from "./AideTextesReference";
 
@@ -7,35 +9,11 @@ export function AidePage() {
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					{/* DSFR JS will manage aria-expanded after hydration */}
-					<button
-						aria-controls="breadcrumb-aide"
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id="breadcrumb-aide">
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<a className="fr-breadcrumb__link" href="/">
-									Accueil
-								</a>
-							</li>
-							<li>
-								<a
-									aria-current="page"
-									className="fr-breadcrumb__link"
-									href="/aide"
-								>
-									Aide et ressources
-								</a>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<AideBreadcrumb
+					collapseId="breadcrumb-aide"
+					current={{ label: "Aide et ressources", href: "/aide" }}
+					items={[{ label: "Accueil", href: "/" }]}
+				/>
 
 				<h1 className="fr-h1 fr-mt-4w">Aide et ressources</h1>
 
@@ -51,14 +29,7 @@ export function AidePage() {
 					<AideTextesReference />
 				</div>
 
-				<div aria-hidden="true" className="fr-grid-row fr-grid-row--center">
-					<img
-						alt=""
-						height="147"
-						src="/assets/images/aide/help-illustration.svg"
-						width="210"
-					/>
-				</div>
+				<AideIllustration />
 			</div>
 		</main>
 	);
