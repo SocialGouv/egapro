@@ -51,7 +51,7 @@ check_pattern '\.(tsx|jsx)$' \
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
-  'shared/DsfrPictogram\.tsx'
+  '(DsfrPictogram\.tsx|ErrorArtwork\.tsx)'
 
 # Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config)
 check_pattern '\.(ts|tsx)$' \

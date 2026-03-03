@@ -50,16 +50,12 @@ describe("ErrorPage", () => {
 		expect(screen.queryByRole("link")).not.toBeInTheDocument();
 	});
 
-	it("renders a decorative error illustration image", () => {
-		render(<ErrorPage />);
+	it("renders the DSFR artwork illustration as decorative", () => {
+		const { container } = render(<ErrorPage />);
 
-		const img = screen.getByTestId("next-image");
-		expect(img).toBeInTheDocument();
-		expect(img).toHaveAttribute("aria-hidden", "true");
-		expect(img).toHaveAttribute("aria-label", "");
-		expect(img).toHaveAttribute(
-			"data-src",
-			"/assets/images/error/technical-error-illustration.svg",
-		);
+		const svg = container.querySelector("svg.fr-artwork");
+		expect(svg).toBeInTheDocument();
+		expect(svg).toHaveAttribute("aria-hidden", "true");
+		expect(svg).toHaveClass("fr-responsive-img");
 	});
 });

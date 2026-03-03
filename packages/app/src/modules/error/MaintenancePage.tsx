@@ -1,6 +1,4 @@
-import Image from "next/image";
-
-import styles from "./ErrorImage.module.scss";
+import { ErrorArtwork } from "./ErrorArtwork";
 
 /** 503 Service Unavailable page content following DSFR error page template. */
 export function MaintenancePage() {
@@ -20,18 +18,8 @@ export function MaintenancePage() {
 							réutiliser le service.
 						</p>
 					</div>
-					<div
-						className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
-					>
-						<Image
-							alt=""
-							aria-hidden="true"
-							className={styles.image}
-							height={300}
-							src="/assets/images/error/technical-error-illustration.svg"
-							unoptimized
-							width={300}
-						/>
+					<div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
+						<ErrorArtwork />
 					</div>
 				</div>
 			</div>

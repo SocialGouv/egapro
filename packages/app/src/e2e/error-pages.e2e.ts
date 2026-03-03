@@ -20,13 +20,11 @@ test.describe("404 Not Found page", () => {
 		await expect(homeLink).toHaveAttribute("href", "/");
 	});
 
-	test("displays the error illustration", async ({ page }) => {
+	test("displays the DSFR error artwork", async ({ page }) => {
 		await page.goto("/this-route-does-not-exist");
 
-		const illustration = page.getByRole("img", { includeHidden: true });
-		await expect(illustration).toHaveAttribute(
-			"src",
-			"/assets/images/error/technical-error-illustration.svg",
-		);
+		const artwork = page.locator("svg.fr-artwork");
+		await expect(artwork).toBeVisible();
+		await expect(artwork).toHaveAttribute("aria-hidden", "true");
 	});
 });

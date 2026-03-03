@@ -5,6 +5,12 @@ paths:
 
 # Testing
 
+## 80% minimum code coverage (enforced)
+
+Global code coverage must stay **at or above 80%** for statements, branches, functions, and lines. This is enforced by Vitest coverage thresholds — `pnpm test --coverage` will fail if any metric drops below 80%.
+
+Run `pnpm test --coverage` to check the current coverage report.
+
 ## 100% coverage on logic files
 
 Every file with logic must have corresponding tests. The only exception is thin route wrappers in `src/app/*/page.tsx`.
