@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
 import styles from "./CompanyBanner.module.scss";
@@ -23,30 +22,12 @@ export function CompanyBanner({
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>
 			<div className="fr-container">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls="breadcrumb-declaration"
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id="breadcrumb-declaration">
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<Link className="fr-breadcrumb__link" href="/">
-									Mon espace
-								</Link>
-							</li>
-							<li>
-								<span aria-current="page" className="fr-breadcrumb__link">
-									{currentPageLabel}
-								</span>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<Breadcrumb
+					items={[
+						{ label: "Mon espace", href: "/" },
+						{ label: currentPageLabel },
+					]}
+				/>
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-auto">

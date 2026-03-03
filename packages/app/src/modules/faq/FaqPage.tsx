@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Breadcrumb } from "~/modules/layout";
+
 import { FaqContent } from "./FaqContent";
 import styles from "./FaqPage.module.scss";
 import { FaqSummary } from "./FaqSummary";
@@ -12,30 +14,12 @@ export function FaqPage() {
 		<main id="content" tabIndex={-1}>
 			<div className={styles.headerZone}>
 				<div className="fr-container">
-					<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-						<button
-							aria-controls="breadcrumb-faq"
-							aria-expanded={false}
-							className="fr-breadcrumb__button"
-							type="button"
-						>
-							Voir le fil d'Ariane
-						</button>
-						<div className="fr-collapse" id="breadcrumb-faq">
-							<ol className="fr-breadcrumb__list">
-								<li>
-									<Link className="fr-breadcrumb__link" href="/">
-										Accueil
-									</Link>
-								</li>
-								<li>
-									<span aria-current="page" className="fr-breadcrumb__link">
-										Questions fréquentes (FAQ)
-									</span>
-								</li>
-							</ol>
-						</div>
-					</nav>
+					<Breadcrumb
+						items={[
+							{ label: "Accueil", href: "/" },
+							{ label: "Questions fréquentes (FAQ)" },
+						]}
+					/>
 
 					<Link
 						aria-label="Retour à l'accueil"

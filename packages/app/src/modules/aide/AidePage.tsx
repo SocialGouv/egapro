@@ -1,4 +1,5 @@
-import { AideBreadcrumb } from "./AideBreadcrumb";
+import { Breadcrumb } from "~/modules/layout";
+
 import { AideCallout } from "./AideCallout";
 import { AideIllustration } from "./AideIllustration";
 import { AideResourceCards } from "./AideResourceCards";
@@ -9,10 +10,11 @@ export function AidePage() {
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<AideBreadcrumb
-					collapseId="breadcrumb-aide"
-					current={{ label: "Aide et ressources", href: "/aide" }}
-					items={[{ label: "Accueil", href: "/" }]}
+				<Breadcrumb
+					items={[
+						{ label: "Accueil", href: "/" },
+						{ label: "Aide et ressources" },
+					]}
 				/>
 
 				<h1 className="fr-h1 fr-mt-4w">Aide et ressources</h1>
