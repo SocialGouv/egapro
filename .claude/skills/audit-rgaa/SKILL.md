@@ -31,7 +31,7 @@ Split the files into batches of ~10 and launch parallel agents. Each agent:
 3. Reports findings with `[SEVERITY] RGAA-{theme}.{criterion} file:line — description`
 
 The RGAA auditor agent checks:
-- **Theme 1**: Images — alt, decorative, icon accessibility
+- **Theme 1**: Images — `next/image` mandatory (raw `<img>` forbidden), alt, decorative, icon accessibility
 - **Theme 2**: Frames — iframe titles
 - **Theme 3**: Colors — color-only information, contrast via DSFR tokens
 - **Theme 5**: Tables — caption, th scope, no layout tables
@@ -48,6 +48,7 @@ The RGAA auditor agent checks:
 
 Fix all `[ERROR]` findings automatically:
 - Missing `<label>` → add `<label htmlFor="...">` with matching `id`
+- Raw `<img>` → replace with `import Image from "next/image"` + `<Image>`
 - Missing `alt` → add descriptive `alt` (or `alt=""` if decorative)
 - Missing `aria-hidden="true"` on decorative icons → add it
 - Missing `<NewTabNotice />` → import and add after link text
