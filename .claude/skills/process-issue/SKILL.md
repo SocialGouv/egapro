@@ -57,13 +57,17 @@ $ARGUMENTS — required: GitHub issue number (`#123`) or URL (`https://github.co
 
 ### Step 3 — Branch
 
-1. Generate a slug from the parent issue title:
-   - Lowercase, replace non-alphanumeric with hyphens, truncate to 40 chars
-2. Branch name: `feat/issue-{N}-{slug}`
-3. If branch already exists (re-run scenario), check it out. Otherwise create from current HEAD.
-   ```bash
-   git checkout -b feat/issue-{N}-{slug} 2>/dev/null || git checkout feat/issue-{N}-{slug}
-   ```
+**Ask the user** with `AskUserQuestion` before doing anything with branches:
+> "Do you want to create a new branch for this issue, or work on the current branch (`{current_branch}`)?"
+- Options: "Create new branch" / "Stay on current branch"
+- If the user chooses to create a new branch:
+  1. Generate a slug from the parent issue title (lowercase, replace non-alphanumeric with hyphens, truncate to 40 chars)
+  2. Branch name: `feat/issue-{N}-{slug}`
+  3. If branch already exists (re-run scenario), check it out. Otherwise create from current HEAD.
+     ```bash
+     git checkout -b feat/issue-{N}-{slug} 2>/dev/null || git checkout feat/issue-{N}-{slug}
+     ```
+- If the user chooses to stay → continue on the current branch.
 
 ### Step 4 — Sequential task loop
 
@@ -116,34 +120,26 @@ If any fails → fix → re-run until all pass.
 
 If any auto-fixes were applied in Phase 2 → re-run Phase 1 validation.
 
-#### 4.5 — Mark task as done
-
-- **Sub-issue** → close it:
-  ```bash
-  gh issue close {task_number} --comment "Implemented in branch feat/issue-{N}-{slug}"
-  ```
-- **Checkbox** → check it in the parent issue body:
-  ```bash
-  gh issue edit {N} --body "updated body with [x]"
-  ```
-
-#### 4.6 — Report progress
+#### 4.5 — Report progress
 
 Display after each task:
 ```
 [{current}/{total}] #{task_number} {task_title} DONE — Validation: PASS | RGAA: {PASS|X findings} | Security: {SECURE|X findings}
 ```
 
-### Step 5 — Cleanup
+### Step 5 — Wrap up (user-driven)
 
-1. Comment on the parent issue with a summary:
-   ```bash
-   gh issue comment {N} --body "All tasks implemented in branch \`feat/issue-{N}-{slug}\`. PR incoming."
-   ```
+**NEVER** take GitHub actions automatically. Always ask with `AskUserQuestion`:
 
-2. Ask the user if they want to open a PR:
-   - If yes, create PR targeting `master` with a summary of all changes
-   - If no, just report the branch name
+> "All tasks are done. What do you want me to do?"
+
+Offer these options (multi-select):
+- **Close sub-issues** — close implemented sub-issues with a comment
+- **Comment on parent issue** — post a summary on #{N}
+- **Open a PR** — create a PR targeting `master`
+- **Nothing** — just show the final report
+
+Only execute the actions the user explicitly selects.
 
 ### Step 6 — Final report
 
