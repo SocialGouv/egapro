@@ -20,6 +20,7 @@ export function AideBreadcrumb({ collapseId, items, current }: Props) {
 				aria-controls={collapseId}
 				aria-expanded="false"
 				className="fr-breadcrumb__button"
+				suppressHydrationWarning
 				type="button"
 			>
 				Voir le fil d'Ariane

@@ -27,13 +27,19 @@ export function CopyEmailButton({ email }: Props) {
 		}
 	}
 
+	const label = copied ? "Copié !" : "Copier";
+	const ariaLabel = copied
+		? "Adresse copiée dans le presse-papier"
+		: `Copier l'adresse ${email}`;
+
 	return (
 		<button
+			aria-label={ariaLabel}
 			className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-clipboard-line fr-btn--icon-left"
 			onClick={handleCopy}
 			type="button"
 		>
-			{copied ? "Copié !" : "Copier"}
+			{label}
 		</button>
 	);
 }

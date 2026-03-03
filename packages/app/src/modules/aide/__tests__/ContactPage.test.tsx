@@ -1,6 +1,22 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { ContactPage } from "../ContactPage";
+
+const writeText = vi.fn().mockResolvedValue(undefined);
+
+beforeAll(() => {
+	Object.defineProperty(Navigator.prototype, "clipboard", {
+		value: { writeText },
+		configurable: true,
+	});
+});
+
+afterAll(() => {
+	Object.defineProperty(Navigator.prototype, "clipboard", {
+		value: undefined,
+		configurable: true,
+	});
+});
 
 describe("ContactPage", () => {
 	it("has #content id on main for skip links", () => {
@@ -58,5 +74,16 @@ describe("ContactPage", () => {
 	it("renders the copy button", () => {
 		render(<ContactPage />);
 		expect(screen.getByRole("button", { name: /copier/i })).toBeInTheDocument();
+	});
+
+	it("copies the email to clipboard on button click", async () => {
+		writeText.mockClear();
+		render(<ContactPage />);
+		screen.getByRole("button", { name: /copier/i }).click();
+
+		await waitFor(() => {
+			expect(writeText).toHaveBeenCalledWith("index@travail.gouv.fr");
+		});
+		expect(screen.getByRole("button", { name: /copiée/i })).toBeInTheDocument();
 	});
 });
