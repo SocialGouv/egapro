@@ -1,4 +1,4 @@
-import common from "../../shared/common.module.scss";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import stepStyles from "../Step6Review.module.scss";
 import { GapBadge } from "./GapBadge";
 

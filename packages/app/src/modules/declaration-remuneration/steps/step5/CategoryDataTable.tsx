@@ -1,12 +1,12 @@
 "use client";
 
-import common from "../../shared/common.module.scss";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import {
 	computeGap,
 	computeTotal,
 	formatGapCompact,
 	formatTotal,
-} from "../../shared/gapUtils";
+} from "~/modules/declaration-remuneration/shared/gapUtils";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import type { EmployeeCategory } from "./categorySerializer";
 

@@ -1,9 +1,9 @@
 "use client";
 
 import type { RefObject } from "react";
-import common from "../../shared/common.module.scss";
-import { QUARTILE_NAMES } from "../../shared/constants";
-import dialogStyles from "../../shared/EditDialog.module.scss";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import dialogStyles from "~/modules/declaration-remuneration/shared/EditDialog.module.scss";
 
 type Props = {
 	dialogRef: RefObject<HTMLDialogElement | null>;

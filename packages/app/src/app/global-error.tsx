@@ -1,6 +1,7 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
+import Image from "next/image";
 import { useEffect } from "react";
 
 import styles from "../modules/error/ErrorImage.module.scss";
@@ -37,11 +38,14 @@ export default function GlobalError({
 							<div
 								className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
 							>
-								<img
+								<Image
 									alt=""
 									aria-hidden="true"
 									className={styles.image}
+									height={300}
 									src="/assets/images/error/technical-error-illustration.svg"
+									unoptimized
+									width={300}
 								/>
 							</div>
 						</div>

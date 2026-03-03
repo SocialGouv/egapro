@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import styles from "./HomeSearch.module.scss";
 
 /** Company search section by SIREN, region, department or sector. */
@@ -32,12 +34,13 @@ export function HomeSearch() {
 						aria-hidden="true"
 						className={`fr-hidden fr-unhidden-md fr-col-md-3 ${styles.illustrationWrapper}`}
 					>
-						<img
+						<Image
 							alt=""
 							className={styles.illustration}
-							height="240"
+							height={240}
 							src="/assets/images/home/search-illustration.svg"
-							width="223"
+							unoptimized
+							width={223}
 						/>
 					</div>
 
