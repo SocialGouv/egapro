@@ -29,7 +29,8 @@ Get the diff and changed files:
 git diff origin/master...HEAD --name-only
 git diff origin/master...HEAD
 ```
-Run the code review against the 15-point checklist in `.claude/agents/code-reviewer/AGENT.md`.
+Run the code review against the 21-point checklist in `.claude/agents/code-reviewer/AGENT.md`.
+This checklist covers all rules from `.claude/rules/` and `block-bad-patterns.sh`.
 
 ### Step 2 — Analyze findings
 
@@ -46,12 +47,15 @@ For each **unresolved** issue (human comments + agent errors):
 2. Apply the fix following project conventions (see `CLAUDE.md` and `.claude/rules/`)
 3. If the fix is ambiguous, list options and ask for clarification
 
-### Step 4 — Validate (parallel agents)
+### Step 4 — Quality gates (parallel agents)
 
-Launch 3 parallel validation agents (same as `/validate`):
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm lint:check && pnpm format:check`
+Launch **5 parallel agents** (all mandatory per automation rules):
+
+1. **Validation: typecheck** — `pnpm typecheck`
+2. **Validation: tests** — `pnpm test`
+3. **Validation: lint+format** — `pnpm lint:check && pnpm format:check`
+4. **RGAA audit** — delegate to `rgaa-auditor` agent on all changed `.tsx` files (skip if no `.tsx` in diff)
+5. **Security audit** — delegate to `security-auditor` agent on all changed `.ts/.tsx` in `server/`, `routers/`, or tRPC (skip if no server files in diff)
 
 ### Step 5 — Report
 
@@ -65,8 +69,14 @@ Launch 3 parallel validation agents (same as `/validate`):
 | Already resolved | @reviewer | ... | ... | Fixed in abc123 |
 | Needs clarification | @reviewer | ... | ... | Asked user |
 
-### Automated Code Review: [PASS | NEEDS WORK | MINOR]
+### Automated Code Review (21-point checklist): [PASS | NEEDS WORK | MINOR]
 [Agent findings here]
+
+### RGAA Audit: [PASS | NEEDS WORK | MINOR | SKIPPED — no .tsx files]
+[RGAA findings here]
+
+### Security Audit: [SECURE | VULNERABLE | SKIPPED — no server files]
+[Security findings here]
 
 ### Validation: [PASS | FAIL]
 [Validation results here]
