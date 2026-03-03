@@ -60,7 +60,7 @@ export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
 		})),
 	];
 
-	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]!);
+	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
 	const visibleRows = allRows.slice(0, pageSize);
 
 	return (
@@ -92,14 +92,14 @@ export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
 													Années précédentes
 												</td>
 											</tr>
-										) : (
+										) : row.declaration ? (
 											<DeclarationRow
-												declaration={row.declaration!}
-												key={`${row.declaration!.type}-${row.declaration!.year}-${i}`}
+												declaration={row.declaration}
+												key={`${row.declaration.type}-${row.declaration.year}-${i}`}
 												siren={siren}
 												userPhone={userPhone}
 											/>
-										),
+										) : null,
 									)}
 								</tbody>
 							</table>

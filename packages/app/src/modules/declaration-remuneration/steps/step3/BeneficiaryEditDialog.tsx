@@ -2,8 +2,8 @@
 
 import type { RefObject } from "react";
 
-import common from "../../shared/common.module.scss";
-import dialogStyles from "../../shared/EditDialog.module.scss";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import dialogStyles from "~/modules/declaration-remuneration/shared/EditDialog.module.scss";
 
 type Props = {
 	dialogRef: RefObject<HTMLDialogElement | null>;

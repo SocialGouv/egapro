@@ -89,8 +89,8 @@ Quality checks run **automatically** after every code change — no command need
 | Gate | When | How |
 |---|---|---|
 | **Validation** | After every task | 3 parallel agents: `pnpm typecheck` + `pnpm test` + `pnpm lint:check && format:check` |
-| **RGAA** | After modifying `.tsx` in `modules/` | Inline check: labels, alt, aria, landmarks, headings |
-| **Security** | After modifying `server/` or tRPC | Inline check: Drizzle ORM, Zod inputs, ownership, env |
+| **RGAA** | **After every task** | Delegate to `rgaa-auditor` agent on all created/modified files |
+| **Security** | **After every task** | Delegate to `security-auditor` agent on all created/modified files |
 | **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
 
 ## Parallelized workflow for multi-page tasks
@@ -123,6 +123,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 | `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
 | `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
+| `/process-issue` | Process a GitHub issue (parent + sub-issues) with mandatory quality gates |
 
 ---
 

@@ -124,11 +124,11 @@ describe("buildDeclarationList", () => {
 		);
 
 		expect(result).toHaveLength(5);
-		expect(result[0]!.year).toBe(2026);
-		expect(result[1]!.year).toBe(2026);
-		expect(result[2]!.year).toBe(2025);
-		expect(result[3]!.year).toBe(2024);
-		expect(result[4]!.year).toBe(2023);
+		expect(result[0]?.year).toBe(2026);
+		expect(result[1]?.year).toBe(2026);
+		expect(result[2]?.year).toBe(2025);
+		expect(result[3]?.year).toBe(2024);
+		expect(result[4]?.year).toBe(2023);
 	});
 
 	it("merges current year DB record with expected types", () => {

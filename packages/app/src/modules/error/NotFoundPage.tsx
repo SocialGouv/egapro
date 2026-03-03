@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import styles from "./ErrorImage.module.scss";
@@ -34,11 +35,14 @@ export function NotFoundPage() {
 					<div
 						className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
 					>
-						<img
+						<Image
 							alt=""
 							aria-hidden="true"
 							className={styles.image}
+							height={300}
 							src="/assets/images/error/technical-error-illustration.svg"
+							unoptimized
+							width={300}
 						/>
 					</div>
 				</div>

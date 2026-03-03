@@ -51,14 +51,14 @@ describe("NotFoundPage", () => {
 	});
 
 	it("renders a decorative error illustration image", () => {
-		const { container } = render(<NotFoundPage />);
+		render(<NotFoundPage />);
 
-		const img = container.querySelector("img");
+		const img = screen.getByTestId("next-image");
 		expect(img).toBeInTheDocument();
 		expect(img).toHaveAttribute("aria-hidden", "true");
-		expect(img).toHaveAttribute("alt", "");
+		expect(img).toHaveAttribute("aria-label", "");
 		expect(img).toHaveAttribute(
-			"src",
+			"data-src",
 			"/assets/images/error/technical-error-illustration.svg",
 		);
 	});
