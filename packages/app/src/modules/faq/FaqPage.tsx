@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { FaqContent } from "./FaqContent";
@@ -14,7 +15,7 @@ export function FaqPage() {
 					<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
 						<button
 							aria-controls="breadcrumb-faq"
-							aria-expanded="false"
+							aria-expanded={false}
 							className="fr-breadcrumb__button"
 							type="button"
 						>
@@ -37,6 +38,7 @@ export function FaqPage() {
 					</nav>
 
 					<Link
+						aria-label="Retour à l'accueil"
 						className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
 						href="/"
 					>
@@ -58,7 +60,7 @@ export function FaqPage() {
 						</div>
 					</div>
 					<div aria-hidden="true" className={styles.illustrationWrapper}>
-						<img
+						<Image
 							alt=""
 							height={147}
 							src="/assets/images/home/help-illustration.svg"

@@ -17,11 +17,11 @@ export function FaqAccordionGroup({
 			{items.map((item, index) => {
 				const accordionId = `accordion-${sectionId}-${subsectionIndex}-${index}`;
 				return (
-					<section className="fr-accordion" key={accordionId}>
+					<div className="fr-accordion" key={accordionId}>
 						<h4 className="fr-accordion__title">
 							<button
 								aria-controls={accordionId}
-								aria-expanded="false"
+								aria-expanded={false}
 								className="fr-accordion__btn"
 								type="button"
 							>
@@ -31,7 +31,7 @@ export function FaqAccordionGroup({
 						<div className="fr-collapse" id={accordionId}>
 							<p>{item.answer}</p>
 						</div>
-					</section>
+					</div>
 				);
 			})}
 		</div>

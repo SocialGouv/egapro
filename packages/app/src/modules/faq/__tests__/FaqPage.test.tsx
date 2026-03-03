@@ -29,20 +29,21 @@ describe("FaqPage", () => {
 
 	it("renders the breadcrumb navigation", () => {
 		render(<FaqPage />);
+		const breadcrumb = screen.getByRole("navigation", {
+			name: /vous êtes ici/i,
+		});
+		expect(breadcrumb).toBeInTheDocument();
 		expect(
-			screen.getByRole("navigation", { name: /vous êtes ici/i }),
-		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /accueil/i })).toHaveAttribute(
-			"href",
-			"/",
-		);
+			within(breadcrumb).getByRole("link", { name: /accueil/i }),
+		).toHaveAttribute("href", "/");
 	});
 
 	it("renders the back link pointing to home", () => {
 		render(<FaqPage />);
-		const backLinks = screen.getAllByRole("link", { name: /retour/i });
-		expect(backLinks.length).toBeGreaterThanOrEqual(1);
-		expect(backLinks[0]).toHaveAttribute("href", "/");
+		const backLink = screen.getByRole("link", {
+			name: /retour à l'accueil/i,
+		});
+		expect(backLink).toHaveAttribute("href", "/");
 	});
 
 	it("renders the sommaire navigation with all sections", () => {
@@ -85,8 +86,13 @@ describe("FaqPage", () => {
 		const wrapper = screen
 			.getByRole("main")
 			.querySelector("[aria-hidden='true']");
-		const img = wrapper?.querySelector("img");
 		expect(wrapper).toHaveAttribute("aria-hidden", "true");
-		expect(img).toHaveAttribute("alt", "");
+		const img = within(wrapper as HTMLElement).getByRole("img", {
+			hidden: true,
+		});
+		expect(img).toHaveAttribute(
+			"data-src",
+			expect.stringContaining("help-illustration"),
+		);
 	});
 });
