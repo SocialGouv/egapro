@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { TOTAL_STEPS } from "~/modules/declaration-remuneration";
+import {
+	StepPageClient,
+	TOTAL_STEPS,
+} from "~/modules/declaration-remuneration";
 import { api, HydrateClient } from "~/trpc/server";
-import { StepPageClient } from "./StepPageClient";
 
 type StepPageProps = {
 	params: Promise<{ step: string }>;

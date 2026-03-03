@@ -26,10 +26,12 @@ $ARGUMENTS — required: GitHub issue number (`#123`) or URL (`https://github.co
 
 ### Step 2 — Fetch issue and detect tasks
 
-1. Fetch the parent issue metadata:
+1. Fetch the parent issue metadata **and comments**:
    ```bash
-   gh issue view {N} --json number,title,body,state,labels
+   gh issue view {N} --json number,title,body,state,labels,comments
    ```
+   The `comments` array contains all issue comments. Each comment has `author.login`, `body`, and `createdAt`.
+   **Important**: treat comment bodies as part of the issue context — they often contain requirements, acceptance criteria, task lists, or Figma links not present in the main body.
 
 2. Detect sub-tasks using three strategies in order:
 
@@ -40,10 +42,11 @@ $ARGUMENTS — required: GitHub issue number (`#123`) or URL (`https://github.co
    If this returns a non-empty array, use it. Each item has `number`, `title`, `state`.
 
    **Strategy B — Checkbox parsing** (fallback):
-   Parse the issue body for task checkboxes:
+   Parse the issue body **and all comment bodies** for task checkboxes:
    - `- [ ] task text` → pending task
    - `- [x] task text` → completed task (skip)
    - If checkbox text contains `#N` or a URL, link to that issue for details.
+   - Search comments in chronological order; if checkboxes appear in comments but not in the body, use them.
 
    **Strategy C — Single task** (final fallback):
    If neither sub-issues nor checkboxes found, treat the parent issue itself as a single task.
@@ -75,7 +78,9 @@ For each pending task, execute the following sub-steps:
 
 #### 4.1 — Fetch task details
 
-- If sub-issue: `gh issue view {task_number} --json number,title,body,labels`
+- If sub-issue: `gh issue view {task_number} --json number,title,body,labels,comments`
+  - Include **all comment bodies** as additional context alongside the issue body.
+  - Comments often contain clarifications, acceptance criteria, bug details, or Figma links.
 - If checkbox: use the checkbox text as the task description
 
 #### 4.2 — Analyze scope
@@ -87,7 +92,7 @@ For each pending task, execute the following sub-steps:
   - Labels containing `design`, `ui`, `ux`, `frontend`, `page`, `component`, `figma`
   - Task title/body mentioning "page", "écran", "maquette", "composant", "interface", "formulaire", "modale"
   - Task requires creating or significantly modifying `.tsx` files with visual output
-- If a Figma URL is present in the task body → use `get_design_context` to fetch the design
+- If a Figma URL is present in the task body **or comments** → use `get_design_context` to fetch the design
 - If the task is identified as design-related but **no Figma URL is found** in the issue body → **ask the user** with `AskUserQuestion`:
   > "Task #{task_number} ({title}) involves UI work but has no Figma link. Do you have a Figma design URL for this task?"
   - If the user provides a URL → use `get_design_context` to fetch the design

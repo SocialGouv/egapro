@@ -27,6 +27,23 @@ Do not extract a value into a `const` at module scope unless it is:
 
 A constant used exactly once right below its definition adds noise, not clarity.
 
+## No custom components in `src/app/`
+
+`src/app/` must **only** contain Next.js route files: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `global-error.tsx`, `template.tsx`, `default.tsx`.
+
+Any custom component (client or server) **must** live in `src/modules/{domain}/`. The `page.tsx` imports from the module barrel.
+
+```tsx
+// CORRECT — page.tsx is a thin wrapper
+import { ErrorTrigger } from "~/modules/testError";
+export default function Page() { return <ErrorTrigger />; }
+
+// FORBIDDEN — custom component next to page.tsx
+src/app/test-error/ErrorTrigger.tsx  // ← BLOCKED by hook
+```
+
+This rule is **enforced by the `block-bad-patterns` hook** — creating a non-route `.tsx` file in `src/app/` will be rejected.
+
 ## Imports
 
 - Use the `~/` path alias (mapped to `src/`). Never use relative paths that go up more than one level (`../../`).
