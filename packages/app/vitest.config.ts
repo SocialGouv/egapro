@@ -44,6 +44,7 @@ export default defineConfig({
 				"node_modules/**",
 				".next/**",
 				"src/test/**",
+				"src/e2e/**",
 				"**/*.config.*",
 				"**/*.d.ts",
 			],
