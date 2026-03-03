@@ -70,6 +70,8 @@ Before reporting ANY task as done, launch **3 parallel agents**:
 
 If any fails → fix → re-run. Only report completion when all 3 pass.
 
+**Bonus: Next.js runtime check** — if the dev server is running, also call `nextjs_call(get_errors)` via the `next-devtools` MCP to catch runtime/compilation errors not visible in `pnpm typecheck`.
+
 ### Gate 2 — RGAA (always)
 
 Verify **inline while writing** AND audit all created/modified files after implementation:

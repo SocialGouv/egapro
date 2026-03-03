@@ -129,11 +129,36 @@ One component = one responsibility. Extract sub-components at ~50 lines of JSX. 
 
 ---
 
-## DSFR — Usage rules
+## MCP Servers (`.mcp.json`)
+
+Three MCP servers are configured and **must be used** in the relevant contexts:
+
+| MCP Server | When to use | Key tools |
+|---|---|---|
+| **next-devtools** | Debugging, error diagnostics, route inspection, docs lookup | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
+| **dsfr** | Before writing any DSFR HTML | `get_component_doc`, `search_components`, `get_color_tokens` |
+| **figma** | When implementing from a Figma design | `get_design_context`, `get_screenshot` |
+
+### MCP Next.js DevTools (mandatory when dev server is running)
+
+The `next-devtools` MCP provides runtime diagnostics directly from the Next.js dev server. **Use it proactively:**
+
+- **Before implementing changes**: call `nextjs_index` to discover the running dev server, then `nextjs_call` to inspect routes, component tree, and current errors
+- **After making changes**: call `nextjs_call` with `get_errors` to check for compilation/runtime errors instead of relying only on terminal output
+- **For Next.js documentation**: call `nextjs_docs` with the correct path (read the `nextjs-docs://llms-index` resource first to find paths). **Never guess Next.js APIs from memory** — always verify via `nextjs_docs`
+- **For browser testing**: use `browser_eval` to start a browser, navigate to pages, take screenshots, and read console messages
+
+```
+# Typical workflow
+1. nextjs_index              → discover servers + available tools
+2. nextjs_call(get_errors)   → check current state
+3. [make code changes]
+4. nextjs_call(get_errors)   → verify no regressions
+```
 
 ### MCP DSFR (mandatory)
 
-The DSFR MCP server is configured in `.mcp.json`. Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
+Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
 
 ### Styling strategy (strict priority order)
 

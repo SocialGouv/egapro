@@ -85,6 +85,7 @@ Otherwise, code only the applicable parts in order:
    - Each component < 200 lines, `"use client"` only where needed
 
 6. Run `pnpm typecheck` to validate foundations compile.
+7. If dev server is running, use `nextjs_call(get_errors)` to verify no runtime errors.
 
 ### Phase 3 — Pages (parallel agents)
 
