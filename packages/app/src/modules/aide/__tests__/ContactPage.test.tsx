@@ -1,18 +1,25 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { ContactPage } from "../ContactPage";
 
 const writeText = vi.fn().mockResolvedValue(undefined);
 
 beforeAll(() => {
-	Object.defineProperty(Navigator.prototype, "clipboard", {
+	Object.defineProperty(navigator, "clipboard", {
 		value: { writeText },
+		writable: true,
 		configurable: true,
 	});
 });
 
 afterAll(() => {
-	Object.defineProperty(Navigator.prototype, "clipboard", {
+	Object.defineProperty(navigator, "clipboard", {
 		value: undefined,
 		configurable: true,
 	});
@@ -49,9 +56,11 @@ describe("ContactPage", () => {
 		expect(aideLink).toHaveAttribute("href", "/aide");
 	});
 
-	it("renders the back link to aide page", () => {
+	it("renders the back link to aide page with explicit aria-label", () => {
 		render(<ContactPage />);
-		const backLink = screen.getByRole("link", { name: /retour/i });
+		const backLink = screen.getByRole("link", {
+			name: /retour à aide et ressources/i,
+		});
 		expect(backLink).toHaveAttribute("href", "/aide");
 	});
 
@@ -79,11 +88,23 @@ describe("ContactPage", () => {
 	it("copies the email to clipboard on button click", async () => {
 		writeText.mockClear();
 		render(<ContactPage />);
-		screen.getByRole("button", { name: /copier/i }).click();
+		fireEvent.click(screen.getByRole("button", { name: /copier/i }));
 
 		await waitFor(() => {
 			expect(writeText).toHaveBeenCalledWith("index@travail.gouv.fr");
 		});
 		expect(screen.getByRole("button", { name: /copiée/i })).toBeInTheDocument();
+	});
+
+	it("shows error state when clipboard API fails", async () => {
+		writeText.mockRejectedValueOnce(new Error("Not allowed"));
+		render(<ContactPage />);
+		fireEvent.click(screen.getByRole("button", { name: /copier/i }));
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: /échoué/i }),
+			).toBeInTheDocument();
+		});
 	});
 });

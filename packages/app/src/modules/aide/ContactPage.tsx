@@ -20,6 +20,7 @@ export function ContactPage() {
 				/>
 
 				<a
+					aria-label="Retour à Aide et ressources"
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
 					href="/aide"
 				>
