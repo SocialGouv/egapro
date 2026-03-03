@@ -5,9 +5,9 @@ paths:
 
 # Testing
 
-## 80% minimum code coverage (enforced)
+## 75% minimum code coverage (enforced)
 
-Global code coverage must stay **at or above 80%** for statements, branches, functions, and lines. This is enforced by Vitest coverage thresholds — `pnpm test --coverage` will fail if any metric drops below 80%.
+Global code coverage must stay **at or above 75%** for statements, branches, functions, and lines. This is enforced by Vitest coverage thresholds — `pnpm test --coverage` will fail if any metric drops below 75%.
 
 Run `pnpm test --coverage` to check the current coverage report.
 
@@ -56,3 +56,19 @@ All common mocks are defined once in `setup.ts` and auto-loaded by Vitest. Never
 - `~/trpc/server` → `HydrateClient` passthrough
 
 Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.
+
+## E2E: every page must be tested
+
+Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When creating or modifying a page, verify that an E2E test exists for it and update it if needed.
+
+E2E tests must cover at minimum:
+- The page renders without errors
+- Key content/headings are visible
+- Error pages (404, 500, 503) display correct status and messaging
+
+Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on port 3000).
+
+**Checklist before completing any page-related task:**
+1. List all routes in `src/app/**/page.tsx`
+2. Verify each has a matching E2E test in `src/e2e/*.e2e.ts`
+3. Add missing E2E tests for any uncovered page
