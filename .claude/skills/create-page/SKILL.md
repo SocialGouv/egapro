@@ -9,7 +9,16 @@ Create one or more pages from Figma designs or specifications using maximum para
 
 ## Arguments
 
-$ARGUMENTS — Figma URLs, page descriptions, or feature specifications
+$ARGUMENTS — **required**: one or more Figma URLs (e.g. `https://figma.com/design/...?node-id=...`)
+
+## Prerequisites
+
+**A Figma URL is mandatory.** Before starting any work:
+
+1. Check that `$ARGUMENTS` contains at least one valid Figma URL (`figma.com/design/` or `figma.com/make/`)
+2. If no Figma URL is provided, **stop immediately** and ask the user:
+   > "This skill requires a Figma design URL. Please provide the Figma link(s) for the page(s) to create."
+3. Do NOT proceed to Phase 1 until a valid Figma URL is available.
 
 ## Instructions
 
@@ -17,7 +26,7 @@ $ARGUMENTS — Figma URLs, page descriptions, or feature specifications
 
 For each page/screen provided, launch a **parallel Explore agent**:
 
-1. **Figma analysis**: use `get_design_context` MCP tool to get code + screenshot
+1. **Figma analysis**: use `get_design_context` MCP tool with the provided Figma URL to get code + screenshot
 2. **DSFR components**: use `get_component_doc` / `search_components` MCP tools to verify correct HTML structure for each DSFR component identified
 3. **Data requirements**: identify tRPC procedures, DB schema changes, types needed
 4. **Existing code**: search the codebase for similar patterns to reuse

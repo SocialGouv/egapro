@@ -79,7 +79,15 @@ For each pending task, execute the following sub-steps:
 - Read the task body/description carefully
 - Identify affected files, modules, and patterns
 - Load `packages/app/CLAUDE.md` if working in `packages/app/`
-- If the task references a Figma URL, use `get_design_context` to fetch the design
+- **Figma design detection**: check if the task involves UI creation or modification (new page, new component, visual change, layout change, design update). Indicators:
+  - Labels containing `design`, `ui`, `ux`, `frontend`, `page`, `component`, `figma`
+  - Task title/body mentioning "page", "écran", "maquette", "composant", "interface", "formulaire", "modale"
+  - Task requires creating or significantly modifying `.tsx` files with visual output
+- If a Figma URL is present in the task body → use `get_design_context` to fetch the design
+- If the task is identified as design-related but **no Figma URL is found** in the issue body → **ask the user** with `AskUserQuestion`:
+  > "Task #{task_number} ({title}) involves UI work but has no Figma link. Do you have a Figma design URL for this task?"
+  - If the user provides a URL → use `get_design_context` to fetch the design
+  - If the user says no / skip → proceed without Figma (implement based on issue description and existing patterns)
 
 #### 4.3 — Implement
 
