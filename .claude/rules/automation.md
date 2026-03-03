@@ -20,16 +20,6 @@ Blocks edits containing forbidden patterns:
 |---|---|---|
 | `biome-ignore`, `eslint-disable`, `@ts-ignore`, `@ts-expect-error` | `.ts/.tsx/.js/.jsx` | Fix the underlying issue |
 | `style={` | `.tsx/.jsx` | Use DSFR classes or a scoped SCSS module |
-<<<<<<< HEAD
-| `<svg>` | `.tsx/.jsx` | Use `DsfrPictogram` for DSFR artwork, `public/assets/*.svg` + `<img>`, or DSFR icon classes (`fr-icon-*`) |
-| `process.env` | `.ts/.tsx` (excl. `env.js`, `instrumentation.ts`, `next.config`, `trpc/react.tsx`) | `import { env } from "~/env.js"` |
-| `../../` (or deeper) | `.ts/.tsx` | Use `~/` path alias |
-| `@media` (width/screen) | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
-| `dangerouslySetInnerHTML` | `.tsx/.jsx` | XSS risk — use safe rendering or DOMPurify |
-| `: any`, `as any` | `.ts/.tsx` (excl. test files) | Use `unknown` with type narrowing |
-||||||| 8cdb5557
-| `<svg>` | `.tsx/.jsx` | Use `public/assets/*.svg` + `<img>` or DSFR icon classes (`fr-icon-*`) |
-=======
 | `<svg>` | `.tsx/.jsx` | Use `DsfrPictogram` for DSFR artwork, `public/assets/*.svg` + `<Image>`, or DSFR icon classes (`fr-icon-*`) |
 | `<img>` | `.tsx/.jsx` (excl. test files) | Use `import Image from "next/image"` |
 | `process.env` | `.ts/.tsx` (excl. `env.js`, `instrumentation.ts`, `next.config`, `trpc/react.tsx`) | `import { env } from "~/env.js"` |
@@ -37,7 +27,6 @@ Blocks edits containing forbidden patterns:
 | `@media` (width/screen) | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
 | `dangerouslySetInnerHTML` | `.tsx/.jsx` | XSS risk — use safe rendering or DOMPurify |
 | `: any`, `as any` | `.ts/.tsx` (excl. test files) | Use `unknown` with type narrowing |
->>>>>>> alpha
 
 To add a new rule: append a `check_pattern` call in `block-bad-patterns.sh`.
 If a hook blocks your edit, do NOT attempt to bypass it. Rethink the approach.
@@ -81,23 +70,11 @@ Before reporting ANY task as done, launch **3 parallel agents**:
 
 If any fails → fix → re-run. Only report completion when all 3 pass.
 
-<<<<<<< HEAD
-### Gate 2 — RGAA (always)
-||||||| 8cdb5557
-### Gate 2 — RGAA (only if `.tsx` produced in `modules/` or `app/`)
-=======
 **Bonus: Next.js runtime check** — if the dev server is running, also call `nextjs_call(get_errors)` via the `next-devtools` MCP to catch runtime/compilation errors not visible in `pnpm typecheck`.
->>>>>>> alpha
 
-<<<<<<< HEAD
-Verify **inline while writing** AND audit all created/modified files after implementation:
-||||||| 8cdb5557
-When you create or modify UI components, verify **inline while writing**:
-=======
 ### Gate 2 — RGAA (always)
 
 Verify **inline while writing** AND audit all created/modified files after implementation:
->>>>>>> alpha
 - `<input>` → associated `<label>` via `htmlFor`/`id`
 - Images → `import Image from "next/image"` (raw `<img>` blocked by hook), descriptive `alt` (or `alt=""` if decorative)
 - Decorative icons → `aria-hidden="true"`

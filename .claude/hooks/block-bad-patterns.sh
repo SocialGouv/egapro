@@ -50,39 +50,6 @@ check_pattern '\.(tsx|jsx)$' \
 # Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
-<<<<<<< HEAD
-  'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <img>, or DSFR icon classes (fr-icon-*).' \
-  'shared/DsfrPictogram\.tsx'
-
-# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config)
-check_pattern '\.(ts|tsx)$' \
-  'process\.env' \
-  'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation\.ts|next\.config|trpc/react\.tsx)'
-
-# Deep relative imports — use ~/ path alias
-check_pattern '\.(ts|tsx)$' \
-  '(\.\./){2,}' \
-  'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.'
-
-# Raw @media queries in SCSS — use DSFR mixins (allow @media print and comments)
-check_pattern '\.scss$' \
-  '@media[[:space:]]+.*((min|max)-width|screen)' \
-  'Raw @media queries are forbidden. Use DSFR mixins: @include respond-from(md) or @include respond-to(sm).'
-
-# dangerouslySetInnerHTML — XSS vector, forbidden in JSX
-check_pattern '\.(tsx|jsx)$' \
-  'dangerouslySetInnerHTML' \
-  'dangerouslySetInnerHTML is forbidden (XSS risk). Use safe rendering or DOMPurify if absolutely necessary.'
-
-# Explicit `any` type — kills TypeScript safety (allow test files)
-check_pattern '\.(ts|tsx)$' \
-  '(: any[^a-zA-Z]|as any[^a-zA-Z])' \
-  'Explicit `any` type is forbidden. Use `unknown` with type narrowing instead.' \
-  '(__tests__|\.test\.|\.spec\.)'
-||||||| 8cdb5557
-  'Inline <svg> is forbidden. Use public/assets/*.svg + <img> or DSFR icon classes (fr-icon-*).'
-=======
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
   'shared/DsfrPictogram\.tsx'
 
@@ -118,6 +85,5 @@ check_pattern '\.(tsx|jsx)$' \
   '<img[[:space:]>]' \
   'Raw <img> is forbidden. Use: import Image from "next/image".' \
   '(__tests__|\.test\.|\.spec\.|setup\.ts)'
->>>>>>> alpha
 
 exit 0
