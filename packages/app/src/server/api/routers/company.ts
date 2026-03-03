@@ -128,4 +128,14 @@ export const companyRouter = createTRPCRouter({
 
 			return { company, declarations: declarationItems };
 		}),
+
+	updateHasCse: protectedProcedure
+		.input(z.object({ siren: z.string().length(9), hasCse: z.boolean() }))
+		.mutation(async ({ ctx, input }) => {
+			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
+			await ctx.db
+				.update(companies)
+				.set({ hasCse: input.hasCse })
+				.where(eq(companies.siren, input.siren));
+		}),
 });

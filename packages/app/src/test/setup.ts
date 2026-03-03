@@ -17,7 +17,12 @@ vi.mock("next/link", () => ({
 // Global mock for next/navigation — avoids repeating in test files.
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
-	useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+	useRouter: () => ({
+		push: vi.fn(),
+		replace: vi.fn(),
+		back: vi.fn(),
+		refresh: vi.fn(),
+	}),
 }));
 
 // Global mock for next/image — renders a plain <div> with role="img".

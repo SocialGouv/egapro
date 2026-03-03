@@ -1,4 +1,5 @@
 import { ArchivesSection } from "./ArchivesSection";
+import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationsSection } from "./DeclarationsSection";
 import { MissingInfoModal } from "./MissingInfoModal";
@@ -24,6 +25,7 @@ export function CompanyDeclarationsPage({
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />
+			<CompanyEditModal company={company} />
 			{!userPhone && <MissingInfoModal siren={company.siren} />}
 		</main>
 	);

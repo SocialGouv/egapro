@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("~/trpc/react", () => ({
 	api: {
+		company: {
+			updateHasCse: {
+				useMutation: vi.fn().mockReturnValue({
+					mutate: vi.fn(),
+					isPending: false,
+				}),
+			},
+		},
 		profile: {
 			updatePhone: {
 				useMutation: vi.fn().mockReturnValue({
