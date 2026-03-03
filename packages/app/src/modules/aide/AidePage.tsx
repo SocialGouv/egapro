@@ -8,6 +8,7 @@ export function AidePage() {
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
 				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
+					{/* DSFR JS will manage aria-expanded after hydration */}
 					<button
 						aria-controls="breadcrumb-aide"
 						aria-expanded="false"
@@ -35,13 +36,6 @@ export function AidePage() {
 						</ol>
 					</div>
 				</nav>
-
-				<a
-					className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
-					href="/"
-				>
-					Retour
-				</a>
 
 				<h1 className="fr-h1 fr-mt-4w">Aide et ressources</h1>
 

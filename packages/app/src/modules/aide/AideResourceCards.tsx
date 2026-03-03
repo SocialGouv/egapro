@@ -6,7 +6,8 @@ type ResourceCardProps = {
 	description: string;
 	href: string;
 	imageSrc: string;
-	imageAlt: string;
+	/** Alt text for the card image. Defaults to "" (decorative) since the card title provides context. */
+	imageAlt?: string;
 };
 
 function ResourceCard({
@@ -15,7 +16,7 @@ function ResourceCard({
 	description,
 	href,
 	imageSrc,
-	imageAlt,
+	imageAlt = "",
 }: ResourceCardProps) {
 	return (
 		<div className="fr-card fr-card--horizontal fr-enlarge-link fr-card--lg">
@@ -58,7 +59,6 @@ export function AideResourceCards() {
 					badge="Nouveau"
 					description="Retrouvez toutes les informations sur les changements apportés par la refonte du site et leurs impacts sur votre déclaration."
 					href="/aide/nouveau-site"
-					imageAlt=""
 					imageSrc="/assets/images/aide/nouveau-site.png"
 					title="Nouveau site : ce qui change pour votre déclaration"
 				/>
@@ -67,7 +67,6 @@ export function AideResourceCards() {
 				<ResourceCard
 					description="Tout savoir sur les indicateurs préremplis via votre DSN, les écarts de rémunération par catégorie et les modalités de calcul."
 					href="/aide/indicateurs-remuneration"
-					imageAlt=""
 					imageSrc="/assets/images/aide/indicateurs-remuneration.png"
 					title="Indicateurs de rémunération"
 				/>
@@ -76,7 +75,6 @@ export function AideResourceCards() {
 				<ResourceCard
 					description="Comprendre vos obligations pour les entreprises dont l'effectif dépasse 1 000 salariés et les modalités de déclaration des indicateurs de représentation."
 					href="/aide/indicateurs-representation"
-					imageAlt=""
 					imageSrc="/assets/images/aide/indicateurs-representation.png"
 					title="Indicateurs de représentation"
 				/>

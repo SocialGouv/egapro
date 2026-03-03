@@ -1,4 +1,4 @@
 // Override DSFR's object-fit: cover (specificity 0,2,1) with (0,3,1)
 :global(.fr-card--horizontal .fr-card__img) img.containImg {
-	object-fit: contain !important;
+	object-fit: contain;
 }

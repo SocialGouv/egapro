@@ -1,12 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { AidePage } from "../AidePage";
-
-vi.mock("~/modules/layout", () => ({
-	NewTabNotice: () => (
-		<span className="fr-sr-only">Ouvre une nouvelle fenêtre</span>
-	),
-}));
 
 describe("AidePage", () => {
 	it("has #content id on main for skip links", () => {
@@ -27,14 +21,6 @@ describe("AidePage", () => {
 			screen.getByRole("navigation", { name: /vous êtes ici/i }),
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /accueil/i })).toHaveAttribute(
-			"href",
-			"/",
-		);
-	});
-
-	it("renders the back link", () => {
-		render(<AidePage />);
-		expect(screen.getByRole("link", { name: /retour/i })).toHaveAttribute(
 			"href",
 			"/",
 		);
@@ -86,11 +72,24 @@ describe("AidePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders external links with target blank", () => {
+	it("renders external links to Legifrance with target blank", () => {
 		render(<AidePage />);
-		const externalLinks = screen
-			.getAllByRole("link")
-			.filter((link) => link.getAttribute("target") === "_blank");
-		expect(externalLinks.length).toBeGreaterThanOrEqual(2);
+		const articleLink = screen.getByRole("link", {
+			name: /article l\. 1142-8/i,
+		});
+		expect(articleLink).toHaveAttribute(
+			"href",
+			"https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037396684",
+		);
+		expect(articleLink).toHaveAttribute("target", "_blank");
+
+		const decretLink = screen.getByRole("link", {
+			name: /décret n° 2019-15/i,
+		});
+		expect(decretLink).toHaveAttribute(
+			"href",
+			"https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038234561",
+		);
+		expect(decretLink).toHaveAttribute("target", "_blank");
 	});
 });

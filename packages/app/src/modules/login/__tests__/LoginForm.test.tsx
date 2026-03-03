@@ -1,12 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { LoginForm } from "../LoginForm";
-
-vi.mock("~/modules/layout", () => ({
-	NewTabNotice: () => (
-		<span className="fr-sr-only"> (ouvre une nouvelle fenêtre)</span>
-	),
-}));
 
 describe("LoginForm", () => {
 	it("displays the login heading", () => {
