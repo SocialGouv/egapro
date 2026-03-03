@@ -1,3 +1,5 @@
+import styles from "./AideResourceCards.module.scss";
+
 type ResourceCardProps = {
 	badge?: string;
 	title: string;
@@ -36,7 +38,11 @@ function ResourceCard({
 			</div>
 			<div className="fr-card__header">
 				<div className="fr-card__img">
-					<img alt={imageAlt} className="fr-responsive-img" src={imageSrc} />
+					<img
+						alt={imageAlt}
+						className={`fr-responsive-img ${styles.containImg}`}
+						src={imageSrc}
+					/>
 				</div>
 			</div>
 		</div>
