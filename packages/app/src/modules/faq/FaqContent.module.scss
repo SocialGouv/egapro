@@ -1,0 +1,9 @@
+.contentCard {
+	background: var(--background-default-grey);
+	border: 1px solid var(--border-default-grey);
+	padding: 1.5rem;
+
+	@include respond-from(md) {
+		padding: 2rem;
+	}
+}

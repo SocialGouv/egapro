@@ -32,6 +32,7 @@
 		"db:push": "pnpm --filter app run db:push",
 		"db:studio": "pnpm --filter app run db:studio",
 		"test:e2e": "PLAYWRIGHT_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
+		"test:rgaa": "PLAYWRIGHT_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:rgaa",
 		"playwright:install": "pnpm --filter app exec playwright install --with-deps chromium",
 		"test:lighthouse": "pnpm --filter app run test:lighthouse",
 		"release": "semantic-release"

@@ -24,6 +24,7 @@
 		"test:coverage": "vitest run --coverage",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
+		"test:rgaa": "playwright test --config playwright.rgaa.config.ts",
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit"
 	},
@@ -48,6 +49,7 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.11.1",
 		"@biomejs/biome": "^2.4.2",
 		"@lhci/cli": "^0.15.1",
 		"@playwright/test": "^1.58.2",
