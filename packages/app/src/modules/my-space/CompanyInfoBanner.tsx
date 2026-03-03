@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Breadcrumb } from "~/modules/layout";
 
 import styles from "./CompanyInfoBanner.module.scss";
 import { formatSiren } from "./formatSiren";
@@ -9,41 +9,18 @@ type Props = {
 	company: CompanyDetail;
 };
 
-const BREADCRUMB_ID = "breadcrumb-company";
-
 export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = new Date().getFullYear();
 
 	return (
 		<div className={`fr-py-4w ${styles.banner}`}>
 			<div className="fr-container">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls={BREADCRUMB_ID}
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id={BREADCRUMB_ID}>
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<Link
-									className="fr-breadcrumb__link"
-									href="/mon-espace/mes-entreprises"
-								>
-									Mon espace
-								</Link>
-							</li>
-							<li>
-								<span aria-current="page" className="fr-breadcrumb__link">
-									{company.name}
-								</span>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<Breadcrumb
+					items={[
+						{ label: "Mon espace", href: "/mon-espace/mes-entreprises" },
+						{ label: company.name },
+					]}
+				/>
 
 				<div className="fr-mt-3w">
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">

@@ -1,4 +1,5 @@
-import { AideBreadcrumb } from "./AideBreadcrumb";
+import { Breadcrumb } from "~/modules/layout";
+
 import { AideIllustration } from "./AideIllustration";
 import styles from "./AideLayout.module.scss";
 import { CopyEmailButton } from "./CopyEmailButton";
@@ -10,12 +11,11 @@ export function ContactPage() {
 	return (
 		<main className={styles.pageBackground} id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<AideBreadcrumb
-					collapseId="breadcrumb-contact"
-					current={{ label: "Nous contacter", href: "/aide/nous-contacter" }}
+				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
 						{ label: "Aide et ressources", href: "/aide" },
+						{ label: "Nous contacter" },
 					]}
 				/>
 

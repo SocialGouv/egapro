@@ -1,18 +1,24 @@
+"use client";
+
+import { useId } from "react";
+
 type BreadcrumbItem = {
 	label: string;
-	href: string;
+	href?: string;
 };
 
 type Props = {
-	/** Unique id for the DSFR collapsible breadcrumb container. */
-	collapseId: string;
 	items: BreadcrumbItem[];
-	/** Label + href for the current page (rendered with aria-current="page"). */
-	current: BreadcrumbItem;
 };
 
-/** Shared DSFR breadcrumb used across aide pages. */
-export function AideBreadcrumb({ collapseId, items, current }: Props) {
+/** Shared DSFR breadcrumb component. Last item (without href) is the current page. */
+export function Breadcrumb({ items }: Props) {
+	const collapseId = `breadcrumb-${useId()}`;
+	const parentItems = items.slice(0, -1);
+	const currentItem = items.at(-1);
+
+	if (!currentItem) return null;
+
 	return (
 		<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
 			{/* DSFR JS will manage aria-expanded after hydration */}
@@ -23,11 +29,11 @@ export function AideBreadcrumb({ collapseId, items, current }: Props) {
 				suppressHydrationWarning
 				type="button"
 			>
-				Voir le fil d'Ariane
+				Voir le fil d&#39;Ariane
 			</button>
 			<div className="fr-collapse" id={collapseId}>
 				<ol className="fr-breadcrumb__list">
-					{items.map((item) => (
+					{parentItems.map((item) => (
 						<li key={item.href}>
 							<a className="fr-breadcrumb__link" href={item.href}>
 								{item.label}
@@ -35,13 +41,9 @@ export function AideBreadcrumb({ collapseId, items, current }: Props) {
 						</li>
 					))}
 					<li>
-						<a
-							aria-current="page"
-							className="fr-breadcrumb__link"
-							href={current.href}
-						>
-							{current.label}
-						</a>
+						<span aria-current="page" className="fr-breadcrumb__link">
+							{currentItem.label}
+						</span>
 					</li>
 				</ol>
 			</div>
