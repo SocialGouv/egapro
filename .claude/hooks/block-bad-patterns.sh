@@ -86,4 +86,14 @@ check_pattern '\.(tsx|jsx)$' \
   'Raw <img> is forbidden. Use: import Image from "next/image".' \
   '(__tests__|\.test\.|\.spec\.|setup\.ts)'
 
+# Custom components in src/app/ — only Next.js route files allowed (page, layout, error, etc.)
+# Detect non-standard .tsx files in src/app/ by checking the filename is not a known route file
+if [[ "$FILE_PATH" =~ src/app/.*\.tsx$ ]] && [[ "$TOOL_NAME" = "Write" ]]; then
+  BASENAME=$(basename "$FILE_PATH" .tsx)
+  case "$BASENAME" in
+    page|layout|loading|error|not-found|global-error|template|default|opengraph-image|icon|apple-icon) ;;
+    *) echo "Blocked: Custom components are forbidden in src/app/. Move to src/modules/ and import from the barrel." >&2; exit 2 ;;
+  esac
+fi
+
 exit 0
