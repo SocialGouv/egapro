@@ -1,5 +1,6 @@
 import { Breadcrumb } from "~/modules/layout";
 
+import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
@@ -26,6 +27,16 @@ export function CompanyInfoBanner({ company }: Props) {
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 						<div className="fr-col">
 							<h2 className="fr-mb-0">{company.name}</h2>
+						</div>
+						<div className="fr-col-auto">
+							<button
+								aria-controls={COMPANY_EDIT_MODAL_ID}
+								className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line fr-btn--icon-left"
+								data-fr-opened="false"
+								type="button"
+							>
+								Modifier
+							</button>
 						</div>
 					</div>
 
