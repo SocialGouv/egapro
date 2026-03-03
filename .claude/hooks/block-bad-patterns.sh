@@ -50,7 +50,7 @@ check_pattern '\.(tsx|jsx)$' \
 # Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
-  'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <img>, or DSFR icon classes (fr-icon-*).' \
+  'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
   'shared/DsfrPictogram\.tsx'
 
 # Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config)
@@ -79,5 +79,11 @@ check_pattern '\.(ts|tsx)$' \
   '(: any[^a-zA-Z]|as any[^a-zA-Z])' \
   'Explicit `any` type is forbidden. Use `unknown` with type narrowing instead.' \
   '(__tests__|\.test\.|\.spec\.)'
+
+# Raw <img> tags — use next/image Image component instead (allow test files)
+check_pattern '\.(tsx|jsx)$' \
+  '<img[[:space:]>]' \
+  'Raw <img> is forbidden. Use: import Image from "next/image".' \
+  '(__tests__|\.test\.|\.spec\.|setup\.ts)'
 
 exit 0

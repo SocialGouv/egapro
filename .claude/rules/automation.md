@@ -20,7 +20,8 @@ Blocks edits containing forbidden patterns:
 |---|---|---|
 | `biome-ignore`, `eslint-disable`, `@ts-ignore`, `@ts-expect-error` | `.ts/.tsx/.js/.jsx` | Fix the underlying issue |
 | `style={` | `.tsx/.jsx` | Use DSFR classes or a scoped SCSS module |
-| `<svg>` | `.tsx/.jsx` | Use `DsfrPictogram` for DSFR artwork, `public/assets/*.svg` + `<img>`, or DSFR icon classes (`fr-icon-*`) |
+| `<svg>` | `.tsx/.jsx` | Use `DsfrPictogram` for DSFR artwork, `public/assets/*.svg` + `<Image>`, or DSFR icon classes (`fr-icon-*`) |
+| `<img>` | `.tsx/.jsx` (excl. test files) | Use `import Image from "next/image"` |
 | `process.env` | `.ts/.tsx` (excl. `env.js`, `instrumentation.ts`, `next.config`, `trpc/react.tsx`) | `import { env } from "~/env.js"` |
 | `../../` (or deeper) | `.ts/.tsx` | Use `~/` path alias |
 | `@media` (width/screen) | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
@@ -73,7 +74,7 @@ If any fails → fix → re-run. Only report completion when all 3 pass.
 
 Verify **inline while writing** AND audit all created/modified files after implementation:
 - `<input>` → associated `<label>` via `htmlFor`/`id`
-- `<img>` → descriptive `alt` (or `alt=""` if decorative)
+- Images → `import Image from "next/image"` (raw `<img>` blocked by hook), descriptive `alt` (or `alt=""` if decorative)
 - Decorative icons → `aria-hidden="true"`
 - `target="_blank"` → `<NewTabNotice />` present
 - Modals → `role="dialog"` + `aria-modal="true"` + `aria-labelledby`

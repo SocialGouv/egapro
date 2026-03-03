@@ -125,7 +125,7 @@ Default: **Server Component**. Add `"use client"` only for hooks, browser events
 
 One component = one responsibility. Extract sub-components at ~50 lines of JSX. Name them after what they display, not their position in the tree.
 
-> Detailed rules (no logic in JSX, no inline SVG, `.map()` limit) → `.claude/rules/react-components.md`
+> Detailed rules (no logic in JSX, no inline SVG, `next/image` mandatory, `.map()` limit) → `.claude/rules/react-components.md`
 
 ---
 
@@ -160,6 +160,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 - **JS**: loaded via `<Script type="module" strategy="beforeInteractive">`. Handles modals, dropdowns, theme toggle, keyboard navigation. Never duplicate this logic in React — use `data-fr-*` attributes.
 - **Dark mode**: `data-fr-scheme="system"` on `<html>`, cookie `fr-theme` read by inline script to avoid flash, `ThemeModal` for user toggle.
 - **Icons**: `fr-icon-{name}-{fill|line}` classes. Always `aria-hidden="true"` on decorative icons.
+- **Figma assets**: always export as **SVG** (never PNG/JPG for illustrations/icons). Store in `public/assets/{module}/`. Only accept raster (WebP) for real photographs.
 
 ---
 
@@ -173,7 +174,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 - **External links**: any `target="_blank"` must contain a `<NewTabNotice />` (text `fr-sr-only`)
 - **aria-current**: use `NavLink` for navigation links — `aria-current="page"` is calculated dynamically via `usePathname()`
 - **Icons**: `aria-hidden="true"` on purely decorative elements
-- **Images**: descriptive `alt` required, `alt=""` for decorative images
+- **Images**: always use `import Image from "next/image"` (raw `<img>` blocked by hook). Descriptive `alt` required, `alt=""` for decorative images
 - **Forms**: each `<input>` must have an associated `<label>` via `htmlFor`/`id`
 
 Never add redundant `role` on semantic elements (`role="navigation"` on `<nav>` is forbidden). Use `role="dialog"` + `aria-modal="true"` only on `<div>` elements.
@@ -229,25 +230,16 @@ Tests live in `__tests__/` subfolder next to the module they test. Never in `src
 
 ### Standard mocks
 
-```ts
-// next/link -> simple HTML anchor
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
-  ),
-}));
+All common mocks are defined once in `src/test/setup.ts` and auto-loaded by Vitest. Never duplicate them in test files:
 
-// next/navigation -> mock usePathname
-vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
+- `next/link` → simple `<a>` tag
+- `next/navigation` → `usePathname` + `useRouter` stubs
+- `next/image` → `<div role="img">` with `aria-label`, `data-src`, `data-testid="next-image"`
+- `next-auth/react` → `signIn` stub
+- `server-only` → empty module
+- `~/trpc/server` → `HydrateClient` passthrough
 
-// server-only -> empty (avoids error in jsdom)
-vi.mock("server-only", () => ({}));
-
-// tRPC server -> HydrateClient passthrough
-vi.mock("~/trpc/server", () => ({
-  HydrateClient: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-```
+Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.
 
 ---
 

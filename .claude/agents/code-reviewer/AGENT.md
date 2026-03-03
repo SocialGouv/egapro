@@ -21,7 +21,8 @@ You receive a list of changed files or a git diff. For each file, check against 
 5. **Useless constants** — Module-scope `const` used only once right below its definition. Remove indirection.
 
 ### Styling & DSFR
-6. **Inline SVG** — Raw `<svg>` elements in components. Must use `public/assets/` + `<img>` or DSFR icon classes.
+6. **Inline SVG** — Raw `<svg>` elements in components. Must use `public/assets/` + `<Image>` (from `next/image`) or DSFR icon classes.
+6b. **Raw `<img>`** — Must use `import Image from "next/image"` instead of raw `<img>` tags.
 7. **Inline styles** — `style={{...}}` in `.tsx` files. Must use DSFR classes or scoped SCSS modules.
 8. **common.module.scss** — Imports from shared SCSS. Each component must have its own scoped SCSS module.
 9. **Raw colors** — Hardcoded `#hex` or `rgba()`. Must use DSFR CSS custom properties.
