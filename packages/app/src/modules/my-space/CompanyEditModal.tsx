@@ -1,13 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
 
-const MODAL_ID = "company-edit-modal";
+export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
+const CURRENT_YEAR = new Date().getFullYear();
 
 type Props = {
 	company: {
@@ -22,18 +24,12 @@ type Props = {
 
 export function CompanyEditModal({ company: initialCompany }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const router = useRouter();
 	const [hasCse, setHasCse] = useState<boolean | null>(initialCompany.hasCse);
-
-	const updateHasCseMutation = api.company.updateHasCse.useMutation({
-		onSuccess: () => {
-			closeModal();
-			window.location.reload();
-		},
-	});
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog && typeof window !== "undefined" && "dsfr" in window) {
+		if (dialog && "dsfr" in window) {
 			(
 				window as unknown as {
 					dsfr: (el: HTMLElement) => { modal: { conceal: () => void } };
@@ -44,13 +40,18 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 		}
 	}, []);
 
+	const updateHasCseMutation = api.company.updateHasCse.useMutation({
+		onSuccess: () => {
+			closeModal();
+			router.refresh();
+		},
+	});
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (hasCse === null) return;
 		updateHasCseMutation.mutate({ siren: initialCompany.siren, hasCse });
 	};
-
-	const currentYear = new Date().getFullYear();
 
 	return (
 		<dialog
@@ -83,10 +84,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</p>
 
 								<form id="company-edit-form" onSubmit={handleSubmit}>
-									<CompanyReadonlySection
-										company={initialCompany}
-										currentYear={currentYear}
-									/>
+									<CompanyReadonlySection company={initialCompany} />
 									<CseRadioGroup hasCse={hasCse} setHasCse={setHasCse} />
 								</form>
 							</div>
@@ -131,13 +129,9 @@ type CompanyReadonlySectionProps = {
 		nafCode: string | null;
 		workforce: number | null;
 	};
-	currentYear: number;
 };
 
-function CompanyReadonlySection({
-	company,
-	currentYear,
-}: CompanyReadonlySectionProps) {
+function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 	return (
 		<>
 			<div className={`fr-mb-3w ${styles.section}`}>
@@ -153,7 +147,7 @@ function CompanyReadonlySection({
 
 			<div className={`fr-mb-3w ${styles.section}`}>
 				<InfoRow
-					label={`Effectif annuel moyen en ${currentYear} :`}
+					label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
 					value={company.workforce?.toLocaleString("fr-FR")}
 				/>
 				<p className={`fr-text--xs fr-mb-0 ${styles.sourceText}`}>
@@ -185,11 +179,8 @@ type CseRadioGroupProps = {
 
 function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
-		<fieldset aria-labelledby="cse-legend cse-messages" className="fr-fieldset">
-			<legend
-				className="fr-fieldset__legend--regular fr-fieldset__legend"
-				id="cse-legend"
-			>
+		<fieldset className="fr-fieldset">
+			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
 				Existence d'un CSE (obligatoire)
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
@@ -199,6 +190,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 						id="cse-radio-yes"
 						name="cse"
 						onChange={() => setHasCse(true)}
+						required
 						type="radio"
 						value="true"
 					/>
@@ -222,11 +214,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 					</label>
 				</div>
 			</div>
-			<div
-				aria-live="polite"
-				className="fr-messages-group"
-				id="cse-messages"
-			></div>
+			<div aria-live="polite" className="fr-messages-group"></div>
 			<p className={`fr-text--xs fr-mb-0 ${styles.sourceText}`}>
 				Source : information relative aux élections professionnelles transmise à
 				l'administration.

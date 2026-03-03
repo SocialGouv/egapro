@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
@@ -52,7 +53,7 @@ export function CompanyInfoBanner({ company }: Props) {
 						</div>
 						<div className="fr-col-auto">
 							<button
-								aria-controls="company-edit-modal"
+								aria-controls={COMPANY_EDIT_MODAL_ID}
 								className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line fr-btn--icon-left"
 								data-fr-opened="false"
 								type="button"

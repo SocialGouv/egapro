@@ -101,7 +101,7 @@ describe("CompanyEditModal", () => {
 
 		const form = document.getElementById("company-edit-form");
 		expect(form).toBeTruthy();
-		fireEvent.submit(form!);
+		if (form) fireEvent.submit(form);
 
 		expect(mockMutate).toHaveBeenCalledWith({
 			siren: "532847196",
