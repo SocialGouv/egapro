@@ -1,57 +1,59 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { ErrorPage } from "../ErrorPage";
+import { MaintenancePage } from "../MaintenancePage";
 
-describe("ErrorPage", () => {
+describe("MaintenancePage", () => {
 	it("renders the main landmark with skip-link target", () => {
-		render(<ErrorPage />);
+		render(<MaintenancePage />);
 
 		const main = screen.getByRole("main");
 		expect(main).toHaveAttribute("id", "content");
 		expect(main).toHaveAttribute("tabIndex", "-1");
 	});
 
-	it("displays the 500 title", () => {
-		render(<ErrorPage />);
+	it("displays the 503 title", () => {
+		render(<MaintenancePage />);
 
 		expect(
-			screen.getByRole("heading", { level: 1, name: "Erreur inattendue" }),
+			screen.getByRole("heading", {
+				level: 1,
+				name: "Service indisponible",
+			}),
 		).toBeInTheDocument();
 	});
 
 	it("displays the error code", () => {
-		render(<ErrorPage />);
+		render(<MaintenancePage />);
 
-		expect(screen.getByText("Erreur 500")).toBeInTheDocument();
+		expect(screen.getByText("Erreur 503")).toBeInTheDocument();
 	});
 
-	it("displays the apology text", () => {
-		render(<ErrorPage />);
+	it("displays the unavailability explanation", () => {
+		render(<MaintenancePage />);
 
 		expect(
-			screen.getByText(/Désolé, le service rencontre un problème/),
+			screen.getByText(/le service est temporairement inaccessible/),
 		).toBeInTheDocument();
 	});
 
 	it("displays the retry guidance", () => {
-		render(<ErrorPage />);
+		render(<MaintenancePage />);
 
 		expect(
-			screen.getByText(
-				/Essayez de rafraîchir la page ou bien réessayez plus tard/,
-			),
+			screen.getByText(/Merci de réessayer plus tard/),
 		).toBeInTheDocument();
 	});
 
 	it("does not render any action button", () => {
-		render(<ErrorPage />);
+		render(<MaintenancePage />);
 
 		expect(screen.queryByRole("link")).not.toBeInTheDocument();
+		expect(screen.queryByRole("button")).not.toBeInTheDocument();
 	});
 
 	it("renders the DSFR artwork illustration as decorative", () => {
-		const { container } = render(<ErrorPage />);
+		const { container } = render(<MaintenancePage />);
 
 		const svg = container.querySelector("svg.fr-artwork");
 		expect(svg).toBeInTheDocument();

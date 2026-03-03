@@ -94,6 +94,14 @@ src/
   e2e/                     <- Playwright tests
 ```
 
+### Absolute rule: no custom components in `src/app/`
+
+`src/app/` contains **only** Next.js route files: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `global-error.tsx`, `template.tsx`, `default.tsx`.
+
+**Every custom component** (client or server) must live in `src/modules/{domain}/`. Pages are thin wrappers that import from module barrels.
+
+This is **enforced by the `block-bad-patterns` hook** — creating a `.tsx` file in `src/app/` that is not a route file will be rejected.
+
 ### Fundamental rule: domain organization
 
 ```
@@ -103,6 +111,9 @@ src/modules/layout/Header/HeaderBrand.tsx
 # FORBIDDEN — organization by file type
 src/components/HeaderBrand.tsx
 src/hooks/useNavigation.ts
+
+# FORBIDDEN — custom component in src/app/
+src/app/my-route/MyComponent.tsx
 ```
 
 Each module exposes an `index.ts` barrel. Consumers always import from the barrel, never from internal sub-files.
@@ -249,9 +260,11 @@ All code (components, functions, variables, comments, file names) in English. Us
 ## Tests
 
 Tests live in `__tests__/` subfolder next to the module they test. Never in `src/app/`.
-100% coverage on all logic files. Test observable behavior, not implementation details.
+75% minimum global coverage (enforced by Vitest thresholds). 100% coverage on all logic files. Test observable behavior, not implementation details.
 
-> Full policy (what to test, mock boundaries, coverage rules) → `.claude/rules/testing.md`
+**E2E completeness**: every route in `src/app/**/page.tsx` must have corresponding E2E tests in `src/e2e/`. Always verify all pages are covered when adding or modifying pages.
+
+> Full policy (what to test, mock boundaries, coverage rules, E2E completeness) → `.claude/rules/testing.md`
 
 ### Standard mocks
 
