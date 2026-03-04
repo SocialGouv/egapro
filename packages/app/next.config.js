@@ -23,7 +23,7 @@ export default withSentryConfig(config, {
 	org: "incubateur",
 	project: "egapro-v2",
 	sentryUrl: "https://sentry2.fabrique.social.gouv.fr",
-	release: { name: process.env.SENTRY_RELEASE },
+	release: { name: process.env.NEXT_PUBLIC_SENTRY_RELEASE },
 
 	// Upload a larger set of source maps for prettier stack traces (increases build time)
 	widenClientFileUpload: true,

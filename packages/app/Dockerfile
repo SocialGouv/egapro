@@ -49,7 +49,7 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     --mount=type=secret,id=sentry_release \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
-    SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
+    NEXT_PUBLIC_SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
     pnpm --filter app build
 
 
