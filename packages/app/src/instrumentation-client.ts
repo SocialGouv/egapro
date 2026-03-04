@@ -18,5 +18,3 @@ Sentry.init({
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
 
-// Capture route transitions for performance tracing in App Router
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

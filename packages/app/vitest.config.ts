@@ -47,6 +47,8 @@ export default defineConfig({
 				"src/e2e/**",
 				"**/*.config.*",
 				"**/*.d.ts",
+				"src/instrumentation.ts",
+				"src/instrumentation-client.ts",
 			],
 			thresholds: {
 				statements: 75,
