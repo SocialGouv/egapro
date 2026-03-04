@@ -32,20 +32,23 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Avoid failing the image build because runtime env vars are not provided at build time.
 ENV SKIP_ENV_VALIDATION=1
 
-# Optional build args (kept for CI parity)
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_API_V2_URL
-ENV NEXT_PUBLIC_API_V2_URL=$NEXT_PUBLIC_API_V2_URL
-ARG NEXT_PUBLIC_GITHUB_SHA
-ENV NEXT_PUBLIC_GITHUB_SHA=$NEXT_PUBLIC_GITHUB_SHA
+# Build-time args for NEXT_PUBLIC_* variables (inlined by Next.js at build time)
 ARG NEXT_PUBLIC_EGAPRO_ENV
 ENV NEXT_PUBLIC_EGAPRO_ENV=$NEXT_PUBLIC_EGAPRO_ENV
-ARG NEXTAUTH_URL
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+ARG NEXT_PUBLIC_MATOMO_URL
+ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
+ARG NEXT_PUBLIC_MATOMO_SITE_ID
+ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
+ARG NEXT_PUBLIC_SENTRY_RELEASE
+ENV NEXT_PUBLIC_SENTRY_RELEASE=$NEXT_PUBLIC_SENTRY_RELEASE
 
 # Build with Next.js cache persisted across builds
+# Sentry auth token is mounted as a BuildKit secret to avoid leaking in image layers
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
+    --mount=type=secret,id=sentry_auth_token \
+    SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     pnpm --filter app build
 
 
