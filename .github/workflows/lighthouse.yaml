@@ -55,7 +55,7 @@ jobs:
           echo "=== Files in .lighthouseci ==="
           ls -lh .lighthouseci/ 2>/dev/null || echo "Directory empty or missing"
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-report
