@@ -1,0 +1,11 @@
+.cardStack {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
