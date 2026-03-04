@@ -5,10 +5,10 @@ Sentry.init({
 	release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 	environment: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 
-	// Performance Monitoring
-	tracesSampleRate: 1.0, // Adjust in production (e.g., 0.1 for 10%)
+	// Capture 100% of traces in dev, adjust in production (e.g., 0.1 for 10%)
+	tracesSampleRate: 1.0,
 
-	// Session Replay
+	// Session Replay: sample 10% of sessions, 100% on error
 	replaysSessionSampleRate: 0.1,
 	replaysOnErrorSampleRate: 1.0,
 
@@ -17,3 +17,6 @@ Sentry.init({
 	// Enable Sentry whenever a DSN is configured (dev + prod)
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
+
+// Capture route transitions for performance tracing in App Router
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

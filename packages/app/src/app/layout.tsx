@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 
-// Sentry client SDK must be imported explicitly because Turbopack does not run the webpack plugin that auto-injects sentry.client.config.ts.
-import "~/sentry-client";
-
 import { MatomoAnalytics } from "~/modules/analytics";
 import { Footer, Header, SkipLinks } from "~/modules/layout";
 import { ProfileModal } from "~/modules/profile";
