@@ -28,9 +28,6 @@ export default withSentryConfig(config, {
 	// Upload a larger set of source maps for prettier stack traces (increases build time)
 	widenClientFileUpload: true,
 
-	// Tree-shake Sentry logger statements to reduce bundle size
-	disableLogger: true,
-
 	// Tunnel Sentry requests to circumvent ad-blockers
 	tunnelRoute: "/monitoring",
 
