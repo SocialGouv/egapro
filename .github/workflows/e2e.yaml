@@ -35,7 +35,7 @@ jobs:
         env:
           SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
