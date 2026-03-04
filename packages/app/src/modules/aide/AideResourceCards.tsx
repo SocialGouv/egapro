@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import styles from "./AideResourceCards.module.scss";
 
 type ResourceCardProps = {
@@ -39,10 +41,12 @@ function ResourceCard({
 			</div>
 			<div className="fr-card__header">
 				<div className="fr-card__img">
-					<img
+					<Image
 						alt={imageAlt}
 						className={`fr-responsive-img ${styles.containImg}`}
+						height={200}
 						src={imageSrc}
+						width={400}
 					/>
 				</div>
 			</div>
