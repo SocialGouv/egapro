@@ -41,14 +41,15 @@ ARG NEXT_PUBLIC_MATOMO_URL
 ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
 ARG NEXT_PUBLIC_MATOMO_SITE_ID
 ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
-ARG NEXT_PUBLIC_SENTRY_RELEASE
-ENV NEXT_PUBLIC_SENTRY_RELEASE=$NEXT_PUBLIC_SENTRY_RELEASE
 
 # Build with Next.js cache persisted across builds
-# Sentry auth token is mounted as a BuildKit secret to avoid leaking in image layers
+# Sentry auth token and release are mounted as BuildKit secrets to avoid leaking in image layers
+# and to preserve build cache (ARG would invalidate cache on every new release)
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
+    --mount=type=secret,id=sentry_release \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
+    SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null) \
     pnpm --filter app build
 
 
