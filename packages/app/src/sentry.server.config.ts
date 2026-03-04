@@ -8,14 +8,6 @@ Sentry.init({
 	// Capture 100% of traces in dev, adjust in production (e.g., 0.1 for 10%)
 	tracesSampleRate: 1.0,
 
-	// Session Replay: sample 10% of sessions, 100% on error
-	replaysSessionSampleRate: 0.1,
-	replaysOnErrorSampleRate: 1.0,
-
-	integrations: [Sentry.replayIntegration()],
-
 	// Enable Sentry whenever a DSN is configured (dev + prod)
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
