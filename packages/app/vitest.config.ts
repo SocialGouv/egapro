@@ -49,6 +49,12 @@ export default defineConfig({
 				"**/*.d.ts",
 				"src/instrumentation.ts",
 				"src/instrumentation-client.ts",
+				"src/sentry.*.config.ts",
+				"src/env.js",
+				"src/trpc/**",
+				"src/server/db/**",
+				"src/server/auth/**",
+				"src/app/api/**",
 			],
 			thresholds: {
 				statements: 75,

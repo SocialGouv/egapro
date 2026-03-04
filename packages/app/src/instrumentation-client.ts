@@ -17,5 +17,3 @@ Sentry.init({
 	// Enable Sentry whenever a DSN is configured (dev + prod)
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
