@@ -36,7 +36,7 @@ async def public_data(path: Path):
     :path:          chemin vers le fichier d'export
     """
 
-    records = await db.declaration.fetch(sql.public_declarations)
+    records = await db.declaration.fetch(sql.public_declarations, constants.PUBLIC_YEARS)
     writer = csv.writer(path, delimiter=";")
     writer.writerow(
         [
@@ -141,7 +141,7 @@ async def public_data_as_xlsx(debug=False):
     """
 
     print("Reading from DB")
-    records = await db.declaration.fetch(sql.public_declarations)
+    records = await db.declaration.fetch(sql.public_declarations, constants.PUBLIC_YEARS)
     workbook = Workbook(write_only=not debug)
     sheet: Union[WriteOnlyWorksheet, Worksheet] = workbook.create_sheet()
     sheet.title = "Données publiques Index Egapro"
