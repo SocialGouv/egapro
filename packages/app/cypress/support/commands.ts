@@ -62,7 +62,7 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   cy.checkUrl("/login");
   cy.get(".fr-connect").click();
 
-  cy.location("origin").should("match", /keycloak/);
+  cy.location("origin").should("match", /keycloak|localhost:8180/);
   const username = Cypress.env("E2E_USERNAME");
   const password = Cypress.env("E2E_PASSWORD");
 
