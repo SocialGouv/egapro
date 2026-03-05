@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import { Step1Opinions, Step2Upload, TOTAL_STEPS } from "~/modules/cseOpinion";
+import { mapOpinionsFromDb } from "~/modules/cseOpinion/mapOpinionsFromDb";
+import { auth } from "~/server/auth";
+import { api } from "~/trpc/server";
 
 type StepPageProps = {
 	params: Promise<{ step: string }>;
@@ -14,7 +17,17 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 1) {
-		return <Step1Opinions />;
+		const [session, { opinions }] = await Promise.all([
+			auth(),
+			api.cseOpinion.get(),
+		]);
+		const initialData = mapOpinionsFromDb(opinions);
+		return (
+			<Step1Opinions
+				email={session?.user?.email ?? undefined}
+				initialData={initialData}
+			/>
+		);
 	}
 
 	if (step === 2) {
