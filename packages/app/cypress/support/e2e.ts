@@ -19,6 +19,7 @@ import "./commands";
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+
 Cypress.on("uncaught:exception", (err, runnable) => {
   // Log detailed error information
   console.log("Uncaught exception details:", {
@@ -31,8 +32,7 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   // Define patterns for errors to suppress
   const suppressPatterns = [
     // System/environment errors
-    "ResizeObserver loop limit exceeded",
-    "ResizeObserver loop completed with undelivered notifications",
+    "ResizeObserver loop",
     "Network request failed",
     "Failed to call method: org.freedesktop.portal.Settings.Read",
     // React/Next.js errors
@@ -55,15 +55,9 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   });
 
   if (shouldSuppress) {
-    console.log("Suppressing known error:", {
-      message: err.message,
-      type: err.name,
-      pattern: suppressPatterns.find(p => err.message?.includes(p) || err.stack?.includes(p)),
-    });
     return false;
   }
 
-  // Log and fail test for unknown errors
-  console.log("Unknown error - failing test:", err);
+  // Fail test for unknown errors
   return true;
 });

@@ -11,6 +11,15 @@ export default defineConfig({
     openMode: 0, // Pas de réessai en mode interactif
   },
   e2e: {
+    setupNodeEvents(on) {
+      on("before:browser:launch", (browser, launchOptions) => {
+        if (browser.family === "chromium") {
+          // Suppress ResizeObserver loop errors in Chromium 128+
+          launchOptions.args.push("--disable-features=ResizeObserverReportUndeliveredNotifications");
+        }
+        return launchOptions;
+      });
+    },
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     env: {
       E2E_USERNAME: process.env.E2E_USERNAME || "test@fia1.fr",
