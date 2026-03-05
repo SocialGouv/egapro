@@ -12,7 +12,7 @@ import {
 	users,
 	verificationTokens,
 } from "~/server/db/schema";
-import { fetchCompanyName } from "~/server/services/weez";
+import { fetchCompanyBySiren } from "~/server/services/weez";
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -57,7 +57,6 @@ function getProviders(): Provider[] {
 					},
 				});
 				const body = await response.text();
-				// ProConnect returns userinfo as a signed JWT, decode the payload
 				let userinfo: Record<string, string>;
 				if (body.startsWith("{")) {
 					userinfo = JSON.parse(body) as Record<string, string>;
@@ -106,43 +105,63 @@ export const authConfig = {
 			const firstName = p?.firstName ? (p.firstName as string) : null;
 			const lastName = p?.lastName ? (p.lastName as string) : null;
 
-			if (user.id) {
+			if (!user.id) return;
+
+			await db.transaction(async (tx) => {
 				const updates: Record<string, string | null> = {};
 				if (siret) updates.siret = siret;
 				if (firstName) updates.firstName = firstName;
 				if (lastName) updates.lastName = lastName;
 
 				if (Object.keys(updates).length > 0) {
-					await db.update(users).set(updates).where(eq(users.id, user.id));
+					await tx.update(users).set(updates).where(eq(users.id, user.id));
 				}
 
-				// Associate user with company from ProConnect SIRET
 				if (siret) {
 					const siren = siret.slice(0, 9);
-					const companyName = await fetchCompanyName(siren);
 
-					await db
+					let companyValues: {
+						siren: string;
+						name: string;
+						address?: string | null;
+						nafCode?: string | null;
+						workforce?: number | null;
+					};
+					try {
+						const companyInfo = await fetchCompanyBySiren(siren);
+						companyValues = companyInfo
+							? {
+									siren,
+									name: companyInfo.name,
+									address: companyInfo.address,
+									nafCode: companyInfo.nafCode,
+									workforce: companyInfo.workforce,
+								}
+							: { siren, name: `Entreprise ${siren}` };
+					} catch {
+						companyValues = { siren, name: `Entreprise ${siren}` };
+					}
+
+					await tx
 						.insert(companies)
-						.values({ siren, name: companyName })
+						.values(companyValues)
 						.onConflictDoUpdate({
 							target: companies.siren,
-							set: { name: companyName, updatedAt: new Date() },
+							set: { ...companyValues, updatedAt: new Date() },
 						});
 
-					await db
+					await tx
 						.insert(userCompanies)
 						.values({ userId: user.id, siren })
 						.onConflictDoNothing();
 				}
-			}
+			});
 		},
 	},
 	callbacks: {
 		redirect({ url, baseUrl }) {
-			// After sign-in, always redirect to /declaration-remuneration
 			if (url.startsWith(baseUrl)) {
 				const path = url.slice(baseUrl.length);
-				// Redirect root or empty path to /declaration-remuneration
 				if (!path || path === "/") return `${baseUrl}/declaration-remuneration`;
 				return url;
 			}

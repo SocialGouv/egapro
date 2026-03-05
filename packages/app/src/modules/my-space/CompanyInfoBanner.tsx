@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { Breadcrumb } from "~/modules/layout";
 
+import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
@@ -9,46 +10,33 @@ type Props = {
 	company: CompanyDetail;
 };
 
-const BREADCRUMB_ID = "breadcrumb-company";
-
 export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = new Date().getFullYear();
 
 	return (
 		<div className={`fr-py-4w ${styles.banner}`}>
 			<div className="fr-container">
-				<nav aria-label="vous êtes ici :" className="fr-breadcrumb">
-					<button
-						aria-controls={BREADCRUMB_ID}
-						aria-expanded="false"
-						className="fr-breadcrumb__button"
-						type="button"
-					>
-						Voir le fil d'Ariane
-					</button>
-					<div className="fr-collapse" id={BREADCRUMB_ID}>
-						<ol className="fr-breadcrumb__list">
-							<li>
-								<Link
-									className="fr-breadcrumb__link"
-									href="/mon-espace/mes-entreprises"
-								>
-									Mon espace
-								</Link>
-							</li>
-							<li>
-								<span aria-current="page" className="fr-breadcrumb__link">
-									{company.name}
-								</span>
-							</li>
-						</ol>
-					</div>
-				</nav>
+				<Breadcrumb
+					items={[
+						{ label: "Mon espace", href: "/mon-espace/mes-entreprises" },
+						{ label: company.name },
+					]}
+				/>
 
 				<div className="fr-mt-3w">
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 						<div className="fr-col">
 							<h2 className="fr-mb-0">{company.name}</h2>
+						</div>
+						<div className="fr-col-auto">
+							<button
+								aria-controls={COMPANY_EDIT_MODAL_ID}
+								className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line fr-btn--icon-left"
+								data-fr-opened="false"
+								type="button"
+							>
+								Modifier
+							</button>
 						</div>
 					</div>
 

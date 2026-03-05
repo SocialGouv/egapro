@@ -1,0 +1,1 @@
+export { FaqPage } from "./FaqPage";

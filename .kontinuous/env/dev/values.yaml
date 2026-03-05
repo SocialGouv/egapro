@@ -1,16 +1,3 @@
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
-  env:
-    - name: E2E_CLEANUP_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: "egapro-secret"
-          key: E2E_CLEANUP_TOKEN
-          optional: true
-  vars:
-    MAILER_ENABLE: "True"
-    MAILER_SMTP_HOST: maildev
-    MAILER_SMTP_PORT: "1025"
-    MAILER_SMTP_SSL: "False"
-    EGAPRO_PROCONNECT_ISSUER: "https://egapro-charon.ovh.fabrique.social.gouv.fr/proconnecttest"

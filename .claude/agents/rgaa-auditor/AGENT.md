@@ -14,7 +14,8 @@ You receive a list of files to audit. Read each file and check against all crite
 ## RGAA Checklist
 
 ### 1. Images (RGAA theme 1)
-- Every `<img>` has an `alt` attribute
+- All images use `import Image from "next/image"` — raw `<img>` is forbidden (blocked by hook)
+- Every `<Image>` has an `alt` prop
 - Decorative images use `alt=""`
 - Informative images have a descriptive `alt` (not "image", "photo", "icon")
 - DSFR icons use `aria-hidden="true"` when decorative

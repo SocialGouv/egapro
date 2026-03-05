@@ -11,29 +11,15 @@ app:
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
-    - secretRef:
-        name: "staff"
-    - secretRef:
-        name: "egapro-secret"
-    - secretRef:
-        name: github-oauth
-    - configMapRef:
-        name: egapro
     - configMapRef:
         name: "proconnect"
     - secretRef:
         name: "proconnect"
+    - secretRef:
+        name: "api"
+    - secretRef:
+        name: "next-auth"
   env:
-    - name: SENTRY_AUTH_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: sentry
-          key: SENTRY_AUTH_TOKEN
-    - name: NEXT_PUBLIC_SENTRY_DSN
-      valueFrom:
-        secretKeyRef:
-          name: sentry
-          key: APP_SENTRY_DSN
     - name: POSTGRES_HOST
       valueFrom:
         secretKeyRef:
@@ -64,13 +50,7 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
-    - name: SECURITY_JWT_SECRET
-      valueFrom:
-        secretKeyRef:
-          name: "egapro-secret"
-          key: EGAPRO_SECRET
   vars:
-    NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
 
 pg:

@@ -1,4 +1,4 @@
-import styles from "./ErrorImage.module.scss";
+import { ErrorArtwork } from "./ErrorArtwork";
 
 /** 500 Internal Server Error page content following DSFR error page template. */
 export function ErrorPage() {
@@ -17,15 +17,8 @@ export function ErrorPage() {
 							Essayez de rafraîchir la page ou bien réessayez plus tard.
 						</p>
 					</div>
-					<div
-						className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
-					>
-						<img
-							alt=""
-							aria-hidden="true"
-							className={styles.image}
-							src="/assets/images/error/technical-error-illustration.svg"
-						/>
+					<div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
+						<ErrorArtwork />
 					</div>
 				</div>
 			</div>

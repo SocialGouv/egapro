@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import styles from "./ErrorImage.module.scss";
+import { ErrorArtwork } from "./ErrorArtwork";
 
 /** 404 Not Found page content following DSFR error page template. */
 export function NotFoundPage() {
@@ -31,15 +31,8 @@ export function NotFoundPage() {
 							</li>
 						</ul>
 					</div>
-					<div
-						className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
-					>
-						<img
-							alt=""
-							aria-hidden="true"
-							className={styles.image}
-							src="/assets/images/error/technical-error-illustration.svg"
-						/>
+					<div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
+						<ErrorArtwork />
 					</div>
 				</div>
 			</div>

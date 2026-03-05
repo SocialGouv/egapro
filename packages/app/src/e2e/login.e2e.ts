@@ -26,6 +26,10 @@ test.describe("ProConnect authentication flow", () => {
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
+
+		await expect(
+			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
+		).toBeVisible();
 	});
 
 	test("shows user menu in header after login", async ({ page }) => {

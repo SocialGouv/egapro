@@ -50,16 +50,23 @@ describe("NotFoundPage", () => {
 		expect(link).toHaveClass("fr-btn");
 	});
 
-	it("renders a decorative error illustration image", () => {
+	it("renders the DSFR artwork illustration as decorative", () => {
 		const { container } = render(<NotFoundPage />);
 
-		const img = container.querySelector("img");
-		expect(img).toBeInTheDocument();
-		expect(img).toHaveAttribute("aria-hidden", "true");
-		expect(img).toHaveAttribute("alt", "");
-		expect(img).toHaveAttribute(
-			"src",
-			"/assets/images/error/technical-error-illustration.svg",
-		);
+		const svg = container.querySelector("svg.fr-artwork");
+		expect(svg).toBeInTheDocument();
+		expect(svg).toHaveAttribute("aria-hidden", "true");
+		expect(svg).toHaveClass("fr-responsive-img");
+	});
+
+	it("uses the correct illustration column classes from DSFR template", () => {
+		const { container } = render(<NotFoundPage />);
+
+		const artworkColumn = container
+			.querySelector("svg.fr-artwork")
+			?.closest("div") as HTMLElement;
+		expect(artworkColumn.className).toContain("fr-col-md-3");
+		expect(artworkColumn.className).toContain("fr-col-offset-md-1");
+		expect(artworkColumn.className).toContain("fr-px-6w");
 	});
 });

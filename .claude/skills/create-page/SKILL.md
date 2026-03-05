@@ -9,7 +9,16 @@ Create one or more pages from Figma designs or specifications using maximum para
 
 ## Arguments
 
-$ARGUMENTS — Figma URLs, page descriptions, or feature specifications
+$ARGUMENTS — **required**: one or more Figma URLs (e.g. `https://figma.com/design/...?node-id=...`)
+
+## Prerequisites
+
+**A Figma URL is mandatory.** Before starting any work:
+
+1. Check that `$ARGUMENTS` contains at least one valid Figma URL (`figma.com/design/` or `figma.com/make/`)
+2. If no Figma URL is provided, **stop immediately** and ask the user:
+   > "This skill requires a Figma design URL. Please provide the Figma link(s) for the page(s) to create."
+3. Do NOT proceed to Phase 1 until a valid Figma URL is available.
 
 ## Instructions
 
@@ -17,7 +26,7 @@ $ARGUMENTS — Figma URLs, page descriptions, or feature specifications
 
 For each page/screen provided, launch a **parallel Explore agent**:
 
-1. **Figma analysis**: use `get_design_context` MCP tool to get code + screenshot
+1. **Figma analysis**: use `get_design_context` MCP tool with the provided Figma URL to get code + screenshot
 2. **DSFR components**: use `get_component_doc` / `search_components` MCP tools to verify correct HTML structure for each DSFR component identified
 3. **Data requirements**: identify tRPC procedures, DB schema changes, types needed
 4. **Existing code**: search the codebase for similar patterns to reuse
@@ -27,33 +36,56 @@ After all agents complete, **synthesize**:
 - List common types
 - List DB schema changes needed
 - List tRPC procedures needed (new or existing)
+- **Classify each page/screen** using the activation rules below
 
 Present synthesis to user and wait for confirmation before Phase 2.
 
-### Phase 2 — Shared foundations (sequential)
+### Activation rules (conditional phases)
 
-Code the shared parts that all pages depend on. Order matters:
+After Phase 1 analysis, classify each page/screen and determine which actions apply.
 
-1. **DB schema** changes in `src/server/db/schema.ts`:
+| Action | Activate when | Skip when |
+|---|---|---|
+| DB / Migration | Data must be persisted or read from PostgreSQL | Static content, no server data |
+| Zod schemas | Forms, API inputs, route parameters exist | Read-only display, static pages |
+| tRPC / API | Frontend needs server data or mutations | Static page, client-only logic |
+| UI components | Visual HTML is rendered | Pure backend (no `.tsx` produced) |
+| Unit tests | **Always** | Never skip |
+| RGAA audit | **Always** | Never skip |
+| Security audit | **Always** | Never skip |
+| E2E tests | A user journey is created, modified, or its underlying API/data changes | Isolated component with no route, internal refacto with no behavior change, config-only change |
+
+**Examples of conditional skipping:**
+- Static info page (CGU, mentions légales) → skip DB, tRPC, Zod. **Keep RGAA + Security**
+- Backend-only tRPC route → skip UI components. **Keep RGAA + Security + E2E** if it serves a user journey
+- Isolated UI component (no data) → skip DB, tRPC, E2E. **Keep RGAA + Security**
+- Form page with API → all actions activated
+
+### Phase 2 — Shared foundations (sequential, conditional)
+
+**Skip this entire phase** if all pages are static with no shared code.
+Otherwise, code only the applicable parts in order:
+
+1. **DB schema** changes in `src/server/db/schema.ts` *(if DB activated)*:
    - camelCase properties (auto-mapped to snake_case)
    - Run `pnpm db:generate` → `pnpm db:migrate`
 
-2. **Zod schemas** in `src/server/api/routers/{domain}/schemas.ts`:
+2. **Zod schemas** in `src/server/api/routers/{domain}/schemas.ts` *(if Zod activated)*:
    - Shared input/output schemas for tRPC procedures
    - Reusable for client-side form validation
 
-3. **tRPC procedures** in `src/server/api/routers/{domain}/router.ts`:
+3. **tRPC procedures** in `src/server/api/routers/{domain}/router.ts` *(if tRPC activated)*:
    - `protectedProcedure` for authenticated endpoints
    - Ownership checks on all mutations
    - `db.transaction()` for multi-write operations
 
-4. **Shared types** in `src/modules/{domain}/types.ts`
+4. **Shared types** in `src/modules/{domain}/types.ts` *(if multiple pages share types)*
 
-5. **Shared components** in `src/modules/{domain}/shared/`:
-   - Extract components used across multiple pages
+5. **Shared components** in `src/modules/{domain}/shared/` *(if components used 2+ times)*:
    - Each component < 200 lines, `"use client"` only where needed
 
 6. Run `pnpm typecheck` to validate foundations compile.
+7. If dev server is running, use `nextjs_call(get_errors)` to verify no runtime errors.
 
 ### Phase 3 — Pages (parallel agents)
 
@@ -80,23 +112,34 @@ Each agent MUST follow:
 - **Server Components** by default, `"use client"` only for hooks/events/browser APIs
 - **DSFR classes** for all styling (no inline styles, no raw colors)
 - **DSFR MCP** to verify HTML structure before writing
+- **Figma assets as SVG**: export all illustrations/icons from Figma as SVG (never PNG/JPG). Store in `public/assets/{module}/`. Only accept raster for real photographs
+- **`next/image`**: all images use `import Image from "next/image"` (raw `<img>` blocked by hook)
 - **Accessibility**: labels, alt, aria attributes, semantic HTML, NewTabNotice
 - **English code**, French user-facing text
 - **Unit tests**: test observable behavior, mock boundaries only
 - **File size**: < 200 lines per file
 
-### Phase 4 — Quality (3 parallel agents)
+### Phase 4 — Quality (parallel agents)
 
-**Agent 1 — RGAA audit** (delegate to `rgaa-auditor`):
-Audit all new/modified `.tsx` files against the 13 RGAA themes.
+Launch **all 4 agents** (RGAA + Security are always mandatory):
 
-**Agent 2 — Security audit** (delegate to `security-auditor`):
-Audit all new/modified server files and tRPC routers against OWASP Top 10.
-
-**Agent 3 — Validation**:
+**Agent: Validation** *(always)*:
 ```bash
 pnpm typecheck && pnpm test && pnpm lint:check && pnpm format:check
 ```
+
+**Agent: RGAA audit** *(always)* — delegate to `rgaa-auditor`:
+Audit all new/modified files against the 13 RGAA themes.
+Auto-fix all `[ERROR]` findings.
+
+**Agent: Security audit** *(always)* — delegate to `security-auditor`:
+Audit all new/modified files against OWASP Top 10.
+Auto-fix all `[CRITICAL]` and `[HIGH]` findings.
+
+**Agent: E2E tests** *(only if navigable user journey created/modified)*:
+Write Playwright tests in `src/e2e/` covering the new user flows.
+
+If RGAA or Security auto-fixes are applied → re-run Validation agent.
 
 ### Phase 5 — Final report
 

@@ -1,15 +1,49 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { DB } from "~/server/db";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
 
-const currentYear = new Date().getFullYear();
+function getCurrentYear() {
+	return new Date().getFullYear();
+}
+
+async function findUserCompany(db: DB, userId: string, siren: string) {
+	const rows = await db
+		.select({
+			siren: companies.siren,
+			name: companies.name,
+			address: companies.address,
+			nafCode: companies.nafCode,
+			workforce: companies.workforce,
+			hasCse: companies.hasCse,
+		})
+		.from(userCompanies)
+		.innerJoin(companies, eq(userCompanies.siren, companies.siren))
+		.where(
+			and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
+		)
+		.limit(1);
+
+	const company = rows[0];
+	if (!company) {
+		throw new Error("Company not found or access denied");
+	}
+	return company;
+}
 
 export const companyRouter = createTRPCRouter({
+	get: protectedProcedure
+		.input(z.object({ siren: z.string().length(9) }))
+		.query(({ ctx, input }) =>
+			findUserCompany(ctx.db, ctx.session.user.id, input.siren),
+		),
+
 	list: protectedProcedure.query(async ({ ctx }) => {
+		const year = getCurrentYear();
+
 		const userCompanyRows = await ctx.db
 			.select({
 				siren: companies.siren,
@@ -35,10 +69,7 @@ export const companyRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.where(
-					and(
-						eq(declarations.year, currentYear),
-						inArray(declarations.siren, sirens),
-					),
+					and(eq(declarations.year, year), inArray(declarations.siren, sirens)),
 				);
 
 			for (const d of decls) {
@@ -61,42 +92,12 @@ export const companyRouter = createTRPCRouter({
 	getWithDeclarations: protectedProcedure
 		.input(z.object({ siren: z.string().length(9) }))
 		.query(async ({ ctx, input }) => {
-			// Verify the user has access to this company
-			const userCompanyRow = await ctx.db
-				.select()
-				.from(userCompanies)
-				.where(
-					and(
-						eq(userCompanies.userId, ctx.session.user.id),
-						eq(userCompanies.siren, input.siren),
-					),
-				)
-				.limit(1);
+			const company = await findUserCompany(
+				ctx.db,
+				ctx.session.user.id,
+				input.siren,
+			);
 
-			if (userCompanyRow.length === 0) {
-				throw new Error("Company not found or access denied");
-			}
-
-			// Fetch company details
-			const companyRows = await ctx.db
-				.select({
-					siren: companies.siren,
-					name: companies.name,
-					address: companies.address,
-					nafCode: companies.nafCode,
-					workforce: companies.workforce,
-					hasCse: companies.hasCse,
-				})
-				.from(companies)
-				.where(eq(companies.siren, input.siren))
-				.limit(1);
-
-			const company = companyRows[0];
-			if (!company) {
-				throw new Error("Company not found");
-			}
-
-			// Fetch all declarations for this company, ordered by year desc
 			const declarationRows = await ctx.db
 				.select({
 					siren: declarations.siren,
@@ -109,6 +110,7 @@ export const companyRouter = createTRPCRouter({
 				.where(eq(declarations.siren, input.siren))
 				.orderBy(desc(declarations.year));
 
+			const year = getCurrentYear();
 			const declarationItems = buildDeclarationList(
 				input.siren,
 				declarationRows.map((d) => ({
@@ -121,9 +123,19 @@ export const companyRouter = createTRPCRouter({
 					currentStep: d.currentStep ?? 0,
 					updatedAt: d.updatedAt,
 				})),
-				currentYear,
+				year,
 			);
 
 			return { company, declarations: declarationItems };
+		}),
+
+	updateHasCse: protectedProcedure
+		.input(z.object({ siren: z.string().length(9), hasCse: z.boolean() }))
+		.mutation(async ({ ctx, input }) => {
+			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
+			await ctx.db
+				.update(companies)
+				.set({ hasCse: input.hasCse })
+				.where(eq(companies.siren, input.siren));
 		}),
 });

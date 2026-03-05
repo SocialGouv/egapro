@@ -22,8 +22,11 @@ test.describe("Declaration workflow", () => {
 		await expect(page.getByRole("link", { name: "Commencer" })).toBeVisible();
 	});
 
-	test("shows company info in banner", async ({ page }) => {
-		await expect(page.getByText(/Mon entreprise/)).toBeVisible();
+	test("shows company name and SIREN in banner", async ({ page }) => {
+		await expect(page.getByText(/130 025 265/)).toBeVisible();
+		await expect(
+			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
+		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {

@@ -3,7 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
-import styles from "../modules/error/ErrorImage.module.scss";
+import { ErrorArtwork } from "~/modules/error";
 
 export default function GlobalError({
 	error,
@@ -17,6 +17,7 @@ export default function GlobalError({
 	return (
 		<html data-fr-scheme="system" lang="fr">
 			<head>
+				<title>Erreur inattendue — Egapro</title>
 				<link href="/dsfr/dsfr.min.css" rel="stylesheet" />
 			</head>
 			<body>
@@ -34,15 +35,8 @@ export default function GlobalError({
 									Essayez de rafraîchir la page ou bien réessayez plus tard.
 								</p>
 							</div>
-							<div
-								className={`fr-col-12 fr-col-md-4 fr-col-offset-md-1 fr-py-0 ${styles.container}`}
-							>
-								<img
-									alt=""
-									aria-hidden="true"
-									className={styles.image}
-									src="/assets/images/error/technical-error-illustration.svg"
-								/>
+							<div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
+								<ErrorArtwork />
 							</div>
 						</div>
 					</div>

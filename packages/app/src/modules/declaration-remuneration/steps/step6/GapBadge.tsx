@@ -3,7 +3,7 @@ import {
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
-} from "../../shared/gapUtils";
+} from "~/modules/declaration-remuneration/shared/gapUtils";
 import stepStyles from "../Step6Review.module.scss";
 
 type Props = {
