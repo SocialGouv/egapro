@@ -142,7 +142,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-02-28");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2026-01-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Non");
     cy.selectByLabel("Préciser les modalités de communication des résultats obtenus auprès de vos salariés *")
       .clear()
