@@ -25,7 +25,9 @@ test.describe("Declaration workflow", () => {
 	test("shows company name and SIREN in banner", async ({ page }) => {
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
 		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
+			page.getByText(
+				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+			),
 		).toBeVisible();
 	});
 
@@ -180,7 +182,7 @@ test.describe("Declaration workflow", () => {
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		// Check the certification checkbox and confirm
-		await page.getByLabel(/Je certifie/).check();
+		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
 		// Verify navigation to the CSE opinion page

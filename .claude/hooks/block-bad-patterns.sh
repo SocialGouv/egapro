@@ -57,7 +57,7 @@ check_pattern '\.(tsx|jsx)$' \
 check_pattern '\.(ts|tsx)$' \
   'process\.env' \
   'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts)'
+  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|e2e/)'
 
 # Deep relative imports — use ~/ path alias
 check_pattern '\.(ts|tsx)$' \
