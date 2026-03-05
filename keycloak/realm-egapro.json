@@ -236,7 +236,7 @@
       "secret": "egapro-local-secret",
       "redirectUris": [
         "http://localhost:3000/*",
-        "https://*.ovh.fabrique.social.gouv.fr/*"
+        "https://*"
       ],
       "webOrigins": [
         "http://localhost:3000",
