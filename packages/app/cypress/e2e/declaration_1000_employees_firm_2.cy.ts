@@ -189,8 +189,8 @@ describe("Declaration", () => {
           "TAttendre à minima 5/10. Pour cela, renforcer notre politique de recrutement à destination des femmes pour les postes à haut niveau de responsabilité.",
         );
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-03-31");
-    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2025-03-31");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
+    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2026-01-15");
     cy.selectByLabel("Préciser les modalités de communication des mesures de correction auprès de vos salariés.").type(
       "Note de service envoyé aux salariés",
     );

@@ -188,8 +188,8 @@ describe("Declaration", () => {
           "Etudier les situations individuelles et réajuster la politique salariale si nécessaire pour résorber les inégalités salariales le cas échéant",
         );
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-06-01");
-    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2025-06-01");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
+    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2026-01-15");
     cy.selectByLabel(
       "Préciser les modalités de communication des objectifs de progression et des mesures de correction auprès de vos salariés.",
     ).type("Note de service envoyé aux salariés");

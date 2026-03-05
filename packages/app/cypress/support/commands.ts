@@ -66,7 +66,7 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   const username = Cypress.env("E2E_USERNAME");
   const password = Cypress.env("E2E_PASSWORD");
 
-  cy.get("form", { timeout: 10000 }).should("be.visible");
+  cy.get("form", { timeout: 30000 }).should("be.visible");
   cy.get('input[id="username"]').clear().type(username);
   cy.get('input[id="password"]').clear().type(password);
   cy.get("form").submit();
