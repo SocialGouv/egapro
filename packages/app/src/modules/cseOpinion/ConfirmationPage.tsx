@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import { DsfrPictogram } from "~/modules/home/DsfrPictogram";
+import { DsfrPictogram } from "~/modules/home";
 
 import styles from "./ConfirmationPage.module.scss";
+import formStyles from "./shared/formActions.module.scss";
 
 type Props = {
 	email?: string;
@@ -10,11 +11,13 @@ type Props = {
 
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
+	const year = new Date().getFullYear() + 1;
+	const dataYear = new Date().getFullYear();
 
 	return (
 		<div>
 			<h1 className="fr-h4 fr-mb-4w">
-				Démarche des indicateurs de rémunération 2027
+				Démarche des indicateurs de rémunération {year}
 			</h1>
 
 			<div className={`fr-mb-4w ${styles.successRow}`}>
@@ -23,7 +26,7 @@ export function ConfirmationPage({ email }: Props) {
 					size={64}
 				/>
 				<p className="fr-text--lg fr-text--bold fr-mb-0">
-					Votre parcours 2027 est désormais terminé
+					Votre parcours {year} est désormais terminé
 				</p>
 			</div>
 
@@ -51,7 +54,7 @@ export function ConfirmationPage({ email }: Props) {
 						Télécharger le récapitulatif de la déclaration des indicateurs
 					</p>
 					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année 2027 au titre des données 2026
+						Année {year} au titre des données {dataYear}
 					</p>
 					<div className={styles.downloadFooter}>
 						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
@@ -65,7 +68,7 @@ export function ConfirmationPage({ email }: Props) {
 						l&apos;indicateur par catégorie de salarié
 					</p>
 					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année 2027 au titre des données 2026
+						Année {year} au titre des données {dataYear}
 					</p>
 					<div className={styles.downloadFooter}>
 						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
@@ -78,7 +81,7 @@ export function ConfirmationPage({ email }: Props) {
 						Télécharger le récapitulatif des éléments transmis
 					</p>
 					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année 2027 au titre des données 2026
+						Année {year} au titre des données {dataYear}
 					</p>
 					<div className={styles.downloadFooter}>
 						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
@@ -99,7 +102,7 @@ export function ConfirmationPage({ email }: Props) {
 				</div>
 			</div>
 
-			<div className={styles.actions}>
+			<div className={formStyles.actions}>
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 					href="/avis-cse/etape/2"

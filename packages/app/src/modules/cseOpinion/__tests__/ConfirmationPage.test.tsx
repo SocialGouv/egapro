@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { ConfirmationPage } from "../ConfirmationPage";
 
 describe("ConfirmationPage", () => {
+	const year = new Date().getFullYear() + 1;
+
 	it("renders the page title", () => {
 		render(<ConfirmationPage />);
 
 		expect(
-			screen.getByText("Démarche des indicateurs de rémunération 2027"),
+			screen.getByText(`Démarche des indicateurs de rémunération ${year}`),
 		).toBeInTheDocument();
 	});
 
@@ -15,7 +17,7 @@ describe("ConfirmationPage", () => {
 		render(<ConfirmationPage />);
 
 		expect(
-			screen.getByText("Votre parcours 2027 est désormais terminé"),
+			screen.getByText(`Votre parcours ${year} est désormais terminé`),
 		).toBeInTheDocument();
 	});
 
