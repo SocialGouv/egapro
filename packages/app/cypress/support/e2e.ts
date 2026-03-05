@@ -32,6 +32,7 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   const suppressPatterns = [
     // System/environment errors
     "ResizeObserver loop limit exceeded",
+    "ResizeObserver loop completed with undelivered notifications",
     "Network request failed",
     "Failed to call method: org.freedesktop.portal.Settings.Read",
     // React/Next.js errors
