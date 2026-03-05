@@ -53,3 +53,7 @@ venv/
 /packages/api/settings.json
 
 mnt/dgt.xlsx
+
+# claude / playwright
+.claude/
+.playwright-mcp/
