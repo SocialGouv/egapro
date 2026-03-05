@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
-from egapro import config, constants, db
+from egapro import config, constants, db, sql
 from egapro.utils import flatten, remove_one_year
 
 
@@ -55,7 +55,10 @@ async def as_xlsx(max_rows=None, debug=False):
     :debug:             Turn on debug to be able to read the generated Workbook
     """
     print("Reading from DB")
-    records = await db.representation_equilibree.all()
+    records = await db.representation_equilibree.fetch(
+        f"SELECT * FROM {db.representation_equilibree.table_name} WHERE year = ANY($1::int[])",
+        constants.PUBLIC_YEARS_REPEQ
+    )
     print("Flattening JSON")
     if max_rows:
         records = records[:max_rows]
