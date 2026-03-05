@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Step6Review } from "../Step6Review";
 
+vi.mock("~/modules/declarationPdf", () => ({
+	DownloadDeclarationPdfButton: () => (
+		<a href="/api/declaration-pdf">Télécharger le récapitulatif (PDF)</a>
+	),
+}));
+
 const mockSubmitMutate = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -265,5 +271,19 @@ describe("Step6Review", () => {
 			"href",
 			"/",
 		);
+	});
+
+	it("renders PDF download button when submitted", () => {
+		render(<Step6Review isSubmitted />);
+		expect(
+			screen.getByRole("link", { name: /télécharger le récapitulatif/i }),
+		).toHaveAttribute("href", "/api/declaration-pdf");
+	});
+
+	it("does not render PDF download button when not submitted", () => {
+		render(<Step6Review />);
+		expect(
+			screen.queryByRole("link", { name: /télécharger le récapitulatif/i }),
+		).not.toBeInTheDocument();
 	});
 });

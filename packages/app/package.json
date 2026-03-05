@@ -31,6 +31,7 @@
 	"dependencies": {
 		"@auth/drizzle-adapter": "^1.11.1",
 		"@gouvfr/dsfr": "^1.14.3",
+		"@react-pdf/renderer": "^4.3.2",
 		"@sentry/nextjs": "^10.39.0",
 		"@socialgouv/matomo-next": "^1.11.0",
 		"@t3-oss/env-nextjs": "^0.13.10",
