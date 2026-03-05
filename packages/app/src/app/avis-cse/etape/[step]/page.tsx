@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
-import { Step1Opinions, Step2Upload, TOTAL_STEPS } from "~/modules/cseOpinion";
-import { mapOpinionsFromDb } from "~/modules/cseOpinion/mapOpinionsFromDb";
+import {
+	mapOpinionsFromDb,
+	Step1Opinions,
+	Step2Upload,
+	TOTAL_STEPS,
+} from "~/modules/cseOpinion";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 

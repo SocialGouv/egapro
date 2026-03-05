@@ -11,6 +11,7 @@ const DOWNLOAD_CARD_TITLES = [
 type Props = {
 	email?: string;
 };
+
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
 	const dataYear = new Date().getFullYear();
