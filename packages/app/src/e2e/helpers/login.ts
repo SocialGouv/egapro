@@ -1,10 +1,19 @@
 import type { Page } from "@playwright/test";
 
+/** Dismiss the cookie consent banner if present. */
+export async function dismissCookieBanner(page: Page) {
+	const refuseButton = page.getByRole("button", { name: "Tout refuser" });
+	if (await refuseButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+		await refuseButton.click();
+	}
+}
+
 /** Log in via ProConnect using the FIA1V2 test identity provider. */
 export async function loginWithProConnect(page: Page) {
 	await page.goto("/login");
+	await dismissCookieBanner(page);
 	await page
-		.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+		.getByRole("link", { name: /s.identifier avec\s*proconnect/i })
 		.click();
 
 	// Fill ProConnect login form with the FIA1V2 test identity

@@ -3,6 +3,11 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
+	test.skip(
+		!process.env.SITE_URL,
+		"Requires a deployed environment with ProConnect",
+	);
+
 	test.beforeEach(async ({ page }) => {
 		await loginWithProConnect(page);
 	});
