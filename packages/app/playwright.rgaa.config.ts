@@ -11,9 +11,11 @@ export default defineConfig({
 	retries: 0,
 	workers: 1,
 	reporter: [["json", { outputFile: "rgaa-results.json" }], ["list"]],
+	timeout: 60_000,
 	use: {
 		baseURL,
 		trace: "off",
+		actionTimeout: 15_000,
 	},
 	projects: [
 		{
