@@ -28,6 +28,17 @@ function formatFileSize(bytes: number): string {
 	return `${(bytes / (1024 * 1024)).toFixed(2)} Mo`;
 }
 
+type DsfrModalApi = { disclose: () => void; conceal: () => void };
+
+function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
+	if (!("dsfr" in window)) return null;
+	return (
+		window as unknown as {
+			dsfr: (el: HTMLElement) => { modal: DsfrModalApi };
+		}
+	).dsfr(element).modal;
+}
+
 export function Step2Upload() {
 	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,16 +90,9 @@ export function Step2Upload() {
 	function openModal() {
 		const dialog = modalRef.current;
 		if (!dialog) return;
-		if ("dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => {
-						modal: { disclose: () => void };
-					};
-				}
-			)
-				.dsfr(dialog)
-				.modal.disclose();
+		const modal = getDsfrModal(dialog);
+		if (modal) {
+			modal.disclose();
 		} else {
 			dialog.showModal();
 		}
@@ -97,16 +101,9 @@ export function Step2Upload() {
 	const closeModal = useCallback(() => {
 		const dialog = modalRef.current;
 		if (!dialog) return;
-		if ("dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => {
-						modal: { conceal: () => void };
-					};
-				}
-			)
-				.dsfr(dialog)
-				.modal.conceal();
+		const modal = getDsfrModal(dialog);
+		if (modal) {
+			modal.conceal();
 		} else {
 			dialog.close();
 		}
@@ -212,6 +209,9 @@ export function Step2Upload() {
 					</section>
 				)}
 
+				<label className="fr-sr-only" htmlFor="cse-file-upload">
+					Sélectionner un fichier PDF
+				</label>
 				<input
 					accept=".pdf"
 					aria-describedby="cse-file-upload-messages"

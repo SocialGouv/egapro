@@ -11,8 +11,8 @@ type Props = {
 
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
-	const year = new Date().getFullYear() + 1;
 	const dataYear = new Date().getFullYear();
+	const year = dataYear + 1;
 
 	return (
 		<div>
@@ -49,45 +49,22 @@ export function ConfirmationPage({ email }: Props) {
 			</h2>
 
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
-				<div className={styles.downloadCard}>
-					<p className="fr-text--bold fr-text--md fr-mb-1w">
-						Télécharger le récapitulatif de la déclaration des indicateurs
-					</p>
-					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année {year} au titre des données {dataYear}
-					</p>
-					<div className={styles.downloadFooter}>
-						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
-						<span aria-hidden="true" className="fr-icon-download-line" />
+				{[
+					"Télécharger le récapitulatif de la déclaration des indicateurs",
+					"Télécharger le récapitulatif de la seconde déclaration de l\u2019indicateur par catégorie de salarié",
+					"Télécharger le récapitulatif des éléments transmis",
+				].map((title) => (
+					<div className={styles.downloadCard} key={title}>
+						<p className="fr-text--bold fr-text--md fr-mb-1w">{title}</p>
+						<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
+							Année {year} au titre des données {dataYear}
+						</p>
+						<div className={styles.downloadFooter}>
+							<span className="fr-text--xs fr-text--mention-grey">PDF</span>
+							<span aria-hidden="true" className="fr-icon-download-line" />
+						</div>
 					</div>
-				</div>
-
-				<div className={styles.downloadCard}>
-					<p className="fr-text--bold fr-text--md fr-mb-1w">
-						Télécharger le récapitulatif de la seconde déclaration de
-						l&apos;indicateur par catégorie de salarié
-					</p>
-					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année {year} au titre des données {dataYear}
-					</p>
-					<div className={styles.downloadFooter}>
-						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
-						<span aria-hidden="true" className="fr-icon-download-line" />
-					</div>
-				</div>
-
-				<div className={styles.downloadCard}>
-					<p className="fr-text--bold fr-text--md fr-mb-1w">
-						Télécharger le récapitulatif des éléments transmis
-					</p>
-					<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-						Année {year} au titre des données {dataYear}
-					</p>
-					<div className={styles.downloadFooter}>
-						<span className="fr-text--xs fr-text--mention-grey">PDF</span>
-						<span aria-hidden="true" className="fr-icon-download-line" />
-					</div>
-				</div>
+				))}
 			</div>
 
 			<div className={`fr-p-5w fr-mb-4w ${styles.feedbackBanner}`}>

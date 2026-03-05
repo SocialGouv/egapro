@@ -95,9 +95,9 @@ export function Step1Opinions({ initialData, email }: Props) {
 				email={email ?? "adresse@exemple.fr"}
 			/>
 
-			<p className="fr-h4 fr-mt-5w fr-mb-3w" role="presentation">
+			<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
 				Transmettre l'avis ou les avis du CSE
-			</p>
+			</h2>
 
 			<CseStepIndicator currentStep={1} />
 
