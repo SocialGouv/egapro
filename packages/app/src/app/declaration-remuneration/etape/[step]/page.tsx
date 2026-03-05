@@ -21,7 +21,7 @@ export default async function StepPage({ params }: StepPageProps) {
 
 	// If declaration is already submitted, redirect non-recap steps to the recap
 	if (data.declaration.status === "submitted" && step !== 6) {
-		redirect("/declaration/etape/6");
+		redirect("/declaration-remuneration/etape/6");
 	}
 
 	const stepCategories = (s: number) =>
