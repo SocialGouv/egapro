@@ -1,0 +1,326 @@
+{
+  "realm": "egapro",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "sslRequired": "none",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Default user role"
+      }
+    ]
+  },
+  "defaultRoles": ["user"],
+  "defaultDefaultClientScopes": ["email", "profile", "roles", "web-origins", "acr", "phone", "organizations"],
+  "clientScopes": [
+    {
+      "name": "email",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "email verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "emailVerified",
+            "claim.name": "email_verified",
+            "jsonType.label": "boolean",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "given_name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "firstName",
+            "claim.name": "given_name",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "family_name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "lastName",
+            "claim.name": "family_name",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "updated_at",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "updatedAt",
+            "claim.name": "updated_at",
+            "jsonType.label": "long",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "web-origins",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "allowed web origins",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-allowed-origins-mapper",
+          "consentRequired": false,
+          "config": {}
+        }
+      ]
+    },
+    {
+      "name": "acr",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "acr loa level",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-acr-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "organizations",
+      "description": "Provides organizations claim with siren/siret",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "Access your organizations"
+      },
+      "protocolMappers": [
+        {
+          "name": "organizations-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "organizations",
+            "claim.name": "organizations",
+            "jsonType.label": "JSON",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "name": "phone",
+      "description": "Phone number scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "phone-number",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "phoneNumber",
+            "claim.name": "phone_number",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "egapro-local",
+      "name": "EgaPro Local",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "egapro-local-secret",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "https://*.ovh.fabrique.social.gouv.fr/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "https://*.ovh.fabrique.social.gouv.fr"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "openid",
+        "email",
+        "profile",
+        "phone",
+        "organizations"
+      ],
+      "optionalClientScopes": []
+    }
+  ],
+  "users": [
+    {
+      "username": "test@fia1.fr",
+      "email": "test@fia1.fr",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Jean",
+      "lastName": "Dupont",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0612345678"],
+        "job": ["Responsable RH"],
+        "organizations": ["[{\"id\":1,\"siren\":\"123456789\",\"siret\":\"12345678900001\",\"label\":\"Entreprise Test A\",\"is_collectivite_territoriale\":false,\"is_external\":false,\"is_service_public\":false},{\"id\":2,\"siren\":\"987654321\",\"siret\":\"98765432100001\",\"label\":\"Entreprise Test B\",\"is_collectivite_territoriale\":false,\"is_external\":false,\"is_service_public\":true}]"]
+      },
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "single@test.fr",
+      "email": "single@test.fr",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Marie",
+      "lastName": "Martin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0698765432"],
+        "job": ["DRH"],
+        "organizations": ["[{\"id\":3,\"siren\":\"111222333\",\"siret\":\"11122233300001\",\"label\":\"Entreprise Unique\",\"is_collectivite_territoriale\":false,\"is_external\":false,\"is_service_public\":false}]"]
+      },
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "staff@egapro.fr",
+      "email": "staff@egapro.fr",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Staff",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "staff",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0600000000"],
+        "job": ["Administrateur"],
+        "organizations": ["[{\"id\":4,\"siren\":\"444555666\",\"siret\":\"44455566600001\",\"label\":\"Administration Egapro\",\"is_collectivite_territoriale\":false,\"is_external\":false,\"is_service_public\":true}]"]
+      },
+      "realmRoles": ["user"]
+    }
+  ]
+}

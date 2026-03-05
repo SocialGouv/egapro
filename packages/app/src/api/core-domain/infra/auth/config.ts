@@ -47,11 +47,13 @@ declare module "next-auth/jwt" {
   }
 }
 
-const charonMcpUrl = new URL(`fabriqueKeycloak/`, config.api.security.auth.charonUrl);
-const charonGithubUrl = new URL("github/", config.api.security.auth.charonUrl);
+const charonUrl = config.api.security.auth.charonUrl;
+const useCharon = config.env !== "prod" && charonUrl;
+const charonMcpUrl = useCharon ? new URL(`fabriqueKeycloak/`, charonUrl) : null;
+const charonGithubUrl = useCharon ? new URL("github/", charonUrl) : null;
 export const monCompteProProvider = ProConnectProvider({
   ...config.api.security.moncomptepro,
-  ...(config.env !== "prod"
+  ...(useCharon && charonMcpUrl
     ? {
         wellKnown: new URL(`.well-known/openid-configuration`, charonMcpUrl).toString(),
       }
@@ -117,7 +119,7 @@ export const authConfig: AuthOptions = {
     }),
     GithubProvider({
       ...config.api.security.github,
-      ...(config.env !== "prod"
+      ...(useCharon && charonGithubUrl
         ? {
             authorization: {
               url: new URL("login/oauth/authorize", charonGithubUrl).toString(),
