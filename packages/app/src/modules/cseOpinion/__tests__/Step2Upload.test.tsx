@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { Step2Upload } from "../Step2Upload";
 
+function getFileInput() {
+	return document.getElementById("cse-file-upload") as HTMLInputElement;
+}
+
 describe("Step2Upload", () => {
 	it("renders the page title", () => {
 		render(<Step2Upload />);
@@ -27,10 +31,19 @@ describe("Step2Upload", () => {
 		expect(screen.getByText(/Taille maximale.*pdf/)).toBeInTheDocument();
 	});
 
-	it("renders the file upload input", () => {
+	it("renders the dropzone with select button", () => {
 		render(<Step2Upload />);
 
-		const fileInput = screen.getByLabelText(/Ajouter un fichier/);
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
+	});
+
+	it("renders a hidden file input", () => {
+		render(<Step2Upload />);
+
+		const fileInput = getFileInput();
 		expect(fileInput).toBeInTheDocument();
 		expect(fileInput).toHaveAttribute("type", "file");
 		expect(fileInput).toHaveAttribute("accept", ".pdf");
@@ -71,7 +84,7 @@ describe("Step2Upload", () => {
 		const user = userEvent.setup();
 		render(<Step2Upload />);
 
-		const fileInput = screen.getByLabelText(/Ajouter un fichier/);
+		const fileInput = getFileInput();
 		expect(fileInput).toHaveAttribute("aria-invalid", "false");
 
 		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
@@ -83,9 +96,8 @@ describe("Step2Upload", () => {
 		render(<Step2Upload />);
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
-		const fileInput = screen.getByLabelText(/Ajouter un fichier/);
+		const fileInput = getFileInput();
 
-		// Use fireEvent to bypass accept attribute filtering (userEvent respects it)
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
@@ -102,7 +114,7 @@ describe("Step2Upload", () => {
 		const file = new File([largeContent], "large.pdf", {
 			type: "application/pdf",
 		});
-		const fileInput = screen.getByLabelText(/Ajouter un fichier/);
+		const fileInput = getFileInput();
 
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -121,19 +133,41 @@ describe("Step2Upload", () => {
 		expect(dialog).toHaveAttribute("id", "cse-submit-modal");
 	});
 
-	it("accepts PDF file and shows filename", async () => {
+	it("accepts PDF file and shows file card", () => {
+		render(<Step2Upload />);
+
+		const file = new File(["content"], "avis-cse.pdf", {
+			type: "application/pdf",
+		});
+		const fileInput = getFileInput();
+
+		fireEvent.change(fileInput, { target: { files: [file] } });
+
+		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
+		expect(screen.getByText("Importation réussie")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Supprimer/ }),
+		).toBeInTheDocument();
+	});
+
+	it("removes file when delete button is clicked", async () => {
 		const user = userEvent.setup();
 		render(<Step2Upload />);
 
 		const file = new File(["content"], "avis-cse.pdf", {
 			type: "application/pdf",
 		});
-		const fileInput = screen.getByLabelText(/Ajouter un fichier/);
+		const fileInput = getFileInput();
 
-		await user.upload(fileInput, file);
+		fireEvent.change(fileInput, { target: { files: [file] } });
 
+		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
+
+		await user.click(screen.getByRole("button", { name: /Supprimer/ }));
+
+		expect(screen.queryByText("avis-cse.pdf")).not.toBeInTheDocument();
 		expect(
-			screen.getByText(/Fichier sélectionné.*avis-cse\.pdf/),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeInTheDocument();
 	});
 });

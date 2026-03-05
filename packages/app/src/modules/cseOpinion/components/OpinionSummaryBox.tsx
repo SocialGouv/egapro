@@ -1,3 +1,5 @@
+import styles from "./OpinionSummaryBox.module.scss";
+
 type Props = {
 	firstDeclTitle: string;
 	secondDeclTitle: string;
@@ -10,7 +12,7 @@ export function OpinionSummaryBox({
 	secondDeclGapTitle,
 }: Props) {
 	return (
-		<div className="fr-p-4w fr-background-alt--blue-france">
+		<div className={`fr-p-4w ${styles.container}`}>
 			<p className="fr-text--bold fr-text--sm fr-mb-2w">
 				Avis CSE à transmettre :
 			</p>

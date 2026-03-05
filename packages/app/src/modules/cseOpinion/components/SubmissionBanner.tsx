@@ -1,3 +1,5 @@
+import styles from "./SubmissionBanner.module.scss";
+
 type Props = {
 	email: string;
 	deadline: string;
@@ -5,7 +7,9 @@ type Props = {
 
 export function SubmissionBanner({ email, deadline }: Props) {
 	return (
-		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
+		<div
+			className={`fr-grid-row fr-grid-row--gutters fr-p-4w ${styles.container}`}
+		>
 			<div className="fr-col-12 fr-col-md-6">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-auto">
@@ -26,7 +30,7 @@ export function SubmissionBanner({ email, deadline }: Props) {
 				</div>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">
-				<div className="fr-p-2w fr-border fr-background-default--grey">
+				<div className={`fr-p-2w fr-border ${styles.receiptCard}`}>
 					<p className="fr-text--sm fr-mb-1w">
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
 						<strong>{email}</strong>.
