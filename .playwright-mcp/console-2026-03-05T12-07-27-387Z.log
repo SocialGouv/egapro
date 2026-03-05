@@ -1,0 +1,4 @@
+[     152ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'web-share'. @ :0
+[     354ms] [WARNING] %cdsfr : HeaderLinks # -  header__tools-links content is different from header__menu-links content.
+As you're using a dynamic framework, you should handle duplication of this content yourself, please refer to documentation:
+https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/en-tete  font-family:Marianne;line-height: 1.5;color:#ba4500 @ https://egapro-install-local-keycloak.ovh.fabrique.social.gouv.fr/_next/static/chunks/4603-1576f97d09fb07eb.js:15

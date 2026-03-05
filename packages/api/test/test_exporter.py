@@ -71,6 +71,37 @@ async def test_dump():
     ]
 
 
+async def test_public_data_as_xlsx_excludes_non_public_years(declaration):
+    """Les déclarations dont l'année n'est pas dans PUBLIC_YEARS ne doivent pas apparaître."""
+    # Déclaration 2024 — dans PUBLIC_YEARS, doit être exportée
+    await declaration(
+        siren="11111111",
+        year=2024,
+        company="Entreprise Publique",
+        compute_notes=True,
+        entreprise={"code_naf": "47.25Z", "région": "11", "département": "77"},
+    )
+    # Déclaration 2025 — pas dans PUBLIC_YEARS (campagne 2026), ne doit PAS être exportée
+    await declaration(
+        siren="22222222",
+        year=2025,
+        company="Entreprise Future",
+        compute_notes=True,
+        entreprise={"code_naf": "47.25Z", "région": "11", "département": "77"},
+    )
+    from unittest.mock import patch
+    with patch("egapro.constants.PUBLIC_YEARS", [2018, 2019, 2020, 2021, 2022, 2023, 2024]):
+        workbook = await exporter.public_data_as_xlsx(debug=True)
+    sheet = workbook.active
+    rows = list(sheet.iter_rows(min_row=2, values_only=True))
+    years = [row[0] for row in rows]
+    sirens = [row[3] for row in rows]
+    assert 2024 in years, "La déclaration 2024 devrait être présente"
+    assert 2025 not in years, "La déclaration 2025 ne devrait PAS être présente"
+    assert "11111111" in sirens
+    assert "22222222" not in sirens
+
+
 async def test_dgt_dump(declaration):
     await declaration(
         siren="12345678",
