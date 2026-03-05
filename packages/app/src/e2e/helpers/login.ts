@@ -13,7 +13,7 @@ export async function loginWithProConnect(page: Page) {
 	await page.goto("/login");
 	await dismissCookieBanner(page);
 	await page
-		.getByRole("link", { name: /s.identifier avec\s*proconnect/i })
+		.getByRole("button", { name: /s.identifier avec\s*proconnect/i })
 		.click();
 
 	// Fill ProConnect login form with the FIA1V2 test identity

@@ -3,12 +3,12 @@ import { expect, test } from "@playwright/test";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
 
 test.describe("Login page", () => {
-	test("displays ProConnect link", async ({ page }) => {
+	test("displays ProConnect button", async ({ page }) => {
 		await page.goto("/login");
 		await dismissCookieBanner(page);
 
 		await expect(
-			page.getByRole("link", { name: /s.identifier avec\s*proconnect/i }),
+			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).toBeVisible();
 	});
 });
@@ -61,7 +61,7 @@ test.describe("ProConnect authentication flow", () => {
 
 		await page.waitForURL("**/login", { timeout: 10000 });
 		await expect(
-			page.getByRole("link", { name: /s.identifier avec\s*proconnect/i }),
+			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).toBeVisible();
 	});
 
