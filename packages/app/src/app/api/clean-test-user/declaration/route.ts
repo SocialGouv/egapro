@@ -1,5 +1,6 @@
 import { declarationRepo, ownershipRepo, representationEquilibreeRepo } from "@api/core-domain/repo";
 import { assertServerSession } from "@api/utils/auth";
+import { config } from "@common/config";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { NextResponse } from "next/server";
@@ -7,13 +8,17 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 // Liste des emails autorisés à utiliser cette API
-const AUTHORIZED_EMAIL = "egapro-e2e@fabrique.social.gouv.fr";
+const AUTHORIZED_EMAILS = ["egapro-e2e@fabrique.social.gouv.fr", "test@fia1.fr"];
 
 /**
- * Route API pour supprimer les déclarations de test lié à l'email
- * Cette route n'est accessible qu'aux utilisateurs dont l'email est dans la liste AUTHORIZED_EMAILS
+ * Route API pour supprimer les déclarations de test lié à l'email.
+ * Désactivée en production.
  */
 export async function POST() {
+  if (config.env === "prod") {
+    return NextResponse.json({ error: "Route désactivée en production" }, { status: 404 });
+  }
+
   try {
     // Vérifier si l'utilisateur est authentifié
     const session = await assertServerSession();
@@ -22,13 +27,13 @@ export async function POST() {
     const lastYear = new PositiveNumber(currentYear - 1);
 
     // Vérifier si l'email de l'utilisateur est autorisé
-    if (!userEmail || AUTHORIZED_EMAIL != userEmail) {
+    if (!userEmail || !AUTHORIZED_EMAILS.includes(userEmail)) {
       return NextResponse.json({ error: "Vous n'êtes pas autorisé à effectuer cette action" }, { status: 403 });
     }
 
     // Récupérer toutes les déclarations des emails autorisés
     // Convertir les chaînes de caractères en objets Email
-    const sirens = await ownershipRepo.getAllSirenByEmail(new Email(AUTHORIZED_EMAIL));
+    const sirens = await ownershipRepo.getAllSirenByEmail(new Email(userEmail));
 
     // Supprimer chaque déclaration
     let deletedCount = 0;
