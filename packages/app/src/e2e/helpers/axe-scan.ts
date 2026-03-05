@@ -20,12 +20,14 @@ export type PageAuditResult = {
 	incompleteCount: number;
 };
 
+type AxeAnalyzeResult = Awaited<ReturnType<AxeBuilder["analyze"]>>;
+
 /** Run axe-core WCAG 2.1 AA audit on the current page. */
 export async function scanPage(
 	page: Page,
 	label: string,
 ): Promise<PageAuditResult> {
-	const results = await new AxeBuilder({ page })
+	const results: AxeAnalyzeResult = await new AxeBuilder({ page })
 		.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"])
 		.analyze();
 

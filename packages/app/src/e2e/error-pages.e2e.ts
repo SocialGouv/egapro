@@ -33,7 +33,7 @@ test.describe("500 Internal Server Error page", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("/test-error");
 		await page
-			.getByRole("button", { name: "Déclencher une erreur 500" })
+			.getByRole("button", { name: "Déclencher une erreur client" })
 			.click();
 	});
 

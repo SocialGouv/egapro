@@ -47,18 +47,13 @@ jobs:
           cache-enabled: true
           fallback-enabled: true
           build-args: |
-            NEXT_PUBLIC_API_URL=https://egapro.travail.gouv.fr/api
-            NEXT_PUBLIC_API_V2_URL=https://egapro.travail.gouv.fr/apiv2
-            NEXTAUTH_URL=https://egapro.travail.gouv.fr/api/auth
-            NEXT_PUBLIC_GITHUB_SHA=${{ github.sha }}
             NEXT_PUBLIC_EGAPRO_ENV=prod
-            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.APP_SENTRY_DSN }}
-            SENTRY_ORG=incubateur
-            SENTRY_PROJECT=egapro-app
-            SENTRY_URL=https://sentry2.fabrique.social.gouv.fr
-            SENTRY_RELEASE=${{ github.ref_name }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
+            NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_PROD }}
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+            sentry_release=${{ github.ref_name }}
 
   kontinuous:
     needs: [build-app]

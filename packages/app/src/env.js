@@ -58,6 +58,7 @@ export const env = createEnv({
 			.optional()
 			.default("dev"),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
 		NEXT_PUBLIC_MATOMO_URL: z.string().url().optional(),
 		NEXT_PUBLIC_MATOMO_SITE_ID: z.string().optional(),
 	},
@@ -77,6 +78,7 @@ export const env = createEnv({
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 		NEXT_PUBLIC_MATOMO_URL: process.env.NEXT_PUBLIC_MATOMO_URL,
 		NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID,
 	},
