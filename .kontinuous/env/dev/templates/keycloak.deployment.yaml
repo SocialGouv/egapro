@@ -5,7 +5,10 @@ metadata:
   labels:
     app: keycloak
   annotations:
-    oblik.socialgouv.io/enabled: "false"
+    oblik.socialgouv.io/min-request-memory: "768Mi"
+    oblik.socialgouv.io/min-limit-memory: "768Mi"
+    oblik.socialgouv.io/min-request-cpu: "200m"
+    oblik.socialgouv.io/min-limit-cpu: "1"
 spec:
   replicas: 1
   selector:
@@ -16,7 +19,10 @@ spec:
       labels:
         app: keycloak
       annotations:
-        oblik.socialgouv.io/enabled: "false"
+        oblik.socialgouv.io/min-request-memory: "768Mi"
+        oblik.socialgouv.io/min-limit-memory: "768Mi"
+        oblik.socialgouv.io/min-request-cpu: "200m"
+        oblik.socialgouv.io/min-limit-cpu: "1"
     spec:
       containers:
         - name: keycloak
