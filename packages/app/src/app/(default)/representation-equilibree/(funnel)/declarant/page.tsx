@@ -2,6 +2,7 @@ import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Link } from "@design-system";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { TITLES } from "../titles";
@@ -20,7 +21,7 @@ const proconnectPersonalInformationUrl = process.env.EGAPRO_PROCONNECT_PERSONAL_
 
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
-  if (!session) return null;
+  if (!session) redirect("/login");
 
   return (
     <>
