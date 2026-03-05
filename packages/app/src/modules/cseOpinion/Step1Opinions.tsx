@@ -27,6 +27,11 @@ export function Step1Opinions({ initialData, email }: Props) {
 	const [firstDeclGap, setFirstDeclGap] = useState<boolean | null>(
 		initialData?.firstDeclGapConsulted ?? null,
 	);
+	const [firstDeclGapOpinion, setFirstDeclGapOpinion] =
+		useState<OpinionType | null>(initialData?.firstDeclGapOpinion ?? null);
+	const [firstDeclGapDate, setFirstDeclGapDate] = useState(
+		initialData?.firstDeclGapDate ?? "",
+	);
 
 	const [secondDeclOpinion, setSecondDeclOpinion] =
 		useState<OpinionType | null>(
@@ -38,19 +43,31 @@ export function Step1Opinions({ initialData, email }: Props) {
 	const [secondDeclGap, setSecondDeclGap] = useState<boolean | null>(
 		initialData?.secondDeclGapConsulted ?? null,
 	);
+	const [secondDeclGapOpinion, setSecondDeclGapOpinion] =
+		useState<OpinionType | null>(initialData?.secondDeclGapOpinion ?? null);
+	const [secondDeclGapDate, setSecondDeclGapDate] = useState(
+		initialData?.secondDeclGapDate ?? "",
+	);
 
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 
+		const firstGapIncomplete =
+			firstDeclGap === true && (!firstDeclGapOpinion || !firstDeclGapDate);
+		const secondGapIncomplete =
+			secondDeclGap === true && (!secondDeclGapOpinion || !secondDeclGapDate);
+
 		if (
 			!firstDeclOpinion ||
 			!firstDeclDate ||
 			firstDeclGap === null ||
+			firstGapIncomplete ||
 			!secondDeclOpinion ||
 			!secondDeclDate ||
-			secondDeclGap === null
+			secondDeclGap === null ||
+			secondGapIncomplete
 		) {
 			setValidationError("Veuillez remplir tous les champs obligatoires.");
 			return;
@@ -103,8 +120,12 @@ export function Step1Opinions({ initialData, email }: Props) {
 
 				<GapConsultationCard
 					consulted={firstDeclGap}
+					date={firstDeclGapDate}
 					id="first-decl-gap"
 					onConsultedChange={setFirstDeclGap}
+					onDateChange={setFirstDeclGapDate}
+					onOpinionChange={setFirstDeclGapOpinion}
+					opinion={firstDeclGapOpinion}
 				/>
 			</div>
 
@@ -122,8 +143,12 @@ export function Step1Opinions({ initialData, email }: Props) {
 
 				<GapConsultationCard
 					consulted={secondDeclGap}
+					date={secondDeclGapDate}
 					id="second-decl-gap"
 					onConsultedChange={setSecondDeclGap}
+					onDateChange={setSecondDeclGapDate}
+					onOpinionChange={setSecondDeclGapOpinion}
+					opinion={secondDeclGapOpinion}
 				/>
 			</div>
 

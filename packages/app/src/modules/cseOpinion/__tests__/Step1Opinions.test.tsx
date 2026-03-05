@@ -79,9 +79,13 @@ describe("Step1Opinions", () => {
 					firstDeclAccuracyOpinion: "favorable",
 					firstDeclAccuracyDate: "2026-01-15",
 					firstDeclGapConsulted: true,
+					firstDeclGapOpinion: "favorable",
+					firstDeclGapDate: "2026-01-20",
 					secondDeclAccuracyOpinion: "unfavorable",
 					secondDeclAccuracyDate: "2026-02-01",
 					secondDeclGapConsulted: false,
+					secondDeclGapOpinion: null,
+					secondDeclGapDate: null,
 				}}
 			/>,
 		);
@@ -97,10 +101,14 @@ describe("Step1Opinions", () => {
 				initialData={{
 					firstDeclAccuracyOpinion: "favorable",
 					firstDeclAccuracyDate: "2026-01-15",
-					firstDeclGapConsulted: true,
+					firstDeclGapConsulted: false,
+					firstDeclGapOpinion: null,
+					firstDeclGapDate: null,
 					secondDeclAccuracyOpinion: "unfavorable",
 					secondDeclAccuracyDate: "2026-02-01",
 					secondDeclGapConsulted: false,
+					secondDeclGapOpinion: null,
+					secondDeclGapDate: null,
 				}}
 			/>,
 		);
