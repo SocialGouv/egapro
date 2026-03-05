@@ -13,8 +13,8 @@ export default defineConfig({
   e2e: {
     baseUrl: process.env.TEST_BASEURL ?? "http://localhost:3000",
     env: {
-      E2E_USERNAME: process.env.E2E_USERNAME,
-      E2E_PASSWORD: process.env.E2E_PASSWORD,
+      E2E_USERNAME: process.env.E2E_USERNAME || "test@fia1.fr",
+      E2E_PASSWORD: process.env.E2E_PASSWORD || "test",
     },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,

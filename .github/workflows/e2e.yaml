@@ -43,5 +43,5 @@ jobs:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
           TEST_BASEURL: ${{ env.SITE_URL }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_USERNAME: ${{ github.ref == 'refs/heads/master' && secrets.E2E_USERNAME || 'test@fia1.fr' }}
+          E2E_PASSWORD: ${{ github.ref == 'refs/heads/master' && secrets.E2E_PASSWORD || 'test' }}
