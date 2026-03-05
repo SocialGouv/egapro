@@ -168,6 +168,20 @@ test.describe("Declaration workflow", () => {
 		await expect(accordion).toBeVisible();
 	});
 
+	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
+		await page.goto("/declaration-remuneration/etape/6");
+
+		// Click the "Suivant" submit button to open the confirmation modal
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		// Check the certification checkbox and confirm
+		await page.getByLabel(/Je certifie/).check();
+		await page.getByRole("button", { name: "Valider" }).click();
+
+		// Verify navigation to the CSE opinion page
+		await page.waitForURL("**/avis-cse/**");
+	});
+
 	test("previous button navigates back", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/2");
 
