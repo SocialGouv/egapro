@@ -1,6 +1,5 @@
 import { renderToBuffer } from "@react-pdf/renderer";
-import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
-import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
+import { buildPdfData, DeclarationPdfDocument } from "~/modules/declarationPdf";
 import { auth } from "~/server/auth";
 
 export async function GET() {

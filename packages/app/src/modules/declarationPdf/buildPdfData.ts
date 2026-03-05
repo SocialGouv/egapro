@@ -1,14 +1,34 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-
+import type { StepCategoryData } from "~/modules/declaration-remuneration";
 import { db } from "~/server/db";
 import {
 	companies,
 	declarationCategories,
 	declarations,
 } from "~/server/db/schema";
+
 import type { DeclarationPdfData } from "./types";
+
+type CategoryRow = typeof declarationCategories.$inferSelect;
+
+function mapStepCategories(
+	categories: CategoryRow[],
+	step: number,
+): StepCategoryData[] {
+	return categories
+		.filter((c) => c.step === step)
+		.map((c) => ({
+			name: c.categoryName,
+			womenCount: c.womenCount ?? undefined,
+			menCount: c.menCount ?? undefined,
+			womenValue: c.womenValue ?? undefined,
+			menValue: c.menValue ?? undefined,
+			womenMedianValue: c.womenMedianValue ?? undefined,
+			menMedianValue: c.menMedianValue ?? undefined,
+		}));
+}
 
 export async function buildPdfData(
 	siren: string,
@@ -75,29 +95,8 @@ export async function buildPdfData(
 		beneficiaryMen: beneficiaryRow?.menValue ?? "",
 	};
 
-	const step4Categories = categories
-		.filter((c) => c.step === 4)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
-
-	const step5Categories = categories
-		.filter((c) => c.step === 5)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
+	const step4Categories = mapStepCategories(categories, 4);
+	const step5Categories = mapStepCategories(categories, 5);
 
 	return {
 		companyName: company?.name ?? `Entreprise ${siren}`,
