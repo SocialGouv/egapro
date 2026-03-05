@@ -5,8 +5,8 @@ import { loginWithProConnect } from "./helpers/login";
 
 /** Scan a page with axe-core and attach results to the test report (no assertion). */
 async function auditPage(page: Page, path: string, label: string) {
-	await page.goto(path);
-	await page.waitForLoadState("networkidle");
+	await page.goto(path, { waitUntil: "domcontentloaded" });
+	await page.waitForTimeout(2000);
 	const result = await scanPage(page, label);
 
 	await test.info().attach("axe-results", {
