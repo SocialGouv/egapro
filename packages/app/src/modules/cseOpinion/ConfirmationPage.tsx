@@ -9,6 +9,12 @@ type Props = {
 	email?: string;
 };
 
+const DOWNLOAD_CARDS = [
+	"Télécharger le récapitulatif de la déclaration des indicateurs",
+	"Télécharger le récapitulatif de la seconde déclaration de l\u2019indicateur par catégorie de salarié",
+	"Télécharger le récapitulatif des éléments transmis",
+];
+
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
 	const dataYear = new Date().getFullYear();
@@ -49,11 +55,7 @@ export function ConfirmationPage({ email }: Props) {
 			</h2>
 
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
-				{[
-					"Télécharger le récapitulatif de la déclaration des indicateurs",
-					"Télécharger le récapitulatif de la seconde déclaration de l\u2019indicateur par catégorie de salarié",
-					"Télécharger le récapitulatif des éléments transmis",
-				].map((title) => (
+				{DOWNLOAD_CARDS.map((title) => (
 					<div className={styles.downloadCard} key={title}>
 						<p className="fr-text--bold fr-text--md fr-mb-1w">{title}</p>
 						<p className="fr-text--sm fr-text--default-grey fr-mb-1w">

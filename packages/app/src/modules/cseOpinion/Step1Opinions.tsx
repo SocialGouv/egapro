@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "~/trpc/react";
 
 import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -52,6 +53,10 @@ export function Step1Opinions({ initialData, email }: Props) {
 
 	const [validationError, setValidationError] = useState<string | null>(null);
 
+	const mutation = api.cseOpinion.saveOpinions.useMutation({
+		onSuccess: () => router.push("/avis-cse/etape/2"),
+	});
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 
@@ -75,8 +80,22 @@ export function Step1Opinions({ initialData, email }: Props) {
 		}
 
 		setValidationError(null);
-		// TODO: call tRPC mutation when API is wired
-		router.push("/avis-cse/etape/2");
+		mutation.mutate({
+			firstDeclaration: {
+				accuracyOpinion: firstDeclOpinion,
+				accuracyDate: firstDeclDate,
+				gapConsulted: firstDeclGap,
+				gapOpinion: firstDeclGapOpinion,
+				gapDate: firstDeclGapDate || null,
+			},
+			secondDeclaration: {
+				accuracyOpinion: secondDeclOpinion,
+				accuracyDate: secondDeclDate,
+				gapConsulted: secondDeclGap,
+				gapOpinion: secondDeclGapOpinion,
+				gapDate: secondDeclGapDate || null,
+			},
+		});
 	}
 
 	return (
@@ -159,6 +178,11 @@ export function Step1Opinions({ initialData, email }: Props) {
 						<p>{validationError}</p>
 					</div>
 				)}
+				{mutation.error && (
+					<div className="fr-alert fr-alert--error fr-mt-3w">
+						<p>{mutation.error.message}</p>
+					</div>
+				)}
 			</div>
 
 			<div className={`fr-mt-4w ${formStyles.actions}`}>
@@ -171,9 +195,10 @@ export function Step1Opinions({ initialData, email }: Props) {
 				</button>
 				<button
 					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+					disabled={mutation.isPending}
 					type="submit"
 				>
-					Suivant
+					{mutation.isPending ? "Enregistrement…" : "Suivant"}
 				</button>
 			</div>
 		</form>
