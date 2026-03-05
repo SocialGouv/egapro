@@ -54,9 +54,7 @@ describe("buildPdfData", () => {
 
 	it("throws when declaration is not submitted", async () => {
 		resetMocks();
-		queryResults.push([
-			{ siren: "123456789", year: 2026, status: "draft" },
-		]);
+		queryResults.push([{ siren: "123456789", year: 2026, status: "draft" }]);
 
 		const { buildPdfData } = await import("../buildPdfData");
 		await expect(buildPdfData("123456789", 2026)).rejects.toThrow(
