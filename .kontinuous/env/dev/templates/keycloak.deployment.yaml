@@ -4,6 +4,8 @@ metadata:
   name: keycloak
   labels:
     app: keycloak
+  annotations:
+    oblik.socialgouv.io/enabled: "false"
 spec:
   replicas: 1
   selector:
@@ -13,6 +15,8 @@ spec:
     metadata:
       labels:
         app: keycloak
+      annotations:
+        oblik.socialgouv.io/enabled: "false"
     spec:
       containers:
         - name: keycloak
