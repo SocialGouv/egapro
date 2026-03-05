@@ -1,4 +1,5 @@
 import { companyRouter } from "~/server/api/routers/company";
+import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
 import { profileRouter } from "~/server/api/routers/profile";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
@@ -10,6 +11,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
 	company: companyRouter,
+	cseOpinion: cseOpinionRouter,
 	declaration: declarationRouter,
 	profile: profileRouter,
 });
