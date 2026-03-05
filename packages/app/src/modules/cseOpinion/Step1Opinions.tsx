@@ -8,6 +8,7 @@ import { CseStepIndicator } from "./components/CseStepIndicator";
 import { GapConsultationCard } from "./components/GapConsultationCard";
 import { SubmissionBanner } from "./components/SubmissionBanner";
 import styles from "./Step1Opinions.module.scss";
+import formStyles from "./shared/formActions.module.scss";
 import type { CseOpinionStep1Data, OpinionType } from "./types";
 
 type Props = {
@@ -160,7 +161,7 @@ export function Step1Opinions({ initialData, email }: Props) {
 				)}
 			</div>
 
-			<div className={`fr-mt-4w ${styles.actions}`}>
+			<div className={`fr-mt-4w ${formStyles.actions}`}>
 				<button
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 					onClick={() => router.back()}

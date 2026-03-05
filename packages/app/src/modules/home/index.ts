@@ -1,3 +1,4 @@
+export { DsfrPictogram } from "./DsfrPictogram";
 export { HomeHero } from "./HomeHero";
 export { HomeNotice } from "./HomeNotice";
 export { HomePage } from "./HomePage";

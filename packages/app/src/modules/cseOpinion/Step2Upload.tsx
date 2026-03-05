@@ -7,7 +7,7 @@ import { useCallback, useRef, useState } from "react";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
-import styles from "./Step2Upload.module.scss";
+import styles from "./shared/formActions.module.scss";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
