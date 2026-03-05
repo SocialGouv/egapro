@@ -1,0 +1,26 @@
+{{- if .Values.keycloak }}
+{{- if .Values.keycloak.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+    - hosts:
+        - keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr
+      secretName: api-crt
+  rules:
+    - host: keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+{{- end }}
+{{- end }}
