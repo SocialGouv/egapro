@@ -63,7 +63,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/representation-equilibree/publication");
-    cy.selectByLabel("Date de publication des écarts calculables *").clear().type("2025-03-07");
+    cy.selectByLabel("Date de publication des écarts calculables *").clear().type("2026-01-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les écarts calculables ? *", "Oui");
     cy.selectByLabel(
       "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables *",

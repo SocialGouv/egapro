@@ -125,7 +125,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-02-18");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2026-01-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Oui");
     cy.selectByLabel(
       "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus *",
@@ -177,7 +177,7 @@ describe("Declaration", () => {
           "L’objectif de progression est d’avoir au moins deux femmes dans cette catégorie et obtenir une note de 5/10 sur cet indicateur.",
         );
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-07-01");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
     cy.contains("button", "Valider et transmettre les informations").click();
     cy.contains("Votre déclaration a été validée et transmise");
     cy.contains("button", "Retour").click();

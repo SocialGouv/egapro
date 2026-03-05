@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+  annotations:
+    oblik.socialgouv.io/min-request-memory: "768Mi"
+    oblik.socialgouv.io/min-limit-memory: "768Mi"
+    oblik.socialgouv.io/min-request-cpu: "200m"
+    oblik.socialgouv.io/min-limit-cpu: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+      annotations:
+        oblik.socialgouv.io/min-request-memory: "768Mi"
+        oblik.socialgouv.io/min-limit-memory: "768Mi"
+        oblik.socialgouv.io/min-request-cpu: "200m"
+        oblik.socialgouv.io/min-limit-cpu: "1"
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          command:
+            - /bin/bash
+            - -c
+            - |
+              export KC_HOSTNAME=https://keycloak-${POD_NAMESPACE}.ovh.fabrique.social.gouv.fr
+              exec /opt/keycloak/bin/kc.sh start-dev --import-realm
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KC_PROXY_HEADERS
+              value: xforwarded
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import/
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /realms/egapro
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /realms/egapro
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm

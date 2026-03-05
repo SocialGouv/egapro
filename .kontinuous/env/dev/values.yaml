@@ -10,11 +10,30 @@ api:
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+    - secretRef:
+        name: "egapro-secret"
+    - secretRef:
+        name: github-oauth
+    - configMapRef:
+        name: egapro
+    - secretRef:
+        name: redis-auth
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
     MAILER_SMTP_PORT: "1025"
     MAILER_SMTP_SSL: "False"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro"
+    EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
+    EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
+
+keycloak:
+  enabled: true
 
 maildev: {}
 pgweb: {}
