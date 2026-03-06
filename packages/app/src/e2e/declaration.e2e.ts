@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
+	test.describe.configure({ mode: "serial" });
+
 	test.skip(
 		!process.env.SITE_URL,
 		"Requires a deployed environment with ProConnect",
