@@ -40,13 +40,11 @@ jobs:
             echo "Namespace not found, skipping DB cleanup"
             exit 0
           fi
-          PGHOST=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGHOST}' | base64 -d)
-          PGPORT=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGPORT}' | base64 -d)
-          PGUSER=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGUSER}' | base64 -d)
-          PGPASSWORD=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGPASSWORD}' | base64 -d)
-          PGDATABASE=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGDATABASE}' | base64 -d)
-          PGSSLMODE=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGSSLMODE}' | base64 -d)
-          DATABASE_URL="postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=${PGSSLMODE}"
+          DATABASE_URL=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.DATABASE_URL}' | base64 -d)
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL not found in secret, skipping DB cleanup"
+            exit 0
+          fi
           echo "DATABASE_URL=${DATABASE_URL}" >> "$GITHUB_OUTPUT"
       - name: Run E2E tests
         run: pnpm test:e2e
