@@ -39,7 +39,7 @@ jobs:
           fi
         env:
           KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
-      - name: Extract DATABASE_URL from Kubernetes
+      - name: Setup DB access via port-forward
         id: db
         env:
           KUBECONFIG: /tmp/kubeconfig
@@ -49,17 +49,43 @@ jobs:
             echo "Namespace not found, skipping DB cleanup"
             exit 0
           fi
-          DATABASE_URL=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.DATABASE_URL}' | base64 -d)
-          if [ -z "$DATABASE_URL" ]; then
-            echo "DATABASE_URL not found in secret, skipping DB cleanup"
+
+          # Extract server URL and token from kubeconfig (--raw to avoid redaction)
+          SERVER=$(kubectl config view --minify --raw -o jsonpath='{.clusters[0].cluster.server}')
+          TOKEN=$(kubectl config view --minify --raw -o jsonpath='{.users[0].user.token}')
+
+          # Fetch secret via direct REST call (bypasses kubectl API discovery issues with Rancher)
+          SECRET_JSON=$(curl -sk -H "Authorization: Bearer $TOKEN" "$SERVER/api/v1/namespaces/$NAMESPACE/secrets/pg-app")
+          PGUSER=$(echo "$SECRET_JSON" | python3 -c "import sys,json,base64; d=json.load(sys.stdin); print(base64.b64decode(d['data']['PGUSER']).decode())")
+          PGPASSWORD=$(echo "$SECRET_JSON" | python3 -c "import sys,json,base64; d=json.load(sys.stdin); print(base64.b64decode(d['data']['PGPASSWORD']).decode())")
+          PGDATABASE=$(echo "$SECRET_JSON" | python3 -c "import sys,json,base64; d=json.load(sys.stdin); print(base64.b64decode(d['data']['PGDATABASE']).decode())")
+          if [ -z "$PGUSER" ]; then
+            echo "DB credentials not found in secret, skipping DB cleanup"
             exit 0
           fi
+
+          # Port-forward pg service to localhost (pg-rw is internal K8s DNS)
+          kubectl port-forward -n "$NAMESPACE" svc/pg-rw 5432:5432 &
+          PF_PID=$!
+          echo "PF_PID=${PF_PID}" >> "$GITHUB_OUTPUT"
+          sleep 3
+
+          # Verify port-forward is running
+          if ! kill -0 "$PF_PID" 2>/dev/null; then
+            echo "Port-forward failed to start, skipping DB cleanup"
+            exit 0
+          fi
+
+          DATABASE_URL="postgresql://${PGUSER}:${PGPASSWORD}@localhost:5432/${PGDATABASE}?sslmode=disable"
           echo "DATABASE_URL=${DATABASE_URL}" >> "$GITHUB_OUTPUT"
       - name: Run E2E tests
         run: pnpm test:e2e
         env:
           SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
           DATABASE_URL: ${{ steps.db.outputs.DATABASE_URL }}
+      - name: Stop port-forward
+        if: always() && steps.db.outputs.PF_PID
+        run: kill ${{ steps.db.outputs.PF_PID }} 2>/dev/null || true
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: failure()
