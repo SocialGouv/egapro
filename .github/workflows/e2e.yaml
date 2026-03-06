@@ -30,10 +30,14 @@ jobs:
       - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
+      - name: Write kubeconfig
+        run: echo "$KUBECONFIG_DATA" > /tmp/kubeconfig
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
       - name: Extract DATABASE_URL from Kubernetes
         id: db
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          KUBECONFIG: /tmp/kubeconfig
         run: |
           NAMESPACE="${{ steps.env.outputs.subdomain }}"
           if [ -z "$NAMESPACE" ]; then
