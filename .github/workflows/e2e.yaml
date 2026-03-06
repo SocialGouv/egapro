@@ -31,7 +31,12 @@ jobs:
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
       - name: Write kubeconfig
-        run: echo "$KUBECONFIG_DATA" > /tmp/kubeconfig
+        run: |
+          printenv KUBECONFIG_DATA > /tmp/kubeconfig
+          # If the secret is base64-encoded, decode it
+          if ! kubectl --kubeconfig=/tmp/kubeconfig config view &>/dev/null; then
+            printenv KUBECONFIG_DATA | base64 -d > /tmp/kubeconfig
+          fi
         env:
           KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
       - name: Extract DATABASE_URL from Kubernetes
