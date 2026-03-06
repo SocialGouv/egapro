@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 
+import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
@@ -256,6 +257,8 @@ export function Step6Review({
 					</p>
 				)}
 			</div>
+
+			{isSubmitted && <DownloadDeclarationPdfButton />}
 
 			{isSubmitted ? (
 				<FormActions nextHref="/" nextLabel="Suivant" previousHref="/" />
