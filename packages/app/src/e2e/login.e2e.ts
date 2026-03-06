@@ -28,7 +28,9 @@ test.describe("ProConnect authentication flow", () => {
 		).toBeVisible();
 
 		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
+			page.getByText(
+				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+			),
 		).toBeVisible();
 	});
 

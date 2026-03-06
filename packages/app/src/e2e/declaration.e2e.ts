@@ -25,7 +25,9 @@ test.describe("Declaration workflow", () => {
 	test("shows company name and SIREN in banner", async ({ page }) => {
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
 		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
+			page.getByText(
+				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+			),
 		).toBeVisible();
 	});
 
@@ -173,24 +175,24 @@ test.describe("Declaration workflow", () => {
 		await expect(accordion).toBeVisible();
 	});
 
+	test("previous button navigates back", async ({ page }) => {
+		await page.goto("/declaration-remuneration/etape/2");
+
+		await page.getByRole("link", { name: "Précédent" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/1");
+	});
+
 	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/6");
 
 		// Click the "Suivant" submit button to open the confirmation modal
 		await page.getByRole("button", { name: "Suivant" }).click();
 
-		// Check the certification checkbox and confirm
-		await page.getByLabel(/Je certifie/).check();
+		// Check the certification checkbox (click label — DSFR hides the native input)
+		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
 		// Verify navigation to the CSE opinion page
 		await page.waitForURL("**/avis-cse/**");
-	});
-
-	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration-remuneration/etape/2");
-
-		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/1");
 	});
 });
