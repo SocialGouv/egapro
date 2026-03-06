@@ -35,11 +35,17 @@ jobs:
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
-          NAMESPACE="${{ steps.env.outputs.namespace }}"
-          if [ -z "$NAMESPACE" ]; then
-            echo "Namespace not found, skipping DB cleanup"
+          BRANCH_SLUG="${{ steps.env.outputs.branchSlug32 }}"
+          if [ -z "$BRANCH_SLUG" ]; then
+            echo "Branch slug not found, skipping DB cleanup"
             exit 0
           fi
+          NAMESPACE=$(kubectl get secret pg-app --all-namespaces --no-headers 2>/dev/null | grep "$BRANCH_SLUG" | awk '{print $1}' | head -1)
+          if [ -z "$NAMESPACE" ]; then
+            echo "Namespace not found for branch slug $BRANCH_SLUG, skipping DB cleanup"
+            exit 0
+          fi
+          echo "Found namespace: $NAMESPACE"
           PGHOST=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGHOST}' | base64 -d)
           PGPORT=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGPORT}' | base64 -d)
           PGUSER=$(kubectl get secret pg-app -n "$NAMESPACE" -o jsonpath='{.data.PGUSER}' | base64 -d)
