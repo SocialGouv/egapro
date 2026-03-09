@@ -9,6 +9,7 @@ export {
 	formatGap,
 	gapLevel,
 } from "./shared/gapUtils";
+export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
 export { Step3VariablePay } from "./steps/Step3VariablePay";

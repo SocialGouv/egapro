@@ -47,7 +47,7 @@ export function Step6Review({
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
-			router.push("/avis-cse");
+			router.push("/declaration-remuneration/parcours-conformite");
 		},
 	});
 
@@ -248,7 +248,7 @@ export function Step6Review({
 
 			{isSubmitted ? (
 				<FormActions
-					nextHref="/avis-cse"
+					nextHref="/declaration-remuneration/parcours-conformite"
 					nextLabel="Suivant"
 					previousHref="/"
 				/>

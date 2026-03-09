@@ -273,4 +273,25 @@ export const declarationRouter = createTRPCRouter({
 
 		return { success: true };
 	}),
+
+	saveCompliancePath: protectedProcedure
+		.input(
+			z.object({
+				path: z.enum(["justify", "corrective_action", "joint_evaluation"]),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const siren = getSiren(ctx.session.user.siret);
+			const year = getCurrentYear();
+
+			await ctx.db
+				.update(declarations)
+				.set({
+					compliancePath: input.path,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+
+			return { success: true };
+		}),
 });
