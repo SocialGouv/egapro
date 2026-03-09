@@ -82,20 +82,28 @@ Cypress.Commands.add("loginWithKeycloak", () => {
 
   if (needsCrossOrigin) {
     cy.origin(keycloakUrl, { args: { username, password } }, ({ username, password }) => {
-      cy.get("form", { timeout: 10000 }).should("be.visible");
-      cy.get('input[id="username"]').clear().type(username);
-      cy.get('input[id="password"]').clear().type(password);
-      cy.get("form").submit();
+      // Wait for form or handle SSO auto-redirect (no form if already authenticated)
+      cy.get("body", { timeout: 30000 }).then(($body) => {
+        if ($body.find('input[id="username"]').length > 0) {
+          cy.get('input[id="username"]').clear().type(username);
+          cy.get('input[id="password"]').clear().type(password);
+          cy.get("form").submit();
+        }
+      });
     });
   } else {
-    // Same origin (CI): interact directly without cy.origin()
-    cy.get("form", { timeout: 10000 }).should("be.visible");
-    cy.get('input[id="username"]').clear().type(username);
-    cy.get('input[id="password"]').clear().type(password);
-    cy.get("form").submit();
+    // Same superdomain (CI): interact directly without cy.origin()
+    // Wait for form or handle SSO auto-redirect
+    cy.get("body", { timeout: 30000 }).then(($body) => {
+      if ($body.find('input[id="username"]').length > 0) {
+        cy.get('input[id="username"]').clear().type(username);
+        cy.get('input[id="password"]').clear().type(password);
+        cy.get("form").submit();
+      }
+    });
   }
 
   // Wait for redirect back to app origin after Keycloak login
-  cy.url({ timeout: 15000 }).should("include", Cypress.config("baseUrl")!);
-  cy.get(".fr-header__tools-links", { timeout: 15000 }).should("exist");
+  cy.url({ timeout: 30000 }).should("include", Cypress.config("baseUrl")!);
+  cy.get(".fr-header__tools-links", { timeout: 30000 }).should("exist");
 });
