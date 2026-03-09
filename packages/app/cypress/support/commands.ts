@@ -58,18 +58,50 @@ Cypress.Commands.add("checkUrl", url => {
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {
+  const keycloakUrl = Cypress.env("KEYCLOAK_URL") as string;
+
+  // Clear all cookies to ensure clean login
+  cy.clearAllCookies();
+  cy.clearAllSessionStorage();
+  cy.clearAllLocalStorage();
+
   cy.visit("/login");
   cy.checkUrl("/login");
   cy.get(".fr-connect").click();
 
-  cy.location("origin").should("eq", "https://keycloak.undercloud.fabrique.social.gouv.fr");
   const username = Cypress.env("E2E_USERNAME");
   const password = Cypress.env("E2E_PASSWORD");
 
-  cy.get("form", { timeout: 10000 }).should("be.visible");
-  cy.get('input[id="username"]').clear().type(username);
-  cy.get('input[id="password"]').clear().type(password);
-  cy.get("form").submit();
+  // cy.origin() is needed when the app and Keycloak are on different ports of the
+  // same host (local dev: localhost:3000 vs localhost:8180). In CI, they are on
+  // different subdomains of the same domain (*.ovh.fabrique.social.gouv.fr) which
+  // Cypress treats as same superdomain, so cy.origin() must NOT be used.
+  const baseUrl = new URL(Cypress.config("baseUrl")!);
+  const keycloakParsed = new URL(keycloakUrl);
+  const needsCrossOrigin = baseUrl.hostname === keycloakParsed.hostname && baseUrl.port !== keycloakParsed.port;
 
-  cy.get(".fr-header__tools-links").should("exist");
+  if (needsCrossOrigin) {
+    cy.origin(keycloakUrl, { args: { username, password } }, ({ username, password }) => {
+      // Wait for form or handle SSO auto-redirect (no form if already authenticated)
+      cy.get("body", { timeout: 30000 }).then(($body) => {
+        if ($body.find('input[id="username"]').length > 0) {
+          cy.get('input[id="username"]').clear().type(username);
+          cy.get('input[id="password"]').clear().type(password);
+          cy.get("form").submit();
+        }
+      });
+    });
+  } else {
+    // Same superdomain (CI): interact directly without cy.origin()
+    // Must wait for the redirect to Keycloak before interacting with the form,
+    // otherwise cy.get("body") resolves on the app page before navigation occurs.
+    cy.url({ timeout: 30000 }).should("include", keycloakParsed.hostname);
+    cy.get('input[id="username"]', { timeout: 30000 }).clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
+  }
+
+  // Wait for redirect back to app origin after Keycloak login
+  cy.url({ timeout: 30000 }).should("include", Cypress.config("baseUrl")!);
+  cy.get(".fr-header__tools-links", { timeout: 30000 }).should("exist");
 });

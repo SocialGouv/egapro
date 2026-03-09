@@ -6,11 +6,13 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/apiv2/clean-test-user/declaration");
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then((response) => { cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`); });
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     cy.loginWithKeycloak();
+    // Clean any leftover declarations (important for retry attempts)
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
@@ -135,7 +137,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-03-04");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2026-01-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Oui");
     cy.selectByLabel(
       "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus *",
@@ -189,8 +191,8 @@ describe("Declaration", () => {
           "TAttendre à minima 5/10. Pour cela, renforcer notre politique de recrutement à destination des femmes pour les postes à haut niveau de responsabilité.",
         );
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-03-31");
-    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2025-03-31");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
+    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2026-01-15");
     cy.selectByLabel("Préciser les modalités de communication des mesures de correction auprès de vos salariés.").type(
       "Note de service envoyé aux salariés",
     );

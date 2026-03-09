@@ -22,6 +22,9 @@ app:
     MAILER_SMTP_SSL: "False"
     NODE_ENV: production
 #    EMAIL_LOGIN: "True"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro"
+    EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
+    EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
     REDIS_SENTINEL_MASTER_NAME: "mymaster"
     REDIS_SENTINEL_HOSTS: |
       [
@@ -31,6 +34,9 @@ app:
       ]
   annotations:
     oblik.socialgouv.io/min-request-cpu: 500m
+
+keycloak:
+  enabled: true
 
 maildev: {}
 pgweb: {}

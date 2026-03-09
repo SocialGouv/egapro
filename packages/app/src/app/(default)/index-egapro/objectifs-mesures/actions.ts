@@ -11,7 +11,6 @@ import { assertServerSession } from "@api/utils/auth";
 import { DeclarationSpecificationError } from "@common/core-domain/domain/specification/DeclarationSpecification";
 import { type UpdateOpMcDTO } from "@common/core-domain/dtos/UpdateOpMcDTO";
 import { type ServerActionResponse } from "@common/utils/next";
-import assert from "assert";
 import { getServerSession } from "next-auth";
 
 export async function getDeclarationOpmc(siren: string, year: number) {
@@ -56,17 +55,13 @@ export async function updateDeclarationOpmc({
     const useCase = new UpdateDeclarationWithOpMc(declarationRepo);
     await useCase.execute({ opmc, siren, year });
 
-    const receiptUseCase = new SendOpmcReceipt(declarationRepo, referentRepo, globalMailerService, jsxPdfService);
-
-    assert(siren, "Siren is required");
-    assert(year, "Year is required");
-    assert(email, "Email is required");
-
-    await receiptUseCase.execute({
-      siren,
-      year,
-      email,
-    });
+    // Send receipt in background, don't block the form submission
+    if (siren && year && email) {
+      const receiptUseCase = new SendOpmcReceipt(declarationRepo, referentRepo, globalMailerService, jsxPdfService);
+      receiptUseCase.execute({ siren, year, email }).catch(error => {
+        console.error("Failed to send OPMC receipt:", error);
+      });
+    }
 
     // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
     // revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);

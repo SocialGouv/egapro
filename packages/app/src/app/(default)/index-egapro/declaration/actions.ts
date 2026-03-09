@@ -50,26 +50,22 @@ export async function saveDeclaration(
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
     await useCase.execute({ declaration, override: session?.user?.staff });
 
-    const receiptUseCase = new SendDeclarationReceipt(
-      declarationRepo,
-      referentRepo,
-      globalMailerService,
-      jsxPdfService,
-    );
-
-    assert(siren, "Siren is required");
-    assert(year, "Year is required");
-    assert(email, "Email is required");
-
-    await receiptUseCase.execute({
-      siren,
-      year,
-      email,
-    });
-
     // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
     // revalidatePath(`/index-egapro/declaration/${siren}/${year}`);
     // revalidatePath(`/index-egapro/declaration/${siren}/${year}/pdf`);
+
+    // Send receipt in background, don't block the declaration submission
+    if (siren && year && email) {
+      const receiptUseCase = new SendDeclarationReceipt(
+        declarationRepo,
+        referentRepo,
+        globalMailerService,
+        jsxPdfService,
+      );
+      receiptUseCase.execute({ siren, year, email }).catch(error => {
+        console.error("Failed to send declaration receipt:", error);
+      });
+    }
 
     return {
       ok: true,
