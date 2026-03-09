@@ -55,7 +55,13 @@ export function CseOpinionLayout({ company, children }: Props) {
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
 								Existence d'un CSE :{" "}
-								<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+								<strong>
+									{company.hasCse === null
+										? "Non renseigné"
+										: company.hasCse
+											? "Oui"
+											: "Non"}
+								</strong>
 							</p>
 						</div>
 					</div>

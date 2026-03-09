@@ -91,7 +91,7 @@ export function Step1Opinions({ initialData, email }: Props) {
 			</div>
 
 			<SubmissionBanner
-				deadline="1er février 2027"
+				deadline={`1er février ${new Date().getFullYear() + 1}`}
 				email={email ?? "adresse@exemple.fr"}
 			/>
 

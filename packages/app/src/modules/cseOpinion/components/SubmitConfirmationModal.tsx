@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 const MODAL_ID = "cse-submit-modal";
 
@@ -16,6 +16,11 @@ export function SubmitConfirmationModal({
 	onSubmit,
 }: Props) {
 	const [certified, setCertified] = useState(false);
+
+	const handleClose = useCallback(() => {
+		setCertified(false);
+		onClose();
+	}, [onClose]);
 
 	return (
 		<dialog
@@ -34,6 +39,7 @@ export function SubmitConfirmationModal({
 								<button
 									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
+									onClick={handleClose}
 									title="Fermer"
 									type="button"
 								>
@@ -47,7 +53,8 @@ export function SubmitConfirmationModal({
 								<p>
 									Vous allez transmettre aux services du ministère chargé du
 									Travail l&apos;avis ou les avis de votre CSE relatifs à
-									l&apos;ensemble de votre démarche 2027.
+									l&apos;ensemble de votre démarche{" "}
+									{new Date().getFullYear() + 1}.
 								</p>
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
@@ -76,7 +83,7 @@ export function SubmitConfirmationModal({
 									<li>
 										<button
 											className="fr-btn fr-btn--secondary"
-											onClick={onClose}
+											onClick={handleClose}
 											type="button"
 										>
 											Annuler

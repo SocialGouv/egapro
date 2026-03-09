@@ -83,11 +83,25 @@ describe("SubmitConfirmationModal", () => {
 		expect(onClose).toHaveBeenCalledOnce();
 	});
 
-	it("renders close button", () => {
+	it("calls onClose when close button is clicked", async () => {
+		const onClose = vi.fn();
+		const user = userEvent.setup();
+		const { dialog } = renderOpenModal({ onClose });
+
+		await user.click(within(dialog).getByRole("button", { name: "Fermer" }));
+
+		expect(onClose).toHaveBeenCalledOnce();
+	});
+
+	it("resets certified checkbox when modal is closed", async () => {
+		const user = userEvent.setup();
 		const { dialog } = renderOpenModal();
 
-		expect(
-			within(dialog).getByRole("button", { name: "Fermer" }),
-		).toBeInTheDocument();
+		const checkbox = within(dialog).getByRole("checkbox");
+		await user.click(checkbox);
+		expect(checkbox).toBeChecked();
+
+		await user.click(within(dialog).getByRole("button", { name: "Annuler" }));
+		expect(checkbox).not.toBeChecked();
 	});
 });
