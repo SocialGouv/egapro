@@ -44,6 +44,8 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     "Minified React error #", // Handle all minified React errors
     // API rate-limiting errors
     "Could not fetch company",
+    // Non-blocking receipt/email errors
+    "Cannot send receipt",
     // DSFR-related errors
     "@codegouvfr/react-dsfr/useIsDark",
     "MutationObserver.observe",
