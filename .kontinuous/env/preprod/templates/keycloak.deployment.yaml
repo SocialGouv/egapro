@@ -44,9 +44,30 @@ spec:
             - name: KC_PROXY_HEADERS
               value: xforwarded
             - name: KEYCLOAK_ADMIN
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: KEYCLOAK_ADMIN
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: KEYCLOAK_CLIENT_SECRET
+            - name: KEYCLOAK_TEST_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: KEYCLOAK_TEST_USER_PASSWORD
+            - name: KEYCLOAK_STAFF_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: KEYCLOAK_STAFF_USER_PASSWORD
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import/

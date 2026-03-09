@@ -249,7 +249,7 @@ data:
           "name": "EgaPro Local",
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
-          "secret": "egapro-local-secret",
+          "secret": "${KEYCLOAK_CLIENT_SECRET:egapro-local-secret}",
           "redirectUris": [
             "http://localhost:3000/*",
             "https://*"
@@ -285,7 +285,7 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "test",
+              "value": "${KEYCLOAK_TEST_USER_PASSWORD:test}",
               "temporary": false
             }
           ],
@@ -314,7 +314,7 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "test",
+              "value": "${KEYCLOAK_TEST_USER_PASSWORD:test}",
               "temporary": false
             }
           ],
@@ -343,7 +343,7 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "staff",
+              "value": "${KEYCLOAK_STAFF_USER_PASSWORD:staff}",
               "temporary": false
             }
           ],
