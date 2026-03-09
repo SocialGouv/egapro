@@ -4,6 +4,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;
 
 export default defineConfig({
+	globalSetup: "./src/e2e/global-setup.ts",
 	testDir: "./src/e2e",
 	testMatch: "**/*.e2e.{ts,tsx}",
 	fullyParallel: true,
