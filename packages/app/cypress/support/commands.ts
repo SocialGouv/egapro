@@ -58,6 +58,8 @@ Cypress.Commands.add("checkUrl", url => {
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {
+  const keycloakUrl = Cypress.env("KEYCLOAK_URL") as string;
+
   // Clear all cookies to ensure clean login
   cy.clearAllCookies();
   cy.clearAllSessionStorage();
@@ -70,12 +72,28 @@ Cypress.Commands.add("loginWithKeycloak", () => {
   const username = Cypress.env("E2E_USERNAME");
   const password = Cypress.env("E2E_PASSWORD");
 
-  // Both locally (localhost:3000 → localhost:8180) and in CI (both on *.ovh.fabrique.social.gouv.fr),
-  // Keycloak shares the same superdomain as the app, so cy.origin() is not needed.
-  cy.get("form", { timeout: 10000 }).should("be.visible");
-  cy.get('input[id="username"]').clear().type(username);
-  cy.get('input[id="password"]').clear().type(password);
-  cy.get("form").submit();
+  // cy.origin() is needed when the app and Keycloak are on different ports of the
+  // same host (local dev: localhost:3000 vs localhost:8180). In CI, they are on
+  // different subdomains of the same domain (*.ovh.fabrique.social.gouv.fr) which
+  // Cypress treats as same superdomain, so cy.origin() must NOT be used.
+  const baseUrl = new URL(Cypress.config("baseUrl")!);
+  const keycloakParsed = new URL(keycloakUrl);
+  const needsCrossOrigin = baseUrl.hostname === keycloakParsed.hostname && baseUrl.port !== keycloakParsed.port;
+
+  if (needsCrossOrigin) {
+    cy.origin(keycloakUrl, { args: { username, password } }, ({ username, password }) => {
+      cy.get("form", { timeout: 10000 }).should("be.visible");
+      cy.get('input[id="username"]').clear().type(username);
+      cy.get('input[id="password"]').clear().type(password);
+      cy.get("form").submit();
+    });
+  } else {
+    // Same origin (CI): interact directly without cy.origin()
+    cy.get("form", { timeout: 10000 }).should("be.visible");
+    cy.get('input[id="username"]').clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
+  }
 
   // Wait for redirect back to app origin after Keycloak login
   cy.url({ timeout: 15000 }).should("include", Cypress.config("baseUrl")!);
