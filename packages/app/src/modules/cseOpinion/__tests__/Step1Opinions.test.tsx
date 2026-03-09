@@ -1,9 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step1Opinions } from "../Step1Opinions";
 
-// Access the mocked router
 const mockPush = vi.fn();
 
 vi.mock("next/navigation", async () => ({
@@ -15,6 +14,10 @@ vi.mock("next/navigation", async () => ({
 		refresh: vi.fn(),
 	}),
 }));
+
+beforeEach(() => {
+	mockPush.mockClear();
+});
 
 describe("Step1Opinions", () => {
 	it("renders the page title", () => {

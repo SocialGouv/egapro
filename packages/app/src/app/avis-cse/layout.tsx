@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
+import { extractSiren } from "~/modules/my-space";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -19,7 +20,7 @@ export default async function CseOpinionRootLayout({
 		redirect("/");
 	}
 
-	const siren = siret.slice(0, 9);
+	const siren = extractSiren(siret);
 	const company = await api.company.get({ siren });
 
 	return <CseOpinionLayout company={company}>{children}</CseOpinionLayout>;

@@ -1,25 +1,25 @@
 import Link from "next/link";
-
 import { DsfrPictogram } from "~/modules/home";
-
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
 
+const DOWNLOAD_CARD_TITLES = [
+	"Télécharger le récapitulatif de la déclaration des indicateurs",
+	"Télécharger le récapitulatif de la seconde déclaration de l\u2019indicateur par catégorie de salarié",
+	"Télécharger le récapitulatif des éléments transmis",
+];
 type Props = {
 	email?: string;
 };
-
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
 	const dataYear = new Date().getFullYear();
 	const year = dataYear + 1;
-
 	return (
 		<div>
 			<h1 className="fr-h4 fr-mb-4w">
 				Démarche des indicateurs de rémunération {year}
 			</h1>
-
 			<div className={`fr-mb-4w ${styles.successRow}`}>
 				<DsfrPictogram
 					path="/dsfr/artwork/pictograms/system/success.svg"
@@ -29,7 +29,6 @@ export function ConfirmationPage({ email }: Props) {
 					Votre parcours {year} est désormais terminé
 				</p>
 			</div>
-
 			<div className={styles.receiptCard}>
 				<p className="fr-text--sm fr-mb-1w">
 					Un accusé de réception a été envoyé à l&apos;adresse e-mail{" "}
@@ -49,11 +48,7 @@ export function ConfirmationPage({ email }: Props) {
 			</h2>
 
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
-				{[
-					"Télécharger le récapitulatif de la déclaration des indicateurs",
-					"Télécharger le récapitulatif de la seconde déclaration de l\u2019indicateur par catégorie de salarié",
-					"Télécharger le récapitulatif des éléments transmis",
-				].map((title) => (
+				{DOWNLOAD_CARD_TITLES.map((title) => (
 					<div className={styles.downloadCard} key={title}>
 						<p className="fr-text--bold fr-text--md fr-mb-1w">{title}</p>
 						<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
@@ -78,7 +73,6 @@ export function ConfirmationPage({ email }: Props) {
 					</p>
 				</div>
 			</div>
-
 			<div className={formStyles.actions}>
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
