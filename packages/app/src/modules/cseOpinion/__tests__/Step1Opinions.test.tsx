@@ -15,8 +15,28 @@ vi.mock("next/navigation", async () => ({
 	}),
 }));
 
+const mockMutate = vi.fn();
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		cseOpinion: {
+			saveOpinions: {
+				useMutation: (opts: { onSuccess?: () => void }) => {
+					mockMutate.mockImplementation(() => opts.onSuccess?.());
+					return {
+						mutate: mockMutate,
+						isPending: false,
+						error: null,
+					};
+				},
+			},
+		},
+	},
+}));
+
 beforeEach(() => {
 	mockPush.mockClear();
+	mockMutate.mockClear();
 });
 
 describe("Step1Opinions", () => {
@@ -74,7 +94,7 @@ describe("Step1Opinions", () => {
 		expect(mockPush).not.toHaveBeenCalled();
 	});
 
-	it("navigates to step 2 when all fields are filled", async () => {
+	it("calls mutation and navigates to step 2 when all fields are filled", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Opinions
@@ -95,6 +115,22 @@ describe("Step1Opinions", () => {
 
 		await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
+		expect(mockMutate).toHaveBeenCalledWith({
+			firstDeclaration: {
+				accuracyOpinion: "favorable",
+				accuracyDate: "2026-01-15",
+				gapConsulted: true,
+				gapOpinion: "favorable",
+				gapDate: "2026-01-20",
+			},
+			secondDeclaration: {
+				accuracyOpinion: "unfavorable",
+				accuracyDate: "2026-02-01",
+				gapConsulted: false,
+				gapOpinion: null,
+				gapDate: null,
+			},
+		});
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
 	});
 

@@ -43,6 +43,13 @@
 			"when": 1772611200000,
 			"tag": "0005_standardize_snake_case",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1772703893318,
+			"tag": "0006_lovely_korath",
+			"breakpoints": true
 		}
 	]
 }

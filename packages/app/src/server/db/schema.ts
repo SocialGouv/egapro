@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
+import { index, pgTableCreator, primaryKey, unique } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
 /**
@@ -201,9 +201,133 @@ export const userCompaniesRelations = relations(userCompanies, ({ one }) => ({
 export const companiesRelations = relations(companies, ({ many }) => ({
 	userCompanies: many(userCompanies),
 	declarations: many(declarations),
+	cseOpinions: many(cseOpinions),
+	cseOpinionFiles: many(cseOpinionFiles),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
 	accounts: many(accounts),
 	userCompanies: many(userCompanies),
 }));
+
+// ── CSE Opinion tables ──────────────────────────────────────────────
+
+export const cseOpinions = createTable(
+	"cse_opinion",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		year: d.integer().notNull(),
+		declarationNumber: d.integer().notNull(),
+		type: d.varchar({ length: 20 }).notNull(),
+		gapConsulted: d.boolean(),
+		opinion: d.varchar({ length: 20 }),
+		opinionDate: d.varchar({ length: 10 }),
+		declarantId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		unique("cse_opinion_siren_year_decl_type_idx").on(
+			t.siren,
+			t.year,
+			t.declarationNumber,
+			t.type,
+		),
+		index("cse_opinion_siren_year_idx").on(t.siren, t.year),
+	],
+);
+
+export const cseOpinionsRelations = relations(cseOpinions, ({ one, many }) => ({
+	company: one(companies, {
+		fields: [cseOpinions.siren],
+		references: [companies.siren],
+	}),
+	declarant: one(users, {
+		fields: [cseOpinions.declarantId],
+		references: [users.id],
+	}),
+	fileLinks: many(cseOpinionFileLinks),
+}));
+
+export const cseOpinionFiles = createTable(
+	"cse_opinion_file",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		year: d.integer().notNull(),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		filePath: d.varchar({ length: 500 }).notNull(),
+		declarantId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		uploadedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [index("cse_opinion_file_siren_year_idx").on(t.siren, t.year)],
+);
+
+export const cseOpinionFilesRelations = relations(
+	cseOpinionFiles,
+	({ one, many }) => ({
+		company: one(companies, {
+			fields: [cseOpinionFiles.siren],
+			references: [companies.siren],
+		}),
+		declarant: one(users, {
+			fields: [cseOpinionFiles.declarantId],
+			references: [users.id],
+		}),
+		opinionLinks: many(cseOpinionFileLinks),
+	}),
+);
+
+export const cseOpinionFileLinks = createTable(
+	"cse_opinion_file_link",
+	(d) => ({
+		fileId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => cseOpinionFiles.id),
+		opinionId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => cseOpinions.id),
+	}),
+	(t) => [primaryKey({ columns: [t.fileId, t.opinionId] })],
+);
+
+export const cseOpinionFileLinksRelations = relations(
+	cseOpinionFileLinks,
+	({ one }) => ({
+		file: one(cseOpinionFiles, {
+			fields: [cseOpinionFileLinks.fileId],
+			references: [cseOpinionFiles.id],
+		}),
+		opinion: one(cseOpinions, {
+			fields: [cseOpinionFileLinks.opinionId],
+			references: [cseOpinions.id],
+		}),
+	}),
+);
