@@ -3,11 +3,6 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
-	test.skip(
-		!process.env.SITE_URL,
-		"Requires a deployed environment with ProConnect",
-	);
-
 	test.beforeEach(async ({ page }) => {
 		await loginWithProConnect(page);
 	});
@@ -180,7 +175,7 @@ test.describe("Declaration workflow", () => {
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		// Check the certification checkbox and confirm
-		await page.getByLabel(/Je certifie/).check();
+		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
 		// Verify navigation to the CSE opinion page
