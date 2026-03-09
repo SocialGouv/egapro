@@ -42,6 +42,8 @@ Cypress.on("uncaught:exception", (err, runnable) => {
     "Loading chunk",
     "Loading CSS chunk",
     "Minified React error #", // Handle all minified React errors
+    // API rate-limiting errors
+    "Could not fetch company",
     // DSFR-related errors
     "@codegouvfr/react-dsfr/useIsDark",
     "MutationObserver.observe",
