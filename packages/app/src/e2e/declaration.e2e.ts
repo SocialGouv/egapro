@@ -3,6 +3,11 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
+	test.skip(
+		!process.env.SITE_URL,
+		"Requires a deployed environment with ProConnect",
+	);
+
 	test.beforeEach(async ({ page }) => {
 		await loginWithProConnect(page);
 	});
@@ -166,6 +171,20 @@ test.describe("Declaration workflow", () => {
 			name: /Définitions et méthode de calcul/i,
 		});
 		await expect(accordion).toBeVisible();
+	});
+
+	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
+		await page.goto("/declaration-remuneration/etape/6");
+
+		// Click the "Suivant" submit button to open the confirmation modal
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		// Check the certification checkbox and confirm
+		await page.getByLabel(/Je certifie/).check();
+		await page.getByRole("button", { name: "Valider" }).click();
+
+		// Verify navigation to the CSE opinion page
+		await page.waitForURL("**/avis-cse/**");
 	});
 
 	test("previous button navigates back", async ({ page }) => {

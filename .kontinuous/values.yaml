@@ -52,6 +52,7 @@ app:
           key: PGSSLMODE
   vars:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
+    NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
 
 pg:
   ~chart: pg

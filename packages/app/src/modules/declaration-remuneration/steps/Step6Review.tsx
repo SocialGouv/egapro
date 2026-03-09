@@ -47,7 +47,7 @@ export function Step6Review({
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
-			router.push("/");
+			router.push("/avis-cse");
 		},
 	});
 
@@ -261,7 +261,11 @@ export function Step6Review({
 			{isSubmitted && <DownloadDeclarationPdfButton />}
 
 			{isSubmitted ? (
-				<FormActions nextHref="/" nextLabel="Suivant" previousHref="/" />
+				<FormActions
+					nextHref="/avis-cse"
+					nextLabel="Suivant"
+					previousHref="/"
+				/>
 			) : (
 				<FormActions
 					nextLabel="Suivant"

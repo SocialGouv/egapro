@@ -253,15 +253,15 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders next link pointing to home when already submitted", () => {
+	it("renders next link pointing to CSE opinion when already submitted", () => {
 		render(<Step6Review isSubmitted />);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
-			"/",
+			"/avis-cse",
 		);
 	});
 
-	it("renders both links pointing to home when already submitted", () => {
+	it("renders previous link to home and next link to CSE when already submitted", () => {
 		render(<Step6Review isSubmitted />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
@@ -269,7 +269,7 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
-			"/",
+			"/avis-cse",
 		);
 	});
 
