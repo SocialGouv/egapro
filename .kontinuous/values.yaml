@@ -157,6 +157,13 @@ files:
   probesPort: 8080
   host: "{{ .Values.global.host }}"
   .ingress.enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 1
+      memory: 512Mi
   volumes:
     - name: files
       persistentVolumeClaim:
@@ -208,6 +215,14 @@ files:
         #       key: API_SENTRY_DSN
         - name: SCHEDULER
           value: "True"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 2
+            memory: 4Gi
+            ephemeral-storage: 5Gi
         volumeMounts:
         - name: files
           mountPath: /mnt/files

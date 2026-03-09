@@ -72,7 +72,7 @@ jobs:
             SENTRY_ORG=incubateur
             SENTRY_PROJECT=egapro-app
             SENTRY_URL=https://sentry2.fabrique.social.gouv.fr
-            SENTRY_RELEASE=${{ github.ref_name }}
+            SENTRY_RELEASE=${{ github.sha }}
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
 
