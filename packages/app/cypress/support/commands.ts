@@ -93,14 +93,12 @@ Cypress.Commands.add("loginWithKeycloak", () => {
     });
   } else {
     // Same superdomain (CI): interact directly without cy.origin()
-    // Wait for form or handle SSO auto-redirect
-    cy.get("body", { timeout: 30000 }).then(($body) => {
-      if ($body.find('input[id="username"]').length > 0) {
-        cy.get('input[id="username"]').clear().type(username);
-        cy.get('input[id="password"]').clear().type(password);
-        cy.get("form").submit();
-      }
-    });
+    // Must wait for the redirect to Keycloak before interacting with the form,
+    // otherwise cy.get("body") resolves on the app page before navigation occurs.
+    cy.url({ timeout: 30000 }).should("include", keycloakParsed.hostname);
+    cy.get('input[id="username"]', { timeout: 30000 }).clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
   }
 
   // Wait for redirect back to app origin after Keycloak login
