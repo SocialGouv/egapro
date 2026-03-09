@@ -34,14 +34,7 @@ export function DeclarationPdfDocument({ data }: Props) {
 				<QuartileSection data={data} />
 				<CategorySection data={data} />
 
-				<Text style={styles.footer}>
-					Document généré le{" "}
-					{new Date().toLocaleDateString("fr-FR", {
-						day: "numeric",
-						month: "long",
-						year: "numeric",
-					})}
-				</Text>
+				<Text style={styles.footer}>Document généré le {data.generatedAt}</Text>
 			</Page>
 		</Document>
 	);

@@ -33,6 +33,7 @@ function mapStepCategories(
 export async function buildPdfData(
 	siren: string,
 	year: number,
+	now: Date,
 ): Promise<DeclarationPdfData> {
 	const [declaration] = await db
 		.select()
@@ -102,6 +103,11 @@ export async function buildPdfData(
 		companyName: company?.name ?? `Entreprise ${siren}`,
 		siren,
 		year,
+		generatedAt: now.toLocaleDateString("fr-FR", {
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+		}),
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
 		step1Categories,

@@ -13,7 +13,7 @@ export async function GET() {
 	const year = new Date().getFullYear();
 
 	try {
-		const data = await buildPdfData(siren, year);
+		const data = await buildPdfData(siren, year, new Date());
 		const buffer = await renderToBuffer(DeclarationPdfDocument({ data }));
 		const filename = `declaration-remuneration-${siren}-${year}.pdf`;
 

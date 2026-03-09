@@ -47,9 +47,9 @@ describe("buildPdfData", () => {
 		queryResults.push([]);
 
 		const { buildPdfData } = await import("../buildPdfData");
-		await expect(buildPdfData("123456789", 2026)).rejects.toThrow(
-			"Déclaration introuvable",
-		);
+		await expect(
+			buildPdfData("123456789", 2026, new Date("2026-03-09")),
+		).rejects.toThrow("Déclaration introuvable");
 	});
 
 	it("throws when declaration is not submitted", async () => {
@@ -57,9 +57,9 @@ describe("buildPdfData", () => {
 		queryResults.push([{ siren: "123456789", year: 2026, status: "draft" }]);
 
 		const { buildPdfData } = await import("../buildPdfData");
-		await expect(buildPdfData("123456789", 2026)).rejects.toThrow(
-			"La déclaration n'est pas encore soumise",
-		);
+		await expect(
+			buildPdfData("123456789", 2026, new Date("2026-03-09")),
+		).rejects.toThrow("La déclaration n'est pas encore soumise");
 	});
 
 	it("returns transformed data for a submitted declaration", async () => {
@@ -138,11 +138,16 @@ describe("buildPdfData", () => {
 		]);
 
 		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData("123456789", 2026);
+		const result = await buildPdfData(
+			"123456789",
+			2026,
+			new Date("2026-03-09"),
+		);
 
 		expect(result.companyName).toBe("Acme Corp");
 		expect(result.siren).toBe("123456789");
 		expect(result.year).toBe(2026);
+		expect(result.generatedAt).toBe("9 mars 2026");
 		expect(result.totalWomen).toBe(50);
 		expect(result.totalMen).toBe(60);
 
@@ -199,7 +204,11 @@ describe("buildPdfData", () => {
 		queryResults.push([]);
 
 		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData("999999999", 2026);
+		const result = await buildPdfData(
+			"999999999",
+			2026,
+			new Date("2026-03-09"),
+		);
 
 		expect(result.companyName).toBe("Entreprise 999999999");
 		expect(result.totalWomen).toBe(0);

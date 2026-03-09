@@ -9,6 +9,7 @@ export type DeclarationPdfData = {
 	companyName: string;
 	siren: string;
 	year: number;
+	generatedAt: string;
 	totalWomen: number;
 	totalMen: number;
 	step1Categories: CategoryData[];
