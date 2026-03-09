@@ -1,12 +1,16 @@
 import styles from "./DeclarationSuccessBanner.module.scss";
 
 type Props = {
+	currentYear: number;
 	email: string;
 	pdfDownloadHref?: string;
 };
 
-export function DeclarationSuccessBanner({ email, pdfDownloadHref }: Props) {
-	const currentYear = new Date().getFullYear();
+export function DeclarationSuccessBanner({
+	currentYear,
+	email,
+	pdfDownloadHref,
+}: Props) {
 	const deadline = `1\u1D49\u02B3 juin ${currentYear}`;
 
 	return (

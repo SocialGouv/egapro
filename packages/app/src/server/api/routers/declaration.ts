@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { declarationCategories, declarations } from "~/server/db/schema";
 
@@ -277,7 +278,7 @@ export const declarationRouter = createTRPCRouter({
 	saveCompliancePath: protectedProcedure
 		.input(
 			z.object({
-				path: z.enum(["justify", "corrective_action", "joint_evaluation"]),
+				path: z.enum(COMPLIANCE_PATHS),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {

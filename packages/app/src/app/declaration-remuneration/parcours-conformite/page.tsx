@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { CompliancePathChoice } from "~/modules/declaration-remuneration";
-import { hasGapsAboveThreshold } from "~/modules/declaration-remuneration/shared/gapUtils";
+import {
+	CompliancePathChoice,
+	hasGapsAboveThreshold,
+} from "~/modules/declaration-remuneration";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -32,10 +34,12 @@ export default async function CompliancePathPage() {
 			: undefined;
 
 	const email = session?.user?.email ?? "";
+	const currentYear = new Date().getFullYear();
 
 	return (
 		<HydrateClient>
 			<CompliancePathChoice
+				currentYear={currentYear}
 				email={email}
 				forcedPath={forcedPath}
 				initialPath={

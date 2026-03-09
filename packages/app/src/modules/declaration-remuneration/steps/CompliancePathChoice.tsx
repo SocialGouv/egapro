@@ -15,6 +15,7 @@ import type { CompliancePathValue } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
+	currentYear: number;
 	email: string;
 	initialPath?: CompliancePathValue;
 	forcedPath?: CompliancePathValue;
@@ -22,12 +23,12 @@ type Props = {
 };
 
 export function CompliancePathChoice({
+	currentYear,
 	email,
 	initialPath,
 	forcedPath,
 	pdfDownloadHref,
 }: Props) {
-	const currentYear = new Date().getFullYear();
 	const router = useRouter();
 	const [selectedPath, setSelectedPath] = useState<
 		CompliancePathValue | undefined
@@ -55,6 +56,7 @@ export function CompliancePathChoice({
 			</div>
 
 			<DeclarationSuccessBanner
+				currentYear={currentYear}
 				email={email}
 				pdfDownloadHref={pdfDownloadHref}
 			/>
