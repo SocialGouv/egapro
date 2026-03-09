@@ -87,11 +87,12 @@ const MesDeclarationsPage = async ({ searchParams }: NextServerPageProps<never, 
     repEq = await getAllRepresentationEquilibreeBySiren(sirenToGet);
     declarations.sort((a, b) => (b.commencer?.annéeIndicateurs || 0) - (a.commencer?.annéeIndicateurs || 0));
     repEq.sort((a, b) => (b.year || 0) - (a.year || 0));
-    for (const siren of sirenList) {
-      const result = await getCompany(siren);
-      if (result.ok) {
-        sirenWithCompanyName.push({ siren, companyName: result.data?.simpleLabel || "" });
-      }
+    for (const company of session?.user.companies || []) {
+      const result = await getCompany(company.siren);
+      sirenWithCompanyName.push({
+        siren: company.siren,
+        companyName: result.ok ? result.data?.simpleLabel || "" : company.label || "",
+      });
     }
     for (const declaration of declarations) {
       if (declaration.commencer?.annéeIndicateurs) {
