@@ -1,3 +1,16 @@
+# [3.16.0](https://github.com/SocialGouv/egapro/compare/v3.15.3...v3.16.0) (2026-03-09)
+
+
+### Bug Fixes
+
+* publication year data ([#2890](https://github.com/SocialGouv/egapro/issues/2890)) ([9af0d37](https://github.com/SocialGouv/egapro/commit/9af0d37f367bbd3884aa7a14c4d430eedae03a5e))
+* session error ([#2911](https://github.com/SocialGouv/egapro/issues/2911)) ([b6b4976](https://github.com/SocialGouv/egapro/commit/b6b497660ed023f68e615dfadd5bfd94ec7c3ff2))
+
+
+### Features
+
+* public year 2025 ([#2951](https://github.com/SocialGouv/egapro/issues/2951)) ([3926ae0](https://github.com/SocialGouv/egapro/commit/3926ae0dce6c4fdb8f367e12cc72b563123b750f))
+
 ## [3.15.3](https://github.com/SocialGouv/egapro/compare/v3.15.2...v3.15.3) (2026-03-02)
 
 
