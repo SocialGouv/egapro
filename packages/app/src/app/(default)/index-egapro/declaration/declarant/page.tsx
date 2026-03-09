@@ -3,6 +3,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 // import { config } from "@common/config";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { AlertExistingDeclaration } from "../AlertExistingDeclaration";
@@ -16,7 +17,7 @@ const proconnectPersonalInformationUrl = process.env.EGAPRO_PROCONNECT_PERSONAL_
 
 const DeclarantPage = async () => {
   const session = await getServerSession(authConfig);
-  if (!session) return null;
+  if (!session) redirect("/login");
 
   return (
     <>

@@ -297,6 +297,7 @@ export const authConfig: AuthOptions = {
     async session({ session, token }) {
       session.user = JSON.parse(JSON.stringify(token.user)); // very important ! to avoid token mutation. Else the companies are added to the token and the headers will too big & rejected by nginx
       session.user.email = token.email;
+      session.user.companies = []; // Default to empty array to prevent TypeError if Redis load fails
       session.staff = {};
 
       // Load companies from Redis using the hash if it exists
@@ -316,7 +317,7 @@ export const authConfig: AuthOptions = {
         }
       }
 
-      if (token.user.staff || token.staff.impersonating) {
+      if (token.user.staff || token.staff?.impersonating) {
         session.staff = token.staff;
 
         // Load last impersonated companies if hash exists
