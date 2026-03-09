@@ -4,8 +4,8 @@ import { defineConfig } from "cypress";
 export default defineConfig({
   defaultCommandTimeout: 30000,
   experimentalStudio: true,
-  video: false,
-  screenshotOnRunFailure: false,
+  video: !!process.env.CI,
+  screenshotOnRunFailure: true,
   retries: {
     runMode: 2, // Réessayer 2 fois en mode CI
     openMode: 0, // Pas de réessai en mode interactif

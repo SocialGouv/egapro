@@ -6,11 +6,13 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then((response) => { cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`); });
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     cy.loginWithKeycloak();
+    // Clean any leftover declarations (important for retry attempts)
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
