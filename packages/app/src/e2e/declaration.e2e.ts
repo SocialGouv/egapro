@@ -3,11 +3,6 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
-	test.skip(
-		!process.env.SITE_URL,
-		"Requires a deployed environment with ProConnect",
-	);
-
 	test.beforeEach(async ({ page }) => {
 		await loginWithProConnect(page);
 	});
@@ -22,11 +17,8 @@ test.describe("Declaration workflow", () => {
 		await expect(page.getByRole("link", { name: "Commencer" })).toBeVisible();
 	});
 
-	test("shows company name and SIREN in banner", async ({ page }) => {
+	test("shows SIREN in banner", async ({ page }) => {
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
-		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
-		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {

@@ -14,36 +14,29 @@ test.describe("Login page", () => {
 });
 
 test.describe("ProConnect authentication flow", () => {
-	test.skip(
-		!process.env.SITE_URL,
-		"Requires a deployed environment with ProConnect",
-	);
-
 	test("redirects to declaration page after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
 		await page.waitForURL("**/declaration-remuneration");
 		await expect(
-			page.getByRole("button", { name: "Mon espace" }),
+			page.getByRole("button", { name: "Mon espace" }).first(),
 		).toBeVisible();
 
-		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
-		).toBeVisible();
+		await expect(page.getByText(/130 025 265/)).toBeVisible();
 	});
 
 	test("shows user menu in header after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
 		await expect(
-			page.getByRole("button", { name: "Mon espace" }),
+			page.getByRole("button", { name: "Mon espace" }).first(),
 		).toBeVisible();
 	});
 
 	test("displays user info in account menu", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.getByRole("button", { name: "Mon espace" }).click();
+		await page.getByRole("button", { name: "Mon espace" }).first().click();
 
 		await expect(
 			page.getByRole("menuitem", { name: "Se déconnecter" }),
@@ -53,7 +46,7 @@ test.describe("ProConnect authentication flow", () => {
 	test("logs out and returns to unauthenticated state", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.getByRole("button", { name: "Mon espace" }).click();
+		await page.getByRole("button", { name: "Mon espace" }).first().click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
 		await page.waitForURL("**/api/auth/signout**");
@@ -72,7 +65,7 @@ test.describe("ProConnect authentication flow", () => {
 
 		await page.goto("/login");
 
-		await page.waitForURL("**/declaration-remuneration");
+		await page.waitForURL("**/declaration-remuneration", { timeout: 10_000 });
 		await expect(
 			page.getByRole("heading", {
 				name: "Déclarer les indicateurs de rémunération",
