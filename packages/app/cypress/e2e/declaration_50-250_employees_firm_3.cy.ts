@@ -6,11 +6,13 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/apiv2/clean-test-user/declaration");
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then((response) => { cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`); });
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
     cy.loginWithKeycloak();
+    // Clean any leftover declarations (important for retry attempts)
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
@@ -142,7 +144,7 @@ describe("Declaration", () => {
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/publication");
-    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2025-02-28");
+    cy.selectByLabel("Date de publication des résultats obtenus *").clear().type("2026-01-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les résultats obtenus ? *", "Non");
     cy.selectByLabel("Préciser les modalités de communication des résultats obtenus auprès de vos salariés *")
       .clear()
@@ -188,8 +190,8 @@ describe("Declaration", () => {
           "Etudier les situations individuelles et réajuster la politique salariale si nécessaire pour résorber les inégalités salariales le cas échéant",
         );
     });
-    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2025-06-01");
-    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2025-06-01");
+    cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
+    cy.selectByLabel("Date de publication des mesures de correction").clear().type("2026-01-15");
     cy.selectByLabel(
       "Préciser les modalités de communication des objectifs de progression et des mesures de correction auprès de vos salariés.",
     ).type("Note de service envoyé aux salariés");
