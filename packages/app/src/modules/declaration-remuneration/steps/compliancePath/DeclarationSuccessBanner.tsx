@@ -1,5 +1,3 @@
-import styles from "./DeclarationSuccessBanner.module.scss";
-
 type Props = {
 	currentYear: number;
 	email: string;
@@ -14,9 +12,7 @@ export function DeclarationSuccessBanner({
 	const deadline = `1\u1D49\u02B3 juin ${currentYear}`;
 
 	return (
-		<div
-			className={`fr-grid-row fr-grid-row--gutters fr-p-4w ${styles.container}`}
-		>
+		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
 			<div className="fr-col-12 fr-col-md-6">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-auto">
@@ -47,7 +43,7 @@ export function DeclarationSuccessBanner({
 				</div>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">
-				<div className={`fr-p-2w fr-border ${styles.receiptCard}`}>
+				<div className="fr-p-2w fr-border fr-background-default--grey">
 					<p className="fr-text--sm fr-mb-1w">
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
 						<strong>{email}</strong>.

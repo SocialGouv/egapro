@@ -9,7 +9,6 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
-import styles from "./CompliancePathChoice.module.scss";
 import { CompliancePathOption } from "./compliancePath/CompliancePathOption";
 import type { CompliancePathValue } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
@@ -48,7 +47,7 @@ export function CompliancePathChoice({
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
-			<div className={styles.titleRow}>
+			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
 				</h1>
