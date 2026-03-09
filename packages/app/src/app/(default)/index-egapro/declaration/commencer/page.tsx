@@ -3,6 +3,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { type FunnelKey, funnelStaticConfig } from "../declarationFunnelConfiguration";
@@ -24,7 +25,7 @@ const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl
 
 const CommencerPage = async () => {
   const session = await getServerSession(authConfig);
-  if (!session) return null;
+  if (!session) redirect("/login");
   const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   if (!session.user.companies.length && !session.user.staff) {
