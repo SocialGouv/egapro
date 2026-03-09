@@ -1,3 +1,16 @@
+# [3.17.0](https://github.com/SocialGouv/egapro/compare/v3.16.0...v3.17.0) (2026-03-09)
+
+
+### Bug Fixes
+
+* data export ([#2873](https://github.com/SocialGouv/egapro/issues/2873)) ([1bc29bd](https://github.com/SocialGouv/egapro/commit/1bc29bd96162c7b520469ea430efe3bbd47cf19d))
+* set organization to user profile ([#2957](https://github.com/SocialGouv/egapro/issues/2957)) ([ebeaba6](https://github.com/SocialGouv/egapro/commit/ebeaba6a4a348012b3b3e4c99c5fd0940e9b2633))
+
+
+### Features
+
+* Install local keycloak ([#2908](https://github.com/SocialGouv/egapro/issues/2908)) ([0ca5b35](https://github.com/SocialGouv/egapro/commit/0ca5b356d1b30fa942b820c6df2b1f4b33769d0a))
+
 # [3.16.0](https://github.com/SocialGouv/egapro/compare/v3.15.3...v3.16.0) (2026-03-09)
 
 
