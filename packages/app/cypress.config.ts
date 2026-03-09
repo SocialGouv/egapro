@@ -24,6 +24,7 @@ export default defineConfig({
     env: {
       E2E_USERNAME: process.env.E2E_USERNAME || "test@fia1.fr",
       E2E_PASSWORD: process.env.E2E_PASSWORD || "test",
+      KEYCLOAK_URL: process.env.KEYCLOAK_URL || "http://localhost:8180",
     },
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,

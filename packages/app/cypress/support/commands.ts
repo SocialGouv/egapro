@@ -58,18 +58,29 @@ Cypress.Commands.add("checkUrl", url => {
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {
+  const keycloakUrl = Cypress.env("KEYCLOAK_URL") as string;
+
+  // Clear all cookies to ensure clean login
+  cy.clearAllCookies();
+  cy.clearAllSessionStorage();
+  cy.clearAllLocalStorage();
+
   cy.visit("/login");
   cy.checkUrl("/login");
   cy.get(".fr-connect").click();
 
-  cy.location("origin").should("match", /keycloak|localhost:8180/);
   const username = Cypress.env("E2E_USERNAME");
   const password = Cypress.env("E2E_PASSWORD");
 
-  cy.get("form", { timeout: 30000 }).should("be.visible");
-  cy.get('input[id="username"]').clear().type(username);
-  cy.get('input[id="password"]').clear().type(password);
-  cy.get("form").submit();
+  // Handle Keycloak login on a different origin
+  cy.origin(keycloakUrl, { args: { username, password } }, ({ username, password }) => {
+    cy.get("form", { timeout: 10000 }).should("be.visible");
+    cy.get('input[id="username"]').clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
+  });
 
-  cy.get(".fr-header__tools-links").should("exist");
+  // Wait for redirect back to app origin after Keycloak login
+  cy.url({ timeout: 15000 }).should("include", Cypress.config("baseUrl")!);
+  cy.get(".fr-header__tools-links", { timeout: 15000 }).should("exist");
 });

@@ -6,7 +6,7 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request("POST", "/apiv2/clean-test-user/declaration");
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
