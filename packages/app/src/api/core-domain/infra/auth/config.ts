@@ -1,4 +1,4 @@
-import { type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
+import { type Organization, type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
 import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
 import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
@@ -228,10 +228,29 @@ export const authConfig: AuthOptions = {
             token.user.companiesHash = ""; // Empty hash for no companies
           }
         } else {
-          const sirenList = profile?.organizations
-            .filter(orga => !!orga)
-            .map(orga => orga.siren || orga.siret.substring(0, 9));
-          if (profile?.email && sirenList) {
+          // Handle both formats:
+          // - Array of Organization objects (ProConnect production)
+          // - Comma-separated SIREN string (Keycloak local)
+          const rawOrganizations = profile?.organizations;
+          const organizations: Organization[] =
+            typeof rawOrganizations === "string"
+              ? rawOrganizations
+                  .split(",")
+                  .map(s => s.trim())
+                  .filter(s => s.length > 0)
+                  .map((siren, i) => ({
+                    id: i + 1,
+                    siren,
+                    siret: siren + "00001",
+                    label: null,
+                    is_collectivite_territoriale: false,
+                    is_external: false,
+                    is_service_public: false,
+                  }))
+              : (rawOrganizations ?? []).filter(orga => !!orga);
+
+          const sirenList = organizations.map(orga => orga.siren || orga.siret.substring(0, 9));
+          if (profile?.email && sirenList.length > 0) {
             try {
               const useCase = new SyncOwnership(ownershipRepo);
               await useCase.execute({ sirens: sirenList, email: profile.email, username: profile.email });
@@ -239,13 +258,10 @@ export const authConfig: AuthOptions = {
               logger.error({ error }, "Error while syncing ownerships");
             }
           }
-          const companiesList =
-            profile?.organizations
-              .filter(orga => !!orga)
-              .map(orga => ({
-                siren: orga.siren || orga.siret.substring(0, 9),
-                label: orga.label,
-              })) ?? [];
+          const companiesList = organizations.map(orga => ({
+            siren: orga.siren || orga.siret.substring(0, 9),
+            label: orga.label,
+          }));
 
           // Create hash and store companies in Redis
           token.user.companiesHash = await companiesUtils.hashCompanies(companiesList);
