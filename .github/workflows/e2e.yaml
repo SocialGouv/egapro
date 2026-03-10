@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Start services
-        run: docker-compose up -d db
+        run: docker compose up -d db
       - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -52,7 +52,7 @@ jobs:
         run: pnpm test:e2e
       - name: Stop services
         if: always()
-        run: docker-compose down
+        run: docker compose down
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
