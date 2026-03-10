@@ -18,6 +18,13 @@ import {
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
+const SOURCE_LABELS: Record<string, string> = {
+	"convention-collective": "Convention collective",
+	"accord-entreprise": "Accord d'entreprise",
+	"classification-interne": "Classification interne",
+	autre: "Autre",
+};
+
 let nextCategoryId = 0;
 function nextId() {
 	return nextCategoryId++;
@@ -37,6 +44,8 @@ type Props = {
 	isSubmitting: boolean;
 	submitError?: string | null;
 	readOnlyNameDetail?: boolean;
+	referencePeriodPicker?: ReactNode;
+	descriptionText?: string;
 };
 
 export function CategoryForm({
@@ -53,6 +62,8 @@ export function CategoryForm({
 	isSubmitting,
 	submitError,
 	readOnlyNameDetail = false,
+	referencePeriodPicker,
+	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 }: Props) {
 	const currentYear = new Date().getFullYear();
 	const referenceYear = currentYear - 1;
@@ -197,49 +208,59 @@ export function CategoryForm({
 			{stepper}
 
 			<div className={stepStyles.categoryBlock}>
-				<p className="fr-mb-0">
-					Cet indicateur permet de mesurer l&apos;écart de rémunération entre
-					les femmes et les hommes au sein de chaque catégorie de salariés, en
-					distinguant le salaire de base des composantes variables ou
-					complémentaires.
-				</p>
+				<p className="fr-mb-0">{descriptionText}</p>
 
-				<div className={stepStyles.categoryHeader}>
+				{readOnlyNameDetail ? (
 					<p className="fr-mb-0">
-						Période de référence pour le calcul des indicateurs : 01/01/
-						{referenceYear} - 31/12/{referenceYear}.
+						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
+						<span className="fr-text--bold">
+							{SOURCE_LABELS[source] ?? source}
+						</span>
 					</p>
-					<TooltipButton
-						id={`${tooltipPrefix}-period`}
-						label="Information sur la période de référence"
-					/>
-				</div>
+				) : (
+					<div className="fr-select-group">
+						<label className="fr-label" htmlFor="source-select">
+							Quelle est la source utilisée pour déterminer les catégories
+							d&apos;emplois ?
+						</label>
+						<select
+							className="fr-select"
+							id="source-select"
+							onChange={(e) => {
+								setSource(e.target.value);
+								setSaved(false);
+							}}
+							value={source}
+						>
+							<option disabled value="">
+								Sélectionner une option
+							</option>
+							<option value="convention-collective">
+								Convention collective
+							</option>
+							<option value="accord-entreprise">
+								Accord d&apos;entreprise
+							</option>
+							<option value="classification-interne">
+								Classification interne
+							</option>
+							<option value="autre">Autre</option>
+						</select>
+					</div>
+				)}
 
-				<div className="fr-select-group">
-					<label className="fr-label" htmlFor="source-select">
-						Quelle est la source utilisée pour déterminer les catégories
-						d&apos;emplois ?
-					</label>
-					<select
-						className="fr-select"
-						id="source-select"
-						onChange={(e) => {
-							setSource(e.target.value);
-							setSaved(false);
-						}}
-						value={source}
-					>
-						<option disabled value="">
-							Sélectionner une option
-						</option>
-						<option value="convention-collective">Convention collective</option>
-						<option value="accord-entreprise">Accord d&apos;entreprise</option>
-						<option value="classification-interne">
-							Classification interne
-						</option>
-						<option value="autre">Autre</option>
-					</select>
-				</div>
+				{referencePeriodPicker ?? (
+					<div className={stepStyles.categoryHeader}>
+						<p className="fr-mb-0">
+							Période de référence pour le calcul des indicateurs : 01/01/
+							{referenceYear} - 31/12/{referenceYear}.
+						</p>
+						<TooltipButton
+							id={`${tooltipPrefix}-period`}
+							label="Information sur la période de référence"
+						/>
+					</div>
+				)}
 			</div>
 
 			<div className={stepStyles.descriptionBlock}>
@@ -258,8 +279,10 @@ export function CategoryForm({
 			<div className="fr-accordions-group" data-fr-group="false">
 				{categories.map((cat, index) => {
 					const collapseId = `cat-accordion-${cat.id}`;
-					const categoryLabel =
-						cat.name.trim() || `Catégorie d'emplois n°${index + 1}`;
+					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
+					const categoryLabel = cat.name.trim()
+						? `${categoryNumber} : ${cat.name.trim()}`
+						: categoryNumber;
 
 					return (
 						<section className="fr-accordion" key={cat.id}>

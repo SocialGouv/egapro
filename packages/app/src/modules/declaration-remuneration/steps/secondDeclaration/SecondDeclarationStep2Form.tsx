@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
 import { CategoryForm } from "../step5/CategoryForm";
 import { BASE_PATH } from "./constants";
+import { ReferencePeriodPicker } from "./ReferencePeriodPicker";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
@@ -17,6 +19,8 @@ export function SecondDeclarationStep2Form({
 	initialSecondDeclarationCategories,
 }: Props) {
 	const router = useRouter();
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
 
 	// Use second declaration data if already started, otherwise pre-fill from first
 	const sourceData =
@@ -31,6 +35,7 @@ export function SecondDeclarationStep2Form({
 	return (
 		<CategoryForm
 			accordionId="accordion-second-decl"
+			descriptionText="Cette seconde déclaration reprend les catégories de salariés définies lors de la première déclaration. Elle permet de mesurer les écarts de rémunération entre les femmes et les hommes au sein de chaque catégorie, en distinguant le salaire de base des composantes variables ou complémentaires."
 			initialCategories={sourceData}
 			instructionText="Modifiez les données de votre première déclaration avant de valider votre indicateur."
 			isSubmitting={isSubmitting}
@@ -40,6 +45,14 @@ export function SecondDeclarationStep2Form({
 			}}
 			previousHref={`${BASE_PATH}/etape/1`}
 			readOnlyNameDetail
+			referencePeriodPicker={
+				<ReferencePeriodPicker
+					endDate={endDate}
+					onEndDateChange={setEndDate}
+					onStartDateChange={setStartDate}
+					startDate={startDate}
+				/>
+			}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			title={
 				<h1 className="fr-h4 fr-mb-0">

@@ -36,7 +36,12 @@ describe("SecondDeclarationStep2Form", () => {
 			/>,
 		);
 		expect(screen.getByText("Nom :")).toBeInTheDocument();
-		expect(screen.getAllByText("Ouvriers")).toHaveLength(2); // accordion button + read-only text
+		expect(
+			screen.getByRole("button", {
+				name: "Catégorie d'emplois n°1 : Ouvriers",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByText("Ouvriers")).toBeInTheDocument(); // read-only name text
 		expect(screen.queryByLabelText("Nom")).not.toBeInTheDocument();
 	});
 
@@ -52,16 +57,33 @@ describe("SecondDeclarationStep2Form", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders source selector with pre-filled value", () => {
+	it("displays source as read-only text", () => {
 		render(
 			<SecondDeclarationStep2Form
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
-		const select = screen.getByLabelText(
-			/Quelle est la source/,
-		) as HTMLSelectElement;
-		expect(select.value).toBe("convention-collective");
+		expect(
+			screen.getByText(/Source utilisée pour déterminer/),
+		).toBeInTheDocument();
+		expect(screen.getByText("Convention collective")).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText(/Quelle est la source/),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders reference period date pickers", () => {
+		render(
+			<SecondDeclarationStep2Form
+				initialFirstDeclarationCategories={mockCategories}
+			/>,
+		);
+		expect(screen.getByLabelText(/Date de début/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Date de fin/)).toBeInTheDocument();
+		// Should NOT show the static period text from step 5
+		expect(
+			screen.queryByText(/Période de référence pour le calcul des indicateurs/),
+		).not.toBeInTheDocument();
 	});
 
 	it("does not render add category button (read-only categories)", () => {
@@ -105,6 +127,11 @@ describe("SecondDeclarationStep2Form", () => {
 				initialSecondDeclarationCategories={secondDeclData}
 			/>,
 		);
-		expect(screen.getAllByText("Techniciens")).toHaveLength(2); // accordion button + read-only text
+		expect(
+			screen.getByRole("button", {
+				name: "Catégorie d'emplois n°1 : Techniciens",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByText("Techniciens")).toBeInTheDocument(); // read-only name text
 	});
 });
