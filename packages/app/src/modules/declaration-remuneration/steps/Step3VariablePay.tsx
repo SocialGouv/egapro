@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -10,17 +10,18 @@ import { FormActions } from "../shared/FormActions";
 import {
 	computeGap,
 	computeProportion,
+	displayDecimal,
 	formatGap,
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 	gapLevel,
+	normalizeDecimalInput,
 } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapRow, VariablePayData } from "../types";
-import { BeneficiaryEditDialog } from "./step3/BeneficiaryEditDialog";
-import { PayGapEditDialog } from "./step3/PayGapEditDialog";
+import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
 	initialData?: VariablePayData;
@@ -41,8 +42,6 @@ export function Step3VariablePay({
 	maxMen,
 }: Step3VariablePayProps) {
 	const router = useRouter();
-	const payDialogRef = useRef<HTMLDialogElement>(null);
-	const benefDialogRef = useRef<HTMLDialogElement>(null);
 
 	const [rows, setRows] = useState<PayGapRow[]>(
 		initialData?.rows?.length ? initialData.rows : DEFAULT_ROWS,
@@ -54,12 +53,6 @@ export function Step3VariablePay({
 		initialData?.beneficiaryMen ?? "",
 	);
 
-	const [editIndex, setEditIndex] = useState<number | null>(null);
-	const [editWomenValue, setEditWomenValue] = useState("");
-	const [editMenValue, setEditMenValue] = useState("");
-
-	const [editBenefWomen, setEditBenefWomen] = useState("");
-	const [editBenefMen, setEditBenefMen] = useState("");
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
@@ -78,69 +71,43 @@ export function Step3VariablePay({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
 	});
 
-	function handleIntegerChange(setter: (v: string) => void, max?: number) {
-		return (e: React.ChangeEvent<HTMLInputElement>) => {
-			const val = e.target.value;
-			if (val === "") {
-				setter(val);
-				setBenefValidationError(null);
-				return;
-			}
-			const n = Number.parseInt(val, 10);
-			if (Number.isNaN(n) || n < 0) return;
-			if (max !== undefined && n > max) {
-				setBenefValidationError(
-					`Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-				);
-				return;
-			}
-			setBenefValidationError(null);
-			setter(val);
-		};
-	}
-
-	// Pay gap modal
-	function openPayEditModal(index: number) {
-		setEditIndex(index);
-		setEditWomenValue(rows[index]?.womenValue ?? "");
-		setEditMenValue(rows[index]?.menValue ?? "");
-		payDialogRef.current?.showModal();
-	}
-
-	const closePayDialog = useCallback(() => {
-		payDialogRef.current?.close();
-	}, []);
-
-	function handleSavePayEdit() {
-		if (editIndex === null) return;
+	function handleRowChange(
+		index: number,
+		field: "womenValue" | "menValue",
+		value: string,
+	) {
+		const normalized = normalizeDecimalInput(value);
+		if (normalized === null) return;
+		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		setRows((prev) =>
 			prev.map((row, i) =>
-				i === editIndex
-					? { ...row, womenValue: editWomenValue, menValue: editMenValue }
-					: row,
+				i === index ? { ...row, [field]: normalized } : row,
 			),
 		);
 		setSaved(false);
-		closePayDialog();
 	}
 
-	// Beneficiary modal
-	function openBenefEditModal() {
-		setEditBenefWomen(beneficiaryWomen);
-		setEditBenefMen(beneficiaryMen);
+	function handleBenefChange(
+		setter: (v: string) => void,
+		max: number | undefined,
+		value: string,
+	) {
+		if (value === "") {
+			setter(value);
+			setBenefValidationError(null);
+			return;
+		}
+		const n = Number.parseInt(value, 10);
+		if (Number.isNaN(n) || n < 0) return;
+		if (max !== undefined && n > max) {
+			setBenefValidationError(
+				`Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			);
+			return;
+		}
 		setBenefValidationError(null);
-		benefDialogRef.current?.showModal();
-	}
-
-	const closeBenefDialog = useCallback(() => {
-		benefDialogRef.current?.close();
-	}, []);
-
-	function handleSaveBenefEdit() {
-		setBeneficiaryWomen(editBenefWomen);
-		setBeneficiaryMen(editBenefMen);
+		setter(value);
 		setSaved(false);
-		closeBenefDialog();
 	}
 
 	function handleSubmit(e: React.FormEvent) {
@@ -171,11 +138,6 @@ export function Step3VariablePay({
 		});
 	}
 
-	const editGap =
-		editWomenValue && editMenValue
-			? computeGap(editWomenValue, editMenValue)
-			: null;
-
 	return (
 		<form onSubmit={handleSubmit}>
 			{/* Title + save status */}
@@ -202,17 +164,22 @@ export function Step3VariablePay({
 				proportion de femmes et d&apos;hommes bénéficiant de ces rémunérations.
 			</p>
 
-			<p className={`fr-mb-3w ${common.fontMedium}`}>
-				Vérifiez les informations préremplies et modifiez-les si elles sont
-				incorrectes avant de valider vos indicateurs.
+			<p className="fr-mb-1w">
+				<strong>
+					Renseignez les informations avant de valider vos indicateurs.
+				</strong>
 				<TooltipButton
 					id="tooltip-step3-info"
 					label="Information sur les indicateurs"
 				/>
 			</p>
 
+			<p className="fr-text--sm fr-mb-3w">Tous les champs sont obligatoires.</p>
+
 			{/* Table 1 - Variable pay gap */}
-			<div className="fr-table fr-table--no-caption fr-mb-1w">
+			<div
+				className={`fr-table fr-table--no-caption fr-mb-1w ${stepStyles.payGapTable}`}
+			>
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
@@ -223,11 +190,9 @@ export function Step3VariablePay({
 								<thead>
 									<tr>
 										<th scope="col">
-											<strong>Rémunération variable ou complémentaire</strong>
+											Rémunération variable
 											<br />
-											<span className={common.fontRegular}>
-												Montant en euros
-											</span>
+											ou complémentaire
 										</th>
 										<th scope="col">Femmes</th>
 										<th scope="col">Hommes</th>
@@ -238,7 +203,6 @@ export function Step3VariablePay({
 												Seuil réglementaire : 5%
 											</span>
 										</th>
-										<th scope="col">{/* actions */}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -250,26 +214,47 @@ export function Step3VariablePay({
 												<td>
 													<strong>{row.label}</strong>
 												</td>
-												<td>{row.womenValue ? `${row.womenValue} €` : "-"}</td>
-												<td>{row.menValue ? `${row.menValue} €` : "-"}</td>
 												<td>
-													{formatGap(gap)}
-													{level && (
-														<>
-															{" "}
+													<span className={stepStyles.inputWithUnit}>
+														<input
+															aria-label={`${row.label} — Femmes`}
+															className="fr-input"
+															inputMode="decimal"
+															onChange={(e) =>
+																handleRowChange(i, "womenValue", e.target.value)
+															}
+															type="text"
+															value={displayDecimal(row.womenValue)}
+														/>
+														<span aria-hidden="true">€</span>
+													</span>
+												</td>
+												<td>
+													<span className={stepStyles.inputWithUnit}>
+														<input
+															aria-label={`${row.label} — Hommes`}
+															className="fr-input"
+															inputMode="decimal"
+															onChange={(e) =>
+																handleRowChange(i, "menValue", e.target.value)
+															}
+															type="text"
+															value={displayDecimal(row.menValue)}
+														/>
+														<span aria-hidden="true">€</span>
+													</span>
+												</td>
+												<td>
+													<span className={stepStyles.gapDisplay}>
+														<span className="fr-text--bold">
+															{formatGap(gap)}
+														</span>
+														{level === "high" && (
 															<span className={gapBadgeClass(level)}>
 																{GAP_LEVEL_LABELS[level]}
 															</span>
-														</>
-													)}
-												</td>
-												<td>
-													<button
-														aria-label={`Modifier ${row.label}`}
-														className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-														onClick={() => openPayEditModal(i)}
-														type="button"
-													/>
+														)}
+													</span>
 												</td>
 											</tr>
 										);
@@ -281,17 +266,10 @@ export function Step3VariablePay({
 				</div>
 			</div>
 
-			{/* Source text */}
-			<p className={`fr-text--sm fr-mb-4w ${common.mentionGrey}`}>
-				Source : déclarations sociales nominatives mise à jour le 27/01/2026.
-				<TooltipButton
-					id="tooltip-source-step3"
-					label="Information sur la source"
-				/>
-			</p>
-
 			{/* Table 2 - Beneficiaries */}
-			<div className="fr-table fr-table--no-caption fr-mb-1w">
+			<div
+				className={`fr-table fr-table--no-caption fr-mb-1w ${stepStyles.payGapTable}`}
+			>
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
@@ -301,16 +279,14 @@ export function Step3VariablePay({
 								</caption>
 								<thead>
 									<tr>
-										<th scope="col">
-											<strong>
-												Bénéficiaires de composantes variables ou
-												complémentaires
-											</strong>
-										</th>
+										<th scope="col">Sexe</th>
 										<th scope="col">Total de salariés</th>
-										<th scope="col">Bénéficiaires</th>
+										<th scope="col">
+											Bénéficiaires de composantes
+											<br />
+											variables ou complémentaires
+										</th>
 										<th scope="col">Proportion</th>
-										<th scope="col">{/* actions */}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -319,32 +295,48 @@ export function Step3VariablePay({
 											<strong>Femmes</strong>
 										</td>
 										<td>{maxWomen ?? "-"}</td>
-										<td>{beneficiaryWomen || "-"}</td>
-										<td>{computeProportion(beneficiaryWomen, maxWomen)}</td>
 										<td>
-											<button
-												aria-label="Modifier les bénéficiaires femmes"
-												className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-												onClick={openBenefEditModal}
-												type="button"
+											<input
+												aria-label="Bénéficiaires femmes"
+												className="fr-input"
+												max={maxWomen}
+												min="0"
+												onChange={(e) =>
+													handleBenefChange(
+														setBeneficiaryWomen,
+														maxWomen,
+														e.target.value,
+													)
+												}
+												type="number"
+												value={beneficiaryWomen}
 											/>
 										</td>
+										<td>{computeProportion(beneficiaryWomen, maxWomen)}</td>
 									</tr>
 									<tr>
 										<td>
 											<strong>Hommes</strong>
 										</td>
 										<td>{maxMen ?? "-"}</td>
-										<td>{beneficiaryMen || "-"}</td>
-										<td>{computeProportion(beneficiaryMen, maxMen)}</td>
 										<td>
-											<button
-												aria-label="Modifier les bénéficiaires hommes"
-												className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-												onClick={openBenefEditModal}
-												type="button"
+											<input
+												aria-label="Bénéficiaires hommes"
+												className="fr-input"
+												max={maxMen}
+												min="0"
+												onChange={(e) =>
+													handleBenefChange(
+														setBeneficiaryMen,
+														maxMen,
+														e.target.value,
+													)
+												}
+												type="number"
+												value={beneficiaryMen}
 											/>
 										</td>
+										<td>{computeProportion(beneficiaryMen, maxMen)}</td>
 									</tr>
 								</tbody>
 							</table>
@@ -352,6 +344,15 @@ export function Step3VariablePay({
 					</div>
 				</div>
 			</div>
+
+			{benefValidationError && (
+				<div
+					aria-live="polite"
+					className="fr-alert fr-alert--error fr-alert--sm fr-mb-3w"
+				>
+					<p>{benefValidationError}</p>
+				</div>
+			)}
 
 			<DefinitionAccordion
 				id="accordion-step3"
@@ -373,33 +374,6 @@ export function Step3VariablePay({
 			<FormActions
 				isSubmitting={mutation.isPending}
 				previousHref="/declaration-remuneration/etape/2"
-			/>
-
-			{/* Pay gap edit modal */}
-			<PayGapEditDialog
-				dialogRef={payDialogRef}
-				editGap={editGap}
-				editMenValue={editMenValue}
-				editWomenValue={editWomenValue}
-				label={editIndex !== null ? rows[editIndex]?.label : undefined}
-				onClose={closePayDialog}
-				onMenChange={setEditMenValue}
-				onSave={handleSavePayEdit}
-				onWomenChange={setEditWomenValue}
-			/>
-
-			{/* Beneficiary edit modal */}
-			<BeneficiaryEditDialog
-				benefValidationError={benefValidationError}
-				dialogRef={benefDialogRef}
-				editBenefMen={editBenefMen}
-				editBenefWomen={editBenefWomen}
-				maxMen={maxMen}
-				maxWomen={maxWomen}
-				onClose={closeBenefDialog}
-				onMenChange={handleIntegerChange(setEditBenefMen, maxMen)}
-				onSave={handleSaveBenefEdit}
-				onWomenChange={handleIntegerChange(setEditBenefWomen, maxWomen)}
 			/>
 		</form>
 	);

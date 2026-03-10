@@ -40,9 +40,23 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders section headings", () => {
+		render(<Step6Review />);
+		expect(
+			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Indicateurs par catégorie de salariés"),
+		).toBeInTheDocument();
+	});
+
+	it("renders SavedIndicator", () => {
+		render(<Step6Review />);
+		expect(screen.getByText("Enregistré")).toBeInTheDocument();
+	});
+
 	it("renders all 4 recap card titles", () => {
 		render(<Step6Review />);
-		// "Écart de rémunération" also appears in the submit modal list, so use getAllByText
 		expect(
 			screen.getAllByText("Écart de rémunération").length,
 		).toBeGreaterThanOrEqual(1);
@@ -66,10 +80,10 @@ describe("Step6Review", () => {
 		expect(screen.queryAllByText("Modifier")).toHaveLength(0);
 	});
 
-	it("renders check icons on all 4 cards", () => {
+	it("does not render check icons on cards", () => {
 		const { container } = render(<Step6Review />);
 		const checkIcons = container.querySelectorAll(".fr-icon-check-line");
-		expect(checkIcons).toHaveLength(4);
+		expect(checkIcons).toHaveLength(0);
 	});
 
 	it("renders tooltip buttons on cards 3 and 4 only", () => {
@@ -118,7 +132,7 @@ describe("Step6Review", () => {
 		// Gap values and badges
 		expect(screen.getAllByText("5,0 %").length).toBeGreaterThanOrEqual(1);
 		expect(screen.getAllByText("3,0 %").length).toBeGreaterThanOrEqual(1);
-		expect(screen.getAllByText("faible").length).toBeGreaterThanOrEqual(1);
+		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
@@ -285,5 +299,86 @@ describe("Step6Review", () => {
 		expect(
 			screen.queryByRole("link", { name: /télécharger le récapitulatif/i }),
 		).not.toBeInTheDocument();
+	});
+
+	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
+		render(
+			<Step6Review
+				step2Rows={[
+					{
+						label: "Annuelle brute moyenne",
+						womenValue: "90",
+						menValue: "100",
+					},
+					{
+						label: "Horaire brute moyenne",
+						womenValue: "100",
+						menValue: "100",
+					},
+					{
+						label: "Annuelle brute médiane",
+						womenValue: "100",
+						menValue: "100",
+					},
+					{
+						label: "Horaire brute médiane",
+						womenValue: "100",
+						menValue: "100",
+					},
+				]}
+			/>,
+		);
+		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
+		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
+		expect(
+			screen.getByText(/Votre entreprise présente des écarts/),
+		).toBeInTheDocument();
+		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
+		expect(
+			screen.getByText(/critères objectifs et non sexistes/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/actions correctives et seconde déclaration/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/évaluation conjointe des rémunérations/),
+		).toBeInTheDocument();
+	});
+
+	it("renders 'Modèles d'avis CSE' link", () => {
+		render(<Step6Review />);
+		expect(
+			screen.getByRole("link", { name: /Modèles d.*avis CSE/ }),
+		).toHaveAttribute("href", "/avis-cse");
+	});
+
+	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
+		render(
+			<Step6Review
+				step2Rows={[
+					{
+						label: "Annuelle brute moyenne",
+						womenValue: "98",
+						menValue: "100",
+					},
+					{
+						label: "Horaire brute moyenne",
+						womenValue: "99",
+						menValue: "100",
+					},
+					{
+						label: "Annuelle brute médiane",
+						womenValue: "97",
+						menValue: "100",
+					},
+					{
+						label: "Horaire brute médiane",
+						womenValue: "99",
+						menValue: "100",
+					},
+				]}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
 	});
 });

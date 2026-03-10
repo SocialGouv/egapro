@@ -1,5 +1,22 @@
+.payGapTable {
+	th,
+	td {
+		white-space: normal;
+	}
+}
+
 .gapDisplay {
 	display: flex;
 	align-items: baseline;
 	gap: 0.5rem;
+}
+
+.inputWithUnit {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	input {
+		min-width: 5rem;
+	}
 }

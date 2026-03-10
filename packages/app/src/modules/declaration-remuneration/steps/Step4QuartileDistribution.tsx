@@ -1,19 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 
 import { api } from "~/trpc/react";
-import common from "../shared/common.module.scss";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { FormActions } from "../shared/FormActions";
+import { normalizeDecimalInput } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { StepCategoryData } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
-import { QuartileEditDialog } from "./step4/QuartileEditDialog";
 import { QuartileTable } from "./step4/QuartileTable";
 
 type Step4QuartileDistributionProps = {
@@ -23,11 +22,6 @@ type Step4QuartileDistributionProps = {
 	maxMen?: number;
 };
 
-type EditMode = {
-	field: "remuneration" | "womenCount" | "menCount";
-	tableType: "annual" | "hourly";
-} | null;
-
 export function Step4QuartileDistribution({
 	initialAnnualCategories,
 	initialHourlyCategories,
@@ -35,7 +29,6 @@ export function Step4QuartileDistribution({
 	maxMen,
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
-	const dialogRef = useRef<HTMLDialogElement>(null);
 
 	const defaultCategories = () =>
 		QUARTILE_NAMES.map((name) => ({ name })) as StepCategoryData[];
@@ -52,8 +45,6 @@ export function Step4QuartileDistribution({
 			: defaultCategories(),
 	);
 
-	const [editMode, setEditMode] = useState<EditMode>(null);
-	const [editValues, setEditValues] = useState<string[]>(["", "", "", ""]);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const hasInitialData = [
@@ -77,90 +68,48 @@ export function Step4QuartileDistribution({
 		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
 	});
 
-	function getCategories(tableType: "annual" | "hourly") {
-		return tableType === "annual" ? annualCategories : hourlyCategories;
-	}
-
-	function openEditModal(
-		field: "remuneration" | "womenCount" | "menCount",
+	function handleCategoryChange(
 		tableType: "annual" | "hourly",
+		index: number,
+		field: "womenValue" | "womenCount" | "menCount",
+		value: string,
 	) {
-		setEditMode({ field, tableType });
-		setValidationError(null);
-		const cats = getCategories(tableType);
-		const values = cats.map((c) => {
-			if (field === "remuneration") return c.womenValue ?? "";
-			if (field === "womenCount") return c.womenCount?.toString() ?? "";
-			return c.menCount?.toString() ?? "";
-		});
-		setEditValues(values);
-		dialogRef.current?.showModal();
-	}
-
-	const closeDialog = useCallback(() => {
-		dialogRef.current?.close();
-		setEditMode(null);
-	}, []);
-
-	function handleValueChange(index: number) {
-		return (e: React.ChangeEvent<HTMLInputElement>) => {
-			const val = e.target.value;
-			if (!editMode) return;
-
-			if (editMode.field === "remuneration") {
-				if (val === "" || Number.parseFloat(val) >= 0) {
-					setEditValues((prev) => prev.map((v, i) => (i === index ? val : v)));
-				}
-			} else {
-				if (val === "") {
-					setEditValues((prev) => prev.map((v, i) => (i === index ? val : v)));
-					setValidationError(null);
-					return;
-				}
-				const n = Number.parseInt(val, 10);
-				if (Number.isNaN(n) || n < 0) return;
-				const max = editMode.field === "womenCount" ? maxWomen : maxMen;
-				if (max !== undefined && n > max) {
-					setValidationError(
-						`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-					);
-					return;
-				}
-				setValidationError(null);
-				setEditValues((prev) => prev.map((v, i) => (i === index ? val : v)));
-			}
-		};
-	}
-
-	function handleSaveEdit() {
-		if (!editMode) return;
 		const setter =
-			editMode.tableType === "annual"
-				? setAnnualCategories
-				: setHourlyCategories;
-		setter((prev) =>
-			prev.map((c, i) => {
-				if (editMode.field === "remuneration") {
-					return { ...c, womenValue: editValues[i] || undefined };
-				}
-				if (editMode.field === "womenCount") {
-					return {
-						...c,
-						womenCount: editValues[i]
-							? Number.parseInt(editValues[i] as string, 10)
-							: undefined,
-					};
-				}
-				return {
-					...c,
-					menCount: editValues[i]
-						? Number.parseInt(editValues[i] as string, 10)
-						: undefined,
-				};
-			}),
-		);
+			tableType === "annual" ? setAnnualCategories : setHourlyCategories;
+
+		if (field === "womenValue") {
+			const normalized = normalizeDecimalInput(value);
+			if (normalized === null) return;
+			if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
+			setter((prev) =>
+				prev.map((c, i) =>
+					i === index ? { ...c, womenValue: normalized || undefined } : c,
+				),
+			);
+		} else {
+			if (value === "") {
+				setter((prev) =>
+					prev.map((c, i) => (i === index ? { ...c, [field]: undefined } : c)),
+				);
+				setValidationError(null);
+				setSaved(false);
+				return;
+			}
+			const n = Number.parseInt(value, 10);
+			if (Number.isNaN(n) || n < 0) return;
+			const max = field === "womenCount" ? maxWomen : maxMen;
+			if (max !== undefined && n > max) {
+				setValidationError(
+					`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+				);
+				return;
+			}
+			setValidationError(null);
+			setter((prev) =>
+				prev.map((c, i) => (i === index ? { ...c, [field]: n } : c)),
+			);
+		}
 		setSaved(false);
-		closeDialog();
 	}
 
 	function handleSubmit(e: React.FormEvent) {
@@ -196,36 +145,6 @@ export function Step4QuartileDistribution({
 		});
 	}
 
-	// 4th quartile percentage for interpretation callout (annual)
-	const q4 = annualCategories[3];
-	const q4Total = (q4?.womenCount ?? 0) + (q4?.menCount ?? 0);
-	const q4WomenPct =
-		q4Total > 0 ? ((q4?.womenCount ?? 0) / q4Total) * 100 : null;
-
-	// Computed total for count dialogs
-	const editTotal =
-		editMode?.field !== "remuneration"
-			? editValues.reduce(
-					(sum, v) => sum + (v ? Number.parseInt(v, 10) || 0 : 0),
-					0,
-				)
-			: 0;
-
-	// Dialog labels
-	const dialogTitle =
-		editMode?.field === "remuneration"
-			? "Modifier les données"
-			: "Modifier les effectifs";
-	const dialogSubtitle = editMode
-		? editMode.field === "remuneration"
-			? editMode.tableType === "annual"
-				? "Rémunération annuelle brute moyenne"
-				: "Rémunération horaire brute moyenne"
-			: editMode.field === "womenCount"
-				? "Nombre de femmes"
-				: "Nombre d'hommes"
-		: "";
-
 	return (
 		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
 			{/* Title + save status */}
@@ -245,65 +164,61 @@ export function Step4QuartileDistribution({
 			<StepIndicator currentStep={4} />
 
 			{/* Description + instructions */}
-			<div className={common.flexColumnGap1}>
+			<div className={stepStyles.instructions}>
 				<p className="fr-mb-0">
 					Cet indicateur répartit l&apos;ensemble des salariés en quatre groupes
 					de rémunération appelés quartiles : du quartile inférieur qui regroupe
 					les salariés les moins rémunérés, au quartile supérieur qui rassemble
 					les salariés les mieux rémunérés.
+					<TooltipButton
+						id="tooltip-step4-description"
+						label="Information sur les quartiles"
+					/>
 				</p>
 
-				<p className={`fr-mb-0 ${common.fontMedium}`}>
-					Vérifiez les informations préremplies et modifiez-les si elles sont
-					incorrectes avant de valider vos indicateurs.
+				<p className="fr-mb-0">
+					<strong>
+						Renseignez les informations avant de valider vos indicateurs.
+					</strong>
 					<TooltipButton
 						id="tooltip-step4-info"
 						label="Information sur les indicateurs"
 					/>
 				</p>
+
+				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Table 1 - Annual remuneration */}
-			<QuartileTable
-				categories={annualCategories}
-				onEditMenCount={() => openEditModal("menCount", "annual")}
-				onEditRemuneration={() => openEditModal("remuneration", "annual")}
-				onEditWomenCount={() => openEditModal("womenCount", "annual")}
-				tableType="annual"
-				title="Rémunération annuelle brute moyenne"
-			/>
+			{/* Tables */}
+			<div className={stepStyles.dataContainer}>
+				<QuartileTable
+					categories={annualCategories}
+					maxMen={maxMen}
+					maxWomen={maxWomen}
+					onCategoryChange={(index, field, value) =>
+						handleCategoryChange("annual", index, field, value)
+					}
+					tableType="annual"
+					title="Rémunération annuelle brute moyenne"
+					validationError={null}
+				/>
 
-			{/* Table 2 - Hourly remuneration */}
-			<QuartileTable
-				categories={hourlyCategories}
-				onEditMenCount={() => openEditModal("menCount", "hourly")}
-				onEditRemuneration={() => openEditModal("remuneration", "hourly")}
-				onEditWomenCount={() => openEditModal("womenCount", "hourly")}
-				tableType="hourly"
-				title="Rémunération horaire brute moyenne"
-			/>
+				<QuartileTable
+					categories={hourlyCategories}
+					maxMen={maxMen}
+					maxWomen={maxWomen}
+					onCategoryChange={(index, field, value) =>
+						handleCategoryChange("hourly", index, field, value)
+					}
+					tableType="hourly"
+					title="Rémunération horaire brute moyenne"
+					validationError={validationError}
+				/>
 
-			<DefinitionAccordion
-				id="accordion-step4"
-				title="Définitions et méthode de calcul"
-			/>
-
-			{/* Interpretation callout */}
-			<div className="fr-callout fr-callout--orange-terre-battue">
-				<p className="fr-callout__text">
-					<strong>Écart en défaveur des femmes :</strong> les femmes sont
-					nettement moins présentes dans le quartile des plus hauts salaires
-					{q4WomenPct !== null && (
-						<> ({q4WomenPct.toFixed(1).replace(".", ",")} %)</>
-					)}
-					, alors qu&apos;elles sont proches de la parité dans les autres
-					quartiles.
-				</p>
-				<p className="fr-callout__text">
-					<strong>Interprétation des résultats :</strong> les femmes accèdent
-					moins aux postes ou situations les mieux rémunérés, ce qui indique une
-					inégalité d&apos;accès aux niveaux de salaire les plus élevés.
-				</p>
+				<DefinitionAccordion
+					id="accordion-step4"
+					title="Définitions et méthode de calcul"
+				/>
 			</div>
 
 			{formValidationError && (
@@ -321,20 +236,6 @@ export function Step4QuartileDistribution({
 			<FormActions
 				isSubmitting={mutation.isPending}
 				previousHref="/declaration-remuneration/etape/3"
-			/>
-
-			{/* Edit dialog */}
-			<QuartileEditDialog
-				dialogRef={dialogRef}
-				dialogSubtitle={dialogSubtitle}
-				dialogTitle={dialogTitle}
-				editTotal={editTotal}
-				editValues={editValues}
-				isRemuneration={editMode?.field === "remuneration"}
-				onClose={closeDialog}
-				onSave={handleSaveEdit}
-				onValueChange={handleValueChange}
-				validationError={validationError}
 			/>
 		</form>
 	);

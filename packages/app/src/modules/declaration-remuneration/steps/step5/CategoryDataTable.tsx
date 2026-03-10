@@ -4,6 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import {
 	computeGap,
 	computeTotal,
+	displayDecimal,
 	formatGapCompact,
 	formatTotal,
 } from "~/modules/declaration-remuneration/shared/gapUtils";
@@ -130,11 +131,10 @@ export function CategoryDataTable({
 												aria-label={`Salaire de base annuel femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("annual-base-women")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseWomen", false)}
-												step="any"
-												type="number"
-												value={cat.annualBaseWomen}
+												type="text"
+												value={displayDecimal(cat.annualBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -145,11 +145,10 @@ export function CategoryDataTable({
 												aria-label={`Salaire de base annuel hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("annual-base-men")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseMen", false)}
-												step="any"
-												type="number"
-												value={cat.annualBaseMen}
+												type="text"
+												value={displayDecimal(cat.annualBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -173,11 +172,10 @@ export function CategoryDataTable({
 												aria-label={`Composantes variables annuelles femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("annual-variable-women")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableWomen", false)}
-												step="any"
-												type="number"
-												value={cat.annualVariableWomen}
+												type="text"
+												value={displayDecimal(cat.annualVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -188,11 +186,10 @@ export function CategoryDataTable({
 												aria-label={`Composantes variables annuelles hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("annual-variable-men")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableMen", false)}
-												step="any"
-												type="number"
-												value={cat.annualVariableMen}
+												type="text"
+												value={displayDecimal(cat.annualVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -234,11 +231,10 @@ export function CategoryDataTable({
 												aria-label={`Salaire de base horaire femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("hourly-base-women")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
-												step="any"
-												type="number"
-												value={cat.hourlyBaseWomen}
+												type="text"
+												value={displayDecimal(cat.hourlyBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -249,11 +245,10 @@ export function CategoryDataTable({
 												aria-label={`Salaire de base horaire hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("hourly-base-men")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
-												step="any"
-												type="number"
-												value={cat.hourlyBaseMen}
+												type="text"
+												value={displayDecimal(cat.hourlyBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -277,11 +272,10 @@ export function CategoryDataTable({
 												aria-label={`Composantes variables horaires femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("hourly-variable-women")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
-												step="any"
-												type="number"
-												value={cat.hourlyVariableWomen}
+												type="text"
+												value={displayDecimal(cat.hourlyVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -292,11 +286,10 @@ export function CategoryDataTable({
 												aria-label={`Composantes variables horaires hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("hourly-variable-men")}
-												min="0"
+												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
-												step="any"
-												type="number"
-												value={cat.hourlyVariableMen}
+												type="text"
+												value={displayDecimal(cat.hourlyVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>

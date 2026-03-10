@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Step3VariablePay } from "../Step3VariablePay";
 
 const mockMutate = vi.fn();
@@ -19,48 +19,38 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-// jsdom does not implement HTMLDialogElement methods
-beforeEach(() => {
-	HTMLDialogElement.prototype.showModal = vi.fn();
-	HTMLDialogElement.prototype.close = vi.fn();
-});
-
 describe("Step3VariablePay", () => {
-	it("renders the pay gap table with 4 rows and empty values", () => {
+	it("renders the pay gap table with 4 rows", () => {
 		render(<Step3VariablePay />);
 		expect(screen.getByText("Annuelle brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Annuelle brute médiane")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute médiane")).toBeInTheDocument();
-		expect(screen.getAllByText("-").length).toBeGreaterThanOrEqual(4);
 	});
 
 	it("renders the beneficiaries table with workforce totals", () => {
 		render(<Step3VariablePay maxMen={60} maxWomen={50} />);
-		expect(
-			screen.getByText(
-				"Bénéficiaires de composantes variables ou complémentaires",
-				{
-					selector: "strong",
-				},
-			),
-		).toBeInTheDocument();
 		expect(screen.getByText("Total de salariés")).toBeInTheDocument();
-		expect(
-			screen.getByText("Bénéficiaires", { selector: "th" }),
-		).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
-		// Step 1 workforce totals should be pre-filled
 		expect(screen.getByText("50")).toBeInTheDocument();
 		expect(screen.getByText("60")).toBeInTheDocument();
 	});
 
-	it("renders table headers with sub-text and seuil réglementaire", () => {
+	it("renders instruction text and mandatory fields notice", () => {
 		render(<Step3VariablePay />);
 		expect(
-			screen.getByText("Rémunération variable ou complémentaire"),
+			screen.getByText(
+				"Renseignez les informations avant de valider vos indicateurs.",
+			),
 		).toBeInTheDocument();
-		expect(screen.getByText("Montant en euros")).toBeInTheDocument();
+		expect(
+			screen.getByText("Tous les champs sont obligatoires."),
+		).toBeInTheDocument();
+	});
+
+	it("renders table headers", () => {
+		render(<Step3VariablePay />);
+		expect(screen.getByText(/Rémunération variable/)).toBeInTheDocument();
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 	});
 
@@ -91,117 +81,65 @@ describe("Step3VariablePay", () => {
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
-	it("opens pay edit modal and rejects negative values", async () => {
+	it("updates pay gap values via inline inputs and rejects negative values", async () => {
 		const user = userEvent.setup();
 		render(<Step3VariablePay />);
 
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "100");
-		expect(womenInput).toHaveValue(100);
+		expect(womenInput).toHaveValue("100");
 
-		// Negative value should be rejected
+		// Negative value should be rejected (minus sign is filtered out)
 		await user.clear(womenInput);
 		await user.type(womenInput, "-50");
-		expect(womenInput).not.toHaveValue(-50);
+		expect(womenInput).not.toHaveValue("-50");
 
 		await user.clear(menInput);
 		await user.type(menInput, "200");
-		expect(menInput).toHaveValue(200);
+		expect(menInput).toHaveValue("200");
 	});
 
-	it("computes gap and shows badge in pay edit modal", async () => {
+	it("computes gap and shows badge after entering values", async () => {
 		const user = userEvent.setup();
 		render(<Step3VariablePay />);
 
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "95");
 		await user.clear(menInput);
 		await user.type(menInput, "100");
 
-		// Gap = |((100-95)/100)*100| = 5.0 % → "élevé"
+		// Gap = 5.0 %
 		expect(screen.getByText("5,0 %")).toBeInTheDocument();
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
-	it("saves pay edit locally but does not show SavedIndicator", async () => {
+	it("updates beneficiary values via inline inputs", async () => {
 		const user = userEvent.setup();
 		render(<Step3VariablePay />);
 
-		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
-
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
-
-		await user.clear(womenInput);
-		await user.type(womenInput, "100");
-		await user.clear(menInput);
-		await user.type(menInput, "200");
-
-		const dialogs = document.querySelectorAll("dialog");
-		const payDialog = dialogs[0] as HTMLElement;
-		const dialogScope = within(payDialog);
-		await user.click(dialogScope.getByText("Enregistrer"));
-
-		// SavedIndicator only shows when data is persisted in DB
-		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
-		expect(screen.getByText("100 €")).toBeInTheDocument();
-		expect(screen.getByText("200 €")).toBeInTheDocument();
-	});
-
-	it("opens beneficiary edit modal and saves values", async () => {
-		const user = userEvent.setup();
-		render(<Step3VariablePay />);
-
-		// Click the first beneficiary edit button (femmes)
-		const benefEditButton = screen.getByRole("button", {
-			name: /modifier les bénéficiaires femmes/i,
-		});
-		await user.click(benefEditButton);
-
-		const womenInput = screen.getByLabelText("Nombre de bénéficiaires Femmes");
-		const menInput = screen.getByLabelText("Nombre de bénéficiaires Hommes");
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "10");
+		expect(womenInput).toHaveValue(10);
+
 		await user.clear(menInput);
 		await user.type(menInput, "20");
-
-		const dialogs = document.querySelectorAll("dialog");
-		const benefDialog = dialogs[1] as HTMLElement;
-		const dialogScope = within(benefDialog);
-		await user.click(dialogScope.getByText("Enregistrer"));
-
-		// SavedIndicator only shows when data is persisted in DB
-		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
-		expect(screen.getByText("10")).toBeInTheDocument();
-		expect(screen.getByText("20")).toBeInTheDocument();
+		expect(menInput).toHaveValue(20);
 	});
 
 	it("blocks beneficiary count exceeding max workforce", async () => {
 		const user = userEvent.setup();
 		render(<Step3VariablePay maxMen={25} maxWomen={15} />);
 
-		const benefEditButton = screen.getByRole("button", {
-			name: /modifier les bénéficiaires femmes/i,
-		});
-		await user.click(benefEditButton);
-
-		const womenInput = screen.getByLabelText("Nombre de bénéficiaires Femmes");
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "20");

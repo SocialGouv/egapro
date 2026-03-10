@@ -4,6 +4,7 @@ import {
 	computePercentage,
 	computeProportion,
 	computeTotal,
+	displayDecimal,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
@@ -12,6 +13,7 @@ import {
 	gapBadgeClass,
 	gapLevel,
 	hasGapsAboveThreshold,
+	normalizeDecimalInput,
 	parseNumber,
 } from "../gapUtils";
 
@@ -38,6 +40,74 @@ describe("parseNumber", () => {
 
 	it("returns NaN for non-numeric input", () => {
 		expect(parseNumber("abc")).toBeNaN();
+	});
+});
+
+describe("normalizeDecimalInput", () => {
+	it("returns empty string as-is", () => {
+		expect(normalizeDecimalInput("")).toBe("");
+	});
+
+	it("replaces comma with dot", () => {
+		expect(normalizeDecimalInput("3,14")).toBe("3.14");
+	});
+
+	it("strips spaces (thousand separators)", () => {
+		expect(normalizeDecimalInput("1 000")).toBe("1000");
+	});
+
+	it("strips non-breaking spaces", () => {
+		expect(normalizeDecimalInput("1\u00A0000")).toBe("1000");
+	});
+
+	it("handles combined spaces, comma and digits", () => {
+		expect(normalizeDecimalInput("1 234,56")).toBe("1234.56");
+	});
+
+	it("rejects letters", () => {
+		expect(normalizeDecimalInput("abc")).toBeNull();
+	});
+
+	it("rejects minus sign", () => {
+		expect(normalizeDecimalInput("-5")).toBeNull();
+	});
+
+	it("accepts digits only", () => {
+		expect(normalizeDecimalInput("42")).toBe("42");
+	});
+
+	it("accepts trailing dot", () => {
+		expect(normalizeDecimalInput("42.")).toBe("42.");
+	});
+});
+
+describe("displayDecimal", () => {
+	it("returns empty string as-is", () => {
+		expect(displayDecimal("")).toBe("");
+	});
+
+	it("replaces dot with comma", () => {
+		expect(displayDecimal("3.14")).toBe("3,14");
+	});
+
+	it("adds thousand separator with non-breaking space", () => {
+		expect(displayDecimal("1000")).toBe("1\u00A0000");
+	});
+
+	it("formats large numbers", () => {
+		expect(displayDecimal("1234567")).toBe("1\u00A0234\u00A0567");
+	});
+
+	it("formats large number with decimals", () => {
+		expect(displayDecimal("1234567.89")).toBe("1\u00A0234\u00A0567,89");
+	});
+
+	it("does not add separator for numbers under 1000", () => {
+		expect(displayDecimal("999")).toBe("999");
+	});
+
+	it("handles number with no decimal part", () => {
+		expect(displayDecimal("50000")).toBe("50\u00A0000");
 	});
 });
 

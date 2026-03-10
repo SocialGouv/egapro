@@ -159,11 +159,11 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		await user.type(input, "100");
-		expect(input).toHaveValue(100);
+		expect(input).toHaveValue("100");
 
 		await user.clear(input);
 		await user.type(input, "-50");
-		expect(input).not.toHaveValue(-50);
+		expect(input).not.toHaveValue("-50");
 	});
 
 	it("computes annual total from base and variable", async () => {

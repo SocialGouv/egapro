@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 
@@ -8,6 +9,7 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { computeGap } from "../shared/gapUtils";
+import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { PayGapRow, StepCategoryData, VariablePayData } from "../types";
 import stepStyles from "./Step6Review.module.scss";
@@ -23,6 +25,11 @@ import { SubmitModal } from "./step6/SubmitModal";
 function findGap(rows: PayGapRow[], label: string): number | null {
 	const row = rows.find((r) => r.label === label);
 	return row ? computeGap(row.womenValue, row.menValue) : null;
+}
+
+/** Check if any gap value is >= 5% (high gap threshold) */
+function hasAnyHighGap(gaps: (number | null)[]): boolean {
+	return gaps.some((g) => g !== null && Math.abs(g) >= 5);
 }
 
 // -- Component --
@@ -83,6 +90,25 @@ export function Step6Review({
 	// Parse step 5 categories
 	const step5Parsed = parseStep5Categories(step5Categories);
 
+	// Check if any gap is high (>= 5%)
+	const allGaps = [
+		annualMeanGap,
+		hourlyMeanGap,
+		annualMedianGap,
+		hourlyMedianGap,
+		step3AnnualMeanGap,
+		step3AnnualMedianGap,
+		step3HourlyMeanGap,
+		step3HourlyMedianGap,
+		...step5Parsed.flatMap((cat) => [
+			cat.annualBaseGap,
+			cat.annualVariableGap,
+			cat.hourlyBaseGap,
+			cat.hourlyVariableGap,
+		]),
+	];
+	const highGap = hasAnyHighGap(allGaps);
+
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		if (!isSubmitted) {
@@ -91,117 +117,143 @@ export function Step6Review({
 	}
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
-			<h1 className="fr-h4 fr-mb-0">
-				Déclaration des indicateurs de rémunération {currentYear}
-			</h1>
+		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
+			{/* Title + save status */}
+			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+				<div className="fr-col">
+					<h1 className="fr-h4 fr-mb-0">
+						Déclaration des indicateurs de rémunération {currentYear}
+					</h1>
+				</div>
+				<div className="fr-col-auto">
+					<SavedIndicator />
+				</div>
+			</div>
 
 			<StepIndicator currentStep={6} />
 
-			<p className={`fr-mb-0 ${common.mentionGrey}`}>
+			<p className="fr-mb-0">
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>
 
-			{/* Card 1: Pay gap (Step 2) */}
-			<div className={stepStyles.card}>
-				<CardTitle>Écart de rémunération</CardTitle>
-				{step2Rows.length > 0 ? (
-					<GapSideBySide
-						annualMeanGap={annualMeanGap}
-						annualMedianGap={annualMedianGap}
-						hourlyMeanGap={hourlyMeanGap}
-						hourlyMedianGap={hourlyMedianGap}
-					/>
-				) : (
-					<p className={`fr-mb-0 ${common.mentionGrey}`}>
-						Aucune donnée renseignée.
-					</p>
-				)}
-			</div>
+			{/* Section: Indicators for all employees */}
+			<h2 className="fr-h6 fr-mb-0">
+				Indicateurs pour l&apos;ensemble de vos salariés
+			</h2>
 
-			{/* Card 2: Variable pay (Step 3) */}
-			<div className={stepStyles.card}>
-				<CardTitle>Écart de rémunération variable ou complémentaire</CardTitle>
-				{step3Data?.rows && step3Data.rows.length > 0 ? (
-					<>
+			<div className={stepStyles.section}>
+				{/* Card 1: Pay gap (Step 2) */}
+				<div className={stepStyles.card}>
+					<CardTitle>Écart de rémunération</CardTitle>
+					{step2Rows.length > 0 ? (
 						<GapSideBySide
-							annualMeanGap={step3AnnualMeanGap}
-							annualMedianGap={step3AnnualMedianGap}
-							hourlyMeanGap={step3HourlyMeanGap}
-							hourlyMedianGap={step3HourlyMedianGap}
+							annualMeanGap={annualMeanGap}
+							annualMedianGap={annualMedianGap}
+							hourlyMeanGap={hourlyMeanGap}
+							hourlyMedianGap={hourlyMedianGap}
 						/>
-						<div className={stepStyles.sideBySide}>
-							<div className={stepStyles.column}>
-								<p className="fr-text--bold fr-text--sm fr-mb-0">Proportion</p>
-								<div className={stepStyles.subSection}>
-									<div className={stepStyles.flex1}>
-										<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
-											Femmes
-										</p>
-										<strong>
-											{step3Data.beneficiaryWomen
-												? `${step3Data.beneficiaryWomen} %`
-												: "-"}
-										</strong>
-									</div>
-									<div className={stepStyles.flex1}>
-										<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
-											Hommes
-										</p>
-										<strong>
-											{step3Data.beneficiaryMen
-												? `${step3Data.beneficiaryMen} %`
-												: "-"}
-										</strong>
+					) : (
+						<p className={`fr-mb-0 ${common.mentionGrey}`}>
+							Aucune donnée renseignée.
+						</p>
+					)}
+				</div>
+
+				{/* Card 2: Variable pay (Step 3) */}
+				<div className={stepStyles.card}>
+					<CardTitle>
+						Écart de rémunération variable ou complémentaire
+					</CardTitle>
+					{step3Data?.rows && step3Data.rows.length > 0 ? (
+						<>
+							<GapSideBySide
+								annualMeanGap={step3AnnualMeanGap}
+								annualMedianGap={step3AnnualMedianGap}
+								hourlyMeanGap={step3HourlyMeanGap}
+								hourlyMedianGap={step3HourlyMedianGap}
+							/>
+							<div className={stepStyles.sideBySide}>
+								<div className={stepStyles.column}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										Proportion
+									</p>
+									<div className={stepStyles.subSection}>
+										<div className={stepStyles.flex1}>
+											<p
+												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
+											>
+												Femmes
+											</p>
+											<strong>
+												{step3Data.beneficiaryWomen
+													? `${step3Data.beneficiaryWomen} %`
+													: "-"}
+											</strong>
+										</div>
+										<div className={stepStyles.flex1}>
+											<p
+												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
+											>
+												Hommes
+											</p>
+											<strong>
+												{step3Data.beneficiaryMen
+													? `${step3Data.beneficiaryMen} %`
+													: "-"}
+											</strong>
+										</div>
 									</div>
 								</div>
+								<div className={stepStyles.verticalSeparator} />
+								<div className={stepStyles.column} />
 							</div>
-							<div className={stepStyles.verticalSeparator} />
-							<div className={stepStyles.column} />
-						</div>
-					</>
-				) : (
-					<p className={`fr-mb-0 ${common.mentionGrey}`}>
-						Aucune donnée renseignée.
-					</p>
-				)}
+						</>
+					) : (
+						<p className={`fr-mb-0 ${common.mentionGrey}`}>
+							Aucune donnée renseignée.
+						</p>
+					)}
+				</div>
+
+				{/* Card 3: Quartile distribution (Step 4) */}
+				<div className={stepStyles.card}>
+					<CardTitle tooltipId="tooltip-quartile">
+						Proportion de femmes et d&apos;hommes dans chaque quartile salarial
+					</CardTitle>
+					{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
+						<>
+							{annualQuartiles.length > 0 && (
+								<QuartileColumn
+									quartiles={annualQuartiles.map((q) => ({
+										label: q.name.replace("annual:", ""),
+										womenCount: q.womenCount ?? 0,
+										menCount: q.menCount ?? 0,
+									}))}
+									title="Rémunération annuelle brute moyenne"
+								/>
+							)}
+							{hourlyQuartiles.length > 0 && (
+								<QuartileColumn
+									quartiles={hourlyQuartiles.map((q) => ({
+										label: q.name.replace("hourly:", ""),
+										womenCount: q.womenCount ?? 0,
+										menCount: q.menCount ?? 0,
+									}))}
+									title="Rémunération horaire brute moyenne"
+								/>
+							)}
+						</>
+					) : (
+						<p className={`fr-mb-0 ${common.mentionGrey}`}>
+							Aucune donnée renseignée.
+						</p>
+					)}
+				</div>
 			</div>
 
-			{/* Card 3: Quartile distribution (Step 4) */}
-			<div className={stepStyles.card}>
-				<CardTitle tooltipId="tooltip-quartile">
-					Proportion de femmes et d&apos;hommes dans chaque quartile salarial
-				</CardTitle>
-				{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
-					<>
-						{annualQuartiles.length > 0 && (
-							<QuartileColumn
-								quartiles={annualQuartiles.map((q) => ({
-									label: q.name.replace("annual:", ""),
-									womenCount: q.womenCount ?? 0,
-									menCount: q.menCount ?? 0,
-								}))}
-								title="Rémunération annuelle brute moyenne"
-							/>
-						)}
-						{hourlyQuartiles.length > 0 && (
-							<QuartileColumn
-								quartiles={hourlyQuartiles.map((q) => ({
-									label: q.name.replace("hourly:", ""),
-									womenCount: q.womenCount ?? 0,
-									menCount: q.menCount ?? 0,
-								}))}
-								title="Rémunération horaire brute moyenne"
-							/>
-						)}
-					</>
-				) : (
-					<p className={`fr-mb-0 ${common.mentionGrey}`}>
-						Aucune donnée renseignée.
-					</p>
-				)}
-			</div>
+			{/* Section: Indicators by employee category */}
+			<h2 className="fr-h6 fr-mb-0">Indicateurs par catégorie de salariés</h2>
 
 			{/* Card 4: Employee categories (Step 5) */}
 			<div className={stepStyles.card}>
@@ -246,6 +298,40 @@ export function Step6Review({
 
 			{isSubmitted && <DownloadDeclarationPdfButton />}
 
+			{/* Next steps callout when high gap detected */}
+			{highGap && (
+				<div className={stepStyles.nextSteps}>
+					<p className="fr-h4 fr-mb-0">Prochaines étapes</p>
+					<p className="fr-text--bold fr-mb-0">Des écarts ont été détectés</p>
+					<p className="fr-mb-0">
+						Votre entreprise présente des écarts supérieurs ou égaux à 5 %. Bien
+						que vous ne soyez pas actuellement soumis à l&apos;obligation de
+						déclaration, vous pouvez mettre en œuvre des actions correctives dès
+						maintenant afin de vous préparer à la conformité lorsque votre
+						effectif dépassera 50 salariés.
+					</p>
+					<hr className={stepStyles.separator} />
+					<p className="fr-text--bold fr-text--lg fr-mb-0">Pour vous aider</p>
+					<ul className="fr-raw-list fr-links-group">
+						<li>
+							<Link className="fr-link" href="#">
+								Qu&apos;entend-on par critères objectifs et non sexistes ?
+							</Link>
+						</li>
+						<li>
+							<Link className="fr-link" href="#">
+								En savoir plus sur actions correctives et seconde déclaration
+							</Link>
+						</li>
+						<li>
+							<Link className="fr-link" href="#">
+								En savoir plus sur évaluation conjointe des rémunérations
+							</Link>
+						</li>
+					</ul>
+				</div>
+			)}
+
 			{isSubmitted ? (
 				<FormActions
 					nextHref="/declaration-remuneration/parcours-conformite"
@@ -259,12 +345,17 @@ export function Step6Review({
 				/>
 			)}
 
+			<Link className={`fr-link ${stepStyles.centeredLink}`} href="/avis-cse">
+				Modèles d&apos;avis CSE
+			</Link>
+
 			{!isSubmitted && (
 				<SubmitModal
 					isPending={submitMutation.isPending}
 					modalRef={modalRef}
 					onClose={closeModal}
 					onSubmit={() => submitMutation.mutate()}
+					year={currentYear}
 				/>
 			)}
 		</form>
