@@ -1,42 +1,70 @@
 name: 🧪 E2E Tests
 
 on:
-  deployment_status:
+  push:
+  workflow_dispatch:
 
 concurrency:
-  group: e2e-${{ github.event.deployment.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   e2e:
     name: "Test e2e"
-    if: >
-      github.event.deployment_status.state == 'success' &&
-      !startsWith(github.event.deployment.environment, 'build-')
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:14.17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: egapro
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/egapro
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXTAUTH_URL: http://localhost:3000/api/auth
+      EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+      EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+      EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+      EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+      SKIP_ENV_VALIDATION: "1"
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.deployment.ref }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          cache: "pnpm"
+          cache: pnpm
+      - name: Restore CI build cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ./*
+          key: "${{ github.sha }}"
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
+      - name: Build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pnpm build
+      - name: Apply database schema
+        run: pnpm db:push
       - name: Install Playwright browsers
         run: pnpm playwright:install
-      - name: Load SocialGouv variables
-        id: env
-        uses: socialgouv/kontinuous/.github/actions/env@v1
       - name: Run E2E tests
         run: pnpm test:e2e
-        env:
-          SITE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report
           path: packages/app/playwright-report/

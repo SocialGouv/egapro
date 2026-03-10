@@ -14,11 +14,6 @@ test.describe("Login page", () => {
 });
 
 test.describe("ProConnect authentication flow", () => {
-	test.skip(
-		!process.env.SITE_URL,
-		"Requires a deployed environment with ProConnect",
-	);
-
 	test("redirects to declaration page after login", async ({ page }) => {
 		await loginWithProConnect(page);
 

@@ -23,6 +23,6 @@ export async function loginWithProConnect(page: Page) {
 	// Handle FIA1V2 identity provider login page
 	await page.getByRole("button", { name: "Se connecter" }).click();
 
-	// Wait for redirect to declaration intro
-	await page.waitForURL("**/declaration-remuneration", { timeout: 15_000 });
+	// Wait for redirect to declaration intro (30s for slow ProConnect in CI)
+	await page.waitForURL("**/declaration-remuneration", { timeout: 30_000 });
 }
