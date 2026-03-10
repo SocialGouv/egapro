@@ -28,9 +28,11 @@ beforeEach(() => {
 describe("Step5EmployeeCategories", () => {
 	it("renders with 1 empty category by default", () => {
 		render(<Step5EmployeeCategories />);
-		expect(screen.getByText("Catégorie d'emplois n°1")).toBeInTheDocument();
 		expect(
-			screen.queryByText("Catégorie d'emplois n°2"),
+			screen.getByRole("button", { name: "Catégorie d'emplois n°1" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Catégorie d'emplois n°2" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByText("Nombre de catégories : 1")).toBeInTheDocument();
 	});
@@ -100,7 +102,9 @@ describe("Step5EmployeeCategories", () => {
 			}),
 		);
 
-		expect(screen.getByText("Catégorie d'emplois n°2")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Catégorie d'emplois n°2" }),
+		).toBeInTheDocument();
 		expect(screen.getByText("Nombre de catégories : 2")).toBeInTheDocument();
 	});
 
@@ -127,7 +131,7 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(dialogScope.getByText("Supprimer"));
 
 		expect(
-			screen.queryByText("Catégorie d'emplois n°2"),
+			screen.queryByRole("button", { name: "Catégorie d'emplois n°2" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByText("Nombre de catégories : 1")).toBeInTheDocument();
 	});
