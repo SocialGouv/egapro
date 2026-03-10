@@ -1,16 +1,44 @@
 import { notFound } from "next/navigation";
-
+import type { StepCategoryData } from "~/modules/declaration-remuneration";
 import {
+	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,
 	SecondDeclarationStep3Review,
 } from "~/modules/declaration-remuneration";
-import { SECOND_DECLARATION_TOTAL_STEPS } from "~/modules/declaration-remuneration/steps/secondDeclaration/constants";
 import { api, HydrateClient } from "~/trpc/server";
 
 type Props = {
 	params: Promise<{ step: string }>;
 };
+
+type DbCategory = {
+	step: number;
+	categoryName: string;
+	womenCount: number | null;
+	menCount: number | null;
+	womenValue: string | null;
+	menValue: string | null;
+	womenMedianValue: string | null;
+	menMedianValue: string | null;
+};
+
+function mapCategories(
+	categories: DbCategory[],
+	step: number,
+): StepCategoryData[] {
+	return categories
+		.filter((c) => c.step === step)
+		.map((c) => ({
+			name: c.categoryName,
+			womenCount: c.womenCount ?? undefined,
+			menCount: c.menCount ?? undefined,
+			womenValue: c.womenValue ?? undefined,
+			menValue: c.menValue ?? undefined,
+			womenMedianValue: c.womenMedianValue ?? undefined,
+			menMedianValue: c.menMedianValue ?? undefined,
+		}));
+}
 
 export default async function SecondDeclarationStepPage({ params }: Props) {
 	const { step: stepParam } = await params;
@@ -23,31 +51,8 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 	const data = await api.declaration.getOrCreate();
 	const currentYear = new Date().getFullYear();
 
-	// Extract step 5 categories (first declaration data) for pre-filling
-	const step5Categories = data.categories
-		.filter((c) => c.step === 5)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
-
-	// Extract step 7 categories (second declaration data, if already started)
-	const step7Categories = data.categories
-		.filter((c) => c.step === 7)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
+	const step5Categories = mapCategories(data.categories, 5);
+	const step7Categories = mapCategories(data.categories, 7);
 
 	const declarationDate = data.declaration.updatedAt
 		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")

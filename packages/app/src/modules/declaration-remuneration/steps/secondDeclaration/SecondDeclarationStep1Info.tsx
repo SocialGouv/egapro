@@ -73,7 +73,7 @@ function ObligationsCallout() {
 	return (
 		<div className="fr-callout">
 			<h3 className="fr-callout__title">
-				Ce que vous devez faire dans un délais de 6 mois
+				Ce que vous devez faire dans un délai de 6 mois
 			</h3>
 			<div className="fr-callout__text">
 				<ul className="fr-mb-0">

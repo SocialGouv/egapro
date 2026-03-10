@@ -60,7 +60,7 @@ describe("SecondDeclarationStep1Info", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Ce que vous devez faire dans un délais de 6 mois"),
+			screen.getByText("Ce que vous devez faire dans un délai de 6 mois"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/Mettre en place des actions correctives/),
