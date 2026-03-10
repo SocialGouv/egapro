@@ -30,7 +30,7 @@ describe("Step3VariablePay", () => {
 
 	it("renders the beneficiaries table with workforce totals", () => {
 		render(<Step3VariablePay maxMen={60} maxWomen={50} />);
-		expect(screen.getByText("Total de salariés")).toBeInTheDocument();
+		expect(screen.getByText(/Total de salariés\s*:\s*110/)).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 		expect(screen.getByText("50")).toBeInTheDocument();
 		expect(screen.getByText("60")).toBeInTheDocument();

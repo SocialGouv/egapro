@@ -280,7 +280,12 @@ export function Step3VariablePay({
 								<thead>
 									<tr>
 										<th scope="col">Sexe</th>
-										<th scope="col">Total de salariés</th>
+										<th scope="col">
+											Total de salariés
+											{maxWomen !== undefined && maxMen !== undefined
+												? ` : ${maxWomen + maxMen}`
+												: ""}
+										</th>
 										<th scope="col">
 											Bénéficiaires de composantes
 											<br />
