@@ -55,7 +55,7 @@ test.describe("Authenticated user features", () => {
 		await page.waitForURL("**/declaration-remuneration/**");
 		await expect(
 			page.getByRole("heading", {
-				name: "Déclarer les indicateurs de rémunération",
+				name: /Déclarer les indicateurs pour l'ensemble/i,
 			}),
 		).toBeVisible();
 	});

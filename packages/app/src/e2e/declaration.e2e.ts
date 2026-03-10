@@ -17,14 +17,14 @@ test.describe("Declaration workflow", () => {
 		await loginWithProConnect(page);
 	});
 
-	test("displays introduction page after login", async ({ page }) => {
+	test("displays step 1 after login", async ({ page }) => {
 		await expect(
 			page.getByRole("heading", {
-				name: "Déclarer les indicateurs de rémunération",
+				name: /Déclarer les indicateurs pour l'ensemble/i,
 			}),
 		).toBeVisible();
 
-		await expect(page.getByRole("link", { name: "Commencer" })).toBeVisible();
+		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
 	});
 
 	test("shows company name and SIREN in banner", async ({ page }) => {
@@ -35,7 +35,6 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
-		await page.getByRole("link", { name: "Commencer" }).click();
 		await page.waitForURL("**/declaration-remuneration/etape/1");
 		await page.waitForLoadState("networkidle");
 
