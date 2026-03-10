@@ -52,25 +52,11 @@ export function Step6Review({
 	});
 
 	const openModal = useCallback(() => {
-		const el = modalRef.current;
-		if (!el) return;
-		const w = window as unknown as Record<string, unknown>;
-		if (typeof w.dsfr === "function") {
-			(w.dsfr as (el: HTMLElement) => { modal: { disclose: () => void } })(
-				el,
-			).modal.disclose();
-		}
+		modalRef.current?.showModal();
 	}, []);
 
 	const closeModal = useCallback(() => {
-		const el = modalRef.current;
-		if (!el) return;
-		const w = window as unknown as Record<string, unknown>;
-		if (typeof w.dsfr === "function") {
-			(w.dsfr as (el: HTMLElement) => { modal: { conceal: () => void } })(
-				el,
-			).modal.conceal();
-		}
+		modalRef.current?.close();
 	}, []);
 
 	// Parse step 2 gaps
