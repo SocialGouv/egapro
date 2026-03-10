@@ -65,6 +65,16 @@ check_pattern '\.(ts|tsx)$' \
   '(\.\./){2,}' \
   'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.'
 
+# Hardcoded hex colors in SCSS — use DSFR CSS custom properties
+check_pattern '\.scss$' \
+  '#[0-9a-fA-F]{3,8}' \
+  'Hardcoded hex colors are forbidden in SCSS. Use DSFR CSS custom properties (var(--background-*, --text-*, --border-*, --artwork-*)).'
+
+# Hardcoded rgb/rgba colors in SCSS — use DSFR CSS custom properties
+check_pattern '\.scss$' \
+  'rgba?\(' \
+  'Hardcoded rgb()/rgba() colors are forbidden in SCSS. Use DSFR CSS custom properties.'
+
 # Raw @media queries in SCSS — use DSFR mixins (allow @media print and comments)
 check_pattern '\.scss$' \
   '@media[[:space:]]+.*((min|max)-width|screen)' \
