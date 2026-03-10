@@ -14,7 +14,12 @@ export function parseNumber(value: string): number {
 /** Normalize decimal input: strip spaces, replace comma with dot, reject invalid chars. */
 export function normalizeDecimalInput(value: string): string | null {
 	const normalized = value.replace(/\s/g, "").replace(",", ".");
-	if (normalized !== "" && !/^\d*\.?\d*$/.test(normalized)) return null;
+	if (normalized === "") return normalized;
+	const dotCount = normalized.split(".").length - 1;
+	if (dotCount > 1) return null;
+	for (const ch of normalized) {
+		if (ch !== "." && (ch < "0" || ch > "9")) return null;
+	}
 	return normalized;
 }
 
