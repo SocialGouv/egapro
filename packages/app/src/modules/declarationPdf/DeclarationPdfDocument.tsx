@@ -1,5 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
+import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 import { CategorySection } from "./sections/CategorySection";
 import { PayGapTable } from "./sections/PayGapTable";
@@ -13,6 +14,8 @@ type Props = {
 };
 
 export function DeclarationPdfDocument({ data }: Props) {
+	ensurePdfFontsRegistered();
+
 	return (
 		<Document>
 			<Page size="A4" style={styles.page}>
