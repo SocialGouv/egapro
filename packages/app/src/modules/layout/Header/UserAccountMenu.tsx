@@ -147,14 +147,16 @@ export function UserAccountMenu({
 					</div>
 
 					<div className={styles.logout}>
-						<Link
+						{/* Native <a> required: this route redirects to an external IdP (ProConnect),
+						    so we need a full browser navigation, not a client-side RSC fetch. */}
+						<a
 							className={styles.logoutLink}
-							href="/api/auth/signout"
+							href="/api/auth/logout"
 							role="menuitem"
 						>
 							<span aria-hidden="true" className="fr-icon-logout-box-r-line" />
 							Se déconnecter
-						</Link>
+						</a>
 					</div>
 				</div>
 			)}
