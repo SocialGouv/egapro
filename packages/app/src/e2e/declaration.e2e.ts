@@ -3,10 +3,7 @@ import { expect, test } from "@playwright/test";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Declaration workflow", () => {
-	test.skip(
-		!process.env.SITE_URL,
-		"Requires a deployed environment with ProConnect",
-	);
+	test.describe.configure({ mode: "serial" });
 
 	test.beforeEach(async ({ page }) => {
 		await loginWithProConnect(page);
@@ -173,6 +170,14 @@ test.describe("Declaration workflow", () => {
 		await expect(accordion).toBeVisible();
 	});
 
+	test("previous button navigates back", async ({ page }) => {
+		await page.goto("/declaration-remuneration/etape/2");
+
+		await page.getByRole("link", { name: "Précédent" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/1");
+	});
+
+	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/6");
 
@@ -180,17 +185,10 @@ test.describe("Declaration workflow", () => {
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		// Check the certification checkbox and confirm
-		await page.getByLabel(/Je certifie/).check();
+		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
 		// Verify navigation to the CSE opinion page
 		await page.waitForURL("**/avis-cse/**");
-	});
-
-	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration-remuneration/etape/2");
-
-		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/1");
 	});
 });
