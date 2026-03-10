@@ -73,7 +73,7 @@ export function computeProportion(count: string, total?: number): string {
 	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
 }
 
-export function formatCurrency(value?: string): string {
+export function formatCurrency(value?: string | null): string {
 	if (!value) return "-";
 	const n = Number.parseFloat(value);
 	if (Number.isNaN(n)) return "-";
@@ -95,18 +95,4 @@ export function computeTotal(base: string, variable: string): number | null {
 export function formatTotal(value: number | null, unit: string): string {
 	if (value === null) return "-";
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
-}
-
-/** Checks if any step 5 category has an absolute gap >= threshold (default 5%) */
-export function hasGapsAboveThreshold(
-	step5Categories: { name: string; womenValue?: string; menValue?: string }[],
-	threshold = 5,
-): boolean {
-	for (const cat of step5Categories) {
-		if (!cat.womenValue || !cat.menValue) continue;
-		if (cat.name.includes(":name:")) continue;
-		const gap = computeGap(cat.womenValue, cat.menValue);
-		if (gap !== null && gap >= threshold) return true;
-	}
-	return false;
 }

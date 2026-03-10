@@ -1,5 +1,6 @@
 import type {
 	CategoryData,
+	EmployeeCategoryRow,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
@@ -16,5 +17,5 @@ export type DeclarationPdfData = {
 	step2Rows: PayGapRow[];
 	step3Data: VariablePayData;
 	step4Categories: StepCategoryData[];
-	step5Categories: StepCategoryData[];
+	step5Categories: EmployeeCategoryRow[];
 };

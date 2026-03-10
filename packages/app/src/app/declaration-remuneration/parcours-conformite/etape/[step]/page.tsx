@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 
 import {
-	mapDbCategories,
 	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,
 	SecondDeclarationStep3Review,
 } from "~/modules/declaration-remuneration";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { api, HydrateClient } from "~/trpc/server";
 
 type Props = {
@@ -24,8 +24,19 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 	const data = await api.declaration.getOrCreate();
 	const currentYear = new Date().getFullYear();
 
-	const step5Categories = mapDbCategories(data.categories, 5);
-	const step7Categories = mapDbCategories(data.categories, 7);
+	const initialCategories = mapToEmployeeCategoryRows(
+		data.jobCategories,
+		data.employeeCategories,
+		"initial",
+	);
+
+	const correctionCategories = mapToEmployeeCategoryRows(
+		data.jobCategories,
+		data.employeeCategories,
+		"correction",
+	);
+
+	const initialSource = data.jobCategories[0]?.source;
 
 	const declarationDate = data.declaration.updatedAt
 		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
@@ -44,9 +55,16 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 		return (
 			<HydrateClient>
 				<SecondDeclarationStep2Form
-					initialFirstDeclarationCategories={step5Categories}
+					initialEndDate={
+						data.declaration.secondDeclReferencePeriodEnd ?? undefined
+					}
+					initialFirstDeclarationCategories={initialCategories}
 					initialSecondDeclarationCategories={
-						step7Categories.length > 0 ? step7Categories : undefined
+						correctionCategories.length > 0 ? correctionCategories : undefined
+					}
+					initialSource={initialSource}
+					initialStartDate={
+						data.declaration.secondDeclReferencePeriodStart ?? undefined
 					}
 				/>
 			</HydrateClient>
@@ -55,7 +73,7 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 
 	// step === 3
 	const reviewCategories =
-		step7Categories.length > 0 ? step7Categories : step5Categories;
+		correctionCategories.length > 0 ? correctionCategories : initialCategories;
 
 	return (
 		<HydrateClient>

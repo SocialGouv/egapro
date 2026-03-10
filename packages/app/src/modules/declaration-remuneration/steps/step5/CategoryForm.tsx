@@ -7,14 +7,17 @@ import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/D
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type {
+	EmployeeCategoryRow,
+	EmployeeCategorySubmitData,
+} from "~/modules/declaration-remuneration/types";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
 import {
 	createEmptyCategory,
-	deserializeCategories,
 	type EmployeeCategory,
-	serializeCategories,
+	fromDatabaseRows,
+	toSubmitData,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
@@ -37,10 +40,11 @@ type Props = {
 	tooltipPrefix: string;
 	accordionId: string;
 	previousHref: string;
-	initialCategories: StepCategoryData[];
+	initialCategories: EmployeeCategoryRow[];
+	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
-	onSubmit: (serialized: StepCategoryData[]) => void;
+	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
 	readOnlyNameDetail?: boolean;
@@ -56,6 +60,7 @@ export function CategoryForm({
 	accordionId,
 	previousHref,
 	initialCategories,
+	initialSource = "",
 	maxWomen,
 	maxMen,
 	onSubmit,
@@ -68,22 +73,14 @@ export function CategoryForm({
 	const currentYear = new Date().getFullYear();
 	const referenceYear = currentYear - 1;
 
-	const initial =
-		initialCategories.length > 0
-			? deserializeCategories(initialCategories, nextId)
-			: { categories: [createEmptyCategory(nextId())], source: "" };
-
 	const [categories, setCategories] = useState<EmployeeCategory[]>(
-		initial.categories,
+		initialCategories.length > 0
+			? fromDatabaseRows(initialCategories, nextId)
+			: [createEmptyCategory(nextId())],
 	);
-	const [source, setSource] = useState(initial.source);
+	const [source, setSource] = useState(initialSource);
 
-	const hasInitialData = initialCategories.some(
-		(c) =>
-			c.name.startsWith("cat:") &&
-			!c.name.match(/^cat:\d+:(name|detail):/) &&
-			(c.womenCount !== undefined || c.womenValue !== undefined),
-	);
+	const hasInitialData = initialCategories.length > 0;
 	const [saved, setSaved] = useState(hasInitialData);
 
 	const [workforceError, setWorkforceError] = useState("");
@@ -191,7 +188,7 @@ export function CategoryForm({
 			}
 		}
 
-		onSubmit(serializeCategories(categories, source));
+		onSubmit(toSubmitData(categories, source));
 	}
 
 	return (

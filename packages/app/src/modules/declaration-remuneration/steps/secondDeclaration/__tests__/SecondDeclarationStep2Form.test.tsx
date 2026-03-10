@@ -1,17 +1,57 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import { describe, expect, it, vi } from "vitest";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep2Form } from "../SecondDeclarationStep2Form";
 
-const mockCategories: StepCategoryData[] = [
-	{ name: "meta:source:convention-collective" },
-	{ name: "cat:0:name:Ouvriers" },
-	{ name: "cat:0:detail:Opérateurs de production" },
-	{ name: "cat:0:effectif", womenCount: 50, menCount: 60 },
-	{ name: "cat:0:annual:base", womenValue: "19114", menValue: "24383" },
-	{ name: "cat:0:annual:variable", womenValue: "2132", menValue: "1802" },
-	{ name: "cat:0:hourly:base", womenValue: "18.88", menValue: "16.73" },
-	{ name: "cat:0:hourly:variable", womenValue: "1.04", menValue: "1.02" },
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declaration: {
+			updateEmployeeCategories: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
+
+function makeCategory(
+	overrides: Partial<EmployeeCategoryRow> = {},
+): EmployeeCategoryRow {
+	return {
+		name: "",
+		detail: "",
+		womenCount: null,
+		menCount: null,
+		annualBaseWomen: null,
+		annualBaseMen: null,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+		...overrides,
+	};
+}
+
+const mockCategories: EmployeeCategoryRow[] = [
+	makeCategory({
+		name: "Ouvriers",
+		detail: "Opérateurs de production",
+		womenCount: 50,
+		menCount: 60,
+		annualBaseWomen: "19114",
+		annualBaseMen: "24383",
+		annualVariableWomen: "2132",
+		annualVariableMen: "1802",
+		hourlyBaseWomen: "18.88",
+		hourlyBaseMen: "16.73",
+		hourlyVariableWomen: "1.04",
+		hourlyVariableMen: "1.02",
+	}),
 ];
 
 describe("SecondDeclarationStep2Form", () => {
@@ -41,7 +81,7 @@ describe("SecondDeclarationStep2Form", () => {
 				name: "Catégorie d'emplois n°1 : Ouvriers",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Ouvriers")).toBeInTheDocument(); // read-only name text
+		expect(screen.getByText("Ouvriers")).toBeInTheDocument();
 		expect(screen.queryByLabelText("Nom")).not.toBeInTheDocument();
 	});
 
@@ -61,6 +101,7 @@ describe("SecondDeclarationStep2Form", () => {
 		render(
 			<SecondDeclarationStep2Form
 				initialFirstDeclarationCategories={mockCategories}
+				initialSource="convention-collective"
 			/>,
 		);
 		expect(
@@ -80,7 +121,6 @@ describe("SecondDeclarationStep2Form", () => {
 		);
 		expect(screen.getByLabelText(/Date de début/)).toBeInTheDocument();
 		expect(screen.getByLabelText(/Date de fin/)).toBeInTheDocument();
-		// Should NOT show the static period text from step 5
 		expect(
 			screen.queryByText(/Période de référence pour le calcul des indicateurs/),
 		).not.toBeInTheDocument();
@@ -110,15 +150,21 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("uses second declaration data when available", () => {
-		const secondDeclData: StepCategoryData[] = [
-			{ name: "meta:source:accord-entreprise" },
-			{ name: "cat:0:name:Techniciens" },
-			{ name: "cat:0:detail:Senior" },
-			{ name: "cat:0:effectif", womenCount: 30, menCount: 40 },
-			{ name: "cat:0:annual:base", womenValue: "25000", menValue: "26000" },
-			{ name: "cat:0:annual:variable", womenValue: "3000", menValue: "3200" },
-			{ name: "cat:0:hourly:base", womenValue: "20", menValue: "21" },
-			{ name: "cat:0:hourly:variable", womenValue: "2", menValue: "2.5" },
+		const secondDeclData: EmployeeCategoryRow[] = [
+			makeCategory({
+				name: "Techniciens",
+				detail: "Senior",
+				womenCount: 30,
+				menCount: 40,
+				annualBaseWomen: "25000",
+				annualBaseMen: "26000",
+				annualVariableWomen: "3000",
+				annualVariableMen: "3200",
+				hourlyBaseWomen: "20",
+				hourlyBaseMen: "21",
+				hourlyVariableWomen: "2",
+				hourlyVariableMen: "2.5",
+			}),
 		];
 
 		render(
@@ -132,6 +178,6 @@ describe("SecondDeclarationStep2Form", () => {
 				name: "Catégorie d'emplois n°1 : Techniciens",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Techniciens")).toBeInTheDocument(); // read-only name text
+		expect(screen.getByText("Techniciens")).toBeInTheDocument();
 	});
 });

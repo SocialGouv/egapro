@@ -11,12 +11,17 @@ import { FormActions } from "../shared/FormActions";
 import { computeGap } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
-import type { PayGapRow, StepCategoryData, VariablePayData } from "../types";
+import type {
+	EmployeeCategoryRow,
+	PayGapRow,
+	StepCategoryData,
+	VariablePayData,
+} from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { CardTitle } from "./step6/CardTitle";
 import { GapColumn } from "./step6/GapColumn";
 import { GapSideBySide } from "./step6/GapSideBySide";
-import { parseStep5Categories } from "./step6/parseStep5Categories";
+import { parseEmployeeCategories } from "./step6/parseStep5Categories";
 import { QuartileColumn } from "./step6/QuartileColumn";
 import { SubmitModal } from "./step6/SubmitModal";
 
@@ -38,7 +43,7 @@ type Props = {
 	step2Rows?: PayGapRow[];
 	step3Data?: VariablePayData;
 	step4Categories?: StepCategoryData[];
-	step5Categories?: StepCategoryData[];
+	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
 };
 
@@ -88,7 +93,7 @@ export function Step6Review({
 	);
 
 	// Parse step 5 categories
-	const step5Parsed = parseStep5Categories(step5Categories);
+	const step5Parsed = parseEmployeeCategories(step5Categories);
 
 	// Check if any gap is high (>= 5%)
 	const allGaps = [

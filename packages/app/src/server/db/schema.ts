@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { index, pgTableCreator, primaryKey, unique } from "drizzle-orm/pg-core";
+import {
+	index,
+	pgEnum,
+	pgTableCreator,
+	primaryKey,
+	unique,
+} from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
 /**
@@ -89,6 +95,11 @@ export const verificationTokens = createTable(
 export const declarations = createTable(
 	"declaration",
 	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
 		siren: d.varchar({ length: 9 }).notNull(),
 		year: d.integer().notNull(),
 		declarantId: d
@@ -104,11 +115,15 @@ export const declarations = createTable(
 		compliancePath: d.varchar({ length: 30 }),
 		currentStep: d.integer().default(0),
 		status: d.varchar({ length: 20 }).default("draft"),
+		secondDeclarationStep: d.integer(),
+		secondDeclarationStatus: d.varchar({ length: 20 }),
+		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
+		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
 	(t) => [
-		primaryKey({ columns: [t.siren, t.year] }),
+		unique("declaration_siren_year_idx").on(t.siren, t.year),
 		index("declaration_declarant_idx").on(t.declarantId),
 	],
 );
@@ -121,6 +136,7 @@ export const declarationsRelations = relations(
 			references: [users.id],
 		}),
 		categories: many(declarationCategories),
+		jobCategories: many(jobCategories),
 	}),
 );
 
@@ -157,6 +173,95 @@ export const declarationCategoriesRelations = relations(
 		}),
 	}),
 );
+
+// ── Employee category tables (indicator G) ─────────────────────────
+
+export const declarationTypeEnum = pgEnum("declaration_type", [
+	"initial",
+	"correction",
+]);
+
+export const jobCategories = createTable(
+	"job_category",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		categoryIndex: d.integer().notNull(),
+		name: d.varchar({ length: 255 }).notNull(),
+		detail: d.varchar({ length: 500 }),
+		source: d.varchar({ length: 50 }).notNull(),
+	}),
+	(t) => [
+		unique("job_category_declaration_index_idx").on(
+			t.declarationId,
+			t.categoryIndex,
+		),
+	],
+);
+
+export const jobCategoriesRelations = relations(
+	jobCategories,
+	({ one, many }) => ({
+		declaration: one(declarations, {
+			fields: [jobCategories.declarationId],
+			references: [declarations.id],
+		}),
+		employeeCategories: many(employeeCategories),
+	}),
+);
+
+export const employeeCategories = createTable(
+	"employee_category",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		jobCategoryId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => jobCategories.id),
+		declarationType: declarationTypeEnum().notNull(),
+		womenCount: d.integer(),
+		menCount: d.integer(),
+		annualBaseWomen: d.numeric(),
+		annualBaseMen: d.numeric(),
+		annualVariableWomen: d.numeric(),
+		annualVariableMen: d.numeric(),
+		hourlyBaseWomen: d.numeric(),
+		hourlyBaseMen: d.numeric(),
+		hourlyVariableWomen: d.numeric(),
+		hourlyVariableMen: d.numeric(),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		unique("employee_category_job_type_idx").on(
+			t.jobCategoryId,
+			t.declarationType,
+		),
+	],
+);
+
+export const employeeCategoriesRelations = relations(
+	employeeCategories,
+	({ one }) => ({
+		jobCategory: one(jobCategories, {
+			fields: [employeeCategories.jobCategoryId],
+			references: [jobCategories.id],
+		}),
+	}),
+);
+
+// ── Company tables ─────────────────────────────────────────────────
 
 export const companies = createTable("company", (d) => ({
 	siren: d.varchar({ length: 9 }).notNull().primaryKey(),

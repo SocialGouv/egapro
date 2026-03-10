@@ -4,24 +4,26 @@ import { useRouter } from "next/navigation";
 
 import { api } from "~/trpc/react";
 import { StepIndicator } from "../shared/StepIndicator";
-import type { StepCategoryData } from "../types";
+import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
 
 type Props = {
-	initialCategories?: StepCategoryData[];
+	initialCategories?: EmployeeCategoryRow[];
+	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
 };
 
 export function Step5EmployeeCategories({
 	initialCategories,
+	initialSource,
 	maxWomen,
 	maxMen,
 }: Props) {
 	const currentYear = new Date().getFullYear();
 	const router = useRouter();
 
-	const mutation = api.declaration.updateStepCategories.useMutation({
+	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/6"),
 	});
 
@@ -29,12 +31,17 @@ export function Step5EmployeeCategories({
 		<CategoryForm
 			accordionId="accordion-step5"
 			initialCategories={initialCategories ?? []}
+			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
-			onSubmit={(serialized) =>
-				mutation.mutate({ step: 5, categories: serialized })
+			onSubmit={(data) =>
+				mutation.mutate({
+					declarationType: "initial",
+					source: data.source,
+					categories: data.categories,
+				})
 			}
 			previousHref="/declaration-remuneration/etape/4"
 			stepper={<StepIndicator currentStep={5} />}

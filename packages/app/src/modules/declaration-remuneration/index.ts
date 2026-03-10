@@ -23,9 +23,10 @@ export {
 	SecondDeclarationStep2Form,
 	SecondDeclarationStep3Review,
 } from "./steps/secondDeclaration";
-export { parseStep5Categories } from "./steps/step6/parseStep5Categories";
+export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
 export type {
 	CategoryData,
+	EmployeeCategoryRow,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
