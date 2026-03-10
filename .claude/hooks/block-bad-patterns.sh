@@ -42,10 +42,11 @@ check_pattern '\.(ts|tsx|js|jsx)$' \
   'biome-ignore|eslint-disable|@ts-ignore|@ts-expect-error' \
   'Suppression comments are forbidden. Fix the underlying issue instead.'
 
-# Inline styles — JSX files only
+# Inline styles — JSX files only (exclude @react-pdf/renderer components which require style={})
 check_pattern '\.(tsx|jsx)$' \
   'style=\{' \
-  'Inline style={{}} is forbidden. Use DSFR classes or a scoped SCSS module.'
+  'Inline style={{}} is forbidden. Use DSFR classes or a scoped SCSS module.' \
+  'declarationPdf/'
 
 # Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
 check_pattern '\.(tsx|jsx)$' \
