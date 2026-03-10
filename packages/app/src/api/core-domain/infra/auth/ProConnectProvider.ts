@@ -17,7 +17,7 @@ export interface ProConnectProfile {
   family_name: string | null;
   given_name: string | null;
   job: string | null;
-  organizations: Organization[];
+  organizations: Organization[] | string;
   phone_number: string | null;
   sub: string;
   updated_at: Date;
