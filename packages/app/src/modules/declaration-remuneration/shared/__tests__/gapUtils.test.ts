@@ -90,16 +90,16 @@ describe("displayDecimal", () => {
 		expect(displayDecimal("3.14")).toBe("3,14");
 	});
 
-	it("adds thousand separator with non-breaking space", () => {
-		expect(displayDecimal("1000")).toBe("1\u00A0000");
+	it("adds thousand separator with narrow no-break space", () => {
+		expect(displayDecimal("1000")).toBe("1\u202F000");
 	});
 
 	it("formats large numbers", () => {
-		expect(displayDecimal("1234567")).toBe("1\u00A0234\u00A0567");
+		expect(displayDecimal("1234567")).toBe("1\u202F234\u202F567");
 	});
 
 	it("formats large number with decimals", () => {
-		expect(displayDecimal("1234567.89")).toBe("1\u00A0234\u00A0567,89");
+		expect(displayDecimal("1234567.89")).toBe("1\u202F234\u202F567,89");
 	});
 
 	it("does not add separator for numbers under 1000", () => {
@@ -107,7 +107,7 @@ describe("displayDecimal", () => {
 	});
 
 	it("handles number with no decimal part", () => {
-		expect(displayDecimal("50000")).toBe("50\u00A0000");
+		expect(displayDecimal("50000")).toBe("50\u202F000");
 	});
 });
 

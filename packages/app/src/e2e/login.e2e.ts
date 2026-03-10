@@ -19,6 +19,7 @@ test.describe("Authenticated user features", () => {
 	test("redirects to declaration page after login", async ({ page }) => {
 		await page.goto("/declaration-remuneration");
 
+		await page.waitForURL("**/declaration-remuneration/**");
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
@@ -51,7 +52,7 @@ test.describe("Authenticated user features", () => {
 	}) => {
 		await page.goto("/login");
 
-		await page.waitForURL("**/declaration-remuneration");
+		await page.waitForURL("**/declaration-remuneration/**");
 		await expect(
 			page.getByRole("heading", {
 				name: "Déclarer les indicateurs de rémunération",

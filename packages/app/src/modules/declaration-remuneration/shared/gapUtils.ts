@@ -18,11 +18,19 @@ export function normalizeDecimalInput(value: string): string | null {
 	return normalized;
 }
 
+const thousandFormatter = new Intl.NumberFormat("fr-FR", {
+	useGrouping: true,
+	maximumFractionDigits: 0,
+});
+
 /** Display a stored decimal value with French locale: comma separator + thousand spaces. */
 export function displayDecimal(value: string): string {
 	if (!value) return value;
 	const [intPart, decPart] = value.split(".");
-	const formatted = (intPart ?? "").replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
+	const n = Number.parseInt(intPart ?? "0", 10);
+	const formatted = Number.isNaN(n)
+		? (intPart ?? "")
+		: thousandFormatter.format(n);
 	return decPart !== undefined ? `${formatted},${decPart}` : formatted;
 }
 
