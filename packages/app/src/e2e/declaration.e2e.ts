@@ -66,10 +66,10 @@ test.describe("Declaration workflow", () => {
 
 		// Fill pay gap data directly in the table
 		await page
-			.getByRole("spinbutton", { name: "Annuelle brute moyenne — Femmes" })
+			.getByRole("textbox", { name: "Annuelle brute moyenne — Femmes" })
 			.fill("30000");
 		await page
-			.getByRole("spinbutton", { name: "Annuelle brute moyenne — Hommes" })
+			.getByRole("textbox", { name: "Annuelle brute moyenne — Hommes" })
 			.fill("32000");
 
 		// Verify gap is computed and displayed
@@ -83,10 +83,10 @@ test.describe("Declaration workflow", () => {
 
 		// Fill variable pay data directly in the table
 		await page
-			.getByRole("spinbutton", { name: "Annuelle brute moyenne — Femmes" })
+			.getByRole("textbox", { name: "Annuelle brute moyenne — Femmes" })
 			.fill("5000");
 		await page
-			.getByRole("spinbutton", { name: "Annuelle brute moyenne — Hommes" })
+			.getByRole("textbox", { name: "Annuelle brute moyenne — Hommes" })
 			.fill("5500");
 
 		// Verify gap is computed
@@ -133,7 +133,7 @@ test.describe("Declaration workflow", () => {
 			page.getByRole("spinbutton", { name: "Effectif femmes, catégorie 1" }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("spinbutton", {
+			page.getByRole("textbox", {
 				name: "Salaire de base annuel femmes, catégorie 1",
 			}),
 		).toBeVisible();
@@ -144,7 +144,9 @@ test.describe("Declaration workflow", () => {
 
 		await expect(page.getByText("Étape 6 sur 6")).toBeVisible();
 		await expect(
-			page.getByRole("heading", { name: /Vérifier les informations/i }),
+			page.getByRole("heading", {
+				name: /Récapitulatif de votre déclaration/i,
+			}),
 		).toBeVisible();
 	});
 

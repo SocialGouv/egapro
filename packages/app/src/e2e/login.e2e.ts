@@ -24,9 +24,7 @@ test.describe("Authenticated user features", () => {
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
 
-		await expect(
-			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
-		).toBeVisible();
+		await expect(page.getByText(/130.?025.?265/)).toBeVisible();
 	});
 
 	test("shows user menu in header after login", async ({ page }) => {
