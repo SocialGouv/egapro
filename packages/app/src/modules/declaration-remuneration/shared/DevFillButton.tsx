@@ -11,7 +11,7 @@ export function DevFillButton({ onFill }: Props) {
 
 	return (
 		<button
-			className="fr-tag fr-tag--sm fr-tag--orange-terre-battue fr-icon-edit-line fr-tag--icon-left"
+			className="fr-btn fr-btn--sm fr-btn--tertiary fr-icon-edit-line fr-btn--icon-left"
 			onClick={onFill}
 			type="button"
 		>
