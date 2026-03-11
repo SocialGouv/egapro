@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import { DevFillButton } from "../shared/DevFillButton";
+import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -75,6 +77,9 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 						Déclarer les indicateurs pour l'ensemble des salariés et par
 						catégorie salariés
 					</h1>
+				</div>
+				<div className="fr-col-auto">
+					<DevFillButton onFill={() => setCategories(DEV_STEP1_CATEGORIES)} />
 				</div>
 				{saved && (
 					<div className="fr-col-auto">

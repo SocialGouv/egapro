@@ -1,6 +1,7 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
+export { DevFillButton } from "./shared/DevFillButton";
 export {
 	computeGap,
 	computePercentage,
