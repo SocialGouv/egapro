@@ -30,11 +30,16 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 		"initial",
 	);
 
-	const correctionCategories = mapToEmployeeCategoryRows(
-		data.jobCategories,
-		data.employeeCategories,
-		"correction",
+	const hasCorrectionData = data.employeeCategories.some(
+		(e) => e.declarationType === "correction",
 	);
+	const correctionCategories = hasCorrectionData
+		? mapToEmployeeCategoryRows(
+				data.jobCategories,
+				data.employeeCategories,
+				"correction",
+			)
+		: [];
 
 	const initialSource = data.jobCategories[0]?.source;
 

@@ -48,7 +48,6 @@ export function CategoryDataTable({
 			: null;
 
 	const id = (suffix: string) => `cat-${catIndex}-${suffix}`;
-
 	return (
 		<div className="fr-table fr-table--no-caption fr-mb-0">
 			<div className="fr-table__wrapper">

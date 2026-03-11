@@ -135,6 +135,10 @@ export const declarationsRelations = relations(
 			fields: [declarations.declarantId],
 			references: [users.id],
 		}),
+		company: one(companies, {
+			fields: [declarations.siren],
+			references: [companies.siren],
+		}),
 		categories: many(declarationCategories),
 		jobCategories: many(jobCategories),
 	}),

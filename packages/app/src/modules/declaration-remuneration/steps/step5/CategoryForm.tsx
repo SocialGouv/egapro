@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
@@ -28,9 +28,9 @@ const SOURCE_LABELS: Record<string, string> = {
 	autre: "Autre",
 };
 
-let nextCategoryId = 0;
-function nextId() {
-	return nextCategoryId++;
+function createIdGenerator() {
+	let id = 0;
+	return () => id++;
 }
 
 type Props = {
@@ -72,6 +72,8 @@ export function CategoryForm({
 }: Props) {
 	const currentYear = new Date().getFullYear();
 	const referenceYear = currentYear - 1;
+	const baseId = useId();
+	const nextId = useRef(createIdGenerator()).current;
 
 	const [categories, setCategories] = useState<EmployeeCategory[]>(
 		initialCategories.length > 0
@@ -190,7 +192,6 @@ export function CategoryForm({
 
 		onSubmit(toSubmitData(categories, source));
 	}
-
 	return (
 		<form className={stepStyles.form} onSubmit={handleSubmit}>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
@@ -275,7 +276,7 @@ export function CategoryForm({
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{categories.map((cat, index) => {
-					const collapseId = `cat-accordion-${cat.id}`;
+					const collapseId = `${baseId}-accordion-${index}`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 					const categoryLabel = cat.name.trim()
 						? `${categoryNumber} : ${cat.name.trim()}`
