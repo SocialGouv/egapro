@@ -1,5 +1,5 @@
 .hero {
-	background: linear-gradient(-33deg, var(--background-alt-blue-france) 39%, #e7d3ff 113%);
+	background: linear-gradient(-33deg, var(--background-alt-blue-france) 39%, var(--background-alt-purple-glycine) 113%);
 }
 
 .heroContent {
@@ -32,7 +32,7 @@
 	align-items: center;
 	background: var(--background-default-grey);
 	border-radius: 50%;
-	color: #7996e6;
+	color: var(--artwork-minor-blue-france);
 	display: flex;
 	flex-shrink: 0;
 	height: 4rem;
