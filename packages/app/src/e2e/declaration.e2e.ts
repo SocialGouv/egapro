@@ -1,7 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { loginWithProConnect } from "./helpers/login";
-
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
 	await page.goto("/declaration-remuneration");
@@ -15,7 +13,9 @@ test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
 
 	test.beforeEach(async ({ page }) => {
-		await loginWithProConnect(page);
+		// Auth is handled by storageState from auth.setup.ts
+		await page.goto("/declaration-remuneration");
+		await page.waitForURL("**/declaration-remuneration/etape/**");
 	});
 
 	test("displays step 1 after login", async ({ page }) => {
