@@ -5,9 +5,10 @@ import { loginWithProConnect } from "./helpers/login";
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
 	await page.goto("/declaration-remuneration");
-	await page.waitForLoadState("networkidle");
+	await page.waitForURL("**/declaration-remuneration/etape/**");
 	await page.goto(`/declaration-remuneration/etape/${step}`);
-	await page.waitForLoadState("networkidle");
+	await page.waitForURL(`**/declaration-remuneration/etape/${step}`);
+	await expect(page.getByText(`Étape ${step} sur 6`)).toBeVisible();
 }
 
 test.describe("Declaration workflow", () => {
@@ -36,7 +37,6 @@ test.describe("Declaration workflow", () => {
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
 		await page.waitForURL("**/declaration-remuneration/etape/1");
-		await page.waitForLoadState("networkidle");
 
 		// Verify stepper
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
