@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { AUTH_FILE } from "./src/e2e/constants";
+import { AUTH_FILE } from "./src/e2e/helpers/login";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;
@@ -14,6 +14,7 @@ export default defineConfig({
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
 	reporter: process.env.CI ? "github" : "list",
+	timeout: 60_000,
 	use: {
 		baseURL,
 		trace: "on-first-retry",

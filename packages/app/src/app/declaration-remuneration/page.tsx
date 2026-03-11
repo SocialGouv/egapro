@@ -1,5 +1,5 @@
-import { DeclarationIntro } from "~/modules/declaration-remuneration";
+import { redirect } from "next/navigation";
 
 export default function DeclarationPage() {
-	return <DeclarationIntro />;
+	redirect("/declaration-remuneration/etape/1");
 }

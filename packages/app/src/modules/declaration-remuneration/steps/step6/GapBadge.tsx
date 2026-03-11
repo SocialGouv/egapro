@@ -18,7 +18,9 @@ export function GapBadge({ gap }: Props) {
 	return (
 		<span className={stepStyles.inlineGap}>
 			<strong>{formatGap(gap)}</strong>
-			<span className={gapBadgeClass(level)}>{GAP_LEVEL_LABELS[level]}</span>
+			{level === "high" && (
+				<span className={gapBadgeClass(level)}>{GAP_LEVEL_LABELS[level]}</span>
+			)}
 		</span>
 	);
 }

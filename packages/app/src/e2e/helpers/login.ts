@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+export const AUTH_FILE = "test-results/.auth/user.json";
+
 /** Dismiss the cookie consent banner if present. */
 export async function dismissCookieBanner(page: Page) {
 	const refuseButton = page.getByRole("button", { name: "Tout refuser" });
@@ -12,19 +14,16 @@ export async function dismissCookieBanner(page: Page) {
 export async function loginWithProConnect(page: Page) {
 	await page.goto("/login");
 	await dismissCookieBanner(page);
+
 	await page
 		.getByRole("button", { name: /s.identifier avec\s*proconnect/i })
 		.click();
 
-	// Fill ProConnect login form (external service, may be slow)
-	await page.getByLabel("Email").fill("test@fia1.fr", { timeout: 30_000 });
+	// ProConnect FIA1V2 flow
+	await page.getByLabel("Email").fill("test@fia1.fr");
 	await page.getByRole("button", { name: /continuer|connexion/i }).click();
+	await page.getByRole("button", { name: "Se connecter" }).click();
 
-	// Handle FIA1V2 identity provider login page
-	await page
-		.getByRole("button", { name: "Se connecter" })
-		.click({ timeout: 15_000 });
-
-	// Wait for redirect to declaration intro
-	await page.waitForURL("**/declaration-remuneration", { timeout: 30_000 });
+	// Wait for redirect to declaration intro (slow ProConnect in CI)
+	await page.waitForURL("**/declaration-remuneration/**", { timeout: 50_000 });
 }

@@ -1,4 +1,3 @@
-export { DeclarationIntro } from "./DeclarationIntro";
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";

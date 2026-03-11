@@ -11,6 +11,34 @@ export function parseNumber(value: string): number {
 	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
 }
 
+/** Normalize decimal input: strip spaces, replace comma with dot, reject invalid chars. */
+export function normalizeDecimalInput(value: string): string | null {
+	const normalized = value.replace(/\s/g, "").replace(",", ".");
+	if (normalized === "") return normalized;
+	const dotCount = normalized.split(".").length - 1;
+	if (dotCount > 1) return null;
+	for (const ch of normalized) {
+		if (ch !== "." && (ch < "0" || ch > "9")) return null;
+	}
+	return normalized;
+}
+
+const thousandFormatter = new Intl.NumberFormat("fr-FR", {
+	useGrouping: true,
+	maximumFractionDigits: 0,
+});
+
+/** Display a stored decimal value with French locale: comma separator + thousand spaces. */
+export function displayDecimal(value: string): string {
+	if (!value) return value;
+	const [intPart, decPart] = value.split(".");
+	const n = Number.parseInt(intPart ?? "0", 10);
+	const formatted = Number.isNaN(n)
+		? (intPart ?? "")
+		: thousandFormatter.format(n);
+	return decPart !== undefined ? `${formatted},${decPart}` : formatted;
+}
+
 export function computeGap(womenVal: string, menVal: string): number | null {
 	const w = parseNumber(womenVal);
 	const m = parseNumber(menVal);

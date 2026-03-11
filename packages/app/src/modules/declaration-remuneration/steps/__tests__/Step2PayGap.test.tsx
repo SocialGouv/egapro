@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Step2PayGap } from "../Step2PayGap";
 
 const mockMutate = vi.fn();
@@ -19,26 +19,30 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-// jsdom does not implement HTMLDialogElement methods
-beforeEach(() => {
-	HTMLDialogElement.prototype.showModal = vi.fn();
-	HTMLDialogElement.prototype.close = vi.fn();
-});
-
 describe("Step2PayGap", () => {
-	it("renders the table with 4 remuneration rows and empty values", () => {
+	it("renders the table with 4 remuneration rows", () => {
 		render(<Step2PayGap />);
 		expect(screen.getByText("Annuelle brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Annuelle brute médiane")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute médiane")).toBeInTheDocument();
-		expect(screen.getAllByText("-").length).toBeGreaterThanOrEqual(4);
 	});
 
-	it("renders table headers with sub-text", () => {
+	it("renders instruction text and mandatory fields notice", () => {
+		render(<Step2PayGap />);
+		expect(
+			screen.getByText(
+				"Renseignez les informations avant de valider vos indicateurs.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Tous les champs sont obligatoires."),
+		).toBeInTheDocument();
+	});
+
+	it("renders table headers", () => {
 		render(<Step2PayGap />);
 		expect(screen.getByText("Rémunération")).toBeInTheDocument();
-		expect(screen.getByText("Montant en euros")).toBeInTheDocument();
 		expect(screen.getByText("Femmes")).toBeInTheDocument();
 		expect(screen.getByText("Hommes")).toBeInTheDocument();
 		expect(
@@ -70,99 +74,60 @@ describe("Step2PayGap", () => {
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
-	it("opens edit modal and rejects negative values", async () => {
+	it("updates values via inline inputs and rejects negative values", async () => {
 		const user = userEvent.setup();
 		render(<Step2PayGap />);
 
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
 
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
-
-		// Type a valid positive value
 		await user.clear(womenInput);
 		await user.type(womenInput, "100");
-		expect(womenInput).toHaveValue(100);
+		expect(womenInput).toHaveValue("100");
 
-		// Type a negative value — should be rejected
+		// Negative value should be rejected (minus sign is filtered out)
 		await user.clear(womenInput);
 		await user.type(womenInput, "-50");
-		expect(womenInput).not.toHaveValue(-50);
+		expect(womenInput).not.toHaveValue("-50");
 
-		// Type a valid value in men input
 		await user.clear(menInput);
 		await user.type(menInput, "200");
-		expect(menInput).toHaveValue(200);
+		expect(menInput).toHaveValue("200");
 	});
 
-	it("computes gap and shows badge after entering values in modal", async () => {
+	it("computes gap and shows badge after entering values", async () => {
 		const user = userEvent.setup();
 		render(<Step2PayGap />);
 
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "95");
 		await user.clear(menInput);
 		await user.type(menInput, "100");
 
-		// Gap = |((100-95)/100)*100| = 5.0 % → "élevé" (>= 5)
+		// Gap = |((100-95)/100)*100| = 5.0 %
 		expect(screen.getByText("5,0 %")).toBeInTheDocument();
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
-	it("shows 'faible' badge when gap is less than 5%", async () => {
+	it("shows no badge when gap is less than 5%", async () => {
 		const user = userEvent.setup();
 		render(<Step2PayGap />);
 
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "97");
 		await user.clear(menInput);
 		await user.type(menInput, "100");
 
-		// Gap = 3.0 % → "faible"
+		// Gap = 3.0 %
 		expect(screen.getByText("3,0 %")).toBeInTheDocument();
-		expect(screen.getByText("faible")).toBeInTheDocument();
-	});
-
-	it("saves edit locally but does not show SavedIndicator", async () => {
-		const user = userEvent.setup();
-		render(<Step2PayGap />);
-
-		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
-
-		const editButtons = screen.getAllByRole("button", { name: /modifier/i });
-		await user.click(editButtons[0] as HTMLElement);
-
-		const womenInput = screen.getByLabelText("Rémunération Femmes");
-		const menInput = screen.getByLabelText("Rémunération Hommes");
-
-		await user.clear(womenInput);
-		await user.type(womenInput, "100");
-		await user.clear(menInput);
-		await user.type(menInput, "200");
-
-		// The dialog is in the DOM but not visually open in jsdom,
-		// so query within the dialog element directly
-		const dialog = document.querySelector("dialog") as HTMLElement;
-		const dialogScope = within(dialog);
-		await user.click(dialogScope.getByText("Enregistrer"));
-
-		// SavedIndicator only shows when data is persisted in DB
-		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
-		expect(screen.getByText("100")).toBeInTheDocument();
-		expect(screen.getByText("200")).toBeInTheDocument();
+		expect(screen.queryByText("faible")).not.toBeInTheDocument();
+		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 1", () => {

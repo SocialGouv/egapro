@@ -1,3 +1,4 @@
+import styles from "./DeclarationLayout.module.scss";
 import { CompanyBanner } from "./shared/CompanyBanner";
 
 type CompanyData = {
@@ -24,7 +25,7 @@ export function DeclarationLayout({
 				currentPageLabel={`Démarche des indicateurs de rémunération ${currentYear}`}
 			/>
 			<main className="fr-container fr-py-7w" id="content">
-				{children}
+				<div className={styles.narrowContent}>{children}</div>
 			</main>
 		</>
 	);

@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { FormActions } from "../shared/FormActions";
+import { normalizeDecimalInput } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -91,10 +92,15 @@ export function Step5EmployeeCategories({
 		isInteger: boolean,
 	) {
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
-			const val = e.target.value;
+			let val = e.target.value;
 			if (val === "") {
 				updateCategory(index, field, val);
 				return;
+			}
+			if (!isInteger) {
+				const normalized = normalizeDecimalInput(val);
+				if (normalized === null) return;
+				val = normalized;
 			}
 			const n = isInteger ? Number.parseInt(val, 10) : Number.parseFloat(val);
 			if (Number.isNaN(n) || n < 0) return;

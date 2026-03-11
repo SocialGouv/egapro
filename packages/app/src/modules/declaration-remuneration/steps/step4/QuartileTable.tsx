@@ -1,12 +1,10 @@
 "use client";
 
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import {
 	computePercentage,
-	formatCurrency,
+	displayDecimal,
 } from "~/modules/declaration-remuneration/shared/gapUtils";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
@@ -14,18 +12,37 @@ type Props = {
 	title: string;
 	tableType: "annual" | "hourly";
 	categories: StepCategoryData[];
-	onEditRemuneration: () => void;
-	onEditWomenCount: () => void;
-	onEditMenCount: () => void;
+	maxWomen?: number;
+	maxMen?: number;
+	validationError: string | null;
+	onCategoryChange: (
+		index: number,
+		field: "womenValue" | "womenCount" | "menCount",
+		value: string,
+	) => void;
 };
+
+/** Format ordinal text like "1er quartile" → 1<sup>er</sup> quartile */
+function OrdinalLabel({ text }: { text: string }) {
+	const match = text.match(/^(\d+)(er|e)\s(.+)$/);
+	if (!match) return <>{text}</>;
+	const [, num, suffix, rest] = match;
+	return (
+		<>
+			{num}
+			<sup>{suffix}</sup> {rest}
+		</>
+	);
+}
 
 export function QuartileTable({
 	title,
 	tableType,
 	categories,
-	onEditRemuneration,
-	onEditWomenCount,
-	onEditMenCount,
+	maxWomen,
+	maxMen,
+	validationError,
+	onCategoryChange,
 }: Props) {
 	const totalWomen = categories.reduce(
 		(sum, c) => sum + (c.womenCount ?? 0),
@@ -38,7 +55,9 @@ export function QuartileTable({
 		<div className={stepStyles.tableWrapper}>
 			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
-				<div className="fr-table fr-table--no-caption fr-mb-0">
+				<div
+					className={`fr-table fr-table--no-caption fr-mb-0 ${stepStyles.quartileTable}`}
+				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">
@@ -49,54 +68,81 @@ export function QuartileTable({
 											<th scope="col">{/* row label */}</th>
 											{QUARTILE_NAMES.map((name) => (
 												<th key={name} scope="col">
-													{name}
+													<OrdinalLabel text={name} />
 												</th>
 											))}
-											<th scope="col">Tous les salariés</th>
-											<th scope="col">{/* actions */}</th>
+											<th scope="col">
+												Tous
+												<br />
+												les salariés
+											</th>
 										</tr>
 									</thead>
 									<tbody>
 										{/* Row 1: Remuneration */}
 										<tr>
 											<td>
-												<strong>Rémunération brute</strong>
+												Rémunération
+												<br />
+												{tableType === "annual"
+													? "annuelle brute"
+													: "horaire brute"}
 											</td>
-											{categories.map((c) => (
-												<td key={c.name}>{formatCurrency(c.womenValue)}</td>
+											{categories.map((c, i) => (
+												<td key={c.name}>
+													<span className={stepStyles.inputWithUnit}>
+														<input
+															aria-label={`Rémunération brute ${c.name}`}
+															className="fr-input"
+															inputMode="decimal"
+															onChange={(e) =>
+																onCategoryChange(
+																	i,
+																	"womenValue",
+																	e.target.value,
+																)
+															}
+															type="text"
+															value={displayDecimal(c.womenValue ?? "")}
+														/>
+														<span aria-hidden="true">€</span>
+													</span>
+												</td>
 											))}
 											<td>-</td>
-											<td>
-												<button
-													aria-label={`Modifier la rémunération ${tableType === "annual" ? "annuelle" : "horaire"}`}
-													className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-													onClick={onEditRemuneration}
-													type="button"
-												/>
-											</td>
 										</tr>
 										{/* Row 2: Women count */}
 										<tr>
 											<td>
-												<strong>Nombre de femmes</strong>
+												Nombre
+												<br />
+												de femmes
 											</td>
-											{categories.map((c) => (
-												<td key={c.name}>{c.womenCount ?? "-"}</td>
+											{categories.map((c, i) => (
+												<td key={c.name}>
+													<input
+														aria-label={`Nombre de femmes ${c.name}`}
+														className="fr-input"
+														max={maxWomen}
+														min="0"
+														onChange={(e) =>
+															onCategoryChange(i, "womenCount", e.target.value)
+														}
+														type="number"
+														value={c.womenCount ?? ""}
+													/>
+												</td>
 											))}
 											<td>{totalWomen || "-"}</td>
-											<td>
-												<button
-													aria-label={`Modifier le nombre de femmes (${tableType === "annual" ? "annuel" : "horaire"})`}
-													className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-													onClick={onEditWomenCount}
-													type="button"
-												/>
-											</td>
 										</tr>
 										{/* Row 3: Women percentage */}
 										<tr>
 											<td>
-												<strong>Pourcentage de femmes</strong>
+												<strong>
+													Pourcentage
+													<br />
+													de femmes
+												</strong>
 											</td>
 											{categories.map((c) => {
 												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
@@ -107,30 +153,39 @@ export function QuartileTable({
 												);
 											})}
 											<td>{computePercentage(totalWomen, totalAll)}</td>
-											<td>{/* no action for computed row */}</td>
 										</tr>
 										{/* Row 4: Men count */}
 										<tr>
 											<td>
-												<strong>Nombre d&apos;hommes</strong>
+												Nombre
+												<br />
+												d&apos;hommes
 											</td>
-											{categories.map((c) => (
-												<td key={c.name}>{c.menCount ?? "-"}</td>
+											{categories.map((c, i) => (
+												<td key={c.name}>
+													<input
+														aria-label={`Nombre d'hommes ${c.name}`}
+														className="fr-input"
+														max={maxMen}
+														min="0"
+														onChange={(e) =>
+															onCategoryChange(i, "menCount", e.target.value)
+														}
+														type="number"
+														value={c.menCount ?? ""}
+													/>
+												</td>
 											))}
 											<td>{totalMen || "-"}</td>
-											<td>
-												<button
-													aria-label={`Modifier le nombre d'hommes (${tableType === "annual" ? "annuel" : "horaire"})`}
-													className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--sm"
-													onClick={onEditMenCount}
-													type="button"
-												/>
-											</td>
 										</tr>
 										{/* Row 5: Men percentage */}
 										<tr>
 											<td>
-												<strong>Pourcentage d&apos;hommes</strong>
+												<strong>
+													Pourcentage
+													<br />
+													d&apos;hommes
+												</strong>
 											</td>
 											{categories.map((c) => {
 												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
@@ -141,7 +196,6 @@ export function QuartileTable({
 												);
 											})}
 											<td>{computePercentage(totalMen, totalAll)}</td>
-											<td>{/* no action for computed row */}</td>
 										</tr>
 									</tbody>
 								</table>
@@ -150,14 +204,14 @@ export function QuartileTable({
 					</div>
 				</div>
 
-				{/* Source text */}
-				<p className={`fr-text--sm fr-mb-0 ${common.mentionGrey}`}>
-					Source : déclarations sociales nominatives mise à jour le 27/01/2026.
-					<TooltipButton
-						id={`tooltip-source-step4-${tableType}`}
-						label="Information sur la source"
-					/>
-				</p>
+				{validationError && (
+					<div
+						aria-live="polite"
+						className="fr-alert fr-alert--error fr-alert--sm"
+					>
+						<p>{validationError}</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -1,5 +1,6 @@
-.gapDisplay {
-	display: flex;
-	align-items: baseline;
-	gap: 0.5rem;
+.payGapTable {
+	th,
+	td {
+		white-space: normal;
+	}
 }

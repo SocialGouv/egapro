@@ -15,3 +15,43 @@
 	flex-direction: column;
 	gap: 2rem;
 }
+
+.instructions {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.dataContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.quartileTable {
+	th,
+	td {
+		white-space: normal;
+	}
+
+	input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+}
+
+.inputWithUnit {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	input {
+		min-width: 5rem;
+	}
+}

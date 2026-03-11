@@ -1,0 +1,33 @@
+.workforceTable {
+	table {
+		width: 100%;
+	}
+
+	@include respond-from(md) {
+		table {
+			table-layout: fixed;
+		}
+	}
+}
+
+.labelCol {
+	@include respond-from(md) {
+		width: 20%;
+	}
+}
+
+.inputCol {
+	min-width: 6rem;
+
+	@include respond-from(md) {
+		width: 30%;
+	}
+}
+
+.totalCol {
+	min-width: 4rem;
+
+	@include respond-from(md) {
+		width: 20%;
+	}
+}
