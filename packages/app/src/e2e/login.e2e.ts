@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
+import { dismissCookieBanner } from "./helpers/login";
 
 test.describe("Login page", () => {
+	test.use({ storageState: { cookies: [], origins: [] } });
+
 	test("displays ProConnect button", async ({ page }) => {
 		await page.goto("/login");
 		await dismissCookieBanner(page);
@@ -13,11 +15,10 @@ test.describe("Login page", () => {
 	});
 });
 
-test.describe("ProConnect authentication flow", () => {
+test.describe("Authenticated user features", () => {
 	test("redirects to declaration page after login", async ({ page }) => {
-		await loginWithProConnect(page);
+		await page.goto("/declaration-remuneration");
 
-		await page.waitForURL("**/declaration-remuneration");
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
@@ -28,7 +29,7 @@ test.describe("ProConnect authentication flow", () => {
 	});
 
 	test("shows user menu in header after login", async ({ page }) => {
-		await loginWithProConnect(page);
+		await page.goto("/declaration-remuneration");
 
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
@@ -36,7 +37,7 @@ test.describe("ProConnect authentication flow", () => {
 	});
 
 	test("displays user info in account menu", async ({ page }) => {
-		await loginWithProConnect(page);
+		await page.goto("/declaration-remuneration");
 
 		await page.getByRole("button", { name: "Mon espace" }).click();
 
@@ -45,26 +46,9 @@ test.describe("ProConnect authentication flow", () => {
 		).toBeVisible();
 	});
 
-	test("logs out and returns to unauthenticated state", async ({ page }) => {
-		await loginWithProConnect(page);
-
-		await page.getByRole("button", { name: "Mon espace" }).click();
-		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
-
-		await page.waitForURL("**/api/auth/signout**");
-		await page.getByRole("button", { name: /sign out/i }).click();
-
-		await page.waitForURL("**/login", { timeout: 10000 });
-		await expect(
-			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
-		).toBeVisible();
-	});
-
 	test("redirects to declaration page when already logged in", async ({
 		page,
 	}) => {
-		await loginWithProConnect(page);
-
 		await page.goto("/login");
 
 		await page.waitForURL("**/declaration-remuneration");

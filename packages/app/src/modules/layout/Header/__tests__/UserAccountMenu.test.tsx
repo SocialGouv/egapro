@@ -84,7 +84,7 @@ describe("UserAccountMenu", () => {
 				name: "Se déconnecter",
 			});
 			expect(logoutLink).toBeInTheDocument();
-			expect(logoutLink).toHaveAttribute("href", "/api/auth/signout");
+			expect(logoutLink).toHaveAttribute("href", "/api/auth/logout");
 		});
 	});
 

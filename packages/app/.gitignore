@@ -53,3 +53,6 @@ yarn-error.log*
 
 # lighthouse ci
 /.lighthouseci
+
+# playwright auth state
+src/e2e/.auth/

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { AUTH_FILE } from "./src/e2e/constants";
+
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;
 
@@ -18,8 +20,24 @@ export default defineConfig({
 	},
 	projects: [
 		{
-			name: "chromium",
+			name: "setup",
+			testMatch: /auth\.setup\.ts/,
 			use: { ...devices["Desktop Chrome"] },
+		},
+		{
+			name: "chromium",
+			testMatch: /(?<!logout\.)e2e\.ts$/,
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: AUTH_FILE,
+			},
+			dependencies: ["setup"],
+		},
+		{
+			name: "logout",
+			testMatch: /logout\.e2e\.ts$/,
+			use: { ...devices["Desktop Chrome"] },
+			dependencies: ["chromium"],
 		},
 	],
 	...(isRemote
