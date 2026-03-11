@@ -12,9 +12,8 @@ type SuitCseResponse = {
  * Returns `true`/`false` if the API responds, or `null` on error/not found.
  */
 export async function fetchCseBySiren(siren: string): Promise<boolean | null> {
-	const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/CSE/${siren}`;
-
 	try {
+		const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/CSE/${siren}`;
 		const response = await fetch(url, {
 			headers: { Accept: "application/json" },
 			signal: AbortSignal.timeout(10_000),
