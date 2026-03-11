@@ -28,6 +28,41 @@ export type VariablePayData = {
 	beneficiaryMen: string;
 };
 
+export type EmployeeCategoryRow = {
+	name: string;
+	detail: string;
+	womenCount: number | null;
+	menCount: number | null;
+	annualBaseWomen: string | null;
+	annualBaseMen: string | null;
+	annualVariableWomen: string | null;
+	annualVariableMen: string | null;
+	hourlyBaseWomen: string | null;
+	hourlyBaseMen: string | null;
+	hourlyVariableWomen: string | null;
+	hourlyVariableMen: string | null;
+};
+
+export type EmployeeCategorySubmitData = {
+	source: string;
+	categories: Array<{
+		name: string;
+		detail: string;
+		data: {
+			womenCount?: number;
+			menCount?: number;
+			annualBaseWomen?: string;
+			annualBaseMen?: string;
+			annualVariableWomen?: string;
+			annualVariableMen?: string;
+			hourlyBaseWomen?: string;
+			hourlyBaseMen?: string;
+			hourlyVariableWomen?: string;
+			hourlyVariableMen?: string;
+		};
+	}>;
+};
+
 export const DEFAULT_CATEGORIES = [
 	"Ouvriers",
 	"Employés",

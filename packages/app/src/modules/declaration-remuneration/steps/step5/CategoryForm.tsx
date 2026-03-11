@@ -1,20 +1,23 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type {
+	EmployeeCategoryRow,
+	EmployeeCategorySubmitData,
+} from "~/modules/declaration-remuneration/types";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
 import {
 	createEmptyCategory,
-	deserializeCategories,
 	type EmployeeCategory,
-	serializeCategories,
+	fromDatabaseRows,
+	toSubmitData,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
@@ -25,9 +28,9 @@ const SOURCE_LABELS: Record<string, string> = {
 	autre: "Autre",
 };
 
-let nextCategoryId = 0;
-function nextId() {
-	return nextCategoryId++;
+function createIdGenerator() {
+	let id = 0;
+	return () => id++;
 }
 
 type Props = {
@@ -37,10 +40,11 @@ type Props = {
 	tooltipPrefix: string;
 	accordionId: string;
 	previousHref: string;
-	initialCategories: StepCategoryData[];
+	initialCategories: EmployeeCategoryRow[];
+	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
-	onSubmit: (serialized: StepCategoryData[]) => void;
+	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
 	readOnlyNameDetail?: boolean;
@@ -56,6 +60,7 @@ export function CategoryForm({
 	accordionId,
 	previousHref,
 	initialCategories,
+	initialSource = "",
 	maxWomen,
 	maxMen,
 	onSubmit,
@@ -67,23 +72,17 @@ export function CategoryForm({
 }: Props) {
 	const currentYear = new Date().getFullYear();
 	const referenceYear = currentYear - 1;
-
-	const initial =
-		initialCategories.length > 0
-			? deserializeCategories(initialCategories, nextId)
-			: { categories: [createEmptyCategory(nextId())], source: "" };
+	const baseId = useId();
+	const nextId = useRef(createIdGenerator()).current;
 
 	const [categories, setCategories] = useState<EmployeeCategory[]>(
-		initial.categories,
+		initialCategories.length > 0
+			? fromDatabaseRows(initialCategories, nextId)
+			: [createEmptyCategory(nextId())],
 	);
-	const [source, setSource] = useState(initial.source);
+	const [source, setSource] = useState(initialSource);
 
-	const hasInitialData = initialCategories.some(
-		(c) =>
-			c.name.startsWith("cat:") &&
-			!c.name.match(/^cat:\d+:(name|detail):/) &&
-			(c.womenCount !== undefined || c.womenValue !== undefined),
-	);
+	const hasInitialData = initialCategories.length > 0;
 	const [saved, setSaved] = useState(hasInitialData);
 
 	const [workforceError, setWorkforceError] = useState("");
@@ -191,9 +190,8 @@ export function CategoryForm({
 			}
 		}
 
-		onSubmit(serializeCategories(categories, source));
+		onSubmit(toSubmitData(categories, source));
 	}
-
 	return (
 		<form className={stepStyles.form} onSubmit={handleSubmit}>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
@@ -278,7 +276,7 @@ export function CategoryForm({
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{categories.map((cat, index) => {
-					const collapseId = `cat-accordion-${cat.id}`;
+					const collapseId = `${baseId}-accordion-${index}`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 					const categoryLabel = cat.name.trim()
 						? `${categoryNumber} : ${cat.name.trim()}`

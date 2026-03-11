@@ -5,19 +5,19 @@ import { useState } from "react";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { hasGapsAboveThreshold } from "~/modules/declaration-remuneration/shared/gapUtils";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
 import { GapColumn } from "../step6/GapColumn";
-import { parseStep5Categories } from "../step6/parseStep5Categories";
+import { parseEmployeeCategories } from "../step6/parseStep5Categories";
 import { BASE_PATH } from "./constants";
 import { NextStepsSection } from "./NextStepsSection";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
-	secondDeclarationCategories: StepCategoryData[];
+	secondDeclarationCategories: EmployeeCategoryRow[];
 };
 
 export function SecondDeclarationStep3Review({
@@ -26,17 +26,23 @@ export function SecondDeclarationStep3Review({
 	const router = useRouter();
 	const [certified, setCertified] = useState(false);
 
-	// TODO: Replace with actual tRPC mutation when backend is ready
-	const isSubmitting = false;
+	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		onSuccess: () => router.push("/avis-cse"),
+	});
 
-	const parsed = parseStep5Categories(secondDeclarationCategories);
-	const gapsExist = hasGapsAboveThreshold(secondDeclarationCategories);
+	const parsed = parseEmployeeCategories(secondDeclarationCategories);
+	const gapsExist = parsed.some(
+		(cat) =>
+			(cat.annualBaseGap !== null && cat.annualBaseGap >= 5) ||
+			(cat.annualVariableGap !== null && cat.annualVariableGap >= 5) ||
+			(cat.hourlyBaseGap !== null && cat.hourlyBaseGap >= 5) ||
+			(cat.hourlyVariableGap !== null && cat.hourlyVariableGap >= 5),
+	);
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		if (!certified) return;
-		// TODO: Call tRPC mutation when backend is ready
-		router.push("/avis-cse");
+		mutation.mutate();
 	}
 
 	return (
@@ -119,7 +125,7 @@ export function SecondDeclarationStep3Review({
 			</div>
 
 			<FormActions
-				isSubmitting={isSubmitting}
+				isSubmitting={mutation.isPending}
 				nextDisabled={!certified}
 				nextLabel="Soumettre"
 				previousHref={`${BASE_PATH}/etape/2`}

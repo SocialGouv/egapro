@@ -1,18 +1,58 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import { describe, expect, it, vi } from "vitest";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
 
-const mockCategories: StepCategoryData[] = [
-	{ name: "meta:source:autre" },
-	{ name: "cat:0:name:Ingénieurs" },
-	{ name: "cat:0:detail:Dev" },
-	{ name: "cat:0:effectif", womenCount: 10, menCount: 15 },
-	{ name: "cat:0:annual:base", womenValue: "3000", menValue: "3200" },
-	{ name: "cat:0:annual:variable", womenValue: "500", menValue: "600" },
-	{ name: "cat:0:hourly:base", womenValue: "18", menValue: "19" },
-	{ name: "cat:0:hourly:variable", womenValue: "3", menValue: "4" },
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declaration: {
+			submitSecondDeclaration: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
+
+function makeCategory(
+	overrides: Partial<EmployeeCategoryRow> = {},
+): EmployeeCategoryRow {
+	return {
+		name: "",
+		detail: "",
+		womenCount: null,
+		menCount: null,
+		annualBaseWomen: null,
+		annualBaseMen: null,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+		...overrides,
+	};
+}
+
+const mockCategories: EmployeeCategoryRow[] = [
+	makeCategory({
+		name: "Ingénieurs",
+		detail: "Dev",
+		womenCount: 10,
+		menCount: 15,
+		annualBaseWomen: "3000",
+		annualBaseMen: "3200",
+		annualVariableWomen: "500",
+		annualVariableMen: "600",
+		hourlyBaseWomen: "18",
+		hourlyBaseMen: "19",
+		hourlyVariableWomen: "3",
+		hourlyVariableMen: "4",
+	}),
 ];
 
 describe("SecondDeclarationStep3Review", () => {
@@ -111,15 +151,20 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("shows gap warning when gaps >= 5% exist", () => {
-		const categoriesWithHighGaps: StepCategoryData[] = [
-			{ name: "meta:source:autre" },
-			{ name: "cat:0:name:Ouvriers" },
-			{ name: "cat:0:detail:" },
-			{ name: "cat:0:effectif", womenCount: 10, menCount: 15 },
-			{ name: "cat:0:annual:base", womenValue: "1000", menValue: "2000" },
-			{ name: "cat:0:annual:variable", womenValue: "100", menValue: "200" },
-			{ name: "cat:0:hourly:base", womenValue: "10", menValue: "20" },
-			{ name: "cat:0:hourly:variable", womenValue: "1", menValue: "2" },
+		const categoriesWithHighGaps: EmployeeCategoryRow[] = [
+			makeCategory({
+				name: "Ouvriers",
+				womenCount: 10,
+				menCount: 15,
+				annualBaseWomen: "1000",
+				annualBaseMen: "2000",
+				annualVariableWomen: "100",
+				annualVariableMen: "200",
+				hourlyBaseWomen: "10",
+				hourlyBaseMen: "20",
+				hourlyVariableWomen: "1",
+				hourlyVariableMen: "2",
+			}),
 		];
 
 		render(
@@ -133,15 +178,20 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("does not show gap warning when all gaps < 5%", () => {
-		const categoriesWithLowGaps: StepCategoryData[] = [
-			{ name: "meta:source:autre" },
-			{ name: "cat:0:name:Ouvriers" },
-			{ name: "cat:0:detail:" },
-			{ name: "cat:0:effectif", womenCount: 10, menCount: 15 },
-			{ name: "cat:0:annual:base", womenValue: "9800", menValue: "10000" },
-			{ name: "cat:0:annual:variable", womenValue: "980", menValue: "1000" },
-			{ name: "cat:0:hourly:base", womenValue: "98", menValue: "100" },
-			{ name: "cat:0:hourly:variable", womenValue: "9.8", menValue: "10" },
+		const categoriesWithLowGaps: EmployeeCategoryRow[] = [
+			makeCategory({
+				name: "Ouvriers",
+				womenCount: 10,
+				menCount: 15,
+				annualBaseWomen: "9800",
+				annualBaseMen: "10000",
+				annualVariableWomen: "980",
+				annualVariableMen: "1000",
+				hourlyBaseWomen: "98",
+				hourlyBaseMen: "100",
+				hourlyVariableWomen: "9.8",
+				hourlyVariableMen: "10",
+			}),
 		];
 
 		render(

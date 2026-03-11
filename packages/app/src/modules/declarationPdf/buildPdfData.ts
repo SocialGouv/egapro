@@ -2,11 +2,14 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 import type { StepCategoryData } from "~/modules/declaration-remuneration";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
 	companies,
 	declarationCategories,
 	declarations,
+	employeeCategories,
+	jobCategories,
 } from "~/server/db/schema";
 
 import type { DeclarationPdfData } from "./types";
@@ -65,6 +68,25 @@ export async function buildPdfData(
 			),
 		);
 
+	const jobs = await db
+		.select()
+		.from(jobCategories)
+		.where(eq(jobCategories.declarationId, declaration.id));
+
+	const jobIds = jobs.map((j) => j.id);
+	let empCats: (typeof employeeCategories.$inferSelect)[] = [];
+	if (jobIds.length > 0) {
+		const results = await Promise.all(
+			jobIds.map((id) =>
+				db
+					.select()
+					.from(employeeCategories)
+					.where(eq(employeeCategories.jobCategoryId, id)),
+			),
+		);
+		empCats = results.flat();
+	}
+
 	const step1Categories = categories
 		.filter((c) => c.step === 1)
 		.map((c) => ({
@@ -97,7 +119,7 @@ export async function buildPdfData(
 	};
 
 	const step4Categories = mapStepCategories(categories, 4);
-	const step5Categories = mapStepCategories(categories, 5);
+	const step5Categories = mapToEmployeeCategoryRows(jobs, empCats, "initial");
 
 	return {
 		companyName: company?.name ?? `Entreprise ${siren}`,

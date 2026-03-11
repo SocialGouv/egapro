@@ -29,6 +29,16 @@ vi.mock("~/server/db/schema", () => ({
 		$inferSelect: {},
 	},
 	companies: { siren: "siren" },
+	jobCategories: { declarationId: "declarationId" },
+	employeeCategories: { jobCategoryId: "jobCategoryId" },
+}));
+
+vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	mapToEmployeeCategoryRows: (
+		_jobs: unknown[],
+		_empCats: unknown[],
+		_type: string,
+	) => [],
 }));
 
 vi.mock("drizzle-orm", () => ({
@@ -64,8 +74,10 @@ describe("buildPdfData", () => {
 
 	it("returns transformed data for a submitted declaration", async () => {
 		resetMocks();
+		// Query 1: declarations
 		queryResults.push([
 			{
+				id: "decl-uuid",
 				siren: "123456789",
 				year: 2026,
 				status: "submitted",
@@ -73,7 +85,9 @@ describe("buildPdfData", () => {
 				totalMen: 60,
 			},
 		]);
+		// Query 2: companies
 		queryResults.push([{ siren: "123456789", name: "Acme Corp" }]);
+		// Query 3: declarationCategories (steps 1-4 only, step 5 from new tables)
 		queryResults.push([
 			{
 				step: 1,
@@ -125,17 +139,9 @@ describe("buildPdfData", () => {
 				womenMedianValue: null,
 				menMedianValue: null,
 			},
-			{
-				step: 5,
-				categoryName: "cat:0:name:Ingénieurs",
-				womenCount: 5,
-				menCount: 8,
-				womenValue: "55000",
-				menValue: "58000",
-				womenMedianValue: null,
-				menMedianValue: null,
-			},
 		]);
+		// Query 4: jobCategories (empty — mapToEmployeeCategoryRows is mocked)
+		queryResults.push([]);
 
 		const { buildPdfData } = await import("../buildPdfData");
 		const result = await buildPdfData(
@@ -185,14 +191,16 @@ describe("buildPdfData", () => {
 			},
 		]);
 
-		expect(result.step5Categories).toHaveLength(1);
-		expect(result.step5Categories[0]?.name).toBe("cat:0:name:Ingénieurs");
+		// step5Categories comes from mapToEmployeeCategoryRows mock (returns [])
+		expect(result.step5Categories).toEqual([]);
 	});
 
 	it("falls back to default company name when company not found", async () => {
 		resetMocks();
+		// Query 1: declarations
 		queryResults.push([
 			{
+				id: "decl-uuid-2",
 				siren: "999999999",
 				year: 2026,
 				status: "submitted",
@@ -200,7 +208,11 @@ describe("buildPdfData", () => {
 				totalMen: null,
 			},
 		]);
+		// Query 2: companies (not found)
 		queryResults.push([]);
+		// Query 3: declarationCategories (empty)
+		queryResults.push([]);
+		// Query 4: jobCategories (empty)
 		queryResults.push([]);
 
 		const { buildPdfData } = await import("../buildPdfData");

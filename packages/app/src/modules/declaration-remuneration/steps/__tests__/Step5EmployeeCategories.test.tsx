@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { Step5EmployeeCategories } from "../Step5EmployeeCategories";
 
 const mockMutate = vi.fn();
@@ -8,7 +9,7 @@ const mockMutate = vi.fn();
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateEmployeeCategories: {
 				useMutation: () => ({
 					mutate: mockMutate,
 					isPending: false,
@@ -24,6 +25,26 @@ beforeEach(() => {
 	HTMLDialogElement.prototype.showModal = vi.fn();
 	HTMLDialogElement.prototype.close = vi.fn();
 });
+
+function makeCategory(
+	overrides: Partial<EmployeeCategoryRow> = {},
+): EmployeeCategoryRow {
+	return {
+		name: "",
+		detail: "",
+		womenCount: null,
+		menCount: null,
+		annualBaseWomen: null,
+		annualBaseMen: null,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+		...overrides,
+	};
+}
 
 describe("Step5EmployeeCategories", () => {
 	it("renders with 1 empty category by default", () => {
@@ -192,23 +213,16 @@ describe("Step5EmployeeCategories", () => {
 		render(
 			<Step5EmployeeCategories
 				initialCategories={[
-					{ name: "meta:source:autre" },
-					{ name: "cat:0:name:Ingénieurs" },
-					{ name: "cat:0:detail:Dev" },
-					{
-						name: "cat:0:effectif",
+					makeCategory({
+						name: "Ingénieurs",
+						detail: "Dev",
 						womenCount: 10,
 						menCount: 15,
-					},
-					{
-						name: "cat:0:annual:base",
-						womenValue: "3000",
-						menValue: "3200",
-					},
-					{ name: "cat:0:annual:variable" },
-					{ name: "cat:0:hourly:base" },
-					{ name: "cat:0:hourly:variable" },
+						annualBaseWomen: "3000",
+						annualBaseMen: "3200",
+					}),
 				]}
+				initialSource="autre"
 			/>,
 		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
@@ -223,19 +237,14 @@ describe("Step5EmployeeCategories", () => {
 		render(
 			<Step5EmployeeCategories
 				initialCategories={[
-					{ name: "meta:source:convention-collective" },
-					{ name: "cat:0:name:Cadres" },
-					{ name: "cat:0:detail:Managers" },
-					{
-						name: "cat:0:effectif",
+					makeCategory({
+						name: "Cadres",
+						detail: "Managers",
 						womenCount: 5,
 						menCount: 8,
-					},
-					{ name: "cat:0:annual:base" },
-					{ name: "cat:0:annual:variable" },
-					{ name: "cat:0:hourly:base" },
-					{ name: "cat:0:hourly:variable" },
+					}),
 				]}
+				initialSource="convention-collective"
 			/>,
 		);
 
@@ -250,7 +259,7 @@ describe("Step5EmployeeCategories", () => {
 		expect(detailInput).toHaveValue("Managers");
 	});
 
-	it("submits serialized data on form submit", async () => {
+	it("submits data on form submit", async () => {
 		const user = userEvent.setup();
 		render(<Step5EmployeeCategories />);
 
@@ -263,11 +272,11 @@ describe("Step5EmployeeCategories", () => {
 
 		expect(mockMutate).toHaveBeenCalledWith(
 			expect.objectContaining({
-				step: 5,
+				declarationType: "initial",
+				source: expect.any(String),
 				categories: expect.arrayContaining([
-					expect.objectContaining({ name: "meta:source:" }),
 					expect.objectContaining({
-						name: "cat:0:name:Techniciens",
+						name: "Techniciens",
 					}),
 				]),
 			}),
