@@ -1,7 +1,9 @@
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;
+const AUTH_FILE = path.join(import.meta.dirname, "src/e2e/.auth/user.json");
 
 export default defineConfig({
 	globalSetup: "./src/e2e/global-setup.ts",
@@ -18,8 +20,24 @@ export default defineConfig({
 	},
 	projects: [
 		{
-			name: "chromium",
+			name: "setup",
+			testMatch: /auth\.setup\.ts/,
 			use: { ...devices["Desktop Chrome"] },
+		},
+		{
+			name: "chromium",
+			testMatch: /(?<!logout\.)e2e\.ts$/,
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: AUTH_FILE,
+			},
+			dependencies: ["setup"],
+		},
+		{
+			name: "logout",
+			testMatch: /logout\.e2e\.ts$/,
+			use: { ...devices["Desktop Chrome"] },
+			dependencies: ["chromium"],
 		},
 	],
 	...(isRemote

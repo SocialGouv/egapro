@@ -1,15 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-import { loginWithProConnect } from "./helpers/login";
-
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
 
-	test.beforeEach(async ({ page }) => {
-		await loginWithProConnect(page);
-	});
-
 	test("displays introduction page after login", async ({ page }) => {
+		await page.goto("/declaration-remuneration");
 		await expect(
 			page.getByRole("heading", {
 				name: "Déclarer les indicateurs de rémunération",
@@ -20,6 +15,7 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("shows company name and SIREN in banner", async ({ page }) => {
+		await page.goto("/declaration-remuneration");
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
 		await expect(
 			page.getByText(/DIRECTION INTERMINISTERIELLE DU NUMERIQUE/),
@@ -27,6 +23,7 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
+		await page.goto("/declaration-remuneration");
 		await page.getByRole("link", { name: "Commencer" }).click();
 		await page.waitForURL("**/declaration-remuneration/etape/1");
 
