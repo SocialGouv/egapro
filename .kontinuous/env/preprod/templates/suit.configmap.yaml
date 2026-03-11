@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: suit
+data:
+  EGAPRO_SUIT_API_URL: "https://api.suit.pp.travail.gouv.fr"

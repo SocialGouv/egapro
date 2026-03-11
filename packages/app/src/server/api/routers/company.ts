@@ -5,6 +5,7 @@ import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
+import { fetchCseBySiren } from "~/server/services/suit";
 
 function getCurrentYear() {
 	return new Date().getFullYear();
@@ -31,6 +32,18 @@ async function findUserCompany(db: DB, userId: string, siren: string) {
 	if (!company) {
 		throw new Error("Company not found or access denied");
 	}
+
+	if (company.hasCse === null) {
+		const hasCse = await fetchCseBySiren(company.siren);
+		if (hasCse !== null) {
+			await db
+				.update(companies)
+				.set({ hasCse })
+				.where(eq(companies.siren, company.siren));
+			company.hasCse = hasCse;
+		}
+	}
+
 	return company;
 }
 

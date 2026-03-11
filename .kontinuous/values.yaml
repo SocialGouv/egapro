@@ -17,6 +17,8 @@ app:
         name: "proconnect"
     - secretRef:
         name: "api"
+    - configMapRef:
+        name: "suit"
     - secretRef:
         name: "next-auth"
   env:

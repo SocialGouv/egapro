@@ -29,6 +29,11 @@ build/
 .env.test.local
 .env.production.local
 
+# python
+*.pyc
+__pycache__/
+*.egg-info/
+
 # typescript
 *.tsbuildinfo
 
