@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { dismissCookieBanner } from "./helpers/login";
+import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
 
 test.describe("Login page", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
@@ -42,6 +42,18 @@ test.describe("Authenticated user features", () => {
 
 		await expect(
 			page.getByRole("menuitem", { name: "Se déconnecter" }),
+		).toBeVisible();
+	});
+
+	test("logs out and returns to unauthenticated state", async ({ page }) => {
+		await loginWithProConnect(page);
+
+		await page.getByRole("button", { name: "Mon espace" }).click();
+		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
+
+		await page.waitForURL("**/login", { timeout: 10000 });
+		await expect(
+			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).toBeVisible();
 	});
 
