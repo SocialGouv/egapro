@@ -36,7 +36,7 @@ export function SecondDeclarationStep3Review({
 		e.preventDefault();
 		if (!certified) return;
 		// TODO: Call tRPC mutation when backend is ready
-		router.push(BASE_PATH);
+		router.push("/avis-cse");
 	}
 
 	return (
