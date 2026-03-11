@@ -21,10 +21,27 @@ Before writing custom CSS, check if the DSFR already provides the utility:
 
 Use `get_component_doc` or `search_components` from the DSFR MCP to verify classes.
 
-## No raw rgba() / hex colors
+## No raw rgba() / hex colors (enforced by hook)
 
 Always use DSFR color tokens (`var(--text-default-grey)`, `var(--background-action-high-blue-france)`, etc.).
-Never hardcode `#hex` or `rgba()` values.
+Never hardcode `#hex`, `rgb()`, or `rgba()` values in SCSS or TSX files.
+
+Common token families:
+- **Backgrounds**: `var(--background-default-grey)`, `var(--background-alt-blue-france)`, `var(--background-contrast-grey)`
+- **Text**: `var(--text-title-grey)`, `var(--text-default-grey)`, `var(--text-mention-grey)`, `var(--text-action-high-blue-france)`
+- **Borders**: `var(--border-default-grey)`, `var(--border-action-high-blue-france)`
+- **Artwork/icons**: `var(--artwork-major-blue-france)`, `var(--artwork-minor-blue-france)`
+- **Shadows**: `var(--raised-shadow)`, `var(--overlap-shadow)`, `var(--lifted-shadow)`
+- **Status**: `var(--text-default-error)`, `var(--background-flat-error)`, `var(--text-default-success)`
+
+**Exception**: `@react-pdf/renderer` cannot use CSS variables. PDF style files (`pdfStyles.ts`) use hex constants named after their DSFR token equivalents, with inline comments documenting the mapping.
+
+## No hardcoded fontFamily
+
+Never set `font-family` in SCSS or component styles — DSFR's Marianne font is inherited from the root `<html>` element.
+Use DSFR typography utility classes (`fr-text--*`, `fr-h1`..`fr-h6`) or the inherited font stack.
+
+**Exception**: PDF rendering (`@react-pdf/renderer`) requires explicit font names since it cannot access browser fonts.
 
 ## No hardcoded breakpoints
 
