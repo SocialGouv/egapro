@@ -12,22 +12,8 @@ jobs:
   e2e:
     name: "Test e2e"
     runs-on: ubuntu-latest
-    services:
-      db:
-        image: postgres:14.17
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: egapro
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/egapro
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       NEXTAUTH_URL: http://localhost:3000/api/auth
       EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
@@ -38,6 +24,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Start services
+        run: docker compose up -d db
       - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -62,6 +50,9 @@ jobs:
         run: pnpm playwright:install
       - name: Run E2E tests
         run: pnpm test:e2e
+      - name: Stop services
+        if: always()
+        run: docker compose down
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()

@@ -5,7 +5,7 @@
 
 	:global(.fr-accordion__btn) {
 		&:hover {
-			background: rgb(0 0 0 / 4%);
+			background: var(--background-default-grey-hover);
 		}
 
 		&[aria-expanded="true"] {

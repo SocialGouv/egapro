@@ -2,12 +2,12 @@
 	max-width: 36rem;
 	border-radius: 0.25rem;
 	border: none;
-	box-shadow: 0 6px 18px 0 rgba(0, 0, 18, 0.16);
+	box-shadow: var(--overlap-shadow);
 }
 
 .dialogSmall {
 	max-width: 30rem;
 	border-radius: 0.25rem;
 	border: none;
-	box-shadow: 0 6px 18px 0 rgba(0, 0, 18, 0.16);
+	box-shadow: var(--overlap-shadow);
 }
