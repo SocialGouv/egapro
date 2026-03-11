@@ -1,62 +1,62 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1771922842861,
-      "tag": "0000_fuzzy_romulus",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1771928448125,
-      "tag": "0001_worthless_dragon_lord",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1772154191182,
-      "tag": "0002_lean_khan",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1772215461501,
-      "tag": "0003_absurd_komodo",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1772223004236,
-      "tag": "0004_next_jack_murdock",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1772611200000,
-      "tag": "0005_standardize_snake_case",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1772703893318,
-      "tag": "0006_lovely_korath",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1773158962249,
-      "tag": "0007_gigantic_doctor_faustus",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1771922842861,
+			"tag": "0000_fuzzy_romulus",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1771928448125,
+			"tag": "0001_worthless_dragon_lord",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1772154191182,
+			"tag": "0002_lean_khan",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1772215461501,
+			"tag": "0003_absurd_komodo",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1772223004236,
+			"tag": "0004_next_jack_murdock",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1772611200000,
+			"tag": "0005_standardize_snake_case",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1772703893318,
+			"tag": "0006_lovely_korath",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1773158962249,
+			"tag": "0007_gigantic_doctor_faustus",
+			"breakpoints": true
+		}
+	]
 }
