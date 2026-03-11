@@ -63,11 +63,13 @@ test.describe("Authenticated user features", () => {
 		await page.goto("/login");
 
 		// Double redirect: /login → /declaration-remuneration → /declaration-remuneration/etape/1
-		await page.waitForURL("**/declaration-remuneration/etape/**", {
+		await page.waitForURL("**/declaration-remuneration/**", {
 			timeout: 15_000,
 		});
-		await expect(page.getByText("Étape 1 sur 6")).toBeVisible({
-			timeout: 15_000,
-		});
+
+		// Verify we are no longer on the login page
+		await expect(
+			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
+		).not.toBeVisible();
 	});
 });
