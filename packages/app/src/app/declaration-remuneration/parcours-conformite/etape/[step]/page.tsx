@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import type { StepCategoryData } from "~/modules/declaration-remuneration";
+
 import {
+	mapDbCategories,
 	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,
@@ -11,34 +12,6 @@ import { api, HydrateClient } from "~/trpc/server";
 type Props = {
 	params: Promise<{ step: string }>;
 };
-
-type DbCategory = {
-	step: number;
-	categoryName: string;
-	womenCount: number | null;
-	menCount: number | null;
-	womenValue: string | null;
-	menValue: string | null;
-	womenMedianValue: string | null;
-	menMedianValue: string | null;
-};
-
-function mapCategories(
-	categories: DbCategory[],
-	step: number,
-): StepCategoryData[] {
-	return categories
-		.filter((c) => c.step === step)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
-}
 
 export default async function SecondDeclarationStepPage({ params }: Props) {
 	const { step: stepParam } = await params;
@@ -51,8 +24,8 @@ export default async function SecondDeclarationStepPage({ params }: Props) {
 	const data = await api.declaration.getOrCreate();
 	const currentYear = new Date().getFullYear();
 
-	const step5Categories = mapCategories(data.categories, 5);
-	const step7Categories = mapCategories(data.categories, 7);
+	const step5Categories = mapDbCategories(data.categories, 5);
+	const step7Categories = mapDbCategories(data.categories, 7);
 
 	const declarationDate = data.declaration.updatedAt
 		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
