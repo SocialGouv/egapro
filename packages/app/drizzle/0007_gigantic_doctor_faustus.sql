@@ -30,6 +30,7 @@ CREATE TABLE "app_job_category" (
 --> statement-breakpoint
 ALTER TABLE "app_declaration" DROP CONSTRAINT "app_declaration_siren_year_pk";--> statement-breakpoint
 ALTER TABLE "app_declaration" ADD COLUMN "id" varchar(255) PRIMARY KEY NOT NULL;--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "compliance_path" varchar(30);--> statement-breakpoint
 ALTER TABLE "app_declaration" ADD COLUMN "second_declaration_step" integer;--> statement-breakpoint
 ALTER TABLE "app_declaration" ADD COLUMN "second_declaration_status" varchar(20);--> statement-breakpoint
 ALTER TABLE "app_declaration" ADD COLUMN "second_decl_reference_period_start" varchar(10);--> statement-breakpoint

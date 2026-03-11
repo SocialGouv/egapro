@@ -637,6 +637,12 @@
 					"notNull": false,
 					"default": "'draft'"
 				},
+				"compliance_path": {
+					"name": "compliance_path",
+					"type": "varchar(30)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"second_declaration_step": {
 					"name": "second_declaration_step",
 					"type": "integer",

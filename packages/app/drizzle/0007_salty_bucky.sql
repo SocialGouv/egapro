@@ -1,1 +1,0 @@
-ALTER TABLE "app_declaration" ADD COLUMN "compliance_path" varchar(30);
