@@ -101,6 +101,7 @@ export const declarations = createTable(
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),
 		categoryScore: d.integer(),
+		compliancePath: d.varchar({ length: 30 }),
 		currentStep: d.integer().default(0),
 		status: d.varchar({ length: 20 }).default("draft"),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),

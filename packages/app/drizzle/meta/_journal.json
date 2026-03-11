@@ -50,6 +50,13 @@
 			"when": 1772703893318,
 			"tag": "0006_lovely_korath",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1773063693536,
+			"tag": "0007_salty_bucky",
+			"breakpoints": true
 		}
 	]
 }
