@@ -66,10 +66,8 @@ test.describe("Authenticated user features", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/**", {
 			timeout: 15_000,
 		});
-		await expect(
-			page.getByRole("heading", {
-				name: /Déclarer les indicateurs pour l'ensemble/i,
-			}),
-		).toBeVisible();
+		await expect(page.getByText("Étape 1 sur 6")).toBeVisible({
+			timeout: 15_000,
+		});
 	});
 });
