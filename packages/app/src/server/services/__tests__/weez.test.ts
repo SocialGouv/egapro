@@ -2,12 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fetchCompanyBySiren } from "../weez";
 
-vi.mock("~/env", () => ({
-	env: {
-		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
-	},
-}));
-
 describe("fetchCompanyBySiren", () => {
 	const fetchSpy = vi.fn();
 

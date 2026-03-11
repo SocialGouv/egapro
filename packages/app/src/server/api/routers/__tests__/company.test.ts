@@ -48,13 +48,6 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
-vi.mock("~/env", () => ({
-	env: {
-		NODE_ENV: "test",
-		DATABASE_URL: "postgres://localhost/test",
-	},
-}));
-
 const mockLimit = vi.fn();
 const mockWhere = vi.fn();
 const mockInnerJoin = vi.fn();

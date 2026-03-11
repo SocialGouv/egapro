@@ -45,7 +45,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
 		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
-		EGAPRO_SUIT_API_URL: z.string().url().optional(),
+		EGAPRO_SUIT_API_URL: z.string().url(),
 	},
 
 	/**

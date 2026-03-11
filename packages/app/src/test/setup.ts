@@ -53,6 +53,20 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
+// Global mock for ~/env — provides test values for all server env vars.
+vi.mock("~/env", () => ({
+	env: {
+		NODE_ENV: "test",
+		DATABASE_URL: "postgres://localhost/test",
+		AUTH_SECRET: "test-secret",
+		EGAPRO_PROCONNECT_CLIENT_ID: "test-client-id",
+		EGAPRO_PROCONNECT_CLIENT_SECRET: "test-client-secret",
+		EGAPRO_PROCONNECT_ISSUER: "https://proconnect.example.com",
+		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
+		EGAPRO_SUIT_API_URL: "https://api.suit.example.com",
+	},
+}));
+
 // Global mock for ~/modules/layout — provides NewTabNotice and Breadcrumb passthroughs.
 vi.mock("~/modules/layout", () => ({
 	NewTabNotice: () =>
