@@ -1,7 +1,5 @@
 import { test as setup } from "@playwright/test";
-
-import { AUTH_FILE } from "./constants";
-import { loginWithProConnect } from "./helpers/login";
+import { AUTH_FILE, loginWithProConnect } from "./helpers/login";
 
 setup("authenticate via ProConnect", async ({ page }) => {
 	setup.setTimeout(60_000);

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { AUTH_FILE } from "./src/e2e/constants";
+import { AUTH_FILE } from "./src/e2e/helpers/login";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;

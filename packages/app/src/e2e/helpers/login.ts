@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+export const AUTH_FILE = "test-results/.auth/user.json";
+
 /** Dismiss the cookie consent banner if present. */
 export async function dismissCookieBanner(page: Page) {
 	const refuseButton = page.getByRole("button", { name: "Tout refuser" });

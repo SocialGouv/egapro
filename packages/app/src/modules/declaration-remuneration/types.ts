@@ -14,6 +14,8 @@ export type StepCategoryData = {
 	menMedianValue?: string;
 };
 
+export type PayGapField = "womenValue" | "menValue";
+
 export type PayGapRow = {
 	label: string;
 	womenValue: string;

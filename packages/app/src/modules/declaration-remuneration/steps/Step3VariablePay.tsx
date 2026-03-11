@@ -15,7 +15,7 @@ import {
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { PayGapRow, VariablePayData } from "../types";
+import type { PayGapField, PayGapRow, VariablePayData } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
@@ -59,11 +59,7 @@ export function Step3VariablePay({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
 	});
 
-	function handleRowChange(
-		index: number,
-		field: "womenValue" | "menValue",
-		value: string,
-	) {
+	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const updated = handlePayGapRowChange(rows, index, field, value);
 		if (!updated) return;
 		setRows(updated);

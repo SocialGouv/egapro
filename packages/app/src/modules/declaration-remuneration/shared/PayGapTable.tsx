@@ -1,4 +1,4 @@
-import type { PayGapRow } from "../types";
+import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
 import {
 	computeGap,
@@ -21,7 +21,7 @@ export const DEFAULT_PAY_GAP_ROWS: PayGapRow[] = [
 export function handlePayGapRowChange(
 	rows: PayGapRow[],
 	index: number,
-	field: "womenValue" | "menValue",
+	field: PayGapField,
 	value: string,
 ): PayGapRow[] | null {
 	const normalized = normalizeDecimalInput(value);
@@ -36,11 +36,7 @@ type PayGapTableProps = {
 	caption: string;
 	columnHeader: string;
 	rows: PayGapRow[];
-	onRowChange: (
-		index: number,
-		field: "womenValue" | "menValue",
-		value: string,
-	) => void;
+	onRowChange: (index: number, field: PayGapField, value: string) => void;
 	className?: string;
 };
 

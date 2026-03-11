@@ -14,7 +14,7 @@ import {
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { PayGapRow } from "../types";
+import type { PayGapField, PayGapRow } from "../types";
 
 type Step2PayGapProps = {
 	initialRows?: PayGapRow[];
@@ -38,11 +38,7 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
 	});
 
-	function handleRowChange(
-		index: number,
-		field: "womenValue" | "menValue",
-		value: string,
-	) {
+	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const updated = handlePayGapRowChange(rows, index, field, value);
 		if (!updated) return;
 		setRows(updated);
