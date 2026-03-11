@@ -1,9 +1,9 @@
-import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
+
+import { AUTH_FILE } from "./src/e2e/constants";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const isRemote = !!process.env.SITE_URL;
-const AUTH_FILE = path.join(import.meta.dirname, "src/e2e/.auth/user.json");
 
 export default defineConfig({
 	globalSetup: "./src/e2e/global-setup.ts",
