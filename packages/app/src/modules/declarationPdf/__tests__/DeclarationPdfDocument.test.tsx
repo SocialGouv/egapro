@@ -162,12 +162,17 @@ const declarationPdfData: DeclarationPdfData = {
 	step5Categories: [
 		{
 			name: "Ingénieurs",
+			detail: "",
 			womenCount: 5,
 			menCount: 8,
-			womenValue: "55000",
-			menValue: "58000",
-			womenMedianValue: undefined,
-			menMedianValue: undefined,
+			annualBaseWomen: "55000",
+			annualBaseMen: "58000",
+			annualVariableWomen: null,
+			annualVariableMen: null,
+			hourlyBaseWomen: null,
+			hourlyBaseMen: null,
+			hourlyVariableWomen: null,
+			hourlyVariableMen: null,
 		},
 	],
 };

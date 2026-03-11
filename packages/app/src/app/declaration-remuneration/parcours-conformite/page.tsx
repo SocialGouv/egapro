@@ -15,13 +15,9 @@ export default async function CompliancePathPage() {
 		redirect("/declaration-remuneration/etape/6");
 	}
 
-	const step5Categories = data.categories
-		.filter((c) => c.step === 5)
-		.map((c) => ({
-			name: c.categoryName,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-		}));
+	const step5Categories = data.employeeCategories.filter(
+		(c) => c.declarationType === "initial",
+	);
 
 	if (!hasGapsAboveThreshold(step5Categories)) {
 		redirect("/avis-cse");

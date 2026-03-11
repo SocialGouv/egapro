@@ -286,17 +286,13 @@ describe("formatTotal", () => {
 describe("hasGapsAboveThreshold", () => {
 	it("returns true when a category has a gap >= 5%", () => {
 		expect(
-			hasGapsAboveThreshold([
-				{ name: "cat:0:annual:base", womenValue: "90", menValue: "100" },
-			]),
+			hasGapsAboveThreshold([{ annualBaseWomen: "90", annualBaseMen: "100" }]),
 		).toBe(true);
 	});
 
 	it("returns false when all gaps are below 5%", () => {
 		expect(
-			hasGapsAboveThreshold([
-				{ name: "cat:0:annual:base", womenValue: "97", menValue: "100" },
-			]),
+			hasGapsAboveThreshold([{ annualBaseWomen: "97", annualBaseMen: "100" }]),
 		).toBe(false);
 	});
 
@@ -304,22 +300,20 @@ describe("hasGapsAboveThreshold", () => {
 		expect(hasGapsAboveThreshold([])).toBe(false);
 	});
 
-	it("skips name rows (containing :name:)", () => {
-		expect(
-			hasGapsAboveThreshold([
-				{ name: "cat:0:name:Ingénieurs", womenValue: "10", menValue: "100" },
-			]),
-		).toBe(false);
+	it("skips categories without values", () => {
+		expect(hasGapsAboveThreshold([{}])).toBe(false);
 	});
 
-	it("skips categories without values", () => {
-		expect(hasGapsAboveThreshold([{ name: "cat:0:annual:base" }])).toBe(false);
+	it("detects gaps in hourly fields", () => {
+		expect(
+			hasGapsAboveThreshold([{ hourlyBaseWomen: "10", hourlyBaseMen: "20" }]),
+		).toBe(true);
 	});
 
 	it("uses custom threshold when provided", () => {
 		expect(
 			hasGapsAboveThreshold(
-				[{ name: "cat:0:annual:base", womenValue: "97", menValue: "100" }],
+				[{ annualBaseWomen: "97", annualBaseMen: "100" }],
 				2,
 			),
 		).toBe(true);

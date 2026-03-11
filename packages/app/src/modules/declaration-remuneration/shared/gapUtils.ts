@@ -96,3 +96,45 @@ export function formatTotal(value: number | null, unit: string): string {
 	if (value === null) return "-";
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
+
+type SalaryPair = {
+	women: string | null;
+	men: string | null;
+};
+
+type EmployeeCategoryLike = {
+	annualBaseWomen?: string | null;
+	annualBaseMen?: string | null;
+	annualVariableWomen?: string | null;
+	annualVariableMen?: string | null;
+	hourlyBaseWomen?: string | null;
+	hourlyBaseMen?: string | null;
+	hourlyVariableWomen?: string | null;
+	hourlyVariableMen?: string | null;
+};
+
+// Returns true if any employee category has a salary gap >= threshold (default 5%).
+export function hasGapsAboveThreshold(
+	categories: EmployeeCategoryLike[],
+	threshold = 5,
+): boolean {
+	return categories.some((cat) => {
+		const pairs: SalaryPair[] = [
+			{ women: cat.annualBaseWomen ?? null, men: cat.annualBaseMen ?? null },
+			{
+				women: cat.annualVariableWomen ?? null,
+				men: cat.annualVariableMen ?? null,
+			},
+			{ women: cat.hourlyBaseWomen ?? null, men: cat.hourlyBaseMen ?? null },
+			{
+				women: cat.hourlyVariableWomen ?? null,
+				men: cat.hourlyVariableMen ?? null,
+			},
+		];
+		return pairs.some(({ women, men }) => {
+			if (!women || !men) return false;
+			const gap = computeGap(women, men);
+			return gap !== null && gap >= threshold;
+		});
+	});
+}
