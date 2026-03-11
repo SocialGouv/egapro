@@ -8,3 +8,4 @@ export { SecondDeclarationStep1Info } from "./SecondDeclarationStep1Info";
 export { SecondDeclarationStep2Form } from "./SecondDeclarationStep2Form";
 export { SecondDeclarationStep3Review } from "./SecondDeclarationStep3Review";
 export { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
+export { SecondDeclarationStepPage } from "./SecondDeclarationStepPage";

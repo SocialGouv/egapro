@@ -11,6 +11,7 @@ export {
 } from "./shared/gapUtils";
 export { mapDbCategories } from "./shared/mapDbCategories";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
+export { CompliancePathPage } from "./steps/CompliancePathPage";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
 export { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -22,6 +23,7 @@ export {
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,
 	SecondDeclarationStep3Review,
+	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
 export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
 export type {
