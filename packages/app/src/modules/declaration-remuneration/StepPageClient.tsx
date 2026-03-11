@@ -8,6 +8,7 @@ import { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 import { Step6Review } from "./steps/Step6Review";
 import type {
 	CategoryData,
+	EmployeeCategoryRow,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,
@@ -24,7 +25,8 @@ type StepPageClientProps = {
 	step2Rows: PayGapRow[];
 	step3Data: VariablePayData;
 	step4Categories: StepCategoryData[];
-	step5Categories: StepCategoryData[];
+	step5Categories: EmployeeCategoryRow[];
+	initialSource?: string;
 };
 
 export function StepPageClient({
@@ -35,6 +37,7 @@ export function StepPageClient({
 	step3Data,
 	step4Categories,
 	step5Categories,
+	initialSource,
 }: StepPageClientProps) {
 	switch (step) {
 		case 1:
@@ -69,6 +72,7 @@ export function StepPageClient({
 			return (
 				<Step5EmployeeCategories
 					initialCategories={step5Categories}
+					initialSource={initialSource}
 					maxMen={declaration.totalMen ?? undefined}
 					maxWomen={declaration.totalWomen ?? undefined}
 				/>

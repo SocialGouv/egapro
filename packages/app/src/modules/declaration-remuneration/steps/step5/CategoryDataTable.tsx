@@ -5,10 +5,10 @@ import {
 	computeGap,
 	computeTotal,
 	displayDecimal,
-	formatGapCompact,
 	formatTotal,
 } from "~/modules/declaration-remuneration/shared/gapUtils";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";
 
 type Props = {
@@ -48,7 +48,6 @@ export function CategoryDataTable({
 			: null;
 
 	const id = (suffix: string) => `cat-${catIndex}-${suffix}`;
-
 	return (
 		<div className="fr-table fr-table--no-caption fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -111,10 +110,7 @@ export function CategoryDataTable({
 											<span className="fr-text--sm">nb</span>
 										</div>
 									</td>
-									<td>
-										{formatGapCompact(computeGap(cat.womenCount, cat.menCount))}{" "}
-										%
-									</td>
+									<td />
 								</tr>
 
 								{/* Section: Rémunération annuelle brute */}
@@ -154,10 +150,9 @@ export function CategoryDataTable({
 										</div>
 									</td>
 									<td>
-										{formatGapCompact(
-											computeGap(cat.annualBaseWomen, cat.annualBaseMen),
-										)}{" "}
-										%
+										<GapBadge
+											gap={computeGap(cat.annualBaseWomen, cat.annualBaseMen)}
+										/>
 									</td>
 								</tr>
 								<tr>
@@ -195,26 +190,24 @@ export function CategoryDataTable({
 										</div>
 									</td>
 									<td>
-										{formatGapCompact(
-											computeGap(
+										<GapBadge
+											gap={computeGap(
 												cat.annualVariableWomen,
 												cat.annualVariableMen,
-											),
-										)}{" "}
-										%
+											)}
+										/>
 									</td>
 								</tr>
 								{/* Total annuel */}
 								<tr>
-									<td className={stepStyles.sectionHeader} colSpan={4}>
+									<td className={stepStyles.sectionHeader}>
 										<strong>Total</strong>
 									</td>
-								</tr>
-								<tr>
-									<td>{/* empty label */}</td>
 									<td>{formatTotal(annualTotalWomen, "€")}</td>
 									<td>{formatTotal(annualTotalMen, "€")}</td>
-									<td>{formatGapCompact(annualTotalGap)} %</td>
+									<td>
+										<GapBadge gap={annualTotalGap} />
+									</td>
 								</tr>
 
 								{/* Section: Rémunération horaire brute */}
@@ -254,10 +247,9 @@ export function CategoryDataTable({
 										</div>
 									</td>
 									<td>
-										{formatGapCompact(
-											computeGap(cat.hourlyBaseWomen, cat.hourlyBaseMen),
-										)}{" "}
-										%
+										<GapBadge
+											gap={computeGap(cat.hourlyBaseWomen, cat.hourlyBaseMen)}
+										/>
 									</td>
 								</tr>
 								<tr>
@@ -295,26 +287,24 @@ export function CategoryDataTable({
 										</div>
 									</td>
 									<td>
-										{formatGapCompact(
-											computeGap(
+										<GapBadge
+											gap={computeGap(
 												cat.hourlyVariableWomen,
 												cat.hourlyVariableMen,
-											),
-										)}{" "}
-										%
+											)}
+										/>
 									</td>
 								</tr>
 								{/* Total horaire */}
 								<tr>
-									<td className={stepStyles.sectionHeader} colSpan={4}>
+									<td className={stepStyles.sectionHeader}>
 										<strong>Total</strong>
 									</td>
-								</tr>
-								<tr>
-									<td>{/* empty label */}</td>
 									<td>{formatTotal(hourlyTotalWomen, "€")}</td>
 									<td>{formatTotal(hourlyTotalMen, "€")}</td>
-									<td>{formatGapCompact(hourlyTotalGap)} %</td>
+									<td>
+										<GapBadge gap={hourlyTotalGap} />
+									</td>
 								</tr>
 							</tbody>
 						</table>

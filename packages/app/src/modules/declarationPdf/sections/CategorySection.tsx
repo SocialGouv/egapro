@@ -2,7 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 
 import {
 	formatCurrency,
-	parseStep5Categories,
+	parseEmployeeCategories,
 } from "~/modules/declaration-remuneration";
 
 import { styles } from "../pdfStyles";
@@ -10,10 +10,7 @@ import type { DeclarationPdfData } from "../types";
 import { GapCell } from "./GapCell";
 
 export function CategorySection({ data }: { data: DeclarationPdfData }) {
-	const parsed = parseStep5Categories(data.step5Categories);
-
-	const findCatValue = (idx: number, suffix: string) =>
-		data.step5Categories.find((c) => c.name === `cat:${idx}:${suffix}`);
+	const parsed = parseEmployeeCategories(data.step5Categories);
 
 	return (
 		<View style={styles.card}>
@@ -22,18 +19,14 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 			</Text>
 			{parsed.length > 0 ? (
 				parsed.map((cat) => {
-					const annualBase = findCatValue(cat.index, "annual:base");
-					const annualVar = findCatValue(cat.index, "annual:variable");
-					const hourlyBase = findCatValue(cat.index, "hourly:base");
-					const hourlyVar = findCatValue(cat.index, "hourly:variable");
-					const effectif = findCatValue(cat.index, "effectif");
+					const row = data.step5Categories[cat.index];
 
 					return (
 						<View key={cat.index} style={styles.categoryBlock}>
 							<Text style={styles.sectionLabel}>
 								{cat.name}
-								{effectif
-									? ` (${effectif.womenCount ?? 0} F / ${effectif.menCount ?? 0} H)`
+								{row
+									? ` (${row.womenCount ?? 0} F / ${row.menCount ?? 0} H)`
 									: ""}
 							</Text>
 							<View style={styles.tableHeader}>
@@ -55,20 +48,20 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 									Salaire de base (annuel)
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(annualBase?.womenValue)}
+									{formatCurrency(row?.annualBaseWomen)}
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(annualBase?.menValue)}
+									{formatCurrency(row?.annualBaseMen)}
 								</Text>
 								<GapCell gap={cat.annualBaseGap} />
 							</View>
 							<View style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>Variables (annuel)</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(annualVar?.womenValue)}
+									{formatCurrency(row?.annualVariableWomen)}
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(annualVar?.menValue)}
+									{formatCurrency(row?.annualVariableMen)}
 								</Text>
 								<GapCell gap={cat.annualVariableGap} />
 							</View>
@@ -77,20 +70,20 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 									Salaire de base (horaire)
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(hourlyBase?.womenValue)}
+									{formatCurrency(row?.hourlyBaseWomen)}
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(hourlyBase?.menValue)}
+									{formatCurrency(row?.hourlyBaseMen)}
 								</Text>
 								<GapCell gap={cat.hourlyBaseGap} />
 							</View>
 							<View style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>Variables (horaire)</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(hourlyVar?.womenValue)}
+									{formatCurrency(row?.hourlyVariableWomen)}
 								</Text>
 								<Text style={styles.tableCellValue}>
-									{formatCurrency(hourlyVar?.menValue)}
+									{formatCurrency(row?.hourlyVariableMen)}
 								</Text>
 								<GapCell gap={cat.hourlyVariableGap} />
 							</View>

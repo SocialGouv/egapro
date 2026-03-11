@@ -4,7 +4,22 @@ import { z } from "zod";
 
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { declarationCategories, declarations } from "~/server/db/schema";
+import {
+	declarationCategories,
+	declarations,
+	employeeCategories,
+	jobCategories,
+} from "~/server/db/schema";
+import {
+	buildEmployeeCategoryValues,
+	deleteJobAndEmployeeCategories,
+	fetchAllCategories,
+} from "./declarationHelpers";
+import {
+	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
+	updateStepCategoriesSchema,
+} from "./schemas";
 
 function getSiren(siret: string | null | undefined): string {
 	if (!siret) {
@@ -33,22 +48,16 @@ export const declarationRouter = createTRPCRouter({
 				.limit(1);
 
 			if (existing.length > 0) {
-				const categories = await tx
-					.select()
-					.from(declarationCategories)
-					.where(
-						and(
-							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, year),
-						),
-					);
 				const declaration = existing[0];
 				if (!declaration)
 					throw new TRPCError({
 						code: "NOT_FOUND",
 						message: "Declaration introuvable",
 					});
-				return { declaration, categories };
+				return {
+					declaration,
+					...(await fetchAllCategories(tx, siren, year, declaration.id)),
+				};
 			}
 
 			const newDeclaration = await tx
@@ -78,16 +87,10 @@ export const declarationRouter = createTRPCRouter({
 						code: "INTERNAL_SERVER_ERROR",
 						message: "Erreur lors de la création",
 					});
-				const categories = await tx
-					.select()
-					.from(declarationCategories)
-					.where(
-						and(
-							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, year),
-						),
-					);
-				return { declaration, categories };
+				return {
+					declaration,
+					...(await fetchAllCategories(tx, siren, year, declaration.id)),
+				};
 			}
 
 			const declaration = newDeclaration[0];
@@ -96,22 +99,17 @@ export const declarationRouter = createTRPCRouter({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Erreur lors de la création",
 				});
-			return { declaration, categories: [] };
+			return {
+				declaration,
+				categories: [],
+				jobCategories: [],
+				employeeCategories: [],
+			};
 		});
 	}),
 
 	updateStep1: protectedProcedure
-		.input(
-			z.object({
-				categories: z.array(
-					z.object({
-						name: z.string(),
-						women: z.number().int().min(0),
-						men: z.number().int().min(0),
-					}),
-				),
-			}),
-		)
+		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = getSiren(ctx.session.user.siret);
 			const year = getCurrentYear();
@@ -120,7 +118,6 @@ export const declarationRouter = createTRPCRouter({
 			const totalMen = input.categories.reduce((sum, c) => sum + c.men, 0);
 
 			await ctx.db.transaction(async (tx) => {
-				// Check if step 1 data changed → reset subsequent steps
 				const existing = await tx
 					.select()
 					.from(declarations)
@@ -134,7 +131,6 @@ export const declarationRouter = createTRPCRouter({
 					existing[0]?.totalMen !== totalMen;
 
 				if (hasChanged) {
-					// Delete categories for steps 2-5
 					await tx
 						.delete(declarationCategories)
 						.where(
@@ -143,9 +139,13 @@ export const declarationRouter = createTRPCRouter({
 								eq(declarationCategories.year, year),
 							),
 						);
+
+					const declarationId = existing[0]?.id;
+					if (declarationId) {
+						await deleteJobAndEmployeeCategories(tx, declarationId);
+					}
 				}
 
-				// Update declaration
 				await tx
 					.update(declarations)
 					.set({
@@ -195,22 +195,7 @@ export const declarationRouter = createTRPCRouter({
 		}),
 
 	updateStepCategories: protectedProcedure
-		.input(
-			z.object({
-				step: z.number().int().min(2).max(5),
-				categories: z.array(
-					z.object({
-						name: z.string(),
-						womenCount: z.number().int().min(0).optional(),
-						menCount: z.number().int().min(0).optional(),
-						womenValue: z.string().optional(),
-						menValue: z.string().optional(),
-						womenMedianValue: z.string().optional(),
-						menMedianValue: z.string().optional(),
-					}),
-				),
-			}),
-		)
+		.input(updateStepCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = getSiren(ctx.session.user.siret);
 			const year = getCurrentYear();
@@ -258,6 +243,115 @@ export const declarationRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	updateEmployeeCategories: protectedProcedure
+		.input(updateEmployeeCategoriesSchema)
+		.mutation(async ({ ctx, input }) => {
+			const siren = getSiren(ctx.session.user.siret);
+			const year = getCurrentYear();
+
+			await ctx.db.transaction(async (tx) => {
+				const [declaration] = await tx
+					.select()
+					.from(declarations)
+					.where(
+						and(eq(declarations.siren, siren), eq(declarations.year, year)),
+					)
+					.limit(1);
+
+				if (!declaration)
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Déclaration introuvable",
+					});
+
+				// Check existing job categories
+				const existingJobs = await tx
+					.select()
+					.from(jobCategories)
+					.where(eq(jobCategories.declarationId, declaration.id));
+
+				if (input.declarationType === "initial") {
+					// For initial: recreate job categories + employee data
+					await deleteJobAndEmployeeCategories(tx, declaration.id);
+
+					for (let i = 0; i < input.categories.length; i++) {
+						const cat = input.categories[i];
+						if (!cat) continue;
+						const [job] = await tx
+							.insert(jobCategories)
+							.values({
+								declarationId: declaration.id,
+								categoryIndex: i,
+								name: cat.name,
+								detail: cat.detail || null,
+								source: input.source,
+							})
+							.returning();
+						if (!job) continue;
+
+						await tx
+							.insert(employeeCategories)
+							.values(buildEmployeeCategoryValues(job.id, "initial", cat.data));
+					}
+
+					await tx
+						.update(declarations)
+						.set({ currentStep: 5, updatedAt: new Date() })
+						.where(eq(declarations.id, declaration.id));
+				} else {
+					// For correction: reuse existing job categories, upsert employee data
+					for (const job of existingJobs) {
+						const cat = input.categories[job.categoryIndex];
+						if (!cat) continue;
+
+						await tx
+							.delete(employeeCategories)
+							.where(
+								and(
+									eq(employeeCategories.jobCategoryId, job.id),
+									eq(employeeCategories.declarationType, "correction"),
+								),
+							);
+
+						await tx
+							.insert(employeeCategories)
+							.values(
+								buildEmployeeCategoryValues(job.id, "correction", cat.data),
+							);
+					}
+
+					await tx
+						.update(declarations)
+						.set({
+							secondDeclarationStep: 2,
+							secondDeclReferencePeriodStart:
+								input.referencePeriodStart ?? null,
+							secondDeclReferencePeriodEnd: input.referencePeriodEnd ?? null,
+							updatedAt: new Date(),
+						})
+						.where(eq(declarations.id, declaration.id));
+				}
+			});
+
+			return { success: true };
+		}),
+
+	submitSecondDeclaration: protectedProcedure.mutation(async ({ ctx }) => {
+		const siren = getSiren(ctx.session.user.siret);
+		const year = getCurrentYear();
+
+		await ctx.db
+			.update(declarations)
+			.set({
+				secondDeclarationStatus: "submitted",
+				secondDeclarationStep: 3,
+				updatedAt: new Date(),
+			})
+			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+
+		return { success: true };
+	}),
 
 	submit: protectedProcedure.mutation(async ({ ctx }) => {
 		const siren = getSiren(ctx.session.user.siret);
