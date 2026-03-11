@@ -50,7 +50,10 @@ test.describe("Authenticated user features", () => {
 	}) => {
 		await page.goto("/login");
 
-		await page.waitForURL("**/declaration-remuneration/**");
+		// Double redirect: /login → /declaration-remuneration → /declaration-remuneration/etape/1
+		await page.waitForURL("**/declaration-remuneration/etape/**", {
+			timeout: 15_000,
+		});
 		await expect(
 			page.getByRole("heading", {
 				name: /Déclarer les indicateurs pour l'ensemble/i,
