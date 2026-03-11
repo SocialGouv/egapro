@@ -11,9 +11,7 @@ type SuitCseResponse = {
  * Fetch CSE existence from the SUIT API for a given SIREN.
  * Returns `true`/`false` if the API responds, or `null` on error/not found.
  */
-export async function fetchCseBySiren(
-	siren: string,
-): Promise<boolean | null> {
+export async function fetchCseBySiren(siren: string): Promise<boolean | null> {
 	const baseUrl = env.EGAPRO_SUIT_API_URL;
 	if (!baseUrl) return null;
 
