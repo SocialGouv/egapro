@@ -40,8 +40,8 @@ beforeEach(() => {
 });
 
 describe("Step1Opinions", () => {
-	it("renders the page title", () => {
-		render(<Step1Opinions />);
+	it("renders compliance path title when compliancePath is joint_evaluation", () => {
+		render(<Step1Opinions compliancePath="joint_evaluation" />);
 
 		expect(
 			screen.getByText(
@@ -50,27 +50,61 @@ describe("Step1Opinions", () => {
 		).toBeInTheDocument();
 	});
 
+	it("does not render compliance path title for other paths", () => {
+		render(<Step1Opinions compliancePath="justify" />);
+
+		expect(
+			screen.queryByText(
+				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
+			),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders h1 as CSE opinion title when no compliance path banner", () => {
+		render(<Step1Opinions />);
+
+		const heading = screen.getByRole("heading", { level: 1 });
+		expect(heading).toHaveTextContent("Transmettre l'avis ou les avis du CSE");
+	});
+
 	it("renders the stepper at step 1", () => {
 		render(<Step1Opinions />);
 
 		expect(screen.getByText(/Étape 1 sur 2/)).toBeInTheDocument();
 	});
 
-	it("renders both declaration sections", () => {
-		render(<Step1Opinions />);
+	it("renders both declaration sections when hasSecondDeclaration is true", () => {
+		render(<Step1Opinions hasSecondDeclaration={true} />);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
-	it("renders the submission banner", () => {
-		render(<Step1Opinions />);
+	it("hides second declaration section when hasSecondDeclaration is false", () => {
+		render(<Step1Opinions hasSecondDeclaration={false} />);
+
+		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
+		expect(screen.queryByText("Deuxième déclaration")).not.toBeInTheDocument();
+	});
+
+	it("renders the submission banner for joint_evaluation path", () => {
+		render(<Step1Opinions compliancePath="joint_evaluation" />);
 
 		expect(
 			screen.getByText(
 				/Votre rapport de l'évaluation conjointe a été transmise/,
 			),
 		).toBeInTheDocument();
+	});
+
+	it("does not render the submission banner for other paths", () => {
+		render(<Step1Opinions />);
+
+		expect(
+			screen.queryByText(
+				/Votre rapport de l'évaluation conjointe a été transmise/,
+			),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders previous and next buttons", () => {
@@ -94,10 +128,11 @@ describe("Step1Opinions", () => {
 		expect(mockPush).not.toHaveBeenCalled();
 	});
 
-	it("calls mutation and navigates to step 2 when all fields are filled", async () => {
+	it("calls mutation with both declarations when hasSecondDeclaration is true", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Opinions
+				hasSecondDeclaration={true}
 				initialData={{
 					firstDeclAccuracyOpinion: "favorable",
 					firstDeclAccuracyDate: "2026-01-15",
@@ -134,6 +169,41 @@ describe("Step1Opinions", () => {
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
 	});
 
+	it("calls mutation without secondDeclaration when hasSecondDeclaration is false", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Opinions
+				hasSecondDeclaration={false}
+				initialData={{
+					firstDeclAccuracyOpinion: "favorable",
+					firstDeclAccuracyDate: "2026-01-15",
+					firstDeclGapConsulted: false,
+					firstDeclGapOpinion: null,
+					firstDeclGapDate: null,
+					secondDeclAccuracyOpinion: null,
+					secondDeclAccuracyDate: "",
+					secondDeclGapConsulted: null,
+					secondDeclGapOpinion: null,
+					secondDeclGapDate: null,
+				}}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+		expect(mockMutate).toHaveBeenCalledWith({
+			firstDeclaration: {
+				accuracyOpinion: "favorable",
+				accuracyDate: "2026-01-15",
+				gapConsulted: false,
+				gapOpinion: null,
+				gapDate: null,
+			},
+			secondDeclaration: undefined,
+		});
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+	});
+
 	it("renders with initial data pre-filled", () => {
 		render(
 			<Step1Opinions
@@ -161,14 +231,19 @@ describe("Step1Opinions", () => {
 		expect(unfavorableRadios[1]).toBeChecked();
 	});
 
-	it("displays email in submission banner", () => {
-		render(<Step1Opinions email="test@example.fr" />);
+	it("displays email in submission banner for joint_evaluation path", () => {
+		render(
+			<Step1Opinions
+				compliancePath="joint_evaluation"
+				email="test@example.fr"
+			/>,
+		);
 
 		expect(screen.getByText("test@example.fr")).toBeInTheDocument();
 	});
 
-	it("uses default email when none provided", () => {
-		render(<Step1Opinions />);
+	it("uses default email when none provided for joint_evaluation path", () => {
+		render(<Step1Opinions compliancePath="joint_evaluation" />);
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});

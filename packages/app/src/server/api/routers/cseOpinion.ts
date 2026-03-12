@@ -76,28 +76,30 @@ export const cseOpinionRouter = createTRPCRouter({
 					declarantId,
 				});
 
-				// Second declaration — accuracy
-				rows.push({
-					siren,
-					year,
-					declarationNumber: 2,
-					type: "accuracy",
-					opinion: input.secondDeclaration.accuracyOpinion,
-					opinionDate: input.secondDeclaration.accuracyDate,
-					declarantId,
-				});
+				if (input.secondDeclaration) {
+					// Second declaration — accuracy
+					rows.push({
+						siren,
+						year,
+						declarationNumber: 2,
+						type: "accuracy",
+						opinion: input.secondDeclaration.accuracyOpinion,
+						opinionDate: input.secondDeclaration.accuracyDate,
+						declarantId,
+					});
 
-				// Second declaration — gap
-				rows.push({
-					siren,
-					year,
-					declarationNumber: 2,
-					type: "gap",
-					gapConsulted: input.secondDeclaration.gapConsulted,
-					opinion: input.secondDeclaration.gapOpinion,
-					opinionDate: input.secondDeclaration.gapDate,
-					declarantId,
-				});
+					// Second declaration — gap
+					rows.push({
+						siren,
+						year,
+						declarationNumber: 2,
+						type: "gap",
+						gapConsulted: input.secondDeclaration.gapConsulted,
+						opinion: input.secondDeclaration.gapOpinion,
+						opinionDate: input.secondDeclaration.gapDate,
+						declarantId,
+					});
+				}
 
 				await tx.insert(cseOpinions).values(rows);
 			});
