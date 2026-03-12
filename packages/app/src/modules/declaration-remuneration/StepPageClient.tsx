@@ -1,5 +1,6 @@
 "use client";
 
+import type { GipPrefillData } from "./shared/gipMdsMapping";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -20,6 +21,7 @@ type StepPageClientProps = {
 		totalMen: number | null;
 		status: string | null;
 	};
+	gipPrefillData?: GipPrefillData;
 	step1Categories: CategoryData[];
 	step2Rows: PayGapRow[];
 	step3Data: VariablePayData;
@@ -30,6 +32,7 @@ type StepPageClientProps = {
 export function StepPageClient({
 	step,
 	declaration,
+	gipPrefillData,
 	step1Categories,
 	step2Rows,
 	step3Data,
@@ -38,12 +41,20 @@ export function StepPageClient({
 }: StepPageClientProps) {
 	switch (step) {
 		case 1:
-			return <Step1Workforce initialCategories={step1Categories} />;
+			return (
+				<Step1Workforce
+					gipPrefillData={gipPrefillData}
+					initialCategories={step1Categories}
+				/>
+			);
 		case 2:
-			return <Step2PayGap initialRows={step2Rows} />;
+			return (
+				<Step2PayGap gipPrefillData={gipPrefillData} initialRows={step2Rows} />
+			);
 		case 3:
 			return (
 				<Step3VariablePay
+					gipPrefillData={gipPrefillData}
 					initialData={step3Data}
 					maxMen={declaration.totalMen ?? undefined}
 					maxWomen={declaration.totalWomen ?? undefined}
@@ -58,6 +69,7 @@ export function StepPageClient({
 				.map((c) => ({ ...c, name: c.name.replace("hourly:", "") }));
 			return (
 				<Step4QuartileDistribution
+					gipPrefillData={gipPrefillData}
 					initialAnnualCategories={annualCats.length ? annualCats : undefined}
 					initialHourlyCategories={hourlyCats.length ? hourlyCats : undefined}
 					maxMen={declaration.totalMen ?? undefined}

@@ -18,6 +18,10 @@ export default async function StepPage({ params }: StepPageProps) {
 	}
 
 	const data = await api.declaration.getOrCreate();
+	console.log(
+		"[DEBUG] gipPrefillData:",
+		JSON.stringify(data.gipPrefillData, null, 2),
+	);
 
 	// If declaration is already submitted, redirect non-recap steps to the recap
 	if (data.declaration.status === "submitted" && step !== 6) {
@@ -37,13 +41,27 @@ export default async function StepPage({ params }: StepPageProps) {
 				menMedianValue: c.menMedianValue ?? undefined,
 			}));
 
-	const step1Categories = data.categories
+	const savedStep1 = data.categories
 		.filter((c) => c.step === 1)
 		.map((c) => ({
 			name: c.categoryName,
 			women: c.womenCount ?? 0,
 			men: c.menCount ?? 0,
 		}));
+
+	const gip = data.gipPrefillData;
+	const step1Categories =
+		savedStep1.length > 0
+			? savedStep1
+			: gip?.step1
+				? [
+						{
+							name: "Nombre de salariés",
+							women: gip.step1.totalWomen ?? 0,
+							men: gip.step1.totalMen ?? 0,
+						},
+					]
+				: [];
 
 	const step2Rows = data.categories
 		.filter((c) => c.step === 2)
@@ -72,6 +90,7 @@ export default async function StepPage({ params }: StepPageProps) {
 		<HydrateClient>
 			<StepPageClient
 				declaration={data.declaration}
+				gipPrefillData={data.gipPrefillData ?? undefined}
 				step={step}
 				step1Categories={step1Categories}
 				step2Rows={step2Rows}

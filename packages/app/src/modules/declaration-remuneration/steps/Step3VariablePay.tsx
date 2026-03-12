@@ -7,11 +7,13 @@ import { api } from "~/trpc/react";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { FormActions } from "../shared/FormActions";
 import { computeProportion } from "../shared/gapUtils";
+import type { GipPrefillData } from "../shared/gipMdsMapping";
 import {
 	DEFAULT_PAY_GAP_ROWS,
 	handlePayGapRowChange,
 	PayGapTable,
 } from "../shared/PayGapTable";
+import { PrefillSource } from "../shared/PrefillNotice";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -20,25 +22,59 @@ import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
 	initialData?: VariablePayData;
+	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
 };
 
+function buildGipRows(gip: GipPrefillData["step3"]): PayGapRow[] {
+	return [
+		{
+			label: "Annuelle brute moyenne",
+			womenValue: gip.annualMeanWomen ?? "",
+			menValue: gip.annualMeanMen ?? "",
+		},
+		{
+			label: "Horaire brute moyenne",
+			womenValue: gip.hourlyMeanWomen ?? "",
+			menValue: gip.hourlyMeanMen ?? "",
+		},
+		{
+			label: "Annuelle brute médiane",
+			womenValue: gip.annualMedianWomen ?? "",
+			menValue: gip.annualMedianMen ?? "",
+		},
+		{
+			label: "Horaire brute médiane",
+			womenValue: gip.hourlyMedianWomen ?? "",
+			menValue: gip.hourlyMedianMen ?? "",
+		},
+	];
+}
+
 export function Step3VariablePay({
 	initialData,
+	gipPrefillData,
 	maxWomen,
 	maxMen,
 }: Step3VariablePayProps) {
 	const router = useRouter();
 
+	const hasSavedRows = !!initialData?.rows?.length;
 	const [rows, setRows] = useState<PayGapRow[]>(
-		initialData?.rows?.length ? initialData.rows : DEFAULT_PAY_GAP_ROWS,
+		hasSavedRows
+			? initialData.rows
+			: gipPrefillData
+				? buildGipRows(gipPrefillData.step3)
+				: DEFAULT_PAY_GAP_ROWS,
 	);
 	const [beneficiaryWomen, setBeneficiaryWomen] = useState(
-		initialData?.beneficiaryWomen ?? "",
+		initialData?.beneficiaryWomen ||
+			(gipPrefillData?.step3.beneficiaryCountWomen?.toString() ?? ""),
 	);
 	const [beneficiaryMen, setBeneficiaryMen] = useState(
-		initialData?.beneficiaryMen ?? "",
+		initialData?.beneficiaryMen ||
+			(gipPrefillData?.step3.beneficiaryCountMen?.toString() ?? ""),
 	);
 
 	const [benefValidationError, setBenefValidationError] = useState<
@@ -145,7 +181,9 @@ export function Step3VariablePay({
 
 			<p className="fr-mb-1w">
 				<strong>
-					Renseignez les informations avant de valider vos indicateurs.
+					{gipPrefillData
+						? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez les informations avant de valider vos indicateurs."}
 				</strong>
 				<TooltipButton
 					id="tooltip-step3-info"
@@ -255,6 +293,13 @@ export function Step3VariablePay({
 				>
 					<p>{benefValidationError}</p>
 				</div>
+			)}
+
+			{gipPrefillData && (
+				<PrefillSource
+					periodEnd={gipPrefillData.periodEnd}
+					tooltipId="tooltip-source-step3"
+				/>
 			)}
 
 			<DefinitionAccordion

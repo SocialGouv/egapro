@@ -9,6 +9,12 @@ export {
 	gapLevel,
 	hasGapsAboveThreshold,
 } from "./shared/gapUtils";
+export type {
+	GipMdsRow,
+	GipPrefillData,
+	GipQuartileData,
+} from "./shared/gipMdsMapping";
+export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
