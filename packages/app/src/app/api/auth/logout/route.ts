@@ -9,7 +9,7 @@ import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
  * Custom logout route that terminates both the local NextAuth session
  * and the ProConnect OIDC session (server-side fire-and-forget).
  *
- * The browser is always redirected to /login — the ProConnect end_session
+ * The browser is always redirected to / (home page) — the ProConnect end_session
  * is called server-side to avoid post_logout_redirect_uri registration issues.
  */
 export async function GET(_request: NextRequest) {
@@ -29,5 +29,5 @@ export async function GET(_request: NextRequest) {
 		await terminateProConnectSession(session.user.id);
 	}
 
-	return NextResponse.redirect(new URL("/login", baseUrl));
+	return NextResponse.redirect(new URL("/", baseUrl));
 }

@@ -10,9 +10,9 @@ test.describe("Logout flow", () => {
 		await page.getByRole("button", { name: "Mon espace" }).click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
-		await page.waitForURL("**/login", { timeout: 10_000 });
+		await page.waitForURL(/\/$/, { timeout: 10_000 });
 		await expect(
-			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
+			page.getByRole("link", { name: "Se connecter" }),
 		).toBeVisible();
 	});
 });
