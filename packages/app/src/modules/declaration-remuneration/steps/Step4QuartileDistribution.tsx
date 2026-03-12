@@ -10,6 +10,8 @@ import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { normalizeDecimalInput } from "../shared/gapUtils";
+import type { GipPrefillData, GipQuartileData } from "../shared/gipMdsMapping";
+import { PrefillSource } from "../shared/PrefillNotice";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -17,9 +19,21 @@ import type { StepCategoryData } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileTable } from "./step4/QuartileTable";
 
+function buildGipQuartileCategories(
+	quartile: GipQuartileData,
+): StepCategoryData[] {
+	return QUARTILE_NAMES.map((name, i) => ({
+		name,
+		womenValue: quartile.thresholds[i] ?? undefined,
+		womenCount: quartile.womenCounts[i] ?? undefined,
+		menCount: quartile.menCounts[i] ?? undefined,
+	}));
+}
+
 type Step4QuartileDistributionProps = {
 	initialAnnualCategories?: StepCategoryData[];
 	initialHourlyCategories?: StepCategoryData[];
+	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
 };
@@ -27,6 +41,7 @@ type Step4QuartileDistributionProps = {
 export function Step4QuartileDistribution({
 	initialAnnualCategories,
 	initialHourlyCategories,
+	gipPrefillData,
 	maxWomen,
 	maxMen,
 }: Step4QuartileDistributionProps) {
@@ -38,13 +53,17 @@ export function Step4QuartileDistribution({
 	const [annualCategories, setAnnualCategories] = useState<StepCategoryData[]>(
 		initialAnnualCategories?.length
 			? initialAnnualCategories
-			: defaultCategories(),
+			: gipPrefillData
+				? buildGipQuartileCategories(gipPrefillData.step4.annual)
+				: defaultCategories(),
 	);
 
 	const [hourlyCategories, setHourlyCategories] = useState<StepCategoryData[]>(
 		initialHourlyCategories?.length
 			? initialHourlyCategories
-			: defaultCategories(),
+			: gipPrefillData
+				? buildGipQuartileCategories(gipPrefillData.step4.hourly)
+				: defaultCategories(),
 	);
 
 	const [validationError, setValidationError] = useState<string | null>(null);
@@ -188,7 +207,9 @@ export function Step4QuartileDistribution({
 
 				<p className="fr-mb-0">
 					<strong>
-						Renseignez les informations avant de valider vos indicateurs.
+						{gipPrefillData
+							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+							: "Renseignez les informations avant de valider vos indicateurs."}
 					</strong>
 					<TooltipButton
 						id="tooltip-step4-info"
@@ -224,6 +245,13 @@ export function Step4QuartileDistribution({
 					title="Rémunération horaire brute moyenne"
 					validationError={validationError}
 				/>
+
+				{gipPrefillData && (
+					<PrefillSource
+						periodEnd={gipPrefillData.periodEnd}
+						tooltipId="tooltip-source-step4"
+					/>
+				)}
 
 				<DefinitionAccordion
 					id="accordion-step4"
