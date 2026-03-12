@@ -169,6 +169,13 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/1");
 	});
 
+	test("previous button is present on step pages", async ({ page }) => {
+		await goToStep(page, 6);
+
+		const previousLink = page.getByRole("link", { name: "Précédent" });
+		await expect(previousLink).toBeVisible();
+	});
+
 	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit navigates to compliance path", async ({ page }) => {
 		await goToStep(page, 6);
@@ -183,12 +190,5 @@ test.describe("Declaration workflow", () => {
 		// After submission, the compliance path flow redirects based on gap and CSE status.
 		// With no gap above threshold, it redirects to confirmation (no CSE) or avis-cse (with CSE).
 		await page.waitForURL("**/parcours-conformite/**");
-	});
-
-	test("previous button is present on step pages", async ({ page }) => {
-		await goToStep(page, 6);
-
-		const previousLink = page.getByRole("link", { name: "Précédent" });
-		await expect(previousLink).toBeVisible();
 	});
 });
