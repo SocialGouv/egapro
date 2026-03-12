@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
 
-import { getDsfrModal, PdfFileUpload } from "~/modules/shared";
+import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
@@ -13,54 +12,17 @@ import formStyles from "./shared/formActions.module.scss";
 
 export function Step2Upload() {
 	const router = useRouter();
-	const modalRef = useRef<HTMLDialogElement>(null);
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [uploadError, setUploadError] = useState<string | null>(null);
-
-	function handleFileChange(file: File | null, error: string | null) {
-		setSelectedFile(file);
-		setUploadError(error);
-	}
-
-	function openModal() {
-		const dialog = modalRef.current;
-		if (!dialog) return;
-		const modal = getDsfrModal(dialog);
-		if (modal) {
-			modal.disclose();
-		} else {
-			dialog.showModal();
-		}
-	}
-
-	const closeModal = useCallback(() => {
-		const dialog = modalRef.current;
-		if (!dialog) return;
-		const modal = getDsfrModal(dialog);
-		if (modal) {
-			modal.conceal();
-		} else {
-			dialog.close();
-		}
-	}, []);
-
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-
-		if (!selectedFile) {
-			setUploadError("Veuillez sélectionner un fichier avant de soumettre.");
-			return;
-		}
-
-		setUploadError(null);
-		openModal();
-	}
-
-	function handleConfirm() {
-		closeModal();
-		// TODO: call tRPC mutation to upload file when API is wired (server must validate magic bytes + size independently)
-		router.push("/avis-cse/confirmation");
-	}
+	const {
+		closeModal,
+		handleConfirm,
+		handleFileChange,
+		handleSubmit,
+		modalRef,
+		selectedFile,
+		uploadError,
+	} = usePdfUploadForm({
+		onConfirm: () => router.push("/avis-cse/confirmation"),
+	});
 
 	return (
 		<>

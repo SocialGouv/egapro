@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { getDsfrModal, PdfFileUpload } from "~/modules/shared";
+import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -17,52 +16,16 @@ type Props = {
 
 export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 	const router = useRouter();
-	const modalRef = useRef<HTMLDialogElement>(null);
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [uploadError, setUploadError] = useState<string | null>(null);
-
-	function handleFileChange(file: File | null, error: string | null) {
-		setSelectedFile(file);
-		setUploadError(error);
-	}
-
-	function openModal() {
-		const dialog = modalRef.current;
-		if (!dialog) return;
-		const modal = getDsfrModal(dialog);
-		if (modal) {
-			modal.disclose();
-		} else {
-			dialog.showModal();
-		}
-	}
-
-	const closeModal = useCallback(() => {
-		const dialog = modalRef.current;
-		if (!dialog) return;
-		const modal = getDsfrModal(dialog);
-		if (modal) {
-			modal.conceal();
-		} else {
-			dialog.close();
-		}
-	}, []);
-
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!selectedFile) {
-			setUploadError("Veuillez sélectionner un fichier avant de soumettre.");
-			return;
-		}
-		setUploadError(null);
-		openModal();
-	}
-
-	function handleConfirm() {
-		closeModal();
-		// TODO: call tRPC mutation to upload file when API is wired
-		router.push("/avis-cse");
-	}
+	// TODO: call tRPC mutation to upload file when API is wired
+	const {
+		closeModal,
+		handleConfirm,
+		handleFileChange,
+		handleSubmit,
+		modalRef,
+		selectedFile,
+		uploadError,
+	} = usePdfUploadForm({ onConfirm: () => router.push("/avis-cse") });
 
 	return (
 		<>
