@@ -162,14 +162,14 @@ export const authConfig = {
 		redirect({ url, baseUrl }) {
 			if (url.startsWith(baseUrl)) {
 				const path = url.slice(baseUrl.length);
-				if (!path || path === "/") return `${baseUrl}/declaration-remuneration`;
+				if (!path || path === "/") return `${baseUrl}/mon-espace`;
 				return url;
 			}
 			if (url.startsWith("/")) {
-				if (url === "/") return `${baseUrl}/declaration-remuneration`;
+				if (url === "/") return `${baseUrl}/mon-espace`;
 				return `${baseUrl}${url}`;
 			}
-			return `${baseUrl}/declaration-remuneration`;
+			return `${baseUrl}/mon-espace`;
 		},
 		session: ({
 			session,

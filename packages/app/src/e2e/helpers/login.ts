@@ -24,6 +24,6 @@ export async function loginWithProConnect(page: Page) {
 	await page.getByRole("button", { name: /continuer|connexion/i }).click();
 	await page.getByRole("button", { name: "Se connecter" }).click();
 
-	// Wait for redirect to declaration intro (slow ProConnect in CI)
-	await page.waitForURL("**/declaration-remuneration/**", { timeout: 50_000 });
+	// Wait for redirect to mon espace (slow ProConnect in CI)
+	await page.waitForURL("**/mon-espace", { timeout: 50_000 });
 }

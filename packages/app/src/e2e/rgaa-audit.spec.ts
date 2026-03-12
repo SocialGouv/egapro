@@ -56,6 +56,10 @@ test.describe("RGAA audit — authenticated pages", () => {
 		});
 	}
 
+	test("Mon espace", async ({ page }) => {
+		await auditPage(page, "/mon-espace", "Mon espace");
+	});
+
 	test("Mes entreprises", async ({ page }) => {
 		await auditPage(page, "/mon-espace/mes-entreprises", "Mes entreprises");
 	});

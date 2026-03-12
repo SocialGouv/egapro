@@ -33,15 +33,9 @@ describe("CompanyTable", () => {
 	it("renders company names as links", () => {
 		render(<CompanyTable companies={companies} />);
 		const linkA = screen.getByRole("link", { name: "Company A" });
-		expect(linkA).toHaveAttribute(
-			"href",
-			"/mon-espace/mes-entreprises/111111111",
-		);
+		expect(linkA).toHaveAttribute("href", "/mon-espace");
 		const linkB = screen.getByRole("link", { name: "Company B" });
-		expect(linkB).toHaveAttribute(
-			"href",
-			"/mon-espace/mes-entreprises/222222222",
-		);
+		expect(linkB).toHaveAttribute("href", "/mon-espace");
 	});
 
 	it("renders SIREN numbers in cells", () => {
