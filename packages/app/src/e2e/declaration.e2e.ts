@@ -166,6 +166,13 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/1");
 	});
 
+	test("previous button is present on step pages", async ({ page }) => {
+		await goToStep(page, 6);
+
+		const previousLink = page.getByRole("link", { name: "Précédent" });
+		await expect(previousLink).toBeVisible();
+	});
+
 	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
 		await goToStep(page, 6);
@@ -177,14 +184,7 @@ test.describe("Declaration workflow", () => {
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
-		// Verify navigation to the CSE opinion page
+		// Verify navigation to the CSE opinion page (hasCse=true set by global-setup, no gap → direct redirect)
 		await page.waitForURL("**/avis-cse/**");
-	});
-
-	test("previous button is present on step pages", async ({ page }) => {
-		await goToStep(page, 6);
-
-		const previousLink = page.getByRole("link", { name: "Précédent" });
-		await expect(previousLink).toBeVisible();
 	});
 });
