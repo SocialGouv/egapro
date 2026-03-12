@@ -4,7 +4,7 @@
  */
 export function PrefillResetWarning() {
 	return (
-		<div className="fr-alert fr-alert--warning fr-alert--sm fr-mb-3w">
+		<div className="fr-alert fr-alert--warning fr-alert--sm">
 			<p>
 				<strong>
 					Attention&nbsp;: toute modification de l&apos;effectif réinitialise

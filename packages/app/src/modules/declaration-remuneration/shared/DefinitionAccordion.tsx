@@ -3,11 +3,16 @@
 type DefinitionAccordionProps = {
 	id: string;
 	title: string;
+	className?: string;
 };
 
-export function DefinitionAccordion({ id, title }: DefinitionAccordionProps) {
+export function DefinitionAccordion({
+	id,
+	title,
+	className,
+}: DefinitionAccordionProps) {
 	return (
-		<section className="fr-accordion fr-mt-4w">
+		<section className={`fr-accordion ${className ?? ""}`}>
 			<h3 className="fr-accordion__title">
 				<button
 					aria-controls={id}
