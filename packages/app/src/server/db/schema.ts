@@ -119,6 +119,7 @@ export const declarations = createTable(
 		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		complianceCompletedAt: d.timestamp({ withTimezone: true }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
@@ -438,6 +439,48 @@ export const cseOpinionFileLinksRelations = relations(
 		opinion: one(cseOpinions, {
 			fields: [cseOpinionFileLinks.opinionId],
 			references: [cseOpinions.id],
+		}),
+	}),
+);
+
+export const jointEvaluationFiles = createTable(
+	"joint_evaluation_file",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		year: d.integer().notNull(),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		filePath: d.varchar({ length: 500 }).notNull(),
+		declarantId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		uploadedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [index("joint_eval_file_siren_year_idx").on(t.siren, t.year)],
+);
+
+export const jointEvaluationFilesRelations = relations(
+	jointEvaluationFiles,
+	({ one }) => ({
+		company: one(companies, {
+			fields: [jointEvaluationFiles.siren],
+			references: [companies.siren],
+		}),
+		declarant: one(users, {
+			fields: [jointEvaluationFiles.declarantId],
+			references: [users.id],
 		}),
 	}),
 );
