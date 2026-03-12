@@ -1,5 +1,5 @@
 {
-	"id": "5f228e94-b184-43df-a930-84638e2f28a4",
+	"id": "b15a568f-2e3e-4e11-b04f-6fd1d1324289",
 	"prevId": "f3e2b98f-a20d-4aea-bb64-55902054d546",
 	"version": "7",
 	"dialect": "postgresql",
@@ -563,6 +563,12 @@
 			"name": "app_declaration",
 			"schema": "",
 			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
 				"siren": {
 					"name": "siren",
 					"type": "varchar(9)",
@@ -617,12 +623,6 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"compliance_path": {
-					"name": "compliance_path",
-					"type": "varchar(30)",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"current_step": {
 					"name": "current_step",
 					"type": "integer",
@@ -636,6 +636,36 @@
 					"primaryKey": false,
 					"notNull": false,
 					"default": "'draft'"
+				},
+				"compliance_path": {
+					"name": "compliance_path",
+					"type": "varchar(30)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"second_declaration_step": {
+					"name": "second_declaration_step",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"second_declaration_status": {
+					"name": "second_declaration_status",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"second_decl_reference_period_start": {
+					"name": "second_decl_reference_period_start",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"second_decl_reference_period_end": {
+					"name": "second_decl_reference_period_end",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
 				},
 				"created_at": {
 					"name": "created_at",
@@ -678,13 +708,199 @@
 					"onUpdate": "no action"
 				}
 			},
-			"compositePrimaryKeys": {
-				"app_declaration_siren_year_pk": {
-					"name": "app_declaration_siren_year_pk",
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"declaration_siren_year_idx": {
+					"name": "declaration_siren_year_idx",
+					"nullsNotDistinct": false,
 					"columns": ["siren", "year"]
 				}
 			},
-			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_employee_category": {
+			"name": "app_employee_category",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"job_category_id": {
+					"name": "job_category_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"declaration_type": {
+					"name": "declaration_type",
+					"type": "declaration_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"women_count": {
+					"name": "women_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"men_count": {
+					"name": "men_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_base_women": {
+					"name": "annual_base_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_base_men": {
+					"name": "annual_base_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_variable_women": {
+					"name": "annual_variable_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_variable_men": {
+					"name": "annual_variable_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_base_women": {
+					"name": "hourly_base_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_base_men": {
+					"name": "hourly_base_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_variable_women": {
+					"name": "hourly_variable_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_variable_men": {
+					"name": "hourly_variable_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"app_employee_category_job_category_id_app_job_category_id_fk": {
+					"name": "app_employee_category_job_category_id_app_job_category_id_fk",
+					"tableFrom": "app_employee_category",
+					"tableTo": "app_job_category",
+					"columnsFrom": ["job_category_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"employee_category_job_type_idx": {
+					"name": "employee_category_job_type_idx",
+					"nullsNotDistinct": false,
+					"columns": ["job_category_id", "declaration_type"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_job_category": {
+			"name": "app_job_category",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"declaration_id": {
+					"name": "declaration_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"category_index": {
+					"name": "category_index",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"detail": {
+					"name": "detail",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"source": {
+					"name": "source",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"app_job_category_declaration_id_app_declaration_id_fk": {
+					"name": "app_job_category_declaration_id_app_declaration_id_fk",
+					"tableFrom": "app_job_category",
+					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"job_category_declaration_index_idx": {
+					"name": "job_category_declaration_index_idx",
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "category_index"]
+				}
+			},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
@@ -921,7 +1137,13 @@
 			"isRLSEnabled": false
 		}
 	},
-	"enums": {},
+	"enums": {
+		"public.declaration_type": {
+			"name": "declaration_type",
+			"schema": "public",
+			"values": ["initial", "correction"]
+		}
+	},
 	"schemas": {},
 	"sequences": {},
 	"roles": {},

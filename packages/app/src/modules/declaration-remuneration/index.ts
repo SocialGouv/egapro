@@ -1,6 +1,7 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
+export { DevFillButton } from "./shared/DevFillButton";
 export {
 	computeGap,
 	computePercentage,
@@ -9,17 +10,27 @@ export {
 	gapLevel,
 	hasGapsAboveThreshold,
 } from "./shared/gapUtils";
+export { mapDbCategories } from "./shared/mapDbCategories";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
+export { CompliancePathPage } from "./steps/CompliancePathPage";
+export { JointEvaluationPage } from "./steps/jointEvaluation";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
 export { Step3VariablePay } from "./steps/Step3VariablePay";
 export { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
 export { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 export { Step6Review } from "./steps/Step6Review";
-
-export { parseStep5Categories } from "./steps/step6/parseStep5Categories";
+export {
+	SECOND_DECLARATION_TOTAL_STEPS,
+	SecondDeclarationStep1Info,
+	SecondDeclarationStep2Form,
+	SecondDeclarationStep3Review,
+	SecondDeclarationStepPage,
+} from "./steps/secondDeclaration";
+export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
 export type {
 	CategoryData,
+	EmployeeCategoryRow,
 	PayGapRow,
 	StepCategoryData,
 	VariablePayData,

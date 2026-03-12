@@ -3,6 +3,7 @@ import {
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { api, HydrateClient } from "~/trpc/server";
 
 type StepPageProps = {
@@ -36,6 +37,14 @@ export default async function StepPage({ params }: StepPageProps) {
 				womenMedianValue: c.womenMedianValue ?? undefined,
 				menMedianValue: c.menMedianValue ?? undefined,
 			}));
+
+	const step5Categories = mapToEmployeeCategoryRows(
+		data.jobCategories,
+		data.employeeCategories,
+		"initial",
+	);
+
+	const initialSource = data.jobCategories[0]?.source;
 
 	const step1Categories = data.categories
 		.filter((c) => c.step === 1)
@@ -72,12 +81,13 @@ export default async function StepPage({ params }: StepPageProps) {
 		<HydrateClient>
 			<StepPageClient
 				declaration={data.declaration}
+				initialSource={initialSource}
 				step={step}
 				step1Categories={step1Categories}
 				step2Rows={step2Rows}
 				step3Data={step3Data}
 				step4Categories={stepCategories(4)}
-				step5Categories={stepCategories(5)}
+				step5Categories={step5Categories}
 			/>
 		</HydrateClient>
 	);

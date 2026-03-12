@@ -73,7 +73,7 @@ export function computeProportion(count: string, total?: number): string {
 	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
 }
 
-export function formatCurrency(value?: string): string {
+export function formatCurrency(value?: string | null): string {
 	if (!value) return "-";
 	const n = Number.parseFloat(value);
 	if (Number.isNaN(n)) return "-";
@@ -97,16 +97,44 @@ export function formatTotal(value: number | null, unit: string): string {
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
 
-/** Checks if any step 5 category has an absolute gap >= threshold (default 5%) */
+type SalaryPair = {
+	women: string | null;
+	men: string | null;
+};
+
+type EmployeeCategoryLike = {
+	annualBaseWomen?: string | null;
+	annualBaseMen?: string | null;
+	annualVariableWomen?: string | null;
+	annualVariableMen?: string | null;
+	hourlyBaseWomen?: string | null;
+	hourlyBaseMen?: string | null;
+	hourlyVariableWomen?: string | null;
+	hourlyVariableMen?: string | null;
+};
+
+// Returns true if any employee category has a salary gap >= threshold (default 5%).
 export function hasGapsAboveThreshold(
-	step5Categories: { name: string; womenValue?: string; menValue?: string }[],
+	categories: EmployeeCategoryLike[],
 	threshold = 5,
 ): boolean {
-	for (const cat of step5Categories) {
-		if (!cat.womenValue || !cat.menValue) continue;
-		if (cat.name.includes(":name:")) continue;
-		const gap = computeGap(cat.womenValue, cat.menValue);
-		if (gap !== null && gap >= threshold) return true;
-	}
-	return false;
+	return categories.some((cat) => {
+		const pairs: SalaryPair[] = [
+			{ women: cat.annualBaseWomen ?? null, men: cat.annualBaseMen ?? null },
+			{
+				women: cat.annualVariableWomen ?? null,
+				men: cat.annualVariableMen ?? null,
+			},
+			{ women: cat.hourlyBaseWomen ?? null, men: cat.hourlyBaseMen ?? null },
+			{
+				women: cat.hourlyVariableWomen ?? null,
+				men: cat.hourlyVariableMen ?? null,
+			},
+		];
+		return pairs.some(({ women, men }) => {
+			if (!women || !men) return false;
+			const gap = computeGap(women, men);
+			return gap !== null && gap >= threshold;
+		});
+	});
 }

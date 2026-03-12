@@ -46,7 +46,7 @@ describe("Step2Upload", () => {
 		render(<Step2Upload />);
 
 		expect(
-			screen.getByText("Veuillez importer l'ensemble des avis de votre CSE"),
+			screen.getByText(/Veuillez importer l'ensemble des avis de votre CSE/),
 		).toBeInTheDocument();
 		expect(screen.getByText(/Taille maximale.*pdf/)).toBeInTheDocument();
 	});

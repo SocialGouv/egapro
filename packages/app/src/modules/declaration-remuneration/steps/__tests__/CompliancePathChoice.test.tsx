@@ -15,10 +15,12 @@ vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			saveCompliancePath: {
-				useMutation: (opts: { onSuccess?: () => void }) => ({
-					mutate: (args: unknown) => {
+				useMutation: (opts: {
+					onSuccess?: (data: unknown, variables: { path: string }) => void;
+				}) => ({
+					mutate: (args: { path: string }) => {
 						mockMutate(args);
-						opts.onSuccess?.();
+						opts.onSuccess?.(undefined, args);
 					},
 					isPending: false,
 					error: null,
@@ -68,7 +70,7 @@ describe("CompliancePathChoice", () => {
 		expect(nextButton).not.toBeDisabled();
 	});
 
-	it("submits the selected path and navigates to /avis-cse", () => {
+	it("submits the selected path and navigates to evaluation-conjointe", () => {
 		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
 		const radio = screen.getByLabelText(
 			"Évaluation conjointe des rémunérations",
@@ -81,7 +83,27 @@ describe("CompliancePathChoice", () => {
 		fireEvent.submit(form);
 
 		expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
-		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
+	});
+
+	it("navigates to second declaration when corrective_action is selected", () => {
+		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		const radio = screen.getByLabelText(
+			"Actions correctives et seconde déclaration",
+		);
+		fireEvent.click(radio);
+
+		const form = screen
+			.getByRole("button", { name: /suivant/i })
+			.closest("form") as HTMLFormElement;
+		fireEvent.submit(form);
+
+		expect(mockMutate).toHaveBeenCalledWith({ path: "corrective_action" });
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/etape/1",
+		);
 	});
 
 	it("pre-selects the initial path when provided", () => {

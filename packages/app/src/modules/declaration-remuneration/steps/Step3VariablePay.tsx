@@ -5,6 +5,12 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import { DevFillButton } from "../shared/DevFillButton";
+import {
+	DEV_STEP3_BENEFICIARY_MEN,
+	DEV_STEP3_BENEFICIARY_WOMEN,
+	DEV_STEP3_ROWS,
+} from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { computeProportion } from "../shared/gapUtils";
 import {
@@ -125,6 +131,15 @@ export function Step3VariablePay({
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
 					</h1>
+				</div>
+				<div className="fr-col-auto">
+					<DevFillButton
+						onFill={() => {
+							setRows(DEV_STEP3_ROWS);
+							setBeneficiaryWomen(DEV_STEP3_BENEFICIARY_WOMEN);
+							setBeneficiaryMen(DEV_STEP3_BENEFICIARY_MEN);
+						}}
+					/>
 				</div>
 				{saved && (
 					<div className="fr-col-auto">

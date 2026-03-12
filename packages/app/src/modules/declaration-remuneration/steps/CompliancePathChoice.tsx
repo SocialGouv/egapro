@@ -34,7 +34,17 @@ export function CompliancePathChoice({
 	>(forcedPath ?? initialPath);
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
-		onSuccess: () => router.push("/avis-cse"),
+		onSuccess: (_, { path }) => {
+			if (path === "corrective_action") {
+				router.push("/declaration-remuneration/parcours-conformite/etape/1");
+			} else if (path === "joint_evaluation") {
+				router.push(
+					"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+				);
+			} else {
+				router.push("/avis-cse");
+			}
+		},
 	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

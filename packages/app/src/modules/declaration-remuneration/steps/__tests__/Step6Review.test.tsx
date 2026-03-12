@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { Step6Review } from "../Step6Review";
 
 vi.mock("~/modules/declarationPdf", () => ({
@@ -23,6 +24,26 @@ vi.mock("~/trpc/react", () => ({
 		},
 	},
 }));
+
+function makeCategory(
+	overrides: Partial<EmployeeCategoryRow> = {},
+): EmployeeCategoryRow {
+	return {
+		name: "",
+		detail: "",
+		womenCount: null,
+		menCount: null,
+		annualBaseWomen: null,
+		annualBaseMen: null,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+		...overrides,
+	};
+}
 
 describe("Step6Review", () => {
 	it("renders title and stepper at step 6", () => {
@@ -119,17 +140,14 @@ describe("Step6Review", () => {
 				]}
 			/>,
 		);
-		// Side-by-side headers
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
 			1,
 		);
 		expect(screen.getAllByText("Horaire brute").length).toBeGreaterThanOrEqual(
 			1,
 		);
-		// Row labels
 		expect(screen.getAllByText("Moyenne").length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByText("Médiane").length).toBeGreaterThanOrEqual(2);
-		// Gap values and badges
 		expect(screen.getAllByText("5,0 %").length).toBeGreaterThanOrEqual(1);
 		expect(screen.getAllByText("3,0 %").length).toBeGreaterThanOrEqual(1);
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
@@ -210,45 +228,32 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				step5Categories={[
-					{ name: "meta:source:autre" },
-					{ name: "cat:0:name:Ingénieurs" },
-					{ name: "cat:0:detail:Dev" },
-					{ name: "cat:0:effectif", womenCount: 10, menCount: 15 },
-					{
-						name: "cat:0:annual:base",
-						womenValue: "3000",
-						menValue: "3200",
-					},
-					{
-						name: "cat:0:annual:variable",
-						womenValue: "500",
-						menValue: "600",
-					},
-					{
-						name: "cat:0:hourly:base",
-						womenValue: "18",
-						menValue: "19",
-					},
-					{
-						name: "cat:0:hourly:variable",
-						womenValue: "3",
-						menValue: "4",
-					},
+					makeCategory({
+						name: "Ingénieurs",
+						detail: "Dev",
+						womenCount: 10,
+						menCount: 15,
+						annualBaseWomen: "3000",
+						annualBaseMen: "3200",
+						annualVariableWomen: "500",
+						annualVariableMen: "600",
+						hourlyBaseWomen: "18",
+						hourlyBaseMen: "19",
+						hourlyVariableWomen: "3",
+						hourlyVariableMen: "4",
+					}),
 				]}
 			/>,
 		);
 		expect(screen.getByText("Ingénieurs")).toBeInTheDocument();
-		// Side-by-side headers
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
 			1,
 		);
 		expect(screen.getAllByText("Horaire brute").length).toBeGreaterThanOrEqual(
 			1,
 		);
-		// Row labels (2 per column = 4 total)
 		expect(screen.getAllByText("Salaire de base").length).toBe(2);
 		expect(screen.getAllByText("Composantes variables").length).toBe(2);
-		// Badges present
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
