@@ -15,9 +15,17 @@ import type { CseOpinionStep1Data, OpinionType } from "./types";
 type Props = {
 	initialData?: CseOpinionStep1Data;
 	email?: string;
+	compliancePath?: string | null;
+	hasSecondDeclaration?: boolean;
 };
 
-export function Step1Opinions({ initialData, email }: Props) {
+export function Step1Opinions({
+	initialData,
+	email,
+	compliancePath,
+	hasSecondDeclaration = true,
+}: Props) {
+	const isJointEvaluation = compliancePath === "joint_evaluation";
 	const router = useRouter();
 
 	const [firstDeclOpinion, setFirstDeclOpinion] = useState<OpinionType | null>(
@@ -63,16 +71,20 @@ export function Step1Opinions({ initialData, email }: Props) {
 		const firstGapIncomplete =
 			firstDeclGap === true && (!firstDeclGapOpinion || !firstDeclGapDate);
 		const secondGapIncomplete =
-			secondDeclGap === true && (!secondDeclGapOpinion || !secondDeclGapDate);
+			hasSecondDeclaration &&
+			secondDeclGap === true &&
+			(!secondDeclGapOpinion || !secondDeclGapDate);
+
+		const secondDeclInvalid =
+			hasSecondDeclaration &&
+			(!secondDeclOpinion || !secondDeclDate || secondDeclGap === null);
 
 		if (
 			!firstDeclOpinion ||
 			!firstDeclDate ||
 			firstDeclGap === null ||
 			firstGapIncomplete ||
-			!secondDeclOpinion ||
-			!secondDeclDate ||
-			secondDeclGap === null ||
+			secondDeclInvalid ||
 			secondGapIncomplete
 		) {
 			setValidationError("Veuillez remplir tous les champs obligatoires.");
@@ -88,35 +100,48 @@ export function Step1Opinions({ initialData, email }: Props) {
 				gapOpinion: firstDeclGapOpinion,
 				gapDate: firstDeclGapDate || null,
 			},
-			secondDeclaration: {
-				accuracyOpinion: secondDeclOpinion,
-				accuracyDate: secondDeclDate,
-				gapConsulted: secondDeclGap,
-				gapOpinion: secondDeclGapOpinion,
-				gapDate: secondDeclGapDate || null,
-			},
+			secondDeclaration:
+				hasSecondDeclaration && secondDeclOpinion && secondDeclGap !== null
+					? {
+							accuracyOpinion: secondDeclOpinion,
+							accuracyDate: secondDeclDate,
+							gapConsulted: secondDeclGap,
+							gapOpinion: secondDeclGapOpinion,
+							gapDate: secondDeclGapDate || null,
+						}
+					: undefined,
 		});
 	}
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
-				<div className="fr-col">
-					<h1 className="fr-h4 fr-mb-0">
-						Parcours de mise en conformité pour l'indicateur par catégorie de
-						salariés
-					</h1>
+			{isJointEvaluation && (
+				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
+					<div className="fr-col">
+						<h1 className="fr-h4 fr-mb-0">
+							Parcours de mise en conformité pour l'indicateur par catégorie de
+							salariés
+						</h1>
+					</div>
 				</div>
-			</div>
+			)}
 
-			<SubmissionBanner
-				deadline={`1er février ${new Date().getFullYear() + 1}`}
-				email={email ?? "adresse@exemple.fr"}
-			/>
+			{isJointEvaluation && (
+				<SubmissionBanner
+					deadline={`1er février ${new Date().getFullYear() + 1}`}
+					email={email ?? "adresse@exemple.fr"}
+				/>
+			)}
 
-			<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
-				Transmettre l'avis ou les avis du CSE
-			</h2>
+			{isJointEvaluation ? (
+				<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
+					Transmettre l'avis ou les avis du CSE
+				</h2>
+			) : (
+				<h1 className="fr-h4 fr-mb-3w">
+					Transmettre l'avis ou les avis du CSE
+				</h1>
+			)}
 
 			<CseStepIndicator currentStep={1} />
 
@@ -149,28 +174,32 @@ export function Step1Opinions({ initialData, email }: Props) {
 				/>
 			</div>
 
-			<h3 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h3>
+			{hasSecondDeclaration && (
+				<>
+					<h3 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h3>
 
-			<div className={styles.cardStack}>
-				<AccuracyOpinionCard
-					date={secondDeclDate}
-					id="second-decl-accuracy"
-					onDateChange={setSecondDeclDate}
-					onOpinionChange={setSecondDeclOpinion}
-					opinion={secondDeclOpinion}
-					title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-				/>
+					<div className={styles.cardStack}>
+						<AccuracyOpinionCard
+							date={secondDeclDate}
+							id="second-decl-accuracy"
+							onDateChange={setSecondDeclDate}
+							onOpinionChange={setSecondDeclOpinion}
+							opinion={secondDeclOpinion}
+							title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+						/>
 
-				<GapConsultationCard
-					consulted={secondDeclGap}
-					date={secondDeclGapDate}
-					id="second-decl-gap"
-					onConsultedChange={setSecondDeclGap}
-					onDateChange={setSecondDeclGapDate}
-					onOpinionChange={setSecondDeclGapOpinion}
-					opinion={secondDeclGapOpinion}
-				/>
-			</div>
+						<GapConsultationCard
+							consulted={secondDeclGap}
+							date={secondDeclGapDate}
+							id="second-decl-gap"
+							onConsultedChange={setSecondDeclGap}
+							onDateChange={setSecondDeclGapDate}
+							onOpinionChange={setSecondDeclGapOpinion}
+							opinion={secondDeclGapOpinion}
+						/>
+					</div>
+				</>
+			)}
 
 			<div aria-live="polite">
 				{validationError && (

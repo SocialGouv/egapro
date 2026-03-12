@@ -21,21 +21,29 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 1) {
-		const [session, { opinions }] = await Promise.all([
+		const [session, { opinions }, declarationData] = await Promise.all([
 			auth(),
 			api.cseOpinion.get(),
+			api.declaration.getOrCreate(),
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
+		const hasSecondDeclaration =
+			declarationData.declaration.secondDeclarationStatus === "submitted";
 		return (
 			<Step1Opinions
+				compliancePath={declarationData.declaration.compliancePath}
 				email={session?.user?.email ?? undefined}
+				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
 			/>
 		);
 	}
 
 	if (step === 2) {
-		return <Step2Upload />;
+		const declarationData = await api.declaration.getOrCreate();
+		const hasSecondDeclaration =
+			declarationData.declaration.secondDeclarationStatus === "submitted";
+		return <Step2Upload hasSecondDeclaration={hasSecondDeclaration} />;
 	}
 
 	notFound();
