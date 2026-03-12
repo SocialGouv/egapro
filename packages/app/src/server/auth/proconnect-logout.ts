@@ -8,39 +8,18 @@ interface OidcConfig {
 	end_session_endpoint: string;
 }
 
-interface JwtPayload {
-	iss?: string;
-}
-
-/**
- * Extract the `iss` (issuer) claim from a JWT without verifying the signature.
- * Used to discover the real OIDC provider issuer, which may differ from the
- * configured issuer when a proxy (e.g. charon) sits in between.
- */
-function extractIssuerFromIdToken(idToken: string): string | undefined {
-	const parts = idToken.split(".");
-	const payload = parts[1];
-	if (!payload) return undefined;
-
-	try {
-		const decoded = JSON.parse(
-			Buffer.from(payload, "base64url").toString(),
-		) as JwtPayload;
-		return decoded.iss;
-	} catch {
-		return undefined;
-	}
-}
-
 /**
  * Build the ProConnect OIDC logout URL and delete the local session from the DB.
  *
  * Steps:
  * 1. Fetch the user's id_token from the accounts table
  * 2. Delete all sessions for the user from the DB
- * 3. Extract the real issuer from the id_token (bypasses proxy like charon)
- * 4. Fetch the issuer's end_session_endpoint from well-known config
- * 5. Return the full redirect URL with id_token_hint + post_logout_redirect_uri
+ * 3. Fetch the end_session_endpoint from the configured issuer (charon proxy)
+ * 4. Return the full redirect URL with id_token_hint + post_logout_redirect_uri
+ *
+ * Uses EGAPRO_PROCONNECT_ISSUER (charon) rather than the real issuer from the
+ * id_token, so that charon can handle the post_logout_redirect_uri dynamically
+ * for all environments (review branches, preprod, prod).
  *
  * If ProConnect is not configured or no id_token is found, falls back to /login.
  */
@@ -68,12 +47,9 @@ export async function getProConnectLogoutUrl(
 		return fallbackUrl;
 	}
 
-	// Use the real issuer from the id_token rather than the configured one.
-	// This ensures we call ProConnect directly even when a proxy (charon)
-	// sits in front and doesn't support the end_session_endpoint.
-	const issuer =
-		extractIssuerFromIdToken(idToken) ?? env.EGAPRO_PROCONNECT_ISSUER;
-	const wellKnownUrl = `${issuer}/.well-known/openid-configuration`;
+	// Use the configured issuer (charon proxy) to discover the end_session_endpoint.
+	// Charon handles redirect_uri whitelisting for all environments.
+	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
 		const response = await fetch(wellKnownUrl);
