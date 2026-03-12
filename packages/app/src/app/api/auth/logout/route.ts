@@ -21,15 +21,11 @@ export async function GET(_request: NextRequest) {
 		: "next-auth.session-token";
 	cookieStore.delete(sessionCookieName);
 
-	// Temporary debug log — remove after validation
-	console.log("[logout] baseUrl:", baseUrl);
-
 	if (!session?.user?.id) {
 		return NextResponse.redirect(new URL("/login", baseUrl));
 	}
 
 	const logoutUrl = await getProConnectLogoutUrl(session.user.id, baseUrl);
-	console.log("[logout] logoutUrl:", logoutUrl);
 
 	return NextResponse.redirect(logoutUrl);
 }
