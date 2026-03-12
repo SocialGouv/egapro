@@ -4,11 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
+import { api } from "~/trpc/react";
+
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
+import { PendingFileCard } from "./components/PendingFileCard";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
+import { UploadedFileCard } from "./components/UploadedFileCard";
 import uploadStyles from "./Step2Upload.module.scss";
 import formStyles from "./shared/formActions.module.scss";
+import type { UploadedFile } from "./types";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -22,12 +27,6 @@ function validateFile(file: File): string | null {
 	return null;
 }
 
-function formatFileSize(bytes: number): string {
-	if (bytes < 1024) return `${bytes} o`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} Ko`;
-	return `${(bytes / (1024 * 1024)).toFixed(2)} Mo`;
-}
-
 type DsfrModalApi = { disclose: () => void; conceal: () => void };
 
 function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
@@ -39,14 +38,44 @@ function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
 	).dsfr(element).modal;
 }
 
-export function Step2Upload() {
+async function uploadFileToApi(
+	file: File,
+): Promise<{ data?: UploadedFile; error?: string }> {
+	const formData = new FormData();
+	formData.append("file", file);
+
+	const response = await fetch("/api/cse-opinion/upload", {
+		method: "POST",
+		body: formData,
+	});
+
+	if (!response.ok) {
+		const body = (await response.json()) as { error: string };
+		return { error: body.error };
+	}
+
+	const uploaded = (await response.json()) as UploadedFile;
+	return { data: uploaded };
+}
+
+type Props = {
+	existingFiles?: UploadedFile[];
+};
+
+export function Step2Upload({ existingFiles = [] }: Props) {
 	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [uploadedFiles, setUploadedFiles] =
+		useState<UploadedFile[]>(existingFiles);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
+	const [isUploading, setIsUploading] = useState(false);
+
+	const submitFiles = api.cseOpinion.submitFiles.useMutation();
+	const deleteFileMutation = api.cseOpinion.deleteFile.useMutation();
 
 	function processFile(file: File) {
 		const error = validateFile(file);
@@ -109,10 +138,50 @@ export function Step2Upload() {
 		}
 	}, []);
 
+	function clearSelectedFile() {
+		setSelectedFile(null);
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
+	}
+
+	async function handleUploadFile() {
+		if (!selectedFile) return;
+
+		setIsUploading(true);
+		setUploadError(null);
+
+		try {
+			const result = await uploadFileToApi(selectedFile);
+			if (result.error) {
+				setUploadError(result.error);
+				return;
+			}
+			const uploaded = result.data;
+			if (uploaded) {
+				setUploadedFiles((prev) => [...prev, uploaded]);
+				clearSelectedFile();
+			}
+		} catch {
+			setUploadError("Erreur lors de l'upload du fichier.");
+		} finally {
+			setIsUploading(false);
+		}
+	}
+
+	async function handleDeleteFile(fileId: string) {
+		try {
+			await deleteFileMutation.mutateAsync({ fileId });
+			setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
+		} catch {
+			setUploadError("Erreur lors de la suppression du fichier.");
+		}
+	}
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 
-		if (!selectedFile) {
+		if (uploadedFiles.length === 0 && !selectedFile) {
 			setUploadError("Veuillez sélectionner un fichier avant de soumettre.");
 			fileInputRef.current?.focus();
 			return;
@@ -122,11 +191,42 @@ export function Step2Upload() {
 		openModal();
 	}
 
-	function handleConfirm() {
+	async function handleConfirm() {
 		closeModal();
-		// TODO: call tRPC mutation to upload file when API is wired (server must validate magic bytes + size independently)
-		router.push("/avis-cse/confirmation");
+		setIsUploading(true);
+
+		try {
+			let allFiles = uploadedFiles;
+
+			// Upload pending file if any
+			if (selectedFile) {
+				const result = await uploadFileToApi(selectedFile);
+				if (result.error) {
+					setUploadError(result.error);
+					setIsUploading(false);
+					return;
+				}
+				const uploaded = result.data;
+				if (uploaded) {
+					allFiles = [...uploadedFiles, uploaded];
+					setUploadedFiles(allFiles);
+					clearSelectedFile();
+				}
+			}
+
+			await submitFiles.mutateAsync({
+				fileIds: allFiles.map((f) => f.id),
+			});
+
+			router.push("/avis-cse/confirmation");
+		} catch {
+			setUploadError("Erreur lors de la soumission.");
+		} finally {
+			setIsUploading(false);
+		}
 	}
+
+	const hasFiles = uploadedFiles.length > 0 || selectedFile !== null;
 
 	return (
 		<>
@@ -150,31 +250,24 @@ export function Step2Upload() {
 					</p>
 				</div>
 
+				{uploadedFiles.map((file) => (
+					<UploadedFileCard
+						disabled={isUploading}
+						fileName={file.fileName}
+						fileSize={file.fileSize}
+						key={file.id}
+						onDelete={() => handleDeleteFile(file.id)}
+					/>
+				))}
+
 				{selectedFile && !uploadError ? (
-					<div className={uploadStyles.fileCard}>
-						<p className="fr-text--md fr-mb-0">{selectedFile.name}</p>
-						<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-							PDF – {formatFileSize(selectedFile.size)}
-						</p>
-						<div className={uploadStyles.fileCardFooter}>
-							<p className="fr-message fr-message--valid fr-mb-0">
-								Importation réussie
-							</p>
-							<button
-								className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
-								onClick={() => {
-									setSelectedFile(null);
-									if (fileInputRef.current) {
-										fileInputRef.current.value = "";
-									}
-								}}
-								title="Supprimer le fichier"
-								type="button"
-							>
-								Supprimer
-							</button>
-						</div>
-					</div>
+					<PendingFileCard
+						fileName={selectedFile.name}
+						fileSize={selectedFile.size}
+						isUploading={isUploading}
+						onDelete={clearSelectedFile}
+						onUpload={handleUploadFile}
+					/>
 				) : (
 					<section
 						aria-label="Zone de dépôt de fichier"
@@ -195,6 +288,7 @@ export function Step2Upload() {
 						<span>
 							<button
 								className={uploadStyles.selectButton}
+								disabled={isUploading}
 								onClick={() => fileInputRef.current?.click()}
 								type="button"
 							>
@@ -252,9 +346,10 @@ export function Step2Upload() {
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={isUploading || !hasFiles}
 						type="submit"
 					>
-						Soumettre
+						{isUploading ? "Envoi en cours…" : "Soumettre"}
 					</button>
 				</div>
 			</form>
