@@ -64,6 +64,7 @@ vi.mock("~/env", () => ({
 		EGAPRO_PROCONNECT_ISSUER: "https://proconnect.example.com",
 		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
 		EGAPRO_SUIT_API_URL: "https://api.suit.example.com",
+		NEXTAUTH_URL: "http://localhost:3000/api/auth",
 	},
 }));
 
