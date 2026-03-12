@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("home page renders", async ({ page }) => {
+test("home page redirects authenticated user to mon-espace", async ({
+	page,
+}) => {
 	await page.goto("/");
-	await expect(
-		page.getByRole("heading", { name: "Bienvenue sur Egapro" }),
-	).toBeVisible();
+	await page.waitForURL("**/mon-espace");
+	expect(page.url()).toContain("/mon-espace");
 });
