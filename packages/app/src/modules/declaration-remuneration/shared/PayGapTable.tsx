@@ -49,7 +49,7 @@ export function PayGapTable({
 }: PayGapTableProps) {
 	return (
 		<div
-			className={`fr-table fr-table--no-caption fr-mb-1w ${className ?? ""}`}
+			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${className ?? ""}`}
 		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
