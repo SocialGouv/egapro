@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import { useCallback, useId, useRef, useState } from "react";
 
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
+import { DevFillButton } from "~/modules/declaration-remuneration/shared/DevFillButton";
+import {
+	createDevStep5Categories,
+	DEV_STEP5_SOURCE,
+} from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
@@ -196,6 +201,14 @@ export function CategoryForm({
 		<form className={stepStyles.form} onSubmit={handleSubmit}>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">{title}</div>
+				<div className="fr-col-auto">
+					<DevFillButton
+						onFill={() => {
+							setCategories(createDevStep5Categories(nextId));
+							setSource(DEV_STEP5_SOURCE);
+						}}
+					/>
+				</div>
 				{saved && (
 					<div className="fr-col-auto">
 						<SavedIndicator />

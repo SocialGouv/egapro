@@ -6,6 +6,8 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import { DevFillButton } from "../shared/DevFillButton";
+import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { normalizeDecimalInput } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -153,6 +155,14 @@ export function Step4QuartileDistribution({
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
 					</h1>
+				</div>
+				<div className="fr-col-auto">
+					<DevFillButton
+						onFill={() => {
+							setAnnualCategories(DEV_STEP4_ANNUAL);
+							setHourlyCategories(DEV_STEP4_HOURLY);
+						}}
+					/>
 				</div>
 				{saved && (
 					<div className="fr-col-auto">

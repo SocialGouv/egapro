@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
+import { DevFillButton } from "../shared/DevFillButton";
+import { DEV_STEP2_ROWS } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import {
 	DEFAULT_PAY_GAP_ROWS,
@@ -73,6 +75,9 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
 					</h1>
+				</div>
+				<div className="fr-col-auto">
+					<DevFillButton onFill={() => setRows(DEV_STEP2_ROWS)} />
 				</div>
 				{saved && (
 					<div className="fr-col-auto">
