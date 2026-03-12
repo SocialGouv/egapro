@@ -18,15 +18,15 @@ test.describe("Login page", () => {
 test.describe("ProConnect authentication flow", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
-	test("redirects to declaration page after login", async ({ page }) => {
+	test("redirects to mon espace after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.waitForURL("**/declaration-remuneration/**");
+		await page.waitForURL("**/mon-espace");
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
 
-		await expect(page.getByText(/130.?025.?265/)).toBeVisible();
+		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
 	});
 
 	test("logs out and returns to unauthenticated state", async ({ page }) => {
@@ -41,14 +41,12 @@ test.describe("ProConnect authentication flow", () => {
 		).toBeVisible();
 	});
 
-	test("redirects to declaration page when already logged in", async ({
-		page,
-	}) => {
+	test("redirects to mon espace when already logged in", async ({ page }) => {
 		await loginWithProConnect(page);
 
 		await page.goto("/login");
 
-		await page.waitForURL("**/declaration-remuneration/**", {
+		await page.waitForURL("**/mon-espace", {
 			timeout: 15_000,
 		});
 

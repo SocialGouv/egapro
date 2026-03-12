@@ -27,7 +27,7 @@ export function CseOpinionLayout({ company, children }: Props) {
 							{ label: "Mon espace", href: "/" },
 							{
 								label: company.name,
-								href: `/mon-espace/mes-entreprises/${company.siren}`,
+								href: "/mon-espace",
 							},
 							{
 								label: `Démarche des indicateurs de rémunération ${currentYear + 1}`,

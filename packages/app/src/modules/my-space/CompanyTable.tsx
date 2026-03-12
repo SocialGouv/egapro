@@ -26,11 +26,7 @@ export function CompanyTable({ companies }: Props) {
 								{companies.map((company) => (
 									<tr key={company.siren}>
 										<td>
-											<Link
-												href={`/mon-espace/mes-entreprises/${company.siren}`}
-											>
-												{company.name}
-											</Link>
+											<Link href="/mon-espace">{company.name}</Link>
 										</td>
 										<td>{company.siren}</td>
 										<td>
