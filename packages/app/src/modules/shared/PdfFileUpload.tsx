@@ -144,10 +144,7 @@ export function PdfFileUpload({
 				</section>
 			)}
 
-			<label className="fr-sr-only" htmlFor={inputId}>
-				Sélectionner un fichier PDF
-			</label>
-			<input
+				<input
 				accept=".pdf"
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}

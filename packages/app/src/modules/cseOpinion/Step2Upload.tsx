@@ -37,13 +37,13 @@ export function Step2Upload() {
 
 				<CseStepIndicator currentStep={2} />
 
-				<div className="fr-mb-3w">
-					<p className="fr-text--md fr-text--bold fr-mb-1w">
+				<div>
+					<label className="fr-label" htmlFor="cse-file-upload">
 						Veuillez importer l&apos;ensemble des avis de votre CSE
-					</p>
-					<p className="fr-text--sm fr-text--mention-grey fr-mb-0">
-						Taille maximale : 10 Mo. Format supporté : pdf.
-					</p>
+						<span className="fr-hint-text">
+							Taille maximale : 10 Mo. Format supporté : pdf.
+						</span>
+					</label>
 				</div>
 
 				<PdfFileUpload

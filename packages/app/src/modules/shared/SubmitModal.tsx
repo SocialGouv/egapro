@@ -61,6 +61,7 @@ export function SubmitModal({
 								<p>{description}</p>
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
+										aria-required="true"
 										checked={certified}
 										id={certifyInputId}
 										onChange={(e) => setCertified(e.target.checked)}
