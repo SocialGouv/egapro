@@ -4,23 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
-import { PdfFileUpload } from "~/modules/shared";
+import { getDsfrModal, PdfFileUpload } from "~/modules/shared";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
 import formStyles from "./shared/formActions.module.scss";
-
-type DsfrModalApi = { disclose: () => void; conceal: () => void };
-
-function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
-	if (!("dsfr" in window)) return null;
-	return (
-		window as unknown as {
-			dsfr: (el: HTMLElement) => { modal: DsfrModalApi };
-		}
-	).dsfr(element).modal;
-}
 
 export function Step2Upload() {
 	const router = useRouter();

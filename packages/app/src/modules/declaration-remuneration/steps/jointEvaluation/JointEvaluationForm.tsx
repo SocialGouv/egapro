@@ -5,22 +5,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { PdfFileUpload } from "~/modules/shared";
+import { NewTabNotice } from "~/modules/layout";
+import { getDsfrModal, PdfFileUpload } from "~/modules/shared";
 
-import styles from "./JointEvaluationForm.module.scss";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
-
-type DsfrModalApi = { disclose: () => void; conceal: () => void };
-
-function getDsfrModal(element: HTMLElement): DsfrModalApi | null {
-	if (!("dsfr" in window)) return null;
-	return (
-		window as unknown as {
-			dsfr: (el: HTMLElement) => { modal: DsfrModalApi };
-		}
-	).dsfr(element).modal;
-}
 
 type Props = {
 	currentYear: number;
@@ -113,7 +101,7 @@ export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 					TéléAccord.
 				</p>
 
-				<div className={styles.deadline}>
+				<div className="fr-highlight">
 					<p className="fr-mb-1v fr-text--md">Date limite</p>
 					<p className="fr-h6 fr-mb-1v">
 						1<sup>er</sup> août {currentYear}
@@ -140,8 +128,8 @@ export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 				/>
 
 				<div>
-					<div className={`${styles.infoBox} ${styles.infoBoxBlue}`}>
-						<h3 className="fr-h6 fr-mb-2w">
+					<div className="fr-callout fr-callout--blue-france">
+						<h3 className="fr-callout__title fr-h6">
 							Ce que vous devez faire dans un délai de 2 mois
 						</h3>
 						<ul className="fr-mb-0">
@@ -151,8 +139,8 @@ export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 							</li>
 						</ul>
 					</div>
-					<div className={styles.infoBox}>
-						<h3 className="fr-h6 fr-mb-2w">Après dépôt du rapport</h3>
+					<div className="fr-callout">
+						<h3 className="fr-callout__title fr-h6">Après dépôt du rapport</h3>
 						<ul className="fr-mb-2w">
 							<li>
 								Réaliser l&apos;analyse conjointe et définir des actions

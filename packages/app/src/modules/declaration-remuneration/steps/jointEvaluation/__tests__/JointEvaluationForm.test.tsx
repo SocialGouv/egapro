@@ -14,10 +14,7 @@ vi.mock("next/navigation", () => ({
 describe("JointEvaluationForm", () => {
 	it("renders the page title and section heading", () => {
 		render(
-			<JointEvaluationForm
-				currentYear={2026}
-				declarationDate="01/06/2026"
-			/>,
+			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
 		);
 
 		expect(
@@ -36,10 +33,7 @@ describe("JointEvaluationForm", () => {
 
 	it("renders the deadline callout with the current year", () => {
 		render(
-			<JointEvaluationForm
-				currentYear={2026}
-				declarationDate="01/06/2026"
-			/>,
+			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
 		);
 
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
@@ -48,10 +42,7 @@ describe("JointEvaluationForm", () => {
 
 	it("shows an error when submitting without a file", () => {
 		render(
-			<JointEvaluationForm
-				currentYear={2026}
-				declarationDate="01/06/2026"
-			/>,
+			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
 		);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
@@ -64,26 +55,18 @@ describe("JointEvaluationForm", () => {
 
 	it("renders the info boxes", () => {
 		render(
-			<JointEvaluationForm
-				currentYear={2026}
-				declarationDate="01/06/2026"
-			/>,
+			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
 		);
 
 		expect(
 			screen.getByText(/ce que vous devez faire dans un délai de 2 mois/i),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText(/après dépôt du rapport/i),
-		).toBeInTheDocument();
+		expect(screen.getByText(/après dépôt du rapport/i)).toBeInTheDocument();
 	});
 
 	it("links back to the compliance path choice page", () => {
 		render(
-			<JointEvaluationForm
-				currentYear={2026}
-				declarationDate="01/06/2026"
-			/>,
+			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
 		);
 
 		const backLink = screen.getByRole("link", { name: /précédent/i });
