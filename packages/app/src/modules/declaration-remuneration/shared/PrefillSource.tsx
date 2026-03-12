@@ -14,7 +14,7 @@ export function PrefillSource({
 	tooltipId = "tooltip-source",
 }: Props) {
 	return (
-		<p className="fr-text--sm fr-mb-1w">
+		<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
 			Source&nbsp;: DSN (Déclarations Sociales Nominatives)
 			{periodEnd && `, mise à jour le ${formatFrenchDate(periodEnd)}`}.
 			<TooltipButton

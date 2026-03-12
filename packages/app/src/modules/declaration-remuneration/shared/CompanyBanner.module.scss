@@ -1,5 +1,10 @@
 .banner {
 	background: var(--background-alt-blue-france);
+
+	:global(.fr-breadcrumb) {
+		margin-top: 0;
+		margin-bottom: 2rem;
+	}
 }
 
 .companyInfo {

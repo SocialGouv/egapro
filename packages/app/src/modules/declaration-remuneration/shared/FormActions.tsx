@@ -8,6 +8,7 @@ type FormActionsProps = {
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
+	className?: string;
 };
 
 export function FormActions({
@@ -16,9 +17,10 @@ export function FormActions({
 	nextLabel = "Suivant",
 	isSubmitting = false,
 	nextDisabled = false,
+	className,
 }: FormActionsProps) {
 	return (
-		<div className={`fr-mt-4w ${styles.actions}`}>
+		<div className={`fr-mt-4w ${styles.actions} ${className ?? ""}`}>
 			{previousHref ? (
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
