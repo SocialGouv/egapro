@@ -15,10 +15,7 @@ describe("CompanyCard", () => {
 		render(<CompanyCard company={company} />);
 		const link = screen.getByRole("link", { name: "Alpha Solutions" });
 		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute(
-			"href",
-			"/mon-espace/mes-entreprises/532847196",
-		);
+		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 
 	it("renders the SIREN number", () => {

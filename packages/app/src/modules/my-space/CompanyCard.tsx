@@ -12,9 +12,7 @@ export function CompanyCard({ company }: Props) {
 			<div className="fr-card__body">
 				<div className="fr-card__content">
 					<h3 className="fr-card__title">
-						<Link href={`/mon-espace/mes-entreprises/${company.siren}`}>
-							{company.name}
-						</Link>
+						<Link href="/mon-espace">{company.name}</Link>
 					</h3>
 					<div className="fr-card__start">
 						<ul className="fr-badges-group">
