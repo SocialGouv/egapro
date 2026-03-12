@@ -144,7 +144,7 @@ export function PdfFileUpload({
 				</section>
 			)}
 
-				<input
+			<input
 				accept=".pdf"
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
