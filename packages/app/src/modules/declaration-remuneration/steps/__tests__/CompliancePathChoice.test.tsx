@@ -70,7 +70,7 @@ describe("CompliancePathChoice", () => {
 		expect(nextButton).not.toBeDisabled();
 	});
 
-	it("submits the selected path and navigates to /avis-cse", () => {
+	it("submits the selected path and navigates to evaluation-conjointe", () => {
 		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
 		const radio = screen.getByLabelText(
 			"Évaluation conjointe des rémunérations",
@@ -83,7 +83,9 @@ describe("CompliancePathChoice", () => {
 		fireEvent.submit(form);
 
 		expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
-		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
 	});
 
 	it("navigates to second declaration when corrective_action is selected", () => {

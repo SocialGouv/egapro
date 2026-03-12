@@ -13,6 +13,7 @@ export {
 export { mapDbCategories } from "./shared/mapDbCategories";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
+export { JointEvaluationPage } from "./steps/jointEvaluation";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";
 export { Step3VariablePay } from "./steps/Step3VariablePay";
