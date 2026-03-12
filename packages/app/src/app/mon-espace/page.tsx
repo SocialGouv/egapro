@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 
-import { CompanyDeclarationsPage } from "~/modules/my-space";
+import { MonEspacePage } from "~/modules/my-space";
 import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
-
-const SIREN_LENGTH = 9;
+import { HydrateClient } from "~/trpc/server";
 
 export default async function Page() {
 	const session = await auth();
@@ -13,20 +11,10 @@ export default async function Page() {
 		redirect("/login");
 	}
 
-	const siret = session.user.siret;
-
-	if (!siret || siret.length < SIREN_LENGTH) {
-		redirect("/mon-espace/mes-entreprises");
-	}
-
-	const siren = siret.slice(0, SIREN_LENGTH);
-	const data = await api.company.getWithDeclarations({ siren });
-
 	return (
 		<HydrateClient>
-			<CompanyDeclarationsPage
-				company={data.company}
-				declarations={data.declarations}
+			<MonEspacePage
+				siret={session.user.siret ?? null}
 				userPhone={session.user.phone ?? null}
 			/>
 		</HydrateClient>
