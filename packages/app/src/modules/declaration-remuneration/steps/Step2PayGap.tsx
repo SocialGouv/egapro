@@ -8,11 +8,13 @@ import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import type { GipPrefillData } from "../shared/gipMdsMapping";
 import {
 	DEFAULT_PAY_GAP_ROWS,
 	handlePayGapRowChange,
 	PayGapTable,
 } from "../shared/PayGapTable";
+import { PrefillSource } from "../shared/PrefillNotice";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -20,13 +22,44 @@ import type { PayGapField, PayGapRow } from "../types";
 
 type Step2PayGapProps = {
 	initialRows?: PayGapRow[];
+	gipPrefillData?: GipPrefillData;
 };
 
-export function Step2PayGap({ initialRows }: Step2PayGapProps) {
+function buildGipRows(gip: GipPrefillData["step2"]): PayGapRow[] {
+	return [
+		{
+			label: "Annuelle brute moyenne",
+			womenValue: gip.annualMeanWomen ?? "",
+			menValue: gip.annualMeanMen ?? "",
+		},
+		{
+			label: "Horaire brute moyenne",
+			womenValue: gip.hourlyMeanWomen ?? "",
+			menValue: gip.hourlyMeanMen ?? "",
+		},
+		{
+			label: "Annuelle brute médiane",
+			womenValue: gip.annualMedianWomen ?? "",
+			menValue: gip.annualMedianMen ?? "",
+		},
+		{
+			label: "Horaire brute médiane",
+			womenValue: gip.hourlyMedianWomen ?? "",
+			menValue: gip.hourlyMedianMen ?? "",
+		},
+	];
+}
+
+export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 	const router = useRouter();
 
+	const hasSavedRows = !!initialRows?.length;
 	const [rows, setRows] = useState<PayGapRow[]>(
-		initialRows?.length ? initialRows : DEFAULT_PAY_GAP_ROWS,
+		hasSavedRows
+			? initialRows
+			: gipPrefillData
+				? buildGipRows(gipPrefillData.step2)
+				: DEFAULT_PAY_GAP_ROWS,
 	);
 
 	const hasInitialData =
@@ -99,7 +132,9 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 
 			<p className="fr-mb-1w">
 				<strong>
-					Renseignez les informations avant de valider vos indicateurs.
+					{gipPrefillData
+						? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez les informations avant de valider vos indicateurs."}
 				</strong>
 				<TooltipButton
 					id="tooltip-step2-info"
@@ -115,6 +150,13 @@ export function Step2PayGap({ initialRows }: Step2PayGapProps) {
 				onRowChange={handleRowChange}
 				rows={rows}
 			/>
+
+			{gipPrefillData && (
+				<PrefillSource
+					periodEnd={gipPrefillData.periodEnd}
+					tooltipId="tooltip-source-step2"
+				/>
+			)}
 
 			<DefinitionAccordion
 				id="accordion-step2"

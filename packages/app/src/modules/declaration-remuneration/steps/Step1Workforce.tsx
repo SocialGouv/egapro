@@ -8,6 +8,9 @@ import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import type { GipPrefillData } from "../shared/gipMdsMapping";
+import { PrefillSource } from "../shared/PrefillNotice";
+import { PrefillResetWarning } from "../shared/PrefillResetWarning";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -17,10 +20,15 @@ import styles from "./Step1Workforce.module.scss";
 
 type Step1WorkforceProps = {
 	initialCategories?: CategoryData[];
+	gipPrefillData?: GipPrefillData;
 };
 
-export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
+export function Step1Workforce({
+	initialCategories,
+	gipPrefillData,
+}: Step1WorkforceProps) {
 	const router = useRouter();
+	const isPrefilled = !!gipPrefillData;
 
 	const [categories, setCategories] = useState<CategoryData[]>(
 		initialCategories?.length
@@ -101,7 +109,9 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 
 			<p className="fr-mb-1w">
 				<strong>
-					Renseignez l&apos;effectif physique de votre entreprise.
+					{isPrefilled
+						? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez l'effectif physique de votre entreprise."}
 				</strong>
 				<TooltipButton
 					id="tooltip-workforce"
@@ -110,6 +120,8 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 			</p>
 
 			<p className="fr-text--sm fr-mb-3w">Tous les champs sont obligatoires.</p>
+
+			{isPrefilled && <PrefillResetWarning />}
 
 			<div
 				className={`fr-table fr-table--no-caption fr-mb-1w ${styles.workforceTable}`}
@@ -171,6 +183,13 @@ export function Step1Workforce({ initialCategories }: Step1WorkforceProps) {
 					</div>
 				</div>
 			</div>
+
+			{isPrefilled && (
+				<PrefillSource
+					periodEnd={gipPrefillData.periodEnd}
+					tooltipId="tooltip-source-step1"
+				/>
+			)}
 
 			<DefinitionAccordion
 				id="accordion-step1"
