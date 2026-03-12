@@ -46,6 +46,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
+		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 	},
 
 	/**
@@ -78,6 +79,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
+		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
