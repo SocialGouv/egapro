@@ -18,7 +18,7 @@ interface OidcConfig {
  * 4. Call end_session_endpoint server-side with id_token_hint (fire-and-forget)
  *
  * The browser is NOT redirected to ProConnect — the caller handles the redirect
- * directly to /login. This avoids the post_logout_redirect_uri registration issue
+ * directly to / (home page). This avoids the post_logout_redirect_uri registration issue
  * with ProConnect (charon proxy does not handle end_session redirect flow).
  *
  * Silently fails if ProConnect is unreachable — the local session is already cleared.
