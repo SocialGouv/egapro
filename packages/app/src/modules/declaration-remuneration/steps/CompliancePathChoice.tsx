@@ -37,6 +37,10 @@ export function CompliancePathChoice({
 		onSuccess: (_, { path }) => {
 			if (path === "corrective_action") {
 				router.push("/declaration-remuneration/parcours-conformite/etape/1");
+			} else if (path === "joint_evaluation") {
+				router.push(
+					"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+				);
 			} else {
 				router.push("/avis-cse");
 			}
