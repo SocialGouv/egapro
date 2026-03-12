@@ -21,6 +21,12 @@ app:
         name: "suit"
     - secretRef:
         name: "next-auth"
+    - configMapRef:
+        name: "s3"
+    - secretRef:
+        name: "s3"
+    - configMapRef:
+        name: "clamav"
   env:
     - name: POSTGRES_HOST
       valueFrom:

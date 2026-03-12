@@ -57,6 +57,13 @@
 			"when": 1773158962249,
 			"tag": "0007_gigantic_doctor_faustus",
 			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1773248431487,
+			"tag": "0008_wakeful_skullbuster",
+			"breakpoints": true
 		}
 	]
 }

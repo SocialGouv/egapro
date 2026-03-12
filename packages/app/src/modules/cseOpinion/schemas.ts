@@ -16,3 +16,11 @@ export const saveOpinionsSchema = z.object({
 });
 
 export type SaveOpinionsInput = z.infer<typeof saveOpinionsSchema>;
+
+export const deleteFileSchema = z.object({
+	fileId: z.string().uuid(),
+});
+
+export const submitFilesSchema = z.object({
+	fileIds: z.array(z.string().uuid()).min(1),
+});
