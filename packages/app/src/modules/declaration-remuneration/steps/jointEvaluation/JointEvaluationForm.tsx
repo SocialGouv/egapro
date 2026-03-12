@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { getDsfrModal, PdfFileUpload } from "~/modules/shared";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
