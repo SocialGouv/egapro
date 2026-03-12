@@ -1,5 +1,5 @@
-import { Font } from "@react-pdf/renderer";
 import { join } from "node:path";
+import { Font } from "@react-pdf/renderer";
 
 export const PDF_FONT_FAMILY = "Marianne";
 
