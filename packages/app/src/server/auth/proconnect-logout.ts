@@ -9,28 +9,25 @@ interface OidcConfig {
 }
 
 /**
- * Build the ProConnect OIDC logout URL and delete the local session from the DB.
+ * Terminate the ProConnect OIDC session server-side and clean up local sessions.
  *
  * Steps:
  * 1. Fetch the user's id_token from the accounts table
  * 2. Delete all sessions for the user from the DB
  * 3. Fetch the end_session_endpoint from the configured issuer (charon proxy)
- * 4. Return the full redirect URL with id_token_hint + redirect_uri
+ * 4. Call end_session_endpoint server-side with id_token_hint (fire-and-forget)
  *
- * Uses EGAPRO_PROCONNECT_ISSUER (charon proxy) so that charon can intercept
- * the redirect_uri and whitelist it dynamically for all environments
- * (review branches, preprod, prod).
+ * The browser is NOT redirected to ProConnect — the caller handles the redirect
+ * directly to /login. This avoids the post_logout_redirect_uri registration issue
+ * with ProConnect (charon proxy does not handle end_session redirect flow).
  *
- * If ProConnect is not configured or no id_token is found, falls back to /login.
+ * Silently fails if ProConnect is unreachable — the local session is already cleared.
  */
-export async function getProConnectLogoutUrl(
+export async function terminateProConnectSession(
 	userId: string,
-	baseUrl: string,
-): Promise<string> {
-	const fallbackUrl = `${baseUrl}/login`;
-
+): Promise<void> {
 	if (!env.EGAPRO_PROCONNECT_ISSUER || !env.EGAPRO_PROCONNECT_CLIENT_ID) {
-		return fallbackUrl;
+		return;
 	}
 
 	// Fetch the stored id_token for this user's ProConnect account
@@ -44,11 +41,10 @@ export async function getProConnectLogoutUrl(
 
 	const idToken = account?.id_token;
 	if (!idToken) {
-		return fallbackUrl;
+		return;
 	}
 
-	// Use the configured issuer (charon proxy) to discover the end_session_endpoint.
-	// Charon handles redirect_uri whitelisting for all environments.
+	// Use the configured issuer (charon proxy) to discover the end_session_endpoint
 	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
@@ -56,17 +52,15 @@ export async function getProConnectLogoutUrl(
 		const config = (await response.json()) as OidcConfig;
 
 		if (!config.end_session_endpoint) {
-			return fallbackUrl;
+			return;
 		}
 
 		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
-		// Use redirect_uri (not post_logout_redirect_uri) so that the Charon proxy
-		// can intercept it and whitelist dynamically for all environments.
-		logoutUrl.searchParams.set("redirect_uri", `${baseUrl}/login`);
 
-		return logoutUrl.toString();
+		// Fire-and-forget: terminate the OIDC session on ProConnect server-side
+		await fetch(logoutUrl.toString());
 	} catch {
-		return fallbackUrl;
+		// Silently fail — local session is already cleared
 	}
 }
