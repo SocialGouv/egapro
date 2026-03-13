@@ -16,6 +16,7 @@ export default defineConfig({
 		baseURL,
 		trace: "off",
 		actionTimeout: 15_000,
+		...(isRemote ? { ignoreHTTPSErrors: true } : {}),
 	},
 	projects: [
 		{
