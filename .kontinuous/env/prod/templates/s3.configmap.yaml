@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: s3
+data:
+  S3_ENDPOINT: "https://s3.fabrique.social.gouv.fr"
+  S3_REGION: "us-east-1"
+  S3_BUCKET_NAME: "egapro-cse-opinions"
