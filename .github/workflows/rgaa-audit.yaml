@@ -123,7 +123,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
-          direct_prompt: |
+          prompt: |
             Tu es un expert accessibilité RGAA. Tu dois rédiger un rapport d'audit RGAA à partir des résultats axe-core ci-dessous, puis le publier sur le wiki GitHub.
 
             ## Données
