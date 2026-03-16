@@ -57,6 +57,31 @@ services:
              mc mb --ignore-existing local/egapro-dev-app &&
              mc anonymous set none local/egapro-dev-app"
 
+  clamavd:
+    image: clamav/clamav:1.4.3
+    volumes:
+      - clamdata:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  clamav-rest:
+    image: benzino77/clamav-rest-api:1.6.2
+    ports:
+      - 3310:3000
+    environment:
+      NODE_ENV: production
+      CLAMD_IP: clamavd
+      APP_FORM_KEY: FILES
+      APP_MAX_FILE_SIZE: "26214400"
+    depends_on:
+      clamavd:
+        condition: service_healthy
+
 volumes:
   pgdata:
   miniodata:
+  clamdata:
