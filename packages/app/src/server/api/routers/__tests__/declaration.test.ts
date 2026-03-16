@@ -9,7 +9,8 @@ vi.mock("~/server/db", () => ({
 }));
 
 vi.mock("../declarationHelpers", async (importOriginal) => {
-	const original = await importOriginal<typeof import("../declarationHelpers")>();
+	const original =
+		await importOriginal<typeof import("../declarationHelpers")>();
 	return {
 		...original,
 		fetchAllCategories: vi.fn().mockResolvedValue({
@@ -118,8 +119,7 @@ describe("declarationRouter", () => {
 					where: vi.fn().mockReturnValue({
 						limit: vi.fn().mockImplementation(() => {
 							selectCallCount++;
-							if (selectCallCount === 1)
-								return Promise.resolve(existingRows);
+							if (selectCallCount === 1) return Promise.resolve(existingRows);
 							if (retryRows && selectCallCount === 2)
 								return Promise.resolve(retryRows);
 							return Promise.resolve([]);
@@ -131,9 +131,7 @@ describe("declarationRouter", () => {
 			const txInsert = vi.fn().mockReturnValue({
 				values: vi.fn().mockReturnValue({
 					onConflictDoNothing: vi.fn().mockReturnValue({
-						returning: vi
-							.fn()
-							.mockResolvedValue(insertReturns ?? []),
+						returning: vi.fn().mockResolvedValue(insertReturns ?? []),
 					}),
 				}),
 			});
@@ -362,14 +360,17 @@ describe("declarationRouter", () => {
 	});
 
 	describe("updateEmployeeCategories", () => {
-		function createEmployeeTx(declaration: unknown, existingJobs: unknown[] = []) {
+		function createEmployeeTx(
+			declaration: unknown,
+			existingJobs: unknown[] = [],
+		) {
 			let selectCallCount = 0;
 			const txSelectWhere = vi.fn().mockImplementation(() => {
 				selectCallCount++;
 				const result = Promise.resolve(
 					selectCallCount === 1 ? [] : existingJobs,
 				);
-				(result as Record<string, unknown>).limit = vi
+				(result as unknown as Record<string, unknown>).limit = vi
 					.fn()
 					.mockResolvedValue(declaration ? [declaration] : []);
 				return result;
@@ -384,12 +385,12 @@ describe("declarationRouter", () => {
 			mockDeleteWhere.mockResolvedValue(undefined);
 			mockDelete.mockReturnValue({ where: mockDeleteWhere });
 
-			const mockReturningFn = vi
-				.fn()
-				.mockResolvedValue([{ id: "new-job-1" }]);
+			const mockReturningFn = vi.fn().mockResolvedValue([{ id: "new-job-1" }]);
 			mockValues.mockReturnValue({
 				returning: mockReturningFn,
-				onConflictDoNothing: vi.fn().mockReturnValue({ returning: mockReturningFn }),
+				onConflictDoNothing: vi
+					.fn()
+					.mockReturnValue({ returning: mockReturningFn }),
 			});
 			mockInsert.mockReturnValue({ values: mockValues });
 
@@ -430,9 +431,7 @@ describe("declarationRouter", () => {
 		});
 
 		it("updates employee categories for correction declaration", async () => {
-			const existingJobs = [
-				{ id: "job-1", categoryIndex: 0, name: "Cadres" },
-			];
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
 			const tx = createEmployeeTx(mockDeclaration, existingJobs);
 			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
 			const mockDb = { transaction: mockTransaction } as unknown;
@@ -452,8 +451,7 @@ describe("declarationRouter", () => {
 				referencePeriodEnd: "2025-12-31",
 			};
 
-			const result =
-				await caller.updateEmployeeCategories(correctionInput);
+			const result = await caller.updateEmployeeCategories(correctionInput);
 
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(

@@ -94,6 +94,7 @@ describe("mapToEmployeeCategoryRows", () => {
 		hourlyVariableWomen: null,
 		hourlyVariableMen: null,
 		createdAt: new Date(),
+		updatedAt: new Date(),
 	};
 
 	it("maps jobs and employee categories into rows sorted by categoryIndex", () => {
