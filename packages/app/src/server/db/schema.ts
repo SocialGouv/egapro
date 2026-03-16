@@ -385,7 +385,6 @@ export const cseOpinionFiles = createTable(
 		year: d.integer().notNull(),
 		fileName: d.varchar({ length: 255 }).notNull(),
 		filePath: d.varchar({ length: 500 }).notNull(),
-		fileSize: d.integer().notNull(),
 		declarantId: d
 			.varchar({ length: 255 })
 			.notNull()

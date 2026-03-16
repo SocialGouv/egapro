@@ -35,8 +35,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 2) {
-		const { files } = await api.cseOpinion.getFiles();
-		return <Step2Upload existingFiles={files} />;
+		return <Step2Upload />;
 	}
 
 	notFound();

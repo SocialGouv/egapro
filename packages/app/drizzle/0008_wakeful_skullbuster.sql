@@ -1,1 +1,0 @@
-ALTER TABLE "app_cse_opinion_file" ADD COLUMN "file_size" integer NOT NULL;

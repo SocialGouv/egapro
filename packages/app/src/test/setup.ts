@@ -64,11 +64,6 @@ vi.mock("~/env", () => ({
 		EGAPRO_PROCONNECT_ISSUER: "https://proconnect.example.com",
 		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
 		EGAPRO_SUIT_API_URL: "https://api.suit.example.com",
-		S3_ENDPOINT: "http://localhost:9000",
-		S3_REGION: "us-east-1",
-		S3_ACCESS_KEY_ID: "test-key",
-		S3_SECRET_ACCESS_KEY: "test-secret",
-		S3_BUCKET_NAME: "test-bucket",
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
 	},
 }));

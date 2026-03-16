@@ -1,27 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Step2Upload } from "../Step2Upload";
-
-const submitFilesMock = vi.fn();
-const deleteFileMock = vi.fn();
-
-vi.mock("~/trpc/react", () => ({
-	api: {
-		cseOpinion: {
-			submitFiles: {
-				useMutation: () => ({
-					mutateAsync: submitFilesMock,
-				}),
-			},
-			deleteFile: {
-				useMutation: () => ({
-					mutateAsync: deleteFileMock,
-				}),
-			},
-		},
-	},
-}));
 
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
@@ -89,33 +69,25 @@ describe("Step2Upload", () => {
 		).toBeInTheDocument();
 	});
 
-	it("disables submit button when no files are present", () => {
+	it("shows error when submitting without file", async () => {
+		const user = userEvent.setup();
 		render(<Step2Upload />);
 
-		const submitButton = screen.getByRole("button", { name: /Soumettre/ });
-		expect(submitButton).toBeDisabled();
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+
+		expect(
+			screen.getByText("Veuillez sélectionner un fichier avant de soumettre."),
+		).toBeInTheDocument();
 	});
 
-	it("enables submit button when a file is selected", () => {
-		render(<Step2Upload />);
-
-		const file = new File(["content"], "avis.pdf", {
-			type: "application/pdf",
-		});
-		fireEvent.change(getFileInput(), { target: { files: [file] } });
-
-		const submitButton = screen.getByRole("button", { name: /Soumettre/ });
-		expect(submitButton).toBeEnabled();
-	});
-
-	it("sets aria-invalid on file input when error occurs", () => {
+	it("sets aria-invalid on file input when error occurs", async () => {
+		const user = userEvent.setup();
 		render(<Step2Upload />);
 
 		const fileInput = getFileInput();
 		expect(fileInput).toHaveAttribute("aria-invalid", "false");
 
-		const file = new File(["content"], "test.txt", { type: "text/plain" });
-		fireEvent.change(fileInput, { target: { files: [file] } });
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
 
 		expect(fileInput).toHaveAttribute("aria-invalid", "true");
 	});
@@ -161,7 +133,7 @@ describe("Step2Upload", () => {
 		expect(dialog).toHaveAttribute("id", "cse-submit-modal");
 	});
 
-	it("accepts PDF file and shows file card with pending state", () => {
+	it("accepts PDF file and shows file card", () => {
 		render(<Step2Upload />);
 
 		const file = new File(["content"], "avis-cse.pdf", {
@@ -172,11 +144,13 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
-		expect(screen.getByText("En attente d'envoi")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Envoyer/ })).toBeInTheDocument();
+		expect(screen.getByText("Importation réussie")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Supprimer/ }),
+		).toBeInTheDocument();
 	});
 
-	it("removes selected file when delete button is clicked", async () => {
+	it("removes file when delete button is clicked", async () => {
 		const user = userEvent.setup();
 		render(<Step2Upload />);
 
@@ -195,102 +169,5 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeInTheDocument();
-	});
-
-	it("renders existing uploaded files", () => {
-		const existingFiles = [
-			{
-				id: "file-1",
-				fileName: "existing.pdf",
-				fileSize: 1024,
-				uploadedAt: new Date("2026-01-01"),
-			},
-		];
-
-		render(<Step2Upload existingFiles={existingFiles} />);
-
-		expect(screen.getByText("existing.pdf")).toBeInTheDocument();
-		expect(screen.getByText("Importation réussie")).toBeInTheDocument();
-	});
-
-	it("calls upload API when Envoyer button is clicked", async () => {
-		const user = userEvent.setup();
-		const mockResponse = {
-			id: "new-id",
-			fileName: "avis.pdf",
-			fileSize: 100,
-			uploadedAt: new Date().toISOString(),
-		};
-
-		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify(mockResponse), {
-				status: 200,
-				headers: { "Content-Type": "application/json" },
-			}),
-		);
-
-		render(<Step2Upload />);
-
-		const file = new File(["content"], "avis.pdf", {
-			type: "application/pdf",
-		});
-		fireEvent.change(getFileInput(), { target: { files: [file] } });
-
-		await user.click(screen.getByRole("button", { name: /Envoyer/ }));
-
-		await waitFor(() => {
-			expect(globalThis.fetch).toHaveBeenCalledWith(
-				"/api/cse-opinion/upload",
-				expect.objectContaining({ method: "POST" }),
-			);
-		});
-	});
-
-	it("shows upload error from API response", async () => {
-		const user = userEvent.setup();
-
-		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(
-				JSON.stringify({ error: "Erreur lors de l'upload du fichier." }),
-				{ status: 500, headers: { "Content-Type": "application/json" } },
-			),
-		);
-
-		render(<Step2Upload />);
-
-		const file = new File(["content"], "test.pdf", {
-			type: "application/pdf",
-		});
-		fireEvent.change(getFileInput(), { target: { files: [file] } });
-
-		await user.click(screen.getByRole("button", { name: /Envoyer/ }));
-
-		await waitFor(() => {
-			expect(
-				screen.getByText("Erreur lors de l'upload du fichier."),
-			).toBeInTheDocument();
-		});
-	});
-
-	it("calls deleteFile mutation when deleting an uploaded file", async () => {
-		const user = userEvent.setup();
-		deleteFileMock.mockResolvedValue({ success: true });
-
-		const existingFiles = [
-			{
-				id: "file-1",
-				fileName: "existing.pdf",
-				fileSize: 1024,
-				uploadedAt: new Date("2026-01-01"),
-			},
-		];
-
-		render(<Step2Upload existingFiles={existingFiles} />);
-
-		await user.click(screen.getByRole("button", { name: /Supprimer/ }));
-
-		await waitFor(() => {
-			expect(deleteFileMock).toHaveBeenCalledWith({ fileId: "file-1" });
-		});
 	});
 });

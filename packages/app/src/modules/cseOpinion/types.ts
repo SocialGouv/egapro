@@ -13,13 +13,6 @@ export type CseOpinionStep1Data = {
 	secondDeclGapDate: string | null;
 };
 
-export type UploadedFile = {
-	id: string;
-	fileName: string;
-	fileSize: number;
-	uploadedAt: Date;
-};
-
 export const TOTAL_STEPS = 2;
 
 export const STEP_TITLES: Record<number, string> = {

@@ -3,7 +3,6 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
-import { getSiren } from "~/server/api/shared/sessionHelpers";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	declarationCategories,
@@ -21,6 +20,16 @@ import {
 	updateStep1Schema,
 	updateStepCategoriesSchema,
 } from "./schemas";
+
+function getSiren(siret: string | null | undefined): string {
+	if (!siret) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "SIRET manquant dans la session",
+		});
+	}
+	return siret.slice(0, 9);
+}
 
 function getCurrentYear() {
 	return new Date().getFullYear();
