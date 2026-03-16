@@ -30,7 +30,7 @@ function createMockDb(rows: unknown[] = []) {
 	mockValues.mockResolvedValue(undefined);
 	mockInsert.mockReturnValue({ values: mockValues });
 
-	mockTransaction.mockImplementation(async (fn: Function) =>
+	mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 		fn({
 			select: mockSelect,
 			delete: mockDelete,

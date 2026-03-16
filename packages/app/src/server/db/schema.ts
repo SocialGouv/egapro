@@ -313,11 +313,13 @@ export const companiesRelations = relations(companies, ({ many }) => ({
 	declarations: many(declarations),
 	cseOpinions: many(cseOpinions),
 	cseOpinionFiles: many(cseOpinionFiles),
+	jointEvaluationFiles: many(jointEvaluationFiles),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
 	accounts: many(accounts),
 	userCompanies: many(userCompanies),
+	jointEvaluationFiles: many(jointEvaluationFiles),
 }));
 
 // ── CSE Opinion tables ──────────────────────────────────────────────

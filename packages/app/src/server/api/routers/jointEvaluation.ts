@@ -32,7 +32,7 @@ export const jointEvaluationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 			const declarantId = ctx.session.user.id;
 
-			// Upsert: delete existing file for this siren/year, then insert
+			// Upsert: one file per company/year — any declarant of the company can replace it
 			await ctx.db.transaction(async (tx) => {
 				await tx
 					.delete(jointEvaluationFiles)
