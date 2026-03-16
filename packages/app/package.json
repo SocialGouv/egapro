@@ -27,6 +27,7 @@
 		"test:rgaa": "playwright test --config playwright.rgaa.config.ts",
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit",
+		"generate:fetch-companies": "tsx scripts/fetch-large-companies.ts",
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts"
 	},
 	"dependencies": {

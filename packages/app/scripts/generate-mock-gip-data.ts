@@ -1,70 +1,21 @@
 /**
- * Generate a realistic mock GIP MDS CSV file with hundreds of companies.
+ * Generate a realistic mock GIP MDS CSV file from real company data.
+ *
+ * Prerequisites:
+ *   npx tsx scripts/fetch-large-companies.ts   # generates data/companies.json
  *
  * Usage:
- *   npx tsx scripts/generate-mock-gip-data.ts > data/mock-gip-mds.csv
- *   npx tsx scripts/generate-mock-gip-data.ts --count 500
+ *   npx tsx scripts/generate-mock-gip-data.ts
+ *
+ * Reads real SIRENs from data/companies.json (fetched from API Recherche
+ * d'Entreprises) and generates mock GIP-MDS indicator data for each.
  *
  * The generated CSV follows the exact GIP MDS format:
  * - Line 1: metadata headers
  * - Line 2: metadata values
  * - Line 3: column headers (75 columns)
  * - Lines 4+: data rows (one per SIREN)
- *
- * Company profiles are diverse:
- * - Large companies (250-50,000 employees)
- * - Various gender gap patterns (balanced, women-disfavored, men-disfavored)
- * - Different pay levels (industry types)
- * - Different variable pay access rates
  */
-
-// ── Configuration ──────────────────────────────────────────────────
-
-const DEFAULT_COUNT = 300;
-
-// Real large French company SIRENs (public data)
-const REAL_SIRENS = [
-	"552120222", // TotalEnergies
-	"542051180", // EDF
-	"423689921", // Orange
-	"343059564", // Société Générale
-	"662042449", // BNP Paribas
-	"572015246", // Renault
-	"542065479", // Sanofi
-	"552083297", // L'Oréal
-	"542051545", // Engie
-	"712042456", // Airbus Group
-	"380129866", // Capgemini
-	"330589770", // Dassault Systèmes
-	"542023841", // AXA
-	"552032534", // Air Liquide
-	"542051180", // Schneider Electric
-	"393525852", // Vinci
-	"572023399", // Michelin
-	"542015482", // Danone
-	"682012977", // Bouygues
-	"562091970", // Vivendi
-	"334816830", // Safran
-	"542107651", // Thales
-	"542065859", // LVMH
-	"572188689", // Pernod Ricard
-	"562014154", // Saint-Gobain
-	"552049447", // Carrefour
-	"410409460", // Atos
-	"389058447", // Worldline
-	"443061841", // Publicis
-	"529514986", // Hermès
-	"562050830", // Kering
-	"378901946", // Alstom
-	"330212793", // Sodexo
-	"414728337", // Veolia
-	"402207794", // Nexity
-	"451321335", // Eiffage
-	"350422622", // Bureau Veritas
-	"303461226", // Bolloré
-	"481968688", // JCDecaux
-	"780152914", // Peugeot (Stellantis)
-];
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -119,13 +70,26 @@ function fmt4(n: number): string {
 	return n.toFixed(4).replace(".", ",");
 }
 
-// ── Company generation ─────────────────────────────────────────────
+// ── Company loading ────────────────────────────────────────────────
 
-function generateSiren(index: number): string {
-	if (index < REAL_SIRENS.length) return REAL_SIRENS[index] as string;
-	// Generate plausible 9-digit SIRENs for remaining companies
-	const base = 100000000 + index * 7919 + randInt(1000, 9999);
-	return String(base).slice(0, 9);
+type InputCompany = {
+	siren: string;
+	name: string;
+	workforce: number | null;
+};
+
+async function loadCompanies(): Promise<InputCompany[]> {
+	const fs = await import("node:fs");
+	const path = await import("node:path");
+	const filePath = path.join(import.meta.dirname, "..", "data", "companies.json");
+
+	if (!fs.existsSync(filePath)) {
+		console.error("Error: data/companies.json not found.");
+		console.error("Run first: npx tsx scripts/fetch-large-companies.ts");
+		process.exit(1);
+	}
+
+	return JSON.parse(fs.readFileSync(filePath, "utf-8")) as InputCompany[];
 }
 
 const PROFILES: CompanyProfile[] = [
@@ -139,10 +103,11 @@ const PROFILES: CompanyProfile[] = [
 	"finance_high_gap",
 ];
 
-function generateCompany(index: number): CompanyData {
+function toCompanyData(input: InputCompany): CompanyData {
 	return {
-		siren: generateSiren(index),
-		workforce: randInt(250, 50000),
+		siren: input.siren,
+		// Use real workforce estimate if available, otherwise generate one (large)
+		workforce: input.workforce ?? randInt(250, 5000),
 		profile: pick(PROFILES),
 	};
 }
@@ -531,16 +496,15 @@ const HEADERS = [
 	"indice_taux_extremes",
 ];
 
-function generateCsv(count: number): string {
+function generateCsv(companies: CompanyData[]): string {
 	const now = new Date().toISOString().slice(0, 19);
 	const lines: string[] = [
 		"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
-		`DGT;DTS;${now};2026-01-01;2026-12-31;${count}`,
+		`DGT;DTS;${now};2026-01-01;2026-12-31;${companies.length}`,
 		HEADERS.join(";"),
 	];
 
-	for (let i = 0; i < count; i++) {
-		const company = generateCompany(i);
+	for (const company of companies) {
 		const row = generateRow(company);
 		lines.push(row.join(";"));
 	}
@@ -550,17 +514,10 @@ function generateCsv(count: number): string {
 
 // ── Main ───────────────────────────────────────────────────────────
 
-const countArg = process.argv.find((a) => a.startsWith("--count="));
-const count = countArg
-	? Number.parseInt(countArg.split("=")[1] ?? "", 10)
-	: DEFAULT_COUNT;
+const inputCompanies = await loadCompanies();
+const companies = inputCompanies.map(toCompanyData);
 
-if (Number.isNaN(count) || count < 1) {
-	console.error("Usage: npx tsx scripts/generate-mock-gip-data.ts [--count=N]");
-	process.exit(1);
-}
-
-const csv = generateCsv(count);
+const csv = generateCsv(companies);
 
 // Write to data/ directory
 const fs = await import("node:fs");
@@ -573,16 +530,19 @@ const outputPath = path.join(dataDir, "mock-gip-mds.csv");
 fs.writeFileSync(outputPath, csv, "utf-8");
 
 console.error(
-	`Generated ${count} mock companies → ${outputPath} (${(csv.length / 1024).toFixed(1)} KB)`,
+	`Generated ${companies.length} mock companies → ${outputPath} (${(csv.length / 1024).toFixed(1)} KB)`,
 );
 
-// Also print profile distribution
-const profiles: Record<string, number> = {};
-for (let i = 0; i < count; i++) {
-	const p = generateCompany(i).profile;
-	profiles[p] = (profiles[p] ?? 0) + 1;
+// Print profile distribution
+const profileCounts: Record<string, number> = {};
+for (const c of companies) {
+	profileCounts[c.profile] = (profileCounts[c.profile] ?? 0) + 1;
 }
 console.error("\nProfile distribution:");
-for (const [p, n] of Object.entries(profiles).sort((a, b) => b[1] - a[1])) {
-	console.error(`  ${p}: ${n} (${((n / count) * 100).toFixed(0)}%)`);
+for (const [p, n] of Object.entries(profileCounts).sort(
+	(a, b) => b[1] - a[1],
+)) {
+	console.error(
+		`  ${p}: ${n} (${((n / companies.length) * 100).toFixed(0)}%)`,
+	);
 }
