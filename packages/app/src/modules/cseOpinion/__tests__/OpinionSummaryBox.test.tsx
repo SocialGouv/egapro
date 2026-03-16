@@ -25,7 +25,7 @@ describe("OpinionSummaryBox", () => {
 	});
 
 	it("renders second declaration items", () => {
-		render(<OpinionSummaryBox {...defaultProps} />);
+		render(<OpinionSummaryBox {...defaultProps} showSecondDeclaration />);
 
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 		expect(
