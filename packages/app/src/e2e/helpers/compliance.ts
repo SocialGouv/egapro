@@ -48,10 +48,10 @@ export async function setupComplianceState(
 
 		await sql`
 			INSERT INTO app_declaration
-				(siren, year, declarant_id, status, current_step, compliance_path,
+				(id, siren, year, declarant_id, status, current_step, compliance_path,
 				 second_declaration_status, compliance_completed_at, created_at, updated_at)
 			VALUES
-				(${TEST_SIREN}, ${year}, ${user.id}, 'submitted', 6, ${compliancePath},
+				(gen_random_uuid(), ${TEST_SIREN}, ${year}, ${user.id}, 'submitted', 6, ${compliancePath},
 				 ${secondDeclarationStatus}, ${complianceCompletedAt}, NOW(), NOW())
 			ON CONFLICT (siren, year) DO UPDATE SET
 				status = 'submitted',
@@ -70,8 +70,8 @@ export async function setupComplianceState(
 		if (!declaration) throw new Error("Declaration not found after upsert");
 
 		await sql`
-			INSERT INTO app_job_category (declaration_id, category_index, name, source)
-			VALUES (${declaration.id}, 0, 'Catégorie test', 'csp')
+			INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
+			VALUES (gen_random_uuid(), ${declaration.id}, 0, 'Catégorie test', 'csp')
 			ON CONFLICT (declaration_id, category_index) DO UPDATE SET name = 'Catégorie test'
 		`;
 
@@ -84,9 +84,9 @@ export async function setupComplianceState(
 
 		await sql`
 			INSERT INTO app_employee_category
-				(job_category_id, declaration_type, women_count, men_count,
+				(id, job_category_id, declaration_type, women_count, men_count,
 				 annual_base_women, annual_base_men, created_at, updated_at)
-			VALUES (${jobCategory.id}, 'initial', 5, 5, 1000, ${menSalary}, NOW(), NOW())
+			VALUES (gen_random_uuid(), ${jobCategory.id}, 'initial', 5, 5, 1000, ${menSalary}, NOW(), NOW())
 			ON CONFLICT (job_category_id, declaration_type) DO UPDATE SET
 				annual_base_women = 1000,
 				annual_base_men = ${menSalary},
@@ -97,10 +97,10 @@ export async function setupComplianceState(
 			const correctionMenSalary = correctionHasGap ? 1100 : 1020;
 			await sql`
 				INSERT INTO app_employee_category
-					(job_category_id, declaration_type, women_count, men_count,
+					(id, job_category_id, declaration_type, women_count, men_count,
 					 annual_base_women, annual_base_men, created_at, updated_at)
 				VALUES
-					(${jobCategory.id}, 'correction', 5, 5, 1000, ${correctionMenSalary}, NOW(), NOW())
+					(gen_random_uuid(), ${jobCategory.id}, 'correction', 5, 5, 1000, ${correctionMenSalary}, NOW(), NOW())
 				ON CONFLICT (job_category_id, declaration_type) DO UPDATE SET
 					annual_base_women = 1000,
 					annual_base_men = ${correctionMenSalary},
