@@ -35,20 +35,22 @@ export default defineConfig({
 			dependencies: ["setup"],
 		},
 		{
-			// Compliance tests run AFTER standard tests to avoid DB state pollution
+			// Compliance tests run AFTER standard tests to avoid DB state pollution.
+			// Depends on setup (auth) only — not chromium — so a flaky login.e2e.ts
+			// does not cascade-skip compliance tests.
 			name: "compliance",
 			testMatch: /compliance\.e2e\.ts$/,
 			use: {
 				...devices["Desktop Chrome"],
 				storageState: AUTH_FILE,
 			},
-			dependencies: ["chromium"],
+			dependencies: ["setup"],
 		},
 		{
 			name: "logout",
 			testMatch: /logout\.e2e\.ts$/,
 			use: { ...devices["Desktop Chrome"] },
-			dependencies: ["compliance"],
+			dependencies: ["chromium", "compliance"],
 		},
 	],
 	...(isRemote
