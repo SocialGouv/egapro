@@ -176,6 +176,18 @@ describe("declarationRouter", () => {
 			expect(result.declaration).toBeDefined();
 		});
 
+		it("throws NOT_FOUND when existing row is unexpectedly undefined", async () => {
+			// existing.length > 0 but existing[0] is undefined (defensive branch)
+			const tx = createGetOrCreateTx([undefined]);
+			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			await expect(caller.getOrCreate()).rejects.toThrow(
+				"Declaration introuvable",
+			);
+		});
+
 		it("throws INTERNAL_SERVER_ERROR when retry also fails", async () => {
 			const tx = createGetOrCreateTx([], [], []);
 			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
@@ -318,6 +330,42 @@ describe("declarationRouter", () => {
 			expect(mockTransaction).toHaveBeenCalled();
 		});
 
+		it("skips reset when totals have not changed", async () => {
+			const unchangedDecl = {
+				...mockDeclaration,
+				totalWomen: 30,
+				totalMen: 40,
+			};
+			const tx = createMockTx([unchangedDecl]);
+			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep1({
+				categories: [
+					{ name: "Cadres", women: 10, men: 15 },
+					{ name: "Employés", women: 20, men: 25 },
+				],
+			});
+
+			expect(result).toEqual({ success: true });
+			// set should NOT include score resets
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.not.objectContaining({ remunerationScore: null }),
+			);
+		});
+
+		it("saves with empty categories array", async () => {
+			const tx = createMockTx([mockDeclaration]);
+			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep1({ categories: [] });
+
+			expect(result).toEqual({ success: true });
+		});
+
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);
@@ -329,6 +377,34 @@ describe("declarationRouter", () => {
 	});
 
 	describe("updateStepCategories", () => {
+		it("saves empty categories for a given step", async () => {
+			const tx = createMockTx();
+			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStepCategories({
+				step: 3,
+				categories: [],
+			});
+
+			expect(result).toEqual({ success: true });
+		});
+
+		it("saves categories with all optional fields undefined", async () => {
+			const tx = createMockTx();
+			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStepCategories({
+				step: 4,
+				categories: [{ name: "Cadres" }],
+			});
+
+			expect(result).toEqual({ success: true });
+		});
+
 		it("saves categories for a given step", async () => {
 			const tx = createMockTx();
 			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
