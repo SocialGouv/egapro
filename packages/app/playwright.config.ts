@@ -27,7 +27,7 @@ export default defineConfig({
 		},
 		{
 			name: "chromium",
-			testMatch: /(?<!logout\.)e2e\.ts$/,
+			testMatch: /(?<!logout\.)(?<!compliance\.)e2e\.ts$/,
 			use: {
 				...devices["Desktop Chrome"],
 				storageState: AUTH_FILE,
@@ -35,10 +35,20 @@ export default defineConfig({
 			dependencies: ["setup"],
 		},
 		{
+			// Compliance tests run AFTER standard tests to avoid DB state pollution
+			name: "compliance",
+			testMatch: /compliance\.e2e\.ts$/,
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: AUTH_FILE,
+			},
+			dependencies: ["chromium"],
+		},
+		{
 			name: "logout",
 			testMatch: /logout\.e2e\.ts$/,
 			use: { ...devices["Desktop Chrome"] },
-			dependencies: ["chromium"],
+			dependencies: ["compliance"],
 		},
 	],
 	...(isRemote

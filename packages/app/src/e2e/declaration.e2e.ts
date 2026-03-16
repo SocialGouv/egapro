@@ -187,9 +187,8 @@ test.describe("Declaration workflow", () => {
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
-		// After submission, the compliance path flow kicks in.
-		// With no gap above threshold: hasCse=true → /avis-cse, hasCse=false → /confirmation.
-		// The hasCse value depends on prior test state, so accept either destination.
-		await page.waitForURL(/\/(avis-cse|parcours-conformite)\//);
+		// After submission, compliance path redirects based on gap + CSE.
+		// global-setup sets hasCse=true and no gap → redirects to /avis-cse
+		await page.waitForURL("**/avis-cse/**");
 	});
 });
