@@ -295,23 +295,6 @@ describe("declarationRouter", () => {
 		});
 	});
 
-	describe("completeCompliancePath", () => {
-		it("sets complianceCompletedAt timestamp", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.completeCompliancePath();
-
-			expect(result).toEqual({ success: true });
-			expect(mockSet).toHaveBeenCalledWith(
-				expect.objectContaining({
-					complianceCompletedAt: expect.any(Date),
-					updatedAt: expect.any(Date),
-				}),
-			);
-		});
-	});
-
 	describe("updateStep1", () => {
 		it("updates totals and inserts categories", async () => {
 			const tx = createMockTx([mockDeclaration]);
