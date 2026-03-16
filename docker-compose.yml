@@ -56,20 +56,6 @@ services:
       sh -c "mc alias set local http://minio:9000 minioadmin minioadmin &&
              mc mb --ignore-existing local/egapro-cse-opinions"
 
-  clamav:
-    image: clamav/clamav:1.4
-    ports:
-      - 3310:3310
-    volumes:
-      - clamdata:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "clamdscan", "--ping", "1"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 120s
-
 volumes:
   pgdata:
   miniodata:
-  clamdata:

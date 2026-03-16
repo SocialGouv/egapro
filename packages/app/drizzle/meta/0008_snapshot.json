@@ -264,13 +264,6 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"scan_status": {
-					"name": "scan_status",
-					"type": "varchar(20)",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "'clean'"
-				},
 				"declarant_id": {
 					"name": "declarant_id",
 					"type": "varchar(255)",

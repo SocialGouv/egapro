@@ -30,11 +30,7 @@ export async function GET(request: Request) {
 			})
 			.from(cseOpinionFiles)
 			.where(
-				and(
-					eq(cseOpinionFiles.id, fileId),
-					eq(cseOpinionFiles.siren, siren),
-					eq(cseOpinionFiles.scanStatus, "clean"),
-				),
+				and(eq(cseOpinionFiles.id, fileId), eq(cseOpinionFiles.siren, siren)),
 			);
 
 		if (!file) {

@@ -251,14 +251,14 @@ describe("Step2Upload", () => {
 
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
 			new Response(
-				JSON.stringify({ error: "Le fichier a été rejeté par l'antivirus." }),
-				{ status: 422, headers: { "Content-Type": "application/json" } },
+				JSON.stringify({ error: "Erreur lors de l'upload du fichier." }),
+				{ status: 500, headers: { "Content-Type": "application/json" } },
 			),
 		);
 
 		render(<Step2Upload />);
 
-		const file = new File(["content"], "virus.pdf", {
+		const file = new File(["content"], "test.pdf", {
 			type: "application/pdf",
 		});
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
@@ -267,7 +267,7 @@ describe("Step2Upload", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.getByText("Le fichier a été rejeté par l'antivirus."),
+				screen.getByText("Erreur lors de l'upload du fichier."),
 			).toBeInTheDocument();
 		});
 	});

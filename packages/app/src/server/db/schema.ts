@@ -386,7 +386,6 @@ export const cseOpinionFiles = createTable(
 		fileName: d.varchar({ length: 255 }).notNull(),
 		filePath: d.varchar({ length: 500 }).notNull(),
 		fileSize: d.integer().notNull(),
-		scanStatus: d.varchar({ length: 20 }).notNull().default("clean"),
 		declarantId: d
 			.varchar({ length: 255 })
 			.notNull()

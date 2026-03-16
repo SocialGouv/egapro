@@ -69,8 +69,6 @@ vi.mock("~/env", () => ({
 		S3_ACCESS_KEY_ID: "test-key",
 		S3_SECRET_ACCESS_KEY: "test-secret",
 		S3_BUCKET_NAME: "test-bucket",
-		CLAMAV_HOST: "localhost",
-		CLAMAV_PORT: 3310,
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
 	},
 }));

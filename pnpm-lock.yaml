@@ -53,9 +53,6 @@ importers:
       '@trpc/server':
         specifier: ^11.0.0
         version: 11.10.0(typescript@5.9.3)
-      clamdjs:
-        specifier: ^1.0.2
-        version: 1.0.2
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(postgres@3.4.8)
@@ -2831,9 +2828,6 @@ packages:
 
   cjs-module-lexer@2.2.0:
     resolution: {integrity: sha512-4bHTS2YuzUvtoLjdy+98ykbNB5jS0+07EvFNXerqZQJ89F7DI6ET7OQo/HJuW6K0aVsKA9hj9/RVb2kQVOrPDQ==}
-
-  clamdjs@1.0.2:
-    resolution: {integrity: sha512-gVnX5ySMULvwYL2ykZQnP4UK4nIK7ftG6z015drJyOFgWpsqXt1Hcq4fMyPwM8LLsxfgfYKLiZi288xuTfmZBQ==}
 
   clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
@@ -8767,8 +8761,6 @@ snapshots:
       zod: 3.25.76
 
   cjs-module-lexer@2.2.0: {}
-
-  clamdjs@1.0.2: {}
 
   clean-stack@2.2.0: {}
 

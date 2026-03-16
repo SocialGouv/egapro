@@ -114,11 +114,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			})
 			.from(cseOpinionFiles)
 			.where(
-				and(
-					eq(cseOpinionFiles.siren, siren),
-					eq(cseOpinionFiles.year, year),
-					eq(cseOpinionFiles.scanStatus, "clean"),
-				),
+				and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)),
 			);
 
 		return { files: rows };
@@ -172,11 +168,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				.select({ id: cseOpinionFiles.id })
 				.from(cseOpinionFiles)
 				.where(
-					and(
-						eq(cseOpinionFiles.siren, siren),
-						eq(cseOpinionFiles.year, year),
-						eq(cseOpinionFiles.scanStatus, "clean"),
-					),
+					and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)),
 				);
 
 			const ownedFileIds = new Set(files.map((f) => f.id));
