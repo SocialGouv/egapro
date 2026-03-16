@@ -187,3 +187,219 @@ describe("findUserCompany CSE auto-fetch", () => {
 		);
 	});
 });
+
+describe("companyRouter.list", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("returns companies with declaration status", async () => {
+		const companyRows = [{ siren: "339787277", name: "Test Company" }];
+		const declRows = [
+			{ siren: "339787277", status: "submitted", currentStep: 6 },
+		];
+
+		// list uses: select().from().innerJoin().where() (no limit) for companies
+		// then select().from().where() for declarations
+		let selectCallCount = 0;
+		const localMockSelect = vi.fn().mockImplementation(() => {
+			selectCallCount++;
+			if (selectCallCount === 1) {
+				// companies query
+				return {
+					from: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockResolvedValue(companyRows),
+						}),
+					}),
+				};
+			}
+			// declarations query
+			return {
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue(declRows),
+				}),
+			};
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.list();
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.siren).toBe("339787277");
+		expect(result[0]?.declarationStatus).toBe("done");
+	});
+
+	it("returns empty list when user has no companies", async () => {
+		const localMockSelect = vi.fn().mockReturnValue({
+			from: vi.fn().mockReturnValue({
+				innerJoin: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue([]),
+				}),
+			}),
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.list();
+
+		expect(result).toEqual([]);
+	});
+
+	it("skips declaration fetch when no sirens found", async () => {
+		const localMockSelect = vi.fn().mockReturnValue({
+			from: vi.fn().mockReturnValue({
+				innerJoin: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue([]),
+				}),
+			}),
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await caller.list();
+
+		// Only 1 select call (companies), no second call for declarations
+		expect(localMockSelect).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("companyRouter.getWithDeclarations", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("returns company with declaration list", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforce: 100,
+			hasCse: true,
+		};
+
+		const declRows = [
+			{
+				siren: "339787277",
+				year: 2026,
+				status: "submitted",
+				currentStep: 6,
+				updatedAt: new Date(),
+			},
+		];
+
+		let selectCallCount = 0;
+		const localMockSelect = vi.fn().mockImplementation(() => {
+			selectCallCount++;
+			if (selectCallCount === 1) {
+				// findUserCompany query
+				return {
+					from: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockReturnValue({
+								limit: vi.fn().mockResolvedValue([companyRow]),
+							}),
+						}),
+					}),
+				};
+			}
+			// declarations query
+			return {
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockReturnValue({
+						orderBy: vi.fn().mockResolvedValue(declRows),
+					}),
+				}),
+			};
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getWithDeclarations({ siren: "339787277" });
+
+		expect(result.company.siren).toBe("339787277");
+		expect(result.declarations).toBeDefined();
+	});
+});
+
+describe("companyRouter.updateHasCse", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("updates hasCse for the given company", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforce: 100,
+			hasCse: false,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockFrom.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		mockUpdateWhere.mockResolvedValue(undefined);
+		mockSet.mockReturnValue({ where: mockUpdateWhere });
+		mockUpdate.mockReturnValue({ set: mockSet });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await caller.updateHasCse({ siren: "339787277", hasCse: true });
+
+		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
+	});
+});

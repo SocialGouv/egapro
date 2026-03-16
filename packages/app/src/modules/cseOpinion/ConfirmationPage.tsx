@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ComplianceCompletionTracker } from "~/modules/declaration-remuneration";
 import { DsfrPictogram } from "~/modules/home";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
@@ -18,6 +19,7 @@ export function ConfirmationPage({ email }: Props) {
 	const year = dataYear + 1;
 	return (
 		<div>
+			<ComplianceCompletionTracker />
 			<h1 className="fr-h4 fr-mb-4w">
 				Démarche des indicateurs de rémunération {year}
 			</h1>

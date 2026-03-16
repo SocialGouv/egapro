@@ -12,7 +12,7 @@ const declarationOpinionSchema = z.object({
 
 export const saveOpinionsSchema = z.object({
 	firstDeclaration: declarationOpinionSchema,
-	secondDeclaration: declarationOpinionSchema,
+	secondDeclaration: declarationOpinionSchema.optional(),
 });
 
 export type SaveOpinionsInput = z.infer<typeof saveOpinionsSchema>;
