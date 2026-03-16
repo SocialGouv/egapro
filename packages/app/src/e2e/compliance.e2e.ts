@@ -12,13 +12,14 @@ const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
 
 async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
 	await page.waitForURL("**/avis-cse/etape/1");
-	await page.locator("#first-decl-accuracy-favorable").click();
+	// DSFR hides native radio inputs — click on the associated label instead
+	await page.locator('label[for="first-decl-accuracy-favorable"]').click();
 	await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-	await page.locator("#first-decl-gap-no").click();
+	await page.locator('label[for="first-decl-gap-no"]').click();
 	if (hasSecondDeclaration) {
-		await page.locator("#second-decl-accuracy-favorable").click();
+		await page.locator('label[for="second-decl-accuracy-favorable"]').click();
 		await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-		await page.locator("#second-decl-gap-no").click();
+		await page.locator('label[for="second-decl-gap-no"]').click();
 	}
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/avis-cse/etape/2");
@@ -50,7 +51,8 @@ async function selectCompliancePath(
 ) {
 	await page.goto(COMPLIANCE_PATH);
 	await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-	await page.locator(`#${pathId}`).click();
+	// DSFR hides native radio inputs — click on the associated label instead
+	await page.locator(`label[for="${pathId}"]`).click();
 	await page.getByRole("button", { name: "Suivant" }).click();
 }
 
