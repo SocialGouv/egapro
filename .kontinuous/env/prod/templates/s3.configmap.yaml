@@ -5,4 +5,4 @@ metadata:
 data:
   S3_ENDPOINT: "https://s3.gra.io.cloud.ovh.net"
   S3_REGION: "gra"
-  S3_BUCKET_NAME: "egapro-dev-app"
+  S3_BUCKET_NAME: "egapro-prod-app"

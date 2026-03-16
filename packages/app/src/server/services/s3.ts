@@ -1,8 +1,10 @@
 import "server-only";
 
 import {
+	CreateBucketCommand,
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadBucketCommand,
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -26,6 +28,28 @@ const s3Client =
 	});
 
 if (env.NODE_ENV !== "production") globalForS3.s3Client = s3Client;
+
+export async function ensureBucket(): Promise<void> {
+	try {
+		await s3Client.send(
+			new HeadBucketCommand({ Bucket: env.S3_BUCKET_NAME }),
+		);
+	} catch (error: unknown) {
+		const statusCode =
+			error instanceof Error && "$metadata" in error
+				? (error as Error & { $metadata: { httpStatusCode: number } })
+						.$metadata.httpStatusCode
+				: undefined;
+
+		if (statusCode === 404 || statusCode === 403) {
+			await s3Client.send(
+				new CreateBucketCommand({ Bucket: env.S3_BUCKET_NAME }),
+			);
+		} else {
+			throw error;
+		}
+	}
+}
 
 export function buildObjectKey(
 	siren: string,

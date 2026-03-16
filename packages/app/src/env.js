@@ -47,10 +47,10 @@ export const env = createEnv({
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
 		S3_ENDPOINT: z.string().url(),
-		S3_REGION: z.string().default("us-east-1"),
+		S3_REGION: z.string(),
 		S3_ACCESS_KEY_ID: z.string(),
 		S3_SECRET_ACCESS_KEY: z.string(),
-		S3_BUCKET_NAME: z.string().default("egapro-cse-opinions"),
+		S3_BUCKET_NAME: z.string(),
 		NEXTAUTH_URL: z.string().url(),
 	},
 
