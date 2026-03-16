@@ -1,7 +1,0 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: clamav
-data:
-  CLAMAV_HOST: "clamav"
-  CLAMAV_PORT: "3310"

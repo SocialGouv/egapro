@@ -57,20 +57,6 @@ services:
              mc mb --ignore-existing local/egapro-dev-app &&
              mc anonymous set none local/egapro-dev-app"
 
-  clamav:
-    image: clamav/clamav:1.4
-    ports:
-      - 3310:3310
-    volumes:
-      - clamdata:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "clamdcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
-
 volumes:
   pgdata:
   miniodata:
-  clamdata:
