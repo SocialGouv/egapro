@@ -183,9 +183,7 @@ describe("Step2PayGap", () => {
 			/>,
 		);
 		// GIP rows should be used — check prefilled values
-		const womenInput = screen.getByLabelText(
-			"Annuelle brute moyenne — Femmes",
-		);
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		expect(womenInput).toHaveValue("35\u202f000");
 	});
 
