@@ -127,19 +127,19 @@ export async function importGipCsvToDb(
 		return { year, rowCount: 0 };
 	}
 
-	await db.transaction(async (tx) => {
-		await tx.delete(gipMdsData).where(eq(gipMdsData.year, year));
+	// Delete existing data for this year before inserting
+	await db.delete(gipMdsData).where(eq(gipMdsData.year, year));
 
-		await tx.insert(gipMdsData).values(
-			rows.map((row) => ({
-				...row,
-				year,
-				periodStart: metadata.periodStart,
-				periodEnd: metadata.periodEnd,
-				siren: row.siren ?? "",
-			})),
-		);
-	});
+	// Insert all rows with metadata
+	await db.insert(gipMdsData).values(
+		rows.map((row) => ({
+			...row,
+			year,
+			periodStart: metadata.periodStart,
+			periodEnd: metadata.periodEnd,
+			siren: row.siren ?? "",
+		})),
+	);
 
 	return { year, rowCount: rows.length };
 }
