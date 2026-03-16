@@ -62,6 +62,13 @@ export async function setupComplianceState(
 				updated_at = NOW()
 		`;
 
+		// Guard against async ComplianceCompletionTracker mutation from previous test
+		await sql`
+			UPDATE app_declaration
+			SET compliance_completed_at = ${complianceCompletedAt}
+			WHERE siren = ${TEST_SIREN} AND year = ${year}
+		`;
+
 		const [declaration] = await sql<{ id: string }[]>`
 			SELECT id FROM app_declaration
 			WHERE siren = ${TEST_SIREN} AND year = ${year}

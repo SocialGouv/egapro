@@ -102,13 +102,19 @@ test.describe("Path 3: gap + justify + hasCse → /avis-cse", () => {
 	}) => {
 		await page.goto(COMPLIANCE_PATH);
 		await expect(
-			page.getByText("Actions correctives et seconde déclaration"),
+			page.getByText("Actions correctives et seconde déclaration", {
+				exact: true,
+			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations"),
+			page.getByText("Évaluation conjointe des rémunérations", {
+				exact: true,
+			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %"),
+			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
+				exact: true,
+			}),
 		).toBeVisible();
 	});
 
@@ -142,7 +148,9 @@ test.describe("Path 5: gap + joint_evaluation + no hasCse → /confirmation", ()
 	}) => {
 		await page.goto(COMPLIANCE_PATH);
 		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %"),
+			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
+				exact: true,
+			}),
 		).not.toBeVisible();
 	});
 
@@ -227,13 +235,17 @@ test.describe("Path 8: corrective_action + correction gap → second round choic
 	}) => {
 		await page.goto(COMPLIANCE_PATH);
 		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %"),
+			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
+				exact: true,
+			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations"),
+			page.getByText("Évaluation conjointe des rémunérations", { exact: true }),
 		).toBeVisible();
 		await expect(
-			page.getByText("Actions correctives et seconde déclaration"),
+			page.getByText("Actions correctives et seconde déclaration", {
+				exact: true,
+			}),
 		).not.toBeVisible();
 	});
 });
