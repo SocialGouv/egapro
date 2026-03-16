@@ -66,7 +66,9 @@ function createMockTx(selectRows: unknown[] = []) {
 function createMockDb(selectRows: unknown[] = []) {
 	const tx = createMockTx(selectRows);
 
-	mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+	mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+		fn(tx),
+	);
 
 	return {
 		select: mockSelect,
@@ -141,7 +143,9 @@ describe("declarationRouter", () => {
 
 		it("returns existing declaration when found", async () => {
 			const tx = createGetOrCreateTx([mockDeclaration]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -153,7 +157,9 @@ describe("declarationRouter", () => {
 
 		it("creates new declaration when none exists", async () => {
 			const tx = createGetOrCreateTx([], [mockDeclaration]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -167,7 +173,9 @@ describe("declarationRouter", () => {
 
 		it("retries select after concurrent insert (onConflictDoNothing returns empty)", async () => {
 			const tx = createGetOrCreateTx([], [], [mockDeclaration]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -179,7 +187,9 @@ describe("declarationRouter", () => {
 		it("throws NOT_FOUND when existing row is unexpectedly undefined", async () => {
 			// existing.length > 0 but existing[0] is undefined (defensive branch)
 			const tx = createGetOrCreateTx([undefined]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -190,7 +200,9 @@ describe("declarationRouter", () => {
 
 		it("throws INTERNAL_SERVER_ERROR when retry also fails", async () => {
 			const tx = createGetOrCreateTx([], [], []);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -298,7 +310,9 @@ describe("declarationRouter", () => {
 	describe("updateStep1", () => {
 		it("updates totals and inserts categories", async () => {
 			const tx = createMockTx([mockDeclaration]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -320,7 +334,9 @@ describe("declarationRouter", () => {
 				totalMen: 40,
 			};
 			const tx = createMockTx([unchangedDecl]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -340,7 +356,9 @@ describe("declarationRouter", () => {
 
 		it("saves with empty categories array", async () => {
 			const tx = createMockTx([mockDeclaration]);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -362,7 +380,9 @@ describe("declarationRouter", () => {
 	describe("updateStepCategories", () => {
 		it("saves empty categories for a given step", async () => {
 			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -376,7 +396,9 @@ describe("declarationRouter", () => {
 
 		it("saves categories with all optional fields undefined", async () => {
 			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -390,7 +412,9 @@ describe("declarationRouter", () => {
 
 		it("saves categories for a given step", async () => {
 			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -475,7 +499,9 @@ describe("declarationRouter", () => {
 
 		it("creates job and employee categories for initial declaration", async () => {
 			const tx = createEmployeeTx(mockDeclaration);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -492,7 +518,9 @@ describe("declarationRouter", () => {
 		it("updates employee categories for correction declaration", async () => {
 			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
 			const tx = createEmployeeTx(mockDeclaration, existingJobs);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
@@ -524,7 +552,9 @@ describe("declarationRouter", () => {
 
 		it("throws when declaration not found", async () => {
 			const tx = createEmployeeTx(null);
-			mockTransaction.mockImplementation(async (fn: Function) => fn(tx));
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 

@@ -186,9 +186,7 @@ describe("fetchAllCategories", () => {
 	it("returns empty employeeCategories when no jobs exist", async () => {
 		const { fetchAllCategories } = await import("../declarationHelpers");
 
-		let selectCallCount = 0;
 		const mockSelectWhere = vi.fn().mockImplementation(() => {
-			selectCallCount++;
 			return Promise.resolve([]);
 		});
 		const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });

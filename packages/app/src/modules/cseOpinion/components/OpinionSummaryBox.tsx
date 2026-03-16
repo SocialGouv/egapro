@@ -11,7 +11,7 @@ export function OpinionSummaryBox({
 	firstDeclTitle,
 	secondDeclTitle,
 	secondDeclGapTitle,
-	showSecondDeclaration = true,
+	showSecondDeclaration = false,
 }: Props) {
 	return (
 		<div className={`fr-p-4w ${styles.container}`}>
