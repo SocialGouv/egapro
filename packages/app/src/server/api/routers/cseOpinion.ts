@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 
-import { saveOpinionsSchema } from "~/modules/cseOpinion";
+import { saveOpinionsSchema } from "~/modules/cseOpinion/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { cseOpinions } from "~/server/db/schema";
 
