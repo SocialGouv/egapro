@@ -1,7 +1,7 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
-export { ComplianceCompletionTracker } from "./shared/ComplianceCompletionTracker";
+export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
 export {
 	computeGap,

@@ -37,12 +37,16 @@ import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
+function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
+	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
+		declaration: { compliancePath, updatedAt },
+	} as never);
+	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+}
+
 describe("JointEvaluationPage", () => {
 	it("redirects when compliancePath is not joint_evaluation", async () => {
-		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-			declaration: { compliancePath: "action_plan", updatedAt: null },
-		} as never);
-		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+		mockDeclaration("action_plan", null);
 
 		await JointEvaluationPage();
 
@@ -52,13 +56,7 @@ describe("JointEvaluationPage", () => {
 	});
 
 	it("renders the form with current year when compliancePath is joint_evaluation", async () => {
-		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-			declaration: {
-				compliancePath: "joint_evaluation",
-				updatedAt: new Date("2025-06-15"),
-			},
-		} as never);
-		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -69,13 +67,7 @@ describe("JointEvaluationPage", () => {
 	});
 
 	it("formats declarationDate from updatedAt when available", async () => {
-		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-			declaration: {
-				compliancePath: "joint_evaluation",
-				updatedAt: new Date("2025-06-15"),
-			},
-		} as never);
-		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -86,10 +78,7 @@ describe("JointEvaluationPage", () => {
 	});
 
 	it("falls back to today's date when updatedAt is null", async () => {
-		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-			declaration: { compliancePath: "joint_evaluation", updatedAt: null },
-		} as never);
-		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+		mockDeclaration("joint_evaluation", null);
 
 		const page = await JointEvaluationPage();
 		render(page);

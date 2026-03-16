@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { DsfrPictogram } from "~/modules/home";
-import { ComplianceCompletionTracker } from "../shared/ComplianceCompletionTracker";
+import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
 import common from "../shared/common.module.scss";
 
 export function ComplianceConfirmation() {
@@ -8,7 +8,7 @@ export function ComplianceConfirmation() {
 
 	return (
 		<div className={common.flexColumnGap2}>
-			<ComplianceCompletionTracker />
+			<ComplianceCompletionEffect />
 			<h1 className="fr-h4 fr-mb-0">
 				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
 				salariés
