@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
@@ -393,11 +393,19 @@ export const declarationRouter = createTRPCRouter({
 	completeCompliancePath: protectedProcedure.mutation(async ({ ctx }) => {
 		const siren = getSiren(ctx.session.user.siret);
 		const year = getCurrentYear();
+		const now = new Date();
 
+		// Idempotent: only set complianceCompletedAt on first completion
 		await ctx.db
 			.update(declarations)
-			.set({ complianceCompletedAt: new Date(), updatedAt: new Date() })
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			.set({ complianceCompletedAt: now, updatedAt: now })
+			.where(
+				and(
+					eq(declarations.siren, siren),
+					eq(declarations.year, year),
+					isNull(declarations.complianceCompletedAt),
+				),
+			);
 
 		return { success: true };
 	}),

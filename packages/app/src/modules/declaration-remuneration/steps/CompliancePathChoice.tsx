@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { api } from "~/trpc/react";
