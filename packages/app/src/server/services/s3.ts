@@ -31,14 +31,12 @@ if (env.NODE_ENV !== "production") globalForS3.s3Client = s3Client;
 
 export async function ensureBucket(): Promise<void> {
 	try {
-		await s3Client.send(
-			new HeadBucketCommand({ Bucket: env.S3_BUCKET_NAME }),
-		);
+		await s3Client.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET_NAME }));
 	} catch (error: unknown) {
 		const statusCode =
 			error instanceof Error && "$metadata" in error
-				? (error as Error & { $metadata: { httpStatusCode: number } })
-						.$metadata.httpStatusCode
+				? (error as Error & { $metadata: { httpStatusCode: number } }).$metadata
+						.httpStatusCode
 				: undefined;
 
 		if (statusCode === 404 || statusCode === 403) {
