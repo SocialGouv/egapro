@@ -30,5 +30,33 @@ services:
     command: >
       sh -c "corepack enable && pnpm --filter app db:push"
 
+  minio:
+    image: minio/minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - miniodata:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "mc alias set local http://minio:9000 minioadmin minioadmin &&
+             mc mb --ignore-existing local/egapro-dev-app &&
+             mc anonymous set none local/egapro-dev-app"
+
 volumes:
   pgdata:
+  miniodata:
