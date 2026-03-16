@@ -51,6 +51,8 @@ export const env = createEnv({
 		S3_ACCESS_KEY_ID: z.string(),
 		S3_SECRET_ACCESS_KEY: z.string(),
 		S3_BUCKET_NAME: z.string(),
+		CLAMAV_HOST: z.string().optional(),
+		CLAMAV_PORT: z.coerce.number().optional(),
 		NEXTAUTH_URL: z.string().url(),
 	},
 
@@ -89,6 +91,8 @@ export const env = createEnv({
 		S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
 		S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
 		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+		CLAMAV_HOST: process.env.CLAMAV_HOST,
+		CLAMAV_PORT: process.env.CLAMAV_PORT,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
