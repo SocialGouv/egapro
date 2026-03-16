@@ -81,7 +81,12 @@ type InputCompany = {
 async function loadCompanies(): Promise<InputCompany[]> {
 	const fs = await import("node:fs");
 	const path = await import("node:path");
-	const filePath = path.join(import.meta.dirname, "..", "data", "companies.json");
+	const filePath = path.join(
+		import.meta.dirname,
+		"..",
+		"data",
+		"companies.json",
+	);
 
 	if (!fs.existsSync(filePath)) {
 		console.error("Error: data/companies.json not found.");
@@ -542,7 +547,5 @@ console.error("\nProfile distribution:");
 for (const [p, n] of Object.entries(profileCounts).sort(
 	(a, b) => b[1] - a[1],
 )) {
-	console.error(
-		`  ${p}: ${n} (${((n / companies.length) * 100).toFixed(0)}%)`,
-	);
+	console.error(`  ${p}: ${n} (${((n / companies.length) * 100).toFixed(0)}%)`);
 }
