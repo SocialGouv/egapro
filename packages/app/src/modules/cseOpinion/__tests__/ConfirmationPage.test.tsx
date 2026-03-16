@@ -1,6 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ConfirmationPage } from "../ConfirmationPage";
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declaration: {
+			completeCompliancePath: {
+				useMutation: () => ({ mutate: vi.fn() }),
+			},
+		},
+	},
+}));
 
 describe("ConfirmationPage", () => {
 	const year = new Date().getFullYear() + 1;

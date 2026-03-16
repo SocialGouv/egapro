@@ -10,7 +10,11 @@ import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
 import formStyles from "./shared/formActions.module.scss";
 
-export function Step2Upload() {
+type Props = {
+	hasSecondDeclaration?: boolean;
+};
+
+export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 	const router = useRouter();
 	const {
 		closeModal,
@@ -58,6 +62,7 @@ export function Step2Upload() {
 						firstDeclTitle="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 						secondDeclGapTitle="Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégorie de salariés"
 						secondDeclTitle="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+						showSecondDeclaration={hasSecondDeclaration}
 					/>
 				</div>
 
