@@ -59,6 +59,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the title and step indicator", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -73,6 +74,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders category gap card with category name", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -82,6 +84,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders gap columns", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -96,6 +99,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the next steps section", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -105,6 +109,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders certification checkbox", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -116,6 +121,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("disables submit button when not certified", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -127,6 +133,7 @@ describe("SecondDeclarationStep3Review", () => {
 		const user = userEvent.setup();
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -141,6 +148,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders previous link to step 2", () => {
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -169,6 +177,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={categoriesWithHighGaps}
 			/>,
 		);
@@ -196,6 +205,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				hasCse={null}
 				secondDeclarationCategories={categoriesWithLowGaps}
 			/>,
 		);
