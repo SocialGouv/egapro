@@ -17,8 +17,6 @@ import { BASE_PATH } from "./constants";
 import { NextStepsSection } from "./NextStepsSection";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
-const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
-
 type Props = {
 	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
@@ -43,7 +41,7 @@ export function SecondDeclarationStep3Review({
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
 		onSuccess: () => {
 			if (gapsExist) {
-				router.push(COMPLIANCE_PATH);
+				router.push(BASE_PATH);
 			} else {
 				router.push(getPostComplianceDestination(hasCse));
 			}
