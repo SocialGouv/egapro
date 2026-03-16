@@ -18,6 +18,7 @@ export default defineConfig({
 	use: {
 		baseURL,
 		trace: "on-first-retry",
+		ignoreHTTPSErrors: true,
 	},
 	projects: [
 		{
