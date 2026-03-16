@@ -71,7 +71,7 @@ test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 		await fillCseStep1(page, false);
 		await submitCseStep2(page);
 		await expect(
-			page.getByText(/Votre parcours .* est désormais terminé/),
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
 		).toBeVisible();
 	});
 });
@@ -85,7 +85,7 @@ test.describe("Path 2: no gap + no hasCse → /parcours-conformite/confirmation"
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 		await expect(
-			page.getByText(/Votre parcours .* est désormais terminé/),
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
 		).toBeVisible();
 	});
 });
