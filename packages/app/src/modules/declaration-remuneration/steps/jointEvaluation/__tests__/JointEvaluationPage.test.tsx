@@ -11,6 +11,9 @@ vi.mock("~/trpc/server", () => ({
 		declaration: {
 			getOrCreate: vi.fn(),
 		},
+		company: {
+			get: vi.fn(),
+		},
 	},
 }));
 
@@ -39,6 +42,7 @@ describe("JointEvaluationPage", () => {
 		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 			declaration: { compliancePath: "action_plan", updatedAt: null },
 		} as never);
+		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 
 		await JointEvaluationPage();
 
@@ -54,6 +58,7 @@ describe("JointEvaluationPage", () => {
 				updatedAt: new Date("2025-06-15"),
 			},
 		} as never);
+		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -70,6 +75,7 @@ describe("JointEvaluationPage", () => {
 				updatedAt: new Date("2025-06-15"),
 			},
 		} as never);
+		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -83,6 +89,7 @@ describe("JointEvaluationPage", () => {
 		vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 			declaration: { compliancePath: "joint_evaluation", updatedAt: null },
 		} as never);
+		vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 
 		const page = await JointEvaluationPage();
 		render(page);

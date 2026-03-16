@@ -32,7 +32,13 @@ vi.mock("~/trpc/react", () => ({
 
 describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
 		).toBeInTheDocument();
@@ -42,7 +48,13 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders all 3 compliance path options", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={true}
+			/>,
+		);
 		expect(
 			screen.getByText("Justifier les écarts de rémunération ≥ 5 %"),
 		).toBeInTheDocument();
@@ -55,15 +67,27 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("disables next button when no path is selected", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
 		expect(nextButton).toBeDisabled();
 	});
 
 	it("enables next button after selecting a path", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		const radio = screen.getByLabelText(
-			"Justifier les écarts de rémunération ≥ 5 %",
+			"Actions correctives et seconde déclaration",
 		);
 		fireEvent.click(radio);
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
@@ -71,7 +95,13 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("submits the selected path and navigates to evaluation-conjointe", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		const radio = screen.getByLabelText(
 			"Évaluation conjointe des rémunérations",
 		);
@@ -89,7 +119,13 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("navigates to second declaration when corrective_action is selected", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		const radio = screen.getByLabelText(
 			"Actions correctives et seconde déclaration",
 		);
@@ -111,6 +147,7 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				currentYear={2026}
 				email="test@example.fr"
+				hasCse={null}
 				initialPath="corrective_action"
 			/>,
 		);
@@ -120,22 +157,31 @@ describe("CompliancePathChoice", () => {
 		expect(radio.checked).toBe(true);
 	});
 
-	it("disables radio buttons when forcedPath is set", () => {
+	it("renders isSecondRound options when isSecondRound is set", () => {
 		render(
 			<CompliancePathChoice
 				currentYear={2026}
 				email="test@example.fr"
-				forcedPath="joint_evaluation"
+				hasCse={null}
+				isSecondRound={true}
 			/>,
 		);
-		const radios = screen.getAllByRole("radio");
-		for (const radio of radios) {
-			expect(radio).toBeDisabled();
-		}
+		expect(
+			screen.getByText("Évaluation conjointe des rémunérations"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText("Actions correctives et seconde déclaration"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 6", () => {
-		render(<CompliancePathChoice currentYear={2026} email="test@example.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="test@example.fr"
+				hasCse={null}
+			/>,
+		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/6",
@@ -143,7 +189,13 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the email in the success banner", () => {
-		render(<CompliancePathChoice currentYear={2026} email="john@company.fr" />);
+		render(
+			<CompliancePathChoice
+				currentYear={2026}
+				email="john@company.fr"
+				hasCse={null}
+			/>,
+		);
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});
 });

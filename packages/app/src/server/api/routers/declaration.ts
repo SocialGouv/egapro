@@ -389,4 +389,16 @@ export const declarationRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	completeCompliancePath: protectedProcedure.mutation(async ({ ctx }) => {
+		const siren = getSiren(ctx.session.user.siret);
+		const year = getCurrentYear();
+
+		await ctx.db
+			.update(declarations)
+			.set({ complianceCompletedAt: new Date(), updatedAt: new Date() })
+			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+
+		return { success: true };
+	}),
 });
