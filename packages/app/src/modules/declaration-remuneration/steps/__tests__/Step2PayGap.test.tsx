@@ -137,4 +137,70 @@ describe("Step2PayGap", () => {
 			"/declaration-remuneration/etape/1",
 		);
 	});
+
+	it("uses gipPrefillData when no initialRows", () => {
+		render(
+			<Step2PayGap
+				gipPrefillData={{
+					step1: { totalWomen: 100, totalMen: 100 },
+					step2: {
+						annualMeanWomen: "35000",
+						annualMeanMen: "38000",
+						hourlyMeanWomen: "18",
+						hourlyMeanMen: "20",
+						annualMedianWomen: "33000",
+						annualMedianMen: "36000",
+						hourlyMedianWomen: "17",
+						hourlyMedianMen: "19",
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: "2026-12-31",
+				}}
+			/>,
+		);
+		// GIP rows should be used — check prefilled values
+		const womenInput = screen.getByLabelText(
+			"Annuelle brute moyenne — Femmes",
+		);
+		expect(womenInput).toHaveValue("35\u202f000");
+	});
+
+	it("shows validation error on submit when fields are incomplete", async () => {
+		const user = userEvent.setup();
+		render(<Step2PayGap />);
+
+		const submitButton = screen.getByRole("button", { name: /suivant/i });
+		await user.click(submitButton);
+
+		expect(
+			screen.getByText(
+				/Veuillez renseigner toutes les données de rémunération/,
+			),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
 });
