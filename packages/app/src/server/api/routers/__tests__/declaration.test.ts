@@ -141,12 +141,26 @@ describe("declarationRouter", () => {
 			return { select: txSelect, insert: txInsert, delete: mockDelete };
 		}
 
+		// Mock for the GIP data select outside the transaction (returns empty = no prefill)
+		function gipSelect() {
+			return {
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockReturnValue({
+						limit: vi.fn().mockResolvedValue([]),
+					}),
+				}),
+			};
+		}
+
 		it("returns existing declaration when found", async () => {
 			const tx = createGetOrCreateTx([mockDeclaration]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);
-			const mockDb = { transaction: mockTransaction } as unknown;
+			const mockDb = {
+				select: vi.fn().mockImplementation(gipSelect),
+				transaction: mockTransaction,
+			} as unknown;
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.getOrCreate();
@@ -160,7 +174,10 @@ describe("declarationRouter", () => {
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);
-			const mockDb = { transaction: mockTransaction } as unknown;
+			const mockDb = {
+				select: vi.fn().mockImplementation(gipSelect),
+				transaction: mockTransaction,
+			} as unknown;
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.getOrCreate();
@@ -176,7 +193,10 @@ describe("declarationRouter", () => {
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);
-			const mockDb = { transaction: mockTransaction } as unknown;
+			const mockDb = {
+				select: vi.fn().mockImplementation(gipSelect),
+				transaction: mockTransaction,
+			} as unknown;
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.getOrCreate();
