@@ -15,6 +15,8 @@ type Props = {
 	maxWomen?: number;
 	maxMen?: number;
 	validationError: string | null;
+	readingNote?: React.ReactNode;
+	sourceNote?: React.ReactNode;
 	onCategoryChange: (
 		index: number,
 		field: "womenValue" | "womenCount" | "menCount",
@@ -42,6 +44,8 @@ export function QuartileTable({
 	maxWomen,
 	maxMen,
 	validationError,
+	readingNote,
+	sourceNote,
 	onCategoryChange,
 }: Props) {
 	const totalWomen = categories.reduce(
@@ -55,8 +59,9 @@ export function QuartileTable({
 		<div className={stepStyles.tableWrapper}>
 			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
+				{readingNote}
 				<div
-					className={`fr-table fr-table--no-caption fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
@@ -148,11 +153,17 @@ export function QuartileTable({
 												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
 												return (
 													<td key={c.name}>
-														{computePercentage(c.womenCount ?? 0, total)}
+														<strong>
+															{computePercentage(c.womenCount ?? 0, total)}
+														</strong>
 													</td>
 												);
 											})}
-											<td>{computePercentage(totalWomen, totalAll)}</td>
+											<td>
+												<strong>
+													{computePercentage(totalWomen, totalAll)}
+												</strong>
+											</td>
 										</tr>
 										{/* Row 4: Men count */}
 										<tr>
@@ -191,11 +202,15 @@ export function QuartileTable({
 												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
 												return (
 													<td key={c.name}>
-														{computePercentage(c.menCount ?? 0, total)}
+														<strong>
+															{computePercentage(c.menCount ?? 0, total)}
+														</strong>
 													</td>
 												);
 											})}
-											<td>{computePercentage(totalMen, totalAll)}</td>
+											<td>
+												<strong>{computePercentage(totalMen, totalAll)}</strong>
+											</td>
 										</tr>
 									</tbody>
 								</table>
@@ -212,6 +227,7 @@ export function QuartileTable({
 						<p>{validationError}</p>
 					</div>
 				)}
+				{sourceNote}
 			</div>
 		</div>
 	);

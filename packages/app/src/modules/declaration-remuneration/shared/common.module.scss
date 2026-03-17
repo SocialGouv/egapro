@@ -33,6 +33,12 @@
 	gap: 2rem;
 }
 
+.dataSection {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
 .flexRowCenter {
 	display: flex;
 	align-items: center;
