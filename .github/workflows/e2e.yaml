@@ -26,7 +26,7 @@ jobs:
       S3_ACCESS_KEY_ID: minioadmin
       S3_SECRET_ACCESS_KEY: minioadmin
       S3_BUCKET_NAME: egapro-dev-app
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      CLAMAV_URL: http://localhost:3310
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

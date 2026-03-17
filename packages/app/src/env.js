@@ -51,7 +51,7 @@ export const env = createEnv({
 		S3_ACCESS_KEY_ID: z.string(),
 		S3_SECRET_ACCESS_KEY: z.string(),
 		S3_BUCKET_NAME: z.string(),
-		CLAMAV_URL: z.string().url().optional(),
+		CLAMAV_URL: z.string().url(),
 		NEXTAUTH_URL: z.string().url(),
 	},
 
