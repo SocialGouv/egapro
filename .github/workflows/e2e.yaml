@@ -31,7 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Start services
-        run: docker compose up -d db migrate minio minio-init
+        run: docker compose up -d
       - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4

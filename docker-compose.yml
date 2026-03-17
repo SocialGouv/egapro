@@ -59,17 +59,19 @@ services:
 
   clamavd:
     image: clamav/clamav:1.4.3
+    profiles: ["clamav"]
     volumes:
       - clamdata:/var/lib/clamav
     healthcheck:
       test: ["CMD", "clamdcheck"]
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 120s
+      retries: 10
+      start_period: 300s
 
   clamav-rest:
     image: benzino77/clamav-rest-api:1.6.2
+    profiles: ["clamav"]
     ports:
       - 3310:3000
     environment:
