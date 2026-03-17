@@ -170,7 +170,7 @@ test.describe("Declaration workflow", () => {
 	});
 
 	// Must be last — mutates declaration status to 'submitted'
-	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
+	test("step 6 submit navigates to compliance path", async ({ page }) => {
 		await goToStep(page, 6);
 
 		// Click the "Suivant" submit button to open the confirmation modal
@@ -180,8 +180,9 @@ test.describe("Declaration workflow", () => {
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
-		// Verify navigation to the CSE opinion page
-		await page.waitForURL("**/avis-cse/**");
+		// After submission, the compliance path flow redirects based on gap and CSE status.
+		// With no gap above threshold, it redirects to confirmation (no CSE) or avis-cse (with CSE).
+		await page.waitForURL("**/parcours-conformite/**");
 	});
 
 	test("previous button is present on step pages", async ({ page }) => {

@@ -119,6 +119,7 @@ export const declarations = createTable(
 		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		complianceCompletedAt: d.timestamp({ withTimezone: true }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),

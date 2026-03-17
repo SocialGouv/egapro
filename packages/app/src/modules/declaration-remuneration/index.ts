@@ -1,6 +1,7 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
+export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
 export {
 	computeGap,
@@ -11,6 +12,7 @@ export {
 	hasGapsAboveThreshold,
 } from "./shared/gapUtils";
 export { mapDbCategories } from "./shared/mapDbCategories";
+export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
 export { JointEvaluationPage } from "./steps/jointEvaluation";

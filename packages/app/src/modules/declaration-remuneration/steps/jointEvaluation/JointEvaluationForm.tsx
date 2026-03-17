@@ -3,20 +3,31 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
 type Props = {
 	currentYear: number;
 	declarationDate: string;
+	hasCse: boolean | null;
 };
 
-export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
+export function JointEvaluationForm({
+	currentYear,
+	declarationDate,
+	hasCse,
+}: Props) {
 	const router = useRouter();
-	// TODO: call tRPC mutation to upload file when API is wired
+
+	const uploadMutation = api.jointEvaluation.uploadFile.useMutation({
+		onSuccess: () => router.push(getPostComplianceDestination(hasCse)),
+	});
+
 	const {
 		closeModal,
 		handleConfirm,
@@ -25,7 +36,16 @@ export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = usePdfUploadForm({ onConfirm: () => router.push("/avis-cse") });
+	} = usePdfUploadForm({
+		onConfirm: () => {
+			if (selectedFile) {
+				uploadMutation.mutate({
+					fileName: selectedFile.name,
+					filePath: selectedFile.name,
+				});
+			}
+		},
+	});
 
 	return (
 		<>
@@ -138,6 +158,7 @@ export function JointEvaluationForm({ currentYear, declarationDate }: Props) {
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={uploadMutation.isPending}
 						type="submit"
 					>
 						Transmettre

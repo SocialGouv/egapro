@@ -11,10 +11,28 @@ vi.mock("next/navigation", () => ({
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
 
+vi.mock("~/trpc/react", () => ({
+	api: {
+		jointEvaluation: {
+			uploadFile: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
+
 describe("JointEvaluationForm", () => {
 	it("renders the page title and section heading", () => {
 		render(
-			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
+			<JointEvaluationForm
+				currentYear={2026}
+				declarationDate="01/06/2026"
+				hasCse={null}
+			/>,
 		);
 
 		expect(
@@ -33,7 +51,11 @@ describe("JointEvaluationForm", () => {
 
 	it("renders the deadline callout with the current year", () => {
 		render(
-			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
+			<JointEvaluationForm
+				currentYear={2026}
+				declarationDate="01/06/2026"
+				hasCse={null}
+			/>,
 		);
 
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
@@ -42,7 +64,11 @@ describe("JointEvaluationForm", () => {
 
 	it("shows an error when submitting without a file", () => {
 		render(
-			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
+			<JointEvaluationForm
+				currentYear={2026}
+				declarationDate="01/06/2026"
+				hasCse={null}
+			/>,
 		);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
@@ -55,7 +81,11 @@ describe("JointEvaluationForm", () => {
 
 	it("renders the info boxes", () => {
 		render(
-			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
+			<JointEvaluationForm
+				currentYear={2026}
+				declarationDate="01/06/2026"
+				hasCse={null}
+			/>,
 		);
 
 		expect(
@@ -66,7 +96,11 @@ describe("JointEvaluationForm", () => {
 
 	it("links back to the compliance path choice page", () => {
 		render(
-			<JointEvaluationForm currentYear={2026} declarationDate="01/06/2026" />,
+			<JointEvaluationForm
+				currentYear={2026}
+				declarationDate="01/06/2026"
+				hasCse={null}
+			/>,
 		);
 
 		const backLink = screen.getByRole("link", { name: /précédent/i });
