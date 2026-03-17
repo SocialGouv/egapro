@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { resetDeclarationToDraft } from "./helpers/declaration-reset";
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
@@ -11,6 +12,12 @@ async function goToStep(page: Page, step: number) {
 
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
+
+	// Reset DB state before this suite runs — guards against compliance tests
+	// interleaving and setting the declaration to 'submitted'.
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+	});
 
 	test.beforeEach(async ({ page }) => {
 		// Auth is handled by storageState from auth.setup.ts
