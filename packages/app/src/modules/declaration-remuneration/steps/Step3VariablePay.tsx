@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { api } from "~/trpc/react";
+import { buildGipRows } from "../shared/buildGipRows";
+import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
 import {
@@ -12,12 +14,15 @@ import {
 	DEV_STEP3_ROWS,
 } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import { computeProportion } from "../shared/gapUtils";
+import type { GipPrefillData } from "../shared/gipMdsMapping";
 import {
 	DEFAULT_PAY_GAP_ROWS,
 	handlePayGapRowChange,
 	PayGapTable,
 } from "../shared/PayGapTable";
+import { PrefillSource } from "../shared/PrefillSource";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -26,25 +31,34 @@ import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
 	initialData?: VariablePayData;
+	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
 };
 
 export function Step3VariablePay({
 	initialData,
+	gipPrefillData,
 	maxWomen,
 	maxMen,
 }: Step3VariablePayProps) {
 	const router = useRouter();
 
+	const hasSavedRows = !!initialData?.rows?.length;
 	const [rows, setRows] = useState<PayGapRow[]>(
-		initialData?.rows?.length ? initialData.rows : DEFAULT_PAY_GAP_ROWS,
+		hasSavedRows
+			? initialData.rows
+			: gipPrefillData
+				? buildGipRows(gipPrefillData.step3)
+				: DEFAULT_PAY_GAP_ROWS,
 	);
 	const [beneficiaryWomen, setBeneficiaryWomen] = useState(
-		initialData?.beneficiaryWomen ?? "",
+		initialData?.beneficiaryWomen ||
+			(gipPrefillData?.step3.beneficiaryCountWomen?.toString() ?? ""),
 	);
 	const [beneficiaryMen, setBeneficiaryMen] = useState(
-		initialData?.beneficiaryMen ?? "",
+		initialData?.beneficiaryMen ||
+			(gipPrefillData?.step3.beneficiaryCountMen?.toString() ?? ""),
 	);
 
 	const [benefValidationError, setBenefValidationError] = useState<
@@ -124,9 +138,9 @@ export function Step3VariablePay({
 	}
 
 	return (
-		<form onSubmit={handleSubmit}>
+		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
 			{/* Title + save status */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-3w">
+			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
@@ -150,146 +164,196 @@ export function Step3VariablePay({
 
 			<StepIndicator currentStep={3} />
 
-			{/* Description */}
-			<p className="fr-mb-2w">
-				Ces indicateurs évaluent et comparent les rémunérations variables
-				(primes, bonus, avantages…) entre les femmes et les hommes. Ils mesurent
-				à la fois l&apos;écart moyen et médian des montants perçus ainsi que la
-				proportion de femmes et d&apos;hommes bénéficiant de ces rémunérations.
-			</p>
+			{/* Introduction */}
+			<div className={common.flexColumnGap1}>
+				<p className="fr-mb-0">
+					Ces indicateurs évaluent et comparent les rémunérations variables
+					(primes, bonus, avantages…) entre les femmes et les hommes. Ils
+					mesurent à la fois l&apos;écart moyen et médian des montants perçus
+					ainsi que la proportion de femmes et d&apos;hommes bénéficiant de ces
+					rémunérations.
+				</p>
 
-			<p className="fr-mb-1w">
-				<strong>
-					Renseignez les informations avant de valider vos indicateurs.
-				</strong>
-				<TooltipButton
-					id="tooltip-step3-info"
-					label="Information sur les indicateurs"
-				/>
-			</p>
+				<p className="fr-mb-0">
+					<strong>
+						{gipPrefillData
+							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+							: "Renseignez les informations avant de valider vos indicateurs."}
+					</strong>
+					<TooltipButton
+						id="tooltip-step3-info"
+						label="Information sur les indicateurs"
+					/>
+				</p>
 
-			<p className="fr-text--sm fr-mb-3w">Tous les champs sont obligatoires.</p>
-
-			{/* Table 1 - Variable pay gap */}
-			<PayGapTable
-				caption="Écart de rémunération variable ou complémentaire"
-				className={stepStyles.payGapTable}
-				columnHeader={"Rémunération variable\nou complémentaire"}
-				onRowChange={handleRowChange}
-				rows={rows}
-			/>
-
-			{/* Table 2 - Beneficiaries */}
-			<div
-				className={`fr-table fr-table--no-caption fr-mb-1w ${stepStyles.payGapTable}`}
-			>
-				<div className="fr-table__wrapper">
-					<div className="fr-table__container">
-						<div className="fr-table__content">
-							<table>
-								<caption>
-									Bénéficiaires de composantes variables ou complémentaires
-								</caption>
-								<thead>
-									<tr>
-										<th scope="col">Sexe</th>
-										<th scope="col">
-											Total de salariés
-											{maxWomen !== undefined && maxMen !== undefined
-												? ` : ${maxWomen + maxMen}`
-												: ""}
-										</th>
-										<th scope="col">
-											Bénéficiaires de composantes
-											<br />
-											variables ou complémentaires
-										</th>
-										<th scope="col">Proportion</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<strong>Femmes</strong>
-										</td>
-										<td>{maxWomen ?? "-"}</td>
-										<td>
-											<input
-												aria-label="Bénéficiaires femmes"
-												className="fr-input"
-												max={maxWomen}
-												min="0"
-												onChange={(e) =>
-													handleBenefChange(
-														setBeneficiaryWomen,
-														maxWomen,
-														e.target.value,
-													)
-												}
-												type="number"
-												value={beneficiaryWomen}
-											/>
-										</td>
-										<td>{computeProportion(beneficiaryWomen, maxWomen)}</td>
-									</tr>
-									<tr>
-										<td>
-											<strong>Hommes</strong>
-										</td>
-										<td>{maxMen ?? "-"}</td>
-										<td>
-											<input
-												aria-label="Bénéficiaires hommes"
-												className="fr-input"
-												max={maxMen}
-												min="0"
-												onChange={(e) =>
-													handleBenefChange(
-														setBeneficiaryMen,
-														maxMen,
-														e.target.value,
-													)
-												}
-												type="number"
-												value={beneficiaryMen}
-											/>
-										</td>
-										<td>{computeProportion(beneficiaryMen, maxMen)}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
+				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{benefValidationError && (
-				<div
-					aria-live="polite"
-					className="fr-alert fr-alert--error fr-alert--sm fr-mb-3w"
-				>
-					<p>{benefValidationError}</p>
+			{/* Data section */}
+			<div className={common.dataSection}>
+				{/* Table 1 - Variable pay gap + source */}
+				<div className={common.flexColumnGapHalf}>
+					<PayGapTable
+						caption="Écart de rémunération variable ou complémentaire"
+						className={stepStyles.payGapTable}
+						columnHeader={"Rémunération variable\nou complémentaire"}
+						onRowChange={handleRowChange}
+						rows={rows}
+					/>
+
+					{gipPrefillData && (
+						<PrefillSource
+							periodEnd={gipPrefillData.periodEnd}
+							tooltipId="tooltip-source-step3-paygap"
+						/>
+					)}
 				</div>
+
+				{/* Table 2 - Beneficiaries + source */}
+				<div className={common.flexColumnGapHalf}>
+					<div
+						className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
+					>
+						<div className="fr-table__wrapper">
+							<div className="fr-table__container">
+								<div className="fr-table__content">
+									<table>
+										<caption>
+											Bénéficiaires de composantes variables ou complémentaires
+										</caption>
+										<thead>
+											<tr>
+												<th scope="col">Sexe</th>
+												<th scope="col">
+													Total de salariés
+													{maxWomen !== undefined && maxMen !== undefined
+														? ` : ${maxWomen + maxMen}`
+														: ""}
+												</th>
+												<th scope="col">
+													Bénéficiaires de composantes
+													<br />
+													variables ou complémentaires
+												</th>
+												<th scope="col">Proportion</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>
+													<strong>Femmes</strong>
+												</td>
+												<td>
+													<strong>{maxWomen ?? "-"}</strong>
+												</td>
+												<td>
+													<input
+														aria-label="Bénéficiaires femmes"
+														className="fr-input"
+														max={maxWomen}
+														min="0"
+														onChange={(e) =>
+															handleBenefChange(
+																setBeneficiaryWomen,
+																maxWomen,
+																e.target.value,
+															)
+														}
+														type="number"
+														value={beneficiaryWomen}
+													/>
+												</td>
+												<td>
+													<strong>
+														{computeProportion(beneficiaryWomen, maxWomen)}
+													</strong>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<strong>Hommes</strong>
+												</td>
+												<td>
+													<strong>{maxMen ?? "-"}</strong>
+												</td>
+												<td>
+													<input
+														aria-label="Bénéficiaires hommes"
+														className="fr-input"
+														max={maxMen}
+														min="0"
+														onChange={(e) =>
+															handleBenefChange(
+																setBeneficiaryMen,
+																maxMen,
+																e.target.value,
+															)
+														}
+														type="number"
+														value={beneficiaryMen}
+													/>
+												</td>
+												<td>
+													<strong>
+														{computeProportion(beneficiaryMen, maxMen)}
+													</strong>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{benefValidationError && (
+						<div
+							aria-live="polite"
+							className="fr-alert fr-alert--error fr-alert--sm"
+						>
+							<p>{benefValidationError}</p>
+						</div>
+					)}
+
+					{gipPrefillData && (
+						<PrefillSource
+							periodEnd={gipPrefillData.periodEnd}
+							tooltipId="tooltip-source-step3"
+						/>
+					)}
+				</div>
+
+				<DefinitionAccordion
+					id="accordion-step3"
+					title="Définitions et méthode de calcul"
+				/>
+			</div>
+
+			{gipPrefillData && (
+				<GapInterpretationCallout
+					beneficiaryMen={beneficiaryMen}
+					beneficiaryWomen={beneficiaryWomen}
+					maxMen={maxMen}
+					maxWomen={maxWomen}
+					rows={rows}
+					variant="variablePay"
+				/>
 			)}
 
-			<DefinitionAccordion
-				id="accordion-step3"
-				title="Définitions et méthode de calcul"
-			/>
-
 			{validationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
+				<div aria-live="polite" className="fr-alert fr-alert--error">
 					<p>{validationError}</p>
 				</div>
 			)}
 
 			{mutation.error && (
-				<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-2w">
+				<div aria-live="polite" className="fr-alert fr-alert--error">
 					<p>{mutation.error.message}</p>
 				</div>
 			)}
 
 			<FormActions
+				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				previousHref="/declaration-remuneration/etape/2"
 			/>

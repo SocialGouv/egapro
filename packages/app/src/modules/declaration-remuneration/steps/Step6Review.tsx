@@ -45,6 +45,7 @@ type Props = {
 	step4Categories?: StepCategoryData[];
 	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
+	isPrefilled?: boolean;
 };
 
 export function Step6Review({
@@ -53,6 +54,7 @@ export function Step6Review({
 	step4Categories = [],
 	step5Categories = [],
 	isSubmitted = false,
+	isPrefilled = false,
 }: Props) {
 	const currentYear = new Date().getFullYear();
 	const router = useRouter();
@@ -303,18 +305,73 @@ export function Step6Review({
 
 			{isSubmitted && <DownloadDeclarationPdfButton />}
 
-			{/* Next steps callout when high gap detected */}
-			{highGap && (
+			{/* Next steps callout when high gap detected or prefilled mode */}
+			{(highGap || isPrefilled) && (
 				<div className={stepStyles.nextSteps}>
-					<p className="fr-h4 fr-mb-0">Prochaines étapes</p>
-					<p className="fr-text--bold fr-mb-0">Des écarts ont été détectés</p>
-					<p className="fr-mb-0">
-						Votre entreprise présente des écarts supérieurs ou égaux à 5 %. Bien
-						que vous ne soyez pas actuellement soumis à l&apos;obligation de
-						déclaration, vous pouvez mettre en œuvre des actions correctives dès
-						maintenant afin de vous préparer à la conformité lorsque votre
-						effectif dépassera 50 salariés.
-					</p>
+					<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
+
+					{isPrefilled && (
+						<>
+							<p className="fr-mb-0">
+								Au cours du temps imparti pour réaliser votre déclaration, vous
+								devez obligatoirement informer et consulter le CSE sur
+								l&apos;exactitude des données déclarées.
+							</p>
+							<div>
+								<p className="fr-mb-0">
+									Le ou les avis du CSE devront être transmis sur le portail
+									lors de la dernière étape.
+								</p>
+								<p className="fr-text--medium fr-mb-0">
+									Mettre à jour la présence d&apos;un CSE
+								</p>
+							</div>
+						</>
+					)}
+
+					{highGap && (
+						<>
+							<p className="fr-text--bold fr-mb-0">
+								Des écarts ont été détectés
+							</p>
+							{isPrefilled ? (
+								<>
+									<p className="fr-mb-0">
+										Suite à l&apos;analyse de vos données de l&apos;indicateur
+										par catégorie de salariés, des écarts &ge; 5 % ont été
+										identifiés. Vous devez engager un des parcours de mise en
+										conformité suivant&nbsp;:
+									</p>
+									<p className="fr-mb-0">
+										Justifier les écarts par des critères objectifs et non
+										sexistes. Si vous choisissez ce parcours, vous devez
+										informer et consulter le CSE (avis à transmettre sur le
+										portail lors de la dernière étape)
+									</p>
+									<p className="fr-mb-0">
+										Si la justification n&apos;est pas possible par des critères
+										objectifs et non sexistes, vous pouvez&nbsp;:
+									</p>
+									<p className="fr-text--bold fr-mb-0">
+										Mettre en place des actions correctives et effectuer une
+										seconde déclaration dans un délai de 6 mois
+									</p>
+									<p className="fr-text--bold fr-mb-0">
+										Réaliser une évaluation conjointe des rémunérations
+									</p>
+								</>
+							) : (
+								<p className="fr-mb-0">
+									Votre entreprise présente des écarts supérieurs ou égaux à 5
+									%. Bien que vous ne soyez pas actuellement soumis à
+									l&apos;obligation de déclaration, vous pouvez mettre en œuvre
+									des actions correctives dès maintenant afin de vous préparer à
+									la conformité lorsque votre effectif dépassera 50 salariés.
+								</p>
+							)}
+						</>
+					)}
+
 					<hr className={stepStyles.separator} />
 					<p className="fr-text--bold fr-text--lg fr-mb-0">Pour vous aider</p>
 					<ul className="fr-raw-list fr-links-group">
