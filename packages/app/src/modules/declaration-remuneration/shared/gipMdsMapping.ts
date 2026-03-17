@@ -187,7 +187,7 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Rem_variable_annuelle_médiane_F: "variableAnnualMedianWomen",
 	Rem_variable_annuelle_médiane_H: "variableAnnualMedianMen",
 	Taux_horaire_variable_médian_ecart: "variableHourlyMedianGap",
-	"Taux_horaire_variable_médian_F ": "variableHourlyMedianWomen",
+	Taux_horaire_variable_médian_F: "variableHourlyMedianWomen",
 	Taux_horaire_variable_médian_H: "variableHourlyMedianMen",
 	Proportion_variable_F: "variableProportionWomen",
 	Proportion_variable_H: "variableProportionMen",
