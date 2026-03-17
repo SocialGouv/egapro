@@ -1,8 +1,4 @@
-import postgres from "postgres";
-
-const DEFAULT_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
-const TEST_SIREN = "130025265";
-const TEST_EMAIL = "test@fia1.fr";
+import { TEST_EMAIL, TEST_SIREN, withDb } from "./db";
 
 type ComplianceStateOptions = {
 	hasCse: boolean | null;
@@ -29,10 +25,7 @@ export async function setupComplianceState(
 		complianceCompletedAt = null,
 	} = options;
 
-	const url = process.env.DATABASE_URL ?? DEFAULT_URL;
-	const sql = postgres(url, { max: 1 });
-
-	try {
+	await withDb(async (sql) => {
 		const year = new Date().getFullYear();
 		// annual_base_men=1100 → 9% gap, annual_base_men=1020 → ~2% gap (below threshold)
 		const menSalary = hasInitialGap ? 1100 : 1020;
@@ -119,7 +112,5 @@ export async function setupComplianceState(
 				WHERE job_category_id = ${jobCategory.id} AND declaration_type = 'correction'
 			`;
 		}
-	} finally {
-		await sql.end();
-	}
+	});
 }

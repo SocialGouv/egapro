@@ -1,13 +1,8 @@
-import postgres from "postgres";
-
-const DEFAULT_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
-const TEST_SIREN = "130025265";
+import { TEST_SIREN, withDb } from "./db";
 
 /** Reset declaration to draft so tests are resilient to compliance test interleaving. */
 export async function resetDeclarationToDraft() {
-	const url = process.env.DATABASE_URL ?? DEFAULT_URL;
-	const sql = postgres(url, { max: 1 });
-	try {
+	await withDb(async (sql) => {
 		await sql`
 			UPDATE app_declaration
 			SET status = 'draft', current_step = 1,
@@ -35,7 +30,5 @@ export async function resetDeclarationToDraft() {
 			    WHERE d.siren = ${TEST_SIREN}
 			  )
 		`;
-	} finally {
-		await sql.end();
-	}
+	});
 }
