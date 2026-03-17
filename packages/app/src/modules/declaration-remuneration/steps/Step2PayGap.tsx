@@ -4,11 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { api } from "~/trpc/react";
-<<<<<<< HEAD
 import { buildGipRows } from "../shared/buildGipRows";
-=======
 import common from "../shared/common.module.scss";
->>>>>>> 87254e0f (fix(ui): pixel-perfect Figma spacing and bold styling)
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
