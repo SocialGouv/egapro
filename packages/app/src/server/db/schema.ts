@@ -587,3 +587,23 @@ export const jointEvaluationFilesRelations = relations(
 		}),
 	}),
 );
+
+// ── Export tables ───────────────────────────────────────────────────
+
+export const exports = createTable(
+	"export",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		date: d.date({ mode: "string" }).notNull(),
+		version: d.varchar({ length: 10 }).notNull().default("v1"),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		s3Key: d.varchar({ length: 500 }).notNull(),
+		rowCount: d.integer().notNull(),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [unique("export_date_version_idx").on(t.date, t.version)],
+);
