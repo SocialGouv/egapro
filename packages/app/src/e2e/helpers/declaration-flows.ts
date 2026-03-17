@@ -9,12 +9,8 @@ async function fillPayGapTable(page: Page) {
 		"Horaire brute médiane",
 	];
 	for (const row of rows) {
-		await page
-			.getByRole("textbox", { name: `${row} — Femmes` })
-			.fill("1000");
-		await page
-			.getByRole("textbox", { name: `${row} — Hommes` })
-			.fill("1000");
+		await page.getByRole("textbox", { name: `${row} — Femmes` }).fill("1000");
+		await page.getByRole("textbox", { name: `${row} — Hommes` }).fill("1000");
 	}
 }
 
@@ -22,45 +18,41 @@ async function fillPayGapTable(page: Page) {
 async function fillStep4Quartiles(page: Page) {
 	// Total must equal step 1 workforce: 10 women, 15 men
 	// Split across 4 quartiles: 3+3+2+2=10 women, 4+4+4+3=15 men
-	const quartileNames = [
-		"1er quartile",
-		"2e quartile",
-		"3e quartile",
-		"4e quartile",
-	];
-	const womenCounts = ["3", "3", "2", "2"];
-	const menCounts = ["4", "4", "4", "3"];
+	const quartiles = [
+		{ name: "1er quartile", women: "3", men: "4" },
+		{ name: "2e quartile", women: "3", men: "4" },
+		{ name: "3e quartile", women: "2", men: "4" },
+		{ name: "4e quartile", women: "2", men: "3" },
+	] as const;
 
-	for (let i = 0; i < 4; i++) {
-		const q = quartileNames[i];
+	for (const q of quartiles) {
 		// Each quartile appears twice (annual table + hourly table) — fill both
 		await page
-			.getByRole("spinbutton", { name: `Nombre de femmes ${q}` })
+			.getByRole("spinbutton", { name: `Nombre de femmes ${q.name}` })
 			.nth(0)
-			.fill(womenCounts[i]);
+			.fill(q.women);
 		await page
-			.getByRole("spinbutton", { name: `Nombre d'hommes ${q}` })
+			.getByRole("spinbutton", { name: `Nombre d'hommes ${q.name}` })
 			.nth(0)
-			.fill(menCounts[i]);
+			.fill(q.men);
 		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q}` })
+			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
 			.nth(0)
 			.fill("1000");
 	}
 
 	// Hourly table (same quartile names, second occurrence)
-	for (let i = 0; i < 4; i++) {
-		const q = quartileNames[i];
+	for (const q of quartiles) {
 		await page
-			.getByRole("spinbutton", { name: `Nombre de femmes ${q}` })
+			.getByRole("spinbutton", { name: `Nombre de femmes ${q.name}` })
 			.nth(1)
-			.fill(womenCounts[i]);
+			.fill(q.women);
 		await page
-			.getByRole("spinbutton", { name: `Nombre d'hommes ${q}` })
+			.getByRole("spinbutton", { name: `Nombre d'hommes ${q.name}` })
 			.nth(1)
-			.fill(menCounts[i]);
+			.fill(q.men);
 		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q}` })
+			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
 			.nth(1)
 			.fill("10");
 	}
@@ -79,12 +71,8 @@ export async function completeDeclaration(
 	await page.waitForURL("**/declaration-remuneration/etape/1");
 
 	// Step 1: Fill workforce (10 women + 15 men = 25 total)
-	await page
-		.getByRole("spinbutton", { name: "Nombre de femmes" })
-		.fill("10");
-	await page
-		.getByRole("spinbutton", { name: "Nombre d'hommes" })
-		.fill("15");
+	await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
+	await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/2");
 
