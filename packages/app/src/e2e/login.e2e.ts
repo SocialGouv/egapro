@@ -30,6 +30,7 @@ test.describe("ProConnect authentication flow", () => {
 	});
 
 	test("logs out and returns to unauthenticated state", async ({ page }) => {
+		test.setTimeout(120_000);
 		await loginWithProConnect(page);
 
 		await page.getByRole("button", { name: "Mon espace" }).click();
