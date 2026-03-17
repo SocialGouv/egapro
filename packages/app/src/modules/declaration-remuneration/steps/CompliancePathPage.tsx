@@ -12,7 +12,7 @@ type ComplianceState =
 	| { type: "first_round" }
 	| { type: "second_round" };
 
-function getComplianceState(
+export function getComplianceState(
 	compliancePath: string | null,
 	secondDeclarationStatus: string | null,
 	initialCategories: Parameters<typeof hasGapsAboveThreshold>[0],
