@@ -1,15 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
+
+const mockMutate = vi.fn();
+const mockPush = vi.fn();
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({ push: mockPush }),
+	usePathname: () => "/declaration-remuneration/parcours-conformite/etape/3",
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submitSecondDeclaration: {
-				useMutation: () => ({
-					mutate: vi.fn(),
+				useMutation: (opts: { onSuccess?: () => void }) => ({
+					mutate: () => {
+						mockMutate();
+						opts.onSuccess?.();
+					},
 					isPending: false,
 					error: null,
 				}),
@@ -56,6 +67,11 @@ const mockCategories: EmployeeCategoryRow[] = [
 ];
 
 describe("SecondDeclarationStep3Review", () => {
+	beforeEach(() => {
+		mockMutate.mockClear();
+		mockPush.mockClear();
+	});
+
 	it("renders the title and step indicator", () => {
 		render(
 			<SecondDeclarationStep3Review
@@ -212,5 +228,88 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(
 			screen.queryByText("Des écarts ont été de nouveau détectés"),
 		).not.toBeInTheDocument();
+	});
+
+	it("navigates to compliance path when gaps persist after submit", async () => {
+		const user = userEvent.setup();
+		const categoriesWithHighGaps: EmployeeCategoryRow[] = [
+			makeCategory({
+				annualBaseWomen: "1000",
+				annualBaseMen: "2000",
+			}),
+		];
+
+		render(
+			<SecondDeclarationStep3Review
+				hasCse={true}
+				secondDeclarationCategories={categoriesWithHighGaps}
+			/>,
+		);
+
+		await user.click(screen.getByLabelText(/Je certifie/));
+		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
+	it("navigates to avis-cse when no gaps and hasCse is true", async () => {
+		const user = userEvent.setup();
+		const categoriesNoGaps: EmployeeCategoryRow[] = [
+			makeCategory({
+				annualBaseWomen: "9800",
+				annualBaseMen: "10000",
+			}),
+		];
+
+		render(
+			<SecondDeclarationStep3Review
+				hasCse={true}
+				secondDeclarationCategories={categoriesNoGaps}
+			/>,
+		);
+
+		await user.click(screen.getByLabelText(/Je certifie/));
+		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
+	it("navigates to confirmation when no gaps and no CSE", async () => {
+		const user = userEvent.setup();
+		const categoriesNoGaps: EmployeeCategoryRow[] = [
+			makeCategory({
+				annualBaseWomen: "9800",
+				annualBaseMen: "10000",
+			}),
+		];
+
+		render(
+			<SecondDeclarationStep3Review
+				hasCse={false}
+				secondDeclarationCategories={categoriesNoGaps}
+			/>,
+		);
+
+		await user.click(screen.getByLabelText(/Je certifie/));
+		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/confirmation",
+		);
+	});
+
+	it("renders empty state when no categories", () => {
+		render(
+			<SecondDeclarationStep3Review
+				hasCse={null}
+				secondDeclarationCategories={[]}
+			/>,
+		);
+		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
 	});
 });
