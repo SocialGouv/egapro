@@ -56,6 +56,15 @@ async function selectCompliancePath(
 	await page.getByRole("button", { name: "Suivant" }).click();
 }
 
+async function submitSecondDeclaration(page: Page, expectedUrlPattern: string) {
+	await page.goto(`${COMPLIANCE_PATH}/etape/3`);
+	await page
+		.getByText(/Je certifie que les données saisies sont exactes/)
+		.click();
+	await page.getByRole("button", { name: "Soumettre" }).click();
+	await page.waitForURL(expectedUrlPattern, { timeout: 10_000 });
+}
+
 // === GROUP A: No gap — auto-redirects ===
 
 test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
@@ -178,12 +187,7 @@ test.describe("Path 6: corrective_action + no correction gap + hasCse → /avis-
 	test("step 3: submit second decl (no gap) → navigates to /avis-cse", async ({
 		page,
 	}) => {
-		await page.goto(`${COMPLIANCE_PATH}/etape/3`);
-		await page
-			.getByText(/Je certifie que les données saisies sont exactes/)
-			.click();
-		await page.getByRole("button", { name: "Soumettre" }).click();
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await submitSecondDeclaration(page, "**/avis-cse/**");
 	});
 });
 
@@ -200,12 +204,7 @@ test.describe("Path 7: corrective_action + no correction gap + no hasCse → /co
 	test("step 3: submit second decl (no gap) → navigates to /confirmation", async ({
 		page,
 	}) => {
-		await page.goto(`${COMPLIANCE_PATH}/etape/3`);
-		await page
-			.getByText(/Je certifie que les données saisies sont exactes/)
-			.click();
-		await page.getByRole("button", { name: "Soumettre" }).click();
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await submitSecondDeclaration(page, `**${CONFIRMATION_PATH}`);
 	});
 });
 
@@ -222,12 +221,7 @@ test.describe("Path 8: corrective_action + correction gap → second round choic
 	test("step 3: submit second decl (gap) → navigates back to compliance path", async ({
 		page,
 	}) => {
-		await page.goto(`${COMPLIANCE_PATH}/etape/3`);
-		await page
-			.getByText(/Je certifie que les données saisies sont exactes/)
-			.click();
-		await page.getByRole("button", { name: "Soumettre" }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await submitSecondDeclaration(page, `**${COMPLIANCE_PATH}`);
 	});
 
 	test("second round shows only justify and joint_evaluation (no corrective_action)", async ({
@@ -331,6 +325,6 @@ test.describe("Path 12: complianceCompletedAt set → immediate redirect", () =>
 			},
 		);
 		// Should be on /avis-cse (hasCse=true)
-		await expect(page.url()).toContain("avis-cse");
+		await expect(page).toHaveURL(/avis-cse/);
 	});
 });
