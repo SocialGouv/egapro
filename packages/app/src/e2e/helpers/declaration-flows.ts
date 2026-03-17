@@ -1,5 +1,71 @@
 import type { Page } from "@playwright/test";
 
+/** Fill all pay gap textboxes on steps 2 and 3 with equal values (no gap). */
+async function fillPayGapTable(page: Page) {
+	const rows = [
+		"Annuelle brute moyenne",
+		"Horaire brute moyenne",
+		"Annuelle brute médiane",
+		"Horaire brute médiane",
+	];
+	for (const row of rows) {
+		await page
+			.getByRole("textbox", { name: `${row} — Femmes` })
+			.fill("1000");
+		await page
+			.getByRole("textbox", { name: `${row} — Hommes` })
+			.fill("1000");
+	}
+}
+
+/** Fill step 4 quartile data with consistent values (total = step 1 workforce). */
+async function fillStep4Quartiles(page: Page) {
+	// Total must equal step 1 workforce: 10 women, 15 men
+	// Split across 4 quartiles: 3+3+2+2=10 women, 4+4+4+3=15 men
+	const quartileNames = [
+		"1er quartile",
+		"2e quartile",
+		"3e quartile",
+		"4e quartile",
+	];
+	const womenCounts = ["3", "3", "2", "2"];
+	const menCounts = ["4", "4", "4", "3"];
+
+	for (let i = 0; i < 4; i++) {
+		const q = quartileNames[i];
+		// Each quartile appears twice (annual table + hourly table) — fill both
+		await page
+			.getByRole("spinbutton", { name: `Nombre de femmes ${q}` })
+			.nth(0)
+			.fill(womenCounts[i]);
+		await page
+			.getByRole("spinbutton", { name: `Nombre d'hommes ${q}` })
+			.nth(0)
+			.fill(menCounts[i]);
+		await page
+			.getByRole("textbox", { name: `Rémunération brute ${q}` })
+			.nth(0)
+			.fill("1000");
+	}
+
+	// Hourly table (same quartile names, second occurrence)
+	for (let i = 0; i < 4; i++) {
+		const q = quartileNames[i];
+		await page
+			.getByRole("spinbutton", { name: `Nombre de femmes ${q}` })
+			.nth(1)
+			.fill(womenCounts[i]);
+		await page
+			.getByRole("spinbutton", { name: `Nombre d'hommes ${q}` })
+			.nth(1)
+			.fill(menCounts[i]);
+		await page
+			.getByRole("textbox", { name: `Rémunération brute ${q}` })
+			.nth(1)
+			.fill("10");
+	}
+}
+
 /**
  * Fill and submit a complete declaration through all 6 steps.
  * Controls whether the employee category data produces a pay gap ≥ 5%.
@@ -12,19 +78,38 @@ export async function completeDeclaration(
 	await page.goto("/declaration-remuneration");
 	await page.waitForURL("**/declaration-remuneration/etape/1");
 
-	// Step 1: Fill workforce
-	await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
-	await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
+	// Step 1: Fill workforce (10 women + 15 men = 25 total)
+	await page
+		.getByRole("spinbutton", { name: "Nombre de femmes" })
+		.fill("10");
+	await page
+		.getByRole("spinbutton", { name: "Nombre d'hommes" })
+		.fill("15");
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/2");
 
-	// Steps 2-4: Click through (pre-populated from GIP-MDS or auto-saved)
-	for (const step of [3, 4, 5]) {
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL(`**/declaration-remuneration/etape/${step}`);
-	}
+	// Step 2: Pay gap — fill all 8 fields with equal values
+	await fillPayGapTable(page);
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL("**/declaration-remuneration/etape/3");
 
-	// Step 5: Fill one employee category with gap or no-gap salary data
+	// Step 3: Variable pay — same table + beneficiary counts
+	await fillPayGapTable(page);
+	await page
+		.getByRole("spinbutton", { name: "Bénéficiaires femmes" })
+		.fill("5");
+	await page
+		.getByRole("spinbutton", { name: "Bénéficiaires hommes" })
+		.fill("5");
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL("**/declaration-remuneration/etape/4");
+
+	// Step 4: Quartile distribution — fill 8 quartiles (4 annual + 4 hourly)
+	await fillStep4Quartiles(page);
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL("**/declaration-remuneration/etape/5");
+
+	// Step 5: Employee categories — fill one category with gap or no-gap salary
 	// Gap formula: |((men - women) / men) * 100|
 	// women=1000, men=1100 → 9% gap (triggers compliance)
 	// women=1000, men=1020 → 2% gap (no compliance)

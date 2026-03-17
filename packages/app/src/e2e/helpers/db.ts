@@ -8,16 +8,38 @@ function createConnection() {
 	return postgres(url, { max: 1 });
 }
 
-/** Reset the test declaration to draft so a new full flow can be tested. */
+/**
+ * Reset the test declaration to draft and clean all associated data
+ * so a new full flow can be tested from scratch.
+ */
 export async function resetDeclarationToDraft() {
 	const sql = createConnection();
 	try {
+		// Reset declaration status
 		await sql`
 			UPDATE app_declaration
 			SET status = 'draft', current_step = 1,
 			    compliance_path = NULL, second_declaration_status = NULL,
 			    compliance_completed_at = NULL
 			WHERE siren = ${TEST_SIREN}
+		`;
+
+		// Clean employee categories (both initial and correction) to avoid stale data
+		await sql`
+			DELETE FROM app_employee_category
+			WHERE job_category_id IN (
+			    SELECT jc.id FROM app_job_category jc
+			    INNER JOIN app_declaration d ON d.id = jc.declaration_id
+			    WHERE d.siren = ${TEST_SIREN}
+			)
+		`;
+
+		// Clean job categories so step 5 starts fresh
+		await sql`
+			DELETE FROM app_job_category
+			WHERE declaration_id IN (
+			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
 		`;
 	} finally {
 		await sql.end();
