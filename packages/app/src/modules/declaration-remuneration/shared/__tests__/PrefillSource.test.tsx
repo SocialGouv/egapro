@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { PrefillSource } from "../PrefillNotice";
+import { PrefillSource } from "../PrefillSource";
 
 describe("PrefillSource", () => {
 	it("renders DSN source text", () => {

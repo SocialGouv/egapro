@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { api } from "~/trpc/react";
+import { buildGipRows } from "../shared/buildGipRows";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
 import {
@@ -19,7 +20,7 @@ import {
 	handlePayGapRowChange,
 	PayGapTable,
 } from "../shared/PayGapTable";
-import { PrefillSource } from "../shared/PrefillNotice";
+import { PrefillSource } from "../shared/PrefillSource";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
@@ -32,31 +33,6 @@ type Step3VariablePayProps = {
 	maxWomen?: number;
 	maxMen?: number;
 };
-
-function buildGipRows(gip: GipPrefillData["step3"]): PayGapRow[] {
-	return [
-		{
-			label: "Annuelle brute moyenne",
-			womenValue: gip.annualMeanWomen ?? "",
-			menValue: gip.annualMeanMen ?? "",
-		},
-		{
-			label: "Horaire brute moyenne",
-			womenValue: gip.hourlyMeanWomen ?? "",
-			menValue: gip.hourlyMeanMen ?? "",
-		},
-		{
-			label: "Annuelle brute médiane",
-			womenValue: gip.annualMedianWomen ?? "",
-			menValue: gip.annualMedianMen ?? "",
-		},
-		{
-			label: "Horaire brute médiane",
-			womenValue: gip.hourlyMedianWomen ?? "",
-			menValue: gip.hourlyMedianMen ?? "",
-		},
-	];
-}
 
 export function Step3VariablePay({
 	initialData,

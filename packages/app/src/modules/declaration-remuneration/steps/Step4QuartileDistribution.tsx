@@ -11,7 +11,7 @@ import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { normalizeDecimalInput } from "../shared/gapUtils";
 import type { GipPrefillData, GipQuartileData } from "../shared/gipMdsMapping";
-import { PrefillSource } from "../shared/PrefillNotice";
+import { PrefillSource } from "../shared/PrefillSource";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
