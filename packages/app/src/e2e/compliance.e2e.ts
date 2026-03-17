@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { setupComplianceState } from "./helpers/compliance";
 import {
+	COMPLIANCE_PATH,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
@@ -10,7 +11,6 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
 
 // === GROUP A: No gap — auto-redirects ===

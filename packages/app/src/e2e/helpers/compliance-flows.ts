@@ -2,7 +2,7 @@ import path from "node:path";
 import type { Page } from "@playwright/test";
 
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
-const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
+export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 
 export async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
 	await page.waitForURL("**/avis-cse/etape/1");
