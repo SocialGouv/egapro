@@ -205,14 +205,10 @@ test.describe("Path 8: gap + corrective action (gap persists) → second round c
 			}),
 		).not.toBeVisible();
 	});
-});
 
-// === GROUP E: Second round paths ===
-
-test.describe("Path 9: second round + justify → /avis-cse", () => {
-	// Reuses state from Path 8 (second declaration submitted, gap persists)
-
-	test("justify → navigates to /avis-cse/etape/1", async ({ page }) => {
+	test("second round: justify → navigates to /avis-cse/etape/1", async ({
+		page,
+	}) => {
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
 	});
