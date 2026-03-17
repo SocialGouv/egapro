@@ -49,7 +49,7 @@ export function CategoryDataTable({
 
 	const id = (suffix: string) => `cat-${catIndex}-${suffix}`;
 	return (
-		<div className="fr-table fr-table--no-caption fr-mb-0">
+		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">

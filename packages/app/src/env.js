@@ -52,6 +52,7 @@ export const env = createEnv({
 		S3_SECRET_ACCESS_KEY: z.string(),
 		S3_BUCKET_NAME: z.string(),
 		NEXTAUTH_URL: z.string().url(),
+		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 	},
 
 	/**
@@ -90,6 +91,7 @@ export const env = createEnv({
 		S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
 		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

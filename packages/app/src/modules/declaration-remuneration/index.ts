@@ -11,6 +11,12 @@ export {
 	gapLevel,
 	hasGapsAboveThreshold,
 } from "./shared/gapUtils";
+export type {
+	GipMdsRow,
+	GipPrefillData,
+	GipQuartileData,
+} from "./shared/gipMdsMapping";
+export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { mapDbCategories } from "./shared/mapDbCategories";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
