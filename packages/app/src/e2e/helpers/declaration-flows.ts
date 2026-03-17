@@ -97,25 +97,29 @@ export async function completeDeclaration(
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/5");
 
-	// Step 5: Employee categories — fill one category with gap or no-gap salary
+	// Step 5: Employee categories — fill salary data to control gap
 	// Gap formula: |((men - women) / men) * 100|
 	// women=1000, men=1100 → 9% gap (triggers compliance)
 	// women=1000, men=1020 → 2% gap (no compliance)
 	const menSalary = options.hasGap ? "1100" : "1020";
 
-	await page
-		.getByRole("combobox", {
-			name: /source utilisée pour déterminer les catégories/i,
-		})
-		.selectOption("csp");
+	// If categories are pre-populated (from getOrCreate), the source select
+	// is replaced by read-only text. Only select source if the combobox exists.
+	const sourceSelect = page.getByRole("combobox", {
+		name: /source utilisée pour déterminer les catégories/i,
+	});
+	if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
+		await sourceSelect.selectOption("csp");
+		await page.getByRole("textbox", { name: "Nom" }).fill("Catégorie test");
+		await page
+			.getByRole("spinbutton", { name: "Effectif femmes, catégorie 1" })
+			.fill("10");
+		await page
+			.getByRole("spinbutton", { name: "Effectif hommes, catégorie 1" })
+			.fill("15");
+	}
 
-	await page.getByRole("textbox", { name: "Nom" }).fill("Catégorie test");
-	await page
-		.getByRole("spinbutton", { name: "Effectif femmes, catégorie 1" })
-		.fill("10");
-	await page
-		.getByRole("spinbutton", { name: "Effectif hommes, catégorie 1" })
-		.fill("15");
+	// Fill salary data on category 1 (works for both fresh and pre-populated)
 	await page
 		.getByRole("textbox", {
 			name: "Salaire de base annuel femmes, catégorie 1",

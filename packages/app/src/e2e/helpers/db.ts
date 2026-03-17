@@ -24,22 +24,15 @@ export async function resetDeclarationToDraft() {
 			WHERE siren = ${TEST_SIREN}
 		`;
 
-		// Clean employee categories (both initial and correction) to avoid stale data
+		// Clean correction employee categories to avoid stale second-declaration data
 		await sql`
 			DELETE FROM app_employee_category
-			WHERE job_category_id IN (
+			WHERE declaration_type = 'correction'
+			  AND job_category_id IN (
 			    SELECT jc.id FROM app_job_category jc
 			    INNER JOIN app_declaration d ON d.id = jc.declaration_id
 			    WHERE d.siren = ${TEST_SIREN}
-			)
-		`;
-
-		// Clean job categories so step 5 starts fresh
-		await sql`
-			DELETE FROM app_job_category
-			WHERE declaration_id IN (
-			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
-			)
+			  )
 		`;
 	} finally {
 		await sql.end();
