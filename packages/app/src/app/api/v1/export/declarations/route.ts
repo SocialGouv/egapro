@@ -116,8 +116,10 @@ export async function GET(request: Request) {
 				updatedAt: row.updatedAt?.toISOString() ?? null,
 				totalWomen: row.totalWomen,
 				totalMen: row.totalMen,
-				indicators: buildIndicators(categories),
-				indicatorG: indicatorG.length > 0 ? indicatorG : null,
+				indicators: {
+					...buildIndicators(categories),
+					G: buildIndicatorG(indicatorG),
+				},
 				secondDeclaration: {
 					status: row.secondDeclarationStatus,
 					referencePeriodStart: row.secondDeclReferencePeriodStart,
@@ -263,7 +265,53 @@ function buildIndicators(categories: CategoryRow[]) {
 	};
 }
 
-// ── Indicator G (job categories + employee categories) ───────────────
+type IndicatorGCategory = {
+	categoryName: string;
+	detail: string | null;
+	womenCount: number | null;
+	menCount: number | null;
+	annualBaseWomen: string | null;
+	annualBaseMen: string | null;
+	annualVariableWomen: string | null;
+	annualVariableMen: string | null;
+	hourlyBaseWomen: string | null;
+	hourlyBaseMen: string | null;
+	hourlyVariableWomen: string | null;
+	hourlyVariableMen: string | null;
+};
+
+function buildIndicatorG(entries: IndicatorGEntry[]): {
+	initial: IndicatorGCategory[];
+	correction: IndicatorGCategory[];
+} | null {
+	if (entries.length === 0) return null;
+
+	const toCategory = (e: IndicatorGEntry): IndicatorGCategory => ({
+		categoryName: e.categoryName,
+		detail: e.detail,
+		womenCount: e.womenCount,
+		menCount: e.menCount,
+		annualBaseWomen: e.annualBaseWomen,
+		annualBaseMen: e.annualBaseMen,
+		annualVariableWomen: e.annualVariableWomen,
+		annualVariableMen: e.annualVariableMen,
+		hourlyBaseWomen: e.hourlyBaseWomen,
+		hourlyBaseMen: e.hourlyBaseMen,
+		hourlyVariableWomen: e.hourlyVariableWomen,
+		hourlyVariableMen: e.hourlyVariableMen,
+	});
+
+	const initial = entries
+		.filter((e) => e.declarationType === "initial")
+		.map(toCategory);
+	const correction = entries
+		.filter((e) => e.declarationType === "correction")
+		.map(toCategory);
+
+	return { initial, correction };
+}
+
+// ── Indicator G query (job categories + employee categories) ─────────
 
 type IndicatorGEntry = {
 	categoryName: string;
