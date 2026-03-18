@@ -1,5 +1,12 @@
-export { buildExportRows } from "./buildExportRows";
-export { generateCsv } from "./generateCsv";
-export { buildExportKey, generateDailyExport } from "./generateDailyExport";
-export { CSV_COLUMNS, EXPORT_VERSION } from "./shared/constants";
-export type { ExportRow } from "./types";
+export { buildExportRows, buildIndicatorGRows } from "./buildExportRows";
+export { generateXlsx } from "./generateXlsx";
+export {
+	buildExportKey,
+	generateYearlyExport,
+} from "./generateYearlyExport";
+export {
+	DECLARATION_COLUMNS,
+	EXPORT_VERSION,
+	INDICATOR_G_COLUMNS,
+} from "./shared/constants";
+export type { ExportRow, IndicatorGRow } from "./types";

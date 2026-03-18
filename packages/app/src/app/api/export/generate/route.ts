@@ -1,26 +1,27 @@
 import { z } from "zod";
 
-import { generateDailyExport } from "~/modules/export";
+import { generateYearlyExport } from "~/modules/export";
 import { db } from "~/server/db";
 
 const querySchema = z.object({
-	date: z
+	year: z
 		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format")
+		.regex(/^\d{4}$/, "Year must be YYYY format")
+		.transform(Number)
 		.optional(),
 });
 
 /**
  * POST /api/export/generate
  *
- * Trigger daily export generation. Called by cron job or manually.
- * Optional query param `date` (YYYY-MM-DD) — defaults to yesterday.
+ * Trigger yearly export XLSX generation. Called by cron job or manually.
+ * Optional query param `year` (YYYY) — defaults to current year.
  */
 export async function POST(request: Request) {
 	try {
 		const url = new URL(request.url);
 		const parsed = querySchema.safeParse({
-			date: url.searchParams.get("date") ?? undefined,
+			year: url.searchParams.get("year") ?? undefined,
 		});
 
 		if (!parsed.success) {
@@ -30,12 +31,12 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const date = parsed.data.date ?? getYesterday();
-		const result = await generateDailyExport(db, date);
+		const year = parsed.data.year ?? new Date().getUTCFullYear();
+		const result = await generateYearlyExport(db, year);
 
 		return Response.json({
 			success: true,
-			date,
+			year,
 			...result,
 		});
 	} catch (error) {
@@ -45,10 +46,4 @@ export async function POST(request: Request) {
 			{ status: 500 },
 		);
 	}
-}
-
-function getYesterday(): string {
-	const d = new Date();
-	d.setUTCDate(d.getUTCDate() - 1);
-	return d.toISOString().slice(0, 10);
 }

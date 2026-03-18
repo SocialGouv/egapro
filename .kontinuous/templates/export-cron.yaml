@@ -24,7 +24,8 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  curl -X POST "http://app:3000/api/export/generate" \
+                  YEAR=$(date -u +%Y)
+                  curl -X POST "http://app:3000/api/export/generate?year=${YEAR}" \
                     --connect-timeout 10 \
                     --max-time 300 \
                     --fail \

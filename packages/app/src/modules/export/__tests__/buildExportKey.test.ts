@@ -7,17 +7,13 @@ vi.mock("~/server/services/s3", () => ({
 }));
 
 describe("buildExportKey", () => {
-	it("should build correct S3 key", async () => {
-		const { buildExportKey } = await import("../generateDailyExport");
-		expect(buildExportKey("2027-03-15", "v1")).toBe(
-			"exports/v1/2027-03-15.csv",
-		);
+	it("should build correct S3 key with year", async () => {
+		const { buildExportKey } = await import("../generateYearlyExport");
+		expect(buildExportKey(2027, "v1")).toBe("exports/v1/2027.xlsx");
 	});
 
 	it("should use version in the key path", async () => {
-		const { buildExportKey } = await import("../generateDailyExport");
-		expect(buildExportKey("2027-03-15", "v2")).toBe(
-			"exports/v2/2027-03-15.csv",
-		);
+		const { buildExportKey } = await import("../generateYearlyExport");
+		expect(buildExportKey(2027, "v2")).toBe("exports/v2/2027.xlsx");
 	});
 });

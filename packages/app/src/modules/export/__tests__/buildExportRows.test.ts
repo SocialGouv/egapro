@@ -13,11 +13,13 @@ describe("buildExportRows", () => {
 	const mockJobFrom = vi.fn(() => ({ where: mockJobWhere }));
 	const mockSelectDistinct = vi.fn(() => ({ from: mockJobFrom }));
 
-	// Mock for getCseOpinionsByDeclaration: select().from().where()
+	// Mock for getCseOpinionsByDeclaration + getCategoriesByDeclaration
 	const mockCseWhere = vi.fn();
 	const mockCseFrom = vi.fn(() => ({ where: mockCseWhere }));
 
-	// Generic select mock that returns different chains based on call order.
+	const mockCatWhere = vi.fn();
+	const mockCatFrom = vi.fn(() => ({ where: mockCatWhere }));
+
 	const mockSelectGeneric = vi.fn<(...args: unknown[]) => unknown>();
 
 	const mockDb = {
@@ -31,12 +33,12 @@ describe("buildExportRows", () => {
 		vi.clearAllMocks();
 		callCount = 0;
 
-		// The main query uses select(), then CSE query also uses select().
-		// We differentiate by call order.
+		// Call order: 1) declarations query, 2) CSE query, 3) categories query
 		mockSelectGeneric.mockImplementation(() => {
 			callCount++;
 			if (callCount === 1) return { from: mockFrom };
-			return { from: mockCseFrom };
+			if (callCount === 2) return { from: mockCseFrom };
+			return { from: mockCatFrom };
 		});
 	});
 
@@ -44,15 +46,16 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
-		const rows = await buildExportRows(mockDb as never, "2027-03-15");
+		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows).toEqual([]);
 		expect(mockSelectGeneric).toHaveBeenCalled();
 	});
 
-	it("should map declaration rows to ExportRow format", async () => {
+	it("should map declaration rows to ExportRow format with year filter", async () => {
 		const dbRow = {
 			declarationId: "decl-1",
 			siren: "123456789",
@@ -84,9 +87,10 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
-		const rows = await buildExportRows(mockDb as never, "2027-03-15");
+		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows).toHaveLength(1);
 		expect(rows[0]).toMatchObject({
@@ -95,8 +99,10 @@ describe("buildExportRows", () => {
 			declarationType: "6_indicateurs",
 			year: 2027,
 			declarantEmail: "jean@acme.fr",
-			createdAt: "2027-03-15T10:00:00.000Z",
-			updatedAt: "2027-03-15T12:00:00.000Z",
+			// Indicator fields should be null when no categories
+			indAAnnualMeanWomen: null,
+			indBAnnualMeanWomen: null,
+			indFAnnualQ1Women: null,
 		});
 	});
 
@@ -132,9 +138,10 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-1" }]);
 		mockCseWhere.mockResolvedValue([]);
+		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
-		const rows = await buildExportRows(mockDb as never, "2027-03-15");
+		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]?.declarationType).toBe("7_indicateurs");
 	});
@@ -186,9 +193,10 @@ describe("buildExportRows", () => {
 				opinionDate: "2027-02-20",
 			},
 		]);
+		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
-		const rows = await buildExportRows(mockDb as never, "2027-03-15");
+		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]).toMatchObject({
 			cseOpinion1Type: "accuracy",
@@ -234,9 +242,10 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
-		const rows = await buildExportRows(mockDb as never, "2027-03-15");
+		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]).toMatchObject({
 			createdAt: null,
