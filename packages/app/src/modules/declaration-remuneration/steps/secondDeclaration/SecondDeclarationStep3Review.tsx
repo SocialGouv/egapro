@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -17,18 +18,16 @@ import { NextStepsSection } from "./NextStepsSection";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 };
 
 export function SecondDeclarationStep3Review({
+	hasCse,
 	secondDeclarationCategories,
 }: Props) {
 	const router = useRouter();
 	const [certified, setCertified] = useState(false);
-
-	const mutation = api.declaration.submitSecondDeclaration.useMutation({
-		onSuccess: () => router.push("/avis-cse"),
-	});
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some(
@@ -38,6 +37,16 @@ export function SecondDeclarationStep3Review({
 			(cat.hourlyBaseGap !== null && cat.hourlyBaseGap >= 5) ||
 			(cat.hourlyVariableGap !== null && cat.hourlyVariableGap >= 5),
 	);
+
+	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		onSuccess: () => {
+			if (gapsExist) {
+				router.push(BASE_PATH);
+			} else {
+				router.push(getPostComplianceDestination(hasCse));
+			}
+		},
+	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();

@@ -1,0 +1,1 @@
+ALTER TABLE "app_declaration" ADD COLUMN "compliance_completed_at" timestamp with time zone;

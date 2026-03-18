@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { resetDeclarationToDraft } from "./helpers/declaration-reset";
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
@@ -11,6 +12,12 @@ async function goToStep(page: Page, step: number) {
 
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
+
+	// Reset DB state before this suite runs — guards against compliance tests
+	// interleaving and setting the declaration to 'submitted'.
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+	});
 
 	test.beforeEach(async ({ page }) => {
 		// Auth is handled by storageState from auth.setup.ts
@@ -169,8 +176,15 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/1");
 	});
 
+	test("previous button is present on step pages", async ({ page }) => {
+		await goToStep(page, 6);
+
+		const previousLink = page.getByRole("link", { name: "Précédent" });
+		await expect(previousLink).toBeVisible();
+	});
+
 	// Must be last — mutates declaration status to 'submitted'
-	test("step 6 submit navigates to CSE opinion page", async ({ page }) => {
+	test("step 6 submit leaves declaration page", async ({ page }) => {
 		await goToStep(page, 6);
 
 		// Click the "Suivant" submit button to open the confirmation modal
@@ -180,14 +194,12 @@ test.describe("Declaration workflow", () => {
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();
 
-		// Verify navigation to the CSE opinion page
-		await page.waitForURL("**/avis-cse/**");
-	});
-
-	test("previous button is present on step pages", async ({ page }) => {
-		await goToStep(page, 6);
-
-		const previousLink = page.getByRole("link", { name: "Précédent" });
-		await expect(previousLink).toBeVisible();
+		// After submission, compliance path kicks in. Destination depends on hasCse
+		// and gap state — exact routing is tested in compliance.e2e.ts.
+		// Here we just verify we left the declaration wizard.
+		await page.waitForURL(
+			(url) => !url.pathname.includes("/declaration-remuneration/etape/"),
+			{ timeout: 15_000 },
+		);
 	});
 });

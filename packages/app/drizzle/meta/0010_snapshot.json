@@ -1,6 +1,6 @@
 {
-	"id": "00bacf79-9c67-43ca-a743-c927b966a752",
-	"prevId": "b15a568f-2e3e-4e11-b04f-6fd1d1324289",
+	"id": "fed5074d-e3c9-42a1-9032-ef0da40bfec1",
+	"prevId": "5f228e94-b184-43df-a930-84638e2f28a4",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -563,12 +563,6 @@
 			"name": "app_declaration",
 			"schema": "",
 			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
 				"siren": {
 					"name": "siren",
 					"type": "varchar(9)",
@@ -643,30 +637,6 @@
 					"notNull": false,
 					"default": "'draft'"
 				},
-				"second_declaration_step": {
-					"name": "second_declaration_step",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"second_declaration_status": {
-					"name": "second_declaration_status",
-					"type": "varchar(20)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"second_decl_reference_period_start": {
-					"name": "second_decl_reference_period_start",
-					"type": "varchar(10)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"second_decl_reference_period_end": {
-					"name": "second_decl_reference_period_end",
-					"type": "varchar(10)",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamp with time zone",
@@ -708,213 +678,21 @@
 					"onUpdate": "no action"
 				}
 			},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {
-				"declaration_siren_year_idx": {
-					"name": "declaration_siren_year_idx",
-					"nullsNotDistinct": false,
+			"compositePrimaryKeys": {
+				"app_declaration_siren_year_pk": {
+					"name": "app_declaration_siren_year_pk",
 					"columns": ["siren", "year"]
 				}
 			},
+			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.app_employee_category": {
-			"name": "app_employee_category",
+		"public.app_gip_mds_data": {
+			"name": "app_gip_mds_data",
 			"schema": "",
 			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"job_category_id": {
-					"name": "job_category_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"declaration_type": {
-					"name": "declaration_type",
-					"type": "declaration_type",
-					"typeSchema": "public",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"women_count": {
-					"name": "women_count",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"men_count": {
-					"name": "men_count",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"annual_base_women": {
-					"name": "annual_base_women",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"annual_base_men": {
-					"name": "annual_base_men",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"annual_variable_women": {
-					"name": "annual_variable_women",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"annual_variable_men": {
-					"name": "annual_variable_men",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"hourly_base_women": {
-					"name": "hourly_base_women",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"hourly_base_men": {
-					"name": "hourly_base_men",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"hourly_variable_women": {
-					"name": "hourly_variable_women",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"hourly_variable_men": {
-					"name": "hourly_variable_men",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"updated_at": {
-					"name": "updated_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				}
-			},
-			"indexes": {},
-			"foreignKeys": {
-				"app_employee_category_job_category_id_app_job_category_id_fk": {
-					"name": "app_employee_category_job_category_id_app_job_category_id_fk",
-					"tableFrom": "app_employee_category",
-					"tableTo": "app_job_category",
-					"columnsFrom": ["job_category_id"],
-					"columnsTo": ["id"],
-					"onDelete": "no action",
-					"onUpdate": "no action"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {
-				"employee_category_job_type_idx": {
-					"name": "employee_category_job_type_idx",
-					"nullsNotDistinct": false,
-					"columns": ["job_category_id", "declaration_type"]
-				}
-			},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.app_job_category": {
-			"name": "app_job_category",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"declaration_id": {
-					"name": "declaration_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"category_index": {
-					"name": "category_index",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"name": {
-					"name": "name",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"detail": {
-					"name": "detail",
-					"type": "varchar(500)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"source": {
-					"name": "source",
-					"type": "varchar(50)",
-					"primaryKey": false,
-					"notNull": true
-				}
-			},
-			"indexes": {},
-			"foreignKeys": {
-				"app_job_category_declaration_id_app_declaration_id_fk": {
-					"name": "app_job_category_declaration_id_app_declaration_id_fk",
-					"tableFrom": "app_job_category",
-					"tableTo": "app_declaration",
-					"columnsFrom": ["declaration_id"],
-					"columnsTo": ["id"],
-					"onDelete": "no action",
-					"onUpdate": "no action"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {
-				"job_category_declaration_index_idx": {
-					"name": "job_category_declaration_index_idx",
-					"nullsNotDistinct": false,
-					"columns": ["declaration_id", "category_index"]
-				}
-			},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.app_joint_evaluation_file": {
-			"name": "app_joint_evaluation_file",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
 				"siren": {
 					"name": "siren",
 					"type": "varchar(9)",
@@ -927,49 +705,451 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"file_name": {
-					"name": "file_name",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"file_path": {
-					"name": "file_path",
-					"type": "varchar(500)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"declarant_id": {
-					"name": "declarant_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"uploaded_at": {
-					"name": "uploaded_at",
+				"imported_at": {
+					"name": "imported_at",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false
 				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
+				"period_start": {
+					"name": "period_start",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"period_end": {
+					"name": "period_end",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"workforce_ema": {
+					"name": "workforce_ema",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"men_count_annual_global": {
+					"name": "men_count_annual_global",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"women_count_annual_global": {
+					"name": "women_count_annual_global",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"men_count_hourly_global": {
+					"name": "men_count_hourly_global",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"women_count_hourly_global": {
+					"name": "women_count_hourly_global",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"men_count_annual_variable": {
+					"name": "men_count_annual_variable",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"women_count_annual_variable": {
+					"name": "women_count_annual_variable",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_mean_gap": {
+					"name": "global_annual_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_mean_women": {
+					"name": "global_annual_mean_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_mean_men": {
+					"name": "global_annual_mean_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_mean_gap": {
+					"name": "global_hourly_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_mean_women": {
+					"name": "global_hourly_mean_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_mean_men": {
+					"name": "global_hourly_mean_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_mean_gap": {
+					"name": "variable_annual_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_mean_women": {
+					"name": "variable_annual_mean_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_mean_men": {
+					"name": "variable_annual_mean_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_mean_gap": {
+					"name": "variable_hourly_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_mean_women": {
+					"name": "variable_hourly_mean_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_mean_men": {
+					"name": "variable_hourly_mean_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_median_gap": {
+					"name": "global_annual_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_median_women": {
+					"name": "global_annual_median_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_median_men": {
+					"name": "global_annual_median_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_median_gap": {
+					"name": "global_hourly_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_median_women": {
+					"name": "global_hourly_median_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_median_men": {
+					"name": "global_hourly_median_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_median_gap": {
+					"name": "variable_annual_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_median_women": {
+					"name": "variable_annual_median_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_median_men": {
+					"name": "variable_annual_median_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_median_gap": {
+					"name": "variable_hourly_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_median_women": {
+					"name": "variable_hourly_median_women",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_median_men": {
+					"name": "variable_hourly_median_men",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_proportion_women": {
+					"name": "variable_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_proportion_men": {
+					"name": "variable_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile_threshold1": {
+					"name": "annual_quartile_threshold1",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile_threshold2": {
+					"name": "annual_quartile_threshold2",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile_threshold3": {
+					"name": "annual_quartile_threshold3",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile1_proportion_women": {
+					"name": "annual_quartile1_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile2_proportion_women": {
+					"name": "annual_quartile2_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile3_proportion_women": {
+					"name": "annual_quartile3_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile4_proportion_women": {
+					"name": "annual_quartile4_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile1_proportion_men": {
+					"name": "annual_quartile1_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile2_proportion_men": {
+					"name": "annual_quartile2_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile3_proportion_men": {
+					"name": "annual_quartile3_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile4_proportion_men": {
+					"name": "annual_quartile4_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile_threshold1": {
+					"name": "hourly_quartile_threshold1",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile_threshold2": {
+					"name": "hourly_quartile_threshold2",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile_threshold3": {
+					"name": "hourly_quartile_threshold3",
+					"type": "numeric(9, 2)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile1_proportion_women": {
+					"name": "hourly_quartile1_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile2_proportion_women": {
+					"name": "hourly_quartile2_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile3_proportion_women": {
+					"name": "hourly_quartile3_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile4_proportion_women": {
+					"name": "hourly_quartile4_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile1_proportion_men": {
+					"name": "hourly_quartile1_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile2_proportion_men": {
+					"name": "hourly_quartile2_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile3_proportion_men": {
+					"name": "hourly_quartile3_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile4_proportion_men": {
+					"name": "hourly_quartile4_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_index": {
+					"name": "confidence_index",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_exotic_contracts": {
+					"name": "confidence_exotic_contracts",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_unit_measure": {
+					"name": "confidence_unit_measure",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_suspension_ratio": {
+					"name": "confidence_suspension_ratio",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_long_suspensions": {
+					"name": "confidence_long_suspensions",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_no_end_suspensions": {
+					"name": "confidence_no_end_suspensions",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_sick_leave_ratio": {
+					"name": "confidence_sick_leave_ratio",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_long_sick_leave": {
+					"name": "confidence_long_sick_leave",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_no_sick_leave": {
+					"name": "confidence_no_sick_leave",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_quota250": {
+					"name": "confidence_quota250",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_quota0": {
+					"name": "confidence_quota0",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_multi_year": {
+					"name": "confidence_multi_year",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_fp_ratio": {
+					"name": "confidence_fp_ratio",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_extreme_remuneration": {
+					"name": "confidence_extreme_remuneration",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"confidence_extreme_rate": {
+					"name": "confidence_extreme_rate",
+					"type": "numeric(9, 4)",
 					"primaryKey": false,
 					"notNull": false
 				}
 			},
 			"indexes": {
-				"joint_eval_file_siren_year_idx": {
-					"name": "joint_eval_file_siren_year_idx",
+				"gip_mds_data_siren_idx": {
+					"name": "gip_mds_data_siren_idx",
 					"columns": [
 						{
 							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -981,27 +1161,13 @@
 					"with": {}
 				}
 			},
-			"foreignKeys": {
-				"app_joint_evaluation_file_siren_app_company_siren_fk": {
-					"name": "app_joint_evaluation_file_siren_app_company_siren_fk",
-					"tableFrom": "app_joint_evaluation_file",
-					"tableTo": "app_company",
-					"columnsFrom": ["siren"],
-					"columnsTo": ["siren"],
-					"onDelete": "no action",
-					"onUpdate": "no action"
-				},
-				"app_joint_evaluation_file_declarant_id_app_user_id_fk": {
-					"name": "app_joint_evaluation_file_declarant_id_app_user_id_fk",
-					"tableFrom": "app_joint_evaluation_file",
-					"tableTo": "app_user",
-					"columnsFrom": ["declarant_id"],
-					"columnsTo": ["id"],
-					"onDelete": "no action",
-					"onUpdate": "no action"
+			"foreignKeys": {},
+			"compositePrimaryKeys": {
+				"app_gip_mds_data_siren_year_pk": {
+					"name": "app_gip_mds_data_siren_year_pk",
+					"columns": ["siren", "year"]
 				}
 			},
-			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
@@ -1239,13 +1405,7 @@
 			"isRLSEnabled": false
 		}
 	},
-	"enums": {
-		"public.declaration_type": {
-			"name": "declaration_type",
-			"schema": "public",
-			"values": ["initial", "correction"]
-		}
-	},
+	"enums": {},
 	"schemas": {},
 	"sequences": {},
 	"roles": {},

@@ -18,6 +18,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	}
 
 	const data = await api.declaration.getOrCreate();
+	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = new Date().getFullYear();
 
 	const initialCategories = mapToEmployeeCategoryRows(
@@ -79,6 +80,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	return (
 		<HydrateClient>
 			<SecondDeclarationStep3Review
+				hasCse={company.hasCse}
 				secondDeclarationCategories={reviewCategories}
 			/>
 		</HydrateClient>

@@ -64,6 +64,20 @@
 			"when": 1773328599101,
 			"tag": "0008_powerful_omega_flight",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1773331852632,
+			"tag": "0009_hot_vector",
+			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1773240598159,
+			"tag": "0010_gip_mds_data",
+			"breakpoints": true
 		}
 	]
 }

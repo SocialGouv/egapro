@@ -119,6 +119,7 @@ export const declarations = createTable(
 		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		complianceCompletedAt: d.timestamp({ withTimezone: true }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
@@ -263,6 +264,107 @@ export const employeeCategoriesRelations = relations(
 			references: [jobCategories.id],
 		}),
 	}),
+);
+
+// ── GIP MDS imported data ───────────────────────────────────────────
+
+export const gipMdsData = createTable(
+	"gip_mds_data",
+	(d) => ({
+		siren: d.varchar({ length: 9 }).notNull(),
+		year: d.integer().notNull(),
+		// File-level metadata
+		importedAt: d
+			.timestamp({ withTimezone: true })
+			.$defaultFn(() => new Date()),
+		periodStart: d.date(),
+		periodEnd: d.date(),
+		// Workforce
+		workforceEma: d.numeric({ precision: 9, scale: 2 }),
+		menCountAnnualGlobal: d.numeric({ precision: 9, scale: 2 }),
+		womenCountAnnualGlobal: d.numeric({ precision: 9, scale: 2 }),
+		menCountHourlyGlobal: d.numeric({ precision: 9, scale: 2 }),
+		womenCountHourlyGlobal: d.numeric({ precision: 9, scale: 2 }),
+		menCountAnnualVariable: d.numeric({ precision: 9, scale: 2 }),
+		womenCountAnnualVariable: d.numeric({ precision: 9, scale: 2 }),
+		// Indicator A — Global mean remuneration gap
+		globalAnnualMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		globalAnnualMeanWomen: d.numeric({ precision: 9, scale: 2 }),
+		globalAnnualMeanMen: d.numeric({ precision: 9, scale: 2 }),
+		globalHourlyMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		globalHourlyMeanWomen: d.numeric({ precision: 9, scale: 2 }),
+		globalHourlyMeanMen: d.numeric({ precision: 9, scale: 2 }),
+		// Indicator B — Variable mean remuneration gap
+		variableAnnualMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		variableAnnualMeanWomen: d.numeric({ precision: 9, scale: 2 }),
+		variableAnnualMeanMen: d.numeric({ precision: 9, scale: 2 }),
+		variableHourlyMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		variableHourlyMeanWomen: d.numeric({ precision: 9, scale: 2 }),
+		variableHourlyMeanMen: d.numeric({ precision: 9, scale: 2 }),
+		// Indicator C — Global median remuneration gap
+		globalAnnualMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		globalAnnualMedianWomen: d.numeric({ precision: 9, scale: 2 }),
+		globalAnnualMedianMen: d.numeric({ precision: 9, scale: 2 }),
+		globalHourlyMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		globalHourlyMedianWomen: d.numeric({ precision: 9, scale: 2 }),
+		globalHourlyMedianMen: d.numeric({ precision: 9, scale: 2 }),
+		// Indicator D — Variable median remuneration gap
+		variableAnnualMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		variableAnnualMedianWomen: d.numeric({ precision: 9, scale: 2 }),
+		variableAnnualMedianMen: d.numeric({ precision: 9, scale: 2 }),
+		variableHourlyMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		variableHourlyMedianWomen: d.numeric({ precision: 9, scale: 2 }),
+		variableHourlyMedianMen: d.numeric({ precision: 9, scale: 2 }),
+		// Indicator E — Variable pay proportion
+		variableProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		variableProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		// Indicator F — Quartile distribution (annual)
+		annualQuartileThreshold1: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartileThreshold2: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartileThreshold3: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartileThreshold4: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile4ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile1ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		// Indicator F — Quartile distribution (hourly)
+		hourlyQuartileThreshold1: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartileThreshold2: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartileThreshold3: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartileThreshold4: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile4ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile1ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		// Confidence index
+		confidenceIndex: d.numeric({ precision: 9, scale: 4 }),
+		confidenceExoticContracts: d.numeric({ precision: 9, scale: 4 }),
+		confidenceUnitMeasure: d.numeric({ precision: 9, scale: 4 }),
+		confidenceSuspensionRatio: d.numeric({ precision: 9, scale: 4 }),
+		confidenceLongSuspensions: d.numeric({ precision: 9, scale: 4 }),
+		confidenceNoEndSuspensions: d.numeric({ precision: 9, scale: 4 }),
+		confidenceSickLeaveRatio: d.numeric({ precision: 9, scale: 4 }),
+		confidenceLongSickLeave: d.numeric({ precision: 9, scale: 4 }),
+		confidenceNoSickLeave: d.numeric({ precision: 9, scale: 4 }),
+		confidenceQuota250: d.numeric({ precision: 9, scale: 4 }),
+		confidenceQuota0: d.numeric({ precision: 9, scale: 4 }),
+		confidenceMultiYear: d.numeric({ precision: 9, scale: 4 }),
+		confidenceFpRatio: d.numeric({ precision: 9, scale: 4 }),
+		confidenceExtremeRemuneration: d.numeric({ precision: 9, scale: 4 }),
+		confidenceExtremeRate: d.numeric({ precision: 9, scale: 4 }),
+	}),
+	(t) => [
+		primaryKey({ columns: [t.siren, t.year] }),
+		index("gip_mds_data_siren_idx").on(t.siren),
+	],
 );
 
 // ── Company tables ─────────────────────────────────────────────────

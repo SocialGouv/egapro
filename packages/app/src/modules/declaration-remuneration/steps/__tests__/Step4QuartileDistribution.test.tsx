@@ -55,7 +55,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders description text about quartiles", () => {
 		render(<Step4QuartileDistribution />);
 		expect(
-			screen.getByText(/répartit l'ensemble des salariés en quatre groupes/),
+			screen.getByText(/compare la proportion de femmes et d'hommes/),
 		).toBeInTheDocument();
 	});
 

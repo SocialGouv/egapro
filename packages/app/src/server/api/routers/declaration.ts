@@ -1,13 +1,15 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 
+import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	declarationCategories,
 	declarations,
 	employeeCategories,
+	gipMdsData,
 	jobCategories,
 } from "~/server/db/schema";
 import {
@@ -40,7 +42,7 @@ export const declarationRouter = createTRPCRouter({
 		const siren = getSiren(ctx.session.user.siret);
 		const year = getCurrentYear();
 
-		return ctx.db.transaction(async (tx) => {
+		const result = await ctx.db.transaction(async (tx) => {
 			const existing = await tx
 				.select()
 				.from(declarations)
@@ -106,6 +108,20 @@ export const declarationRouter = createTRPCRouter({
 				employeeCategories: [],
 			};
 		});
+
+		// Fetch GIP data for automatic prefilling (no user choice needed)
+		const gipRow = await ctx.db
+			.select()
+			.from(gipMdsData)
+			.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+			.limit(1);
+
+		const gipPrefillData = gipRow[0] ? mapGipToFormData(gipRow[0]) : null;
+
+		return {
+			...result,
+			gipPrefillData,
+		};
 	}),
 
 	updateStep1: protectedProcedure
@@ -389,4 +405,24 @@ export const declarationRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	completeCompliancePath: protectedProcedure.mutation(async ({ ctx }) => {
+		const siren = getSiren(ctx.session.user.siret);
+		const year = getCurrentYear();
+		const now = new Date();
+
+		// Idempotent: only set complianceCompletedAt on first completion
+		await ctx.db
+			.update(declarations)
+			.set({ complianceCompletedAt: now, updatedAt: now })
+			.where(
+				and(
+					eq(declarations.siren, siren),
+					eq(declarations.year, year),
+					isNull(declarations.complianceCompletedAt),
+				),
+			);
+
+		return { success: true };
+	}),
 });

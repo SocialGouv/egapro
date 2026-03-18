@@ -53,6 +53,7 @@ export const env = createEnv({
 		S3_BUCKET_NAME: z.string(),
 		CLAMAV_URL: z.string().url(),
 		NEXTAUTH_URL: z.string().url(),
+		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 	},
 
 	/**
@@ -92,6 +93,7 @@ export const env = createEnv({
 		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 		CLAMAV_URL: process.env.CLAMAV_URL,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
