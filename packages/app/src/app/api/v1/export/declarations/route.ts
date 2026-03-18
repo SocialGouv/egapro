@@ -158,7 +158,7 @@ function getNextDate(date: string): string {
 	return d.toISOString().slice(0, 10);
 }
 
-// ── Indicator A (step 2), B (step 3), F (step 4) ────────────────────
+// ── Indicators A–F (steps 1–4) ──────────────────────────────────────
 
 type CategoryRow = {
 	step: number;
@@ -219,21 +219,42 @@ async function getCategoriesByDeclaration(
 	return map;
 }
 
+const MEAN_CATEGORIES = ["Annuelle brute moyenne", "Horaire brute moyenne"];
+const MEDIAN_CATEGORIES = ["Annuelle brute médiane", "Horaire brute médiane"];
+const BENEFICIARY_CATEGORY = "Bénéficiaires";
+
 function buildIndicators(categories: CategoryRow[]) {
-	const byStep = (step: number) => categories.filter((c) => c.step === step);
+	const step2 = categories.filter((c) => c.step === 2);
+	const step3 = categories.filter((c) => c.step === 3);
+	const step4 = categories.filter((c) => c.step === 4);
+
+	const payValue = (c: CategoryRow) => ({
+		category: c.categoryName,
+		womenValue: c.womenValue,
+		menValue: c.menValue,
+	});
 
 	return {
-		A: byStep(2).map((c) => ({
-			category: c.categoryName,
-			womenValue: c.womenValue,
-			menValue: c.menValue,
-		})),
-		B: byStep(3).map((c) => ({
-			category: c.categoryName,
-			womenValue: c.womenValue,
-			menValue: c.menValue,
-		})),
-		F: byStep(4).map((c) => ({
+		A: step2
+			.filter((c) => MEAN_CATEGORIES.includes(c.categoryName))
+			.map(payValue),
+		B: step3
+			.filter(
+				(c) =>
+					MEAN_CATEGORIES.includes(c.categoryName) &&
+					c.categoryName !== BENEFICIARY_CATEGORY,
+			)
+			.map(payValue),
+		C: step2
+			.filter((c) => MEDIAN_CATEGORIES.includes(c.categoryName))
+			.map(payValue),
+		D: step3
+			.filter((c) => MEDIAN_CATEGORIES.includes(c.categoryName))
+			.map(payValue),
+		E: step3
+			.filter((c) => c.categoryName === BENEFICIARY_CATEGORY)
+			.map(payValue),
+		F: step4.map((c) => ({
 			category: c.categoryName,
 			womenCount: c.womenCount,
 			menCount: c.menCount,
