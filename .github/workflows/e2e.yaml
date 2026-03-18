@@ -55,9 +55,6 @@ jobs:
         run: pnpm db:push
       - name: Install Playwright browsers
         run: pnpm playwright:install
-      - name: Wait for ClamAV to be ready
-        run: docker compose up -d --wait clamavd
-        timeout-minutes: 10
       - name: Run E2E tests
         run: pnpm test:e2e
       - name: Stop services
