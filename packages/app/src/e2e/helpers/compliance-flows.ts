@@ -21,11 +21,13 @@ export async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
 
 export async function submitCseStep2(page: Page) {
 	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-	await page.getByRole("button", { name: "Soumettre" }).click();
+	await page.getByRole("button", { name: "Ajouter le fichier" }).click();
 	await page
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.click();
 	await page.getByRole("button", { name: "Valider" }).click();
+	await page.getByText("Fichier transmis").waitFor({ timeout: 10_000 });
+	await page.getByRole("link", { name: "Suivant" }).click();
 	await page.waitForURL("**/avis-cse/confirmation");
 }
 

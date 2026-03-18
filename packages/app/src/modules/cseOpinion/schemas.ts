@@ -16,3 +16,9 @@ export const saveOpinionsSchema = z.object({
 });
 
 export type SaveOpinionsInput = z.infer<typeof saveOpinionsSchema>;
+
+export const deleteFileSchema = z.object({
+	fileId: z.string().min(1),
+});
+
+export type DeleteFileInput = z.infer<typeof deleteFileSchema>;
