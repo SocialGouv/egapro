@@ -1,5 +1,6 @@
 export { FileUpload } from "./FileUpload";
 export { getDsfrModal } from "./getDsfrModal";
+export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
 export {
 	FILE_TOO_LARGE_ERROR,

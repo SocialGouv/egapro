@@ -1,4 +1,4 @@
-import { parseSiren } from "~/modules/my-space";
+import { parseSiren } from "~/modules/shared/parseSiren";
 import { auth } from "~/server/auth";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 

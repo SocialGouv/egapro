@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { FileUpload, uploadFile, useFileUploadForm } from "~/modules/shared";
+import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -24,7 +23,6 @@ export function JointEvaluationForm({
 	hasCse,
 }: Props) {
 	const router = useRouter();
-	const [isUploading, setIsUploading] = useState(false);
 
 	const saveMutation = api.jointEvaluation.uploadFile.useMutation({
 		onSuccess: () => router.push(getPostComplianceDestination(hasCse)),
@@ -35,27 +33,11 @@ export function JointEvaluationForm({
 		handleConfirm,
 		handleFileChange,
 		handleSubmit,
+		isPending,
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = useFileUploadForm({
-		onConfirm: async () => {
-			if (!selectedFile) return;
-			setIsUploading(true);
-			try {
-				const result = await uploadFile(selectedFile);
-				if (!result.ok) {
-					throw new Error(result.error);
-				}
-				saveMutation.mutate({
-					fileName: selectedFile.name,
-					filePath: result.key,
-				});
-			} catch {
-				setIsUploading(false);
-			}
-		},
-	});
+	} = useFileUploadForm({ saveMutation });
 
 	return (
 		<>
@@ -171,7 +153,7 @@ export function JointEvaluationForm({
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isUploading || saveMutation.isPending}
+						disabled={isPending}
 						type="submit"
 					>
 						Transmettre

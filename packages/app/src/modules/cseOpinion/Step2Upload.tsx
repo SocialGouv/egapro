@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-import { FileUpload, uploadFile, useFileUploadForm } from "~/modules/shared";
+import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -18,7 +17,6 @@ type Props = {
 
 export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 	const router = useRouter();
-	const [isUploading, setIsUploading] = useState(false);
 
 	const saveMutation = api.cseOpinion.uploadFile.useMutation({
 		onSuccess: () => router.push("/avis-cse/confirmation"),
@@ -29,27 +27,11 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 		handleConfirm,
 		handleFileChange,
 		handleSubmit,
+		isPending,
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = useFileUploadForm({
-		onConfirm: async () => {
-			if (!selectedFile) return;
-			setIsUploading(true);
-			try {
-				const result = await uploadFile(selectedFile);
-				if (!result.ok) {
-					throw new Error(result.error);
-				}
-				saveMutation.mutate({
-					fileName: selectedFile.name,
-					filePath: result.key,
-				});
-			} catch {
-				setIsUploading(false);
-			}
-		},
-	});
+	} = useFileUploadForm({ saveMutation });
 
 	return (
 		<>
@@ -101,7 +83,7 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isUploading || saveMutation.isPending}
+						disabled={isPending}
 						type="submit"
 					>
 						Soumettre

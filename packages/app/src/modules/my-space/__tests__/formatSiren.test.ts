@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { formatSiren, parseSiren } from "../formatSiren";
+import { parseSiren } from "~/modules/shared/parseSiren";
+
+import { formatSiren } from "../formatSiren";
 
 describe("formatSiren", () => {
 	it("formats a 9-digit SIREN with spaces", () => {

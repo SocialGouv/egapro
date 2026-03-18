@@ -11,7 +11,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { parseSiren } from "~/modules/my-space";
+import { parseSiren } from "~/modules/shared/parseSiren";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
