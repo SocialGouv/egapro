@@ -14,6 +14,19 @@ import {
 } from "~/server/db/schema";
 import type { CategoryRow, CseRow, IndicatorGEntry } from "./fetchDeclarations";
 
+// ── Shared helper ────────────────────────────────────────────────────
+
+function groupByKey<T>(rows: T[], keyFn: (row: T) => string): Map<string, T[]> {
+	const map = new Map<string, T[]>();
+	for (const row of rows) {
+		const key = keyFn(row);
+		const existing = map.get(key) ?? [];
+		existing.push(row);
+		map.set(key, existing);
+	}
+	return map;
+}
+
 // ── Main query ───────────────────────────────────────────────────────
 
 export type DeclarationRow = Awaited<
@@ -69,13 +82,6 @@ export async function fetchCategoriesByDeclaration(
 ): Promise<Map<string, CategoryRow[]>> {
 	if (keys.length === 0) return new Map();
 
-	const pairConditions = keys.map((k) =>
-		and(
-			eq(declarationCategories.siren, k.siren),
-			eq(declarationCategories.year, k.year),
-		),
-	);
-
 	const rows = await db
 		.select({
 			siren: declarationCategories.siren,
@@ -90,16 +96,18 @@ export async function fetchCategoriesByDeclaration(
 			menMedianValue: declarationCategories.menMedianValue,
 		})
 		.from(declarationCategories)
-		.where(or(...pairConditions));
+		.where(
+			or(
+				...keys.map((k) =>
+					and(
+						eq(declarationCategories.siren, k.siren),
+						eq(declarationCategories.year, k.year),
+					),
+				),
+			),
+		);
 
-	const map = new Map<string, CategoryRow[]>();
-	for (const row of rows) {
-		const key = `${row.siren}-${row.year}`;
-		const existing = map.get(key) ?? [];
-		existing.push(row);
-		map.set(key, existing);
-	}
-	return map;
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
 
 // ── Indicator G (jobCategories + employeeCategories) ─────────────────
@@ -133,13 +141,7 @@ export async function fetchIndicatorGByDeclaration(
 		)
 		.where(inArray(jobCategories.declarationId, declarationIds));
 
-	const map = new Map<string, IndicatorGEntry[]>();
-	for (const row of rows) {
-		const existing = map.get(row.declarationId) ?? [];
-		existing.push(row);
-		map.set(row.declarationId, existing);
-	}
-	return map;
+	return groupByKey(rows, (r) => r.declarationId);
 }
 
 // ── CSE opinions ─────────────────────────────────────────────────────
@@ -148,10 +150,6 @@ export async function fetchCseOpinionsByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 ): Promise<Map<string, CseRow[]>> {
 	if (keys.length === 0) return new Map();
-
-	const pairConditions = keys.map((k) =>
-		and(eq(cseOpinions.siren, k.siren), eq(cseOpinions.year, k.year)),
-	);
 
 	const rows = await db
 		.select({
@@ -162,14 +160,13 @@ export async function fetchCseOpinionsByDeclaration(
 			opinionDate: cseOpinions.opinionDate,
 		})
 		.from(cseOpinions)
-		.where(or(...pairConditions));
+		.where(
+			or(
+				...keys.map((k) =>
+					and(eq(cseOpinions.siren, k.siren), eq(cseOpinions.year, k.year)),
+				),
+			),
+		);
 
-	const map = new Map<string, CseRow[]>();
-	for (const row of rows) {
-		const key = `${row.siren}-${row.year}`;
-		const existing = map.get(key) ?? [];
-		existing.push(row);
-		map.set(key, existing);
-	}
-	return map;
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
