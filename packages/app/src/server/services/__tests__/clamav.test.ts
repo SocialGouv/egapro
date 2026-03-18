@@ -1,97 +1,133 @@
+import net from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const fetchMock = vi.fn();
-global.fetch = fetchMock;
+vi.mock("node:net", () => {
+	const socket = {
+		write: vi.fn().mockReturnValue(true),
+		on: vi.fn(),
+		once: vi.fn(),
+		destroy: vi.fn(),
+		setTimeout: vi.fn(),
+	};
+	return {
+		default: {
+			createConnection: vi.fn().mockReturnValue(socket),
+		},
+	};
+});
+
+function getSocket() {
+	return vi.mocked(net.createConnection).mock.results[0]
+		?.value as net.Socket & {
+		write: ReturnType<typeof vi.fn>;
+		on: ReturnType<typeof vi.fn>;
+		once: ReturnType<typeof vi.fn>;
+		destroy: ReturnType<typeof vi.fn>;
+		setTimeout: ReturnType<typeof vi.fn>;
+	};
+}
 
 describe("clamav service", () => {
 	afterEach(() => {
-		fetchMock.mockReset();
-	});
-
-	it("returns clean when CLAMAV_URL is not set", async () => {
-		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_URL", {
-			value: undefined,
-			writable: true,
-			configurable: true,
-		});
-
-		const { scanBuffer } = await import("../clamav");
-		const result = await scanBuffer(Buffer.from("test"), "test.pdf");
-		expect(result.clean).toBe(true);
+		vi.restoreAllMocks();
 	});
 
 	it("returns clean for an uninfected file", async () => {
 		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_URL", {
-			value: "http://localhost:3000",
+		Object.defineProperty(env, "CLAMAV_HOST", {
+			value: "localhost",
+			writable: true,
+			configurable: true,
+		});
+		Object.defineProperty(env, "CLAMAV_PORT", {
+			value: 3310,
 			writable: true,
 			configurable: true,
 		});
 
-		fetchMock.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({
-				success: true,
-				data: {
-					result: [{ is_infected: false, viruses: [] }],
-				},
-			}),
-		});
-
 		const { scanBuffer } = await import("../clamav");
-		const result = await scanBuffer(Buffer.from("clean"), "clean.pdf");
+		const promise = scanBuffer(Buffer.from("clean"));
 
-		expect(result.clean).toBe(true);
-		expect(fetchMock).toHaveBeenCalledWith(
-			"http://localhost:3000/api/v1/scan",
-			expect.objectContaining({ method: "POST" }),
+		const socket = getSocket();
+
+		const onHandlers = new Map<string, (...args: unknown[]) => void>();
+		socket.on.mockImplementation(
+			(event: string, handler: (...args: unknown[]) => void) => {
+				onHandlers.set(event, handler);
+				if (event === "end") {
+					setTimeout(() => {
+						onHandlers.get("data")?.(Buffer.from("stream: OK\0"));
+						onHandlers.get("end")?.();
+					}, 0);
+				}
+				return socket;
+			},
 		);
+
+		const result = await promise;
+		expect(result.clean).toBe(true);
+		expect(net.createConnection).toHaveBeenCalledWith({
+			host: "localhost",
+			port: 3310,
+		});
 	});
 
 	it("returns infected for a FOUND reply", async () => {
 		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_URL", {
-			value: "http://localhost:3000",
+		Object.defineProperty(env, "CLAMAV_HOST", {
+			value: "localhost",
+			writable: true,
+			configurable: true,
+		});
+		Object.defineProperty(env, "CLAMAV_PORT", {
+			value: 3310,
 			writable: true,
 			configurable: true,
 		});
 
-		fetchMock.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({
-				success: true,
-				data: {
-					result: [{ is_infected: true, viruses: ["Eicar-Signature"] }],
-				},
-			}),
-		});
-
 		const { scanBuffer } = await import("../clamav");
-		const result = await scanBuffer(Buffer.from("infected"), "virus.pdf");
+		const promise = scanBuffer(Buffer.from("infected"));
 
+		const socket = getSocket();
+		const onHandlers = new Map<string, (...args: unknown[]) => void>();
+		socket.on.mockImplementation(
+			(event: string, handler: (...args: unknown[]) => void) => {
+				onHandlers.set(event, handler);
+				if (event === "end") {
+					setTimeout(() => {
+						onHandlers.get("data")?.(
+							Buffer.from("stream: Eicar-Signature FOUND\0"),
+						);
+						onHandlers.get("end")?.();
+					}, 0);
+				}
+				return socket;
+			},
+		);
+
+		const result = await promise;
 		expect(result.clean).toBe(false);
 		if (!result.clean) {
 			expect(result.virus).toBe("Eicar-Signature");
 		}
 	});
 
-	it("throws when ClamAV REST API returns an error", async () => {
-		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_URL", {
-			value: "http://localhost:3000",
-			writable: true,
-			configurable: true,
-		});
+	it("creates a clamd stream with INSTREAM command", async () => {
+		const { createClamdStream } = await import("../clamav");
+		const clamd = createClamdStream("localhost", 3310);
 
-		fetchMock.mockResolvedValueOnce({
-			ok: false,
-			status: 500,
-		});
+		const socket = getSocket();
+		expect(socket.write).toHaveBeenCalledWith("zINSTREAM\0");
 
-		const { scanBuffer } = await import("../clamav");
-		await expect(scanBuffer(Buffer.from("test"), "test.pdf")).rejects.toThrow(
-			"ClamAV scan failed with status 500",
-		);
+		await clamd.sendChunk(Buffer.from("test"));
+
+		// Verify size header was sent (4 bytes big-endian)
+		const sizeHeader = Buffer.alloc(4);
+		sizeHeader.writeUInt32BE(4, 0);
+		expect(socket.write).toHaveBeenCalledWith(sizeHeader);
+		expect(socket.write).toHaveBeenCalledWith(Buffer.from("test"));
+
+		clamd.destroy();
+		expect(socket.destroy).toHaveBeenCalled();
 	});
 });

@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
+import { PdfFileUpload, uploadPdf, usePdfUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
@@ -16,6 +18,12 @@ type Props = {
 
 export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 	const router = useRouter();
+	const [isUploading, setIsUploading] = useState(false);
+
+	const saveMutation = api.cseOpinion.uploadFile.useMutation({
+		onSuccess: () => router.push("/avis-cse/confirmation"),
+	});
+
 	const {
 		closeModal,
 		handleConfirm,
@@ -25,7 +33,22 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 		selectedFile,
 		uploadError,
 	} = usePdfUploadForm({
-		onConfirm: () => router.push("/avis-cse/confirmation"),
+		onConfirm: async () => {
+			if (!selectedFile) return;
+			setIsUploading(true);
+			try {
+				const result = await uploadPdf(selectedFile);
+				if (!result.ok) {
+					throw new Error(result.error);
+				}
+				saveMutation.mutate({
+					fileName: selectedFile.name,
+					filePath: result.key,
+				});
+			} catch {
+				setIsUploading(false);
+			}
+		},
 	});
 
 	return (
@@ -75,6 +98,7 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={isUploading || saveMutation.isPending}
 						type="submit"
 					>
 						Soumettre

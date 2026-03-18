@@ -1,7 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Step2Upload } from "../Step2Upload";
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		cseOpinion: {
+			uploadFile: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
 
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;

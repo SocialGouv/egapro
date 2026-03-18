@@ -60,6 +60,8 @@ services:
   clamavd:
     image: clamav/clamav:1.4.3
     profiles: ["clamav"]
+    ports:
+      - 3310:3310
     volumes:
       - clamdata:/var/lib/clamav
     healthcheck:
@@ -68,20 +70,6 @@ services:
       timeout: 10s
       retries: 10
       start_period: 300s
-
-  clamav-rest:
-    image: benzino77/clamav-rest-api:1.6.2
-    profiles: ["clamav"]
-    ports:
-      - 3310:3000
-    environment:
-      NODE_ENV: production
-      CLAMD_IP: clamavd
-      APP_FORM_KEY: FILES
-      APP_MAX_FILE_SIZE: "26214400"
-    depends_on:
-      clamavd:
-        condition: service_healthy
 
 volumes:
   pgdata:

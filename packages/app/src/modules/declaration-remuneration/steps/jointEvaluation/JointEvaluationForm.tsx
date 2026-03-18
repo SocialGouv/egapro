@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
+import { PdfFileUpload, uploadPdf, usePdfUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -23,8 +24,9 @@ export function JointEvaluationForm({
 	hasCse,
 }: Props) {
 	const router = useRouter();
+	const [isUploading, setIsUploading] = useState(false);
 
-	const uploadMutation = api.jointEvaluation.uploadFile.useMutation({
+	const saveMutation = api.jointEvaluation.uploadFile.useMutation({
 		onSuccess: () => router.push(getPostComplianceDestination(hasCse)),
 	});
 
@@ -37,12 +39,20 @@ export function JointEvaluationForm({
 		selectedFile,
 		uploadError,
 	} = usePdfUploadForm({
-		onConfirm: () => {
-			if (selectedFile) {
-				uploadMutation.mutate({
+		onConfirm: async () => {
+			if (!selectedFile) return;
+			setIsUploading(true);
+			try {
+				const result = await uploadPdf(selectedFile);
+				if (!result.ok) {
+					throw new Error(result.error);
+				}
+				saveMutation.mutate({
 					fileName: selectedFile.name,
-					filePath: selectedFile.name,
+					filePath: result.key,
 				});
+			} catch {
+				setIsUploading(false);
 			}
 		},
 	});
@@ -158,7 +168,7 @@ export function JointEvaluationForm({
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={uploadMutation.isPending}
+						disabled={isUploading || saveMutation.isPending}
 						type="submit"
 					>
 						Transmettre

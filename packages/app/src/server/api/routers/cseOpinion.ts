@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { saveOpinionsSchema } from "~/modules/cseOpinion/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { cseOpinions } from "~/server/db/schema";
+import { cseOpinionFiles, cseOpinions } from "~/server/db/schema";
 
 function getSiren(siret: string | null | undefined): string {
 	if (!siret) {
@@ -106,4 +107,57 @@ export const cseOpinionRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	uploadFile: protectedProcedure
+		.input(
+			z.object({
+				fileName: z.string().min(1),
+				filePath: z.string().min(1),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const siren = getSiren(ctx.session.user.siret);
+			const year = getCseYear();
+			const declarantId = ctx.session.user.id;
+
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.delete(cseOpinionFiles)
+					.where(
+						and(
+							eq(cseOpinionFiles.siren, siren),
+							eq(cseOpinionFiles.year, year),
+						),
+					);
+
+				await tx.insert(cseOpinionFiles).values({
+					siren,
+					year,
+					fileName: input.fileName,
+					filePath: input.filePath,
+					declarantId,
+				});
+			});
+
+			return { success: true };
+		}),
+
+	getFile: protectedProcedure.query(async ({ ctx }) => {
+		const siren = getSiren(ctx.session.user.siret);
+		const year = getCseYear();
+
+		const rows = await ctx.db
+			.select({
+				fileName: cseOpinionFiles.fileName,
+				filePath: cseOpinionFiles.filePath,
+				uploadedAt: cseOpinionFiles.uploadedAt,
+			})
+			.from(cseOpinionFiles)
+			.where(
+				and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)),
+			)
+			.limit(1);
+
+		return rows[0] ?? null;
+	}),
 });
