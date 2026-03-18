@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -23,19 +24,23 @@ export function Step2Upload({
 }: Props) {
 	const router = useRouter();
 	const utils = api.useUtils();
+	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+	const refreshFileList = useCallback(() => {
+		void utils.cseOpinion.getFiles.invalidate();
+		router.refresh();
+	}, [utils, router]);
 
 	const saveMutation = api.cseOpinion.uploadFile.useMutation({
-		onSuccess: () => {
-			void utils.cseOpinion.getFiles.invalidate();
-			router.refresh();
-		},
+		onSuccess: refreshFileList,
 	});
 
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: () => {
-			void utils.cseOpinion.getFiles.invalidate();
-			router.refresh();
+			setDeletingFileId(null);
+			refreshFileList();
 		},
+		onError: () => setDeletingFileId(null),
 	});
 
 	const {
@@ -65,23 +70,35 @@ export function Step2Upload({
 
 				<CseStepIndicator currentStep={2} />
 
-				<div>
-					<label className="fr-label" htmlFor="cse-file-upload">
+				{canAddMore ? (
+					<div>
+						<label className="fr-label" htmlFor="cse-file-upload">
+							Veuillez importer l&apos;ensemble des avis de votre CSE
+							<span className="fr-hint-text">
+								Taille maximale : 10 Mo par fichier. Format supporté : pdf.
+								{existingFiles.length > 0 &&
+									` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
+							</span>
+						</label>
+					</div>
+				) : (
+					<p className="fr-label">
 						Veuillez importer l&apos;ensemble des avis de votre CSE
 						<span className="fr-hint-text">
-							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
-							{existingFiles.length > 0 &&
-								` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
+							{` (${existingFiles.length}/${MAX_CSE_FILES} fichiers)`}
 						</span>
-					</label>
-				</div>
+					</p>
+				)}
 
 				{existingFiles.map((file) => (
 					<ExistingFileCard
 						file={file}
-						isDeleting={deleteMutation.isPending}
+						isDeleting={deletingFileId === file.id}
 						key={file.id}
-						onDelete={(fileId) => deleteMutation.mutate({ fileId })}
+						onDelete={(fileId) => {
+							setDeletingFileId(fileId);
+							deleteMutation.mutate({ fileId });
+						}}
 					/>
 				))}
 
@@ -98,7 +115,11 @@ export function Step2Upload({
 				)}
 
 				{!canAddMore && (
-					<p className="fr-text--sm fr-text--mention-grey fr-mt-2w">
+					<p
+						aria-live="polite"
+						className="fr-text--sm fr-text--mention-grey fr-mt-2w"
+						role="status"
+					>
 						Nombre maximum de fichiers atteint ({MAX_CSE_FILES}).
 					</p>
 				)}

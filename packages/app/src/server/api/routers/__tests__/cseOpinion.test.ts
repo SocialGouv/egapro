@@ -241,13 +241,14 @@ describe("cseOpinionRouter", () => {
 			filePath: "339787277/2027/test-uuid.pdf",
 		};
 
-		it("saves file record to DB", async () => {
+		it("saves file record to DB in a transaction", async () => {
 			const mockDb = createMockDb([]);
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.uploadFile(validInput);
 
 			expect(result).toEqual({ success: true });
+			expect(mockTransaction).toHaveBeenCalled();
 			expect(mockInsert).toHaveBeenCalled();
 			expect(mockValues).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -273,7 +274,10 @@ describe("cseOpinionRouter", () => {
 			const caller = await createCaller(mockDb);
 
 			await expect(
-				caller.uploadFile({ fileName: "", filePath: "some/path.pdf" }),
+				caller.uploadFile({
+					fileName: "",
+					filePath: "339787277/2027/test-uuid.pdf",
+				}),
 			).rejects.toThrow();
 		});
 
@@ -283,6 +287,30 @@ describe("cseOpinionRouter", () => {
 
 			await expect(
 				caller.uploadFile({ fileName: "test.pdf", filePath: "" }),
+			).rejects.toThrow();
+		});
+
+		it("rejects non-PDF fileName", async () => {
+			const mockDb = createMockDb([]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.uploadFile({
+					fileName: "malicious.exe",
+					filePath: "339787277/2027/test-uuid.pdf",
+				}),
+			).rejects.toThrow();
+		});
+
+		it("rejects invalid filePath format", async () => {
+			const mockDb = createMockDb([]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.uploadFile({
+					fileName: "test.pdf",
+					filePath: "invalid/path/with spaces.pdf",
+				}),
 			).rejects.toThrow();
 		});
 

@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-import { z } from "zod";
+
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
+	uploadFileSchema,
 } from "~/modules/cseOpinion/schemas";
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
@@ -118,39 +119,36 @@ export const cseOpinionRouter = createTRPCRouter({
 	}),
 
 	uploadFile: companyProcedure
-		.input(
-			z.object({
-				fileName: z.string().min(1),
-				filePath: z.string().min(1),
-			}),
-		)
+		.input(uploadFileSchema)
 		.mutation(async ({ ctx, input }) => {
 			const year = getCseYear();
 			const declarantId = ctx.session.user.id;
 
-			const existingFiles = await ctx.db
-				.select({ id: cseOpinionFiles.id })
-				.from(cseOpinionFiles)
-				.where(
-					and(
-						eq(cseOpinionFiles.siren, ctx.siren),
-						eq(cseOpinionFiles.year, year),
-					),
-				);
+			await ctx.db.transaction(async (tx) => {
+				const existingFiles = await tx
+					.select({ id: cseOpinionFiles.id })
+					.from(cseOpinionFiles)
+					.where(
+						and(
+							eq(cseOpinionFiles.siren, ctx.siren),
+							eq(cseOpinionFiles.year, year),
+						),
+					);
 
-			if (existingFiles.length >= MAX_CSE_FILES) {
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: `Nombre maximum de fichiers atteint (${MAX_CSE_FILES}).`,
+				if (existingFiles.length >= MAX_CSE_FILES) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Nombre maximum de fichiers atteint (${MAX_CSE_FILES}).`,
+					});
+				}
+
+				await tx.insert(cseOpinionFiles).values({
+					siren: ctx.siren,
+					year,
+					fileName: input.fileName,
+					filePath: input.filePath,
+					declarantId,
 				});
-			}
-
-			await ctx.db.insert(cseOpinionFiles).values({
-				siren: ctx.siren,
-				year,
-				fileName: input.fileName,
-				filePath: input.filePath,
-				declarantId,
 			});
 
 			return { success: true };
@@ -187,6 +185,7 @@ export const cseOpinionRouter = createTRPCRouter({
 					and(
 						eq(cseOpinionFiles.id, input.fileId),
 						eq(cseOpinionFiles.siren, ctx.siren),
+						eq(cseOpinionFiles.year, year),
 					),
 				);
 
