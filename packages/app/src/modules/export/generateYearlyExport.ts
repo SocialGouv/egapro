@@ -61,7 +61,6 @@ export async function generateYearlyExport(
 				fileName,
 				s3Key,
 				rowCount: declarationRows.length,
-				createdAt: new Date(),
 			})
 			.where(and(eq(exports.year, year), eq(exports.version, EXPORT_VERSION)));
 	} else {

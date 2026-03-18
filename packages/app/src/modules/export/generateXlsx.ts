@@ -39,7 +39,8 @@ function addSheet<T extends Record<string, unknown>>(
 	for (const row of rows) {
 		const values: Record<string, unknown> = {};
 		for (const col of columns) {
-			values[String(col.key)] = row[col.key] ?? "";
+			const val = row[col.key];
+			values[String(col.key)] = val === null || val === undefined ? null : val;
 		}
 		sheet.addRow(values);
 	}

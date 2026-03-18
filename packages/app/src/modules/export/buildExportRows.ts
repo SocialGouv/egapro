@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
 import {
@@ -181,7 +181,7 @@ async function getDeclarationsWithIndicatorG(
 	const rows = await db
 		.selectDistinct({ declarationId: jobCategories.declarationId })
 		.from(jobCategories)
-		.where(sql`${jobCategories.declarationId} IN ${declarationIds}`);
+		.where(inArray(jobCategories.declarationId, declarationIds));
 
 	return new Set(rows.map((r) => r.declarationId));
 }
@@ -201,8 +201,12 @@ async function getCategoriesByDeclaration(
 ): Promise<Map<string, CategoryRow[]>> {
 	if (keys.length === 0) return new Map();
 
-	const uniqueSirens = [...new Set(keys.map((k) => k.siren))];
-	const uniqueYears = [...new Set(keys.map((k) => k.year))];
+	const pairConditions = keys.map((k) =>
+		and(
+			eq(declarationCategories.siren, k.siren),
+			eq(declarationCategories.year, k.year),
+		),
+	);
 
 	const rows = await db
 		.select({
@@ -218,9 +222,8 @@ async function getCategoriesByDeclaration(
 		.from(declarationCategories)
 		.where(
 			and(
-				sql`${declarationCategories.siren} IN ${uniqueSirens}`,
-				sql`${declarationCategories.year} IN ${uniqueYears}`,
-				sql`${declarationCategories.step} IN ${[2, 3, 4]}`,
+				or(...pairConditions),
+				inArray(declarationCategories.step, [2, 3, 4]),
 			),
 		);
 
@@ -385,8 +388,9 @@ async function getCseOpinionsByDeclaration(
 ): Promise<Map<string, CseOpinionRow[]>> {
 	if (keys.length === 0) return new Map();
 
-	const uniqueSirens = [...new Set(keys.map((k) => k.siren))];
-	const uniqueYears = [...new Set(keys.map((k) => k.year))];
+	const pairConditions = keys.map((k) =>
+		and(eq(cseOpinions.siren, k.siren), eq(cseOpinions.year, k.year)),
+	);
 
 	const rows = await db
 		.select({
@@ -397,12 +401,7 @@ async function getCseOpinionsByDeclaration(
 			opinionDate: cseOpinions.opinionDate,
 		})
 		.from(cseOpinions)
-		.where(
-			and(
-				sql`${cseOpinions.siren} IN ${uniqueSirens}`,
-				sql`${cseOpinions.year} IN ${uniqueYears}`,
-			),
-		);
+		.where(or(...pairConditions));
 
 	const map = new Map<string, CseOpinionRow[]>();
 	for (const row of rows) {
