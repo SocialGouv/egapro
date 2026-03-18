@@ -3,8 +3,8 @@ import { NewTabNotice } from "~/modules/layout";
 /** Textes de référence section with external legislation links. */
 export function AideTextesReference() {
 	return (
-		<div className="fr-callout fr-callout--no-border">
-			<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
+		<div className="fr-p-5w fr-background-default--grey">
+			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-auto">
 					<span
 						aria-hidden="true"
@@ -12,8 +12,8 @@ export function AideTextesReference() {
 					/>
 				</div>
 				<div className="fr-col">
-					<h2 className="fr-callout__title">Textes de référence</h2>
-					<p className="fr-callout__text">
+					<h2 className="fr-h4 fr-mb-1w">Textes de référence</h2>
+					<p className="fr-text--regular fr-mb-2w">
 						Consultez les textes législatifs et réglementaires
 					</p>
 					<ul className="fr-links-group">

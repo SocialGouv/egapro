@@ -24,6 +24,7 @@ export default function RootLayout({
 				</Script>
 				<link href="/dsfr/dsfr.min.css" rel="stylesheet" />
 				<link href="/dsfr/utility/icons/icons.min.css" rel="stylesheet" />
+				<link href="/dsfr/utility/colors/colors.min.css" rel="stylesheet" />
 				<link
 					href="/dsfr/favicon/apple-touch-icon.png"
 					rel="apple-touch-icon"
