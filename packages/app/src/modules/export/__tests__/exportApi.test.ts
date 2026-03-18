@@ -34,10 +34,6 @@ vi.mock("~/server/db/schema", () => ({
 		compliancePath: "compliancePath",
 		totalWomen: "totalWomen",
 		totalMen: "totalMen",
-		remunerationScore: "remunerationScore",
-		variableRemunerationScore: "variableRemunerationScore",
-		quartileScore: "quartileScore",
-		categoryScore: "categoryScore",
 		secondDeclarationStatus: "secondDeclarationStatus",
 		secondDeclReferencePeriodStart: "secondDeclReferencePeriodStart",
 		secondDeclReferencePeriodEnd: "secondDeclReferencePeriodEnd",
@@ -163,10 +159,6 @@ describe("GET /api/v1/export/declarations", () => {
 				compliancePath: null,
 				totalWomen: 100,
 				totalMen: 150,
-				remunerationScore: 5,
-				variableRemunerationScore: 3,
-				quartileScore: 2,
-				categoryScore: null,
 				secondDeclarationStatus: null,
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
@@ -199,7 +191,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const decl = body.declarations[0];
 		expect(decl.siren).toBe("123456789");
 		expect(decl.declarant.email).toBe("jean@acme.fr");
-		expect(decl.scores.remuneration).toBe(5);
+		expect(decl.scores).toBeUndefined();
 		expect(decl.indicators).toEqual({ A: [], B: [], F: [] });
 		expect(decl.indicatorG).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
