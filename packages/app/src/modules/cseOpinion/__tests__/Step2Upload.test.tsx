@@ -1,10 +1,40 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Step2Upload } from "../Step2Upload";
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		cseOpinion: {
+			uploadFile: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+			deleteFile: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+		useUtils: () => ({
+			cseOpinion: {
+				getFiles: { invalidate: vi.fn() },
+			},
+		}),
+	},
+}));
 
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
+}
+
+function makeFile(name: string, id: string) {
+	return { id, fileName: name, uploadedAt: new Date("2026-03-15") };
 }
 
 describe("Step2Upload", () => {
@@ -57,7 +87,7 @@ describe("Step2Upload", () => {
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
-	it("renders previous link and submit button", () => {
+	it("renders previous link and add file button", () => {
 		render(<Step2Upload />);
 
 		const previousLink = screen.getByRole("link", { name: /Précédent/ });
@@ -65,7 +95,7 @@ describe("Step2Upload", () => {
 		expect(previousLink).toHaveAttribute("href", "/avis-cse/etape/1");
 
 		expect(
-			screen.getByRole("button", { name: /Soumettre/ }),
+			screen.getByRole("button", { name: /Ajouter le fichier/ }),
 		).toBeInTheDocument();
 	});
 
@@ -73,7 +103,9 @@ describe("Step2Upload", () => {
 		const user = userEvent.setup();
 		render(<Step2Upload />);
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+		await user.click(
+			screen.getByRole("button", { name: /Ajouter le fichier/ }),
+		);
 
 		expect(
 			screen.getByText("Veuillez sélectionner un fichier avant de soumettre."),
@@ -87,7 +119,9 @@ describe("Step2Upload", () => {
 		const fileInput = getFileInput();
 		expect(fileInput).toHaveAttribute("aria-invalid", "false");
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+		await user.click(
+			screen.getByRole("button", { name: /Ajouter le fichier/ }),
+		);
 
 		expect(fileInput).toHaveAttribute("aria-invalid", "true");
 	});
@@ -102,7 +136,7 @@ describe("Step2Upload", () => {
 
 		expect(
 			screen.getByText(
-				"Format de fichier non supporté. Seul le format PDF est accepté.",
+				"Format de fichier non supporté. Formats acceptés : pdf.",
 			),
 		).toBeInTheDocument();
 	});
@@ -119,9 +153,7 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
-			screen.getByText(
-				"Le fichier dépasse la taille maximale autorisée de 10 Mo.",
-			),
+			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
 		).toBeInTheDocument();
 	});
 
@@ -169,5 +201,72 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeInTheDocument();
+	});
+
+	it("shows existing file cards when files are provided", () => {
+		render(
+			<Step2Upload
+				existingFiles={[
+					makeFile("avis-1.pdf", "file-1"),
+					makeFile("avis-2.pdf", "file-2"),
+				]}
+			/>,
+		);
+
+		expect(screen.getByText("avis-1.pdf")).toBeInTheDocument();
+		expect(screen.getByText("avis-2.pdf")).toBeInTheDocument();
+		expect(screen.getAllByText("Fichier transmis")).toHaveLength(2);
+	});
+
+	it("shows 'Suivant' link and upload button when files exist but under limit", () => {
+		render(<Step2Upload existingFiles={[makeFile("avis-1.pdf", "file-1")]} />);
+
+		expect(screen.getByRole("link", { name: /Suivant/ })).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Ajouter le fichier/ }),
+		).toBeInTheDocument();
+	});
+
+	it("shows file count in hint text", () => {
+		render(
+			<Step2Upload
+				existingFiles={[
+					makeFile("avis-1.pdf", "file-1"),
+					makeFile("avis-2.pdf", "file-2"),
+				]}
+			/>,
+		);
+
+		expect(screen.getByText(/2\/4 fichiers/)).toBeInTheDocument();
+	});
+
+	it("hides dropzone and upload button when max files reached", () => {
+		render(
+			<Step2Upload
+				existingFiles={[
+					makeFile("avis-1.pdf", "f1"),
+					makeFile("avis-2.pdf", "f2"),
+					makeFile("avis-3.pdf", "f3"),
+					makeFile("avis-4.pdf", "f4"),
+				]}
+			/>,
+		);
+
+		expect(screen.getByText(/Nombre maximum/)).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Sélectionner un fichier/ }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Ajouter le fichier/ }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /Suivant/ })).toBeInTheDocument();
+	});
+
+	it("does not show Suivant link when no files exist", () => {
+		render(<Step2Upload />);
+
+		expect(
+			screen.queryByRole("link", { name: /Suivant/ }),
+		).not.toBeInTheDocument();
 	});
 });

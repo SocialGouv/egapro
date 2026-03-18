@@ -236,7 +236,7 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.getOrCreate()).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});
@@ -262,7 +262,7 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.submit()).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});
@@ -409,7 +409,7 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.updateStep1({ categories: [] })).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});

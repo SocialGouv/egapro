@@ -94,7 +94,7 @@ describe("jointEvaluationRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.uploadFile(validInput)).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 
@@ -147,7 +147,7 @@ describe("jointEvaluationRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.getFile()).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});

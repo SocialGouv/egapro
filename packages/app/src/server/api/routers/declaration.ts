@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	declarationCategories,
 	declarations,
@@ -23,23 +23,13 @@ import {
 	updateStepCategoriesSchema,
 } from "./schemas";
 
-function getSiren(siret: string | null | undefined): string {
-	if (!siret) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "SIRET manquant dans la session",
-		});
-	}
-	return siret.slice(0, 9);
-}
-
 function getCurrentYear() {
 	return new Date().getFullYear();
 }
 
 export const declarationRouter = createTRPCRouter({
-	getOrCreate: protectedProcedure.query(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	getOrCreate: companyProcedure.query(async ({ ctx }) => {
+		const siren = ctx.siren;
 		const year = getCurrentYear();
 
 		const result = await ctx.db.transaction(async (tx) => {
@@ -124,10 +114,10 @@ export const declarationRouter = createTRPCRouter({
 		};
 	}),
 
-	updateStep1: protectedProcedure
+	updateStep1: companyProcedure
 		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
+			const siren = ctx.siren;
 			const year = getCurrentYear();
 
 			const totalWomen = input.categories.reduce((sum, c) => sum + c.women, 0);
@@ -210,10 +200,10 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStepCategories: protectedProcedure
+	updateStepCategories: companyProcedure
 		.input(updateStepCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
+			const siren = ctx.siren;
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
@@ -260,10 +250,10 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: protectedProcedure
+	updateEmployeeCategories: companyProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
+			const siren = ctx.siren;
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
@@ -353,8 +343,8 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submitSecondDeclaration: protectedProcedure.mutation(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	submitSecondDeclaration: companyProcedure.mutation(async ({ ctx }) => {
+		const siren = ctx.siren;
 		const year = getCurrentYear();
 
 		await ctx.db
@@ -369,8 +359,8 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	submit: protectedProcedure.mutation(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	submit: companyProcedure.mutation(async ({ ctx }) => {
+		const siren = ctx.siren;
 		const year = getCurrentYear();
 
 		await ctx.db
@@ -385,14 +375,14 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	saveCompliancePath: protectedProcedure
+	saveCompliancePath: companyProcedure
 		.input(
 			z.object({
 				path: z.enum(COMPLIANCE_PATHS),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
+			const siren = ctx.siren;
 			const year = getCurrentYear();
 
 			await ctx.db
@@ -406,12 +396,14 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	completeCompliancePath: protectedProcedure.mutation(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	completeCompliancePath: companyProcedure.mutation(async ({ ctx }) => {
+		const siren = ctx.siren;
 		const year = getCurrentYear();
 		const now = new Date();
 
 		// Idempotent: only set complianceCompletedAt on first completion
+		// Also requires status = 'submitted' to prevent stale fire-and-forget
+		// mutations from overwriting a reset declaration.
 		await ctx.db
 			.update(declarations)
 			.set({ complianceCompletedAt: now, updatedAt: now })
@@ -419,6 +411,7 @@ export const declarationRouter = createTRPCRouter({
 				and(
 					eq(declarations.siren, siren),
 					eq(declarations.year, year),
+					eq(declarations.status, "submitted"),
 					isNull(declarations.complianceCompletedAt),
 				),
 			);

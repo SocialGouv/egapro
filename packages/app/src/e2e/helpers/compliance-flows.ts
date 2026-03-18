@@ -21,11 +21,13 @@ export async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
 
 export async function submitCseStep2(page: Page) {
 	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-	await page.getByRole("button", { name: "Soumettre" }).click();
+	await page.getByRole("button", { name: "Ajouter le fichier" }).click();
 	await page
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.click();
 	await page.getByRole("button", { name: "Valider" }).click();
+	await page.getByText("Fichier transmis").waitFor({ timeout: 10_000 });
+	await page.getByRole("link", { name: "Suivant" }).click();
 	await page.waitForURL("**/avis-cse/confirmation");
 }
 
@@ -50,14 +52,40 @@ export async function selectCompliancePath(
 	await page.getByRole("button", { name: "Suivant" }).click();
 }
 
-export async function submitSecondDeclaration(
+/**
+ * Complete the corrective action second declaration flow (steps 1-3).
+ * Step 1 is info-only, step 2 edits correction data, step 3 reviews and submits.
+ * @param hasGap Whether the correction data should still have a gap ≥ 5%
+ */
+export async function completeSecondDeclaration(
 	page: Page,
-	expectedUrlPattern: string,
+	options: { hasGap: boolean },
 ) {
-	await page.goto(`${COMPLIANCE_PATH}/etape/3`);
+	// Step 1: Info page — just click through
+	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, { timeout: 10_000 });
+	await page.getByRole("link", { name: "Suivant" }).click();
+	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/2`);
+
+	// Step 2: Edit correction employee category data
+	// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap
+	const menSalary = options.hasGap ? "1100" : "1020";
+	await page
+		.getByRole("textbox", {
+			name: "Salaire de base annuel femmes, catégorie 1",
+		})
+		.fill("1000");
+	await page
+		.getByRole("textbox", {
+			name: "Salaire de base annuel hommes, catégorie 1",
+		})
+		.fill(menSalary);
+
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
+
+	// Step 3: Review and submit
 	await page
 		.getByText(/Je certifie que les données saisies sont exactes/)
 		.click();
 	await page.getByRole("button", { name: "Soumettre" }).click();
-	await page.waitForURL(expectedUrlPattern, { timeout: 10_000 });
 }
