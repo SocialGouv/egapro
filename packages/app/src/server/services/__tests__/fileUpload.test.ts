@@ -74,6 +74,11 @@ describe("fileUpload service", () => {
 			writable: true,
 			configurable: true,
 		});
+		Object.defineProperty(env, "CLAMAV_PORT", {
+			value: 3310,
+			writable: true,
+			configurable: true,
+		});
 
 		mockClamd.finish.mockResolvedValueOnce({
 			clean: false,

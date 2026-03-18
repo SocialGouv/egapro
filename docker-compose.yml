@@ -58,8 +58,7 @@ services:
              mc anonymous set none local/egapro-dev-app"
 
   clamavd:
-    image: clamav/clamav:1.4.3
-    profiles: ["clamav"]
+    image: clamav/clamav-debian:1.5.2
     ports:
       - 3310:3310
     volumes:

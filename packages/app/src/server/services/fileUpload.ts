@@ -17,13 +17,6 @@ type UploadResult =
 /**
  * Streams a file to ClamAV (INSTREAM) and S3 (multipart) simultaneously.
  *
- * Flow:
- * 1. Read the request body chunk by chunk
- * 2. Each chunk is sent to both clamd and S3 in parallel
- * 3. After the stream ends, clamd returns its verdict
- * 4. If clean → CompleteMultipartUpload → success
- * 5. If infected → AbortMultipartUpload → rejected
- *
  * Memory footprint: ~5MB (S3 part buffer) + a few KB (clamd socket).
  */
 export async function handleStreamingUpload(

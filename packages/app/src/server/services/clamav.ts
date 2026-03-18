@@ -70,7 +70,7 @@ export function createClamdStream(host: string, port: number) {
 					if (cleaned.endsWith("OK")) {
 						resolve({ clean: true });
 					} else {
-						const match = cleaned.match(/stream:\s*(.+)\s+FOUND/);
+						const match = cleaned.match(/stream: (\S+) FOUND/);
 						resolve({
 							clean: false,
 							virus: match?.[1] ?? "unknown",
