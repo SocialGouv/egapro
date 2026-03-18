@@ -1,115 +1,32 @@
 import { describe, expect, it, vi } from "vitest";
 
-// Mock DB: main query (declarations join) returns via mockMainWhere,
-// sub-queries (categories, indicatorG, CSE) all return via mockSubWhere.
-const mockMainWhere = vi.fn();
-const mockInnerJoin2 = vi.fn(() => ({ where: mockMainWhere }));
-const mockInnerJoin1 = vi.fn(() => ({ innerJoin: mockInnerJoin2 }));
-const mockMainFrom = vi.fn(() => ({ innerJoin: mockInnerJoin1 }));
+const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
+const mockFetchCategories = vi.fn().mockResolvedValue(new Map());
+const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
+const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 
-const mockSubWhere = vi.fn().mockResolvedValue([]);
-const mockSubInnerJoin = vi.fn(() => ({ where: mockSubWhere }));
-const mockSubFrom = vi.fn(() => ({
-	where: mockSubWhere,
-	innerJoin: mockSubInnerJoin,
-}));
-
-let selectCallCount = 0;
-const mockSelect = vi.fn(() => {
-	selectCallCount++;
-	if (selectCallCount === 1) return { from: mockMainFrom };
-	return { from: mockSubFrom };
+vi.mock("~/modules/export/fetchDeclarations", async (importOriginal) => {
+	const original = (await importOriginal()) as Record<string, unknown>;
+	return {
+		...original,
+		fetchSubmittedDeclarations: (...args: unknown[]) =>
+			mockFetchSubmitted(...args),
+		fetchCategoriesByDeclaration: (...args: unknown[]) =>
+			mockFetchCategories(...args),
+		fetchIndicatorGByDeclaration: (...args: unknown[]) =>
+			mockFetchIndicatorG(...args),
+		fetchCseOpinionsByDeclaration: (...args: unknown[]) =>
+			mockFetchCse(...args),
+	};
 });
-
-vi.mock("~/server/db", () => ({
-	db: { select: mockSelect },
-}));
-
-vi.mock("~/server/db/schema", () => ({
-	declarations: {
-		siren: "siren",
-		year: "year",
-		status: "status",
-		id: "id",
-		compliancePath: "compliancePath",
-		totalWomen: "totalWomen",
-		totalMen: "totalMen",
-		secondDeclarationStatus: "secondDeclarationStatus",
-		secondDeclReferencePeriodStart: "secondDeclReferencePeriodStart",
-		secondDeclReferencePeriodEnd: "secondDeclReferencePeriodEnd",
-		createdAt: "createdAt",
-		updatedAt: "updatedAt",
-		declarantId: "declarantId",
-	},
-	companies: {
-		siren: "siren",
-		name: "name",
-		workforce: "workforce",
-		nafCode: "nafCode",
-		address: "address",
-		hasCse: "hasCse",
-	},
-	users: {
-		id: "id",
-		firstName: "firstName",
-		lastName: "lastName",
-		email: "email",
-		phone: "phone",
-	},
-	declarationCategories: {
-		siren: "siren",
-		year: "year",
-		step: "step",
-		categoryName: "categoryName",
-		womenCount: "womenCount",
-		menCount: "menCount",
-		womenValue: "womenValue",
-		menValue: "menValue",
-		womenMedianValue: "womenMedianValue",
-		menMedianValue: "menMedianValue",
-	},
-	jobCategories: {
-		id: "id",
-		declarationId: "declarationId",
-		name: "name",
-		detail: "detail",
-	},
-	employeeCategories: {
-		jobCategoryId: "jobCategoryId",
-		declarationType: "declarationType",
-		womenCount: "womenCount",
-		menCount: "menCount",
-		annualBaseWomen: "annualBaseWomen",
-		annualBaseMen: "annualBaseMen",
-		annualVariableWomen: "annualVariableWomen",
-		annualVariableMen: "annualVariableMen",
-		hourlyBaseWomen: "hourlyBaseWomen",
-		hourlyBaseMen: "hourlyBaseMen",
-		hourlyVariableWomen: "hourlyVariableWomen",
-		hourlyVariableMen: "hourlyVariableMen",
-	},
-	cseOpinions: {
-		siren: "siren",
-		year: "year",
-		type: "type",
-		opinion: "opinion",
-		opinionDate: "opinionDate",
-	},
-}));
-
-vi.mock("drizzle-orm", () => ({
-	and: vi.fn((...args: unknown[]) => args),
-	eq: vi.fn((a: unknown, b: unknown) => [a, b]),
-	gte: vi.fn((a: unknown, b: unknown) => ["gte", a, b]),
-	lt: vi.fn((a: unknown, b: unknown) => ["lt", a, b]),
-	sql: vi.fn(),
-}));
 
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		selectCallCount = 0;
-		mockSubWhere.mockResolvedValue([]);
+		mockFetchSubmitted.mockResolvedValue([]);
+		mockFetchCategories.mockResolvedValue(new Map());
+		mockFetchIndicatorG.mockResolvedValue(new Map());
+		mockFetchCse.mockResolvedValue(new Map());
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {
@@ -132,9 +49,19 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("should return empty declarations when no match", async () => {
-		mockMainWhere.mockResolvedValue([]);
+	it("should return 400 when date_end format is invalid", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = new Request(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=bad",
+		);
+		const response = await GET(request);
 
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.details).toBeDefined();
+	});
+
+	it("should return empty declarations when no match", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
@@ -147,10 +74,24 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.declarations).toEqual([]);
 		expect(body.dateBegin).toBe("2027-03-15");
 		expect(body.dateEnd).toBe("2027-03-16");
+		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-16");
 	});
 
-	it("should return declarations with all indicators", async () => {
-		mockMainWhere.mockResolvedValue([
+	it("should use date_end when provided", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = new Request(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=2027-03-20",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.dateEnd).toBe("2027-03-20");
+		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-20");
+	});
+
+	it("should return assembled declarations with indicators", async () => {
+		mockFetchSubmitted.mockResolvedValue([
 			{
 				declarationId: "decl-1",
 				siren: "123456789",
@@ -178,20 +119,17 @@ describe("GET /api/v1/export/declarations", () => {
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request(
-			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=2027-03-20",
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
 		expect(body.count).toBe(1);
-		expect(body.dateBegin).toBe("2027-03-15");
-		expect(body.dateEnd).toBe("2027-03-20");
 
 		const decl = body.declarations[0];
 		expect(decl.siren).toBe("123456789");
 		expect(decl.declarant.email).toBe("jean@acme.fr");
-		expect(decl.scores).toBeUndefined();
 		expect(decl.indicators).toEqual({
 			A: [],
 			B: [],
