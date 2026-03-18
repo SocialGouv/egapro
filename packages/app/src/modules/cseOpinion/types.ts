@@ -1,5 +1,11 @@
 export type OpinionType = "favorable" | "unfavorable";
 
+export type UploadedFile = {
+	id: string;
+	fileName: string;
+	uploadedAt: Date;
+};
+
 export type CseOpinionStep1Data = {
 	firstDeclAccuracyOpinion: OpinionType | null;
 	firstDeclAccuracyDate: string | null;
@@ -12,6 +18,8 @@ export type CseOpinionStep1Data = {
 	secondDeclGapOpinion: OpinionType | null;
 	secondDeclGapDate: string | null;
 };
+
+export const MAX_CSE_FILES = 4;
 
 export const TOTAL_STEPS = 2;
 

@@ -1,9 +1,15 @@
+import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-import { z } from "zod";
 
-import { saveOpinionsSchema } from "~/modules/cseOpinion/schemas";
+import {
+	deleteFileSchema,
+	saveOpinionsSchema,
+	uploadFileSchema,
+} from "~/modules/cseOpinion/schemas";
+import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { cseOpinionFiles, cseOpinions } from "~/server/db/schema";
+import { deleteFile as deleteS3File } from "~/server/services/s3";
 
 function getCseYear() {
 	return new Date().getFullYear() + 1;
@@ -92,26 +98,49 @@ export const cseOpinionRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
+	getFiles: companyProcedure.query(async ({ ctx }) => {
+		const year = getCseYear();
+
+		const rows = await ctx.db
+			.select({
+				id: cseOpinionFiles.id,
+				fileName: cseOpinionFiles.fileName,
+				uploadedAt: cseOpinionFiles.uploadedAt,
+			})
+			.from(cseOpinionFiles)
+			.where(
+				and(
+					eq(cseOpinionFiles.siren, ctx.siren),
+					eq(cseOpinionFiles.year, year),
+				),
+			);
+
+		return { files: rows };
+	}),
+
 	uploadFile: companyProcedure
-		.input(
-			z.object({
-				fileName: z.string().min(1),
-				filePath: z.string().min(1),
-			}),
-		)
+		.input(uploadFileSchema)
 		.mutation(async ({ ctx, input }) => {
 			const year = getCseYear();
 			const declarantId = ctx.session.user.id;
 
 			await ctx.db.transaction(async (tx) => {
-				await tx
-					.delete(cseOpinionFiles)
+				const existingFiles = await tx
+					.select({ id: cseOpinionFiles.id })
+					.from(cseOpinionFiles)
 					.where(
 						and(
 							eq(cseOpinionFiles.siren, ctx.siren),
 							eq(cseOpinionFiles.year, year),
 						),
 					);
+
+				if (existingFiles.length >= MAX_CSE_FILES) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Nombre maximum de fichiers atteint (${MAX_CSE_FILES}).`,
+					});
+				}
 
 				await tx.insert(cseOpinionFiles).values({
 					siren: ctx.siren,
@@ -125,24 +154,43 @@ export const cseOpinionRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	getFile: companyProcedure.query(async ({ ctx }) => {
-		const year = getCseYear();
+	deleteFile: companyProcedure
+		.input(deleteFileSchema)
+		.mutation(async ({ ctx, input }) => {
+			const year = getCseYear();
 
-		const rows = await ctx.db
-			.select({
-				fileName: cseOpinionFiles.fileName,
-				filePath: cseOpinionFiles.filePath,
-				uploadedAt: cseOpinionFiles.uploadedAt,
-			})
-			.from(cseOpinionFiles)
-			.where(
-				and(
-					eq(cseOpinionFiles.siren, ctx.siren),
-					eq(cseOpinionFiles.year, year),
-				),
-			)
-			.limit(1);
+			const rows = await ctx.db
+				.select({ filePath: cseOpinionFiles.filePath })
+				.from(cseOpinionFiles)
+				.where(
+					and(
+						eq(cseOpinionFiles.id, input.fileId),
+						eq(cseOpinionFiles.siren, ctx.siren),
+						eq(cseOpinionFiles.year, year),
+					),
+				)
+				.limit(1);
 
-		return rows[0] ?? null;
-	}),
+			const file = rows[0];
+			if (!file) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Fichier introuvable.",
+				});
+			}
+
+			await ctx.db
+				.delete(cseOpinionFiles)
+				.where(
+					and(
+						eq(cseOpinionFiles.id, input.fileId),
+						eq(cseOpinionFiles.siren, ctx.siren),
+						eq(cseOpinionFiles.year, year),
+					),
+				);
+
+			await deleteS3File(file.filePath);
+
+			return { success: true };
+		}),
 });

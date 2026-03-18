@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -10,16 +11,36 @@ import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
 import formStyles from "./shared/formActions.module.scss";
+import { MAX_CSE_FILES, type UploadedFile } from "./types";
 
 type Props = {
 	hasSecondDeclaration?: boolean;
+	existingFiles?: UploadedFile[];
 };
 
-export function Step2Upload({ hasSecondDeclaration = true }: Props) {
+export function Step2Upload({
+	hasSecondDeclaration = true,
+	existingFiles = [],
+}: Props) {
 	const router = useRouter();
+	const utils = api.useUtils();
+	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+	const refreshFileList = useCallback(() => {
+		void utils.cseOpinion.getFiles.invalidate();
+		router.refresh();
+	}, [utils, router]);
 
 	const saveMutation = api.cseOpinion.uploadFile.useMutation({
-		onSuccess: () => router.push("/avis-cse/confirmation"),
+		onSuccess: refreshFileList,
+	});
+
+	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
+		onSuccess: () => {
+			setDeletingFileId(null);
+			refreshFileList();
+		},
+		onError: () => setDeletingFileId(null),
 	});
 
 	const {
@@ -32,6 +53,9 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 		selectedFile,
 		uploadError,
 	} = useFileUploadForm({ saveMutation });
+
+	const hasFiles = existingFiles.length > 0;
+	const canAddMore = existingFiles.length < MAX_CSE_FILES;
 
 	return (
 		<>
@@ -46,24 +70,55 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 
 				<CseStepIndicator currentStep={2} />
 
-				<div>
-					<label className="fr-label" htmlFor="cse-file-upload">
+				{canAddMore ? (
+					<div>
+						<label className="fr-label" htmlFor="cse-file-upload">
+							Veuillez importer l&apos;ensemble des avis de votre CSE
+							<span className="fr-hint-text">
+								Taille maximale : 10 Mo par fichier. Format supporté : pdf.
+								{existingFiles.length > 0 &&
+									` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
+							</span>
+						</label>
+					</div>
+				) : (
+					<p className="fr-label">
 						Veuillez importer l&apos;ensemble des avis de votre CSE
 						<span className="fr-hint-text">
-							Taille maximale : 10 Mo. Format supporté : pdf.
+							{` (${existingFiles.length}/${MAX_CSE_FILES} fichiers)`}
 						</span>
-					</label>
-				</div>
+					</p>
+				)}
 
-				<FileUpload
-					accept=".pdf"
-					acceptLabel="pdf"
-					allowedMimeTypes={["application/pdf"]}
-					error={uploadError}
-					inputId="cse-file-upload"
-					onFileChange={handleFileChange}
-					selectedFile={selectedFile}
-				/>
+				{existingFiles.map((file) => (
+					<ExistingFileCard
+						file={file}
+						isDeleting={deletingFileId === file.id}
+						key={file.id}
+						onDelete={(fileId) => {
+							setDeletingFileId(fileId);
+							deleteMutation.mutate({ fileId });
+						}}
+					/>
+				))}
+
+				{canAddMore && (
+					<FileUpload
+						accept=".pdf"
+						acceptLabel="pdf"
+						allowedMimeTypes={["application/pdf"]}
+						error={uploadError}
+						inputId="cse-file-upload"
+						onFileChange={handleFileChange}
+						selectedFile={selectedFile}
+					/>
+				)}
+
+				{!canAddMore && (
+					<output className="fr-text--sm fr-text--mention-grey fr-mt-2w">
+						Nombre maximum de fichiers atteint ({MAX_CSE_FILES}).
+					</output>
+				)}
 
 				<div className="fr-mt-4w">
 					<OpinionSummaryBox
@@ -81,13 +136,23 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					>
 						Précédent
 					</Link>
-					<button
-						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isPending}
-						type="submit"
-					>
-						Soumettre
-					</button>
+					{canAddMore && (
+						<button
+							className="fr-btn fr-icon-upload-line fr-btn--icon-left"
+							disabled={isPending}
+							type="submit"
+						>
+							{isPending ? "Envoi en cours…" : "Ajouter le fichier"}
+						</button>
+					)}
+					{hasFiles && (
+						<Link
+							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+							href="/avis-cse/confirmation"
+						>
+							Suivant
+						</Link>
+					)}
 				</div>
 			</form>
 
@@ -97,5 +162,38 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 				onSubmit={handleConfirm}
 			/>
 		</>
+	);
+}
+
+type ExistingFileCardProps = {
+	file: UploadedFile;
+	isDeleting: boolean;
+	onDelete: (fileId: string) => void;
+};
+
+function ExistingFileCard({
+	file,
+	isDeleting,
+	onDelete,
+}: ExistingFileCardProps) {
+	return (
+		<div className="fr-card fr-card--no-border fr-p-3w fr-mb-2w">
+			<p className="fr-text--md fr-mb-0">{file.fileName}</p>
+			<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
+				PDF — Importé le {new Date(file.uploadedAt).toLocaleDateString("fr-FR")}
+			</p>
+			<div>
+				<p className="fr-message fr-message--valid fr-mb-0">Fichier transmis</p>
+				<button
+					className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-mt-1w"
+					disabled={isDeleting}
+					onClick={() => onDelete(file.id)}
+					title={`Supprimer ${file.fileName}`}
+					type="button"
+				>
+					{isDeleting ? "Suppression…" : "Supprimer"}
+				</button>
+			</div>
+		</div>
 	);
 }
