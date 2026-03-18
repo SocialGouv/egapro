@@ -5,20 +5,15 @@ const mockFetchCategories = vi.fn().mockResolvedValue(new Map());
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 
-vi.mock("~/modules/export/fetchDeclarations", async (importOriginal) => {
-	const original = (await importOriginal()) as Record<string, unknown>;
-	return {
-		...original,
-		fetchSubmittedDeclarations: (...args: unknown[]) =>
-			mockFetchSubmitted(...args),
-		fetchCategoriesByDeclaration: (...args: unknown[]) =>
-			mockFetchCategories(...args),
-		fetchIndicatorGByDeclaration: (...args: unknown[]) =>
-			mockFetchIndicatorG(...args),
-		fetchCseOpinionsByDeclaration: (...args: unknown[]) =>
-			mockFetchCse(...args),
-	};
-});
+vi.mock("~/modules/export/queries", () => ({
+	fetchSubmittedDeclarations: (...args: unknown[]) =>
+		mockFetchSubmitted(...args),
+	fetchCategoriesByDeclaration: (...args: unknown[]) =>
+		mockFetchCategories(...args),
+	fetchIndicatorGByDeclaration: (...args: unknown[]) =>
+		mockFetchIndicatorG(...args),
+	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
+}));
 
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
