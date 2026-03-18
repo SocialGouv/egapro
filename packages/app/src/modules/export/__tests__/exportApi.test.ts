@@ -192,7 +192,14 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.siren).toBe("123456789");
 		expect(decl.declarant.email).toBe("jean@acme.fr");
 		expect(decl.scores).toBeUndefined();
-		expect(decl.indicators).toEqual({ A: [], B: [], F: [] });
+		expect(decl.indicators).toEqual({
+			A: [],
+			B: [],
+			C: [],
+			D: [],
+			E: [],
+			F: [],
+		});
 		expect(decl.indicatorG).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
 		// No declarationType field
