@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/home";
 
@@ -20,7 +21,7 @@ function ResourceTile({
 			<div className="fr-tile__body">
 				<div className="fr-tile__content">
 					<h3 className="fr-tile__title">
-						<a href={href}>{title}</a>
+						<Link href={href}>{title}</Link>
 					</h3>
 					<p className="fr-tile__detail">{detail}</p>
 				</div>
@@ -37,7 +38,7 @@ function ResourceTile({
 /** Bottom navigation banner with links to FAQ, reference texts and contact. */
 export function AideBottomBanner() {
 	return (
-		<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mt-6w">
+		<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mt-4w">
 			<div className="fr-col-12 fr-col-md-9">
 				<div className="fr-grid-row fr-grid-row--gutters">
 					<div className="fr-col-12 fr-col-md-4">

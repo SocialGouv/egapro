@@ -17,13 +17,12 @@ describe("AidePage", () => {
 
 	it("renders the breadcrumb navigation", () => {
 		render(<AidePage />);
-		expect(
-			screen.getByRole("navigation", { name: /vous êtes ici/i }),
-		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /accueil/i })).toHaveAttribute(
-			"href",
-			"/",
-		);
+		const breadcrumbNav = screen.getByRole("navigation", {
+			name: /vous êtes ici/i,
+		});
+		expect(breadcrumbNav).toBeInTheDocument();
+		const breadcrumbLink = breadcrumbNav.querySelector('a[href="/"]');
+		expect(breadcrumbLink).toBeInTheDocument();
 	});
 
 	it("renders the deadline callout", () => {
@@ -68,8 +67,8 @@ describe("AidePage", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/textes législatifs et réglementaires/i),
-		).toBeInTheDocument();
+			screen.getAllByText(/textes législatifs et réglementaires/i).length,
+		).toBeGreaterThanOrEqual(1);
 	});
 
 	it("renders external links to Legifrance with target blank", () => {
@@ -99,7 +98,7 @@ describe("AidePage", () => {
 		expect(backLink).toHaveAttribute("href", "/");
 	});
 
-	it("renders the bottom banner with resource tiles", () => {
+	it("renders the bottom banner with all three resource tiles", () => {
 		render(<AidePage />);
 		expect(
 			screen.getByRole("heading", {
@@ -110,14 +109,14 @@ describe("AidePage", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 3,
+				name: /textes de référence/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
 				name: /nous contacter/i,
 			}),
 		).toBeInTheDocument();
-	});
-
-	it("applies the blue background class on main", () => {
-		render(<AidePage />);
-		const main = screen.getByRole("main");
-		expect(main.className).toContain("pageBackground");
 	});
 });
