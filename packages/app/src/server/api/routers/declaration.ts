@@ -412,6 +412,8 @@ export const declarationRouter = createTRPCRouter({
 		const now = new Date();
 
 		// Idempotent: only set complianceCompletedAt on first completion
+		// Also requires status = 'submitted' to prevent stale fire-and-forget
+		// mutations from overwriting a reset declaration.
 		await ctx.db
 			.update(declarations)
 			.set({ complianceCompletedAt: now, updatedAt: now })
@@ -419,6 +421,7 @@ export const declarationRouter = createTRPCRouter({
 				and(
 					eq(declarations.siren, siren),
 					eq(declarations.year, year),
+					eq(declarations.status, "submitted"),
 					isNull(declarations.complianceCompletedAt),
 				),
 			);
