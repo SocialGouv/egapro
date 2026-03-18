@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { resetDeclarationToDraft } from "./helpers/declaration-reset";
+import { resetDeclarationToDraft } from "./helpers/db";
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
