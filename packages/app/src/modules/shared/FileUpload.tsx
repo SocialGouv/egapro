@@ -2,19 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 
-import styles from "./PdfFileUpload.module.scss";
-
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-
-function validateFile(file: File): string | null {
-	if (file.type !== "application/pdf") {
-		return "Format de fichier non supporté. Seul le format PDF est accepté.";
-	}
-	if (file.size > MAX_FILE_SIZE_BYTES) {
-		return "Le fichier dépasse la taille maximale autorisée de 10 Mo.";
-	}
-	return null;
-}
+import styles from "./FileUpload.module.scss";
+import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
 
 function formatFileSize(bytes: number): string {
 	if (bytes < 1024) return `${bytes} o`;
@@ -22,22 +11,49 @@ function formatFileSize(bytes: number): string {
 	return `${(bytes / (1024 * 1024)).toFixed(2)} Mo`;
 }
 
+function getExtensionLabel(name: string): string {
+	const ext = name.split(".").pop()?.toUpperCase();
+	return ext ?? "Fichier";
+}
+
 type Props = {
 	inputId: string;
 	selectedFile: File | null;
 	error: string | null;
 	onFileChange: (file: File | null, error: string | null) => void;
+	/** Comma-separated list of accepted file extensions (e.g. ".pdf,.docx,.jpg"). */
+	accept: string;
+	/** Comma-separated list of accepted MIME types for validation (e.g. "application/pdf,image/jpeg"). */
+	allowedMimeTypes: string[];
+	/** Human-readable hint displayed under the label (e.g. "pdf, docx, jpg"). */
+	acceptLabel: string;
 };
 
-export function PdfFileUpload({
+export function FileUpload({
 	inputId,
 	selectedFile,
 	error,
 	onFileChange,
+	accept,
+	allowedMimeTypes,
+	acceptLabel,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
 	const [isDragging, setIsDragging] = useState(false);
+
+	const validateFile = useCallback(
+		(file: File): string | null => {
+			if (!allowedMimeTypes.includes(file.type)) {
+				return `Format de fichier non supporté. Formats acceptés : ${acceptLabel}.`;
+			}
+			if (file.size > MAX_FILE_SIZE) {
+				return FILE_TOO_LARGE_ERROR;
+			}
+			return null;
+		},
+		[allowedMimeTypes, acceptLabel],
+	);
 
 	const processFile = useCallback(
 		(file: File) => {
@@ -48,7 +64,7 @@ export function PdfFileUpload({
 				onFileChange(file, null);
 			}
 		},
-		[onFileChange],
+		[onFileChange, validateFile],
 	);
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -94,7 +110,8 @@ export function PdfFileUpload({
 				<div className={styles.fileCard}>
 					<p className="fr-text--md fr-mb-0">{selectedFile.name}</p>
 					<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-						PDF – {formatFileSize(selectedFile.size)}
+						{getExtensionLabel(selectedFile.name)} –{" "}
+						{formatFileSize(selectedFile.size)}
 					</p>
 					<div className={styles.fileCardFooter}>
 						<p className="fr-message fr-message--valid fr-mb-0">
@@ -145,7 +162,7 @@ export function PdfFileUpload({
 			)}
 
 			<input
-				accept=".pdf"
+				accept={accept}
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
 				className="fr-sr-only"
