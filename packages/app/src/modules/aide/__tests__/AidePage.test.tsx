@@ -17,13 +17,12 @@ describe("AidePage", () => {
 
 	it("renders the breadcrumb navigation", () => {
 		render(<AidePage />);
-		expect(
-			screen.getByRole("navigation", { name: /vous êtes ici/i }),
-		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /accueil/i })).toHaveAttribute(
-			"href",
-			"/",
-		);
+		const breadcrumbNav = screen.getByRole("navigation", {
+			name: /vous êtes ici/i,
+		});
+		expect(breadcrumbNav).toBeInTheDocument();
+		const breadcrumbLink = breadcrumbNav.querySelector('a[href="/"]');
+		expect(breadcrumbLink).toBeInTheDocument();
 	});
 
 	it("renders the deadline callout", () => {
@@ -68,8 +67,8 @@ describe("AidePage", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/textes législatifs et réglementaires/i),
-		).toBeInTheDocument();
+			screen.getAllByText(/textes législatifs et réglementaires/i).length,
+		).toBeGreaterThanOrEqual(1);
 	});
 
 	it("renders external links to Legifrance with target blank", () => {
@@ -91,5 +90,33 @@ describe("AidePage", () => {
 			"https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038234561",
 		);
 		expect(decretLink).toHaveAttribute("target", "_blank");
+	});
+
+	it("renders the back link", () => {
+		render(<AidePage />);
+		const backLink = screen.getByRole("link", { name: /retour à l'accueil/i });
+		expect(backLink).toHaveAttribute("href", "/");
+	});
+
+	it("renders the bottom banner with all three resource tiles", () => {
+		render(<AidePage />);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /questions fréquentes/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /textes de référence/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /nous contacter/i,
+			}),
+		).toBeInTheDocument();
 	});
 });

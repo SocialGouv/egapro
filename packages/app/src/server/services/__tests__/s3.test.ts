@@ -12,11 +12,15 @@ vi.mock("@aws-sdk/client-s3", () => {
 		S3Client: class {
 			send = sendMock;
 		},
-		PutObjectCommand: vi.fn(),
-		GetObjectCommand: vi.fn(),
-		DeleteObjectCommand: vi.fn(),
-		HeadBucketCommand: vi.fn(),
+		AbortMultipartUploadCommand: vi.fn(),
+		CompleteMultipartUploadCommand: vi.fn(),
 		CreateBucketCommand: vi.fn(),
+		CreateMultipartUploadCommand: vi.fn(),
+		DeleteObjectCommand: vi.fn(),
+		GetObjectCommand: vi.fn(),
+		HeadBucketCommand: vi.fn(),
+		PutObjectCommand: vi.fn(),
+		UploadPartCommand: vi.fn(),
 	};
 });
 
@@ -88,6 +92,54 @@ describe("s3 service", () => {
 
 			expect(DeleteObjectCommand).toHaveBeenCalledWith(
 				expect.objectContaining({ Key: "key.pdf" }),
+			);
+		});
+	});
+
+	describe("createMultipartUpload", () => {
+		it("initializes, sends chunks, and completes", async () => {
+			sendMock
+				.mockResolvedValueOnce({ UploadId: "test-upload-id" })
+				.mockResolvedValueOnce({ ETag: '"etag-1"' })
+				.mockResolvedValueOnce({});
+
+			const { createMultipartUpload } = await import("../s3");
+			const upload = createMultipartUpload("key.pdf", "application/pdf");
+
+			await upload.init();
+			await upload.sendChunk(Buffer.from("test-data"));
+			await upload.complete();
+
+			const { CreateMultipartUploadCommand, UploadPartCommand } = await import(
+				"@aws-sdk/client-s3"
+			);
+			expect(CreateMultipartUploadCommand).toHaveBeenCalledWith(
+				expect.objectContaining({ Key: "key.pdf" }),
+			);
+			expect(UploadPartCommand).toHaveBeenCalledWith(
+				expect.objectContaining({
+					UploadId: "test-upload-id",
+					PartNumber: 1,
+				}),
+			);
+		});
+
+		it("aborts the upload on error", async () => {
+			sendMock
+				.mockResolvedValueOnce({ UploadId: "test-upload-id" })
+				.mockResolvedValueOnce({});
+
+			const { createMultipartUpload } = await import("../s3");
+			const upload = createMultipartUpload("key.pdf", "application/pdf");
+
+			await upload.init();
+			await upload.abort();
+
+			const { AbortMultipartUploadCommand } = await import(
+				"@aws-sdk/client-s3"
+			);
+			expect(AbortMultipartUploadCommand).toHaveBeenCalledWith(
+				expect.objectContaining({ UploadId: "test-upload-id" }),
 			);
 		});
 	});

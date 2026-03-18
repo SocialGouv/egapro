@@ -1,6 +1,7 @@
 import "server-only";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "~/modules/shared";
+
 const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
 
 type ValidationResult = {
@@ -14,10 +15,7 @@ export function validatePdf(buffer: Buffer): ValidationResult {
 	}
 
 	if (buffer.length > MAX_FILE_SIZE) {
-		return {
-			valid: false,
-			error: "Le fichier dépasse la taille maximale autorisée de 10 Mo.",
-		};
+		return { valid: false, error: FILE_TOO_LARGE_ERROR };
 	}
 
 	const hasPdfSignature = PDF_MAGIC_BYTES.every(

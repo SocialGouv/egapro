@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: export-generate-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: export-generate-daily
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.12.1
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  YEAR=$(date -u +%Y)
+                  curl -X POST "http://app:3000/api/export/generate?year=${YEAR}" \
+                    --connect-timeout 10 \
+                    --max-time 300 \
+                    --fail \
+                    --silent \
+                    --show-error
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

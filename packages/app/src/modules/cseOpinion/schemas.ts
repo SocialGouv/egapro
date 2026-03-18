@@ -16,3 +16,25 @@ export const saveOpinionsSchema = z.object({
 });
 
 export type SaveOpinionsInput = z.infer<typeof saveOpinionsSchema>;
+
+export const uploadFileSchema = z.object({
+	fileName: z
+		.string()
+		.min(1)
+		.regex(/\.pdf$/i, "Le fichier doit être un PDF."),
+	filePath: z
+		.string()
+		.min(1)
+		.regex(
+			/^[a-z0-9]{9}\/\d{4}\/[a-z0-9-]+\.[a-z]+$/,
+			"Chemin de fichier invalide.",
+		),
+});
+
+export type UploadFileInput = z.infer<typeof uploadFileSchema>;
+
+export const deleteFileSchema = z.object({
+	fileId: z.string().min(1),
+});
+
+export type DeleteFileInput = z.infer<typeof deleteFileSchema>;

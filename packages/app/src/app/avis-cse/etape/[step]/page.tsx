@@ -40,10 +40,18 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 2) {
-		const declarationData = await api.declaration.getOrCreate();
+		const [declarationData, { files }] = await Promise.all([
+			api.declaration.getOrCreate(),
+			api.cseOpinion.getFiles(),
+		]);
 		const hasSecondDeclaration =
 			declarationData.declaration.secondDeclarationStatus === "submitted";
-		return <Step2Upload hasSecondDeclaration={hasSecondDeclaration} />;
+		return (
+			<Step2Upload
+				existingFiles={files}
+				hasSecondDeclaration={hasSecondDeclaration}
+			/>
+		);
 	}
 
 	notFound();
