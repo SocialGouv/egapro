@@ -1,21 +1,12 @@
+import { parseSiren } from "~/modules/my-space";
 import { auth } from "~/server/auth";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 
-/**
- * Extracts the authenticated user's SIREN from the session.
- * Returns null if the user is not authenticated or has no SIRET.
- */
-async function getAuthenticatedSiren() {
-	const session = await auth();
-	if (!session?.user) return null;
-	const siret = session.user.siret;
-	if (!siret) return null;
-	return siret.slice(0, 9);
-}
-
 export async function POST(request: Request) {
-	const siren = await getAuthenticatedSiren();
-	if (!siren) {
+	const session = await auth();
+	const siren = parseSiren(session?.user?.siret);
+
+	if (!session?.user || !siren) {
 		return Response.json({ error: "Non authentifié" }, { status: 401 });
 	}
 

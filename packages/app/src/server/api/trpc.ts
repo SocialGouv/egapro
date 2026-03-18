@@ -11,6 +11,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { parseSiren } from "~/modules/my-space";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
@@ -131,12 +132,12 @@ export const protectedProcedure = t.procedure
  * Use this for any procedure that operates on company-scoped data.
  */
 export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	const siret = ctx.session.user.siret;
-	if (!siret) {
+	const siren = parseSiren(ctx.session.user.siret);
+	if (!siren) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",
-			message: "SIRET manquant dans la session",
+			message: "SIRET manquant ou invalide dans la session",
 		});
 	}
-	return next({ ctx: { ...ctx, siren: siret.slice(0, 9) } });
+	return next({ ctx: { ...ctx, siren } });
 });

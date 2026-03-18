@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
-import { MAX_FILE_SIZE } from "./uploadConfig";
+import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
 
 function formatFileSize(bytes: number): string {
 	if (bytes < 1024) return `${bytes} o`;
@@ -48,7 +48,7 @@ export function FileUpload({
 				return `Format de fichier non supporté. Formats acceptés : ${acceptLabel}.`;
 			}
 			if (file.size > MAX_FILE_SIZE) {
-				return "Le fichier dépasse la taille maximale autorisée de 10 Mo.";
+				return FILE_TOO_LARGE_ERROR;
 			}
 			return null;
 		},

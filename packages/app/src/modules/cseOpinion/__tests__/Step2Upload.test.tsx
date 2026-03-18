@@ -133,9 +133,7 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
-			screen.getByText(
-				"Le fichier dépasse la taille maximale autorisée de 10 Mo.",
-			),
+			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
 		).toBeInTheDocument();
 	});
 

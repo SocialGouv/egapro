@@ -5,7 +5,7 @@ import path from "node:path";
 
 import { env } from "~/env";
 
-import { MAX_FILE_SIZE } from "~/modules/shared";
+import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "~/modules/shared";
 
 import { createClamdStream, type ScanResult } from "./clamav";
 import { createMultipartUpload } from "./s3";
@@ -63,10 +63,7 @@ export async function handleStreamingUpload(
 		await s3Upload.abort().catch(() => {});
 
 		if (err instanceof FileTooLargeError) {
-			return {
-				ok: false,
-				error: "Le fichier dépasse la taille maximale autorisée de 10 Mo.",
-			};
+			return { ok: false, error: FILE_TOO_LARGE_ERROR };
 		}
 		throw err;
 	}

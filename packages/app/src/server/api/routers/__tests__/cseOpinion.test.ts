@@ -95,7 +95,7 @@ describe("cseOpinionRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.get()).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});
@@ -179,7 +179,7 @@ describe("cseOpinionRouter", () => {
 			const caller = await createCaller(mockDb, null as never);
 
 			await expect(caller.saveOpinions(validInput)).rejects.toThrow(
-				"SIRET manquant dans la session",
+				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});
