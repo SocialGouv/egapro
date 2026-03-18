@@ -1,32 +1,28 @@
 import { describe, expect, it, vi } from "vitest";
 
-// Mock DB with chained query builder
-const mockWhere = vi.fn();
-const mockInnerJoin2 = vi.fn(() => ({ where: mockWhere }));
+// Mock DB: main query (declarations join) returns via mockMainWhere,
+// sub-queries (categories, indicatorG, CSE) all return via mockSubWhere.
+const mockMainWhere = vi.fn();
+const mockInnerJoin2 = vi.fn(() => ({ where: mockMainWhere }));
 const mockInnerJoin1 = vi.fn(() => ({ innerJoin: mockInnerJoin2 }));
-const mockFrom = vi.fn(() => ({ innerJoin: mockInnerJoin1 }));
+const mockMainFrom = vi.fn(() => ({ innerJoin: mockInnerJoin1 }));
 
-// Mock for selectDistinct (indicator G check)
-const mockJobWhere = vi.fn();
-const mockJobFrom = vi.fn(() => ({ where: mockJobWhere }));
-const mockSelectDistinct = vi.fn(() => ({ from: mockJobFrom }));
-
-// Mock for CSE opinions
-const mockCseWhere = vi.fn();
-const mockCseFrom = vi.fn(() => ({ where: mockCseWhere }));
+const mockSubWhere = vi.fn().mockResolvedValue([]);
+const mockSubInnerJoin = vi.fn(() => ({ where: mockSubWhere }));
+const mockSubFrom = vi.fn(() => ({
+	where: mockSubWhere,
+	innerJoin: mockSubInnerJoin,
+}));
 
 let selectCallCount = 0;
 const mockSelect = vi.fn(() => {
 	selectCallCount++;
-	if (selectCallCount === 1) return { from: mockFrom };
-	return { from: mockCseFrom };
+	if (selectCallCount === 1) return { from: mockMainFrom };
+	return { from: mockSubFrom };
 });
 
 vi.mock("~/server/db", () => ({
-	db: {
-		select: mockSelect,
-		selectDistinct: mockSelectDistinct,
-	},
+	db: { select: mockSelect },
 }));
 
 vi.mock("~/server/db/schema", () => ({
@@ -64,7 +60,38 @@ vi.mock("~/server/db/schema", () => ({
 		email: "email",
 		phone: "phone",
 	},
-	jobCategories: { declarationId: "declarationId" },
+	declarationCategories: {
+		siren: "siren",
+		year: "year",
+		step: "step",
+		categoryName: "categoryName",
+		womenCount: "womenCount",
+		menCount: "menCount",
+		womenValue: "womenValue",
+		menValue: "menValue",
+		womenMedianValue: "womenMedianValue",
+		menMedianValue: "menMedianValue",
+	},
+	jobCategories: {
+		id: "id",
+		declarationId: "declarationId",
+		name: "name",
+		detail: "detail",
+	},
+	employeeCategories: {
+		jobCategoryId: "jobCategoryId",
+		declarationType: "declarationType",
+		womenCount: "womenCount",
+		menCount: "menCount",
+		annualBaseWomen: "annualBaseWomen",
+		annualBaseMen: "annualBaseMen",
+		annualVariableWomen: "annualVariableWomen",
+		annualVariableMen: "annualVariableMen",
+		hourlyBaseWomen: "hourlyBaseWomen",
+		hourlyBaseMen: "hourlyBaseMen",
+		hourlyVariableWomen: "hourlyVariableWomen",
+		hourlyVariableMen: "hourlyVariableMen",
+	},
 	cseOpinions: {
 		siren: "siren",
 		year: "year",
@@ -86,6 +113,7 @@ describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		selectCallCount = 0;
+		mockSubWhere.mockResolvedValue([]);
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {
@@ -109,9 +137,7 @@ describe("GET /api/v1/export/declarations", () => {
 	});
 
 	it("should return empty declarations when no match", async () => {
-		mockWhere.mockResolvedValue([]);
-		mockJobWhere.mockResolvedValue([]);
-		mockCseWhere.mockResolvedValue([]);
+		mockMainWhere.mockResolvedValue([]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request(
@@ -127,8 +153,8 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.dateEnd).toBe("2027-03-16");
 	});
 
-	it("should return declarations with date range", async () => {
-		mockWhere.mockResolvedValue([
+	it("should return declarations with all indicators", async () => {
+		mockMainWhere.mockResolvedValue([
 			{
 				declarationId: "decl-1",
 				siren: "123456789",
@@ -157,8 +183,6 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantPhone: "0612345678",
 			},
 		]);
-		mockJobWhere.mockResolvedValue([]);
-		mockCseWhere.mockResolvedValue([]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request(
@@ -171,9 +195,15 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.count).toBe(1);
 		expect(body.dateBegin).toBe("2027-03-15");
 		expect(body.dateEnd).toBe("2027-03-20");
-		expect(body.declarations[0].siren).toBe("123456789");
-		expect(body.declarations[0].declarationType).toBe("6_indicateurs");
-		expect(body.declarations[0].declarant.email).toBe("jean@acme.fr");
-		expect(body.declarations[0].scores.remuneration).toBe(5);
+
+		const decl = body.declarations[0];
+		expect(decl.siren).toBe("123456789");
+		expect(decl.declarant.email).toBe("jean@acme.fr");
+		expect(decl.scores.remuneration).toBe(5);
+		expect(decl.indicators).toEqual({ A: [], B: [], F: [] });
+		expect(decl.indicatorG).toBeNull();
+		expect(decl.cseOpinions).toEqual([]);
+		// No declarationType field
+		expect(decl.declarationType).toBeUndefined();
 	});
 });

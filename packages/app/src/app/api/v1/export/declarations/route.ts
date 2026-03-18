@@ -5,7 +5,9 @@ import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
+	declarationCategories,
 	declarations,
+	employeeCategories,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
@@ -24,6 +26,7 @@ const querySchema = z.object({
  * GET /api/v1/export/declarations?date_begin=YYYY-MM-DD&date_end=YYYY-MM-DD
  *
  * Public REST API returning submitted declarations as JSON.
+ * Includes all indicators (A, B, F, G) for each declaration.
  * - date_begin (required): start date (inclusive), filters on submission date (updatedAt)
  * - date_end (optional): end date (exclusive). If omitted, returns only date_begin day.
  */
@@ -88,15 +91,20 @@ export async function GET(request: Request) {
 				),
 			);
 
+		const sirenYearKeys = rows.map((r) => ({ siren: r.siren, year: r.year }));
 		const declarationIds = rows.map((r) => r.declarationId);
-		const hasIndicatorG = await getDeclarationsWithIndicatorG(declarationIds);
-		const cseMap = await getCseOpinionsByDeclaration(
-			rows.map((r) => ({ siren: r.siren, year: r.year })),
-		);
+
+		const [categoriesMap, indicatorGMap, cseMap] = await Promise.all([
+			getCategoriesByDeclaration(sirenYearKeys),
+			getIndicatorGByDeclaration(declarationIds),
+			getCseOpinionsByDeclaration(sirenYearKeys),
+		]);
 
 		const data = rows.map((row) => {
-			const cseKey = `${row.siren}-${row.year}`;
-			const opinions = cseMap.get(cseKey) ?? [];
+			const key = `${row.siren}-${row.year}`;
+			const categories = categoriesMap.get(key) ?? [];
+			const indicatorG = indicatorGMap.get(row.declarationId) ?? [];
+			const opinions = cseMap.get(key) ?? [];
 
 			return {
 				siren: row.siren,
@@ -107,9 +115,6 @@ export async function GET(request: Request) {
 				hasCse: row.hasCse,
 				year: row.year,
 				status: row.status,
-				declarationType: hasIndicatorG.has(row.declarationId)
-					? "7_indicateurs"
-					: "6_indicateurs",
 				compliancePath: row.compliancePath,
 				createdAt: row.createdAt?.toISOString() ?? null,
 				updatedAt: row.updatedAt?.toISOString() ?? null,
@@ -121,6 +126,8 @@ export async function GET(request: Request) {
 					quartile: row.quartileScore,
 					category: row.categoryScore,
 				},
+				indicators: buildIndicators(categories),
+				indicatorG: indicatorG.length > 0 ? indicatorG : null,
 				secondDeclaration: {
 					status: row.secondDeclarationStatus,
 					referencePeriodStart: row.secondDeclReferencePeriodStart,
@@ -161,18 +168,161 @@ function getNextDate(date: string): string {
 	return d.toISOString().slice(0, 10);
 }
 
-async function getDeclarationsWithIndicatorG(
-	declarationIds: string[],
-): Promise<Set<string>> {
-	if (declarationIds.length === 0) return new Set();
+// ── Indicator A (step 2), B (step 3), F (step 4) ────────────────────
+
+type CategoryRow = {
+	step: number;
+	categoryName: string;
+	womenCount: number | null;
+	menCount: number | null;
+	womenValue: string | null;
+	menValue: string | null;
+	womenMedianValue: string | null;
+	menMedianValue: string | null;
+};
+
+async function getCategoriesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, CategoryRow[]>> {
+	if (keys.length === 0) return new Map();
+
+	const uniqueSirens = [...new Set(keys.map((k) => k.siren))];
+	const uniqueYears = [...new Set(keys.map((k) => k.year))];
 
 	const rows = await db
-		.selectDistinct({ declarationId: jobCategories.declarationId })
+		.select({
+			siren: declarationCategories.siren,
+			year: declarationCategories.year,
+			step: declarationCategories.step,
+			categoryName: declarationCategories.categoryName,
+			womenCount: declarationCategories.womenCount,
+			menCount: declarationCategories.menCount,
+			womenValue: declarationCategories.womenValue,
+			menValue: declarationCategories.menValue,
+			womenMedianValue: declarationCategories.womenMedianValue,
+			menMedianValue: declarationCategories.menMedianValue,
+		})
+		.from(declarationCategories)
+		.where(
+			and(
+				sql`${declarationCategories.siren} IN ${uniqueSirens}`,
+				sql`${declarationCategories.year} IN ${uniqueYears}`,
+			),
+		);
+
+	const map = new Map<string, CategoryRow[]>();
+	for (const row of rows) {
+		const key = `${row.siren}-${row.year}`;
+		const existing = map.get(key) ?? [];
+		existing.push({
+			step: row.step,
+			categoryName: row.categoryName,
+			womenCount: row.womenCount,
+			menCount: row.menCount,
+			womenValue: row.womenValue,
+			menValue: row.menValue,
+			womenMedianValue: row.womenMedianValue,
+			menMedianValue: row.menMedianValue,
+		});
+		map.set(key, existing);
+	}
+	return map;
+}
+
+function buildIndicators(categories: CategoryRow[]) {
+	const byStep = (step: number) => categories.filter((c) => c.step === step);
+
+	return {
+		A: byStep(2).map((c) => ({
+			category: c.categoryName,
+			womenValue: c.womenValue,
+			menValue: c.menValue,
+		})),
+		B: byStep(3).map((c) => ({
+			category: c.categoryName,
+			womenValue: c.womenValue,
+			menValue: c.menValue,
+		})),
+		F: byStep(4).map((c) => ({
+			category: c.categoryName,
+			womenCount: c.womenCount,
+			menCount: c.menCount,
+			womenValue: c.womenValue,
+		})),
+	};
+}
+
+// ── Indicator G (job categories + employee categories) ───────────────
+
+type IndicatorGEntry = {
+	categoryName: string;
+	detail: string | null;
+	declarationType: string;
+	womenCount: number | null;
+	menCount: number | null;
+	annualBaseWomen: string | null;
+	annualBaseMen: string | null;
+	annualVariableWomen: string | null;
+	annualVariableMen: string | null;
+	hourlyBaseWomen: string | null;
+	hourlyBaseMen: string | null;
+	hourlyVariableWomen: string | null;
+	hourlyVariableMen: string | null;
+};
+
+async function getIndicatorGByDeclaration(
+	declarationIds: string[],
+): Promise<Map<string, IndicatorGEntry[]>> {
+	if (declarationIds.length === 0) return new Map();
+
+	const rows = await db
+		.select({
+			declarationId: jobCategories.declarationId,
+			categoryName: jobCategories.name,
+			detail: jobCategories.detail,
+			declarationType: employeeCategories.declarationType,
+			womenCount: employeeCategories.womenCount,
+			menCount: employeeCategories.menCount,
+			annualBaseWomen: employeeCategories.annualBaseWomen,
+			annualBaseMen: employeeCategories.annualBaseMen,
+			annualVariableWomen: employeeCategories.annualVariableWomen,
+			annualVariableMen: employeeCategories.annualVariableMen,
+			hourlyBaseWomen: employeeCategories.hourlyBaseWomen,
+			hourlyBaseMen: employeeCategories.hourlyBaseMen,
+			hourlyVariableWomen: employeeCategories.hourlyVariableWomen,
+			hourlyVariableMen: employeeCategories.hourlyVariableMen,
+		})
 		.from(jobCategories)
+		.innerJoin(
+			employeeCategories,
+			eq(jobCategories.id, employeeCategories.jobCategoryId),
+		)
 		.where(sql`${jobCategories.declarationId} IN ${declarationIds}`);
 
-	return new Set(rows.map((r) => r.declarationId));
+	const map = new Map<string, IndicatorGEntry[]>();
+	for (const row of rows) {
+		const existing = map.get(row.declarationId) ?? [];
+		existing.push({
+			categoryName: row.categoryName,
+			detail: row.detail,
+			declarationType: row.declarationType,
+			womenCount: row.womenCount,
+			menCount: row.menCount,
+			annualBaseWomen: row.annualBaseWomen,
+			annualBaseMen: row.annualBaseMen,
+			annualVariableWomen: row.annualVariableWomen,
+			annualVariableMen: row.annualVariableMen,
+			hourlyBaseWomen: row.hourlyBaseWomen,
+			hourlyBaseMen: row.hourlyBaseMen,
+			hourlyVariableWomen: row.hourlyVariableWomen,
+			hourlyVariableMen: row.hourlyVariableMen,
+		});
+		map.set(row.declarationId, existing);
+	}
+	return map;
 }
+
+// ── CSE opinions ─────────────────────────────────────────────────────
 
 type CseRow = {
 	type: string;
