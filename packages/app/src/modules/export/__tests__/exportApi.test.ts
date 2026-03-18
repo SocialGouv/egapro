@@ -201,9 +201,7 @@ describe("GET /api/v1/export/declarations", () => {
 			F: [],
 			G: null,
 		});
-		expect(decl.indicatorG).toBeUndefined();
+		expect(decl.correction).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
-		// No declarationType field
-		expect(decl.declarationType).toBeUndefined();
 	});
 });

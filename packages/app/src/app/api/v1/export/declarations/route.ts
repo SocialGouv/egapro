@@ -102,6 +102,8 @@ export async function GET(request: Request) {
 			const indicatorG = indicatorGMap.get(row.declarationId) ?? [];
 			const opinions = cseMap.get(key) ?? [];
 
+			const { initial, correction } = buildIndicatorG(indicatorG);
+
 			return {
 				siren: row.siren,
 				companyName: row.companyName,
@@ -118,8 +120,9 @@ export async function GET(request: Request) {
 				totalMen: row.totalMen,
 				indicators: {
 					...buildIndicators(categories),
-					G: buildIndicatorG(indicatorG),
+					G: initial.length > 0 ? initial : null,
 				},
+				correction: correction.length > 0 ? correction : null,
 				secondDeclaration: {
 					status: row.secondDeclarationStatus,
 					referencePeriodStart: row.secondDeclReferencePeriodStart,
@@ -283,9 +286,7 @@ type IndicatorGCategory = {
 function buildIndicatorG(entries: IndicatorGEntry[]): {
 	initial: IndicatorGCategory[];
 	correction: IndicatorGCategory[];
-} | null {
-	if (entries.length === 0) return null;
-
+} {
 	const toCategory = (e: IndicatorGEntry): IndicatorGCategory => ({
 		categoryName: e.categoryName,
 		detail: e.detail,
