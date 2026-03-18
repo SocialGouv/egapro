@@ -24,8 +24,8 @@ const mockSelect = vi.fn(() => {
 
 vi.mock("~/server/db", () => ({
 	db: {
-		select: (...args: unknown[]) => mockSelect(...args),
-		selectDistinct: (...args: unknown[]) => mockSelectDistinct(...args),
+		select: mockSelect,
+		selectDistinct: mockSelectDistinct,
 	},
 }));
 
