@@ -1,18 +1,51 @@
 import postgres from "postgres";
 
-export const DEFAULT_DB_URL =
-	"postgresql://postgres:postgres@localhost:5438/egapro";
-export const TEST_SIREN = "130025265";
-export const TEST_EMAIL = "test@fia1.fr";
+const DEFAULT_DB_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
+const TEST_SIREN = "130025265";
 
-/** Run a callback inside a single DB transaction, then close the connection. */
-export async function withDb(
-	fn: (sql: postgres.Sql) => Promise<void>,
-): Promise<void> {
+function createConnection() {
 	const url = process.env.DATABASE_URL ?? DEFAULT_DB_URL;
-	const sql = postgres(url, { max: 1 });
+	return postgres(url, { max: 1 });
+}
+
+/**
+ * Reset the test declaration to draft and clean all associated data
+ * so a new full flow can be tested from scratch.
+ */
+export async function resetDeclarationToDraft() {
+	const sql = createConnection();
 	try {
-		await sql.begin((tx) => fn(tx as unknown as postgres.Sql));
+		// Reset declaration status
+		await sql`
+			UPDATE app_declaration
+			SET status = 'draft', current_step = 1,
+			    compliance_path = NULL, second_declaration_status = NULL,
+			    compliance_completed_at = NULL
+			WHERE siren = ${TEST_SIREN}
+		`;
+
+		// Clean correction employee categories to avoid stale second-declaration data
+		await sql`
+			DELETE FROM app_employee_category
+			WHERE declaration_type = 'correction'
+			  AND job_category_id IN (
+			    SELECT jc.id FROM app_job_category jc
+			    INNER JOIN app_declaration d ON d.id = jc.declaration_id
+			    WHERE d.siren = ${TEST_SIREN}
+			  )
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Toggle the hasCse flag on the test company. */
+export async function setCompanyHasCse(hasCse: boolean) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_company SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
+		`;
 	} finally {
 		await sql.end();
 	}

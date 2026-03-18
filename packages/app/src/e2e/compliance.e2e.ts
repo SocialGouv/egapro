@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
-import { setupComplianceState } from "./helpers/compliance";
 import {
 	COMPLIANCE_PATH,
+	completeSecondDeclaration,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
-	submitSecondDeclaration,
 	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
+import { resetDeclarationToDraft, setCompanyHasCse } from "./helpers/db";
+import { completeDeclaration } from "./helpers/declaration-flows";
 
 test.describe.configure({ mode: "serial" });
 
@@ -17,13 +18,17 @@ const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
 
 test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({ hasCse: true, hasInitialGap: false });
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("redirects to /avis-cse and completes CSE opinion flow", async ({
+	test("complete declaration without gap, then CSE opinion flow", async ({
 		page,
 	}) => {
-		await page.goto(COMPLIANCE_PATH);
+		test.slow(); // Full declaration (6 steps) + CSE step 1 + CSE step 2
+		await completeDeclaration(page, { hasGap: false });
+
+		// No gap + hasCse → auto-redirect to /avis-cse
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 		await fillCseStep1(page, false);
 		await submitCseStep2(page);
@@ -33,13 +38,17 @@ test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 	});
 });
 
-test.describe("Path 2: no gap + no hasCse → /parcours-conformite/confirmation", () => {
+test.describe("Path 2: no gap + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({ hasCse: false, hasInitialGap: false });
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(false);
 	});
 
-	test("redirects to compliance confirmation page", async ({ page }) => {
-		await page.goto(COMPLIANCE_PATH);
+	test("complete declaration without gap, redirects to confirmation", async ({
+		page,
+	}) => {
+		await completeDeclaration(page, { hasGap: false });
+
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 		await expect(
 			page.getByText(/Votre parcours .* est (désormais )?terminé/),
@@ -47,17 +56,21 @@ test.describe("Path 2: no gap + no hasCse → /parcours-conformite/confirmation"
 	});
 });
 
-// === GROUP B: First round — choice form ===
+// === GROUP B: Gap — compliance choice form ===
 
-test.describe("Path 3: gap + justify + hasCse → /avis-cse", () => {
+test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({ hasCse: true, hasInitialGap: true });
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("shows 3 compliance options including justify (hasCse=true)", async ({
+	test("complete declaration with gap, shows 3 compliance options", async ({
 		page,
 	}) => {
-		await page.goto(COMPLIANCE_PATH);
+		await completeDeclaration(page, { hasGap: true });
+
+		// Gap + hasCse → compliance choice page
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 		await expect(
 			page.getByText("Actions correctives et seconde déclaration", {
 				exact: true,
@@ -81,29 +94,33 @@ test.describe("Path 3: gap + justify + hasCse → /avis-cse", () => {
 	});
 });
 
-test.describe("Path 4: gap + joint_evaluation + hasCse → /avis-cse", () => {
+test.describe("Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({ hasCse: true, hasInitialGap: true });
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("joint_evaluation → upload PDF → navigates to /avis-cse/etape/1", async ({
+	test("complete declaration with gap, joint evaluation → CSE", async ({
 		page,
 	}) => {
+		test.slow(); // Full declaration + compliance choice + joint eval upload
+		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 	});
 });
 
-test.describe("Path 5: gap + joint_evaluation + no hasCse → /confirmation", () => {
+test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({ hasCse: false, hasInitialGap: true });
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(false);
 	});
 
 	test("shows only 2 options without justify (hasCse=false)", async ({
 		page,
 	}) => {
-		await page.goto(COMPLIANCE_PATH);
+		await completeDeclaration(page, { hasGap: true });
 		await expect(
 			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
 				exact: true,
@@ -111,68 +128,69 @@ test.describe("Path 5: gap + joint_evaluation + no hasCse → /confirmation", ()
 		).not.toBeVisible();
 	});
 
-	test("joint_evaluation → upload PDF → navigates to /confirmation", async ({
-		page,
-	}) => {
+	test("joint evaluation → upload PDF → /confirmation", async ({ page }) => {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 	});
 });
 
-// === GROUP C: Corrective action — second declaration review ===
+// === GROUP C: Corrective action — second declaration (no remaining gap) ===
 
-test.describe("Path 6: corrective_action + no correction gap + hasCse → /avis-cse", () => {
+test.describe("Path 6: gap + corrective action (no gap after) + hasCse → /avis-cse", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: true,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			correctionHasGap: false,
-		});
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("step 3: submit second decl (no gap) → navigates to /avis-cse", async ({
+	test("declaration → corrective action → correct without gap → /avis-cse", async ({
 		page,
 	}) => {
-		await submitSecondDeclaration(page, "**/avis-cse/**");
+		test.slow(); // Full declaration + compliance + second declaration
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 	});
 });
 
-test.describe("Path 7: corrective_action + no correction gap + no hasCse → /confirmation", () => {
+test.describe("Path 7: gap + corrective action (no gap after) + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: false,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			correctionHasGap: false,
-		});
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(false);
 	});
 
-	test("step 3: submit second decl (no gap) → navigates to /confirmation", async ({
+	test("declaration → corrective action → correct without gap → /confirmation", async ({
 		page,
 	}) => {
-		await submitSecondDeclaration(page, `**${CONFIRMATION_PATH}`);
+		test.slow(); // Full declaration + compliance + second declaration
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 	});
 });
 
-test.describe("Path 8: corrective_action + correction gap → second round choices", () => {
+// === GROUP D: Corrective action with remaining gap → second round ===
+
+test.describe("Path 8: gap + corrective action (gap persists) → second round choices", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: true,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			correctionHasGap: true,
-		});
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("step 3: submit second decl (gap) → navigates back to compliance path", async ({
+	test("declaration → corrective action → correct WITH gap → back to compliance choice", async ({
 		page,
 	}) => {
-		await submitSecondDeclaration(page, `**${COMPLIANCE_PATH}`);
+		test.slow(); // Full declaration + compliance + second declaration
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: true });
+		// Gap still exists → redirect back to compliance choice
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 	});
 
-	test("second round shows only justify and joint_evaluation (no corrective_action)", async ({
+	test("second round shows only justify and joint evaluation (no corrective action)", async ({
 		page,
 	}) => {
 		await page.goto(COMPLIANCE_PATH);
@@ -182,7 +200,9 @@ test.describe("Path 8: corrective_action + correction gap → second round choic
 			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations", { exact: true }),
+			page.getByText("Évaluation conjointe des rémunérations", {
+				exact: true,
+			}),
 		).toBeVisible();
 		await expect(
 			page.getByText("Actions correctives et seconde déclaration", {
@@ -190,89 +210,79 @@ test.describe("Path 8: corrective_action + correction gap → second round choic
 			}),
 		).not.toBeVisible();
 	});
-});
 
-// === GROUP D: Second round ===
-
-test.describe("Path 9: second round + justify → /avis-cse", () => {
-	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: true,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			secondDeclarationStatus: "submitted",
-			correctionHasGap: true,
-		});
-	});
-
-	test("justify → navigates to /avis-cse/etape/1", async ({ page }) => {
+	test("second round: justify → navigates to /avis-cse/etape/1", async ({
+		page,
+	}) => {
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
 	});
 });
 
-test.describe("Path 10: second round + joint_evaluation + hasCse → /avis-cse", () => {
+test.describe("Path 10: second round + joint evaluation + hasCse → /avis-cse", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: true,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			secondDeclarationStatus: "submitted",
-			correctionHasGap: true,
-		});
+		// Fresh run: declaration → corrective action with gap → second round
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("joint_evaluation → upload PDF → navigates to /avis-cse", async ({
+	test("full flow → second round → joint evaluation → /avis-cse", async ({
 		page,
 	}) => {
+		test.slow(); // Full declaration + compliance + second decl + second round
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: true });
+		// Now in second round
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 	});
 });
 
-test.describe("Path 11: second round + joint_evaluation + no hasCse → /confirmation", () => {
+test.describe("Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: false,
-			hasInitialGap: true,
-			compliancePath: "corrective_action",
-			secondDeclarationStatus: "submitted",
-			correctionHasGap: true,
-		});
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(false);
 	});
 
-	test("joint_evaluation → upload PDF → navigates to /confirmation", async ({
+	test("full flow → second round → joint evaluation → /confirmation", async ({
 		page,
 	}) => {
+		test.slow(); // Full declaration + compliance + second decl + second round
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 	});
 });
 
-// === GROUP E: Redirect guard ===
+// === GROUP F: Redirect guard (complianceCompletedAt) ===
 
-test.describe("Path 12: complianceCompletedAt set → immediate redirect", () => {
+test.describe("Path 12: compliance already completed → redirect", () => {
 	test.beforeAll(async () => {
-		await setupComplianceState({
-			hasCse: true,
-			hasInitialGap: true,
-			complianceCompletedAt: new Date(),
-		});
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
 	});
 
-	test("compliance already completed → redirects away from choice page", async ({
+	test("complete full flow, then verify compliance path redirects away", async ({
 		page,
 	}) => {
+		test.slow(); // Full declaration + CSE step 1 + CSE step 2 + redirect check
+		// Complete declaration without gap → auto-redirect to CSE → complete CSE
+		await completeDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await fillCseStep1(page, false);
+		await submitCseStep2(page);
+
+		// complianceCompletedAt is now set — navigating back should redirect
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(
 			(url) => !url.pathname.endsWith("/parcours-conformite"),
-			{
-				timeout: 10_000,
-			},
+			{ timeout: 10_000 },
 		);
-		// Should be on /avis-cse (hasCse=true)
 		await expect(page).toHaveURL(/avis-cse/);
 	});
 });
