@@ -59,10 +59,6 @@ export async function GET(request: Request) {
 				compliancePath: declarations.compliancePath,
 				totalWomen: declarations.totalWomen,
 				totalMen: declarations.totalMen,
-				remunerationScore: declarations.remunerationScore,
-				variableRemunerationScore: declarations.variableRemunerationScore,
-				quartileScore: declarations.quartileScore,
-				categoryScore: declarations.categoryScore,
 				secondDeclarationStatus: declarations.secondDeclarationStatus,
 				secondDeclReferencePeriodStart:
 					declarations.secondDeclReferencePeriodStart,
@@ -120,12 +116,6 @@ export async function GET(request: Request) {
 				updatedAt: row.updatedAt?.toISOString() ?? null,
 				totalWomen: row.totalWomen,
 				totalMen: row.totalMen,
-				scores: {
-					remuneration: row.remunerationScore,
-					variableRemuneration: row.variableRemunerationScore,
-					quartile: row.quartileScore,
-					category: row.categoryScore,
-				},
 				indicators: buildIndicators(categories),
 				indicatorG: indicatorG.length > 0 ? indicatorG : null,
 				secondDeclaration: {
