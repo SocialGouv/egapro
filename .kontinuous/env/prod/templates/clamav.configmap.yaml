@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: clamav
+data:
+  CLAMAV_HOST: "clamavd-service.clamav.svc.cluster.local"
+  CLAMAV_PORT: "3310"

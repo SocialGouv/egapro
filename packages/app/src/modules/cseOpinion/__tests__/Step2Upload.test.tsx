@@ -1,7 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Step2Upload } from "../Step2Upload";
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		cseOpinion: {
+			uploadFile: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
 
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
@@ -102,7 +116,7 @@ describe("Step2Upload", () => {
 
 		expect(
 			screen.getByText(
-				"Format de fichier non supporté. Seul le format PDF est accepté.",
+				"Format de fichier non supporté. Formats acceptés : pdf.",
 			),
 		).toBeInTheDocument();
 	});
@@ -119,9 +133,7 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
-			screen.getByText(
-				"Le fichier dépasse la taille maximale autorisée de 10 Mo.",
-			),
+			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
 		).toBeInTheDocument();
 	});
 

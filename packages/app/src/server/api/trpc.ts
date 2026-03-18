@@ -11,6 +11,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { parseSiren } from "~/modules/shared/parseSiren";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
@@ -123,3 +124,20 @@ export const protectedProcedure = t.procedure
 			},
 		});
 	});
+
+/**
+ * Company procedure — authenticated + SIREN extracted from session.
+ *
+ * Guarantees `ctx.siren` is a valid 9-digit SIREN.
+ * Use this for any procedure that operates on company-scoped data.
+ */
+export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
+	const siren = parseSiren(ctx.session.user.siret);
+	if (!siren) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "SIRET manquant ou invalide dans la session",
+		});
+	}
+	return next({ ctx: { ...ctx, siren } });
+});

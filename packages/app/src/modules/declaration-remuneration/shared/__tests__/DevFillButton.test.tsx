@@ -29,12 +29,12 @@ describe("DevFillButton", () => {
 
 	it("renders nothing when env is not dev", async () => {
 		const { env } = await import("~/env");
-		(env as Record<string, string>).NEXT_PUBLIC_EGAPRO_ENV = "preprod";
+		(env as Record<string, unknown>).NEXT_PUBLIC_EGAPRO_ENV = "preprod";
 
 		const { container } = render(<DevFillButton onFill={vi.fn()} />);
 		expect(container.innerHTML).toBe("");
 
 		// Restore for other tests
-		(env as Record<string, string>).NEXT_PUBLIC_EGAPRO_ENV = "dev";
+		(env as Record<string, unknown>).NEXT_PUBLIC_EGAPRO_ENV = "dev";
 	});
 });

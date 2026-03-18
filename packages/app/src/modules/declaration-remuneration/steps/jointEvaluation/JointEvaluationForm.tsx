@@ -6,7 +6,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
+import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -24,7 +24,7 @@ export function JointEvaluationForm({
 }: Props) {
 	const router = useRouter();
 
-	const uploadMutation = api.jointEvaluation.uploadFile.useMutation({
+	const saveMutation = api.jointEvaluation.uploadFile.useMutation({
 		onSuccess: () => router.push(getPostComplianceDestination(hasCse)),
 	});
 
@@ -33,19 +33,11 @@ export function JointEvaluationForm({
 		handleConfirm,
 		handleFileChange,
 		handleSubmit,
+		isPending,
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = usePdfUploadForm({
-		onConfirm: () => {
-			if (selectedFile) {
-				uploadMutation.mutate({
-					fileName: selectedFile.name,
-					filePath: selectedFile.name,
-				});
-			}
-		},
-	});
+	} = useFileUploadForm({ saveMutation });
 
 	return (
 		<>
@@ -103,7 +95,10 @@ export function JointEvaluationForm({
 					</label>
 				</div>
 
-				<PdfFileUpload
+				<FileUpload
+					accept=".pdf"
+					acceptLabel="pdf"
+					allowedMimeTypes={["application/pdf"]}
 					error={uploadError}
 					inputId="joint-evaluation-file-upload"
 					onFileChange={handleFileChange}
@@ -158,7 +153,7 @@ export function JointEvaluationForm({
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={uploadMutation.isPending}
+						disabled={isPending}
 						type="submit"
 					>
 						Transmettre

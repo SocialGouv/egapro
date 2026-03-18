@@ -1,27 +1,16 @@
-import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { saveOpinionsSchema } from "~/modules/cseOpinion/schemas";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { cseOpinions } from "~/server/db/schema";
-
-function getSiren(siret: string | null | undefined): string {
-	if (!siret) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "SIRET manquant dans la session",
-		});
-	}
-	return siret.slice(0, 9);
-}
+import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { cseOpinionFiles, cseOpinions } from "~/server/db/schema";
 
 function getCseYear() {
 	return new Date().getFullYear() + 1;
 }
 
 export const cseOpinionRouter = createTRPCRouter({
-	get: protectedProcedure.query(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	get: companyProcedure.query(async ({ ctx }) => {
 		const year = getCseYear();
 
 		const rows = await ctx.db
@@ -33,29 +22,28 @@ export const cseOpinionRouter = createTRPCRouter({
 				gapConsulted: cseOpinions.gapConsulted,
 			})
 			.from(cseOpinions)
-			.where(and(eq(cseOpinions.siren, siren), eq(cseOpinions.year, year)));
+			.where(and(eq(cseOpinions.siren, ctx.siren), eq(cseOpinions.year, year)));
 
 		return { opinions: rows };
 	}),
 
-	saveOpinions: protectedProcedure
+	saveOpinions: companyProcedure
 		.input(saveOpinionsSchema)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
 			const year = getCseYear();
 			const declarantId = ctx.session.user.id;
 
 			await ctx.db.transaction(async (tx) => {
-				// Delete existing opinions for this siren/year
 				await tx
 					.delete(cseOpinions)
-					.where(and(eq(cseOpinions.siren, siren), eq(cseOpinions.year, year)));
+					.where(
+						and(eq(cseOpinions.siren, ctx.siren), eq(cseOpinions.year, year)),
+					);
 
 				const rows: (typeof cseOpinions.$inferInsert)[] = [];
 
-				// First declaration — accuracy
 				rows.push({
-					siren,
+					siren: ctx.siren,
 					year,
 					declarationNumber: 1,
 					type: "accuracy",
@@ -64,9 +52,8 @@ export const cseOpinionRouter = createTRPCRouter({
 					declarantId,
 				});
 
-				// First declaration — gap
 				rows.push({
-					siren,
+					siren: ctx.siren,
 					year,
 					declarationNumber: 1,
 					type: "gap",
@@ -77,9 +64,8 @@ export const cseOpinionRouter = createTRPCRouter({
 				});
 
 				if (input.secondDeclaration) {
-					// Second declaration — accuracy
 					rows.push({
-						siren,
+						siren: ctx.siren,
 						year,
 						declarationNumber: 2,
 						type: "accuracy",
@@ -88,9 +74,8 @@ export const cseOpinionRouter = createTRPCRouter({
 						declarantId,
 					});
 
-					// Second declaration — gap
 					rows.push({
-						siren,
+						siren: ctx.siren,
 						year,
 						declarationNumber: 2,
 						type: "gap",
@@ -106,4 +91,58 @@ export const cseOpinionRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	uploadFile: companyProcedure
+		.input(
+			z.object({
+				fileName: z.string().min(1),
+				filePath: z.string().min(1),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const year = getCseYear();
+			const declarantId = ctx.session.user.id;
+
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.delete(cseOpinionFiles)
+					.where(
+						and(
+							eq(cseOpinionFiles.siren, ctx.siren),
+							eq(cseOpinionFiles.year, year),
+						),
+					);
+
+				await tx.insert(cseOpinionFiles).values({
+					siren: ctx.siren,
+					year,
+					fileName: input.fileName,
+					filePath: input.filePath,
+					declarantId,
+				});
+			});
+
+			return { success: true };
+		}),
+
+	getFile: companyProcedure.query(async ({ ctx }) => {
+		const year = getCseYear();
+
+		const rows = await ctx.db
+			.select({
+				fileName: cseOpinionFiles.fileName,
+				filePath: cseOpinionFiles.filePath,
+				uploadedAt: cseOpinionFiles.uploadedAt,
+			})
+			.from(cseOpinionFiles)
+			.where(
+				and(
+					eq(cseOpinionFiles.siren, ctx.siren),
+					eq(cseOpinionFiles.year, year),
+				),
+			)
+			.limit(1);
+
+		return rows[0] ?? null;
+	}),
 });

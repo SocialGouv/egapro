@@ -1,26 +1,15 @@
-import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { jointEvaluationFiles } from "~/server/db/schema";
-
-function getSiren(siret: string | null | undefined): string {
-	if (!siret) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "SIRET manquant dans la session",
-		});
-	}
-	return siret.slice(0, 9);
-}
 
 function getCurrentYear() {
 	return new Date().getFullYear();
 }
 
 export const jointEvaluationRouter = createTRPCRouter({
-	uploadFile: protectedProcedure
+	uploadFile: companyProcedure
 		.input(
 			z.object({
 				fileName: z.string().min(1),
@@ -28,7 +17,6 @@ export const jointEvaluationRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const siren = getSiren(ctx.session.user.siret);
 			const year = getCurrentYear();
 			const declarantId = ctx.session.user.id;
 
@@ -38,13 +26,13 @@ export const jointEvaluationRouter = createTRPCRouter({
 					.delete(jointEvaluationFiles)
 					.where(
 						and(
-							eq(jointEvaluationFiles.siren, siren),
+							eq(jointEvaluationFiles.siren, ctx.siren),
 							eq(jointEvaluationFiles.year, year),
 						),
 					);
 
 				await tx.insert(jointEvaluationFiles).values({
-					siren,
+					siren: ctx.siren,
 					year,
 					fileName: input.fileName,
 					filePath: input.filePath,
@@ -55,8 +43,7 @@ export const jointEvaluationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	getFile: protectedProcedure.query(async ({ ctx }) => {
-		const siren = getSiren(ctx.session.user.siret);
+	getFile: companyProcedure.query(async ({ ctx }) => {
 		const year = getCurrentYear();
 
 		const rows = await ctx.db
@@ -68,7 +55,7 @@ export const jointEvaluationRouter = createTRPCRouter({
 			.from(jointEvaluationFiles)
 			.where(
 				and(
-					eq(jointEvaluationFiles.siren, siren),
+					eq(jointEvaluationFiles.siren, ctx.siren),
 					eq(jointEvaluationFiles.year, year),
 				),
 			)

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { PdfFileUpload, usePdfUploadForm } from "~/modules/shared";
+import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
@@ -16,17 +17,21 @@ type Props = {
 
 export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 	const router = useRouter();
+
+	const saveMutation = api.cseOpinion.uploadFile.useMutation({
+		onSuccess: () => router.push("/avis-cse/confirmation"),
+	});
+
 	const {
 		closeModal,
 		handleConfirm,
 		handleFileChange,
 		handleSubmit,
+		isPending,
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = usePdfUploadForm({
-		onConfirm: () => router.push("/avis-cse/confirmation"),
-	});
+	} = useFileUploadForm({ saveMutation });
 
 	return (
 		<>
@@ -50,7 +55,10 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					</label>
 				</div>
 
-				<PdfFileUpload
+				<FileUpload
+					accept=".pdf"
+					acceptLabel="pdf"
+					allowedMimeTypes={["application/pdf"]}
 					error={uploadError}
 					inputId="cse-file-upload"
 					onFileChange={handleFileChange}
@@ -75,6 +83,7 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					</Link>
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={isPending}
 						type="submit"
 					>
 						Soumettre
