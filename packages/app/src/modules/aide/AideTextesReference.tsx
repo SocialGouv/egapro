@@ -3,7 +3,7 @@ import { NewTabNotice } from "~/modules/layout";
 /** Textes de référence section with external legislation links. */
 export function AideTextesReference() {
 	return (
-		<div className="fr-callout fr-callout--no-border">
+		<div className="fr-callout fr-callout--blue-france">
 			<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 				<div className="fr-col-auto">
 					<span

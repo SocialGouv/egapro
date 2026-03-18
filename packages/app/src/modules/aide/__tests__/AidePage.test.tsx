@@ -92,4 +92,32 @@ describe("AidePage", () => {
 		);
 		expect(decretLink).toHaveAttribute("target", "_blank");
 	});
+
+	it("renders the back link", () => {
+		render(<AidePage />);
+		const backLink = screen.getByRole("link", { name: /retour à l'accueil/i });
+		expect(backLink).toHaveAttribute("href", "/");
+	});
+
+	it("renders the bottom banner with resource tiles", () => {
+		render(<AidePage />);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /questions fréquentes/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /nous contacter/i,
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("applies the blue background class on main", () => {
+		render(<AidePage />);
+		const main = screen.getByRole("main");
+		expect(main.className).toContain("pageBackground");
+	});
 });

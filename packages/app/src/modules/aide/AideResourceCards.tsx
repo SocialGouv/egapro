@@ -28,7 +28,7 @@ function ResourceCard({
 						<div className="fr-card__start">
 							<ul className="fr-badges-group">
 								<li>
-									<p className="fr-badge fr-badge--new">{badge}</p>
+									<p className="fr-badge fr-badge--blue-france">{badge}</p>
 								</li>
 							</ul>
 						</div>
