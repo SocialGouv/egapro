@@ -122,11 +122,11 @@ export async function GET(request: Request) {
 					...buildIndicators(categories),
 					G: initial.length > 0 ? initial : null,
 				},
-				correction: correction.length > 0 ? correction : null,
 				secondDeclaration: {
 					status: row.secondDeclarationStatus,
 					referencePeriodStart: row.secondDeclReferencePeriodStart,
 					referencePeriodEnd: row.secondDeclReferencePeriodEnd,
+					correction: correction.length > 0 ? correction : null,
 				},
 				declarant: {
 					firstName: row.declarantFirstName,
