@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { PdfFileUpload, uploadPdf, usePdfUploadForm } from "~/modules/shared";
+import { FileUpload, uploadFile, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -32,12 +32,12 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = usePdfUploadForm({
+	} = useFileUploadForm({
 		onConfirm: async () => {
 			if (!selectedFile) return;
 			setIsUploading(true);
 			try {
-				const result = await uploadPdf(selectedFile);
+				const result = await uploadFile(selectedFile);
 				if (!result.ok) {
 					throw new Error(result.error);
 				}
@@ -73,7 +73,10 @@ export function Step2Upload({ hasSecondDeclaration = true }: Props) {
 					</label>
 				</div>
 
-				<PdfFileUpload
+				<FileUpload
+					accept=".pdf"
+					acceptLabel="pdf"
+					allowedMimeTypes={["application/pdf"]}
 					error={uploadError}
 					inputId="cse-file-upload"
 					onFileChange={handleFileChange}

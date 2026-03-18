@@ -1,18 +1,22 @@
 import { auth } from "~/server/auth";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 
-export async function POST(request: Request) {
+/**
+ * Extracts the authenticated user's SIREN from the session.
+ * Returns null if the user is not authenticated or has no SIRET.
+ */
+async function getAuthenticatedSiren() {
 	const session = await auth();
-	if (!session?.user) {
-		return Response.json({ error: "Non authentifié" }, { status: 401 });
-	}
-
+	if (!session?.user) return null;
 	const siret = session.user.siret;
-	if (!siret) {
-		return Response.json(
-			{ error: "SIRET manquant dans la session" },
-			{ status: 400 },
-		);
+	if (!siret) return null;
+	return siret.slice(0, 9);
+}
+
+export async function POST(request: Request) {
+	const siren = await getAuthenticatedSiren();
+	if (!siren) {
+		return Response.json({ error: "Non authentifié" }, { status: 401 });
 	}
 
 	const fileName = request.headers.get("x-filename");
@@ -30,14 +34,16 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const siren = siret.slice(0, 9);
 	const year = new Date().getFullYear();
+	const contentType =
+		request.headers.get("content-type") ?? "application/octet-stream";
 
 	try {
 		const result = await handleStreamingUpload(request.body, {
 			siren,
 			year,
 			fileName,
+			contentType,
 		});
 
 		if (!result.ok) {

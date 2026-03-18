@@ -7,7 +7,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { PdfFileUpload, uploadPdf, usePdfUploadForm } from "~/modules/shared";
+import { FileUpload, uploadFile, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -38,12 +38,12 @@ export function JointEvaluationForm({
 		modalRef,
 		selectedFile,
 		uploadError,
-	} = usePdfUploadForm({
+	} = useFileUploadForm({
 		onConfirm: async () => {
 			if (!selectedFile) return;
 			setIsUploading(true);
 			try {
-				const result = await uploadPdf(selectedFile);
+				const result = await uploadFile(selectedFile);
 				if (!result.ok) {
 					throw new Error(result.error);
 				}
@@ -113,7 +113,10 @@ export function JointEvaluationForm({
 					</label>
 				</div>
 
-				<PdfFileUpload
+				<FileUpload
+					accept=".pdf"
+					acceptLabel="pdf"
+					allowedMimeTypes={["application/pdf"]}
 					error={uploadError}
 					inputId="joint-evaluation-file-upload"
 					onFileChange={handleFileChange}

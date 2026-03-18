@@ -1,16 +1,19 @@
 type UploadSuccess = { ok: true; key: string };
 type UploadError = { ok: false; error: string; virus?: string };
 
-export type UploadPdfResult = UploadSuccess | UploadError;
+export type UploadFileResult = UploadSuccess | UploadError;
 
 /**
- * Uploads a PDF file to the server via the streaming upload endpoint.
+ * Uploads a file to the server via the streaming upload endpoint.
  * The file is sent as raw binary with the filename in a header.
  */
-export async function uploadPdf(file: File): Promise<UploadPdfResult> {
+export async function uploadFile(file: File): Promise<UploadFileResult> {
 	const response = await fetch("/api/upload", {
 		method: "POST",
-		headers: { "X-Filename": file.name },
+		headers: {
+			"Content-Type": file.type || "application/octet-stream",
+			"X-Filename": file.name,
+		},
 		body: file,
 	});
 

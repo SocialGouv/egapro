@@ -31,12 +31,10 @@ function createReadableStream(data: Uint8Array): ReadableStream<Uint8Array> {
 	});
 }
 
-// %PDF- header for valid PDFs
-const PDF_HEADER = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]);
+const SAMPLE_DATA = new Uint8Array([0x01, 0x02, 0x03]);
 
-describe("fileUpload service", () => {
-	it("uploads a clean file successfully", async () => {
-		const { env } = await import("~/env");
+function setEnv() {
+	return import("~/env").then(({ env }) => {
 		Object.defineProperty(env, "CLAMAV_HOST", {
 			value: "localhost",
 			writable: true,
@@ -47,15 +45,24 @@ describe("fileUpload service", () => {
 			writable: true,
 			configurable: true,
 		});
+	});
+}
+
+const baseOptions = {
+	siren: "123456789",
+	year: 2027,
+	fileName: "rapport.pdf",
+	contentType: "application/pdf",
+};
+
+describe("fileUpload service", () => {
+	it("uploads a clean file successfully", async () => {
+		await setEnv();
 
 		const { handleStreamingUpload } = await import("../fileUpload");
-		const stream = createReadableStream(PDF_HEADER);
+		const stream = createReadableStream(SAMPLE_DATA);
 
-		const result = await handleStreamingUpload(stream, {
-			siren: "123456789",
-			year: 2027,
-			fileName: "test.pdf",
-		});
+		const result = await handleStreamingUpload(stream, baseOptions);
 
 		expect(result.ok).toBe(true);
 		if (result.ok) {
@@ -67,18 +74,25 @@ describe("fileUpload service", () => {
 		expect(mockClamd.finish).toHaveBeenCalled();
 	});
 
+	it("preserves the original file extension in the S3 key", async () => {
+		await setEnv();
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const stream = createReadableStream(SAMPLE_DATA);
+
+		const result = await handleStreamingUpload(stream, {
+			...baseOptions,
+			fileName: "photo.jpg",
+		});
+
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.key).toMatch(/\.jpg$/);
+		}
+	});
+
 	it("rejects an infected file", async () => {
-		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_HOST", {
-			value: "localhost",
-			writable: true,
-			configurable: true,
-		});
-		Object.defineProperty(env, "CLAMAV_PORT", {
-			value: 3310,
-			writable: true,
-			configurable: true,
-		});
+		await setEnv();
 
 		mockClamd.finish.mockResolvedValueOnce({
 			clean: false,
@@ -86,13 +100,9 @@ describe("fileUpload service", () => {
 		});
 
 		const { handleStreamingUpload } = await import("../fileUpload");
-		const stream = createReadableStream(PDF_HEADER);
+		const stream = createReadableStream(SAMPLE_DATA);
 
-		const result = await handleStreamingUpload(stream, {
-			siren: "123456789",
-			year: 2027,
-			fileName: "virus.pdf",
-		});
+		const result = await handleStreamingUpload(stream, baseOptions);
 
 		expect(result).toEqual({
 			ok: false,
@@ -102,47 +112,8 @@ describe("fileUpload service", () => {
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 	});
 
-	it("rejects a non-PDF file", async () => {
-		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_HOST", {
-			value: "localhost",
-			writable: true,
-			configurable: true,
-		});
-		Object.defineProperty(env, "CLAMAV_PORT", {
-			value: 3310,
-			writable: true,
-			configurable: true,
-		});
-
-		const { handleStreamingUpload } = await import("../fileUpload");
-		const stream = createReadableStream(new Uint8Array([0x00, 0x01, 0x02]));
-
-		const result = await handleStreamingUpload(stream, {
-			siren: "123456789",
-			year: 2027,
-			fileName: "fake.pdf",
-		});
-
-		expect(result).toEqual({
-			ok: false,
-			error: "Le fichier n'est pas un PDF valide.",
-		});
-		expect(mockS3Upload.abort).toHaveBeenCalled();
-	});
-
 	it("rejects an empty file", async () => {
-		const { env } = await import("~/env");
-		Object.defineProperty(env, "CLAMAV_HOST", {
-			value: "localhost",
-			writable: true,
-			configurable: true,
-		});
-		Object.defineProperty(env, "CLAMAV_PORT", {
-			value: 3310,
-			writable: true,
-			configurable: true,
-		});
+		await setEnv();
 
 		const { handleStreamingUpload } = await import("../fileUpload");
 		const stream = new ReadableStream({
@@ -151,11 +122,7 @@ describe("fileUpload service", () => {
 			},
 		});
 
-		const result = await handleStreamingUpload(stream, {
-			siren: "123456789",
-			year: 2027,
-			fileName: "empty.pdf",
-		});
+		const result = await handleStreamingUpload(stream, baseOptions);
 
 		expect(result).toEqual({
 			ok: false,

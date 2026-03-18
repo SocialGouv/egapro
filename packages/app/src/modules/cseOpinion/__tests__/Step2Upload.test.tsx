@@ -116,7 +116,7 @@ describe("Step2Upload", () => {
 
 		expect(
 			screen.getByText(
-				"Format de fichier non supporté. Seul le format PDF est accepté.",
+				"Format de fichier non supporté. Formats acceptés : pdf.",
 			),
 		).toBeInTheDocument();
 	});

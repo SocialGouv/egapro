@@ -105,8 +105,7 @@ export async function deleteFile(key: string): Promise<void> {
 	);
 }
 
-// Minimum part size for S3 multipart upload (5 MB, required by S3 except for the last part)
-const S3_PART_MIN_SIZE = 5 * 1024 * 1024;
+import { S3_PART_MIN_SIZE } from "~/modules/shared";
 
 /**
  * Creates an incremental multipart upload to S3.

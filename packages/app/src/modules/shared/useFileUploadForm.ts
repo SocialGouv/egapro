@@ -8,7 +8,7 @@ type Options = {
 	onConfirm: () => void;
 };
 
-export function usePdfUploadForm({ onConfirm }: Options) {
+export function useFileUploadForm({ onConfirm }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [uploadError, setUploadError] = useState<string | null>(null);

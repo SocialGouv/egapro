@@ -1,6 +1,7 @@
 import "server-only";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+import { MAX_FILE_SIZE } from "~/modules/shared";
+
 const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
 
 type ValidationResult = {

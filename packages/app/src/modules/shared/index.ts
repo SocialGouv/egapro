@@ -1,5 +1,10 @@
+export { FileUpload } from "./FileUpload";
 export { getDsfrModal } from "./getDsfrModal";
-export { PdfFileUpload } from "./PdfFileUpload";
 export { SubmitModal } from "./SubmitModal";
-export { uploadPdf } from "./uploadPdf";
-export { usePdfUploadForm } from "./usePdfUploadForm";
+export {
+	MAX_FILE_SIZE,
+	S3_PART_MIN_SIZE,
+	SCAN_TIMEOUT_MS,
+} from "./uploadConfig";
+export { uploadFile } from "./uploadFile";
+export { useFileUploadForm } from "./useFileUploadForm";

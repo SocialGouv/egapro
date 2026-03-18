@@ -1,14 +1,22 @@
 import "server-only";
 
 import crypto from "node:crypto";
+import path from "node:path";
 
 import { env } from "~/env";
+
+import { MAX_FILE_SIZE } from "~/modules/shared";
 
 import { createClamdStream, type ScanResult } from "./clamav";
 import { createMultipartUpload } from "./s3";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
+type UploadOptions = {
+	siren: string;
+	year: number;
+	fileName: string;
+	contentType: string;
+	maxSize?: number;
+};
 
 type UploadResult =
 	| { ok: true; key: string }
@@ -21,18 +29,18 @@ type UploadResult =
  */
 export async function handleStreamingUpload(
 	stream: ReadableStream<Uint8Array>,
-	options: { siren: string; year: number; fileName: string },
+	options: UploadOptions,
 ): Promise<UploadResult> {
+	const maxSize = options.maxSize ?? MAX_FILE_SIZE;
+	const ext = path.extname(options.fileName) || ".bin";
 	const fileId = crypto.randomUUID();
-	const key = `${options.siren}/${options.year}/${fileId}.pdf`;
+	const key = `${options.siren}/${options.year}/${fileId}${ext}`;
 
 	const clamd = createClamdStream(env.CLAMAV_HOST, env.CLAMAV_PORT);
-	const s3Upload = createMultipartUpload(key, "application/pdf");
+	const s3Upload = createMultipartUpload(key, options.contentType);
 	await s3Upload.init();
 
 	let totalBytes = 0;
-	let firstChunk = true;
-
 	const reader = stream.getReader();
 
 	try {
@@ -43,19 +51,8 @@ export async function handleStreamingUpload(
 			const buf = Buffer.from(value);
 			totalBytes += buf.length;
 
-			if (totalBytes > MAX_FILE_SIZE) {
+			if (totalBytes > maxSize) {
 				throw new FileTooLargeError();
-			}
-
-			// Validate PDF magic bytes on the first chunk
-			if (firstChunk) {
-				firstChunk = false;
-				const hasPdfSignature = PDF_MAGIC_BYTES.every(
-					(byte, index) => buf[index] === byte,
-				);
-				if (!hasPdfSignature) {
-					throw new InvalidPdfError();
-				}
 			}
 
 			// Send to both destinations in parallel
@@ -70,9 +67,6 @@ export async function handleStreamingUpload(
 				ok: false,
 				error: "Le fichier dépasse la taille maximale autorisée de 10 Mo.",
 			};
-		}
-		if (err instanceof InvalidPdfError) {
-			return { ok: false, error: "Le fichier n'est pas un PDF valide." };
 		}
 		throw err;
 	}
@@ -110,11 +104,5 @@ export async function handleStreamingUpload(
 class FileTooLargeError extends Error {
 	constructor() {
 		super("File too large");
-	}
-}
-
-class InvalidPdfError extends Error {
-	constructor() {
-		super("Invalid PDF");
 	}
 }

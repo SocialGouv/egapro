@@ -4,9 +4,9 @@ import net from "node:net";
 
 import { env } from "~/env";
 
-export type ScanResult = { clean: true } | { clean: false; virus: string };
+import { SCAN_TIMEOUT_MS } from "~/modules/shared";
 
-const SCAN_TIMEOUT_MS = 30_000;
+export type ScanResult = { clean: true } | { clean: false; virus: string };
 
 /**
  * Opens a TCP connection to clamd and sends the INSTREAM command.

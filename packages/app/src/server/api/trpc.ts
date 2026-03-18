@@ -123,3 +123,20 @@ export const protectedProcedure = t.procedure
 			},
 		});
 	});
+
+/**
+ * Company procedure — authenticated + SIREN extracted from session.
+ *
+ * Guarantees `ctx.siren` is a valid 9-digit SIREN.
+ * Use this for any procedure that operates on company-scoped data.
+ */
+export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
+	const siret = ctx.session.user.siret;
+	if (!siret) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "SIRET manquant dans la session",
+		});
+	}
+	return next({ ctx: { ...ctx, siren: siret.slice(0, 9) } });
+});
