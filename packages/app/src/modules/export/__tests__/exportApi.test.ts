@@ -201,7 +201,7 @@ describe("GET /api/v1/export/declarations", () => {
 			F: [],
 			G: null,
 		});
-		expect(decl.correction).toBeNull();
+		expect(decl.secondDeclaration.correction).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
 	});
 });
