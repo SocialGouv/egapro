@@ -49,12 +49,6 @@ jobs:
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm build
-      - name: Wait for database to be ready
-        run: |
-          for i in $(seq 1 30); do
-            pg_isready -h localhost -p 5438 && break
-            sleep 1
-          done
       - name: Apply database schema
         run: pnpm db:push
       - name: Install Playwright browsers

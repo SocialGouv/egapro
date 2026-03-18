@@ -1,4 +1,5 @@
 export { buildExportRows, buildIndicatorGRows } from "./buildExportRows";
+export { downloadExport } from "./downloadExport";
 export { generateXlsx } from "./generateXlsx";
 export {
 	buildExportKey,

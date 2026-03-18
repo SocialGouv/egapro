@@ -599,6 +599,7 @@ export const exports = createTable(
 			.primaryKey()
 			.$defaultFn(() => crypto.randomUUID()),
 		year: d.integer().notNull(),
+		// Keep in sync with EXPORT_VERSION in modules/export/shared/constants.ts
 		version: d.varchar({ length: 10 }).notNull().default("v1"),
 		fileName: d.varchar({ length: 255 }).notNull(),
 		s3Key: d.varchar({ length: 500 }).notNull(),

@@ -1,10 +1,7 @@
-import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { EXPORT_VERSION } from "~/modules/export";
+import { downloadExport } from "~/modules/export/downloadExport";
 import { db } from "~/server/db";
-import { exports } from "~/server/db/schema";
-import { getFile } from "~/server/services/s3";
 
 const querySchema = z.object({
 	year: z
@@ -32,27 +29,19 @@ export async function GET(request: Request) {
 			);
 		}
 
-		const { year } = parsed.data;
+		const result = await downloadExport(db, parsed.data.year);
 
-		const [exportRow] = await db
-			.select({ s3Key: exports.s3Key, fileName: exports.fileName })
-			.from(exports)
-			.where(and(eq(exports.year, year), eq(exports.version, EXPORT_VERSION)))
-			.limit(1);
-
-		if (!exportRow) {
+		if (!result.found) {
 			return Response.json(
-				{ error: `No export found for year ${year}` },
+				{ error: `No export found for year ${parsed.data.year}` },
 				{ status: 404 },
 			);
 		}
 
-		const { body, contentType } = await getFile(exportRow.s3Key);
-
-		return new Response(body, {
+		return new Response(result.body, {
 			headers: {
-				"Content-Type": contentType,
-				"Content-Disposition": `attachment; filename="${exportRow.fileName}"`,
+				"Content-Type": result.contentType,
+				"Content-Disposition": `attachment; filename="${result.fileName}"`,
 			},
 		});
 	} catch (error) {
