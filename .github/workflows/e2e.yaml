@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "Waiting for ClamAV daemon…"
           for i in $(seq 1 60); do
-            if docker compose exec clamavd clamdcheck 2>/dev/null; then
+            if docker compose exec clamavd clamdscan --ping 2>/dev/null; then
               echo "ClamAV is ready"
               break
             fi
