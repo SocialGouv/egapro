@@ -115,13 +115,9 @@ export function Step2Upload({
 				)}
 
 				{!canAddMore && (
-					<p
-						aria-live="polite"
-						className="fr-text--sm fr-text--mention-grey fr-mt-2w"
-						role="status"
-					>
+					<output className="fr-text--sm fr-text--mention-grey fr-mt-2w">
 						Nombre maximum de fichiers atteint ({MAX_CSE_FILES}).
-					</p>
+					</output>
 				)}
 
 				<div className="fr-mt-4w">
