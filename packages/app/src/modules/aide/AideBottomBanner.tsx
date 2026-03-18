@@ -38,38 +38,36 @@ function ResourceTile({
 /** Bottom navigation banner with links to FAQ, reference texts and contact. */
 export function AideBottomBanner() {
 	return (
-		<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle fr-mt-4w">
-			<div className="fr-col-12 fr-col-md-9">
-				<div className="fr-grid-row fr-grid-row--gutters">
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Réponses aux questions les plus courantes"
-							href="/faq"
-							pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-							title="Questions fréquentes (FAQ)"
-						/>
-					</div>
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Consultez les textes législatifs et réglementaires"
-							href="/textes-reference"
-							pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-							title="Textes de référence"
-						/>
-					</div>
-					<div className="fr-col-12 fr-col-md-4">
-						<ResourceTile
-							detail="Besoin d'aide ? Contactez nos services d'assistance"
-							href="/aide/nous-contacter"
-							pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
-							title="Nous contacter"
-						/>
-					</div>
+		<>
+			<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+				<div className="fr-col-12 fr-col-md-4">
+					<ResourceTile
+						detail="Réponses aux questions les plus courantes"
+						href="/faq"
+						pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
+						title="Questions fréquentes (FAQ)"
+					/>
+				</div>
+				<div className="fr-col-12 fr-col-md-4">
+					<ResourceTile
+						detail="Consultez les textes législatifs et réglementaires"
+						href="/textes-reference"
+						pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
+						title="Textes de référence"
+					/>
+				</div>
+				<div className="fr-col-12 fr-col-md-4">
+					<ResourceTile
+						detail="Besoin d'aide ? Contactez nos services d'assistance"
+						href="/aide/nous-contacter"
+						pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
+						title="Nous contacter"
+					/>
 				</div>
 			</div>
 			<div
 				aria-hidden="true"
-				className="fr-col-12 fr-col-md-3 fr-grid-row fr-grid-row--center"
+				className="fr-grid-row fr-grid-row--center fr-mt-4w"
 			>
 				<Image
 					alt=""
@@ -79,6 +77,6 @@ export function AideBottomBanner() {
 					width={210}
 				/>
 			</div>
-		</div>
+		</>
 	);
 }

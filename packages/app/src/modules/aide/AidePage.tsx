@@ -12,7 +12,7 @@ import { AideTextesReference } from "./AideTextesReference";
 export function AidePage() {
 	return (
 		<main className={styles.pageBackground} id="content" tabIndex={-1}>
-			<div className="fr-container fr-py-6w">
+			<div className="fr-container fr-pt-3w fr-pb-6w">
 				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
