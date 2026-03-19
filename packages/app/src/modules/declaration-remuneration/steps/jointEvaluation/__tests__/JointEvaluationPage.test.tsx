@@ -34,6 +34,7 @@ vi.mock("../JointEvaluationForm", () => ({
 }));
 
 import { redirect } from "next/navigation";
+import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
@@ -62,7 +63,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("current-year")).toHaveTextContent(
-			String(new Date().getFullYear()),
+			String(getCurrentYear()),
 		);
 	});
 

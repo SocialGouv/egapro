@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -32,10 +32,14 @@ export function SecondDeclarationStep3Review({
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some(
 		(cat) =>
-			(cat.annualBaseGap !== null && cat.annualBaseGap >= 5) ||
-			(cat.annualVariableGap !== null && cat.annualVariableGap >= 5) ||
-			(cat.hourlyBaseGap !== null && cat.hourlyBaseGap >= 5) ||
-			(cat.hourlyVariableGap !== null && cat.hourlyVariableGap >= 5),
+			(cat.annualBaseGap !== null &&
+				cat.annualBaseGap >= GAP_ALERT_THRESHOLD) ||
+			(cat.annualVariableGap !== null &&
+				cat.annualVariableGap >= GAP_ALERT_THRESHOLD) ||
+			(cat.hourlyBaseGap !== null &&
+				cat.hourlyBaseGap >= GAP_ALERT_THRESHOLD) ||
+			(cat.hourlyVariableGap !== null &&
+				cat.hourlyVariableGap >= GAP_ALERT_THRESHOLD),
 	);
 
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({

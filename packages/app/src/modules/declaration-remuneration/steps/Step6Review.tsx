@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import { getCurrentYear } from "~/modules/domain";
+import { GAP_ALERT_THRESHOLD, getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
@@ -32,9 +32,9 @@ function findGap(rows: PayGapRow[], label: string): number | null {
 	return row ? computeGap(row.womenValue, row.menValue) : null;
 }
 
-/** Check if any gap value is >= 5% (high gap threshold) */
+/** Check if any gap value is >= the regulatory threshold */
 function hasAnyHighGap(gaps: (number | null)[]): boolean {
-	return gaps.some((g) => g !== null && Math.abs(g) >= 5);
+	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
 }
 
 // -- Component --
