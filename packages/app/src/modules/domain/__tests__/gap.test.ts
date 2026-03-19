@@ -91,7 +91,7 @@ describe("computeGap", () => {
 		expect(computeGap("200", "100")).toBeCloseTo(100);
 	});
 
-	it("returns null when men value is zero", () => {
+	it("returns null when men value is zero (division by zero)", () => {
 		expect(computeGap("100", "0")).toBeNull();
 	});
 
@@ -101,6 +101,10 @@ describe("computeGap", () => {
 
 	it("handles equal values (0% gap)", () => {
 		expect(computeGap("100", "100")).toBeCloseTo(0);
+	});
+
+	it("computes 100% gap when women earn 0", () => {
+		expect(computeGap("0", "100")).toBeCloseTo(100);
 	});
 });
 

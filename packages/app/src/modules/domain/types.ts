@@ -9,9 +9,3 @@ export type DeclarationType = "remuneration" | "representation";
 
 /** Company size classification for declaration obligations. */
 export type CompanySize = "voluntary" | "triennial" | "annual";
-
-/** Available compliance paths when gap exceeds threshold. */
-export type CompliancePath =
-	| "justify"
-	| "corrective_action"
-	| "joint_evaluation";

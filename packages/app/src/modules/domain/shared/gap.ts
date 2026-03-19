@@ -37,7 +37,7 @@ export function displayDecimal(value: string): string {
 export function computeGap(womenVal: string, menVal: string): number | null {
 	const w = parseNumber(womenVal);
 	const m = parseNumber(menVal);
-	if (!w || !m || m === 0) return null;
+	if (Number.isNaN(w) || Number.isNaN(m) || m === 0) return null;
 	return Math.abs(((m - w) / m) * 100);
 }
 

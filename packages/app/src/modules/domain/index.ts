@@ -36,7 +36,6 @@ export {
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
 	CompanySize,
-	CompliancePath,
 	DeclarationStatus,
 	DeclarationType,
 	GapLevel,
