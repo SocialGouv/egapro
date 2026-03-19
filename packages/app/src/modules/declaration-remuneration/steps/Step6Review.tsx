@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
+import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
@@ -56,7 +56,7 @@ export function Step6Review({
 	isSubmitted = false,
 	isPrefilled = false,
 }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
@@ -20,7 +21,7 @@ export function Step5EmployeeCategories({
 	maxWomen,
 	maxMen,
 }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 	const router = useRouter();
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({

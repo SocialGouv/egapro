@@ -1,0 +1,130 @@
+import type { GapLevel } from "../types";
+import { GAP_ALERT_THRESHOLD } from "./constants";
+
+export function parseNumber(value: string): number {
+	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
+}
+
+/** Normalize decimal input: strip spaces, replace comma with dot, reject invalid chars. */
+export function normalizeDecimalInput(value: string): string | null {
+	const normalized = value.replace(/\s/g, "").replace(",", ".");
+	if (normalized === "") return normalized;
+	const dotCount = normalized.split(".").length - 1;
+	if (dotCount > 1) return null;
+	for (const ch of normalized) {
+		if (ch !== "." && (ch < "0" || ch > "9")) return null;
+	}
+	return normalized;
+}
+
+const thousandFormatter = new Intl.NumberFormat("fr-FR", {
+	useGrouping: true,
+	maximumFractionDigits: 0,
+});
+
+/** Display a stored decimal value with French locale: comma separator + thousand spaces. */
+export function displayDecimal(value: string): string {
+	if (!value) return value;
+	const [intPart, decPart] = value.split(".");
+	const n = Number.parseInt(intPart ?? "0", 10);
+	const formatted = Number.isNaN(n)
+		? (intPart ?? "")
+		: thousandFormatter.format(n);
+	return decPart !== undefined ? `${formatted},${decPart}` : formatted;
+}
+
+/** Compute gap as absolute percentage: |((men - women) / men) * 100|. */
+export function computeGap(womenVal: string, menVal: string): number | null {
+	const w = parseNumber(womenVal);
+	const m = parseNumber(menVal);
+	if (!w || !m || m === 0) return null;
+	return Math.abs(((m - w) / m) * 100);
+}
+
+export function formatGap(gap: number | null): string {
+	if (gap === null) return "-";
+	return `${gap.toFixed(1).replace(".", ",")} %`;
+}
+
+export function formatGapCompact(gap: number | null): string {
+	if (gap === null) return "-";
+	return gap.toFixed(1).replace(".", ",");
+}
+
+/** Classify a gap value against the regulatory threshold. */
+export function gapLevel(gap: number | null): GapLevel | null {
+	if (gap === null) return null;
+	return gap < GAP_ALERT_THRESHOLD ? "low" : "high";
+}
+
+export function computeProportion(count: string, total?: number): string {
+	const n = Number.parseInt(count, 10);
+	if (Number.isNaN(n) || !total || total === 0) return "-";
+	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
+}
+
+export function formatCurrency(value?: string | null): string {
+	if (!value) return "-";
+	const n = Number.parseFloat(value);
+	if (Number.isNaN(n)) return "-";
+	return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
+}
+
+export function computePercentage(count: number, total: number): string {
+	if (total === 0) return "-";
+	return `${((count / total) * 100).toFixed(1).replace(".", ",")} %`;
+}
+
+export function computeTotal(base: string, variable: string): number | null {
+	const b = Number.parseFloat(base);
+	const v = Number.parseFloat(variable);
+	if (Number.isNaN(b) && Number.isNaN(v)) return null;
+	return (Number.isNaN(b) ? 0 : b) + (Number.isNaN(v) ? 0 : v);
+}
+
+export function formatTotal(value: number | null, unit: string): string {
+	if (value === null) return "-";
+	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
+}
+
+type SalaryPair = {
+	women: string | null;
+	men: string | null;
+};
+
+type EmployeeCategoryLike = {
+	annualBaseWomen?: string | null;
+	annualBaseMen?: string | null;
+	annualVariableWomen?: string | null;
+	annualVariableMen?: string | null;
+	hourlyBaseWomen?: string | null;
+	hourlyBaseMen?: string | null;
+	hourlyVariableWomen?: string | null;
+	hourlyVariableMen?: string | null;
+};
+
+/** Returns true if any employee category has a salary gap >= threshold (default: regulatory 5%). */
+export function hasGapsAboveThreshold(
+	categories: EmployeeCategoryLike[],
+	threshold = GAP_ALERT_THRESHOLD,
+): boolean {
+	return categories.some((cat) => {
+		const pairs: SalaryPair[] = [
+			{ women: cat.annualBaseWomen ?? null, men: cat.annualBaseMen ?? null },
+			{
+				women: cat.annualVariableWomen ?? null,
+				men: cat.annualVariableMen ?? null,
+			},
+			{ women: cat.hourlyBaseWomen ?? null, men: cat.hourlyBaseMen ?? null },
+			{
+				women: cat.hourlyVariableWomen ?? null,
+				men: cat.hourlyVariableMen ?? null,
+			},
+		];
+		return pairs.some(({ women, men }) => {
+			if (!women || !men) return false;
+			const gap = computeGap(women, men);
+			return gap !== null && gap >= threshold;
+		});
+	});
+}

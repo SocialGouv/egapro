@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -16,7 +17,7 @@ type Props = {
 };
 
 export function CseOpinionLayout({ company, children }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	return (
 		<>

@@ -40,6 +40,10 @@ You receive a list of changed files or a git diff. For each file, check against 
 20. **Barrel import violation** — Importing from internal module paths instead of the barrel `index.ts`.
 21. **Missing ownership check** — tRPC mutations modifying data without verifying the user owns the resource.
 
+### Domain layer
+22. **Inline business rule** — `new Date().getFullYear()`, `siret.slice(0, 9)`, or hardcoded regulatory thresholds (`5`, `50`, `100`) instead of imports from `~/modules/domain` (`getCurrentYear`, `extractSiren`, `GAP_ALERT_THRESHOLD`, `COMPANY_SIZE_*`).
+23. **Local duplicate** — Local `getCurrentYear`/`getCseYear`/`getSiren` function definitions that duplicate domain functions. Must import from `~/modules/domain`.
+
 ## Output Format
 
 For each violation found:
@@ -49,7 +53,7 @@ For each violation found:
 ```
 
 Severity levels:
-- `[ERROR]` — Must fix before merge (items 6, 7, 8, 13, 14, 15, 16, 17, 19, 21)
+- `[ERROR]` — Must fix before merge (items 6, 7, 8, 13, 14, 15, 16, 17, 19, 21, 22, 23)
 - `[WARN]` — Should fix (items 1, 2, 3, 4, 5, 9, 10, 11, 12, 18, 20)
 
 End with:

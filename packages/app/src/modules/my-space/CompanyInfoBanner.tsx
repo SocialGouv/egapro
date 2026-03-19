@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function CompanyInfoBanner({ company }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	return (
 		<div className={`fr-py-4w ${styles.banner}`}>

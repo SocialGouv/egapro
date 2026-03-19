@@ -41,13 +41,14 @@ Runs `pnpm biome check --write` automatically:
 
 ## Activation rules
 
-All 3 core gates (Validation, RGAA, Security) are **always launched** — they cannot be skipped.
+All 4 core gates (Validation, RGAA, Domain layer, Security) are **always launched** — they cannot be skipped.
 Each audit agent scopes itself based on the files actually modified.
 
 | Gate | Always launched | Scope |
 |---|---|---|
 | Validation (typecheck + tests + lint) | **Yes** | All files |
 | RGAA | **Yes** | If `.tsx` files modified → full 13-theme audit. Otherwise → instant `PASS — no UI files` |
+| Domain layer | **Yes** | No inline `getFullYear()`, `slice(0,9)`, or hardcoded thresholds. Import from `~/modules/domain` |
 | Security | **Yes** | If `.ts/.tsx` in `server/`, `routers/`, or tRPC modified → full OWASP audit. Otherwise → instant `SECURE — no server files` |
 | E2E tests | Only when relevant | A user journey is created, modified, or its underlying API/data changes |
 
@@ -96,7 +97,16 @@ Verify **inline while writing** AND audit all created/modified files after imple
 After implementation, delegate to `rgaa-auditor` agent on all created/modified files.
 Full checklist (13 RGAA themes) in `.claude/agents/rgaa-auditor/AGENT.md`.
 
-### Gate 3 — Security (always)
+### Gate 3 — Domain layer (always)
+
+Verify **inline while writing**:
+- No `new Date().getFullYear()` → use `getCurrentYear()` or `getCseYear()` from `~/modules/domain`
+- No `siret.slice(0, 9)` → use `extractSiren(siret)` from `~/modules/domain`
+- No hardcoded thresholds (5%, 50, 100) → use named constants from `~/modules/domain`
+- No local `getCurrentYear`/`getCseYear`/`getSiren` function definitions → import from `~/modules/domain`
+- New business rules → add to `~/modules/domain` as pure functions with tests
+
+### Gate 4 — Security (always)
 
 Verify **inline while writing** AND audit all created/modified files after implementation:
 - Queries → Drizzle ORM only (no raw SQL)
@@ -110,7 +120,7 @@ Verify **inline while writing** AND audit all created/modified files after imple
 After implementation, delegate to `security-auditor` agent on all created/modified files.
 Full checklist (OWASP Top 10) in `.claude/agents/security-auditor/AGENT.md`.
 
-### Gate 4 — PR review (when on a PR branch)
+### Gate 5 — PR review (when on a PR branch)
 
 When the current git branch has an open PR, **before starting work**:
 1. `gh pr view --json comments,reviews,reviewDecision`

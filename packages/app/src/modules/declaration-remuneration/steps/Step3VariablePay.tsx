@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStepCategoriesSchema } from "../schemas";
@@ -97,7 +98,7 @@ export function Step3VariablePay({
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	const mutation = api.declaration.updateStepCategories.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),

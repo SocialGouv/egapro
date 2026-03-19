@@ -52,6 +52,17 @@ src/
       page.tsx             <- ProConnect login page (redirects if already logged in)
 
   modules/                 <- Business logic and components by domain
+    domain/                <- Pure business rules (isomorphic, zero React deps)
+      index.ts             <- Barrel: single import point for all domain logic
+      types.ts             <- Domain types (GapLevel, DeclarationStatus, etc.)
+      shared/
+        constants.ts       <- Regulatory constants (thresholds, campaign year)
+        gap.ts             <- Gap calculation and formatting (pure functions)
+        siren.ts           <- SIREN extraction, formatting, validation
+        campaign.ts        <- Campaign year, CSE year (temporal rules)
+        declarationStatus.ts <- Declaration status state machine
+        companySize.ts     <- Company size classification & CSE requirement
+      __tests__/           <- 100% coverage on all domain functions
     analytics/             <- Matomo tracking
       index.ts             <- Barrel: exports MatomoAnalytics
       MatomoAnalytics.tsx  <- Client component for Matomo tracking (NEXT_PUBLIC_MATOMO_*)

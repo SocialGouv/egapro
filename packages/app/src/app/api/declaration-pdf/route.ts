@@ -1,6 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
+import { extractSiren, getCurrentYear } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
 export async function GET() {
@@ -9,8 +10,8 @@ export async function GET() {
 		return new Response("Non autorisé", { status: 401 });
 	}
 
-	const siren = session.user.siret.slice(0, 9);
-	const year = new Date().getFullYear();
+	const siren = extractSiren(session.user.siret);
+	const year = getCurrentYear();
 
 	try {
 		const data = await buildPdfData(siren, year, new Date());

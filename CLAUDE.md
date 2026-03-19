@@ -12,7 +12,10 @@ Key concepts for development:
 - **Indicators A–F**: pre-calculated by GIP-MDS from DSN data, available each March
 - **Indicator G**: company-calculated pay gap by job categories (base + variable compensation)
 - **Alert threshold**: gap >= 5% triggers additional obligations (second declaration, CSE opinion, joint assessment)
-- **CSE opinion**: PDF upload, companies >= 100 employees only, up to 3/year
+- **CSE opinion**: PDF upload, companies >= 100 employees only, up to 4/year
+- **Company sizes**: < 50 (voluntary), 50–99 (triennial), >= 100 (annual + CSE required)
+
+All business rules are centralized in `packages/app/src/modules/domain/` as pure TypeScript functions. See `packages/app/CLAUDE.md` for details.
 
 Full specs: <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
 
@@ -106,6 +109,7 @@ Quality checks run **automatically** after every code change — no command need
 |---|---|---|
 | **Validation** | After every task | 3 parallel agents: `pnpm typecheck` + `pnpm test` + `pnpm lint:check && format:check` |
 | **RGAA** | **After every task** | Delegate to `rgaa-auditor` agent on all created/modified files |
+| **Domain layer** | **After every task** | No inline `getFullYear()`, `slice(0,9)`, hardcoded thresholds — import from `~/modules/domain` |
 | **Security** | **After every task** | Delegate to `security-auditor` agent on all created/modified files |
 | **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
 
@@ -126,7 +130,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 
 | Agent | Role | Triggered by |
 |---|---|---|
-| `code-reviewer` | 21-point code quality checklist | `/review-pr`, PR gate |
+| `code-reviewer` | 23-point code quality checklist | `/review-pr`, PR gate |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit | `/audit-rgaa`, RGAA gate |
 | `security-auditor` | OWASP Top 10 + RGS security review | `/audit-secu`, security gate |
 

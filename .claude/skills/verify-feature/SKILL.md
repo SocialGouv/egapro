@@ -125,7 +125,27 @@ For changed files in `src/server/`:
 - Multi-write without `db.transaction()` → **VIOLATION**
 - Raw SQL → **VIOLATION**
 
-#### 1.14 Accessibility (`automation.md § Gate 2`)
+#### 1.14 Domain layer (`code-quality.md § Domain layer`)
+
+For all changed `.ts/.tsx` files (excluding tests and `domain/` itself):
+
+```bash
+# Must return ZERO — no inline getFullYear outside domain/
+grep -rn "new Date()\.getFullYear()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# Must return ZERO — no inline slice(0, 9) outside domain/
+grep -rn "slice(0, 9)" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/"
+
+# Must return ZERO — no local getCurrentYear/getCseYear definitions outside domain/
+grep -rn "function getCurrentYear\|function getCseYear\|function getSiren" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/"
+```
+
+- Inline `new Date().getFullYear()` instead of `getCurrentYear()` from domain → **VIOLATION**
+- Inline `siret.slice(0, 9)` instead of `extractSiren()` from domain → **VIOLATION**
+- Local `getCurrentYear`/`getCseYear`/`getSiren` function instead of domain import → **VIOLATION**
+- Hardcoded regulatory threshold (`< 5`, `>= 100`, `< 50`) instead of domain constant → **WARNING**
+
+#### 1.15 Accessibility (`automation.md § Gate 2`)
 
 For changed `.tsx` files:
 - `<input>` without associated `<label>` → **VIOLATION**

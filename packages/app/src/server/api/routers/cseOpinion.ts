@@ -1,19 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 	uploadFileSchema,
 } from "~/modules/cseOpinion/schemas";
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
+import { getCseYear } from "~/modules/domain";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { cseOpinionFiles, cseOpinions } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
-
-function getCseYear() {
-	return new Date().getFullYear() + 1;
-}
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: companyProcedure.query(async ({ ctx }) => {

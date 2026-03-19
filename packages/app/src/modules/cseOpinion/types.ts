@@ -19,7 +19,8 @@ export type CseOpinionStep1Data = {
 	secondDeclGapDate: string | null;
 };
 
-export const MAX_CSE_FILES = 4;
+// Domain re-export (canonical source: ~/modules/domain)
+export { MAX_CSE_FILES } from "~/modules/domain";
 
 export const TOTAL_STEPS = 2;
 

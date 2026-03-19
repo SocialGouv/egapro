@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { getCurrentYear } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -65,7 +66,7 @@ export async function CompliancePathPage() {
 	}
 
 	const email = session?.user?.email ?? "";
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	return (
 		<HydrateClient>
