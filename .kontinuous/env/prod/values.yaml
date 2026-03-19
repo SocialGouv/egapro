@@ -2,6 +2,8 @@ global:
   host: egapro.travail.gouv.fr
 
 api:
+  ingress:
+    enabled: false
   autoscale:
     enabled: true
   resources:
@@ -68,6 +70,8 @@ app:
       memory: 2G
 
 nginx:
+  ingress:
+    enabled: false
   autoscale:
     enabled: true
     minReplicas: 2
