@@ -57,14 +57,9 @@ Each audit agent scopes itself based on the files actually modified.
 
 ## Feature lifecycle (mandatory)
 
-### At the START of every feature
-
-Before writing any code, run `/verify-feature` on the current state of the codebase.
-This catches pre-existing issues and establishes a clean baseline.
-
 ### At the END of every feature
 
-After completing the implementation, run `/verify-feature` again.
+After completing the implementation, run `/verify-feature`.
 The skill loops until zero violations — **never report a task as done with known issues**.
 
 ---

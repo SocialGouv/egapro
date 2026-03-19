@@ -9,7 +9,6 @@ Comprehensive audit of ALL project rules. **Loops automatically** — fix every 
 
 ## When this runs
 
-- **Automatically at the START of every feature** (before writing code)
 - **Automatically at the END of every feature** (before reporting done)
 - **Manually** via `/verify-feature` when you want a full check
 
