@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
+import { getDsfrModal } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
@@ -40,15 +41,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog && "dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => { modal: { conceal: () => void } };
-				}
-			)
-				.dsfr(dialog)
-				.modal.conceal();
-		}
+		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
 	const updateHasCseMutation = api.company.updateHasCse.useMutation({

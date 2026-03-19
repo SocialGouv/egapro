@@ -13,13 +13,13 @@ import {
 } from "../shared/categoryRowMapping";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import { DevFillButton } from "../shared/DevFillButton";
 import {
 	DEV_STEP3_BENEFICIARY_MEN,
 	DEV_STEP3_BENEFICIARY_WOMEN,
 	DEV_STEP3_ROWS,
 } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import { computeProportion } from "../shared/gapUtils";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -29,8 +29,8 @@ import {
 	PayGapTable,
 } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
-import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
+import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, VariablePayData } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
@@ -64,11 +64,11 @@ export function Step3VariablePay({
 		initialData?.beneficiaryMen ||
 		(gipPrefillData?.step3.beneficiaryCountMen?.toString() ?? "");
 
-	const hasInitialData =
-		(initialData?.rows?.some((r) => r.womenValue || r.menValue) ||
-			initialData?.beneficiaryWomen ||
-			initialData?.beneficiaryMen) ??
-		false;
+	const hasInitialData = !!(
+		initialData?.rows?.some((r) => r.womenValue || r.menValue) ||
+		initialData?.beneficiaryWomen ||
+		initialData?.beneficiaryMen
+	);
 
 	const form = useZodForm(updateStepCategoriesSchema, {
 		defaultValues: {
@@ -165,34 +165,25 @@ export function Step3VariablePay({
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
-			{/* Title + save status */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">
+			<StepTitleRow
+				onDevFill={() => {
+					form.setValue("categories", [
+						...rowsToCategories(DEV_STEP3_ROWS),
+						{
+							name: "Bénéficiaires",
+							womenValue: DEV_STEP3_BENEFICIARY_WOMEN,
+							menValue: DEV_STEP3_BENEFICIARY_MEN,
+						},
+					]);
+					setSaved(false);
+				}}
+				saved={saved}
+				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
 					</h1>
-				</div>
-				<div className="fr-col-auto">
-					<DevFillButton
-						onFill={() => {
-							form.setValue("categories", [
-								...rowsToCategories(DEV_STEP3_ROWS),
-								{
-									name: "Bénéficiaires",
-									womenValue: DEV_STEP3_BENEFICIARY_WOMEN,
-									menValue: DEV_STEP3_BENEFICIARY_MEN,
-								},
-							]);
-							setSaved(false);
-						}}
-					/>
-				</div>
-				{saved && (
-					<div className="fr-col-auto">
-						<SavedIndicator />
-					</div>
-				)}
-			</div>
+				}
+			/>
 
 			<StepIndicator currentStep={3} />
 
@@ -372,17 +363,10 @@ export function Step3VariablePay({
 				/>
 			)}
 
-			{validationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{validationError}</p>
-				</div>
-			)}
-
-			{mutation.error && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{mutation.error.message}</p>
-				</div>
-			)}
+			<FormErrors
+				mutationError={mutation.error?.message}
+				validationError={validationError}
+			/>
 
 			<FormActions
 				className="fr-mt-0"

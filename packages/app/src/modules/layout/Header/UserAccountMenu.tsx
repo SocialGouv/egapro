@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
 interface UserAccountMenuProps {
@@ -30,15 +31,7 @@ export function UserAccountMenu({
 	const openProfileModal = useCallback(() => {
 		close();
 		const modal = document.getElementById("profile-modal");
-		if (modal && "dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => { modal: { disclose: () => void } };
-				}
-			)
-				.dsfr(modal)
-				.modal.disclose();
-		}
+		if (modal) getDsfrModal(modal)?.disclose();
 	}, [close]);
 
 	const getMenuItems = useCallback(

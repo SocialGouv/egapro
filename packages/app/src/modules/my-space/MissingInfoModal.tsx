@@ -4,6 +4,7 @@ import { useCallback, useRef } from "react";
 
 import { updatePhoneSchema } from "~/modules/profile/schemas";
 import { getDsfrModal } from "~/modules/shared";
+import { PhoneField } from "~/modules/shared/PhoneField";
 import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -75,38 +76,11 @@ export function MissingInfoModal({ siren }: Props) {
 									votre profil.
 								</p>
 								<form id="missing-info-form" onSubmit={onSubmit}>
-									<div
-										className={
-											phoneError
-												? "fr-input-group fr-input-group--error"
-												: "fr-input-group"
-										}
-									>
-										<label className="fr-label" htmlFor="missing-info-phone">
-											Numéro de téléphone (obligatoire)
-											<span className="fr-hint-text">
-												Format attendu : 01 22 33 44 55
-											</span>
-										</label>
-										<input
-											aria-describedby="missing-info-phone-messages"
-											className="fr-input"
-											id="missing-info-phone"
-											type="tel"
-											{...form.register("phone")}
-										/>
-										<div
-											aria-live="polite"
-											className="fr-messages-group"
-											id="missing-info-phone-messages"
-										>
-											{phoneError && (
-												<p className="fr-message fr-message--error">
-													{phoneError}
-												</p>
-											)}
-										</div>
-									</div>
+									<PhoneField
+										error={phoneError}
+										inputId="missing-info-phone"
+										registration={form.register("phone")}
+									/>
 								</form>
 							</div>
 							<div className="fr-modal__footer">

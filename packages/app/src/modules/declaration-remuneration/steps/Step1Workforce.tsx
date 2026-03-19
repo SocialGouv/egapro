@@ -8,14 +8,14 @@ import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { PrefillResetWarning } from "../shared/PrefillResetWarning";
 import { PrefillSource } from "../shared/PrefillSource";
-import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
+import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { CategoryData } from "../types";
 import { DEFAULT_CATEGORIES } from "../types";
@@ -89,27 +89,19 @@ export function Step1Workforce({
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">
+			<StepTitleRow
+				onDevFill={() => {
+					form.setValue("categories", DEV_STEP1_CATEGORIES);
+					setSaved(false);
+				}}
+				saved={saved}
+				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclarer les indicateurs pour l'ensemble des salariés et par
 						catégorie salariés
 					</h1>
-				</div>
-				<div className="fr-col-auto">
-					<DevFillButton
-						onFill={() => {
-							form.setValue("categories", DEV_STEP1_CATEGORIES);
-							setSaved(false);
-						}}
-					/>
-				</div>
-				{saved && (
-					<div className="fr-col-auto">
-						<SavedIndicator />
-					</div>
-				)}
-			</div>
+				}
+			/>
 
 			<StepIndicator currentStep={1} />
 
@@ -217,17 +209,10 @@ export function Step1Workforce({
 				/>
 			</div>
 
-			{validationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{validationError}</p>
-				</div>
-			)}
-
-			{mutation.error && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{mutation.error.message}</p>
-				</div>
-			)}
+			<FormErrors
+				mutationError={mutation.error?.message}
+				validationError={validationError}
+			/>
 
 			<FormActions
 				className="fr-mt-0"

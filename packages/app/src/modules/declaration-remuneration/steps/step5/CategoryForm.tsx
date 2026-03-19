@@ -6,13 +6,13 @@ import { useFieldArray } from "react-hook-form";
 
 import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
-import { DevFillButton } from "~/modules/declaration-remuneration/shared/DevFillButton";
 import {
 	createDevStep5Categories,
 	DEV_STEP5_SOURCE,
 } from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type {
 	EmployeeCategoryRow,
@@ -232,24 +232,16 @@ export function CategoryForm({
 
 	return (
 		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">{title}</div>
-				<div className="fr-col-auto">
-					<DevFillButton
-						onFill={() => {
-							const devCats = createDevStep5Categories(nextId);
-							form.setValue("categories", toFormValues(devCats));
-							form.setValue("source", DEV_STEP5_SOURCE);
-							setSaved(false);
-						}}
-					/>
-				</div>
-				{saved && (
-					<div className="fr-col-auto">
-						<SavedIndicator />
-					</div>
-				)}
-			</div>
+			<StepTitleRow
+				onDevFill={() => {
+					const devCats = createDevStep5Categories(nextId);
+					form.setValue("categories", toFormValues(devCats));
+					form.setValue("source", DEV_STEP5_SOURCE);
+					setSaved(false);
+				}}
+				saved={saved}
+				title={title}
+			/>
 
 			{stepper}
 
@@ -456,17 +448,10 @@ export function CategoryForm({
 				title="Définitions et méthode de calcul"
 			/>
 
-			{workforceError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{workforceError}</p>
-				</div>
-			)}
-
-			{submitError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{submitError}</p>
-				</div>
-			)}
+			<FormErrors
+				mutationError={submitError}
+				validationError={workforceError}
+			/>
 
 			<FormActions isSubmitting={isSubmitting} previousHref={previousHref} />
 

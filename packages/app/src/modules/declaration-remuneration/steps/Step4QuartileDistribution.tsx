@@ -8,14 +8,14 @@ import { api } from "~/trpc/react";
 import { updateStepCategoriesSchema } from "../schemas";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import { DevFillButton } from "../shared/DevFillButton";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
+import { FormErrors } from "../shared/FormErrors";
 import { normalizeDecimalInput } from "../shared/gapUtils";
 import type { GipPrefillData, GipQuartileData } from "../shared/gipMdsMapping";
 import { PrefillSource } from "../shared/PrefillSource";
-import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
+import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { StepCategoryData } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
@@ -199,30 +199,21 @@ export function Step4QuartileDistribution({
 
 	return (
 		<form className={stepStyles.formColumn} onSubmit={onSubmit}>
-			{/* Title + save status */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">
+			<StepTitleRow
+				onDevFill={() => {
+					form.setValue(
+						"categories",
+						stepToFormCategories(DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY),
+					);
+					setSaved(false);
+				}}
+				saved={saved}
+				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}
 					</h1>
-				</div>
-				<div className="fr-col-auto">
-					<DevFillButton
-						onFill={() => {
-							form.setValue(
-								"categories",
-								stepToFormCategories(DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY),
-							);
-							setSaved(false);
-						}}
-					/>
-				</div>
-				{saved && (
-					<div className="fr-col-auto">
-						<SavedIndicator />
-					</div>
-				)}
-			</div>
+				}
+			/>
 
 			<StepIndicator currentStep={4} />
 
@@ -328,17 +319,10 @@ export function Step4QuartileDistribution({
 				/>
 			)}
 
-			{formValidationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{formValidationError}</p>
-				</div>
-			)}
-
-			{mutation.error && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{mutation.error.message}</p>
-				</div>
-			)}
+			<FormErrors
+				mutationError={mutation.error?.message}
+				validationError={formValidationError}
+			/>
 
 			<FormActions
 				className="fr-mt-0"
