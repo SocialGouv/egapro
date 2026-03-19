@@ -7,6 +7,13 @@ export const MAX_FILE_SIZE_LABEL = `${MAX_FILE_SIZE / (1024 * 1024)} Mo`;
 /** Error message when file exceeds the size limit. */
 export const FILE_TOO_LARGE_ERROR = `La taille du fichier ne doit pas dépasser ${MAX_FILE_SIZE_LABEL}.`;
 
+/** MIME types accepted by the upload endpoint. Validated server-side via magic bytes. */
+export const ALLOWED_UPLOAD_MIME_TYPES = [
+	"application/pdf",
+	"image/png",
+	"image/jpeg",
+] as const;
+
 /** ClamAV scan timeout in milliseconds (30s). */
 export const SCAN_TIMEOUT_MS = 30_000;
 
