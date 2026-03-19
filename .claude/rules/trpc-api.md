@@ -5,29 +5,30 @@ paths:
 
 # tRPC API
 
-## Zod schemas in dedicated files
+## Zod schemas in module folders (shared frontend/backend)
 
-Define Zod input/output schemas in a `schemas.ts` file next to the router, not inline in procedure definitions.
-This enables reuse across procedures and in client-side form validation.
+Zod schemas live in `src/modules/{domain}/schemas.ts` — **never** in `src/server/api/routers/`.
+Routers import schemas from modules. Forms use the same schemas via `useZodForm`.
 
 ```ts
-// FORBIDDEN — inline schema
+// FORBIDDEN — inline schema in router
 export const myRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ siren: z.string(), year: z.number() }))
     .mutation(...)
 });
 
-// CORRECT — schemas.ts
-// schemas.ts
-export const createInput = z.object({ siren: z.string(), year: z.number() });
-
-// router.ts
+// FORBIDDEN — schema in src/server/api/routers/schemas.ts
 import { createInput } from "./schemas";
+
+// CORRECT — schema in src/modules/{domain}/schemas.ts
+import { createInput } from "~/modules/myDomain/schemas";
 export const myRouter = createTRPCRouter({
   create: protectedProcedure.input(createInput).mutation(...)
 });
 ```
+
+Router files must **never** `import { z } from "zod"` — all Zod usage is in module schema files.
 
 ## TRPCError with proper codes
 

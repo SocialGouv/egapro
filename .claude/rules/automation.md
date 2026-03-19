@@ -55,6 +55,20 @@ Each audit agent scopes itself based on the files actually modified.
 
 ---
 
+## Feature lifecycle (mandatory)
+
+### At the START of every feature
+
+Before writing any code, run `/verify-feature` on the current state of the codebase.
+This catches pre-existing issues and establishes a clean baseline.
+
+### At the END of every feature
+
+After completing the implementation, run `/verify-feature` again.
+The skill loops until zero violations — **never report a task as done with known issues**.
+
+---
+
 ## Automatic quality gates (mandatory)
 
 These gates trigger **automatically** without user input. Do NOT wait to be asked.
@@ -136,5 +150,6 @@ Skills in `.claude/skills/` can be triggered explicitly with `/command`:
 | `/audit-secu` | Deep OWASP + RGS audit with detailed report |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
 | `/process-issue` | Process a GitHub issue end-to-end with mandatory RGAA + security gates |
+| `/verify-feature` | Full rules audit (forms, schemas, DRY, a11y, security) — loops until zero issues |
 
 These produce detailed reports and are more thorough than the automatic inline gates.

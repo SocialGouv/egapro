@@ -1,64 +1,139 @@
 ---
 name: verify-feature
-description: Post-feature completeness audit — loops until zero issues remain (forms, schemas, code quality, tests)
+description: Full codebase rules audit — runs at start AND end of every feature, loops until zero issues
 ---
 
 # /verify-feature
 
-Run after completing a feature to catch everything before the user has to ask. **Loops automatically** — fix every issue found, re-audit, repeat until zero issues.
+Comprehensive audit of ALL project rules. **Loops automatically** — fix every issue found, re-audit, repeat until zero issues.
 
-## Philosophy
+## When this runs
 
-This skill exists because a single audit pass often misses things. The loop guarantees convergence: audit → fix → re-audit → fix → ... → zero issues.
+- **Automatically at the START of every feature** (before writing code)
+- **Automatically at the END of every feature** (before reporting done)
+- **Manually** via `/verify-feature` when you want a full check
 
 ## Instructions
 
-### Phase 1 — Structural audit (read-only)
+### Phase 1 — Structural audit (read-only, do it yourself)
 
-Run these checks **yourself** (not via sub-agent — agents miss things):
-
-#### 1.1 Forms: react-hook-form everywhere
-
-For every `.tsx` file modified in this feature (use `git diff origin/master...HEAD --name-only`):
-
-- If it contains `<form` + `useState` → check it uses `useZodForm`. Flag if it doesn't.
-- If it contains `useMutation` + `useState` without `useZodForm` → flag it (hidden form pattern).
-- If it uses manual `e.preventDefault()` inside a `handleSubmit` without `form.handleSubmit` → flag it.
-- If it uses `useState` for data that's also in `useZodForm` (dual state) → flag it.
-
-#### 1.2 Schemas: Zod in the right places
-
+Detect changed files:
 ```bash
-# Must return ZERO results — no Zod in routers
-grep -r "from ['\"]zod['\"]" src/server/api/routers/ --include="*.ts"
-
-# Must return ZERO results — no Zod in components
-grep -r "from ['\"]zod['\"]" src/modules/ --include="*.tsx"
-
-# Must return ZERO results — no inline z.object in API routes
-grep -r "z\.object(" src/app/api/ --include="*.ts"
+git diff --name-only HEAD   # uncommitted changes
 ```
 
-If any returns results → flag the file and which schema should be extracted.
+If no uncommitted changes, use `git diff origin/master...HEAD --name-only` scoped to `packages/app/src/`.
 
-#### 1.3 Schema duplication
+Run ALL checks below on the changed files. If a check is not relevant to the changed files, mark it `SKIP` and move on.
 
-Read each `modules/*/schemas.ts` file. Check:
-- No two schemas define the same shape
-- No schema wraps another without adding value
-- No dead exports (types/schemas exported but never imported anywhere)
+---
 
-#### 1.4 Barrel completeness
+#### 1.1 Forms — react-hook-form everywhere (`code-quality.md § Form conventions`)
 
-For each `modules/*/schemas.ts`, verify the corresponding `modules/*/index.ts` re-exports all schemas.
+For every `.tsx` file with `<form` or `useMutation`:
+- `useState` for form field data without `useZodForm` → **VIOLATION**
+- Manual `e.preventDefault()` in `handleSubmit` without `form.handleSubmit` → **VIOLATION** (exception: parameterless confirmation mutations)
+- Dual state: `useState` duplicating data already in `useZodForm` → **VIOLATION**
+- `useState` for UI-only state (saved, errors, modals) → OK
 
-#### 1.5 Router alignment
+#### 1.2 Schemas — Zod in the right places (`code-quality.md § Form conventions`, `trpc-api.md`)
 
-For each router in `src/server/api/routers/*.ts`:
-- Verify zero `import { z }` from zod
-- Verify every `.input()` references a schema from `~/modules/*/schemas`
+```bash
+# Must return ZERO — no Zod in routers
+grep -rn "from ['\"]zod['\"]" src/server/api/routers/ --include="*.ts"
 
-### Phase 2 — Validation (parallel)
+# Must return ZERO — no Zod in components
+grep -rn "from ['\"]zod['\"]" src/modules/ --include="*.tsx"
+
+# Must return ZERO — no inline z.object in API routes
+grep -rn "z\.object(" src/app/api/ --include="*.ts"
+```
+
+#### 1.3 Schema quality (`code-quality.md § DRY`)
+
+- No two schemas defining the same shape across files
+- No dead exports (types/schemas exported but never imported)
+- Every `modules/*/schemas.ts` re-exported from its `modules/*/index.ts` barrel
+
+#### 1.4 File size (`code-quality.md § File size`)
+
+```bash
+# Flag files over 400 lines (split required) — BLOCK files over 800
+wc -l $(git diff --name-only HEAD -- '*.ts' '*.tsx') 2>/dev/null | sort -rn | head -20
+```
+
+#### 1.5 Imports (`code-quality.md § Imports`)
+
+```bash
+# Must return ZERO — no deep relative imports
+grep -rn "from ['\"]\.\.\/\.\.\/" src/modules/ --include="*.ts" --include="*.tsx"
+```
+
+#### 1.6 No custom components in src/app/ (`code-quality.md § No custom components`)
+
+```bash
+# Must return ZERO — only route files allowed
+find src/app -name "*.tsx" ! -name "page.tsx" ! -name "layout.tsx" ! -name "loading.tsx" ! -name "error.tsx" ! -name "not-found.tsx" ! -name "global-error.tsx" ! -name "template.tsx" ! -name "default.tsx" ! -name "opengraph-image.tsx" ! -path "*/__tests__/*" | head -20
+```
+
+#### 1.7 TypeScript (`code-quality.md § TypeScript`)
+
+```bash
+# Must return ZERO — no explicit any (excluding tests)
+grep -rn ": any\b\|as any\b" src/modules/ src/server/ --include="*.ts" --include="*.tsx" | grep -v "__tests__" | grep -v "\.test\."
+```
+
+#### 1.8 Environment variables (`code-quality.md § Environment variables`)
+
+```bash
+# Must return ZERO — no direct process.env (excluding allowed files)
+grep -rn "process\.env" src/ --include="*.ts" --include="*.tsx" | grep -v "env.js" | grep -v "instrumentation.ts" | grep -v "next.config" | grep -v "trpc/react.tsx"
+```
+
+#### 1.9 Database (`database-drizzle.md`)
+
+For changed files in `src/server/`:
+- Multi-write without `db.transaction()` → **VIOLATION**
+- `new Date()` at module scope → **VIOLATION**
+
+#### 1.10 React components (`react-components.md`)
+
+For changed `.tsx` files:
+- Inline `<svg>` → **VIOLATION** (blocked by hook)
+- Raw `<img>` → **VIOLATION** (blocked by hook)
+- `.map()` callback over 5 lines of JSX → **VIOLATION**
+
+#### 1.11 Styling (`styling-dsfr.md`)
+
+For changed `.scss` and `.tsx` files:
+- Raw `@media` with width/screen → **VIOLATION**
+- Hardcoded hex/rgb colors → **VIOLATION**
+- `style={` inline → **VIOLATION** (blocked by hook)
+
+#### 1.12 Testing (`testing.md`)
+
+For changed files:
+- New component/function without corresponding test → **WARNING**
+- Test mocks duplicating `src/test/setup.ts` mocks → **VIOLATION**
+- New page without E2E test → **WARNING**
+
+#### 1.13 Security (`automation.md § Gate 3`)
+
+For changed files in `src/server/`:
+- tRPC input without schema → **VIOLATION**
+- Mutation without ownership check → **WARNING**
+- Raw SQL → **VIOLATION**
+
+#### 1.14 Accessibility (`automation.md § Gate 2`)
+
+For changed `.tsx` files:
+- `<input>` without associated `<label>` → **VIOLATION**
+- `target="_blank"` without `<NewTabNotice />` → **VIOLATION**
+- Decorative icon without `aria-hidden="true"` → **WARNING**
+
+---
+
+### Phase 2 — Validation (parallel agents)
 
 Launch **3 parallel agents**:
 
@@ -66,42 +141,43 @@ Launch **3 parallel agents**:
 2. **Agent: tests** — `pnpm test`
 3. **Agent: lint+format** — `pnpm lint:check && pnpm format:check`
 
+---
+
 ### Phase 3 — Fix loop
 
-If **any issue** was found in Phase 1 or Phase 2:
+If **any VIOLATION** was found in Phase 1 or Phase 2:
 
-1. Fix all issues
-2. Go back to Phase 1 — re-run the **full audit** (not just the failing check)
-3. Repeat until **zero issues** across both phases
+1. Fix all violations
+2. Go back to **Phase 1 step 1** — re-run the full audit
+3. Repeat until **zero violations** across both phases
 
-**Never report completion with known issues.** The loop must converge to zero.
+**Never report completion with known violations.**
+
+---
 
 ### Phase 4 — Final report
 
-Only after zero issues remain:
+Only after zero violations remain:
 
 ```
 ## Feature Verification: PASS ✅
 
-### Forms
-- X form components checked — all use useZodForm
-- useState only for UI state (saved, errors, modals)
+### Rules checked
+| Rule | Files | Status |
+|---|---|---|
+| Forms (react-hook-form) | X files | PASS |
+| Schemas (no inline Zod) | X routers | PASS |
+| File size (< 400 lines) | X files | PASS |
+| Imports (no deep relative) | X files | PASS |
+| TypeScript (no any) | X files | PASS |
+| Env vars (no process.env) | X files | PASS |
+| ... | ... | ... |
 
-### Schemas
-- X schema files, Y total schemas
-- Zero inline Zod in routers/API routes
-- Zero duplication
-- All barrels complete
-
-### Quality
-- Typecheck: clean
-- Tests: X/X passed
-- Lint: clean
-- Format: clean
+### Quality gates
+| Gate | Status |
+|---|---|
+| Typecheck | clean |
+| Tests | X/X passed |
+| Lint | clean |
+| Format | clean |
 ```
-
-## When to use
-
-- After completing any feature that touches forms, schemas, or tRPC routers
-- When the user says "verify" or "check everything"
-- When unsure if the implementation is complete

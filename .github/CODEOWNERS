@@ -2,5 +2,3 @@
 .github/workflows/*.yml @socialgouv/sre
 .github/CODEOWNERS @socialgouv/sre
 .kontinuous/ @socialgouv/sre
-
-@gary-van-woerkens
