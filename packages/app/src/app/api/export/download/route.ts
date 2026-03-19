@@ -1,14 +1,6 @@
-import { z } from "zod";
-
 import { downloadExport } from "~/modules/export/downloadExport";
+import { exportYearQuerySchema } from "~/modules/export/schemas";
 import { db } from "~/server/db";
-
-const querySchema = z.object({
-	year: z
-		.string()
-		.regex(/^\d{4}$/, "Year must be YYYY format")
-		.transform(Number),
-});
 
 /**
  * GET /api/export/download?year=2026
@@ -18,7 +10,7 @@ const querySchema = z.object({
 export async function GET(request: Request) {
 	try {
 		const url = new URL(request.url);
-		const parsed = querySchema.safeParse({
+		const parsed = exportYearQuerySchema.safeParse({
 			year: url.searchParams.get("year") ?? undefined,
 		});
 

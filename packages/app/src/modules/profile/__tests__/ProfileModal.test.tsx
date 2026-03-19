@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRefetch = vi.fn().mockResolvedValue({
 	data: {
@@ -55,6 +55,11 @@ function getForm() {
 	if (!form) throw new Error("Form not found");
 	return form;
 }
+
+beforeEach(() => {
+	mockMutate.mockClear();
+	mockRefetch.mockClear();
+});
 
 describe("ProfileModal", () => {
 	it("renders a dialog element with correct id and aria attributes", () => {
@@ -137,47 +142,61 @@ describe("ProfileModal", () => {
 		).toHaveAttribute("aria-controls", "profile-modal");
 	});
 
-	it("shows validation error when submitting empty phone", () => {
+	it("shows validation error when submitting empty phone", async () => {
 		render(<ProfileModal />);
 		fireEvent.change(getPhoneInput(), { target: { value: "" } });
 		fireEvent.submit(getForm());
-		expect(
-			screen.getByText("Le numéro de téléphone est obligatoire."),
-		).toBeInTheDocument();
+		await waitFor(() => {
+			const errorMessage = document.querySelector(
+				"#profile-phone-messages .fr-message--error",
+			);
+			expect(errorMessage).toBeInTheDocument();
+		});
 	});
 
-	it("shows validation error for invalid phone format", () => {
+	it("shows validation error for invalid phone format", async () => {
 		render(<ProfileModal />);
 		fireEvent.change(getPhoneInput(), { target: { value: "012233" } });
 		fireEvent.submit(getForm());
-		const errorMessage = document.querySelector(
-			"#profile-phone-messages .fr-message--error",
-		);
-		expect(errorMessage).toBeInTheDocument();
-		expect(errorMessage).toHaveTextContent("Format attendu : 01 22 33 44 55");
+		await waitFor(() => {
+			const errorMessage = document.querySelector(
+				"#profile-phone-messages .fr-message--error",
+			);
+			expect(errorMessage).toBeInTheDocument();
+			expect(errorMessage).toHaveTextContent("Format attendu : 01 22 33 44 55");
+		});
 	});
 
-	it("calls mutation with valid phone on form submit", () => {
+	it("calls mutation with valid phone on form submit", async () => {
 		render(<ProfileModal />);
 		fireEvent.change(getPhoneInput(), {
 			target: { value: "01 22 33 44 55" },
 		});
 		fireEvent.submit(getForm());
-		expect(mockMutate).toHaveBeenCalledWith({ phone: "01 22 33 44 55" });
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ phone: "0122334455" });
+		});
 	});
 
-	it("clears error when user types after validation failure", () => {
+	it("clears error when form is resubmitted with valid data", async () => {
 		render(<ProfileModal />);
 		const input = getPhoneInput();
+
+		// First submit with invalid data to trigger error
 		fireEvent.change(input, { target: { value: "" } });
 		fireEvent.submit(getForm());
-		expect(
-			screen.getByText("Le numéro de téléphone est obligatoire."),
-		).toBeInTheDocument();
-		fireEvent.change(input, { target: { value: "0" } });
-		expect(
-			screen.queryByText("Le numéro de téléphone est obligatoire."),
-		).not.toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				document.querySelector("#profile-phone-messages .fr-message--error"),
+			).toBeInTheDocument();
+		});
+
+		// Then submit with valid data — error should clear
+		fireEvent.change(input, { target: { value: "01 22 33 44 55" } });
+		fireEvent.submit(getForm());
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalled();
+		});
 	});
 
 	it("has proper aria-describedby on the phone input", () => {

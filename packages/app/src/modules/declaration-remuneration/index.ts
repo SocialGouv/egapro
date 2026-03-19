@@ -1,6 +1,15 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
+export {
+	categoryFormEntrySchema,
+	categoryFormSchema,
+	jointEvaluationUploadSchema,
+	saveCompliancePathSchema,
+	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
+	updateStepCategoriesSchema,
+} from "./schemas";
 export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
 export {

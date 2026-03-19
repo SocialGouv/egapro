@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockMutate = vi.fn();
 
@@ -29,6 +29,10 @@ const company = {
 	workforce: 2256,
 	hasCse: null as boolean | null,
 };
+
+beforeEach(() => {
+	mockMutate.mockClear();
+});
 
 // The <dialog> is closed (not open) in jsdom, so its content is hidden.
 // We use { hidden: true } for role queries to access hidden elements.
@@ -94,7 +98,7 @@ describe("CompanyEditModal", () => {
 		expect(screen.getByLabelText("Non", { exact: true })).not.toBeChecked();
 	});
 
-	it("calls mutation with correct data on submit", () => {
+	it("calls mutation with correct data on submit", async () => {
 		render(<CompanyEditModal company={company} />);
 
 		fireEvent.click(screen.getByLabelText("Non", { exact: true }));
@@ -103,9 +107,11 @@ describe("CompanyEditModal", () => {
 		expect(form).toBeTruthy();
 		if (form) fireEvent.submit(form);
 
-		expect(mockMutate).toHaveBeenCalledWith({
-			siren: "532847196",
-			hasCse: false,
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({
+				siren: "532847196",
+				hasCse: false,
+			});
 		});
 	});
 

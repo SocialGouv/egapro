@@ -3,11 +3,6 @@ export { CseOpinionLayout } from "./CseOpinionLayout";
 export { mapOpinionsFromDb } from "./mapOpinionsFromDb";
 export { Step1Opinions } from "./Step1Opinions";
 export { Step2Upload } from "./Step2Upload";
-export type {
-	DeleteFileInput,
-	SaveOpinionsInput,
-	UploadFileInput,
-} from "./schemas";
 export {
 	deleteFileSchema,
 	saveOpinionsSchema,

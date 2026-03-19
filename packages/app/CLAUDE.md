@@ -234,6 +234,50 @@ Never add redundant `role` on semantic elements (`role="navigation"` on `<nav>` 
 
 ---
 
+## Forms
+
+### Form state management
+
+All forms must use `react-hook-form` with Zod validation via the shared `useZodForm` hook:
+
+```tsx
+import { useZodForm } from "~/modules/shared";
+import { mySchema } from "~/modules/{domain}/schemas";
+
+const form = useZodForm(mySchema, { defaultValues: { ... } });
+```
+
+**Forbidden patterns:**
+- Multiple `useState` calls for form fields — use `useZodForm` instead
+- Manual imperative validation in `handleSubmit` — Zod handles it
+- Inline Zod schemas in tRPC routers — extract to `modules/{domain}/schemas.ts`
+
+### Shared validation schemas
+
+Zod schemas are the **single source of truth** for both frontend forms and tRPC backend:
+
+```
+src/modules/{domain}/schemas.ts    <- define schemas here
+src/modules/{domain}/index.ts      <- re-export from barrel
+src/server/api/routers/{x}.ts      <- import from ~/modules/{domain}/schemas
+src/modules/{domain}/MyForm.tsx    <- import from ~/modules/{domain}/schemas
+```
+
+Never define schemas in `src/server/api/routers/`. Always in `src/modules/{domain}/schemas.ts`.
+
+### DSFR form integration
+
+- `register()` spreads directly on native `<input>` elements with DSFR classes
+- Use `Controller` for non-standard controls (radios, custom selects)
+- Field errors: `fr-input-group--error` + `<p className="fr-error-text">`
+- Form errors: `fr-alert fr-alert--error` with `aria-live="polite"`
+
+### File uploads
+
+File upload forms keep the `useFileUploadForm` hook pattern. They do not need `react-hook-form` since the file upload lifecycle (select, validate, upload to S3, save metadata via tRPC) is distinct from standard form submission.
+
+---
+
 ## File size
 
 < 200 lines ideal, 200-400 acceptable, > 400 split, > 800 **forbidden**.

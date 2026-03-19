@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import {
 	assembleDeclaration,
 	fetchCategoriesByDeclaration,
@@ -7,16 +5,7 @@ import {
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
 } from "~/modules/export/fetchDeclarations";
-
-const querySchema = z.object({
-	date_begin: z
-		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, "date_begin must be YYYY-MM-DD format"),
-	date_end: z
-		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, "date_end must be YYYY-MM-DD format")
-		.optional(),
-});
+import { exportDeclarationsQuerySchema } from "~/modules/export/schemas";
 
 /**
  * GET /api/v1/export/declarations?date_begin=YYYY-MM-DD&date_end=YYYY-MM-DD
@@ -28,7 +17,7 @@ const querySchema = z.object({
 export async function GET(request: Request) {
 	try {
 		const url = new URL(request.url);
-		const parsed = querySchema.safeParse({
+		const parsed = exportDeclarationsQuerySchema.safeParse({
 			date_begin: url.searchParams.get("date_begin") ?? undefined,
 			date_end: url.searchParams.get("date_end") ?? undefined,
 		});

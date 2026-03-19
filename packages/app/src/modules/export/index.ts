@@ -6,6 +6,11 @@ export {
 	generateYearlyExport,
 } from "./generateYearlyExport";
 export {
+	exportDeclarationsQuerySchema,
+	exportYearOptionalQuerySchema,
+	exportYearQuerySchema,
+} from "./schemas";
+export {
 	DECLARATION_COLUMNS,
 	EXPORT_VERSION,
 	INDICATOR_G_COLUMNS,

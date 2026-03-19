@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { Controller } from "react-hook-form";
 
+import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import common from "../shared/common.module.scss";
@@ -205,9 +207,12 @@ export function CompliancePathChoice({
 	pdfDownloadHref,
 }: Props) {
 	const router = useRouter();
-	const [selectedPath, setSelectedPath] = useState<
-		CompliancePathValue | undefined
-	>(initialPath);
+
+	const form = useZodForm(saveCompliancePathSchema, {
+		defaultValues: { path: initialPath },
+	});
+
+	const selectedPath = form.watch("path");
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
@@ -223,14 +228,13 @@ export function CompliancePathChoice({
 		},
 	});
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		if (!selectedPath) return;
-		mutation.mutate({ path: selectedPath });
-	}
+	const onSubmit = form.handleSubmit((data) => {
+		if (!data.path) return;
+		mutation.mutate({ path: data.path });
+	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
@@ -274,29 +278,35 @@ export function CompliancePathChoice({
 				</p>
 			</div>
 
-			<fieldset
-				aria-labelledby="compliance-path-legend"
-				className="fr-fieldset"
-			>
-				<legend className="fr-sr-only" id="compliance-path-legend">
-					Choix du parcours de mise en conformité
-				</legend>
+			<Controller
+				control={form.control}
+				name="path"
+				render={({ field }) => (
+					<fieldset
+						aria-labelledby="compliance-path-legend"
+						className="fr-fieldset"
+					>
+						<legend className="fr-sr-only" id="compliance-path-legend">
+							Choix du parcours de mise en conformité
+						</legend>
 
-				{isSecondRound ? (
-					<SecondRoundOptions
-						currentYear={currentYear}
-						selectedPath={selectedPath}
-						setSelectedPath={setSelectedPath}
-					/>
-				) : (
-					<FirstRoundOptions
-						currentYear={currentYear}
-						hasCse={hasCse}
-						selectedPath={selectedPath}
-						setSelectedPath={setSelectedPath}
-					/>
+						{isSecondRound ? (
+							<SecondRoundOptions
+								currentYear={currentYear}
+								selectedPath={field.value}
+								setSelectedPath={field.onChange}
+							/>
+						) : (
+							<FirstRoundOptions
+								currentYear={currentYear}
+								hasCse={hasCse}
+								selectedPath={field.value}
+								setSelectedPath={field.onChange}
+							/>
+						)}
+					</fieldset>
 				)}
-			</fieldset>
+			/>
 
 			<FormActions
 				isSubmitting={mutation.isPending}

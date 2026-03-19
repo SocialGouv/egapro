@@ -1,4 +1,5 @@
 import { parseSiren } from "~/modules/shared/parseSiren";
+import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
 import { auth } from "~/server/auth";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 
@@ -25,9 +26,22 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const year = new Date().getFullYear();
 	const contentType =
 		request.headers.get("content-type") ?? "application/octet-stream";
+
+	const isAllowedType = (
+		ALLOWED_UPLOAD_MIME_TYPES as readonly string[]
+	).includes(contentType);
+	if (!isAllowedType) {
+		return Response.json(
+			{
+				error: `Type de fichier non autorisé : ${contentType}. Types acceptés : ${ALLOWED_UPLOAD_MIME_TYPES.join(", ")}.`,
+			},
+			{ status: 400 },
+		);
+	}
+
+	const year = new Date().getFullYear();
 
 	try {
 		const result = await handleStreamingUpload(request.body, {
@@ -35,6 +49,7 @@ export async function POST(request: Request) {
 			year,
 			fileName,
 			contentType,
+			allowedMimeTypes: ALLOWED_UPLOAD_MIME_TYPES,
 		});
 
 		if (!result.ok) {

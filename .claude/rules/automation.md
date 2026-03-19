@@ -55,6 +55,15 @@ Each audit agent scopes itself based on the files actually modified.
 
 ---
 
+## Feature lifecycle (mandatory)
+
+### At the END of every feature
+
+After completing the implementation, run `/verify-feature`.
+The skill loops until zero violations — **never report a task as done with known issues**.
+
+---
+
 ## Automatic quality gates (mandatory)
 
 These gates trigger **automatically** without user input. Do NOT wait to be asked.
@@ -91,7 +100,7 @@ Full checklist (13 RGAA themes) in `.claude/agents/rgaa-auditor/AGENT.md`.
 
 Verify **inline while writing** AND audit all created/modified files after implementation:
 - Queries → Drizzle ORM only (no raw SQL)
-- tRPC inputs → Zod schemas (in `schemas.ts`, not inline)
+- tRPC inputs → Zod schemas from `~/modules/{domain}/schemas.ts` (never inline, never in routers)
 - Protected routes → `protectedProcedure`
 - Mutations → ownership check (`userId` from session)
 - Multi-write → `db.transaction()`
@@ -136,5 +145,6 @@ Skills in `.claude/skills/` can be triggered explicitly with `/command`:
 | `/audit-secu` | Deep OWASP + RGS audit with detailed report |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
 | `/process-issue` | Process a GitHub issue end-to-end with mandatory RGAA + security gates |
+| `/verify-feature` | Full rules audit (forms, schemas, DRY, a11y, security) — loops until zero issues |
 
 These produce detailed reports and are more thorough than the automatic inline gates.

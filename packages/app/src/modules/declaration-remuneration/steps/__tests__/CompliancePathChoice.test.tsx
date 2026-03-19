@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CompliancePathChoice } from "../CompliancePathChoice";
 
@@ -29,6 +29,11 @@ vi.mock("~/trpc/react", () => ({
 		},
 	},
 }));
+
+beforeEach(() => {
+	mockMutate.mockClear();
+	mockPush.mockClear();
+});
 
 describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner", () => {
@@ -94,7 +99,7 @@ describe("CompliancePathChoice", () => {
 		expect(nextButton).not.toBeDisabled();
 	});
 
-	it("submits the selected path and navigates to evaluation-conjointe", () => {
+	it("submits the selected path and navigates to evaluation-conjointe", async () => {
 		render(
 			<CompliancePathChoice
 				currentYear={2026}
@@ -112,13 +117,15 @@ describe("CompliancePathChoice", () => {
 			.closest("form") as HTMLFormElement;
 		fireEvent.submit(form);
 
-		expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
+		});
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 		);
 	});
 
-	it("navigates to second declaration when corrective_action is selected", () => {
+	it("navigates to second declaration when corrective_action is selected", async () => {
 		render(
 			<CompliancePathChoice
 				currentYear={2026}
@@ -136,7 +143,9 @@ describe("CompliancePathChoice", () => {
 			.closest("form") as HTMLFormElement;
 		fireEvent.submit(form);
 
-		expect(mockMutate).toHaveBeenCalledWith({ path: "corrective_action" });
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "corrective_action" });
+		});
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/etape/1",
 		);

@@ -1,15 +1,6 @@
-import { z } from "zod";
-
 import { generateYearlyExport } from "~/modules/export";
+import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
 import { db } from "~/server/db";
-
-const querySchema = z.object({
-	year: z
-		.string()
-		.regex(/^\d{4}$/, "Year must be YYYY format")
-		.transform(Number)
-		.optional(),
-});
 
 /**
  * POST /api/export/generate
@@ -20,7 +11,7 @@ const querySchema = z.object({
 export async function POST(request: Request) {
 	try {
 		const url = new URL(request.url);
-		const parsed = querySchema.safeParse({
+		const parsed = exportYearOptionalQuerySchema.safeParse({
 			year: url.searchParams.get("year") ?? undefined,
 		});
 

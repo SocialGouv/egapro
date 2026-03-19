@@ -1,33 +1,52 @@
 import "server-only";
 
-import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "~/modules/shared";
-
-const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
-
-type ValidationResult = {
-	valid: boolean;
-	error?: string;
+/**
+ * Known file signatures (magic bytes) for server-side content validation.
+ * This prevents clients from uploading disguised files.
+ */
+const FILE_SIGNATURES: Record<string, number[]> = {
+	"application/pdf": [0x25, 0x50, 0x44, 0x46, 0x2d], // %PDF-
+	"image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+	"image/jpeg": [0xff, 0xd8, 0xff],
 };
 
-export function validatePdf(buffer: Buffer): ValidationResult {
-	if (buffer.length === 0) {
+/** Minimum bytes needed to check any signature. */
+export const MIN_SIGNATURE_BYTES = 8;
+
+type ValidationResult =
+	| { valid: true; detectedType: string }
+	| { valid: false; error: string };
+
+/**
+ * Validates that the file header matches one of the allowed MIME types
+ * by checking magic bytes. Rejects files whose actual content does not
+ * match any allowed signature.
+ */
+export function validateFileSignature(
+	headerBytes: Buffer,
+	allowedMimeTypes: readonly string[],
+): ValidationResult {
+	if (headerBytes.length === 0) {
 		return { valid: false, error: "Le fichier est vide." };
 	}
 
-	if (buffer.length > MAX_FILE_SIZE) {
-		return { valid: false, error: FILE_TOO_LARGE_ERROR };
+	for (const mimeType of allowedMimeTypes) {
+		const signature = FILE_SIGNATURES[mimeType];
+		if (!signature) continue;
+
+		if (headerBytes.length < signature.length) continue;
+
+		const matches = signature.every(
+			(byte, index) => headerBytes[index] === byte,
+		);
+		if (matches) {
+			return { valid: true, detectedType: mimeType };
+		}
 	}
 
-	const hasPdfSignature = PDF_MAGIC_BYTES.every(
-		(byte, index) => buffer[index] === byte,
-	);
-
-	if (!hasPdfSignature) {
-		return {
-			valid: false,
-			error: "Le fichier n'est pas un PDF valide.",
-		};
-	}
-
-	return { valid: true };
+	return {
+		valid: false,
+		error:
+			"Format de fichier non supporté. Le contenu ne correspond pas aux formats autorisés.",
+	};
 }

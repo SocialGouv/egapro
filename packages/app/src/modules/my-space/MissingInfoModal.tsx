@@ -1,8 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
-import { normalizePhone, phoneDigitsRegex } from "~/modules/profile/phone";
+import { updatePhoneSchema } from "~/modules/profile/schemas";
+import { getDsfrModal } from "~/modules/shared";
+import { PhoneField } from "~/modules/shared/PhoneField";
+import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 const MODAL_ID = "missing-info-modal";
@@ -14,8 +18,12 @@ type Props = {
 
 export function MissingInfoModal({ siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const [phone, setPhone] = useState("");
-	const [phoneError, setPhoneError] = useState<string | null>(null);
+
+	const form = useZodForm(updatePhoneSchema, {
+		defaultValues: { phone: "" },
+	});
+
+	const phoneError = form.formState.errors.phone?.message ?? null;
 
 	const updatePhoneMutation = api.profile.updatePhone.useMutation({
 		onSuccess: () => {
@@ -26,53 +34,17 @@ export function MissingInfoModal({ siren }: Props) {
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog && typeof window !== "undefined" && "dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => { modal: { conceal: () => void } };
-				}
-			)
-				.dsfr(dialog)
-				.modal.conceal();
-		}
+		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
-	// Reset form when modal opens
-	useEffect(() => {
-		const dialog = dialogRef.current;
-		if (!dialog) return;
+	useDsfrDialogOpen(
+		dialogRef,
+		useCallback(() => form.reset({ phone: "" }), [form]),
+	);
 
-		const observer = new MutationObserver((mutations) => {
-			for (const mutation of mutations) {
-				if (mutation.attributeName === "open" && dialog.open) {
-					setPhone("");
-					setPhoneError(null);
-					break;
-				}
-			}
-		});
-
-		observer.observe(dialog, { attributes: true, attributeFilter: ["open"] });
-		return () => observer.disconnect();
-	}, []);
-
-	const validatePhone = (value: string): string | null => {
-		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!phoneDigitsRegex.test(normalizePhone(value)))
-			return "Format attendu : 01 22 33 44 55";
-		return null;
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		const error = validatePhone(phone);
-		if (error) {
-			setPhoneError(error);
-			return;
-		}
-		setPhoneError(null);
-		updatePhoneMutation.mutate({ phone });
-	};
+	const onSubmit = form.handleSubmit((data) => {
+		updatePhoneMutation.mutate(data);
+	});
 
 	return (
 		<dialog
@@ -103,43 +75,12 @@ export function MissingInfoModal({ siren }: Props) {
 									Pour continuer, vous devez ajouter un numéro de téléphone à
 									votre profil.
 								</p>
-								<form id="missing-info-form" onSubmit={handleSubmit}>
-									<div
-										className={
-											phoneError
-												? "fr-input-group fr-input-group--error"
-												: "fr-input-group"
-										}
-									>
-										<label className="fr-label" htmlFor="missing-info-phone">
-											Numéro de téléphone (obligatoire)
-											<span className="fr-hint-text">
-												Format attendu : 01 22 33 44 55
-											</span>
-										</label>
-										<input
-											aria-describedby="missing-info-phone-messages"
-											className="fr-input"
-											id="missing-info-phone"
-											onChange={(e) => {
-												setPhone(e.target.value);
-												if (phoneError) setPhoneError(null);
-											}}
-											type="tel"
-											value={phone}
-										/>
-										<div
-											aria-live="polite"
-											className="fr-messages-group"
-											id="missing-info-phone-messages"
-										>
-											{phoneError && (
-												<p className="fr-message fr-message--error">
-													{phoneError}
-												</p>
-											)}
-										</div>
-									</div>
+								<form id="missing-info-form" onSubmit={onSubmit}>
+									<PhoneField
+										error={phoneError}
+										inputId="missing-info-phone"
+										registration={form.register("phone")}
+									/>
 								</form>
 							</div>
 							<div className="fr-modal__footer">

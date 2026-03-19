@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
-import { z } from "zod";
 
+import { jointEvaluationUploadSchema } from "~/modules/declaration-remuneration/schemas";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { jointEvaluationFiles } from "~/server/db/schema";
 
@@ -10,12 +10,7 @@ function getCurrentYear() {
 
 export const jointEvaluationRouter = createTRPCRouter({
 	uploadFile: companyProcedure
-		.input(
-			z.object({
-				fileName: z.string().min(1),
-				filePath: z.string().min(1),
-			}),
-		)
+		.input(jointEvaluationUploadSchema)
 		.mutation(async ({ ctx, input }) => {
 			const year = getCurrentYear();
 			const declarantId = ctx.session.user.id;

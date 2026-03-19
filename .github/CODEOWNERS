@@ -1,6 +1,7 @@
-# Protect workflow files
-.github/workflows/*.yml @socialgouv/sre
-.github/CODEOWNERS @socialgouv/sre
-.kontinuous/ @socialgouv/sre
+# Default reviewers for all PRs
+* @SocialGouv/admins-egapro
 
-@gary-van-woerkens
+# Protect workflow files
+.github/workflows/*.yml @socialgouv/sre @SocialGouv/admins-egapro
+.github/CODEOWNERS @socialgouv/sre @SocialGouv/admins-egapro
+.kontinuous/ @socialgouv/sre @SocialGouv/admins-egapro

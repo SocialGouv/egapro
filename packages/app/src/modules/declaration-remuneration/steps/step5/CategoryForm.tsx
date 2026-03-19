@@ -2,20 +2,23 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useId, useRef, useState } from "react";
+import { useFieldArray } from "react-hook-form";
 
+import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
-import { DevFillButton } from "~/modules/declaration-remuneration/shared/DevFillButton";
 import {
 	createDevStep5Categories,
 	DEV_STEP5_SOURCE,
 } from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
 import {
@@ -36,6 +39,23 @@ const SOURCE_LABELS: Record<string, string> = {
 function createIdGenerator() {
 	let id = 0;
 	return () => id++;
+}
+
+function toFormValues(cats: EmployeeCategory[]) {
+	return cats.map((c) => ({
+		name: c.name,
+		detail: c.detail,
+		womenCount: c.womenCount,
+		menCount: c.menCount,
+		annualBaseWomen: c.annualBaseWomen,
+		annualBaseMen: c.annualBaseMen,
+		annualVariableWomen: c.annualVariableWomen,
+		annualVariableMen: c.annualVariableMen,
+		hourlyBaseWomen: c.hourlyBaseWomen,
+		hourlyBaseMen: c.hourlyBaseMen,
+		hourlyVariableWomen: c.hourlyVariableWomen,
+		hourlyVariableMen: c.hourlyVariableMen,
+	}));
 }
 
 type Props = {
@@ -80,16 +100,25 @@ export function CategoryForm({
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
 
-	const [categories, setCategories] = useState<EmployeeCategory[]>(
+	const initialCats =
 		initialCategories.length > 0
 			? fromDatabaseRows(initialCategories, nextId)
-			: [createEmptyCategory(nextId())],
-	);
-	const [source, setSource] = useState(initialSource);
+			: [createEmptyCategory(nextId())];
+
+	const form = useZodForm(categoryFormSchema, {
+		defaultValues: {
+			source: initialSource,
+			categories: toFormValues(initialCats),
+		},
+	});
+
+	const { fields, append, remove } = useFieldArray({
+		control: form.control,
+		name: "categories",
+	});
 
 	const hasInitialData = initialCategories.length > 0;
 	const [saved, setSaved] = useState(hasInitialData);
-
 	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
@@ -99,17 +128,6 @@ export function CategoryForm({
 		setDeleteIndex(null);
 	}, []);
 
-	function updateCategory(
-		index: number,
-		field: keyof EmployeeCategory,
-		value: string,
-	) {
-		setCategories((prev) =>
-			prev.map((cat, i) => (i === index ? { ...cat, [field]: value } : cat)),
-		);
-		setSaved(false);
-	}
-
 	function handlePositiveNumberChange(
 		index: number,
 		field: keyof EmployeeCategory,
@@ -117,18 +135,23 @@ export function CategoryForm({
 	) {
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
 			const val = e.target.value;
+			const formField = field as Exclude<keyof EmployeeCategory, "id">;
 			if (val === "") {
-				updateCategory(index, field, val);
+				form.setValue(`categories.${index}.${formField}`, val);
+				setSaved(false);
 				return;
 			}
 			const n = isInteger ? Number.parseInt(val, 10) : Number.parseFloat(val);
 			if (Number.isNaN(n) || n < 0) return;
-			updateCategory(index, field, val);
+			form.setValue(`categories.${index}.${formField}`, val);
+			setSaved(false);
 		};
 	}
 
 	function addCategory() {
-		setCategories((prev) => [...prev, createEmptyCategory(nextId())]);
+		const empty = createEmptyCategory(nextId());
+		const formEntry = toFormValues([empty])[0];
+		if (formEntry) append(formEntry);
 		setSaved(false);
 	}
 
@@ -139,17 +162,18 @@ export function CategoryForm({
 
 	function confirmRemoveCategory() {
 		if (deleteIndex !== null) {
-			setCategories((prev) => prev.filter((_, i) => i !== deleteIndex));
+			remove(deleteIndex);
 			setSaved(false);
 		}
 		closeDeleteDialog();
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+	const categories = form.watch("categories");
+
+	const handleFormSubmit = form.handleSubmit((data) => {
 		setWorkforceError("");
 
-		const emptyNames = categories.some((cat) => !cat.name.trim());
+		const emptyNames = data.categories.some((cat) => !cat.name.trim());
 		if (emptyNames) {
 			setWorkforceError(
 				"Le nom de chaque catégorie d'emplois est obligatoire.",
@@ -157,7 +181,7 @@ export function CategoryForm({
 			return;
 		}
 
-		const names = categories.map((cat) => cat.name.trim().toLowerCase());
+		const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
 		const hasDuplicates = names.length !== new Set(names).size;
 		if (hasDuplicates) {
 			setWorkforceError(
@@ -167,12 +191,12 @@ export function CategoryForm({
 		}
 
 		if (maxWomen !== undefined || maxMen !== undefined) {
-			const totalWomen = categories.reduce(
+			const totalWomen = data.categories.reduce(
 				(sum, cat) =>
 					sum + (cat.womenCount ? Number.parseInt(cat.womenCount, 10) : 0),
 				0,
 			);
-			const totalMen = categories.reduce(
+			const totalMen = data.categories.reduce(
 				(sum, cat) =>
 					sum + (cat.menCount ? Number.parseInt(cat.menCount, 10) : 0),
 				0,
@@ -195,26 +219,29 @@ export function CategoryForm({
 			}
 		}
 
-		onSubmit(toSubmitData(categories, source));
-	}
+		onSubmit(
+			toSubmitData(
+				data.categories.map((cat, i) => ({
+					id: i,
+					...cat,
+				})),
+				data.source,
+			),
+		);
+	});
+
 	return (
-		<form className={stepStyles.form} onSubmit={handleSubmit}>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">{title}</div>
-				<div className="fr-col-auto">
-					<DevFillButton
-						onFill={() => {
-							setCategories(createDevStep5Categories(nextId));
-							setSource(DEV_STEP5_SOURCE);
-						}}
-					/>
-				</div>
-				{saved && (
-					<div className="fr-col-auto">
-						<SavedIndicator />
-					</div>
-				)}
-			</div>
+		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
+			<StepTitleRow
+				onDevFill={() => {
+					const devCats = createDevStep5Categories(nextId);
+					form.setValue("categories", toFormValues(devCats));
+					form.setValue("source", DEV_STEP5_SOURCE);
+					setSaved(false);
+				}}
+				saved={saved}
+				title={title}
+			/>
 
 			{stepper}
 
@@ -225,7 +252,7 @@ export function CategoryForm({
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
-							{SOURCE_LABELS[source] ?? source}
+							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
 						</span>
 					</p>
 				) : (
@@ -237,11 +264,11 @@ export function CategoryForm({
 						<select
 							className="fr-select"
 							id="source-select"
+							{...form.register("source")}
 							onChange={(e) => {
-								setSource(e.target.value);
+								form.setValue("source", e.target.value);
 								setSaved(false);
 							}}
-							value={source}
 						>
 							<option disabled value="">
 								Sélectionner une option
@@ -288,15 +315,17 @@ export function CategoryForm({
 			</div>
 
 			<div className="fr-accordions-group" data-fr-group="false">
-				{categories.map((cat, index) => {
+				{fields.map((field, index) => {
+					const cat = categories[index];
 					const collapseId = `${baseId}-accordion-${index}`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
-					const categoryLabel = cat.name.trim()
-						? `${categoryNumber} : ${cat.name.trim()}`
+					const catName = cat?.name?.trim() ?? "";
+					const categoryLabel = catName
+						? `${categoryNumber} : ${catName}`
 						: categoryNumber;
 
 					return (
-						<section className="fr-accordion" key={cat.id}>
+						<section className="fr-accordion" key={field.id}>
 							<h3 className="fr-accordion__title">
 								<button
 									aria-controls={collapseId}
@@ -312,7 +341,7 @@ export function CategoryForm({
 								id={collapseId}
 							>
 								<div className={stepStyles.categoryBlock}>
-									{!readOnlyNameDetail && categories.length > 1 && (
+									{!readOnlyNameDetail && fields.length > 1 && (
 										<div className={stepStyles.categoryFooter}>
 											<button
 												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
@@ -328,13 +357,13 @@ export function CategoryForm({
 										<>
 											<p className="fr-mb-0">
 												<span className="fr-text--bold">Nom : </span>
-												{cat.name}
+												{cat?.name}
 											</p>
 											<p className="fr-mb-0">
 												<span className="fr-text--bold">
 													Détail des emplois :{" "}
 												</span>
-												{cat.detail}
+												{cat?.detail}
 											</p>
 										</>
 									) : (
@@ -349,11 +378,15 @@ export function CategoryForm({
 												<input
 													className="fr-input"
 													id={`cat-${index}-name`}
-													onChange={(e) =>
-														updateCategory(index, "name", e.target.value)
-													}
+													{...form.register(`categories.${index}.name`)}
+													onChange={(e) => {
+														form.setValue(
+															`categories.${index}.name`,
+															e.target.value,
+														);
+														setSaved(false);
+													}}
 													type="text"
-													value={cat.name}
 												/>
 											</div>
 
@@ -367,18 +400,24 @@ export function CategoryForm({
 												<input
 													className="fr-input"
 													id={`cat-${index}-detail`}
-													onChange={(e) =>
-														updateCategory(index, "detail", e.target.value)
-													}
+													{...form.register(`categories.${index}.detail`)}
+													onChange={(e) => {
+														form.setValue(
+															`categories.${index}.detail`,
+															e.target.value,
+														);
+														setSaved(false);
+													}}
 													type="text"
-													value={cat.detail}
 												/>
 											</div>
 										</>
 									)}
 
 									<CategoryDataTable
-										category={cat}
+										category={
+											cat ? { id: index, ...cat } : createEmptyCategory(index)
+										}
 										categoryIndex={index}
 										onPositiveNumberChange={handlePositiveNumberChange}
 									/>
@@ -391,7 +430,7 @@ export function CategoryForm({
 
 			<div className={stepStyles.categoryFooter}>
 				<p className="fr-text--bold fr-mb-0">
-					Nombre de catégories : {categories.length}
+					Nombre de catégories : {fields.length}
 				</p>
 				{!readOnlyNameDetail && (
 					<button
@@ -409,17 +448,10 @@ export function CategoryForm({
 				title="Définitions et méthode de calcul"
 			/>
 
-			{workforceError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{workforceError}</p>
-				</div>
-			)}
-
-			{submitError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
-					<p>{submitError}</p>
-				</div>
-			)}
+			<FormErrors
+				mutationError={submitError}
+				validationError={workforceError}
+			/>
 
 			<FormActions isSubmitting={isSubmitting} previousHref={previousHref} />
 

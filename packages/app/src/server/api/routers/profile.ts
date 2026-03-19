@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
-import { phoneSchema } from "~/modules/profile/phone";
+import { updatePhoneSchema } from "~/modules/profile/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { users } from "~/server/db/schema";
 
@@ -30,7 +29,7 @@ export const profileRouter = createTRPCRouter({
 	}),
 
 	updatePhone: protectedProcedure
-		.input(z.object({ phone: phoneSchema }))
+		.input(updatePhoneSchema)
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db
 				.update(users)
