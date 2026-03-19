@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
@@ -31,18 +33,22 @@ export function Step1Workforce({
 	const router = useRouter();
 	const isPrefilled = !!gipPrefillData;
 
-	const [categories, setCategories] = useState<CategoryData[]>(
-		initialCategories?.length
-			? initialCategories
-			: DEFAULT_CATEGORIES.map((name) => ({ name, women: 0, men: 0 })),
-	);
+	const hasInitialData =
+		initialCategories?.some((c) => c.women > 0 || c.men > 0) ?? false;
 
+	const defaultCategories = initialCategories?.length
+		? initialCategories
+		: DEFAULT_CATEGORIES.map((name) => ({ name, women: 0, men: 0 }));
+
+	const form = useZodForm(updateStep1Schema, {
+		defaultValues: { categories: defaultCategories },
+	});
+
+	const categories = form.watch("categories");
 	const totalWomen = categories.reduce((sum, c) => sum + c.women, 0);
 	const totalMen = categories.reduce((sum, c) => sum + c.men, 0);
 	const total = totalWomen + totalMen;
 
-	const hasInitialData =
-		initialCategories?.some((c) => c.women > 0 || c.men > 0) ?? false;
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -52,7 +58,7 @@ export function Step1Workforce({
 
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-		setCategories([
+		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: value, men: totalMen },
 		]);
 		setSaved(false);
@@ -60,26 +66,29 @@ export function Step1Workforce({
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-		setCategories([
+		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: totalWomen, men: value },
 		]);
 		setSaved(false);
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (total === 0) {
+	const onSubmit = form.handleSubmit((data) => {
+		const formTotal = data.categories.reduce(
+			(sum, c) => sum + c.women + c.men,
+			0,
+		);
+		if (formTotal === 0) {
 			setValidationError(
 				"Veuillez renseigner les effectifs avant de passer à l'étape suivante.",
 			);
 			return;
 		}
 		setValidationError(null);
-		mutation.mutate({ categories });
-	}
+		mutation.mutate(data);
+	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
 					<h1 className="fr-h4 fr-mb-0">
@@ -88,7 +97,12 @@ export function Step1Workforce({
 					</h1>
 				</div>
 				<div className="fr-col-auto">
-					<DevFillButton onFill={() => setCategories(DEV_STEP1_CATEGORIES)} />
+					<DevFillButton
+						onFill={() => {
+							form.setValue("categories", DEV_STEP1_CATEGORIES);
+							setSaved(false);
+						}}
+					/>
 				</div>
 				{saved && (
 					<div className="fr-col-auto">

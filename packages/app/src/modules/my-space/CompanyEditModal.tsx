@@ -1,11 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
+import { Controller } from "react-hook-form";
 
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
+import { updateHasCseSchema } from "./schemas";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
@@ -25,7 +28,15 @@ type Props = {
 export function CompanyEditModal({ company: initialCompany }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const router = useRouter();
-	const [hasCse, setHasCse] = useState<boolean | null>(initialCompany.hasCse);
+
+	const form = useZodForm(updateHasCseSchema, {
+		defaultValues: {
+			siren: initialCompany.siren,
+			hasCse: initialCompany.hasCse ?? undefined,
+		},
+	});
+
+	const hasCse = form.watch("hasCse");
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
@@ -47,11 +58,10 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 		},
 	});
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (hasCse === null) return;
-		updateHasCseMutation.mutate({ siren: initialCompany.siren, hasCse });
-	};
+	const onSubmit = form.handleSubmit((data) => {
+		if (data.hasCse === undefined) return;
+		updateHasCseMutation.mutate({ siren: data.siren, hasCse: data.hasCse });
+	});
 
 	return (
 		<dialog
@@ -83,9 +93,18 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									manquante si nécessaire.
 								</p>
 
-								<form id="company-edit-form" onSubmit={handleSubmit}>
+								<form id="company-edit-form" onSubmit={onSubmit}>
 									<CompanyReadonlySection company={initialCompany} />
-									<CseRadioGroup hasCse={hasCse} setHasCse={setHasCse} />
+									<Controller
+										control={form.control}
+										name="hasCse"
+										render={({ field }) => (
+											<CseRadioGroup
+												hasCse={field.value ?? null}
+												setHasCse={field.onChange}
+											/>
+										)}
+									/>
 								</form>
 							</div>
 							<div className="fr-modal__footer">
@@ -94,7 +113,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										<button
 											className="fr-btn"
 											disabled={
-												hasCse === null || updateHasCseMutation.isPending
+												hasCse === undefined || updateHasCseMutation.isPending
 											}
 											form="company-edit-form"
 											type="submit"

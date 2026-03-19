@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import styles from "./ProfileModal.module.scss";
-import { normalizePhone, phoneDigitsRegex } from "./phone";
+import { updatePhoneSchema } from "./schemas";
 
 const MODAL_ID = "profile-modal";
 const MODAL_TITLE_ID = "profile-modal-title";
@@ -12,8 +13,12 @@ const MODAL_TITLE_ID = "profile-modal-title";
 /** DSFR modal displaying user profile with editable phone field. */
 export function ProfileModal() {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const [phone, setPhone] = useState("");
-	const [phoneError, setPhoneError] = useState<string | null>(null);
+
+	const form = useZodForm(updatePhoneSchema, {
+		defaultValues: { phone: "" },
+	});
+
+	const phoneError = form.formState.errors.phone?.message ?? null;
 
 	const profileQuery = api.profile.get.useQuery(undefined, {
 		enabled: false,
@@ -43,14 +48,14 @@ export function ProfileModal() {
 			.refetch()
 			.then((result) => {
 				if (result.data) {
-					setPhone(result.data.phone ?? "");
-					setPhoneError(null);
+					form.setValue("phone", result.data.phone ?? "");
+					form.clearErrors();
 				}
 			})
 			.catch(() => {
 				// Query error is already handled by React Query's error state
 			});
-	}, [profileQuery]);
+	}, [profileQuery, form]);
 
 	// Detect when the DSFR modal opens by observing the dialog's `open` attribute.
 	useEffect(() => {
@@ -70,23 +75,9 @@ export function ProfileModal() {
 		return () => observer.disconnect();
 	}, [handleDialogOpen]);
 
-	const validatePhone = (value: string): string | null => {
-		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!phoneDigitsRegex.test(normalizePhone(value)))
-			return "Format attendu : 01 22 33 44 55";
-		return null;
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		const error = validatePhone(phone);
-		if (error) {
-			setPhoneError(error);
-			return;
-		}
-		setPhoneError(null);
-		updatePhoneMutation.mutate({ phone });
-	};
+	const onSubmit = form.handleSubmit((data) => {
+		updatePhoneMutation.mutate(data);
+	});
 
 	return (
 		<dialog
@@ -118,7 +109,7 @@ export function ProfileModal() {
 									de vérifier les données affichées et de compléter les
 									informations manquantes si nécessaire.
 								</p>
-								<form id="profile-form" onSubmit={handleSubmit}>
+								<form id="profile-form" onSubmit={onSubmit}>
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-3w">
 										<div className="fr-col-12 fr-col-md-6">
 											<ReadonlyField
@@ -153,12 +144,8 @@ export function ProfileModal() {
 											aria-describedby="profile-phone-messages"
 											className="fr-input"
 											id="profile-phone"
-											onChange={(e) => {
-												setPhone(e.target.value);
-												if (phoneError) setPhoneError(null);
-											}}
 											type="tel"
-											value={phone}
+											{...form.register("phone")}
 										/>
 										<div
 											aria-live="polite"

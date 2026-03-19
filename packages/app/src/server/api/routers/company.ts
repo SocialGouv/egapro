@@ -1,7 +1,10 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { z } from "zod";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
+import {
+	sirenInputSchema,
+	updateHasCseSchema,
+} from "~/modules/my-space/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
@@ -49,7 +52,7 @@ async function findUserCompany(db: DB, userId: string, siren: string) {
 
 export const companyRouter = createTRPCRouter({
 	get: protectedProcedure
-		.input(z.object({ siren: z.string().length(9) }))
+		.input(sirenInputSchema)
 		.query(({ ctx, input }) =>
 			findUserCompany(ctx.db, ctx.session.user.id, input.siren),
 		),
@@ -103,7 +106,7 @@ export const companyRouter = createTRPCRouter({
 	}),
 
 	getWithDeclarations: protectedProcedure
-		.input(z.object({ siren: z.string().length(9) }))
+		.input(sirenInputSchema)
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(
 				ctx.db,
@@ -143,7 +146,7 @@ export const companyRouter = createTRPCRouter({
 		}),
 
 	updateHasCse: protectedProcedure
-		.input(z.object({ siren: z.string().length(9), hasCse: z.boolean() }))
+		.input(updateHasCseSchema)
 		.mutation(async ({ ctx, input }) => {
 			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
 			await ctx.db

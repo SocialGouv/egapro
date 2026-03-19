@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Controller } from "react-hook-form";
+
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
@@ -9,11 +11,23 @@ import { CseStepIndicator } from "./components/CseStepIndicator";
 import { GapConsultationCard } from "./components/GapConsultationCard";
 import { SubmissionBanner } from "./components/SubmissionBanner";
 import styles from "./Step1Opinions.module.scss";
+import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
-import type { CseOpinionStep1Data, OpinionType } from "./types";
+import type { OpinionType } from "./types";
 
 type Props = {
-	initialData?: CseOpinionStep1Data;
+	initialData?: {
+		firstDeclAccuracyOpinion: OpinionType | null;
+		firstDeclAccuracyDate: string | null;
+		firstDeclGapConsulted: boolean | null;
+		firstDeclGapOpinion: OpinionType | null;
+		firstDeclGapDate: string | null;
+		secondDeclAccuracyOpinion: OpinionType | null;
+		secondDeclAccuracyDate: string | null;
+		secondDeclGapConsulted: boolean | null;
+		secondDeclGapOpinion: OpinionType | null;
+		secondDeclGapDate: string | null;
+	};
 	email?: string;
 	compliancePath?: string | null;
 	hasSecondDeclaration?: boolean;
@@ -28,93 +42,61 @@ export function Step1Opinions({
 	const isJointEvaluation = compliancePath === "joint_evaluation";
 	const router = useRouter();
 
-	const [firstDeclOpinion, setFirstDeclOpinion] = useState<OpinionType | null>(
-		initialData?.firstDeclAccuracyOpinion ?? null,
-	);
-	const [firstDeclDate, setFirstDeclDate] = useState(
-		initialData?.firstDeclAccuracyDate ?? "",
-	);
-	const [firstDeclGap, setFirstDeclGap] = useState<boolean | null>(
-		initialData?.firstDeclGapConsulted ?? null,
-	);
-	const [firstDeclGapOpinion, setFirstDeclGapOpinion] =
-		useState<OpinionType | null>(initialData?.firstDeclGapOpinion ?? null);
-	const [firstDeclGapDate, setFirstDeclGapDate] = useState(
-		initialData?.firstDeclGapDate ?? "",
-	);
-
-	const [secondDeclOpinion, setSecondDeclOpinion] =
-		useState<OpinionType | null>(
-			initialData?.secondDeclAccuracyOpinion ?? null,
-		);
-	const [secondDeclDate, setSecondDeclDate] = useState(
-		initialData?.secondDeclAccuracyDate ?? "",
-	);
-	const [secondDeclGap, setSecondDeclGap] = useState<boolean | null>(
-		initialData?.secondDeclGapConsulted ?? null,
-	);
-	const [secondDeclGapOpinion, setSecondDeclGapOpinion] =
-		useState<OpinionType | null>(initialData?.secondDeclGapOpinion ?? null);
-	const [secondDeclGapDate, setSecondDeclGapDate] = useState(
-		initialData?.secondDeclGapDate ?? "",
-	);
-
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const form = useZodForm(saveOpinionsSchema, {
+		defaultValues: {
+			firstDeclaration: {
+				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
+				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
+				gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
+				gapOpinion: initialData?.firstDeclGapOpinion ?? null,
+				gapDate: initialData?.firstDeclGapDate ?? null,
+			},
+			secondDeclaration: hasSecondDeclaration
+				? {
+						accuracyOpinion:
+							initialData?.secondDeclAccuracyOpinion ?? undefined,
+						accuracyDate: initialData?.secondDeclAccuracyDate ?? "",
+						gapConsulted: initialData?.secondDeclGapConsulted ?? undefined,
+						gapOpinion: initialData?.secondDeclGapOpinion ?? null,
+						gapDate: initialData?.secondDeclGapDate ?? null,
+					}
+				: undefined,
+		},
+	});
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push("/avis-cse/etape/2"),
 	});
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-
+	const onSubmit = form.handleSubmit((data) => {
+		// Additional validation for conditional gap fields
 		const firstGapIncomplete =
-			firstDeclGap === true && (!firstDeclGapOpinion || !firstDeclGapDate);
+			data.firstDeclaration.gapConsulted === true &&
+			(!data.firstDeclaration.gapOpinion || !data.firstDeclaration.gapDate);
 		const secondGapIncomplete =
 			hasSecondDeclaration &&
-			secondDeclGap === true &&
-			(!secondDeclGapOpinion || !secondDeclGapDate);
+			data.secondDeclaration?.gapConsulted === true &&
+			(!data.secondDeclaration?.gapOpinion || !data.secondDeclaration?.gapDate);
 
-		const secondDeclInvalid =
-			hasSecondDeclaration &&
-			(!secondDeclOpinion || !secondDeclDate || secondDeclGap === null);
-
-		if (
-			!firstDeclOpinion ||
-			!firstDeclDate ||
-			firstDeclGap === null ||
-			firstGapIncomplete ||
-			secondDeclInvalid ||
-			secondGapIncomplete
-		) {
-			setValidationError("Veuillez remplir tous les champs obligatoires.");
+		if (firstGapIncomplete || secondGapIncomplete) {
 			return;
 		}
 
-		setValidationError(null);
-		mutation.mutate({
-			firstDeclaration: {
-				accuracyOpinion: firstDeclOpinion,
-				accuracyDate: firstDeclDate,
-				gapConsulted: firstDeclGap,
-				gapOpinion: firstDeclGapOpinion,
-				gapDate: firstDeclGapDate || null,
-			},
-			secondDeclaration:
-				hasSecondDeclaration && secondDeclOpinion && secondDeclGap !== null
-					? {
-							accuracyOpinion: secondDeclOpinion,
-							accuracyDate: secondDeclDate,
-							gapConsulted: secondDeclGap,
-							gapOpinion: secondDeclGapOpinion,
-							gapDate: secondDeclGapDate || null,
-						}
-					: undefined,
-		});
-	}
+		mutation.mutate(data);
+	});
+
+	// Watch fields for controlled sub-components
+	const firstDeclOpinion = form.watch("firstDeclaration.accuracyOpinion");
+	const firstDeclDate = form.watch("firstDeclaration.accuracyDate");
+	const firstDeclGapOpinion = form.watch("firstDeclaration.gapOpinion");
+	const firstDeclGapDate = form.watch("firstDeclaration.gapDate");
+	const secondDeclOpinion = form.watch("secondDeclaration.accuracyOpinion");
+	const secondDeclDate = form.watch("secondDeclaration.accuracyDate");
+	const secondDeclGapOpinion = form.watch("secondDeclaration.gapOpinion");
+	const secondDeclGapDate = form.watch("secondDeclaration.gapDate");
 
 	return (
-		<form onSubmit={handleSubmit}>
+		<form onSubmit={onSubmit}>
 			{isJointEvaluation && (
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 					<div className="fr-col">
@@ -155,22 +137,34 @@ export function Step1Opinions({
 
 			<div className={styles.cardStack}>
 				<AccuracyOpinionCard
-					date={firstDeclDate}
+					date={firstDeclDate ?? ""}
 					id="first-decl-accuracy"
-					onDateChange={setFirstDeclDate}
-					onOpinionChange={setFirstDeclOpinion}
-					opinion={firstDeclOpinion}
+					onDateChange={(v) =>
+						form.setValue("firstDeclaration.accuracyDate", v)
+					}
+					onOpinionChange={(v) =>
+						form.setValue("firstDeclaration.accuracyOpinion", v)
+					}
+					opinion={firstDeclOpinion ?? null}
 					title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 				/>
 
-				<GapConsultationCard
-					consulted={firstDeclGap}
-					date={firstDeclGapDate}
-					id="first-decl-gap"
-					onConsultedChange={setFirstDeclGap}
-					onDateChange={setFirstDeclGapDate}
-					onOpinionChange={setFirstDeclGapOpinion}
-					opinion={firstDeclGapOpinion}
+				<Controller
+					control={form.control}
+					name="firstDeclaration.gapConsulted"
+					render={({ field }) => (
+						<GapConsultationCard
+							consulted={field.value ?? null}
+							date={firstDeclGapDate ?? ""}
+							id="first-decl-gap"
+							onConsultedChange={field.onChange}
+							onDateChange={(v) => form.setValue("firstDeclaration.gapDate", v)}
+							onOpinionChange={(v) =>
+								form.setValue("firstDeclaration.gapOpinion", v)
+							}
+							opinion={firstDeclGapOpinion ?? null}
+						/>
+					)}
 				/>
 			</div>
 
@@ -180,31 +174,45 @@ export function Step1Opinions({
 
 					<div className={styles.cardStack}>
 						<AccuracyOpinionCard
-							date={secondDeclDate}
+							date={secondDeclDate ?? ""}
 							id="second-decl-accuracy"
-							onDateChange={setSecondDeclDate}
-							onOpinionChange={setSecondDeclOpinion}
-							opinion={secondDeclOpinion}
+							onDateChange={(v) =>
+								form.setValue("secondDeclaration.accuracyDate", v)
+							}
+							onOpinionChange={(v) =>
+								form.setValue("secondDeclaration.accuracyOpinion", v)
+							}
+							opinion={secondDeclOpinion ?? null}
 							title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
 						/>
 
-						<GapConsultationCard
-							consulted={secondDeclGap}
-							date={secondDeclGapDate}
-							id="second-decl-gap"
-							onConsultedChange={setSecondDeclGap}
-							onDateChange={setSecondDeclGapDate}
-							onOpinionChange={setSecondDeclGapOpinion}
-							opinion={secondDeclGapOpinion}
+						<Controller
+							control={form.control}
+							name="secondDeclaration.gapConsulted"
+							render={({ field }) => (
+								<GapConsultationCard
+									consulted={field.value ?? null}
+									date={secondDeclGapDate ?? ""}
+									id="second-decl-gap"
+									onConsultedChange={field.onChange}
+									onDateChange={(v) =>
+										form.setValue("secondDeclaration.gapDate", v)
+									}
+									onOpinionChange={(v) =>
+										form.setValue("secondDeclaration.gapOpinion", v)
+									}
+									opinion={secondDeclGapOpinion ?? null}
+								/>
+							)}
 						/>
 					</div>
 				</>
 			)}
 
 			<div aria-live="polite">
-				{validationError && (
+				{form.formState.errors.firstDeclaration && (
 					<div className="fr-alert fr-alert--error fr-mt-3w">
-						<p>{validationError}</p>
+						<p>Veuillez remplir tous les champs obligatoires.</p>
 					</div>
 				)}
 				{mutation.error && (

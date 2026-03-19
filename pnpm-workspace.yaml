@@ -2,6 +2,7 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - '@sentry/cli'
   - esbuild
   - sharp

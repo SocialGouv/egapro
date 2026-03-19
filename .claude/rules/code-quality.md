@@ -77,6 +77,13 @@ Keep files under 200 lines. Split at 400. Files over 800 lines are forbidden.
 - **Error handling**: always `try/catch` with explicit user-facing error message
 - **Input validation**: Zod at system boundaries (forms, route params, API body)
 
+## Form conventions
+
+- **No manual form state**: never use multiple `useState` for form fields. Use `useZodForm` from `~/modules/shared`.
+- **No inline validation**: never write manual `if (!field) { setError(...) }` in handleSubmit. Use Zod schemas via `zodResolver`.
+- **No router-level schemas**: never define Zod schemas in `src/server/api/routers/`. Define them in `src/modules/{domain}/schemas.ts` and import from there.
+- **Shared schemas**: the same Zod schema must be used by both the form (`useZodForm`) and the tRPC procedure (`.input()`).
+
 ## Environment variables
 
 Declared and validated in `src/env.js` via `@t3-oss/env-nextjs` + Zod. **Never read `process.env` directly** — always `import { env } from "~/env.js"`.

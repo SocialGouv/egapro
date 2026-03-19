@@ -5,6 +5,16 @@ export {
 	buildExportKey,
 	generateYearlyExport,
 } from "./generateYearlyExport";
+export type {
+	ExportDeclarationsQuery,
+	ExportYearOptionalQuery,
+	ExportYearQuery,
+} from "./schemas";
+export {
+	exportDeclarationsQuerySchema,
+	exportYearOptionalQuerySchema,
+	exportYearQuerySchema,
+} from "./schemas";
 export {
 	DECLARATION_COLUMNS,
 	EXPORT_VERSION,

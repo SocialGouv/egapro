@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
+
 export const updateStep1Schema = z.object({
 	categories: z.array(
 		z.object({
@@ -9,6 +11,8 @@ export const updateStep1Schema = z.object({
 		}),
 	),
 });
+
+export type UpdateStep1Input = z.infer<typeof updateStep1Schema>;
 
 export const updateStepCategoriesSchema = z.object({
 	step: z.number().int().min(2).max(4),
@@ -24,6 +28,10 @@ export const updateStepCategoriesSchema = z.object({
 		}),
 	),
 });
+
+export type UpdateStepCategoriesInput = z.infer<
+	typeof updateStepCategoriesSchema
+>;
 
 const employeeCategoryDataSchema = z.object({
 	womenCount: z.number().int().min(0).optional(),
@@ -51,3 +59,42 @@ export const updateEmployeeCategoriesSchema = z.object({
 	referencePeriodStart: z.string().optional(),
 	referencePeriodEnd: z.string().optional(),
 });
+
+export type UpdateEmployeeCategoriesInput = z.infer<
+	typeof updateEmployeeCategoriesSchema
+>;
+
+export const categoryFormEntrySchema = z.object({
+	name: z.string(),
+	detail: z.string(),
+	womenCount: z.string(),
+	menCount: z.string(),
+	annualBaseWomen: z.string(),
+	annualBaseMen: z.string(),
+	annualVariableWomen: z.string(),
+	annualVariableMen: z.string(),
+	hourlyBaseWomen: z.string(),
+	hourlyBaseMen: z.string(),
+	hourlyVariableWomen: z.string(),
+	hourlyVariableMen: z.string(),
+});
+
+export const categoryFormSchema = z.object({
+	source: z.string(),
+	categories: z.array(categoryFormEntrySchema),
+});
+
+export const saveCompliancePathSchema = z.object({
+	path: z.enum(COMPLIANCE_PATHS),
+});
+
+export type SaveCompliancePathInput = z.infer<typeof saveCompliancePathSchema>;
+
+export const jointEvaluationUploadSchema = z.object({
+	fileName: z.string().min(1),
+	filePath: z.string().min(1),
+});
+
+export type JointEvaluationUploadInput = z.infer<
+	typeof jointEvaluationUploadSchema
+>;

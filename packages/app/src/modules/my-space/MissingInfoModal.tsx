@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-import { normalizePhone, phoneDigitsRegex } from "~/modules/profile/phone";
+import { updatePhoneSchema } from "~/modules/profile/schemas";
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 const MODAL_ID = "missing-info-modal";
@@ -14,8 +15,12 @@ type Props = {
 
 export function MissingInfoModal({ siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const [phone, setPhone] = useState("");
-	const [phoneError, setPhoneError] = useState<string | null>(null);
+
+	const form = useZodForm(updatePhoneSchema, {
+		defaultValues: { phone: "" },
+	});
+
+	const phoneError = form.formState.errors.phone?.message ?? null;
 
 	const updatePhoneMutation = api.profile.updatePhone.useMutation({
 		onSuccess: () => {
@@ -45,8 +50,7 @@ export function MissingInfoModal({ siren }: Props) {
 		const observer = new MutationObserver((mutations) => {
 			for (const mutation of mutations) {
 				if (mutation.attributeName === "open" && dialog.open) {
-					setPhone("");
-					setPhoneError(null);
+					form.reset({ phone: "" });
 					break;
 				}
 			}
@@ -54,25 +58,11 @@ export function MissingInfoModal({ siren }: Props) {
 
 		observer.observe(dialog, { attributes: true, attributeFilter: ["open"] });
 		return () => observer.disconnect();
-	}, []);
+	}, [form]);
 
-	const validatePhone = (value: string): string | null => {
-		if (!value.trim()) return "Le numéro de téléphone est obligatoire.";
-		if (!phoneDigitsRegex.test(normalizePhone(value)))
-			return "Format attendu : 01 22 33 44 55";
-		return null;
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		const error = validatePhone(phone);
-		if (error) {
-			setPhoneError(error);
-			return;
-		}
-		setPhoneError(null);
-		updatePhoneMutation.mutate({ phone });
-	};
+	const onSubmit = form.handleSubmit((data) => {
+		updatePhoneMutation.mutate(data);
+	});
 
 	return (
 		<dialog
@@ -103,7 +93,7 @@ export function MissingInfoModal({ siren }: Props) {
 									Pour continuer, vous devez ajouter un numéro de téléphone à
 									votre profil.
 								</p>
-								<form id="missing-info-form" onSubmit={handleSubmit}>
+								<form id="missing-info-form" onSubmit={onSubmit}>
 									<div
 										className={
 											phoneError
@@ -121,12 +111,8 @@ export function MissingInfoModal({ siren }: Props) {
 											aria-describedby="missing-info-phone-messages"
 											className="fr-input"
 											id="missing-info-phone"
-											onChange={(e) => {
-												setPhone(e.target.value);
-												if (phoneError) setPhoneError(null);
-											}}
 											type="tel"
-											value={phone}
+											{...form.register("phone")}
 										/>
 										<div
 											aria-live="polite"

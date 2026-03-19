@@ -1,9 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
-import { z } from "zod";
 
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
-import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
+import {
+	saveCompliancePathSchema,
+	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
+	updateStepCategoriesSchema,
+} from "~/modules/declaration-remuneration/schemas";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	declarationCategories,
@@ -17,11 +21,6 @@ import {
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 } from "./declarationHelpers";
-import {
-	updateEmployeeCategoriesSchema,
-	updateStep1Schema,
-	updateStepCategoriesSchema,
-} from "./schemas";
 
 function getCurrentYear() {
 	return new Date().getFullYear();
@@ -376,11 +375,7 @@ export const declarationRouter = createTRPCRouter({
 	}),
 
 	saveCompliancePath: companyProcedure
-		.input(
-			z.object({
-				path: z.enum(COMPLIANCE_PATHS),
-			}),
-		)
+		.input(saveCompliancePathSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
 			const year = getCurrentYear();

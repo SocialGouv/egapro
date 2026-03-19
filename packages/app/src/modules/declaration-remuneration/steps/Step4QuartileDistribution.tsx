@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { updateStepCategoriesSchema } from "../schemas";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
@@ -32,6 +34,45 @@ function buildGipQuartileCategories(
 	}));
 }
 
+function stepToFormCategories(
+	annual: StepCategoryData[],
+	hourly: StepCategoryData[],
+) {
+	return [
+		...annual.map((c) => ({
+			name: `annual:${c.name}`,
+			womenCount: c.womenCount,
+			menCount: c.menCount,
+			womenValue: c.womenValue,
+		})),
+		...hourly.map((c) => ({
+			name: `hourly:${c.name}`,
+			womenCount: c.womenCount,
+			menCount: c.menCount,
+			womenValue: c.womenValue,
+		})),
+	];
+}
+
+function formToStepCategories(
+	categories: {
+		name?: string;
+		womenCount?: number;
+		menCount?: number;
+		womenValue?: string;
+	}[],
+	prefix: "annual" | "hourly",
+): StepCategoryData[] {
+	return categories
+		.filter((c) => c.name?.startsWith(`${prefix}:`))
+		.map((c) => ({
+			name: c.name?.replace(`${prefix}:`, "") ?? "",
+			womenCount: c.womenCount,
+			menCount: c.menCount,
+			womenValue: c.womenValue,
+		}));
+}
+
 type Step4QuartileDistributionProps = {
 	initialAnnualCategories?: StepCategoryData[];
 	initialHourlyCategories?: StepCategoryData[];
@@ -49,26 +90,20 @@ export function Step4QuartileDistribution({
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 
-	const defaultCategories = () =>
+	const emptyCategories = () =>
 		QUARTILE_NAMES.map((name) => ({ name })) as StepCategoryData[];
 
-	const [annualCategories, setAnnualCategories] = useState<StepCategoryData[]>(
-		initialAnnualCategories?.length
-			? initialAnnualCategories
-			: gipPrefillData
-				? buildGipQuartileCategories(gipPrefillData.step4.annual)
-				: defaultCategories(),
-	);
+	const defaultAnnual = initialAnnualCategories?.length
+		? initialAnnualCategories
+		: gipPrefillData
+			? buildGipQuartileCategories(gipPrefillData.step4.annual)
+			: emptyCategories();
 
-	const [hourlyCategories, setHourlyCategories] = useState<StepCategoryData[]>(
-		initialHourlyCategories?.length
-			? initialHourlyCategories
-			: gipPrefillData
-				? buildGipQuartileCategories(gipPrefillData.step4.hourly)
-				: defaultCategories(),
-	);
-
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const defaultHourly = initialHourlyCategories?.length
+		? initialHourlyCategories
+		: gipPrefillData
+			? buildGipQuartileCategories(gipPrefillData.step4.hourly)
+			: emptyCategories();
 
 	const hasInitialData = [
 		...(initialAnnualCategories ?? []),
@@ -80,6 +115,19 @@ export function Step4QuartileDistribution({
 			c.womenValue !== undefined ||
 			c.menValue !== undefined,
 	);
+
+	const form = useZodForm(updateStepCategoriesSchema, {
+		defaultValues: {
+			step: 4,
+			categories: stepToFormCategories(defaultAnnual, defaultHourly),
+		},
+	});
+
+	const categories = form.watch("categories");
+	const annualCategories = formToStepCategories(categories, "annual");
+	const hourlyCategories = formToStepCategories(categories, "hourly");
+
+	const [validationError, setValidationError] = useState<string | null>(null);
 	const [saved, setSaved] = useState(hasInitialData);
 	const [formValidationError, setFormValidationError] = useState<string | null>(
 		null,
@@ -97,23 +145,20 @@ export function Step4QuartileDistribution({
 		field: "womenValue" | "womenCount" | "menCount",
 		value: string,
 	) {
-		const setter =
-			tableType === "annual" ? setAnnualCategories : setHourlyCategories;
+		const formIndex =
+			tableType === "annual" ? index : index + QUARTILE_NAMES.length;
 
 		if (field === "womenValue") {
 			const normalized = normalizeDecimalInput(value);
 			if (normalized === null) return;
 			if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
-			setter((prev) =>
-				prev.map((c, i) =>
-					i === index ? { ...c, womenValue: normalized || undefined } : c,
-				),
+			form.setValue(
+				`categories.${formIndex}.womenValue`,
+				normalized || undefined,
 			);
 		} else {
 			if (value === "") {
-				setter((prev) =>
-					prev.map((c, i) => (i === index ? { ...c, [field]: undefined } : c)),
-				);
+				form.setValue(`categories.${formIndex}.${field}`, undefined);
 				setValidationError(null);
 				setSaved(false);
 				return;
@@ -128,17 +173,14 @@ export function Step4QuartileDistribution({
 				return;
 			}
 			setValidationError(null);
-			setter((prev) =>
-				prev.map((c, i) => (i === index ? { ...c, [field]: n } : c)),
-			);
+			form.setValue(`categories.${formIndex}.${field}`, n);
 		}
 		setSaved(false);
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		const allCategories = [...annualCategories, ...hourlyCategories];
-		const incomplete = allCategories.some(
+	const onSubmit = form.handleSubmit(() => {
+		const allStepCategories = [...annualCategories, ...hourlyCategories];
+		const incomplete = allStepCategories.some(
 			(c) =>
 				c.womenCount === undefined || c.menCount === undefined || !c.womenValue,
 		);
@@ -151,25 +193,12 @@ export function Step4QuartileDistribution({
 		setFormValidationError(null);
 		mutation.mutate({
 			step: 4,
-			categories: [
-				...annualCategories.map((c) => ({
-					name: `annual:${c.name}`,
-					womenCount: c.womenCount,
-					menCount: c.menCount,
-					womenValue: c.womenValue,
-				})),
-				...hourlyCategories.map((c) => ({
-					name: `hourly:${c.name}`,
-					womenCount: c.womenCount,
-					menCount: c.menCount,
-					womenValue: c.womenValue,
-				})),
-			],
+			categories: stepToFormCategories(annualCategories, hourlyCategories),
 		});
-	}
+	});
 
 	return (
-		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
+		<form className={stepStyles.formColumn} onSubmit={onSubmit}>
 			{/* Title + save status */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
@@ -180,8 +209,11 @@ export function Step4QuartileDistribution({
 				<div className="fr-col-auto">
 					<DevFillButton
 						onFill={() => {
-							setAnnualCategories(DEV_STEP4_ANNUAL);
-							setHourlyCategories(DEV_STEP4_HOURLY);
+							form.setValue(
+								"categories",
+								stepToFormCategories(DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY),
+							);
+							setSaved(false);
 						}}
 					/>
 				</div>

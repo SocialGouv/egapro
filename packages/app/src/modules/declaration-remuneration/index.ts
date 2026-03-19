@@ -1,6 +1,22 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
+export type {
+	JointEvaluationUploadInput,
+	SaveCompliancePathInput,
+	UpdateEmployeeCategoriesInput,
+	UpdateStep1Input,
+	UpdateStepCategoriesInput,
+} from "./schemas";
+export {
+	categoryFormEntrySchema,
+	categoryFormSchema,
+	jointEvaluationUploadSchema,
+	saveCompliancePathSchema,
+	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
+	updateStepCategoriesSchema,
+} from "./schemas";
 export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
 export {

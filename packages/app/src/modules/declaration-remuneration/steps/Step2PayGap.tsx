@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { updateStepCategoriesSchema } from "../schemas";
 import { buildGipRows } from "../shared/buildGipRows";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
@@ -23,6 +25,24 @@ import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, PayGapRow } from "../types";
 
+function rowsToCategories(rows: PayGapRow[]) {
+	return rows.map((r) => ({
+		name: r.label,
+		womenValue: r.womenValue,
+		menValue: r.menValue,
+	}));
+}
+
+function categoriesToRows(
+	categories: { name?: string; womenValue?: string; menValue?: string }[],
+): PayGapRow[] {
+	return categories.map((c) => ({
+		label: c.name ?? "",
+		womenValue: c.womenValue ?? "",
+		menValue: c.menValue ?? "",
+	}));
+}
+
 type Step2PayGapProps = {
 	initialRows?: PayGapRow[];
 	gipPrefillData?: GipPrefillData;
@@ -32,16 +52,25 @@ export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 	const router = useRouter();
 
 	const hasSavedRows = !!initialRows?.length;
-	const [rows, setRows] = useState<PayGapRow[]>(
-		hasSavedRows
-			? initialRows
-			: gipPrefillData
-				? buildGipRows(gipPrefillData.step2)
-				: DEFAULT_PAY_GAP_ROWS,
-	);
+	const defaultRows = hasSavedRows
+		? initialRows
+		: gipPrefillData
+			? buildGipRows(gipPrefillData.step2)
+			: DEFAULT_PAY_GAP_ROWS;
 
 	const hasInitialData =
 		initialRows?.some((r) => r.womenValue || r.menValue) ?? false;
+
+	const form = useZodForm(updateStepCategoriesSchema, {
+		defaultValues: {
+			step: 2,
+			categories: rowsToCategories(defaultRows),
+		},
+	});
+
+	const categories = form.watch("categories");
+	const rows = categoriesToRows(categories);
+
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -54,12 +83,11 @@ export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const updated = handlePayGapRowChange(rows, index, field, value);
 		if (!updated) return;
-		setRows(updated);
+		form.setValue("categories", rowsToCategories(updated));
 		setSaved(false);
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+	const onSubmit = form.handleSubmit(() => {
 		const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
 		if (incomplete) {
 			setValidationError(
@@ -70,16 +98,12 @@ export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 		setValidationError(null);
 		mutation.mutate({
 			step: 2,
-			categories: rows.map((r) => ({
-				name: r.label,
-				womenValue: r.womenValue,
-				menValue: r.menValue,
-			})),
+			categories: rowsToCategories(rows),
 		});
-	}
+	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			{/* Title + save status */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
@@ -88,7 +112,12 @@ export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 					</h1>
 				</div>
 				<div className="fr-col-auto">
-					<DevFillButton onFill={() => setRows(DEV_STEP2_ROWS)} />
+					<DevFillButton
+						onFill={() => {
+							form.setValue("categories", rowsToCategories(DEV_STEP2_ROWS));
+							setSaved(false);
+						}}
+					/>
 				</div>
 				{saved && (
 					<div className="fr-col-auto">
