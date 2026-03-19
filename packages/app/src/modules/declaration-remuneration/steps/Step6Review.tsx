@@ -97,7 +97,7 @@ export function Step6Review({
 	// Parse step 5 categories
 	const step5Parsed = parseEmployeeCategories(step5Categories);
 
-	// Check if any gap is high (>= 5%)
+	// Check if any gap exceeds the regulatory threshold
 	const allGaps = [
 		annualMeanGap,
 		hourlyMeanGap,
