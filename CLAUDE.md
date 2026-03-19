@@ -140,6 +140,7 @@ When creating multiple pages/screens, follow this 4-phase approach:
 | `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
 | `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
 | `/process-issue` | Process a GitHub issue (parent + sub-issues) with mandatory quality gates |
+| `/verify-feature` | Post-feature completeness audit — loops until zero issues (forms, schemas, code quality) |
 
 ---
 

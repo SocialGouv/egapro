@@ -15,8 +15,6 @@ export const saveOpinionsSchema = z.object({
 	secondDeclaration: declarationOpinionSchema.optional(),
 });
 
-export type SaveOpinionsInput = z.infer<typeof saveOpinionsSchema>;
-
 export const uploadFileSchema = z.object({
 	fileName: z
 		.string()
@@ -31,10 +29,6 @@ export const uploadFileSchema = z.object({
 		),
 });
 
-export type UploadFileInput = z.infer<typeof uploadFileSchema>;
-
 export const deleteFileSchema = z.object({
 	fileId: z.string().min(1),
 });
-
-export type DeleteFileInput = z.infer<typeof deleteFileSchema>;

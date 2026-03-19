@@ -12,8 +12,6 @@ export const updateStep1Schema = z.object({
 	),
 });
 
-export type UpdateStep1Input = z.infer<typeof updateStep1Schema>;
-
 export const updateStepCategoriesSchema = z.object({
 	step: z.number().int().min(2).max(4),
 	categories: z.array(
@@ -28,10 +26,6 @@ export const updateStepCategoriesSchema = z.object({
 		}),
 	),
 });
-
-export type UpdateStepCategoriesInput = z.infer<
-	typeof updateStepCategoriesSchema
->;
 
 const employeeCategoryDataSchema = z.object({
 	womenCount: z.number().int().min(0).optional(),
@@ -60,10 +54,6 @@ export const updateEmployeeCategoriesSchema = z.object({
 	referencePeriodEnd: z.string().optional(),
 });
 
-export type UpdateEmployeeCategoriesInput = z.infer<
-	typeof updateEmployeeCategoriesSchema
->;
-
 export const categoryFormEntrySchema = z.object({
 	name: z.string(),
 	detail: z.string(),
@@ -88,13 +78,7 @@ export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),
 });
 
-export type SaveCompliancePathInput = z.infer<typeof saveCompliancePathSchema>;
-
 export const jointEvaluationUploadSchema = z.object({
 	fileName: z.string().min(1),
 	filePath: z.string().min(1),
 });
-
-export type JointEvaluationUploadInput = z.infer<
-	typeof jointEvaluationUploadSchema
->;

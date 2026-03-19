@@ -1,13 +1,6 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
 export { StepPageClient } from "./StepPageClient";
-export type {
-	JointEvaluationUploadInput,
-	SaveCompliancePathInput,
-	UpdateEmployeeCategoriesInput,
-	UpdateStep1Input,
-	UpdateStepCategoriesInput,
-} from "./schemas";
 export {
 	categoryFormEntrySchema,
 	categoryFormSchema,
