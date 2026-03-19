@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
+import { getDsfrModal } from "~/modules/shared";
+import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./ProfileModal.module.scss";
@@ -32,15 +34,7 @@ export function ProfileModal() {
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog && typeof window !== "undefined" && "dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => { modal: { conceal: () => void } };
-				}
-			)
-				.dsfr(dialog)
-				.modal.conceal();
-		}
+		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
 	const handleDialogOpen = useCallback(() => {
@@ -57,23 +51,7 @@ export function ProfileModal() {
 			});
 	}, [profileQuery, form]);
 
-	// Detect when the DSFR modal opens by observing the dialog's `open` attribute.
-	useEffect(() => {
-		const dialog = dialogRef.current;
-		if (!dialog) return;
-
-		const observer = new MutationObserver((mutations) => {
-			for (const mutation of mutations) {
-				if (mutation.attributeName === "open" && dialog.open) {
-					handleDialogOpen();
-					break;
-				}
-			}
-		});
-
-		observer.observe(dialog, { attributes: true, attributeFilter: ["open"] });
-		return () => observer.disconnect();
-	}, [handleDialogOpen]);
+	useDsfrDialogOpen(dialogRef, handleDialogOpen);
 
 	const onSubmit = form.handleSubmit((data) => {
 		updatePhoneMutation.mutate(data);

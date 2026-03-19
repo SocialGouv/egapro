@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 import { updatePhoneSchema } from "~/modules/profile/schemas";
+import { getDsfrModal } from "~/modules/shared";
+import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -31,34 +33,13 @@ export function MissingInfoModal({ siren }: Props) {
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
-		if (dialog && typeof window !== "undefined" && "dsfr" in window) {
-			(
-				window as unknown as {
-					dsfr: (el: HTMLElement) => { modal: { conceal: () => void } };
-				}
-			)
-				.dsfr(dialog)
-				.modal.conceal();
-		}
+		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
-	// Reset form when modal opens
-	useEffect(() => {
-		const dialog = dialogRef.current;
-		if (!dialog) return;
-
-		const observer = new MutationObserver((mutations) => {
-			for (const mutation of mutations) {
-				if (mutation.attributeName === "open" && dialog.open) {
-					form.reset({ phone: "" });
-					break;
-				}
-			}
-		});
-
-		observer.observe(dialog, { attributes: true, attributeFilter: ["open"] });
-		return () => observer.disconnect();
-	}, [form]);
+	useDsfrDialogOpen(
+		dialogRef,
+		useCallback(() => form.reset({ phone: "" }), [form]),
+	);
 
 	const onSubmit = form.handleSubmit((data) => {
 		updatePhoneMutation.mutate(data);

@@ -10,4 +10,5 @@ export {
 	SCAN_TIMEOUT_MS,
 } from "./uploadConfig";
 export { uploadFile } from "./uploadFile";
+export { useDsfrDialogOpen } from "./useDsfrDialogOpen";
 export { useFileUploadForm } from "./useFileUploadForm";

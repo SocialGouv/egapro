@@ -7,6 +7,10 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStepCategoriesSchema } from "../schemas";
 import { buildGipRows } from "../shared/buildGipRows";
+import {
+	categoriesToRows,
+	rowsToCategories,
+} from "../shared/categoryRowMapping";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DevFillButton } from "../shared/DevFillButton";
@@ -24,24 +28,6 @@ import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, PayGapRow } from "../types";
-
-function rowsToCategories(rows: PayGapRow[]) {
-	return rows.map((r) => ({
-		name: r.label,
-		womenValue: r.womenValue,
-		menValue: r.menValue,
-	}));
-}
-
-function categoriesToRows(
-	categories: { name?: string; womenValue?: string; menValue?: string }[],
-): PayGapRow[] {
-	return categories.map((c) => ({
-		label: c.name ?? "",
-		womenValue: c.womenValue ?? "",
-		menValue: c.menValue ?? "",
-	}));
-}
 
 type Step2PayGapProps = {
 	initialRows?: PayGapRow[];
