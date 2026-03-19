@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { useZodForm } from "~/modules/shared";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStepCategoriesSchema } from "../schemas";
 import { QUARTILE_NAMES } from "../shared/constants";

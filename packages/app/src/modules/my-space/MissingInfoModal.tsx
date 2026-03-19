@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import { updatePhoneSchema } from "~/modules/profile/schemas";
-import { useZodForm } from "~/modules/shared";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 const MODAL_ID = "missing-info-modal";

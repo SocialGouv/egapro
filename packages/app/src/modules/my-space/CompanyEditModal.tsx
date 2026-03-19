@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
-import { useZodForm } from "~/modules/shared";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";

@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { useZodForm } from "~/modules/shared";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import common from "../shared/common.module.scss";

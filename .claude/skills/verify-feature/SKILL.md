@@ -1,6 +1,6 @@
 ---
 name: verify-feature
-description: Full codebase rules audit — runs at start AND end of every feature, loops until zero issues
+description: Full codebase rules audit — runs at END of every feature, loops until zero issues
 ---
 
 # /verify-feature
@@ -9,7 +9,7 @@ Comprehensive audit of ALL project rules. **Loops automatically** — fix every 
 
 ## When this runs
 
-- **Automatically at the END of every feature** (before reporting done)
+- **Automatically at the END of every feature** (before reporting done — see `automation.md § Feature lifecycle`)
 - **Manually** via `/verify-feature` when you want a full check
 
 ## Instructions
@@ -116,11 +116,13 @@ For changed files:
 - Test mocks duplicating `src/test/setup.ts` mocks → **VIOLATION**
 - New page without E2E test → **WARNING**
 
-#### 1.13 Security (`automation.md § Gate 3`)
+#### 1.13 tRPC & Security (`trpc-api.md`, `automation.md § Gate 3`)
 
 For changed files in `src/server/`:
-- tRPC input without schema → **VIOLATION**
+- tRPC input without schema from `~/modules/{domain}/schemas` → **VIOLATION**
+- Router file importing `z` from `zod` → **VIOLATION**
 - Mutation without ownership check → **WARNING**
+- Multi-write without `db.transaction()` → **VIOLATION**
 - Raw SQL → **VIOLATION**
 
 #### 1.14 Accessibility (`automation.md § Gate 2`)
@@ -129,16 +131,23 @@ For changed `.tsx` files:
 - `<input>` without associated `<label>` → **VIOLATION**
 - `target="_blank"` without `<NewTabNotice />` → **VIOLATION**
 - Decorative icon without `aria-hidden="true"` → **WARNING**
+- Heading hierarchy skipping levels → **VIOLATION**
+- Form groups without `<fieldset>` + `<legend>` → **WARNING**
 
 ---
 
-### Phase 2 — Validation (parallel agents)
+### Phase 2 — Quality gates (matches `automation.md § Automatic quality gates`)
 
-Launch **3 parallel agents**:
+Launch **3 parallel agents** for validation:
 
 1. **Agent: typecheck** — `pnpm typecheck`
 2. **Agent: tests** — `pnpm test`
 3. **Agent: lint+format** — `pnpm lint:check && pnpm format:check`
+
+Then launch **2 parallel agents** for audits (scoped to changed files):
+
+4. **Agent: RGAA** — delegate to `rgaa-auditor` agent (`.claude/agents/rgaa-auditor/AGENT.md`) on all changed `.tsx` files. If no `.tsx` files changed → `SKIP`.
+5. **Agent: Security** — delegate to `security-auditor` agent (`.claude/agents/security-auditor/AGENT.md`) on all changed `.ts/.tsx` files in `server/`, `routers/`, or tRPC. If none → `SKIP`.
 
 ---
 
@@ -177,6 +186,7 @@ Only after zero violations remain:
 |---|---|
 | Typecheck | clean |
 | Tests | X/X passed |
-| Lint | clean |
-| Format | clean |
+| Lint + Format | clean |
+| RGAA | PASS / SKIP |
+| Security | PASS / SKIP |
 ```

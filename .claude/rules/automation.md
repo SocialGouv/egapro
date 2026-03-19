@@ -100,7 +100,7 @@ Full checklist (13 RGAA themes) in `.claude/agents/rgaa-auditor/AGENT.md`.
 
 Verify **inline while writing** AND audit all created/modified files after implementation:
 - Queries → Drizzle ORM only (no raw SQL)
-- tRPC inputs → Zod schemas (in `schemas.ts`, not inline)
+- tRPC inputs → Zod schemas from `~/modules/{domain}/schemas.ts` (never inline, never in routers)
 - Protected routes → `protectedProcedure`
 - Mutations → ownership check (`userId` from session)
 - Multi-write → `db.transaction()`

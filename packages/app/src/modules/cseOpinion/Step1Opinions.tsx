@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
-import { useZodForm } from "~/modules/shared";
+import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
