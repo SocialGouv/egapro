@@ -1,8 +1,12 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
+import type {
+	TransmittedPdfData,
+	TransmittedPdfOpinion,
+} from "./buildTransmittedPdfData";
+import { formatFrenchDate } from "./formatFrenchDate";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
-import type { TransmittedPdfData, TransmittedPdfOpinion } from "./buildTransmittedPdfData";
 
 type Props = {
 	data: TransmittedPdfData;
@@ -11,14 +15,6 @@ type Props = {
 function formatDate(dateStr: string | null): string {
 	if (!dateStr) return "Non renseignée";
 	return dateStr;
-}
-
-function formatUploadDate(date: Date): string {
-	return date.toLocaleDateString("fr-FR", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	});
 }
 
 function formatOpinionType(type: string): string {
@@ -64,10 +60,11 @@ function OpinionSection({
 				{formatDeclarationLabel(declarationNumber)}
 			</Text>
 			{opinions.map((opinion) => (
-				<View key={`opinion-${declarationNumber}-${opinion.type}`} style={styles.tableRow}>
-					<Text style={styles.tableCellLabel}>
-						Type : {opinion.type}
-					</Text>
+				<View
+					key={`opinion-${declarationNumber}-${opinion.type}`}
+					style={styles.tableRow}
+				>
+					<Text style={styles.tableCellLabel}>Type : {opinion.type}</Text>
 					<Text style={styles.tableCellValue}>
 						Avis : {formatOpinionType(opinion.opinion ?? "")}
 					</Text>
@@ -96,9 +93,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 					<Text style={styles.title}>
 						Récapitulatif des éléments transmis {data.year + 1}
 					</Text>
-					<Text style={styles.subtitle}>
-						Au titre des données {data.year}
-					</Text>
+					<Text style={styles.subtitle}>Au titre des données {data.year}</Text>
 					<Text style={styles.companyInfo}>
 						{data.companyName} — SIREN {data.siren}
 					</Text>
@@ -115,8 +110,8 @@ export function TransmittedPdfDocument({ data }: Props) {
 							if (!opinions) return null;
 							return (
 								<OpinionSection
-									key={`decl-${num}`}
 									declarationNumber={num}
+									key={`decl-${num}`}
 									opinions={opinions}
 								/>
 							);
@@ -134,7 +129,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 							<View key={file.fileName} style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>{file.fileName}</Text>
 								<Text style={styles.tableCellValue}>
-									Déposé le {formatUploadDate(file.uploadedAt)}
+									Déposé le {formatFrenchDate(file.uploadedAt)}
 								</Text>
 							</View>
 						))
@@ -150,7 +145,8 @@ export function TransmittedPdfDocument({ data }: Props) {
 								{data.jointEvaluationFile.fileName}
 							</Text>
 							<Text style={styles.tableCellValue}>
-								Déposé le {formatUploadDate(data.jointEvaluationFile.uploadedAt)}
+								Déposé le{" "}
+								{formatFrenchDate(data.jointEvaluationFile.uploadedAt)}
 							</Text>
 						</View>
 					) : (

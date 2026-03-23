@@ -11,6 +11,7 @@ import {
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";
+import { formatFrenchDate } from "./formatFrenchDate";
 
 import type { DeclarationPdfData } from "./types";
 
@@ -130,11 +131,7 @@ export async function buildPdfData(
 		companyName: company?.name ?? `Entreprise ${siren}`,
 		siren,
 		year,
-		generatedAt: now.toLocaleDateString("fr-FR", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		}),
+		generatedAt: formatFrenchDate(now),
 		isSecondDeclaration: declarationType === "correction",
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,

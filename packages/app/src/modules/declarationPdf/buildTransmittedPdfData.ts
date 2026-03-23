@@ -9,6 +9,7 @@ import {
 	cseOpinions,
 	jointEvaluationFiles,
 } from "~/server/db/schema";
+import { formatFrenchDate } from "./formatFrenchDate";
 
 export type TransmittedPdfOpinion = {
 	declarationNumber: number;
@@ -40,11 +41,7 @@ export async function buildTransmittedPdfData(
 	const year = getCseYear();
 
 	const [companyResults, opinions, cseFiles, jointFiles] = await Promise.all([
-		db
-			.select()
-			.from(companies)
-			.where(eq(companies.siren, siren))
-			.limit(1),
+		db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
 		db
 			.select({
 				declarationNumber: cseOpinions.declarationNumber,
@@ -61,7 +58,9 @@ export async function buildTransmittedPdfData(
 				uploadedAt: cseOpinionFiles.uploadedAt,
 			})
 			.from(cseOpinionFiles)
-			.where(and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year))),
+			.where(
+				and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)),
+			),
 		db
 			.select({
 				fileName: jointEvaluationFiles.fileName,
@@ -86,11 +85,7 @@ export async function buildTransmittedPdfData(
 		companyName: company.name,
 		siren,
 		year,
-		generatedAt: now.toLocaleDateString("fr-FR", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		}),
+		generatedAt: formatFrenchDate(now),
 		opinions,
 		cseFiles,
 		jointEvaluationFile: jointFiles[0] ?? null,
