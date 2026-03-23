@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: gip-mds-import
   namespace: {{ .Values.global.namespace }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 5
   template:
