@@ -54,12 +54,26 @@ describe("ConfirmationPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders document download section", () => {
+	it("renders document download section without second declaration card", () => {
 		render(<ConfirmationPage />);
 
 		expect(
 			screen.getByText("Documents récapitulatifs de votre déclaration"),
 		).toBeInTheDocument();
+		expect(
+			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/récapitulatif de la seconde déclaration/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(/récapitulatif des éléments transmis/),
+		).toBeInTheDocument();
+	});
+
+	it("renders second declaration card when hasSecondDeclaration is true", () => {
+		render(<ConfirmationPage hasSecondDeclaration />);
+
 		expect(
 			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
 		).toBeInTheDocument();
