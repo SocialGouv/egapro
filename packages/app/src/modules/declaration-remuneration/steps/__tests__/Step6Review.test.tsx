@@ -22,6 +22,14 @@ vi.mock("~/trpc/react", () => ({
 				}),
 			},
 		},
+		company: {
+			updateHasCse: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+				}),
+			},
+		},
 	},
 }));
 
@@ -309,6 +317,7 @@ describe("Step6Review", () => {
 	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
 		render(
 			<Step6Review
+				siren="532847196"
 				step2Rows={[
 					{
 						label: "Annuelle brute moyenne",
@@ -336,19 +345,17 @@ describe("Step6Review", () => {
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				/Votre entreprise de moins de 50 salariés présente des écarts/,
-			),
+			screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
 		).toBeInTheDocument();
 		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
 		expect(
-			screen.getByText(/critères objectifs et non sexistes/),
+			screen.getByRole("link", { name: /critères objectifs/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/actions correctives et seconde déclaration/),
+			screen.getByRole("link", { name: /actions correctives/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/évaluation conjointe des rémunérations/),
+			screen.getByRole("link", { name: /évaluation conjointe/ }),
 		).toBeInTheDocument();
 	});
 
