@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gip-mds-import
+  namespace: {{ .Values.global.namespace }}
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        app: gip-mds-import
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 100
+        runAsNonRoot: true
+      containers:
+        - name: trigger
+          image: curlimages/curl:8.12.1
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for app to be ready..."
+              for i in $(seq 1 60); do
+                if curl -sf "http://app/api/healthz" > /dev/null 2>&1; then
+                  echo "App is ready, importing GIP MDS data..."
+                  curl -X POST "http://app/api/gip-mds/import" \
+                    --connect-timeout 10 \
+                    --max-time 60 \
+                    --fail \
+                    --show-error
+                  exit $?
+                fi
+                echo "App not ready yet, retrying in 5s... ($i/60)"
+                sleep 5
+              done
+              echo "App did not become ready in time"
+              exit 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

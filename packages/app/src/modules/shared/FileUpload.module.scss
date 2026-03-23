@@ -20,6 +20,11 @@
 	border-color: var(--border-plain-error);
 }
 
+.dropzoneDisabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 .selectButton {
 	display: inline-flex;
 	align-items: center;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import dialogStyles from "~/modules/declaration-remuneration/shared/EditDialog.module.scss";
+const MODAL_ID = "submit-modal";
 
 type Props = {
 	modalRef: React.RefObject<HTMLDialogElement | null>;
@@ -25,7 +25,8 @@ export function SubmitModal({
 	return (
 		<dialog
 			aria-labelledby="submit-modal-title"
-			className={`fr-p-4w ${dialogStyles.dialog}`}
+			className="fr-modal"
+			id={MODAL_ID}
 			ref={modalRef}
 		>
 			<div className="fr-container fr-container--fluid fr-container-md">
@@ -34,8 +35,9 @@ export function SubmitModal({
 						<div className="fr-modal__body">
 							<div className="fr-modal__header">
 								<button
-									aria-controls="submit-modal"
+									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
+									onClick={onClose}
 									title="Fermer"
 									type="button"
 								>

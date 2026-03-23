@@ -65,9 +65,9 @@ describe("Step2Upload", () => {
 		render(<Step2Upload />);
 
 		expect(
-			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
 		).toBeInTheDocument();
-		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-les ici")).toBeInTheDocument();
 	});
 
 	it("renders a hidden file input", () => {
@@ -95,7 +95,7 @@ describe("Step2Upload", () => {
 		expect(previousLink).toHaveAttribute("href", "/avis-cse/etape/1");
 
 		expect(
-			screen.getByRole("button", { name: /Ajouter le fichier/ }),
+			screen.getByRole("button", { name: /Soumettre/ }),
 		).toBeInTheDocument();
 	});
 
@@ -103,12 +103,12 @@ describe("Step2Upload", () => {
 		const user = userEvent.setup();
 		render(<Step2Upload />);
 
-		await user.click(
-			screen.getByRole("button", { name: /Ajouter le fichier/ }),
-		);
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
 
 		expect(
-			screen.getByText("Veuillez sélectionner un fichier avant de soumettre."),
+			screen.getByText(
+				"Veuillez sélectionner au moins un fichier avant de soumettre.",
+			),
 		).toBeInTheDocument();
 	});
 
@@ -119,9 +119,7 @@ describe("Step2Upload", () => {
 		const fileInput = getFileInput();
 		expect(fileInput).toHaveAttribute("aria-invalid", "false");
 
-		await user.click(
-			screen.getByRole("button", { name: /Ajouter le fichier/ }),
-		);
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
 
 		expect(fileInput).toHaveAttribute("aria-invalid", "true");
 	});
@@ -199,7 +197,7 @@ describe("Step2Upload", () => {
 
 		expect(screen.queryByText("avis-cse.pdf")).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
 		).toBeInTheDocument();
 	});
 
@@ -218,12 +216,11 @@ describe("Step2Upload", () => {
 		expect(screen.getAllByText("Fichier transmis")).toHaveLength(2);
 	});
 
-	it("shows 'Suivant' link and upload button when files exist but under limit", () => {
+	it("shows submit button when files exist but under limit", () => {
 		render(<Step2Upload existingFiles={[makeFile("avis-1.pdf", "file-1")]} />);
 
-		expect(screen.getByRole("link", { name: /Suivant/ })).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: /Ajouter le fichier/ }),
+			screen.getByRole("button", { name: /Soumettre/ }),
 		).toBeInTheDocument();
 	});
 
@@ -240,7 +237,7 @@ describe("Step2Upload", () => {
 		expect(screen.getByText(/2\/4 fichiers/)).toBeInTheDocument();
 	});
 
-	it("hides dropzone and upload button when max files reached", () => {
+	it("disables dropzone when max files reached", () => {
 		render(
 			<Step2Upload
 				existingFiles={[
@@ -252,21 +249,12 @@ describe("Step2Upload", () => {
 			/>,
 		);
 
-		expect(screen.getByText(/Nombre maximum/)).toBeInTheDocument();
+		const selectButton = screen.getByRole("button", {
+			name: /Sélectionner des fichiers/,
+		});
+		expect(selectButton).toBeDisabled();
 		expect(
-			screen.queryByRole("button", { name: /Sélectionner un fichier/ }),
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByRole("button", { name: /Ajouter le fichier/ }),
-		).not.toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /Suivant/ })).toBeInTheDocument();
-	});
-
-	it("does not show Suivant link when no files exist", () => {
-		render(<Step2Upload />);
-
-		expect(
-			screen.queryByRole("link", { name: /Suivant/ }),
-		).not.toBeInTheDocument();
+			screen.getByRole("button", { name: /Soumettre/ }),
+		).toBeInTheDocument();
 	});
 });

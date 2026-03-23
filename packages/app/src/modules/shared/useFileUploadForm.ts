@@ -16,12 +16,12 @@ type Options = {
 
 export function useFileUploadForm({ saveMutation }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 
-	function handleFileChange(file: File | null, error: string | null) {
-		setSelectedFile(file);
+	function handleFilesChange(files: File[], error: string | null) {
+		setSelectedFiles(files);
 		setUploadError(error);
 	}
 
@@ -49,8 +49,10 @@ export function useFileUploadForm({ saveMutation }: Options) {
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		if (!selectedFile) {
-			setUploadError("Veuillez sélectionner un fichier avant de soumettre.");
+		if (selectedFiles.length === 0) {
+			setUploadError(
+				"Veuillez sélectionner au moins un fichier avant de soumettre.",
+			);
 			return;
 		}
 		setUploadError(null);
@@ -59,20 +61,24 @@ export function useFileUploadForm({ saveMutation }: Options) {
 
 	async function handleConfirm() {
 		closeModal();
-		if (!selectedFile) return;
+		if (selectedFiles.length === 0) return;
 
 		setIsUploading(true);
 		try {
-			const result = await uploadFile(selectedFile);
-			if (!result.ok) {
-				setUploadError(result.error);
-				setIsUploading(false);
-				return;
+			for (const file of selectedFiles) {
+				const result = await uploadFile(file);
+				if (!result.ok) {
+					setUploadError(result.error);
+					setIsUploading(false);
+					return;
+				}
+				saveMutation.mutate({
+					fileName: file.name,
+					filePath: result.key,
+				});
 			}
-			saveMutation.mutate({
-				fileName: selectedFile.name,
-				filePath: result.key,
-			});
+			setSelectedFiles([]);
+			setIsUploading(false);
 		} catch {
 			setIsUploading(false);
 		}
@@ -81,11 +87,11 @@ export function useFileUploadForm({ saveMutation }: Options) {
 	return {
 		closeModal,
 		handleConfirm,
-		handleFileChange,
+		handleFilesChange,
 		handleSubmit,
 		isPending: isUploading || saveMutation.isPending,
 		modalRef,
-		selectedFile,
+		selectedFiles,
 		uploadError,
 	};
 }

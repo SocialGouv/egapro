@@ -9,6 +9,9 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	outputFileTracingIncludes: {
+		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
+	},
 	serverExternalPackages: ["@react-pdf/renderer"],
 	sassOptions: {
 		additionalData: `
