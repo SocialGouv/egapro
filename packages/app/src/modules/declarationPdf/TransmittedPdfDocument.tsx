@@ -158,9 +158,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 					)}
 				</View>
 
-				<Text style={styles.footer}>
-					Document généré le {data.generatedAt}
-				</Text>
+				<Text style={styles.footer}>Document généré le {data.generatedAt}</Text>
 			</Page>
 		</Document>
 	);

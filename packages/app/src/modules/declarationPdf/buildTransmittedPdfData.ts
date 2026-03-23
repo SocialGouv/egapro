@@ -74,12 +74,7 @@ export async function buildTransmittedPdfData(
 			uploadedAt: cseOpinionFiles.uploadedAt,
 		})
 		.from(cseOpinionFiles)
-		.where(
-			and(
-				eq(cseOpinionFiles.siren, siren),
-				eq(cseOpinionFiles.year, year),
-			),
-		);
+		.where(and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)));
 
 	const [jointFile] = await db
 		.select({
