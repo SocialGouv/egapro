@@ -16,22 +16,28 @@ export {
 } from "./shared/constants";
 // Declaration status
 export { computeDeclarationStatus } from "./shared/declarationStatus";
-// Gap calculations
+// Display formatting (%, €, units)
 export {
-	computeGap,
 	computePercentage,
 	computeProportion,
-	computeTotal,
-	displayDecimal,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatTotal,
+} from "./shared/format";
+// Gap business rules (calculations & threshold classification)
+export {
+	computeGap,
+	computeTotal,
 	gapLevel,
 	hasGapsAboveThreshold,
+} from "./shared/gap";
+// Number parsing & normalization (French locale)
+export {
+	displayDecimal,
 	normalizeDecimalInput,
 	parseNumber,
-} from "./shared/gap";
+} from "./shared/number";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {

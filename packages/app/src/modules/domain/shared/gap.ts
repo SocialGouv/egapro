@@ -1,39 +1,24 @@
+/**
+ * Gender pay gap business rules.
+ *
+ * This module contains the core calculations and classifications for
+ * salary gaps between women and men. These are the regulatory rules
+ * that determine whether a company must take corrective action:
+ *
+ * - `computeGap`: absolute percentage difference between two salary values
+ * - `gapLevel`: classify a gap against the regulatory 5% threshold
+ * - `hasGapsAboveThreshold`: detect significant gaps across employee categories
+ * - `computeTotal`: sum base + variable compensation components
+ *
+ * For number parsing/normalization, see `number.ts`.
+ * For display formatting (%, €, units), see `format.ts`.
+ */
+
 import type { GapLevel } from "../types";
 import { GAP_ALERT_THRESHOLD } from "./constants";
+import { parseNumber } from "./number";
 
-export function parseNumber(value: string): number {
-	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
-}
-
-/** Normalize decimal input: strip spaces, replace comma with dot, reject invalid chars. */
-export function normalizeDecimalInput(value: string): string | null {
-	const normalized = value.replace(/\s/g, "").replace(",", ".");
-	if (normalized === "") return normalized;
-	const dotCount = normalized.split(".").length - 1;
-	if (dotCount > 1) return null;
-	for (const ch of normalized) {
-		if (ch !== "." && (ch < "0" || ch > "9")) return null;
-	}
-	return normalized;
-}
-
-const thousandFormatter = new Intl.NumberFormat("fr-FR", {
-	useGrouping: true,
-	maximumFractionDigits: 0,
-});
-
-/** Display a stored decimal value with French locale: comma separator + thousand spaces. */
-export function displayDecimal(value: string): string {
-	if (!value) return value;
-	const [intPart, decPart] = value.split(".");
-	const n = Number.parseInt(intPart ?? "0", 10);
-	const formatted = Number.isNaN(n)
-		? (intPart ?? "")
-		: thousandFormatter.format(n);
-	return decPart !== undefined ? `${formatted},${decPart}` : formatted;
-}
-
-/** Compute gap as absolute percentage: |((men - women) / men) * 100|. */
+/** Compute gap as absolute percentage: |((men - women) / men) * 100|. Returns null if inputs are invalid or men is zero. */
 export function computeGap(womenVal: string, menVal: string): number | null {
 	const w = parseNumber(womenVal);
 	const m = parseNumber(menVal);
@@ -41,50 +26,18 @@ export function computeGap(womenVal: string, menVal: string): number | null {
 	return Math.abs(((m - w) / m) * 100);
 }
 
-export function formatGap(gap: number | null): string {
-	if (gap === null) return "-";
-	return `${gap.toFixed(1).replace(".", ",")} %`;
-}
-
-export function formatGapCompact(gap: number | null): string {
-	if (gap === null) return "-";
-	return gap.toFixed(1).replace(".", ",");
-}
-
-/** Classify a gap value against the regulatory threshold. */
+/** Classify a gap value against the regulatory threshold (5% by default). */
 export function gapLevel(gap: number | null): GapLevel | null {
 	if (gap === null) return null;
 	return gap < GAP_ALERT_THRESHOLD ? "low" : "high";
 }
 
-export function computeProportion(count: string, total?: number): string {
-	const n = Number.parseInt(count, 10);
-	if (Number.isNaN(n) || !total || total === 0) return "-";
-	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
-}
-
-export function formatCurrency(value?: string | null): string {
-	if (!value) return "-";
-	const n = Number.parseFloat(value);
-	if (Number.isNaN(n)) return "-";
-	return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
-}
-
-export function computePercentage(count: number, total: number): string {
-	if (total === 0) return "-";
-	return `${((count / total) * 100).toFixed(1).replace(".", ",")} %`;
-}
-
+/** Sum base and variable compensation. Returns null only when both inputs are invalid. */
 export function computeTotal(base: string, variable: string): number | null {
 	const b = Number.parseFloat(base);
 	const v = Number.parseFloat(variable);
 	if (Number.isNaN(b) && Number.isNaN(v)) return null;
 	return (Number.isNaN(b) ? 0 : b) + (Number.isNaN(v) ? 0 : v);
-}
-
-export function formatTotal(value: number | null, unit: string): string {
-	if (value === null) return "-";
-	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
 
 type SalaryPair = {

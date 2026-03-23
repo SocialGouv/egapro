@@ -2,85 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
 	computeGap,
-	computePercentage,
-	computeProportion,
 	computeTotal,
-	displayDecimal,
-	formatCurrency,
-	formatGap,
-	formatGapCompact,
-	formatTotal,
 	gapLevel,
 	hasGapsAboveThreshold,
-	normalizeDecimalInput,
-	parseNumber,
 } from "../shared/gap";
-
-describe("parseNumber", () => {
-	it("parses a simple number", () => {
-		expect(parseNumber("42")).toBe(42);
-	});
-
-	it("handles comma as decimal separator", () => {
-		expect(parseNumber("3,14")).toBeCloseTo(3.14);
-	});
-
-	it("strips spaces (thousand separators)", () => {
-		expect(parseNumber("1 000")).toBe(1000);
-	});
-
-	it("handles combined spaces and comma", () => {
-		expect(parseNumber("1 234,56")).toBeCloseTo(1234.56);
-	});
-
-	it("returns NaN for empty string", () => {
-		expect(parseNumber("")).toBeNaN();
-	});
-});
-
-describe("normalizeDecimalInput", () => {
-	it("returns empty string as-is", () => {
-		expect(normalizeDecimalInput("")).toBe("");
-	});
-
-	it("replaces comma with dot", () => {
-		expect(normalizeDecimalInput("3,14")).toBe("3.14");
-	});
-
-	it("strips spaces", () => {
-		expect(normalizeDecimalInput("1 000")).toBe("1000");
-	});
-
-	it("rejects letters", () => {
-		expect(normalizeDecimalInput("abc")).toBeNull();
-	});
-
-	it("rejects minus sign", () => {
-		expect(normalizeDecimalInput("-5")).toBeNull();
-	});
-
-	it("rejects multiple dots", () => {
-		expect(normalizeDecimalInput("1.2.3")).toBeNull();
-	});
-});
-
-describe("displayDecimal", () => {
-	it("returns empty string as-is", () => {
-		expect(displayDecimal("")).toBe("");
-	});
-
-	it("replaces dot with comma", () => {
-		expect(displayDecimal("3.14")).toBe("3,14");
-	});
-
-	it("adds thousand separator", () => {
-		expect(displayDecimal("1000")).toBe("1\u202F000");
-	});
-
-	it("formats large number with decimals", () => {
-		expect(displayDecimal("1234567.89")).toBe("1\u202F234\u202F567,89");
-	});
-});
 
 describe("computeGap", () => {
 	it("computes gap as absolute percentage", () => {
@@ -108,26 +33,6 @@ describe("computeGap", () => {
 	});
 });
 
-describe("formatGap", () => {
-	it("formats a gap with French decimal separator", () => {
-		expect(formatGap(5.3)).toBe("5,3 %");
-	});
-
-	it("returns dash for null", () => {
-		expect(formatGap(null)).toBe("-");
-	});
-});
-
-describe("formatGapCompact", () => {
-	it("formats without percent sign", () => {
-		expect(formatGapCompact(5.3)).toBe("5,3");
-	});
-
-	it("returns dash for null", () => {
-		expect(formatGapCompact(null)).toBe("-");
-	});
-});
-
 describe("gapLevel", () => {
 	it("returns low for gap below threshold", () => {
 		expect(gapLevel(3)).toBe("low");
@@ -150,36 +55,6 @@ describe("gapLevel", () => {
 	});
 });
 
-describe("computeProportion", () => {
-	it("computes percentage from count and total", () => {
-		expect(computeProportion("25", 100)).toBe("25,0 %");
-	});
-
-	it("returns dash when total is zero", () => {
-		expect(computeProportion("10", 0)).toBe("-");
-	});
-});
-
-describe("formatCurrency", () => {
-	it("formats a number with euro sign", () => {
-		expect(formatCurrency("1234.5")).toMatch(/1[\s\u202f]234,5 €/);
-	});
-
-	it("returns dash for undefined", () => {
-		expect(formatCurrency(undefined)).toBe("-");
-	});
-});
-
-describe("computePercentage", () => {
-	it("computes percentage from count and total", () => {
-		expect(computePercentage(25, 100)).toBe("25,0 %");
-	});
-
-	it("returns dash when total is zero", () => {
-		expect(computePercentage(10, 0)).toBe("-");
-	});
-});
-
 describe("computeTotal", () => {
 	it("sums base and variable", () => {
 		expect(computeTotal("100", "50")).toBe(150);
@@ -187,16 +62,6 @@ describe("computeTotal", () => {
 
 	it("returns null when both are NaN", () => {
 		expect(computeTotal("", "")).toBeNull();
-	});
-});
-
-describe("formatTotal", () => {
-	it("formats value with unit", () => {
-		expect(formatTotal(1234.5, "€")).toMatch(/1[\s\u202f]234,5 €/);
-	});
-
-	it("returns dash for null", () => {
-		expect(formatTotal(null, "€")).toBe("-");
 	});
 });
 
