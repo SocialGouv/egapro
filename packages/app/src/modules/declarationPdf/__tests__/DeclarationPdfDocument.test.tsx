@@ -127,6 +127,7 @@ const declarationPdfData: DeclarationPdfData = {
 	siren: "123456789",
 	year: 2026,
 	generatedAt: "10 mars 2026",
+	isSecondDeclaration: false,
 	totalWomen: 50,
 	totalMen: 60,
 	step1Categories: [{ name: "Cadres", women: 20, men: 30 }],
