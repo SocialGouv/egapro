@@ -1,7 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { buildTransmittedPdfData } from "~/modules/declarationPdf/buildTransmittedPdfData";
 import { TransmittedPdfDocument } from "~/modules/declarationPdf/TransmittedPdfDocument";
-import { extractSiren, getCseYear } from "~/modules/domain";
+import { extractSiren } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
 export async function GET() {
@@ -11,12 +11,11 @@ export async function GET() {
 	}
 
 	const siren = extractSiren(session.user.siret);
-	const year = getCseYear();
 
 	try {
 		const data = await buildTransmittedPdfData(siren, new Date());
 		const buffer = await renderToBuffer(TransmittedPdfDocument({ data }));
-		const filename = `recapitulatif-elements-transmis-${siren}-${year + 1}.pdf`;
+		const filename = `recapitulatif-elements-transmis-${siren}-${data.year + 1}.pdf`;
 
 		return new Response(new Uint8Array(buffer), {
 			headers: {
@@ -26,6 +25,6 @@ export async function GET() {
 		});
 	} catch (error) {
 		console.error("[transmitted-pdf]", error);
-		return new Response("Impossible de générer le PDF", { status: 400 });
+		return new Response("Impossible de générer le PDF", { status: 500 });
 	}
 }

@@ -7,7 +7,6 @@ import {
 	companies,
 	cseOpinionFiles,
 	cseOpinions,
-	declarations,
 	jointEvaluationFiles,
 } from "~/server/db/schema";
 
@@ -29,7 +28,6 @@ export type TransmittedPdfData = {
 	siren: string;
 	year: number;
 	generatedAt: string;
-	compliancePath: string | null;
 	opinions: TransmittedPdfOpinion[];
 	cseFiles: TransmittedPdfFile[];
 	jointEvaluationFile: TransmittedPdfFile | null;
@@ -41,54 +39,48 @@ export async function buildTransmittedPdfData(
 ): Promise<TransmittedPdfData> {
 	const year = getCseYear();
 
-	const [company] = await db
-		.select()
-		.from(companies)
-		.where(eq(companies.siren, siren))
-		.limit(1);
+	const [companyResults, opinions, cseFiles, jointFiles] = await Promise.all([
+		db
+			.select()
+			.from(companies)
+			.where(eq(companies.siren, siren))
+			.limit(1),
+		db
+			.select({
+				declarationNumber: cseOpinions.declarationNumber,
+				type: cseOpinions.type,
+				opinion: cseOpinions.opinion,
+				opinionDate: cseOpinions.opinionDate,
+				gapConsulted: cseOpinions.gapConsulted,
+			})
+			.from(cseOpinions)
+			.where(and(eq(cseOpinions.siren, siren), eq(cseOpinions.year, year))),
+		db
+			.select({
+				fileName: cseOpinionFiles.fileName,
+				uploadedAt: cseOpinionFiles.uploadedAt,
+			})
+			.from(cseOpinionFiles)
+			.where(and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year))),
+		db
+			.select({
+				fileName: jointEvaluationFiles.fileName,
+				uploadedAt: jointEvaluationFiles.uploadedAt,
+			})
+			.from(jointEvaluationFiles)
+			.where(
+				and(
+					eq(jointEvaluationFiles.siren, siren),
+					eq(jointEvaluationFiles.year, year),
+				),
+			)
+			.limit(1),
+	]);
 
+	const company = companyResults[0];
 	if (!company) {
 		throw new Error("Entreprise introuvable");
 	}
-
-	const [declaration] = await db
-		.select()
-		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
-		.limit(1);
-
-	const opinions = await db
-		.select({
-			declarationNumber: cseOpinions.declarationNumber,
-			type: cseOpinions.type,
-			opinion: cseOpinions.opinion,
-			opinionDate: cseOpinions.opinionDate,
-			gapConsulted: cseOpinions.gapConsulted,
-		})
-		.from(cseOpinions)
-		.where(and(eq(cseOpinions.siren, siren), eq(cseOpinions.year, year)));
-
-	const cseFiles = await db
-		.select({
-			fileName: cseOpinionFiles.fileName,
-			uploadedAt: cseOpinionFiles.uploadedAt,
-		})
-		.from(cseOpinionFiles)
-		.where(and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)));
-
-	const [jointFile] = await db
-		.select({
-			fileName: jointEvaluationFiles.fileName,
-			uploadedAt: jointEvaluationFiles.uploadedAt,
-		})
-		.from(jointEvaluationFiles)
-		.where(
-			and(
-				eq(jointEvaluationFiles.siren, siren),
-				eq(jointEvaluationFiles.year, year),
-			),
-		)
-		.limit(1);
 
 	return {
 		companyName: company.name,
@@ -99,9 +91,8 @@ export async function buildTransmittedPdfData(
 			month: "long",
 			year: "numeric",
 		}),
-		compliancePath: declaration?.compliancePath ?? null,
 		opinions,
 		cseFiles,
-		jointEvaluationFile: jointFile ?? null,
+		jointEvaluationFile: jointFiles[0] ?? null,
 	};
 }

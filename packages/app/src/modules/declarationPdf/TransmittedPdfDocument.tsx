@@ -35,9 +35,9 @@ function formatOpinionType(type: string): string {
 }
 
 function formatDeclarationLabel(declarationNumber: number): string {
-	return declarationNumber === 1
-		? "1re déclaration"
-		: "2e déclaration";
+	if (declarationNumber === 1) return "1re déclaration";
+	if (declarationNumber === 2) return "2e déclaration";
+	return `${declarationNumber}e déclaration`;
 }
 
 function groupOpinionsByDeclaration(
