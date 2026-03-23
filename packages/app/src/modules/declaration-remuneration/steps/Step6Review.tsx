@@ -9,6 +9,7 @@ import {
 	GAP_ALERT_THRESHOLD,
 	getCurrentYear,
 } from "~/modules/domain";
+import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
@@ -49,6 +50,7 @@ type Props = {
 	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
 	isPrefilled?: boolean;
+	employeeCount?: number;
 };
 
 export function Step6Review({
@@ -58,6 +60,7 @@ export function Step6Review({
 	step5Categories = [],
 	isSubmitted = false,
 	isPrefilled = false,
+	employeeCount,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const router = useRouter();
@@ -69,11 +72,15 @@ export function Step6Review({
 	});
 
 	const openModal = useCallback(() => {
-		modalRef.current?.showModal();
+		if (modalRef.current) {
+			getDsfrModal(modalRef.current)?.disclose();
+		}
 	}, []);
 
 	const closeModal = useCallback(() => {
-		modalRef.current?.close();
+		if (modalRef.current) {
+			getDsfrModal(modalRef.current)?.conceal();
+		}
 	}, []);
 
 	// Parse step 2 gaps
@@ -365,11 +372,7 @@ export function Step6Review({
 								</>
 							) : (
 								<p className="fr-mb-0">
-									Votre entreprise présente des écarts supérieurs ou égaux à 5
-									%. Bien que vous ne soyez pas actuellement soumis à
-									l&apos;obligation de déclaration, vous pouvez mettre en œuvre
-									des actions correctives dès maintenant afin de vous préparer à
-									la conformité lorsque votre effectif dépassera 50 salariés.
+									{`Votre entreprise de ${employeeCount !== undefined ? `${employeeCount} salarié${employeeCount > 1 ? "s" : ""}` : "moins de 50 salariés"} présente des écarts supérieurs ou égaux à 5 %. ${employeeCount === undefined || employeeCount <= 50 ? `Bien que vous ne soyez pas actuellement soumis à l'obligation de déclaration, vous pouvez mettre en œuvre des actions correctives dès maintenant afin de vous préparer à la conformité lorsque votre effectif dépassera 50 salariés.` : `Il vous faut mettre en œuvre des actions correctives ou avoir la validation de votre CSE.`}`}
 								</p>
 							)}
 						</>

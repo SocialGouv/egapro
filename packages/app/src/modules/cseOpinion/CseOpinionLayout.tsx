@@ -69,7 +69,9 @@ export function CseOpinionLayout({ company, children }: Props) {
 				</div>
 			</div>
 			<main className="fr-container fr-py-7w" id="content">
-				{children}
+				<div className="fr-grid-row fr-grid-row--center">
+					<div className="fr-col-12 fr-col-lg-8">{children}</div>
+				</div>
 			</main>
 		</>
 	);

@@ -31,11 +31,11 @@ export function JointEvaluationForm({
 	const {
 		closeModal,
 		handleConfirm,
-		handleFileChange,
+		handleFilesChange,
 		handleSubmit,
 		isPending,
 		modalRef,
-		selectedFile,
+		selectedFiles,
 		uploadError,
 	} = useFileUploadForm({ saveMutation });
 
@@ -101,8 +101,8 @@ export function JointEvaluationForm({
 					allowedMimeTypes={["application/pdf"]}
 					error={uploadError}
 					inputId="joint-evaluation-file-upload"
-					onFileChange={handleFileChange}
-					selectedFile={selectedFile}
+					onFilesChange={handleFilesChange}
+					selectedFiles={selectedFiles}
 				/>
 
 				<div>

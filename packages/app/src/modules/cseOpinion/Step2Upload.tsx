@@ -32,7 +32,9 @@ export function Step2Upload({
 	}, [utils, router]);
 
 	const saveMutation = api.cseOpinion.uploadFile.useMutation({
-		onSuccess: refreshFileList,
+		onSuccess: () => {
+			router.push("/avis-cse/confirmation");
+		},
 	});
 
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
@@ -46,16 +48,15 @@ export function Step2Upload({
 	const {
 		closeModal,
 		handleConfirm,
-		handleFileChange,
+		handleFilesChange,
 		handleSubmit,
 		isPending,
 		modalRef,
-		selectedFile,
+		selectedFiles,
 		uploadError,
 	} = useFileUploadForm({ saveMutation });
 
-	const hasFiles = existingFiles.length > 0;
-	const canAddMore = existingFiles.length < MAX_CSE_FILES;
+	const remainingSlots = MAX_CSE_FILES - existingFiles.length;
 
 	return (
 		<>
@@ -70,25 +71,16 @@ export function Step2Upload({
 
 				<CseStepIndicator currentStep={2} />
 
-				{canAddMore ? (
-					<div>
-						<label className="fr-label" htmlFor="cse-file-upload">
-							Veuillez importer l&apos;ensemble des avis de votre CSE
-							<span className="fr-hint-text">
-								Taille maximale : 10 Mo par fichier. Format supporté : pdf.
-								{existingFiles.length > 0 &&
-									` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
-							</span>
-						</label>
-					</div>
-				) : (
-					<p className="fr-label">
+				<div>
+					<label className="fr-label" htmlFor="cse-file-upload">
 						Veuillez importer l&apos;ensemble des avis de votre CSE
 						<span className="fr-hint-text">
-							{` (${existingFiles.length}/${MAX_CSE_FILES} fichiers)`}
+							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
+							{existingFiles.length > 0 &&
+								` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
 						</span>
-					</p>
-				)}
+					</label>
+				</div>
 
 				{existingFiles.map((file) => (
 					<ExistingFileCard
@@ -102,23 +94,16 @@ export function Step2Upload({
 					/>
 				))}
 
-				{canAddMore && (
-					<FileUpload
-						accept=".pdf"
-						acceptLabel="pdf"
-						allowedMimeTypes={["application/pdf"]}
-						error={uploadError}
-						inputId="cse-file-upload"
-						onFileChange={handleFileChange}
-						selectedFile={selectedFile}
-					/>
-				)}
-
-				{!canAddMore && (
-					<output className="fr-text--sm fr-text--mention-grey fr-mt-2w">
-						Nombre maximum de fichiers atteint ({MAX_CSE_FILES}).
-					</output>
-				)}
+				<FileUpload
+					accept=".pdf"
+					acceptLabel="pdf"
+					allowedMimeTypes={["application/pdf"]}
+					error={uploadError}
+					inputId="cse-file-upload"
+					maxFiles={remainingSlots}
+					onFilesChange={handleFilesChange}
+					selectedFiles={selectedFiles}
+				/>
 
 				<div className="fr-mt-4w">
 					<OpinionSummaryBox
@@ -136,23 +121,13 @@ export function Step2Upload({
 					>
 						Précédent
 					</Link>
-					{canAddMore && (
-						<button
-							className="fr-btn fr-icon-upload-line fr-btn--icon-left"
-							disabled={isPending}
-							type="submit"
-						>
-							{isPending ? "Envoi en cours…" : "Ajouter le fichier"}
-						</button>
-					)}
-					{hasFiles && (
-						<Link
-							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							href="/avis-cse/confirmation"
-						>
-							Suivant
-						</Link>
-					)}
+					<button
+						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={isPending}
+						type="submit"
+					>
+						{isPending ? "Envoi en cours\u2026" : "Soumettre"}
+					</button>
 				</div>
 			</form>
 
@@ -191,7 +166,7 @@ function ExistingFileCard({
 					title={`Supprimer ${file.fileName}`}
 					type="button"
 				>
-					{isDeleting ? "Suppression…" : "Supprimer"}
+					{isDeleting ? "Suppression\u2026" : "Supprimer"}
 				</button>
 			</div>
 		</div>
