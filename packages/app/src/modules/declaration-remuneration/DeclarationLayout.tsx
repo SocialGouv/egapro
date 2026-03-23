@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import styles from "./DeclarationLayout.module.scss";
 import { CompanyBanner } from "./shared/CompanyBanner";
 
@@ -17,7 +18,7 @@ export function DeclarationLayout({
 	company,
 	children,
 }: DeclarationLayoutProps) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 	return (
 		<>
 			<CompanyBanner

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { getCurrentYear } from "~/modules/domain";
+
 import { DeclarationLink } from "./DeclarationLink";
 import { getDeclarationStepLabel } from "./DeclarationStepLabel";
 import { StatusBadge } from "./StatusBadge";
@@ -40,7 +42,7 @@ function getDeadline(declaration: DeclarationItem): string {
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
 		(d) => d.year >= currentYear,
 	);

@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { getCurrentYear } from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
-const currentYear = new Date().getFullYear();
+const currentYear = getCurrentYear();
 
 const declarations: DeclarationItem[] = [
 	{

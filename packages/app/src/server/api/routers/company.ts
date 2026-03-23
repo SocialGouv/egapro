@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
+import { computeDeclarationStatus, getCurrentYear } from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
-import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 import {
 	sirenInputSchema,
 	updateHasCseSchema,
@@ -9,10 +9,6 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
 import { fetchCseBySiren } from "~/server/services/suit";
-
-function getCurrentYear() {
-	return new Date().getFullYear();
-}
 
 async function findUserCompany(db: DB, userId: string, siren: string) {
 	const rows = await db

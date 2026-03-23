@@ -1,12 +1,8 @@
 import { and, eq } from "drizzle-orm";
-
 import { jointEvaluationUploadSchema } from "~/modules/declaration-remuneration/schemas";
+import { getCurrentYear } from "~/modules/domain";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { jointEvaluationFiles } from "~/server/db/schema";
-
-function getCurrentYear() {
-	return new Date().getFullYear();
-}
 
 export const jointEvaluationRouter = createTRPCRouter({
 	uploadFile: companyProcedure

@@ -216,9 +216,10 @@ Les agents sont des sous-processus specialises avec leur propre checklist. Ils t
 
 | Agent | Checklist | Utilise par |
 |---|---|---|
-| `code-reviewer` | 15 points : logique JSX, duplication, naming, inline styles, transactions DB, Zod schemas... | `/review-pr`, gate PR |
-| `rgaa-auditor` | 13 themes RGAA complets : images, formulaires, navigation, structure, couleurs, modales... | `/audit-rgaa`, gate RGAA |
-| `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | `/audit-secu`, gate securite |
+| `validator` | Typecheck + tests + lint + format en parallele | Toutes les gates, tous les skills |
+| `structural-auditor` | 16 regles : forms, schemas, DRY, imports, file size, naming, domain layer... | Gate automatique, `/validate`, `/review-pr` |
+| `rgaa-auditor` | 13 themes RGAA complets : images, formulaires, navigation, structure, couleurs, modales... | Gate automatique, `/validate` |
+| `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | Gate automatique, `/validate` |
 
 ### Skills (`.claude/skills/`)
 
@@ -226,11 +227,10 @@ Les skills sont des workflows complexes invocables avec `/commande`. Ils orchest
 
 | Commande | Ce que ca fait |
 |---|---|
-| `/validate` | Lance **3 agents en parallele** : typecheck + tests + lint. Corrige et relance si echec. |
-| `/review-pr` | Detecte la PR de la branche, fetch les commentaires GH, lance le code-reviewer, applique les fixes, valide. |
-| `/audit-rgaa` | Decoupe les fichiers en batches, lance des agents rgaa-auditor en parallele, auto-fix les erreurs, genere un rapport. |
-| `/audit-secu` | Lance 4 agents paralleles (server, client, config, deps), auto-fix les critiques/high, genere un rapport. |
-| `/create-page` | Workflow 4 phases : analyse Figma (//), code partage, pages en parallele (worktrees), qualite (//). |
+| `/validate` | Lance **4 agents en parallele** (validator + structural + RGAA + security), auto-fix, boucle jusqu'a zero violation. Argument optionnel : `rgaa`, `security`, `structure`. |
+| `/review-pr` | Detecte la PR de la branche, fetch les commentaires GH, lance le structural-auditor, applique les fixes, valide. |
+| `/process-issue` | Traite une issue GitHub (parent + sub-issues) end-to-end avec quality gates obligatoires. |
+| `/split-pr` | Decoupe la branche en plusieurs PRs focalisees pour faciliter la review. |
 
 ### Gates automatiques (`.claude/rules/automation.md`)
 
@@ -238,9 +238,10 @@ Les gates sont le coeur de l'automatisation. Elles se declenchent **toutes seule
 
 | Gate | Se declenche quand... | Ce qui se passe |
 |---|---|---|
-| **Validation** | Claude finit une tache | 3 agents paralleles verifient typecheck + tests + lint avant de reporter "termine" |
+| **Validation** | Claude finit une tache | 4 agents paralleles verifient typecheck + tests + lint + structure + RGAA + securite avant de reporter "termine" |
 | **RGAA** | Claude modifie un `.tsx` | Verification inline de l'accessibilite (labels, alt, aria, landmarks, headings) |
 | **Securite** | Claude modifie `server/` ou tRPC | Verification inline OWASP (Drizzle, Zod, ownership, process.env, transactions) |
+| **Domain layer** | Claude ecrit du code | Hooks bloquent getFullYear(), slice(0,9), import zod dans les mauvais fichiers |
 | **PR review** | La branche a une PR ouverte | Auto-fetch des commentaires non resolus, signalement avant de commencer |
 
 ### Workflow type

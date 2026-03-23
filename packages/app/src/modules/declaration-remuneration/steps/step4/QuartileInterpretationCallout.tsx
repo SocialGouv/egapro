@@ -1,6 +1,6 @@
-import { computePercentage } from "~/modules/declaration-remuneration/shared/gapUtils";
 import styles from "~/modules/declaration-remuneration/shared/InterpretationCallout.module.scss";
 import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import { computePercentage } from "~/modules/domain";
 
 type Props = {
 	annualCategories: StepCategoryData[];

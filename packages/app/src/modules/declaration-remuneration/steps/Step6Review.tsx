@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
+import {
+	computeGap,
+	GAP_ALERT_THRESHOLD,
+	getCurrentYear,
+} from "~/modules/domain";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
-import { computeGap } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import type {
@@ -32,9 +35,9 @@ function findGap(rows: PayGapRow[], label: string): number | null {
 	return row ? computeGap(row.womenValue, row.menValue) : null;
 }
 
-/** Check if any gap value is >= 5% (high gap threshold) */
+/** Check if any gap value is >= the regulatory threshold */
 function hasAnyHighGap(gaps: (number | null)[]): boolean {
-	return gaps.some((g) => g !== null && Math.abs(g) >= 5);
+	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
 }
 
 // -- Component --
@@ -56,7 +59,7 @@ export function Step6Review({
 	isSubmitted = false,
 	isPrefilled = false,
 }: Props) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
@@ -97,7 +100,7 @@ export function Step6Review({
 	// Parse step 5 categories
 	const step5Parsed = parseEmployeeCategories(step5Categories);
 
-	// Check if any gap is high (>= 5%)
+	// Check if any gap exceeds the regulatory threshold
 	const allGaps = [
 		annualMeanGap,
 		hourlyMeanGap,

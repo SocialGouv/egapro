@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
+import { getCseYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -110,7 +111,7 @@ export function Step1Opinions({
 
 			{isJointEvaluation && (
 				<SubmissionBanner
-					deadline={`1er février ${new Date().getFullYear() + 1}`}
+					deadline={`1er février ${getCseYear()}`}
 					email={email ?? "adresse@exemple.fr"}
 				/>
 			)}

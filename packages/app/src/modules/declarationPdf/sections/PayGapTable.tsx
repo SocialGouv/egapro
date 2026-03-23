@@ -1,10 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import {
-	computeGap,
-	formatCurrency,
-	type PayGapRow,
-} from "~/modules/declaration-remuneration";
+import type { PayGapRow } from "~/modules/declaration-remuneration";
+import { computeGap, formatCurrency } from "~/modules/domain";
 
 import { styles } from "../pdfStyles";
 import { GapCell } from "./GapCell";

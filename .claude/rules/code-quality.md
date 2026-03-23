@@ -44,6 +44,21 @@ src/app/test-error/ErrorTrigger.tsx  // ← BLOCKED by hook
 
 This rule is **enforced by the `block-bad-patterns` hook** — creating a non-route `.tsx` file in `src/app/` will be rejected.
 
+## Domain layer (`~/modules/domain`)
+
+All **pure business rules** (isomorphic, zero React/tRPC/Drizzle deps) live in `~/modules/domain`. Always import from the barrel:
+
+```ts
+import { getCurrentYear, extractSiren, GAP_ALERT_THRESHOLD } from "~/modules/domain";
+```
+
+Rules:
+- **No inline `new Date().getFullYear()`** — use `getCurrentYear()` or `getCseYear()` from domain.
+- **No inline `siret.slice(0, 9)`** — use `extractSiren(siret)` from domain.
+- **No hardcoded thresholds** (5%, 50, 100) — use named constants (`GAP_ALERT_THRESHOLD`, `COMPANY_SIZE_*`).
+- **New business rules** must be added to domain as pure functions with unit tests.
+- **UI-specific helpers** (badge classes, DSFR labels) stay in the feature module — only pure logic goes in domain.
+
 ## Imports
 
 - Use the `~/` path alias (mapped to `src/`). Never use relative paths that go up more than one level (`../../`).
