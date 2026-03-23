@@ -4,9 +4,7 @@ metadata:
   name: gip-mds-import
   namespace: {{ .Values.global.namespace }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: "10"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-delete-policy: before-hook-creation
 spec:
   backoffLimit: 3
   template:
@@ -29,9 +27,9 @@ spec:
             - |
               echo "Waiting for app to be ready..."
               for i in $(seq 1 30); do
-                if curl -sf "http://app:3000/api/healthz" > /dev/null 2>&1; then
+                if curl -sf "http://app/api/healthz" > /dev/null 2>&1; then
                   echo "App is ready, importing GIP MDS data..."
-                  curl -X POST "http://app:3000/api/gip-mds/import" \
+                  curl -X POST "http://app/api/gip-mds/import" \
                     --connect-timeout 10 \
                     --max-time 60 \
                     --fail \
