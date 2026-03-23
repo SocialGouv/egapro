@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { env } from "~/env.js";
-import { openApiSpec } from "~/modules/export/openapi";
+import { openApiSpec } from "~/modules/export";
 
 export function GET() {
 	if (env.NEXT_PUBLIC_EGAPRO_ENV === "prod") {

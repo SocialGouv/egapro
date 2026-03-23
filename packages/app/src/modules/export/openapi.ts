@@ -273,6 +273,13 @@ export const openApiSpec = {
 										details: {
 											type: "array",
 											description: "Zod validation issues",
+											items: {
+												type: "object",
+												properties: {
+													path: { type: "array", items: { type: "string" } },
+													message: { type: "string" },
+												},
+											},
 										},
 									},
 								},

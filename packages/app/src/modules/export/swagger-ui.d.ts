@@ -5,7 +5,6 @@ declare global {
 			presets: { apis: unknown };
 		};
 		SwaggerUIStandalonePreset: unknown;
-		__swaggerInit?: () => void;
 	}
 }
 
