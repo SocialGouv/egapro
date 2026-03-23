@@ -42,7 +42,12 @@ function getDeadline(declaration: DeclarationItem): string {
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-export function DeclarationsSection({ siren, declarations, userPhone, hasCse }: Props) {
+export function DeclarationsSection({
+	siren,
+	declarations,
+	userPhone,
+	hasCse,
+}: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
 		(d) => d.year >= currentYear,

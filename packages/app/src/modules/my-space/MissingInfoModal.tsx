@@ -64,7 +64,8 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 		window.location.href = `/declaration-remuneration?siren=${siren}`;
 	});
 
-	const isPending = updatePhoneMutation.isPending || updateHasCseMutation.isPending;
+	const isPending =
+		updatePhoneMutation.isPending || updateHasCseMutation.isPending;
 
 	return (
 		<dialog
@@ -117,7 +118,10 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 															setValueAs: (v: string) => v === "true",
 														})}
 													/>
-													<label className="fr-label" htmlFor="missing-info-cse-yes">
+													<label
+														className="fr-label"
+														htmlFor="missing-info-cse-yes"
+													>
 														Oui
 													</label>
 												</div>
@@ -132,7 +136,10 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 															setValueAs: (v: string) => v === "true",
 														})}
 													/>
-													<label className="fr-label" htmlFor="missing-info-cse-no">
+													<label
+														className="fr-label"
+														htmlFor="missing-info-cse-no"
+													>
 														Non
 													</label>
 												</div>

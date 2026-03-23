@@ -20,7 +20,13 @@ type Props = {
 };
 
 /** Link that opens the missing info modal if phone or CSE is missing, or navigates directly. */
-export function DeclarationLink({ siren, type, userPhone, hasCse, children }: Props) {
+export function DeclarationLink({
+	siren,
+	type,
+	userPhone,
+	hasCse,
+	children,
+}: Props) {
 	if (userPhone && hasCse !== null) {
 		return <Link href={TYPE_HREFS[type](siren)}>{children}</Link>;
 	}

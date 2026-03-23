@@ -28,7 +28,11 @@ export function CompanyDeclarationsPage({
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
 			{(!userPhone || company.hasCse === null) && (
-				<MissingInfoModal hasCse={company.hasCse} siren={company.siren} userPhone={userPhone} />
+				<MissingInfoModal
+					hasCse={company.hasCse}
+					siren={company.siren}
+					userPhone={userPhone}
+				/>
 			)}
 		</main>
 	);
