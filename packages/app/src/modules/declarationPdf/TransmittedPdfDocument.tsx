@@ -63,8 +63,8 @@ function OpinionSection({
 			<Text style={styles.sectionLabel}>
 				{formatDeclarationLabel(declarationNumber)}
 			</Text>
-			{opinions.map((opinion, index) => (
-				<View key={`opinion-${declarationNumber}-${index}`} style={styles.tableRow}>
+			{opinions.map((opinion) => (
+				<View key={`opinion-${declarationNumber}-${opinion.type}`} style={styles.tableRow}>
 					<Text style={styles.tableCellLabel}>
 						Type : {opinion.type}
 					</Text>
@@ -130,8 +130,8 @@ export function TransmittedPdfDocument({ data }: Props) {
 					{data.cseFiles.length === 0 ? (
 						<Text style={styles.noData}>Aucun fichier déposé</Text>
 					) : (
-						data.cseFiles.map((file, index) => (
-							<View key={`file-${index}`} style={styles.tableRow}>
+						data.cseFiles.map((file) => (
+							<View key={file.fileName} style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>{file.fileName}</Text>
 								<Text style={styles.tableCellValue}>
 									Déposé le {formatUploadDate(file.uploadedAt)}
