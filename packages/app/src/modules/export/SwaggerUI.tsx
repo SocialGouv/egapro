@@ -30,18 +30,15 @@ export function SwaggerUI() {
 
 	return (
 		<>
-			<link
-				href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
-				rel="stylesheet"
-			/>
+			<link href="/swagger-ui/swagger-ui.css" rel="stylesheet" />
 			<Script
 				onLoad={tryInit}
-				src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"
+				src="/swagger-ui/swagger-ui-bundle.js"
 				strategy="afterInteractive"
 			/>
 			<Script
 				onLoad={tryInit}
-				src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"
+				src="/swagger-ui/swagger-ui-standalone-preset.js"
 				strategy="afterInteractive"
 			/>
 			<div id="swagger-ui" />

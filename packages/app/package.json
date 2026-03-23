@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "node scripts/copy-dsfr.js && next build",
+		"build": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.js && next build",
 		"check": "biome check .",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
@@ -16,7 +16,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "node scripts/copy-dsfr.js && next dev --turbo",
+		"dev": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.js && next dev --turbo",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",
@@ -72,6 +72,7 @@
 		"drizzle-kit": "^0.31.10",
 		"jsdom": "^28.1.0",
 		"sass": "^1.97.3",
+		"swagger-ui-dist": "^5.32.1",
 		"typescript": "^5.9.3",
 		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.0.18"
