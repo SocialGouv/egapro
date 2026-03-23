@@ -15,9 +15,14 @@ spec:
         app: gip-mds-import
     spec:
       restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 100
+        runAsNonRoot: true
       containers:
         - name: trigger
           image: curlimages/curl:8.12.1
+          securityContext:
+            allowPrivilegeEscalation: false
           command:
             - /bin/sh
             - -c
