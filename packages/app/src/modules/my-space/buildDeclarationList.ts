@@ -1,11 +1,10 @@
+import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
+
 import type {
 	DeclarationItem,
 	DeclarationStatus,
 	DeclarationType,
 } from "./types";
-
-/** Declaration types that every company is expected to file each year. */
-const EXPECTED_TYPES: DeclarationType[] = ["remuneration", "representation"];
 
 type DbDeclaration = {
 	type: DeclarationType;
@@ -32,7 +31,7 @@ export function buildDeclarationList(
 	const rows: DeclarationItem[] = [];
 
 	// Current year: ensure one row per expected type
-	for (const type of EXPECTED_TYPES) {
+	for (const type of EXPECTED_DECLARATION_TYPES) {
 		const existing = dbDeclarations.find(
 			(d) => d.year === currentYear && d.type === type,
 		);

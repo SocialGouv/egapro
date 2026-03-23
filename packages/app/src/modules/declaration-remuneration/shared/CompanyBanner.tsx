@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -17,7 +18,7 @@ export function CompanyBanner({
 	company,
 	currentPageLabel,
 }: CompanyBannerProps) {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>

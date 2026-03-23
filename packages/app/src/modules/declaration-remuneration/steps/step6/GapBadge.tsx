@@ -1,9 +1,8 @@
 import {
-	formatGap,
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
-	gapLevel,
-} from "~/modules/declaration-remuneration/shared/gapUtils";
+} from "~/modules/declaration-remuneration/shared/gapBadge";
+import { formatGap, gapLevel } from "~/modules/domain";
 import stepStyles from "../Step6Review.module.scss";
 
 type Props = {

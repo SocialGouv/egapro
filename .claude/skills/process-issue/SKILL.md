@@ -106,24 +106,14 @@ For each pending task, execute the following sub-steps:
 
 #### 4.4 — Quality gates (MANDATORY — not conditional)
 
-**Phase 1 — Validation** (3 parallel agents):
+Launch **4 parallel agents**:
 
-1. **Agent: typecheck** — `pnpm typecheck`
-2. **Agent: tests** — `pnpm test`
-3. **Agent: lint+format** — `pnpm lint:check && pnpm format:check`
+1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
+2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all files created/modified in this task
+3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` on all files created/modified in this task. Auto-fix all `[ERROR]` findings.
+4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all files created/modified in this task. Auto-fix all `[CRITICAL]` and `[HIGH]` findings.
 
-If any fails → fix → re-run until all pass.
-
-**Phase 2 — Audits** (2 parallel agents, ALWAYS run regardless of file types):
-
-1. **Agent: RGAA audit** — delegate to `rgaa-auditor` agent (`.claude/agents/rgaa-auditor/AGENT.md`)
-   - Pass all files created/modified in this task
-   - Auto-fix all `[ERROR]` findings
-2. **Agent: Security audit** — delegate to `security-auditor` agent (`.claude/agents/security-auditor/AGENT.md`)
-   - Pass all files created/modified in this task
-   - Auto-fix all `[CRITICAL]` and `[HIGH]` findings
-
-If any auto-fixes were applied in Phase 2 → re-run Phase 1 validation.
+If any fails → fix → re-run. If auto-fixes applied → re-run validator.
 
 #### 4.5 — Report progress
 

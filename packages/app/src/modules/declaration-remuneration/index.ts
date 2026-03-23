@@ -12,14 +12,7 @@ export {
 } from "./schemas";
 export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
-export {
-	computeGap,
-	computePercentage,
-	formatCurrency,
-	formatGap,
-	gapLevel,
-	hasGapsAboveThreshold,
-} from "./shared/gapUtils";
+export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
 export type {
 	GipMdsRow,
 	GipPrefillData,

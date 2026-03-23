@@ -336,7 +336,9 @@ describe("Step6Review", () => {
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
 		expect(
-			screen.getByText(/Votre entreprise présente des écarts/),
+			screen.getByText(
+				/Votre entreprise de moins de 50 salariés présente des écarts/,
+			),
 		).toBeInTheDocument();
 		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
 		expect(

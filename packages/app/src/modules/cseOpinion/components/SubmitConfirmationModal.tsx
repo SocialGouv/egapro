@@ -1,5 +1,6 @@
 "use client";
 
+import { getCseYear } from "~/modules/domain";
 import { SubmitModal } from "~/modules/shared";
 
 type Props = {
@@ -21,7 +22,7 @@ export function SubmitConfirmationModal({
 				<>
 					Vous allez transmettre aux services du ministère chargé du Travail
 					l&apos;avis ou les avis de votre CSE relatifs à l&apos;ensemble de
-					votre démarche {new Date().getFullYear() + 1}.
+					votre démarche {getCseYear()}.
 				</>
 			}
 			modalId="cse-submit-modal"

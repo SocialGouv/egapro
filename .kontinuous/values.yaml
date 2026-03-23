@@ -27,6 +27,9 @@ app:
         name: "s3"
     - configMapRef:
         name: "clamav"
+    - configMapRef:
+        name: "gip-mds"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:

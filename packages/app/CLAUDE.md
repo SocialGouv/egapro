@@ -10,10 +10,8 @@
 All quality checks are **automatic** — no manual commands needed:
 
 - **Lint/format**: auto-applied by the `auto-lint` hook after each edit and Bash command
-- **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits
-- **Validation**: 3 parallel agents (typecheck + tests + lint) run automatically after every task
-- **RGAA**: accessibility checked inline when modifying UI components
-- **Security**: verified inline when modifying server/tRPC code
+- **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits (13 patterns including domain layer violations)
+- **Post-task gates**: 4 parallel agents run automatically after every task: `validator` (typecheck + test + lint), `structural-auditor` (16 rules), `rgaa-auditor` (13 RGAA themes on .tsx), `security-auditor` (OWASP on server files)
 
 See `.claude/rules/automation.md` for full details.
 
@@ -52,6 +50,17 @@ src/
       page.tsx             <- ProConnect login page (redirects if already logged in)
 
   modules/                 <- Business logic and components by domain
+    domain/                <- Pure business rules (isomorphic, zero React deps)
+      index.ts             <- Barrel: single import point for all domain logic
+      types.ts             <- Domain types (GapLevel, DeclarationStatus, etc.)
+      shared/
+        constants.ts       <- Regulatory constants (thresholds, campaign year)
+        gap.ts             <- Gap calculation and formatting (pure functions)
+        siren.ts           <- SIREN extraction, formatting, validation
+        campaign.ts        <- Campaign year, CSE year (temporal rules)
+        declarationStatus.ts <- Declaration status state machine
+        companySize.ts     <- Company size classification & CSE requirement
+      __tests__/           <- 100% coverage on all domain functions
     analytics/             <- Matomo tracking
       index.ts             <- Barrel: exports MatomoAnalytics
       MatomoAnalytics.tsx  <- Client component for Matomo tracking (NEXT_PUBLIC_MATOMO_*)

@@ -1,5 +1,5 @@
-import { computeGap } from "~/modules/declaration-remuneration/shared/gapUtils";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { computeGap } from "~/modules/domain";
 
 export type ParsedCategory = {
 	index: number;

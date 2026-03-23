@@ -3,6 +3,7 @@ import {
 	DeclarationLayout,
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
+import { extractSiren } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -22,7 +23,7 @@ export default async function DeclarationRootLayout({
 		return <MissingSiret />;
 	}
 
-	const siren = siret.slice(0, 9);
+	const siren = extractSiren(siret);
 	const company = await api.company.get({ siren });
 
 	return <DeclarationLayout company={company}>{children}</DeclarationLayout>;

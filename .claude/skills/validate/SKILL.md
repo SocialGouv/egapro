@@ -5,67 +5,69 @@ description: Run all quality checks (lint, format, typecheck, tests) with parall
 
 # /validate
 
-Run all quality checks to ensure the codebase is CI-ready. Includes RGAA and Security audits.
+Comprehensive quality check. Runs all agents, auto-fixes issues, loops until clean.
+
+## Arguments
+
+$ARGUMENTS — optional focus: `rgaa`, `security`, `structure`, or empty for full check.
 
 ## Instructions
 
-### Phase 1 — Validation (3 parallel agents)
+### Step 1 — Detect scope
 
-Launch **3 parallel agents** for maximum speed:
-
-#### Agent 1 — Lint + Format
-```bash
-pnpm lint:check && pnpm format:check
-```
-Report any errors or warnings.
-
-#### Agent 2 — TypeScript
-```bash
-pnpm typecheck
-```
-Report any type errors with file:line references.
-
-#### Agent 3 — Unit Tests
-```bash
-pnpm test
-```
-Report any test failures with test names.
-
-### Phase 2 — Audits (2 parallel agents)
-
-Detect changed files:
 ```bash
 git diff origin/master...HEAD --name-only
 ```
 
-Launch **2 parallel agents**:
+If no changes vs master, use uncommitted changes:
 
-#### Agent 4 — RGAA audit
-Delegate to `rgaa-auditor` agent (`.claude/agents/rgaa-auditor/AGENT.md`).
-Pass all changed `.tsx` files. Auto-fix all `[ERROR]` findings.
+```bash
+git diff --name-only HEAD
+```
 
-#### Agent 5 — Security audit
-Delegate to `security-auditor` agent (`.claude/agents/security-auditor/AGENT.md`).
-Pass all changed `.ts`/`.tsx` files. Auto-fix all `[CRITICAL]` and `[HIGH]` findings.
+### Step 2 — Launch agents
 
-### After agents complete
+**If no argument (full check)** — launch **4 parallel agents**:
 
-1. If **all 5 pass**: report `PASS` with a one-line summary.
-2. If **any fail**: fix the issues, then re-run the failing check(s) only.
-3. If Phase 2 auto-fixes were applied → re-run Phase 1 validation.
-4. Repeat until all 5 pass.
+1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
+2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all changed files
+3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` on all changed `.tsx` files. Auto-fix all `[ERROR]` findings.
+4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all changed `.ts/.tsx` files. Auto-fix all `[CRITICAL]` and `[HIGH]` findings.
 
-## Output Format
+**If argument = `rgaa`** — launch RGAA auditor only (+ validator after fixes).
+**If argument = `security`** — launch Security auditor only (+ validator after fixes).
+**If argument = `structure`** — launch Structural auditor only.
+
+### Step 3 — Fix loop
+
+1. If **any agent reports violations**: fix all issues.
+2. Re-run **only the failing agents**.
+3. If auto-fixes were applied → also re-run validator.
+4. **Repeat until zero violations across all agents.**
+
+Never report completion with known violations.
+
+### Step 4 — Report
 
 ```
 ## Validation: [PASS | FAIL]
 
 | Check | Status | Details |
 |---|---|---|
-| Lint | PASS/FAIL | X warnings, Y errors |
-| Format | PASS/FAIL | X files need formatting |
-| Typecheck | PASS/FAIL | X errors |
-| Tests | PASS/FAIL | X/Y passed |
-| RGAA | PASS/NEEDS WORK | X errors, Y warnings |
-| Security | SECURE/VULNERABLE | X critical, Y high |
+| Typecheck | PASS/FAIL | ... |
+| Tests | PASS/FAIL | ... |
+| Lint + Format | PASS/FAIL | ... |
+| Structure | PASS/NEEDS WORK | ... |
+| RGAA | PASS/NEEDS WORK | ... |
+| Security | SECURE/VULNERABLE | ... |
 ```
+
+### Lighthouse confirmation (if dev server is running)
+
+If `pnpm dev` is running on port 3000, also run:
+
+```bash
+pnpm test:lighthouse
+```
+
+Lighthouse accessibility must score **100%**.
