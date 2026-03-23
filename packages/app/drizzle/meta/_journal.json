@@ -99,13 +99,6 @@
 			"when": 1774108800000,
 			"tag": "0013_add_gip_quartile_threshold4",
 			"breakpoints": true
-		},
-		{
-			"idx": 14,
-			"version": "7",
-			"when": 1774483200000,
-			"tag": "0014_drop_session_tables",
-			"breakpoints": true
 		}
 	]
 }
