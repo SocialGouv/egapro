@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStepCategoriesSchema } from "../schemas";
@@ -12,7 +11,6 @@ import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
-import { normalizeDecimalInput } from "../shared/gapUtils";
 import type { GipPrefillData, GipQuartileData } from "../shared/gipMdsMapping";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";

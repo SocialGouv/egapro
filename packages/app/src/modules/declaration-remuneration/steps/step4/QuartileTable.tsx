@@ -1,11 +1,8 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
-import {
-	computePercentage,
-	displayDecimal,
-} from "~/modules/declaration-remuneration/shared/gapUtils";
 import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import { computePercentage, displayDecimal } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
 type Props = {

@@ -1,11 +1,8 @@
 import { redirect } from "next/navigation";
-
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-
 import { getPostComplianceDestination } from "../shared/complianceNavigation";
-import { hasGapsAboveThreshold } from "../shared/gapUtils";
 import { CompliancePathChoice } from "./CompliancePathChoice";
 
 type ComplianceState =

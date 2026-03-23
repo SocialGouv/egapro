@@ -1,9 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import {
-	computePercentage,
-	type StepCategoryData,
-} from "~/modules/declaration-remuneration";
+import type { StepCategoryData } from "~/modules/declaration-remuneration";
+import { computePercentage } from "~/modules/domain";
 
 import { styles } from "../pdfStyles";
 import type { DeclarationPdfData } from "../types";

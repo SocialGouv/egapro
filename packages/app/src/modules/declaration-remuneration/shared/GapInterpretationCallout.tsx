@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
-
-import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import {
+	computeGap,
+	computeProportion,
+	formatGapCompact,
+	GAP_ALERT_THRESHOLD,
+} from "~/modules/domain";
 import type { PayGapRow } from "../types";
-import { computeGap, computeProportion, formatGapCompact } from "./gapUtils";
 import styles from "./InterpretationCallout.module.scss";
 
 type GapDirection = "women" | "men" | "balanced";

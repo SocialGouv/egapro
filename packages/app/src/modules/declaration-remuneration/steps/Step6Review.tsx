@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import { GAP_ALERT_THRESHOLD, getCurrentYear } from "~/modules/domain";
+import {
+	computeGap,
+	GAP_ALERT_THRESHOLD,
+	getCurrentYear,
+} from "~/modules/domain";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
-import { computeGap } from "../shared/gapUtils";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import type {

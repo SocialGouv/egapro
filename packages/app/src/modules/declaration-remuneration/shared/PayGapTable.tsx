@@ -1,14 +1,13 @@
-import type { PayGapField, PayGapRow } from "../types";
-import common from "./common.module.scss";
 import {
 	computeGap,
 	displayDecimal,
 	formatGap,
-	GAP_LEVEL_LABELS,
-	gapBadgeClass,
 	gapLevel,
 	normalizeDecimalInput,
-} from "./gapUtils";
+} from "~/modules/domain";
+import type { PayGapField, PayGapRow } from "../types";
+import common from "./common.module.scss";
+import { GAP_LEVEL_LABELS, gapBadgeClass } from "./gapBadge";
 import styles from "./PayGapTable.module.scss";
 
 export const DEFAULT_PAY_GAP_ROWS: PayGapRow[] = [
