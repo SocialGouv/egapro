@@ -21,12 +21,15 @@ export function CompanyDeclarationsPage({
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={company.hasCse}
 				siren={company.siren}
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
-			{!userPhone && <MissingInfoModal siren={company.siren} />}
+			{(!userPhone || company.hasCse === null) && (
+				<MissingInfoModal hasCse={company.hasCse} siren={company.siren} userPhone={userPhone} />
+			)}
 		</main>
 	);
 }

@@ -39,6 +39,7 @@ describe("DeclarationsSection", () => {
 		render(
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={true}
 				siren="532847196"
 				userPhone="0122334455"
 			/>,
@@ -52,6 +53,7 @@ describe("DeclarationsSection", () => {
 		render(
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={true}
 				siren="532847196"
 				userPhone="0122334455"
 			/>,
@@ -74,6 +76,7 @@ describe("DeclarationsSection", () => {
 		render(
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={true}
 				siren="532847196"
 				userPhone="0122334455"
 			/>,
@@ -89,6 +92,7 @@ describe("DeclarationsSection", () => {
 		render(
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={true}
 				siren="532847196"
 				userPhone="0122334455"
 			/>,
@@ -100,6 +104,7 @@ describe("DeclarationsSection", () => {
 		render(
 			<DeclarationsSection
 				declarations={declarations}
+				hasCse={true}
 				siren="532847196"
 				userPhone="0122334455"
 			/>,

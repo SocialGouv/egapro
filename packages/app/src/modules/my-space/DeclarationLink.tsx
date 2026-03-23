@@ -15,12 +15,13 @@ type Props = {
 	siren: string;
 	type: DeclarationType;
 	userPhone: string | null;
+	hasCse: boolean | null;
 	children: React.ReactNode;
 };
 
-/** Link that opens the missing info modal if phone is missing, or navigates directly. */
-export function DeclarationLink({ siren, type, userPhone, children }: Props) {
-	if (userPhone) {
+/** Link that opens the missing info modal if phone or CSE is missing, or navigates directly. */
+export function DeclarationLink({ siren, type, userPhone, hasCse, children }: Props) {
+	if (userPhone && hasCse !== null) {
 		return <Link href={TYPE_HREFS[type](siren)}>{children}</Link>;
 	}
 

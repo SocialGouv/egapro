@@ -18,6 +18,7 @@ type Props = {
 	siren: string;
 	declarations: DeclarationItem[];
 	userPhone: string | null;
+	hasCse: boolean | null;
 };
 
 function formatDate(date: Date | null): string {
@@ -41,7 +42,7 @@ function getDeadline(declaration: DeclarationItem): string {
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
+export function DeclarationsSection({ siren, declarations, userPhone, hasCse }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
 		(d) => d.year >= currentYear,
@@ -97,6 +98,7 @@ export function DeclarationsSection({ siren, declarations, userPhone }: Props) {
 										) : row.declaration ? (
 											<DeclarationRow
 												declaration={row.declaration}
+												hasCse={hasCse}
 												key={`${row.declaration.type}-${row.declaration.year}-${i}`}
 												siren={siren}
 												userPhone={userPhone}
@@ -136,17 +138,20 @@ type DeclarationRowProps = {
 	declaration: DeclarationItem;
 	siren: string;
 	userPhone: string | null;
+	hasCse: boolean | null;
 };
 
 function DeclarationRow({
 	declaration,
 	siren,
 	userPhone,
+	hasCse,
 }: DeclarationRowProps) {
 	return (
 		<tr>
 			<td>
 				<DeclarationLink
+					hasCse={hasCse}
 					siren={siren}
 					type={declaration.type}
 					userPhone={userPhone}

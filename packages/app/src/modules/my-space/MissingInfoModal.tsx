@@ -2,35 +2,46 @@
 
 import { useCallback, useRef } from "react";
 
-import { updatePhoneSchema } from "~/modules/profile/schemas";
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
 import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
+import { missingInfoSchema } from "./schemas";
+
 const MODAL_ID = "missing-info-modal";
 const MODAL_TITLE_ID = "missing-info-modal-title";
 
 type Props = {
 	siren: string;
+	userPhone: string | null;
+	hasCse: boolean | null;
 };
 
-export function MissingInfoModal({ siren }: Props) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
+function getDescription(needsPhone: boolean, needsCse: boolean): string {
+	if (needsPhone && needsCse) {
+		return "Pour continuer, vous devez renseigner un numéro de téléphone et indiquer si un CSE a été mis en place dans votre entreprise.";
+	}
+	if (needsPhone) {
+		return "Pour continuer, vous devez ajouter un numéro de téléphone à votre profil.";
+	}
+	return "Pour continuer, vous devez indiquer si un CSE a été mis en place dans votre entreprise.";
+}
 
-	const form = useZodForm(updatePhoneSchema, {
-		defaultValues: { phone: "" },
+export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
+	const dialogRef = useRef<HTMLDialogElement>(null);
+	const needsPhone = !userPhone;
+	const needsCse = hasCse === null;
+
+	const form = useZodForm(missingInfoSchema, {
+		defaultValues: { phone: "", hasCse: undefined },
 	});
 
 	const phoneError = form.formState.errors.phone?.message ?? null;
 
-	const updatePhoneMutation = api.profile.updatePhone.useMutation({
-		onSuccess: () => {
-			closeModal();
-			window.location.href = `/declaration-remuneration?siren=${siren}`;
-		},
-	});
+	const updatePhoneMutation = api.profile.updatePhone.useMutation();
+	const updateHasCseMutation = api.company.updateHasCse.useMutation();
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
@@ -39,12 +50,21 @@ export function MissingInfoModal({ siren }: Props) {
 
 	useDsfrDialogOpen(
 		dialogRef,
-		useCallback(() => form.reset({ phone: "" }), [form]),
+		useCallback(() => form.reset({ phone: "", hasCse: undefined }), [form]),
 	);
 
-	const onSubmit = form.handleSubmit((data) => {
-		updatePhoneMutation.mutate(data);
+	const onSubmit = form.handleSubmit(async (data) => {
+		if (needsPhone) {
+			await updatePhoneMutation.mutateAsync({ phone: data.phone });
+		}
+		if (needsCse && data.hasCse !== undefined) {
+			await updateHasCseMutation.mutateAsync({ siren, hasCse: data.hasCse });
+		}
+		closeModal();
+		window.location.href = `/declaration-remuneration?siren=${siren}`;
 	});
+
+	const isPending = updatePhoneMutation.isPending || updateHasCseMutation.isPending;
 
 	return (
 		<dialog
@@ -72,15 +92,53 @@ export function MissingInfoModal({ siren }: Props) {
 									Informations manquantes
 								</h2>
 								<p className="fr-text--regular fr-mb-3w">
-									Pour continuer, vous devez ajouter un numéro de téléphone à
-									votre profil.
+									{getDescription(needsPhone, needsCse)}
 								</p>
 								<form id="missing-info-form" onSubmit={onSubmit}>
-									<PhoneField
-										error={phoneError}
-										inputId="missing-info-phone"
-										registration={form.register("phone")}
-									/>
+									{needsPhone && (
+										<PhoneField
+											error={phoneError}
+											inputId="missing-info-phone"
+											registration={form.register("phone")}
+										/>
+									)}
+									{needsCse && (
+										<fieldset className="fr-fieldset">
+											<legend className="fr-fieldset__legend fr-text--regular">
+												Un CSE a-t-il été mis en place dans votre entreprise ?
+											</legend>
+											<div className="fr-fieldset__element">
+												<div className="fr-radio-group fr-radio-rich">
+													<input
+														id="missing-info-cse-yes"
+														type="radio"
+														value="true"
+														{...form.register("hasCse", {
+															setValueAs: (v: string) => v === "true",
+														})}
+													/>
+													<label className="fr-label" htmlFor="missing-info-cse-yes">
+														Oui
+													</label>
+												</div>
+											</div>
+											<div className="fr-fieldset__element">
+												<div className="fr-radio-group fr-radio-rich">
+													<input
+														id="missing-info-cse-no"
+														type="radio"
+														value="false"
+														{...form.register("hasCse", {
+															setValueAs: (v: string) => v === "true",
+														})}
+													/>
+													<label className="fr-label" htmlFor="missing-info-cse-no">
+														Non
+													</label>
+												</div>
+											</div>
+										</fieldset>
+									)}
 								</form>
 							</div>
 							<div className="fr-modal__footer">
@@ -88,11 +146,11 @@ export function MissingInfoModal({ siren }: Props) {
 									<li>
 										<button
 											className="fr-btn"
-											disabled={updatePhoneMutation.isPending}
+											disabled={isPending}
 											form="missing-info-form"
 											type="submit"
 										>
-											Commencer la déclaration
+											Enregistrer
 										</button>
 									</li>
 									<li>
@@ -101,7 +159,7 @@ export function MissingInfoModal({ siren }: Props) {
 											className="fr-btn fr-btn--secondary"
 											type="button"
 										>
-											Annuler
+											Retour
 										</button>
 									</li>
 								</ul>
