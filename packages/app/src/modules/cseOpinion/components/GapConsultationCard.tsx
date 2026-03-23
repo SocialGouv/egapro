@@ -1,4 +1,5 @@
 import type { OpinionType } from "../types";
+import styles from "./OpinionCard.module.scss";
 
 type Props = {
 	id: string;
@@ -24,7 +25,7 @@ export function GapConsultationCard({
 	const dateId = `${id}-date`;
 
 	return (
-		<div className="fr-p-2w fr-border fr-border-radius--4">
+		<div className={styles.card}>
 			<p className="fr-text--bold fr-mb-3w" id={legendId}>
 				Justification des écarts &ge; 5 % par des critères objectifs et non
 				sexistes de l'indicateur de rémunération par catégorie de salariés
@@ -116,7 +117,7 @@ export function GapConsultationCard({
 						</div>
 					</fieldset>
 
-					<div className="fr-input-group fr-mt-3w">
+					<div className="fr-input-group fr-mt-3w fr-col-12 fr-col-md-4">
 						<label className="fr-label" htmlFor={dateId}>
 							Date de l'avis rendu par le CSE
 							<span className="fr-hint-text">Format attendu : JJ/MM/AAAA</span>
@@ -125,6 +126,7 @@ export function GapConsultationCard({
 							className="fr-input"
 							id={dateId}
 							onChange={(e) => onDateChange(e.target.value)}
+							placeholder="Sélectionner une date"
 							type="date"
 							value={date}
 						/>
