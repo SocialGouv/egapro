@@ -22,6 +22,7 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import { getCurrentYear } from "~/modules/domain";
 import { CompanyDeclarationsPage } from "../CompanyDeclarationsPage";
 import type { CompanyDetail, DeclarationItem } from "../types";
 
@@ -34,7 +35,7 @@ const company: CompanyDetail = {
 	hasCse: null,
 };
 
-const currentYear = new Date().getFullYear();
+const currentYear = getCurrentYear();
 
 const declarations: DeclarationItem[] = [
 	{

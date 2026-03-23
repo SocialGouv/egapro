@@ -97,6 +97,29 @@ check_pattern '\.(tsx|jsx)$' \
   'Raw <img> is forbidden. Use: import Image from "next/image".' \
   '(__tests__|\.test\.|\.spec\.|setup\.ts)'
 
+# Domain layer — getFullYear() must come from ~/modules/domain (allow domain/ itself and tests)
+check_pattern '\.(ts|tsx)$' \
+  'getFullYear\(\)' \
+  'Inline getFullYear() is forbidden. Use getCurrentYear() or getCseYear() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — slice(0, 9) for SIREN extraction must come from ~/modules/domain
+check_pattern '\.(ts|tsx)$' \
+  'slice\(0,[[:space:]]*9\)' \
+  'Inline slice(0, 9) is forbidden. Use extractSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
+check_pattern 'routers/.*\.ts$' \
+  "from ['\"]zod['\"]" \
+  'Zod imports are forbidden in router files. Import schemas from ~/modules/{domain}/schemas.ts.'
+
+# Zod imports forbidden in component files — schemas must be in ~/modules/{domain}/schemas.ts
+check_pattern '\.(tsx)$' \
+  "from ['\"]zod['\"]" \
+  'Zod imports are forbidden in components. Import schemas from ~/modules/{domain}/schemas.ts.' \
+  '(__tests__|\.test\.|\.spec\.)'
+
 # Custom components in src/app/ — only Next.js route files allowed (page, layout, error, etc.)
 # Detect non-standard .tsx files in src/app/ by checking the filename is not a known route file
 if [[ "$FILE_PATH" =~ src/app/.*\.tsx$ ]] && [[ "$TOOL_NAME" = "Write" ]]; then

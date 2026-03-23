@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getCurrentYear } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -19,7 +20,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 
 	const data = await api.declaration.getOrCreate();
 	const company = await api.company.get({ siren: data.declaration.siren });
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	const initialCategories = mapToEmployeeCategoryRows(
 		data.jobCategories,

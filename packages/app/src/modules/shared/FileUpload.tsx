@@ -18,25 +18,28 @@ function getExtensionLabel(name: string): string {
 
 type Props = {
 	inputId: string;
-	selectedFile: File | null;
+	selectedFiles: File[];
 	error: string | null;
-	onFileChange: (file: File | null, error: string | null) => void;
+	onFilesChange: (files: File[], error: string | null) => void;
 	/** Comma-separated list of accepted file extensions (e.g. ".pdf,.docx,.jpg"). */
 	accept: string;
 	/** Comma-separated list of accepted MIME types for validation (e.g. "application/pdf,image/jpeg"). */
 	allowedMimeTypes: string[];
 	/** Human-readable hint displayed under the label (e.g. "pdf, docx, jpg"). */
 	acceptLabel: string;
+	/** Maximum number of files that can be selected. */
+	maxFiles?: number;
 };
 
 export function FileUpload({
 	inputId,
-	selectedFile,
+	selectedFiles,
 	error,
-	onFileChange,
+	onFilesChange,
 	accept,
 	allowedMimeTypes,
 	acceptLabel,
+	maxFiles = 1,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
@@ -55,30 +58,39 @@ export function FileUpload({
 		[allowedMimeTypes, acceptLabel],
 	);
 
-	const processFile = useCallback(
-		(file: File) => {
-			const validationError = validateFile(file);
-			if (validationError) {
-				onFileChange(null, validationError);
-			} else {
-				onFileChange(file, null);
+	const processFiles = useCallback(
+		(newFiles: FileList | File[]) => {
+			const filesToAdd = Array.from(newFiles);
+			const remainingSlots = maxFiles - selectedFiles.length;
+			const capped = filesToAdd.slice(0, remainingSlots);
+
+			for (const file of capped) {
+				const validationError = validateFile(file);
+				if (validationError) {
+					onFilesChange(selectedFiles, validationError);
+					return;
+				}
 			}
+			onFilesChange([...selectedFiles, ...capped], null);
 		},
-		[onFileChange, validateFile],
+		[onFilesChange, validateFile, selectedFiles, maxFiles],
 	);
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		processFile(file);
+		const files = e.target.files;
+		if (!files || files.length === 0) return;
+		processFiles(files);
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
 	}
 
 	function handleDrop(e: React.DragEvent) {
 		e.preventDefault();
 		setIsDragging(false);
-		const file = e.dataTransfer.files[0];
-		if (!file) return;
-		processFile(file);
+		const files = e.dataTransfer.files;
+		if (!files || files.length === 0) return;
+		processFiles(files);
 	}
 
 	function handleDragOver(e: React.DragEvent) {
@@ -95,23 +107,55 @@ export function FileUpload({
 		setIsDragging(false);
 	}
 
-	function handleRemove() {
-		onFileChange(null, null);
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
+	function handleRemove(index: number) {
+		const updated = selectedFiles.filter((_, i) => i !== index);
+		onFilesChange(updated, null);
 	}
 
 	const messagesId = `${inputId}-messages`;
+	const canAddMore = selectedFiles.length < maxFiles;
 
 	return (
 		<div>
-			{selectedFile && !error ? (
-				<div className={styles.fileCard}>
-					<p className="fr-text--md fr-mb-0">{selectedFile.name}</p>
+			<section
+				aria-label="Zone de dépôt de fichier"
+				className={[
+					styles.dropzone,
+					isDragging && canAddMore && styles.dropzoneDragging,
+					error && styles.dropzoneError,
+					!canAddMore && styles.dropzoneDisabled,
+				]
+					.filter(Boolean)
+					.join(" ")}
+				onDragEnter={canAddMore ? handleDragEnter : undefined}
+				onDragLeave={canAddMore ? handleDragLeave : undefined}
+				onDragOver={canAddMore ? handleDragOver : undefined}
+				onDrop={canAddMore ? handleDrop : undefined}
+				ref={dropzoneRef}
+			>
+				<span aria-hidden="true" className="fr-icon-file-add-fill" />
+				<span>
+					<button
+						className={styles.selectButton}
+						disabled={!canAddMore}
+						onClick={() => fileInputRef.current?.click()}
+						type="button"
+					>
+						Sélectionner des fichiers
+						<span
+							aria-hidden="true"
+							className="fr-icon-upload-line fr-icon--sm"
+						/>
+					</button>
+				</span>
+				<p className="fr-text--sm fr-mb-0">ou glisser-les ici</p>
+			</section>
+
+			{selectedFiles.map((file, index) => (
+				<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
+					<p className="fr-text--md fr-mb-0">{file.name}</p>
 					<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-						{getExtensionLabel(selectedFile.name)} –{" "}
-						{formatFileSize(selectedFile.size)}
+						{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
 					</p>
 					<div className={styles.fileCardFooter}>
 						<p className="fr-message fr-message--valid fr-mb-0">
@@ -119,47 +163,15 @@ export function FileUpload({
 						</p>
 						<button
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
-							onClick={handleRemove}
-							title="Supprimer le fichier"
+							onClick={() => handleRemove(index)}
+							title={`Supprimer ${file.name}`}
 							type="button"
 						>
 							Supprimer
 						</button>
 					</div>
 				</div>
-			) : (
-				<section
-					aria-label="Zone de dépôt de fichier"
-					className={[
-						styles.dropzone,
-						isDragging && styles.dropzoneDragging,
-						error && styles.dropzoneError,
-					]
-						.filter(Boolean)
-						.join(" ")}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onDragOver={handleDragOver}
-					onDrop={handleDrop}
-					ref={dropzoneRef}
-				>
-					<span aria-hidden="true" className="fr-icon-file-add-fill" />
-					<span>
-						<button
-							className={styles.selectButton}
-							onClick={() => fileInputRef.current?.click()}
-							type="button"
-						>
-							Sélectionner un fichier
-							<span
-								aria-hidden="true"
-								className="fr-icon-upload-line fr-icon--sm"
-							/>
-						</button>
-					</span>
-					<p className="fr-text--sm fr-mb-0">ou glisser-le ici</p>
-				</section>
-			)}
+			))}
 
 			<input
 				accept={accept}
@@ -167,6 +179,7 @@ export function FileUpload({
 				aria-invalid={error !== null}
 				className="fr-sr-only"
 				id={inputId}
+				multiple={maxFiles > 1}
 				name={inputId}
 				onChange={handleFileChange}
 				ref={fileInputRef}

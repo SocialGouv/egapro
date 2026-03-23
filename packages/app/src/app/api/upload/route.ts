@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
 import { auth } from "~/server/auth";
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const year = new Date().getFullYear();
+	const year = getCurrentYear();
 
 	try {
 		const result = await handleStreamingUpload(request.body, {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ComplianceCompletionEffect } from "~/modules/declaration-remuneration";
+import { getCurrentYear } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/home";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
@@ -15,7 +16,7 @@ type Props = {
 
 export function ConfirmationPage({ email }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
-	const dataYear = new Date().getFullYear();
+	const dataYear = getCurrentYear();
 	const year = dataYear + 1;
 	return (
 		<div>

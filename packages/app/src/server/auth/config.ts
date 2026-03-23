@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
+import { extractSiren } from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	accounts,
@@ -118,7 +119,7 @@ export const authConfig = {
 				}
 
 				if (siret) {
-					const siren = siret.slice(0, 9);
+					const siren = extractSiren(siret);
 
 					let companyValues: {
 						siren: string;

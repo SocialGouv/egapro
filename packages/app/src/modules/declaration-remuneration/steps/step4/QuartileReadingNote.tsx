@@ -1,5 +1,5 @@
-import { computePercentage } from "~/modules/declaration-remuneration/shared/gapUtils";
 import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import { computePercentage } from "~/modules/domain";
 
 type Props = {
 	categories: StepCategoryData[];

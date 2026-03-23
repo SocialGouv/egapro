@@ -1,4 +1,7 @@
-export type DeclarationStatus = "to_complete" | "in_progress" | "done";
+// Domain re-exports (canonical source: ~/modules/domain)
+export type { DeclarationStatus, DeclarationType } from "~/modules/domain";
+
+import type { DeclarationStatus, DeclarationType } from "~/modules/domain";
 
 export type CompanyItem = {
 	siren: string;
@@ -16,8 +19,6 @@ export type CompanyDetail = {
 	workforce: number | null;
 	hasCse: boolean | null;
 };
-
-export type DeclarationType = "remuneration" | "representation";
 
 export type DeclarationItem = {
 	type: DeclarationType;
