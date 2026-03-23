@@ -106,16 +106,12 @@ If a cherry-pick conflicts:
 
 #### 3c — Verify the branch is green
 
-Launch **3 parallel agents**:
-
-1. **Agent: typecheck** — `pnpm typecheck`
-2. **Agent: tests** — `pnpm test`
-3. **Agent: lint+format** — `pnpm lint:check && pnpm format:check`
+Delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format).
 
 If any check fails:
 1. Fix the issue and commit the fix on this branch
-2. Re-run only the failing check(s)
-3. Repeat until all 3 pass
+2. Re-run validator
+3. Repeat until all pass
 
 #### 3d — Push and create the PR
 

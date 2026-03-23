@@ -107,44 +107,32 @@ Quality checks run **automatically** after every code change — no command need
 
 | Gate | When | How |
 |---|---|---|
-| **Validation** | After every task | 3 parallel agents: `pnpm typecheck` + `pnpm test` + `pnpm lint:check && format:check` |
-| **RGAA** | **After every task** | Delegate to `rgaa-auditor` agent on all created/modified files |
-| **Domain layer** | **After every task** | No inline `getFullYear()`, `slice(0,9)`, hardcoded thresholds — import from `~/modules/domain` |
-| **Security** | **After every task** | Delegate to `security-auditor` agent on all created/modified files |
+| **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
+| **Structure** | After every task | `structural-auditor` agent (16 rules: forms, schemas, DRY, imports…) |
+| **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
+| **Security** | After every task | `security-auditor` agent on modified server files |
+| **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
-
-## Parallelized workflow for multi-page tasks
-
-When creating multiple pages/screens, follow this 4-phase approach:
-
-| Phase | Strategy | Details |
-|---|---|---|
-| 1. Analysis | **Parallel** | Launch one Explore agent per page (Figma analysis, DSFR components, data needs) |
-| 2. Shared code | **Sequential** | DB schema, shared types, shared components, tRPC procedures |
-| 3. Pages | **Parallel** | One agent per page (with `isolation: "worktree"` for git isolation) |
-| 4. Quality | **Parallel** | Automatic via quality gates above |
 
 ## Agents and skills
 
-### Agents (`.claude/agents/`) — specialized sub-agents, delegated automatically
+### Agents (`.claude/agents/`) — 4 agents, all run automatically after every task
 
-| Agent | Role | Triggered by |
-|---|---|---|
-| `code-reviewer` | 23-point code quality checklist | `/review-pr`, PR gate |
-| `rgaa-auditor` | 13-theme RGAA accessibility audit | `/audit-rgaa`, RGAA gate |
-| `security-auditor` | OWASP Top 10 + RGS security review | `/audit-secu`, security gate |
+| Agent | Role |
+|---|---|
+| `validator` | Typecheck + test + lint + format (parallel) |
+| `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) |
+| `rgaa-auditor` | 13-theme RGAA accessibility audit |
+| `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — manual overrides via `/command`
+### Skills (`.claude/skills/`) — 4 manual commands
 
 | Skill | Purpose |
 |---|---|
-| `/validate` | Force run all quality checks (3 parallel agents) |
-| `/review-pr` | Deep PR review: GH comments + code-reviewer + RGAA + security + auto-fix |
-| `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report + auto-fix |
-| `/audit-secu` | Deep OWASP + RGS security audit with detailed report + auto-fix |
-| `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
-| `/process-issue` | Process a GitHub issue (parent + sub-issues) with mandatory quality gates |
-| `/verify-feature` | Full rules audit — runs auto at END of every feature, loops until zero issues |
+| `/validate` | Force all 4 agents + auto-fix + loop until zero. Optional focus: `rgaa`, `security`, `structure` |
+| `/review-pr` | PR review: GH comments + structural-auditor + all quality gates |
+| `/process-issue` | Process a GitHub issue end-to-end with mandatory quality gates |
+| `/split-pr` | Split the current branch into multiple focused PRs |
 
 ---
 

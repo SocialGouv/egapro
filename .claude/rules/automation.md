@@ -27,6 +27,11 @@ Blocks edits containing forbidden patterns:
 | `@media` (width/screen) | `.scss` | Use DSFR mixins: `@include respond-from(md)` / `respond-to(sm)` |
 | `dangerouslySetInnerHTML` | `.tsx/.jsx` | XSS risk — use safe rendering or DOMPurify |
 | `: any`, `as any` | `.ts/.tsx` (excl. test files) | Use `unknown` with type narrowing |
+| `getFullYear()` | `.ts/.tsx` (excl. `domain/`, tests) | Use `getCurrentYear()` / `getCseYear()` from `~/modules/domain` |
+| `slice(0, 9)` | `.ts/.tsx` (excl. `domain/`, tests) | Use `extractSiren()` from `~/modules/domain` |
+| `from "zod"` | `routers/*.ts`, `.tsx` (excl. tests) | Import schemas from `~/modules/{domain}/schemas.ts` |
+| `#hex`, `rgb()`, `rgba()` | `.scss` | Use DSFR CSS custom properties |
+| Non-route `.tsx` in `src/app/` | `src/app/**/*.tsx` | Move to `src/modules/` and import from barrel |
 
 To add a new rule: append a `check_pattern` call in `block-bad-patterns.sh`.
 If a hook blocks your edit, do NOT attempt to bypass it. Rethink the approach.
@@ -34,34 +39,9 @@ If a hook blocks your edit, do NOT attempt to bypass it. Rethink the approach.
 ### PostToolUse — `auto-lint.sh` (matcher: `Edit|Write|Bash`)
 
 Runs `pnpm biome check --write` automatically:
+
 - **After Edit/Write**: lints the single edited file
 - **After Bash**: lints all git-modified files after `pnpm test|build|typecheck|lint|format|check`
-
----
-
-## Activation rules
-
-All 4 core gates (Validation, RGAA, Domain layer, Security) are **always launched** — they cannot be skipped.
-Each audit agent scopes itself based on the files actually modified.
-
-| Gate | Always launched | Scope |
-|---|---|---|
-| Validation (typecheck + tests + lint) | **Yes** | All files |
-| RGAA | **Yes** | If `.tsx` files modified → full 13-theme audit. Otherwise → instant `PASS — no UI files` |
-| Domain layer | **Yes** | No inline `getFullYear()`, `slice(0,9)`, or hardcoded thresholds. Import from `~/modules/domain` |
-| Security | **Yes** | If `.ts/.tsx` in `server/`, `routers/`, or tRPC modified → full OWASP audit. Otherwise → instant `SECURE — no server files` |
-| E2E tests | Only when relevant | A user journey is created, modified, or its underlying API/data changes |
-
-> **Junior-proof policy:** Agents are always in the pipeline — a junior cannot "forget" to run them. The agent itself decides if there is work to do based on the modified files. Zero overhead when not relevant, zero chance of skipping when relevant.
-
----
-
-## Feature lifecycle (mandatory)
-
-### At the END of every feature
-
-After completing the implementation, run `/verify-feature`.
-The skill loops until zero violations — **never report a task as done with known issues**.
 
 ---
 
@@ -70,21 +50,27 @@ The skill loops until zero violations — **never report a task as done with kno
 These gates trigger **automatically** without user input. Do NOT wait to be asked.
 **All gates are mandatory on every task** (junior-proof policy).
 
-### Gate 1 — Validation (always)
+### After every task — agent delegation
 
-Before reporting ANY task as done, launch **3 parallel agents**:
+Before reporting ANY task as done, launch **4 parallel agents**:
 
-1. **Agent: typecheck** — `pnpm typecheck`
-2. **Agent: tests** — `pnpm test`
-3. **Agent: lint+format** — `pnpm lint:check && pnpm format:check`
+1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
+2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all modified files
+3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` on all modified `.tsx` files. If no `.tsx` files → instant `PASS — no UI files`.
+4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all modified `.ts/.tsx` in `server/`, `routers/`, or tRPC. If none → instant `SECURE — no server files`.
 
-If any fails → fix → re-run. Only report completion when all 3 pass.
+If any fails → fix → re-run. Only report completion when all 4 pass.
 
 **Bonus: Next.js runtime check** — if the dev server is running, also call `nextjs_call(get_errors)` via the `next-devtools` MCP to catch runtime/compilation errors not visible in `pnpm typecheck`.
 
-### Gate 2 — RGAA (always)
+> **Junior-proof policy:** Agents are always in the pipeline — a junior cannot "forget" to run them. The agent itself decides if there is work to do based on the modified files. Zero overhead when not relevant, zero chance of skipping when relevant.
 
-Verify **inline while writing** AND audit all created/modified files after implementation:
+### While writing — inline rules
+
+Apply these rules **as you write code**, before any agent runs:
+
+**RGAA (accessibility):**
+
 - `<input>` → associated `<label>` via `htmlFor`/`id`
 - Images → `import Image from "next/image"` (raw `<img>` blocked by hook), descriptive `alt` (or `alt=""` if decorative)
 - Decorative icons → `aria-hidden="true"`
@@ -94,21 +80,16 @@ Verify **inline while writing** AND audit all created/modified files after imple
 - Heading hierarchy → no skipped levels (h1 → h3 without h2)
 - Form groups → `<fieldset>` + `<legend>`
 
-After implementation, delegate to `rgaa-auditor` agent on all created/modified files.
-Full checklist (13 RGAA themes) in `.claude/agents/rgaa-auditor/AGENT.md`.
+**Domain layer:**
 
-### Gate 3 — Domain layer (always)
-
-Verify **inline while writing**:
 - No `new Date().getFullYear()` → use `getCurrentYear()` or `getCseYear()` from `~/modules/domain`
 - No `siret.slice(0, 9)` → use `extractSiren(siret)` from `~/modules/domain`
 - No hardcoded thresholds (5%, 50, 100) → use named constants from `~/modules/domain`
 - No local `getCurrentYear`/`getCseYear`/`getSiren` function definitions → import from `~/modules/domain`
 - New business rules → add to `~/modules/domain` as pure functions with tests
 
-### Gate 4 — Security (always)
+**Security:**
 
-Verify **inline while writing** AND audit all created/modified files after implementation:
 - Queries → Drizzle ORM only (no raw SQL)
 - tRPC inputs → Zod schemas from `~/modules/{domain}/schemas.ts` (never inline, never in routers)
 - Protected routes → `protectedProcedure`
@@ -117,15 +98,17 @@ Verify **inline while writing** AND audit all created/modified files after imple
 - Env vars → `~/env.js` (never `process.env`)
 - No secrets in client code
 
-After implementation, delegate to `security-auditor` agent on all created/modified files.
-Full checklist (OWASP Top 10) in `.claude/agents/security-auditor/AGENT.md`.
-
-### Gate 5 — PR review (when on a PR branch)
+### PR review (when on a PR branch)
 
 When the current git branch has an open PR, **before starting work**:
+
 1. `gh pr view --json comments,reviews,reviewDecision`
 2. Identify unresolved comments
 3. Mention them to the user before proceeding
+
+### E2E tests (when relevant)
+
+Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes.
 
 ---
 
@@ -135,7 +118,8 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 
 | Agent | Role | Model |
 |---|---|---|
-| `code-reviewer` | 15-point code quality checklist | sonnet |
+| `validator` | Typecheck + test + lint + format (parallel) | sonnet |
+| `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) | sonnet |
 | `rgaa-auditor` | Full 13-theme RGAA accessibility audit | sonnet |
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 
@@ -143,18 +127,13 @@ These agents are **read-only** — they report findings but never modify files. 
 
 ---
 
-## Skills (manual override)
+## Skills (manual)
 
 Skills in `.claude/skills/` can be triggered explicitly with `/command`:
 
-| Skill | When to use manually |
+| Skill | When to use |
 |---|---|
-| `/validate` | Force a full validation pass |
-| `/review-pr` | Deep PR review with code-reviewer agent + GH comments |
-| `/audit-rgaa` | Deep 13-theme RGAA audit with detailed report |
-| `/audit-secu` | Deep OWASP + RGS audit with detailed report |
-| `/create-page` | Create pages from Figma (4-phase parallelized workflow) |
-| `/process-issue` | Process a GitHub issue end-to-end with mandatory RGAA + security gates |
-| `/verify-feature` | Full rules audit (forms, schemas, DRY, a11y, security) — loops until zero issues |
-
-These produce detailed reports and are more thorough than the automatic inline gates.
+| `/validate` | Force a full quality pass — all 4 agents + auto-fix + loop until zero. Accepts optional focus: `rgaa`, `security`, `structure` |
+| `/review-pr` | Deep PR review with structural-auditor + GH comments |
+| `/process-issue` | Process a GitHub issue end-to-end with mandatory quality gates |
+| `/split-pr` | Split the current branch into multiple focused PRs |
