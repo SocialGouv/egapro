@@ -3,10 +3,8 @@ kind: Job
 metadata:
   name: gip-mds-import
   namespace: {{ .Values.global.namespace }}
-  annotations:
-    helm.sh/hook-delete-policy: before-hook-creation
 spec:
-  backoffLimit: 3
+  backoffLimit: 5
   template:
     metadata:
       labels:
@@ -26,7 +24,7 @@ spec:
             - -c
             - |
               echo "Waiting for app to be ready..."
-              for i in $(seq 1 30); do
+              for i in $(seq 1 60); do
                 if curl -sf "http://app/api/healthz" > /dev/null 2>&1; then
                   echo "App is ready, importing GIP MDS data..."
                   curl -X POST "http://app/api/gip-mds/import" \
@@ -36,7 +34,7 @@ spec:
                     --show-error
                   exit $?
                 fi
-                echo "App not ready yet, retrying in 5s... ($i/30)"
+                echo "App not ready yet, retrying in 5s... ($i/60)"
                 sleep 5
               done
               echo "App did not become ready in time"
