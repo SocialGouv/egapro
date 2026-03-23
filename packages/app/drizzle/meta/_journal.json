@@ -92,6 +92,13 @@
 			"when": 1774022400000,
 			"tag": "0012_export_date_to_year",
 			"breakpoints": true
+		},
+		{
+			"idx": 13,
+			"version": "7",
+			"when": 1774483200000,
+			"tag": "0013_drop_session_tables",
+			"breakpoints": true
 		}
 	]
 }
