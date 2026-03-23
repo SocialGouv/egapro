@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gip-mds-import
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: gip-mds-import
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: trigger
+          image: curlimages/curl:8.12.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for app to be ready..."
+              for i in $(seq 1 30); do
+                if curl -sf "http://app:3000/api/healthz" > /dev/null 2>&1; then
+                  echo "App is ready, importing GIP MDS data..."
+                  curl -X POST "http://app:3000/api/gip-mds/import" \
+                    --connect-timeout 10 \
+                    --max-time 60 \
+                    --fail \
+                    --show-error
+                  exit $?
+                fi
+                echo "App not ready yet, retrying in 5s... ($i/30)"
+                sleep 5
+              done
+              echo "App did not become ready in time"
+              exit 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
