@@ -3,21 +3,6 @@
 import Script from "next/script";
 import { useRef } from "react";
 
-function initSwagger() {
-	if (!window.SwaggerUIBundle || !window.SwaggerUIStandalonePreset) return;
-
-	window.SwaggerUIBundle({
-		url: "/api/v1/openapi.json",
-		dom_id: "#swagger-ui",
-		deepLinking: true,
-		presets: [
-			window.SwaggerUIBundle.presets.apis,
-			window.SwaggerUIStandalonePreset,
-		],
-		layout: "StandaloneLayout",
-	});
-}
-
 export function SwaggerUI() {
 	const initializedRef = useRef(false);
 
@@ -25,7 +10,17 @@ export function SwaggerUI() {
 		if (initializedRef.current) return;
 		if (!window.SwaggerUIBundle || !window.SwaggerUIStandalonePreset) return;
 		initializedRef.current = true;
-		initSwagger();
+
+		window.SwaggerUIBundle({
+			url: "/api/v1/openapi.json",
+			dom_id: "#swagger-ui",
+			deepLinking: true,
+			presets: [
+				window.SwaggerUIBundle.presets.apis,
+				window.SwaggerUIStandalonePreset,
+			],
+			layout: "StandaloneLayout",
+		});
 	};
 
 	return (

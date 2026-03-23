@@ -10,6 +10,7 @@ export function GET() {
 
 	return NextResponse.json(openApiSpec, {
 		headers: {
+			// Public read-only spec — intentionally open to all origins.
 			"Access-Control-Allow-Origin": "*",
 			"Cache-Control": "public, max-age=3600",
 		},
