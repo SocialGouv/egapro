@@ -334,6 +334,69 @@
         "sirens": ["444555666"]
       },
       "realmRoles": ["user"]
+    },
+    {
+      "username": "dominique.bouteiller@sg.social.gouv.fr",
+      "email": "dominique.bouteiller@sg.social.gouv.fr",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Dominique",
+      "lastName": "Bouteiller",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mCQe#F%P7wgXm#",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0612345678"],
+        "job": ["Responsable RH"],
+        "sirens": ["491753364, 384964508, 440137818, 440137982, 441388311, 804450377, 817989791, 820709046, 834547168, 351630371, 983923384, 442424560, 821832219, 982446213, 982446122, 981216658, 980276067"]
+      },
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "pro.lucievidal@gmail.com",
+      "email": "pro.lucievidal@gmail.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Lucie",
+      "lastName": "Vidal",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mCQe#F%P7wgXm#",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0612345678"],
+        "job": ["Responsable RH"],
+        "sirens": ["491753364, 384964508, 440137818, 440137982, 441388311, 804450377, 817989791, 820709046, 834547168, 351630371, 983923384, 442424560, 821832219, 982446213, 982446122, 981216658, 980276067"]
+      },
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "aljanuel.pro@gmail.com",
+      "email": "aljanuel.pro@gmail.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "A.",
+      "lastName": "Ljanuel",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mCQe#F%P7wgXm#",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "phoneNumber": ["0612345678"],
+        "job": ["Responsable RH"],
+        "sirens": ["491753364, 384964508, 440137818, 440137982, 441388311, 804450377, 817989791, 820709046, 834547168, 351630371, 983923384, 442424560, 821832219, 982446213, 982446122, 981216658, 980276067"]
+      },
+      "realmRoles": ["user"]
     }
   ]
 }
