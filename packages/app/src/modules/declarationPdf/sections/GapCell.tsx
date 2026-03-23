@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { formatGap, gapLevel } from "~/modules/declaration-remuneration";
+import { formatGap, gapLevel } from "~/modules/domain";
 
 import { styles } from "../pdfStyles";
 

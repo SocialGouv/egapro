@@ -6,7 +6,7 @@ import {
 	computeTotal,
 	displayDecimal,
 	formatTotal,
-} from "~/modules/declaration-remuneration/shared/gapUtils";
+} from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";

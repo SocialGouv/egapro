@@ -1,9 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import {
-	formatCurrency,
-	parseEmployeeCategories,
-} from "~/modules/declaration-remuneration";
+import { parseEmployeeCategories } from "~/modules/declaration-remuneration";
+import { formatCurrency } from "~/modules/domain";
 
 import { styles } from "../pdfStyles";
 import type { DeclarationPdfData } from "../types";

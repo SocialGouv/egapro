@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { getCseYear } from "~/modules/domain";
 import { ConfirmationPage } from "../ConfirmationPage";
 
 vi.mock("~/trpc/react", () => ({
@@ -13,7 +14,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 describe("ConfirmationPage", () => {
-	const year = new Date().getFullYear() + 1;
+	const year = getCseYear();
 
 	it("renders the page title", () => {
 		render(<ConfirmationPage />);

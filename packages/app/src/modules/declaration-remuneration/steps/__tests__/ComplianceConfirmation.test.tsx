@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { getCurrentYear } from "~/modules/domain";
 
 vi.mock(
 	"~/modules/declaration-remuneration/shared/ComplianceCompletionEffect",
@@ -24,7 +25,7 @@ describe("ComplianceConfirmation", () => {
 	it("displays the completion message with current year", () => {
 		render(<ComplianceConfirmation />);
 
-		const year = new Date().getFullYear();
+		const year = getCurrentYear();
 		expect(
 			screen.getByText(
 				new RegExp(`Votre parcours de mise en conformité ${year} est terminé`),

@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
-
+import {
+	computeGap,
+	computeProportion,
+	formatGapCompact,
+	GAP_ALERT_THRESHOLD,
+} from "~/modules/domain";
 import type { PayGapRow } from "../types";
-import { computeGap, computeProportion, formatGapCompact } from "./gapUtils";
 import styles from "./InterpretationCallout.module.scss";
 
 type GapDirection = "women" | "men" | "balanced";
@@ -36,7 +40,7 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 		: null;
 
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
-	const hasHighGap = gaps.some((g) => g !== null && g >= 5);
+	const hasHighGap = gaps.some((g) => g !== null && g >= GAP_ALERT_THRESHOLD);
 
 	// Determine direction based on raw values (women < men = disfavor of women)
 	let womenLowerCount = 0;

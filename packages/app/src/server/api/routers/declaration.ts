@@ -1,13 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
-
-import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
 	updateStepCategoriesSchema,
 } from "~/modules/declaration-remuneration/schemas";
+import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
+import { getCurrentYear } from "~/modules/domain";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	declarationCategories,
@@ -21,10 +21,6 @@ import {
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 } from "./declarationHelpers";
-
-function getCurrentYear() {
-	return new Date().getFullYear();
-}
 
 export const declarationRouter = createTRPCRouter({
 	getOrCreate: companyProcedure.query(async ({ ctx }) => {

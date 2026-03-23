@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { getCurrentYear } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/home";
 import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
 import common from "../shared/common.module.scss";
 
 export function ComplianceConfirmation() {
-	const currentYear = new Date().getFullYear();
+	const currentYear = getCurrentYear();
 
 	return (
 		<div className={common.flexColumnGap2}>

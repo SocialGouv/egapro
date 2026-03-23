@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
+import { getCurrentYear } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -13,7 +14,7 @@ import { updateHasCseSchema } from "./schemas";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = getCurrentYear();
 
 type Props = {
 	company: {

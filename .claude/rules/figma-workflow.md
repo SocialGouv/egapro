@@ -65,7 +65,7 @@ Read `fontSize` from the Figma node's `textStyle`. Map to the correct DSFR class
 
 **Do not assume any cell, label, or value is regular weight by default** — always check the Figma data.
 
-**Figma API limitations**: the API only exposes the *dominant* style of a text node. Character-level overrides (e.g., a bold number inside a regular sentence) are invisible. When the API shows `Regular` but bold is plausible, **always download a screenshot** (`download_figma_images`) to verify visually.
+**Figma API limitations**: the API only exposes the *dominant* style of a text node. Character-level overrides (e.g., a bold number inside a regular sentence) are invisible. When the API shows `Regular` but bold is plausible, **always download a screenshot** (`get_screenshot`) to verify visually.
 
 **Tables and data grids**: always download a screenshot and verify bold **cell-by-cell**. Common bold patterns:
 - Summary/total columns or rows
@@ -95,7 +95,7 @@ Consider that components may encapsulate siblings: if a title is inside a compon
 
 For **every pair of adjacent elements**, compare the Figma spacing with the code's margin/gap:
 
-1. **Read Figma spacing**: fetch the parent frame with `get_figma_data` and read its `itemSpacing` / `gap`
+1. **Read Figma spacing**: fetch the parent frame with `get_design_context` and read its `itemSpacing` / `gap`
 2. **Map to DSFR**: `1w` = 8px, `2w` = 16px, `3w` = 24px, `4w` = 32px, `5w` = 40px
 3. **Verify the CSS value**: check in `public/dsfr/dsfr.css` — never guess (e.g., `3w` = 24px, not 12px)
 4. **Flex vs. normal flow**: in flex containers, margins **add to** gap (no collapsing). In normal flow, vertical margins collapse to `max(top, bottom)`. A `margin-top: 32px` child inside a `gap: 24px` flex parent = 56px total, not 32px.
@@ -116,7 +116,7 @@ Do not add elements (tooltips, icons, decorations) that are not present in the F
 
 When comparing a Figma screen to existing code, **never** rely on a flat text extraction (`text:` lines). Instead:
 
-1. **Fetch the content frame** with full depth via `get_figma_data`
+1. **Fetch the content frame** with full depth via `get_design_context`
 2. **Walk the node tree top-to-bottom**, listing every visible element in order: headings, paragraphs, alerts, tables, source lines, accordions, buttons, etc.
 3. **Build a structural checklist** — one line per element with its type, text, and position relative to siblings
 4. **Compare element-by-element** against the current code's JSX, checking:
@@ -139,7 +139,7 @@ If a browser MCP is available (Playwright, next-devtools `browser_eval`, etc.):
 
 1. **Navigate** to the page in the dev server
 2. **Take a screenshot** of the rendered page
-3. **Download the Figma screenshot** via `download_figma_images`
+3. **Download the Figma screenshot** via `get_screenshot`
 4. **Compare side-by-side** against the checklist below
 5. **Fix discrepancies** before moving to the next screen
 
@@ -148,7 +148,7 @@ If a browser MCP is available (Playwright, next-devtools `browser_eval`, etc.):
 If no browser tool is available:
 
 1. **Ask the user to take a screenshot** of the rendered page
-2. **Download the Figma screenshot** via `download_figma_images`
+2. **Download the Figma screenshot** via `get_screenshot`
 3. **Compare both images** against the checklist below
 4. **Fix discrepancies** before moving to the next screen
 
@@ -176,7 +176,7 @@ This step catches issues that code review alone misses: wrong CSS class names (t
 
 ## Tooling
 
-- Always use the **`figma-dev`** MCP server (`get_figma_data`) to fetch design data
+- Always use the **`figma`** MCP server (`get_design_context`) to fetch design data
 - Use `search_components` and `get_component_doc` from the **`dsfr`** MCP to verify component structure
 - When Figma data is too large, **do NOT fall back to flat text extraction**. Instead, fetch child nodes individually and walk the tree structure to build the element checklist described above
-- Use `download_figma_images` to get PNG screenshots for visual comparison (especially for tables, bold verification, and Phase 4 validation)
+- Use `get_screenshot` to get PNG screenshots for visual comparison (especially for tables, bold verification, and Phase 4 validation)
