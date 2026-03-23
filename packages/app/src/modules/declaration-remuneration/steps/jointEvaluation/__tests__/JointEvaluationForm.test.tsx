@@ -74,7 +74,7 @@ describe("JointEvaluationForm", () => {
 		fireEvent.click(submitButton);
 
 		expect(
-			screen.getByText(/veuillez sélectionner un fichier/i),
+			screen.getByText(/veuillez sélectionner au moins un fichier/i),
 		).toBeInTheDocument();
 	});
 

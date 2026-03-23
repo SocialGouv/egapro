@@ -92,6 +92,11 @@ export function StepPageClient({
 		case 6:
 			return (
 				<Step6Review
+					employeeCount={
+						declaration.totalWomen != null && declaration.totalMen != null
+							? declaration.totalWomen + declaration.totalMen
+							: undefined
+					}
 					isSubmitted={declaration.status === "submitted"}
 					step2Rows={step2Rows}
 					step3Data={step3Data}
