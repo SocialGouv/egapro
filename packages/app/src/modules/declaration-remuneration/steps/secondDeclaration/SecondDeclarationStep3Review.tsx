@@ -5,6 +5,7 @@ import { useCallback, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
+import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -16,7 +17,6 @@ import { CardTitle } from "../step6/CardTitle";
 import { GapColumn } from "../step6/GapColumn";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
 import { BASE_PATH } from "./constants";
-import { NextStepsSection } from "./NextStepsSection";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
@@ -137,7 +137,11 @@ export function SecondDeclarationStep3Review({
 				)}
 			</div>
 
-			<NextStepsSection hasGapsAboveThreshold={gapsExist} siren={siren} />
+			<NextStepsBox
+				hasGapsAboveThreshold={gapsExist}
+				isSecondDeclaration
+				siren={siren}
+			/>
 
 			<FormActions
 				nextLabel="Soumettre"

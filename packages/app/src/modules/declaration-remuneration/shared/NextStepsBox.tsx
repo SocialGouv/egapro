@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import stepStyles from "../steps/Step6Review.module.scss";
-import { UpdateCseModal } from "../steps/step6/UpdateCseModal";
+import styles from "./NextStepsBox.module.scss";
+import { UpdateCseModal } from "./UpdateCseModal";
 
 type Props = {
 	hasGapsAboveThreshold: boolean;
@@ -19,7 +19,7 @@ export function NextStepsBox({
 }: Props) {
 	return (
 		<>
-			<div className={stepStyles.nextSteps}>
+			<div className={styles.nextSteps}>
 				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
 
 				<p className="fr-mb-0">
@@ -39,7 +39,7 @@ export function NextStepsBox({
 					<div className="fr-mt-1w">
 						<button
 							aria-controls="update-cse-modal"
-							className={`fr-btn fr-btn--tertiary-no-outline fr-btn--sm ${stepStyles.buttonLink}`}
+							className={`fr-btn fr-btn--tertiary-no-outline fr-btn--sm ${styles.buttonLink}`}
 							data-fr-opened="false"
 							type="button"
 						>
@@ -87,7 +87,7 @@ export function NextStepsBox({
 					</>
 				)}
 
-				<hr className={stepStyles.separator} />
+				<hr className={styles.separator} />
 				<p className="fr-text--bold fr-text--lg fr-mb-0">Pour vous aider</p>
 				<ul className="fr-raw-list fr-links-group">
 					<li>
