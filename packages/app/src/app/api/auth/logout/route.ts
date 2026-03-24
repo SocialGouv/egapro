@@ -2,26 +2,39 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { auth } from "~/server/auth";
-import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
+import { buildProConnectLogoutUrl } from "~/server/auth/proconnect-logout";
 
 /**
  * Custom logout route that terminates both the local NextAuth session
- * and the ProConnect OIDC session (server-side fire-and-forget).
+ * and the ProConnect OIDC session (via browser redirect).
  *
- * The browser is always redirected to / (home page) — the ProConnect end_session
- * is called server-side to avoid post_logout_redirect_uri registration issues.
+ * Flow:
+ * 1. Delete the local JWT cookie on the response
+ * 2. Redirect the browser to ProConnect's end_session_endpoint
+ *    → ProConnect clears its own session cookie in the browser
+ *    → ProConnect redirects back to our post_logout_redirect_uri (home page)
+ *
+ * If ProConnect is unavailable or not configured, falls back to a simple
+ * redirect to the home page.
  */
 export async function GET(_request: NextRequest) {
 	const session = await auth();
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
+	// Build the ProConnect logout URL for browser-side session termination
+	let redirectTo = `${baseUrl}/`;
 	if (session?.user?.id) {
-		// Terminate ProConnect OIDC session server-side (fire-and-forget)
-		await terminateProConnectSession(session.user.id);
+		const proConnectUrl = await buildProConnectLogoutUrl(
+			session.user.id,
+			`${baseUrl}/`,
+		);
+		if (proConnectUrl) {
+			redirectTo = proConnectUrl;
+		}
 	}
 
-	const response = NextResponse.redirect(new URL("/", baseUrl));
+	const response = NextResponse.redirect(redirectTo);
 
 	// Delete the NextAuth session cookie directly on the redirect response
 	// to ensure the Set-Cookie header is included in the 307 response.

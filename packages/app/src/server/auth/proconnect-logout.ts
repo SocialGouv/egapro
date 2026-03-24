@@ -9,25 +9,22 @@ interface OidcConfig {
 }
 
 /**
- * Terminate the ProConnect OIDC session server-side.
+ * Build the ProConnect OIDC end_session URL for browser-side redirect.
  *
- * Steps:
- * 1. Fetch the user's id_token from the accounts table
- * 2. Fetch the end_session_endpoint from the configured issuer (charon proxy)
- * 3. Call end_session_endpoint server-side with id_token_hint (fire-and-forget)
+ * The browser must be redirected to this URL so that ProConnect clears its
+ * own session cookie. A server-side fetch to end_session_endpoint does NOT
+ * clear the browser-side ProConnect session, which causes "phantom" re-login.
  *
- * The browser is NOT redirected to ProConnect — the caller handles the redirect
- * directly to / (home page). This avoids the post_logout_redirect_uri registration issue
- * with ProConnect (charon proxy does not handle end_session redirect flow).
- *
- * The local session is JWT-based (stateless) — clearing the cookie is handled by the caller.
- * Silently fails if ProConnect is unreachable.
+ * Returns `null` if ProConnect is not configured, the id_token is missing,
+ * or the OIDC discovery fails — in that case the caller should fall back
+ * to a simple redirect to the home page.
  */
-export async function terminateProConnectSession(
+export async function buildProConnectLogoutUrl(
 	userId: string,
-): Promise<void> {
+	postLogoutRedirectUri: string,
+): Promise<string | null> {
 	if (!env.EGAPRO_PROCONNECT_ISSUER || !env.EGAPRO_PROCONNECT_CLIENT_ID) {
-		return;
+		return null;
 	}
 
 	// Fetch the stored id_token for this user's ProConnect account
@@ -38,10 +35,10 @@ export async function terminateProConnectSession(
 
 	const idToken = account?.id_token;
 	if (!idToken) {
-		return;
+		return null;
 	}
 
-	// Use the configured issuer (charon proxy) to discover the end_session_endpoint
+	// Discover the end_session_endpoint from the OIDC provider
 	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
@@ -49,15 +46,19 @@ export async function terminateProConnectSession(
 		const config = (await response.json()) as OidcConfig;
 
 		if (!config.end_session_endpoint) {
-			return;
+			return null;
 		}
 
 		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
+		logoutUrl.searchParams.set(
+			"post_logout_redirect_uri",
+			postLogoutRedirectUri,
+		);
 
-		// Fire-and-forget: terminate the OIDC session on ProConnect server-side
-		await fetch(logoutUrl.toString());
+		return logoutUrl.toString();
 	} catch {
-		// Silently fail — local session is already cleared
+		// Silently fail — local session cookie is still cleared by the caller
+		return null;
 	}
 }
