@@ -84,7 +84,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 	ensurePdfFontsRegistered();
 
 	const groupedOpinions = groupOpinionsByDeclaration(data.opinions);
-	const declarationNumbers = [...groupedOpinions.keys()].sort();
+	const declarationNumbers = [...groupedOpinions.keys()].sort((a, b) => a - b);
 
 	return (
 		<Document>
