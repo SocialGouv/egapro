@@ -8,8 +8,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
 	title: "Egapro",
-	description:
-		"Index de l'égalité professionnelle et représentation équilibrée femmes‑hommes",
+	description: "Indicateurs d'égalité professionnelle femmes‑hommes",
 };
 
 export default function RootLayout({
