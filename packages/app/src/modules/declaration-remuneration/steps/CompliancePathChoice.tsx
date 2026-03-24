@@ -241,6 +241,7 @@ export function CompliancePathChoice({
 			<DeclarationSuccessBanner
 				currentYear={currentYear}
 				email={email}
+				isSecondDeclaration={isSecondRound}
 				pdfDownloadHref={pdfDownloadHref}
 			/>
 
