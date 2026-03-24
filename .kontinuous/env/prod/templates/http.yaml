@@ -1,0 +1,186 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    application: egapro
+    component: api
+  name: api-crt
+spec:
+  dnsNames:
+  - egapro.travail.gouv.fr
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: api-crt
+  usages:
+  - digital signature
+  - key encipherment
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app-redirect
+spec:
+  dnsNames:
+  - egapro.fabrique.social.gouv.fr
+  - index-egapro.travail.gouv.fr
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: app-redirect
+  usages:
+  - digital signature
+  - key encipherment
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api
+  namespace: egapro
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`) && PathPrefix(`/api`)
+    middlewares:
+    - name: strip-api-prefix
+    priority: 100
+    services:
+    - name: api
+      port: 80
+  tls:
+    secretName: api-crt
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: app-redirect
+  namespace: egapro
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`egapro.fabrique.social.gouv.fr`) || Host(`index-egapro.travail.gouv.fr`)
+    middlewares:
+    - name: redirect-to-egapro-travail
+    priority: 10000
+    services:
+    - kind: TraefikService
+      name: noop@internal
+  tls:
+    secretName: app-redirect
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: app-redirect-index-egapro
+  namespace: egapro
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`index-egapro.travail.gouv.fr`) && (PathPrefix(`/simulateur`) ||
+      PathPrefix(`/declaration`))
+    middlewares:
+    - name: redirect-index-egapro-prefix
+    priority: 10001
+    services:
+    - kind: TraefikService
+      name: noop@internal
+  tls:
+    secretName: app-redirect
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx
+  namespace: egapro
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`)
+    middlewares:
+    - name: security-headers-nginx
+    priority: 10000
+    services:
+    - name: nginx
+      port: 80
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`) && PathPrefix(`/api/auth`)
+    middlewares:
+    - name: security-headers-nginx
+    priority: 10000
+    services:
+    - name: nginx
+      port: 80
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`) && PathPrefix(`/api/monitoring`)
+    middlewares:
+    - name: security-headers-nginx
+    priority: 10000
+    services:
+    - name: nginx
+      port: 80
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`) && PathPrefix(`/index-egapro/recherche`)
+    middlewares:
+    - name: security-headers-nginx
+    priority: 10000
+    services:
+    - name: nginx
+      port: 80
+  tls:
+    secretName: api-crt
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-index-egapro-prefix
+spec:
+  redirectRegex:
+    permanent: true
+    regex: ^https://index-egapro\.travail\.gouv\.fr(.*)
+    replacement: https://egapro.travail.gouv.fr/index-egapro${1}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-egapro-travail
+spec:
+  redirectRegex:
+    permanent: true
+    regex: ^https://[^/]+(.*)
+    replacement: https://egapro.travail.gouv.fr${1}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: security-headers-nginx
+spec:
+  headers:
+    customResponseHeaders:
+      Cross-Origin-Embedder-Policy: credentialless
+      Cross-Origin-Opener-Policy: same-origin
+      Cross-Origin-Resource-Policy: cross-origin
+      Permissions-Policy: fullscreen=(), display-capture=(), camera=(), microphone=(),
+        web-share=(), geolocation=()
+      Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: deny
+      X-XSS-Protection: 1; mode=block
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api-prefix
+spec:
+  stripPrefix:
+    prefixes:
+    - /api

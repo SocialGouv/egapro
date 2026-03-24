@@ -1,3 +1,11 @@
+## [3.17.1](https://github.com/SocialGouv/egapro/compare/v3.17.0...v3.17.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* configuration realm keycloak ([#2958](https://github.com/SocialGouv/egapro/issues/2958)) ([ed64157](https://github.com/SocialGouv/egapro/commit/ed6415784c852a7f7564283cc0077394b933ff45))
+* ingress order for httproutes ([80e934f](https://github.com/SocialGouv/egapro/commit/80e934fac687fe1242a8fda6ff620ed486c2da93))
+
 # [3.17.0](https://github.com/SocialGouv/egapro/compare/v3.16.0...v3.17.0) (2026-03-09)
 
 
