@@ -22,7 +22,7 @@ type Props = {
 };
 
 function formatDate(date: Date | null): string {
-	if (!date) return "-";
+	if (!date) return "Aucune";
 	return new Intl.DateTimeFormat("fr-FR", {
 		day: "2-digit",
 		month: "2-digit",
@@ -69,7 +69,17 @@ export function DeclarationsSection({
 	];
 
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
-	const visibleRows = allRows.slice(0, pageSize);
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize));
+	const safePage = Math.min(currentPage, totalPages);
+	const startIndex = (safePage - 1) * pageSize;
+	const visibleRows = allRows.slice(startIndex, startIndex + pageSize);
+
+	function handlePageSizeChange(newSize: number) {
+		setPageSize(newSize);
+		setCurrentPage(1);
+	}
 
 	return (
 		<div className="fr-container fr-my-6w">
@@ -88,7 +98,7 @@ export function DeclarationsSection({
 										<th scope="col">Année</th>
 										<th scope="col">Étape</th>
 										<th scope="col">Statut</th>
-										<th scope="col">Date limite de la déclaration</th>
+										<th scope="col">Échéance</th>
 										<th scope="col">Mise à jour</th>
 									</tr>
 								</thead>
@@ -123,7 +133,7 @@ export function DeclarationsSection({
 						<select
 							className="fr-select"
 							id="table-page-size"
-							onChange={(e) => setPageSize(Number(e.target.value))}
+							onChange={(e) => handlePageSizeChange(Number(e.target.value))}
 							value={pageSize}
 						>
 							{PAGE_SIZE_OPTIONS.map((size) => (
@@ -135,6 +145,13 @@ export function DeclarationsSection({
 					</div>
 				</div>
 			</div>
+			{totalPages > 1 && (
+				<Pagination
+					currentPage={safePage}
+					onPageChange={setCurrentPage}
+					totalPages={totalPages}
+				/>
+			)}
 		</div>
 	);
 }
@@ -173,4 +190,122 @@ function DeclarationRow({
 			<td>{formatDate(declaration.updatedAt)}</td>
 		</tr>
 	);
+}
+
+type PaginationProps = {
+	currentPage: number;
+	totalPages: number;
+	onPageChange: (page: number) => void;
+};
+
+function Pagination({
+	currentPage,
+	totalPages,
+	onPageChange,
+}: PaginationProps) {
+	const pages = buildPageNumbers(currentPage, totalPages);
+
+	return (
+		<nav aria-label="Pagination" className="fr-pagination fr-mt-2w">
+			<ul className="fr-pagination__list">
+				<li>
+					<button
+						aria-disabled={currentPage === 1}
+						className="fr-pagination__link fr-pagination__link--first"
+						disabled={currentPage === 1}
+						onClick={() => onPageChange(1)}
+						title="Première page"
+						type="button"
+					>
+						Première page
+					</button>
+				</li>
+				<li>
+					<button
+						aria-disabled={currentPage === 1}
+						className="fr-pagination__link fr-pagination__link--prev fr-pagination__link--lg-label"
+						disabled={currentPage === 1}
+						onClick={() => onPageChange(currentPage - 1)}
+						title="Page précédente"
+						type="button"
+					>
+						Page précédente
+					</button>
+				</li>
+				{pages.map((page) =>
+					page === "ellipsis-start" || page === "ellipsis-end" ? (
+						<li key={page}>
+							<span className="fr-pagination__link fr-hidden fr-unhidden-lg">
+								…
+							</span>
+						</li>
+					) : (
+						<li key={page}>
+							<button
+								aria-current={page === currentPage ? "page" : undefined}
+								className="fr-pagination__link"
+								onClick={() => onPageChange(page)}
+								title={`Page ${page}`}
+								type="button"
+							>
+								{page}
+							</button>
+						</li>
+					),
+				)}
+				<li>
+					<button
+						aria-disabled={currentPage === totalPages}
+						className="fr-pagination__link fr-pagination__link--next fr-pagination__link--lg-label"
+						disabled={currentPage === totalPages}
+						onClick={() => onPageChange(currentPage + 1)}
+						title="Page suivante"
+						type="button"
+					>
+						Page suivante
+					</button>
+				</li>
+				<li>
+					<button
+						aria-disabled={currentPage === totalPages}
+						className="fr-pagination__link fr-pagination__link--last"
+						disabled={currentPage === totalPages}
+						onClick={() => onPageChange(totalPages)}
+						title="Dernière page"
+						type="button"
+					>
+						Dernière page
+					</button>
+				</li>
+			</ul>
+		</nav>
+	);
+}
+
+type PageItem = number | "ellipsis-start" | "ellipsis-end";
+
+function buildPageNumbers(currentPage: number, totalPages: number): PageItem[] {
+	if (totalPages <= 7) {
+		return Array.from({ length: totalPages }, (_, i) => i + 1);
+	}
+
+	const pages: PageItem[] = [1];
+
+	if (currentPage > 3) {
+		pages.push("ellipsis-start");
+	}
+
+	const start = Math.max(2, currentPage - 1);
+	const end = Math.min(totalPages - 1, currentPage + 1);
+
+	for (let i = start; i <= end; i++) {
+		pages.push(i);
+	}
+
+	if (currentPage < totalPages - 2) {
+		pages.push("ellipsis-end");
+	}
+
+	pages.push(totalPages);
+	return pages;
 }

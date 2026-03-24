@@ -1,19 +1,16 @@
-import Image from "next/image";
+import { DsfrPictogram } from "~/modules/home";
+
+import styles from "./ArchivesSection.module.scss";
 
 export function ArchivesSection() {
 	return (
 		<div className="fr-container fr-mb-6w">
-			<div className="fr-card fr-card--grey fr-card--no-border fr-p-3w">
+			<div className={styles.card}>
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-auto">
-						<Image
-							alt=""
-							aria-hidden="true"
-							className="fr-artwork"
-							height={80}
-							src="/dsfr/artwork/pictograms/document/archive.svg"
-							unoptimized
-							width={80}
+						<DsfrPictogram
+							path="/dsfr/artwork/pictograms/document/archive.svg"
+							size={80}
 						/>
 					</div>
 					<div className="fr-col">

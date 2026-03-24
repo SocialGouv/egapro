@@ -18,9 +18,9 @@ describe("WelcomeBanner", () => {
 		).toBeInTheDocument();
 	});
 
-	it("has the DSFR info alert class", () => {
+	it("has the DSFR info notice class", () => {
 		const { container } = render(<WelcomeBanner />);
-		expect(container.querySelector(".fr-alert--info")).toBeInTheDocument();
+		expect(container.querySelector(".fr-notice--info")).toBeInTheDocument();
 	});
 
 	it("hides the banner when close button is clicked", () => {
