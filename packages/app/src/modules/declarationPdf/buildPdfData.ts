@@ -120,7 +120,11 @@ export async function buildPdfData(
 	};
 
 	const step4Categories = mapStepCategories(categories, 4);
-	const step5Categories = mapToEmployeeCategoryRows(jobs, empCats, declarationType);
+	const step5Categories = mapToEmployeeCategoryRows(
+		jobs,
+		empCats,
+		declarationType,
+	);
 
 	return {
 		companyName: company?.name ?? `Entreprise ${siren}`,
