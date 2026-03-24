@@ -81,9 +81,10 @@ export async function completeSecondDeclaration(
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
 
-	// Step 3: Review and submit
+	// Step 3: Review and submit (opens confirmation modal)
+	await page.getByRole("button", { name: "Soumettre" }).click();
 	await page
 		.getByText(/Je certifie que les données saisies sont exactes/)
 		.click();
-	await page.getByRole("button", { name: "Soumettre" }).click();
+	await page.getByRole("button", { name: "Valider" }).click();
 }
