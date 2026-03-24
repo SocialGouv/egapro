@@ -145,8 +145,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 								{data.jointEvaluationFile.fileName}
 							</Text>
 							<Text style={styles.tableCellValue}>
-								Déposé le{" "}
-								{formatLongDate(data.jointEvaluationFile.uploadedAt)}
+								Déposé le {formatLongDate(data.jointEvaluationFile.uploadedAt)}
 							</Text>
 						</View>
 					) : (
