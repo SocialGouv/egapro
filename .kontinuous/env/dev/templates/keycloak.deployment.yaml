@@ -34,11 +34,13 @@ spec:
             - sh
             - -c
             - |
-              sed -e "s/__KEYCLOAK_RGAA_PASSWORD__/${KEYCLOAK_RGAA_PASSWORD}/g" \
-                  -e "s/__KEYCLOAK_RGAA_EMAIL__/${KEYCLOAK_RGAA_EMAIL}/g" \
-                  -e "s/__KEYCLOAK_RGAA_EMAIL_2__/${KEYCLOAK_RGAA_EMAIL_2}/g" \
-                  -e "s/__KEYCLOAK_RGAA_EMAIL_3__/${KEYCLOAK_RGAA_EMAIL_3}/g" \
-                /realm-template/realm-egapro.json > /realm-ready/realm-egapro.json
+              awk '{
+                gsub(/__KEYCLOAK_RGAA_PASSWORD__/, ENVIRON["KEYCLOAK_RGAA_PASSWORD"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL__/, ENVIRON["KEYCLOAK_RGAA_EMAIL"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL_2__/, ENVIRON["KEYCLOAK_RGAA_EMAIL_2"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL_3__/, ENVIRON["KEYCLOAK_RGAA_EMAIL_3"]);
+                print
+              }' /realm-template/realm-egapro.json > /realm-ready/realm-egapro.json
           env:
             - name: KEYCLOAK_RGAA_PASSWORD
               valueFrom:
