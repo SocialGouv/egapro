@@ -345,7 +345,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "mCQe#F%P7wgXm#",
+          "value": "__KEYCLOAK_RGAA_PASSWORD__",
           "temporary": false
         }
       ],
@@ -366,7 +366,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "mCQe#F%P7wgXm#",
+          "value": "__KEYCLOAK_RGAA_PASSWORD__",
           "temporary": false
         }
       ],
@@ -387,7 +387,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "mCQe#F%P7wgXm#",
+          "value": "__KEYCLOAK_RGAA_PASSWORD__",
           "temporary": false
         }
       ],
