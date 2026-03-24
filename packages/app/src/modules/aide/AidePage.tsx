@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Breadcrumb } from "~/modules/layout";
 
-import { AideBottomBanner } from "./AideBottomBanner";
 import { AideCallout } from "./AideCallout";
 import styles from "./AideLayout.module.scss";
 import { AideResourceCards } from "./AideResourceCards";
@@ -41,8 +40,6 @@ export function AidePage() {
 				<div className="fr-mb-4w">
 					<AideTextesReference />
 				</div>
-
-				<AideBottomBanner />
 			</div>
 		</main>
 	);
