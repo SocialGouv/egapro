@@ -2,26 +2,26 @@ import { eq } from "drizzle-orm";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { accounts, sessions } from "~/server/db/schema";
+import { accounts } from "~/server/db/schema";
 
 interface OidcConfig {
 	end_session_endpoint: string;
 }
 
 /**
- * Terminate the ProConnect OIDC session server-side and clean up local sessions.
+ * Terminate the ProConnect OIDC session server-side.
  *
  * Steps:
  * 1. Fetch the user's id_token from the accounts table
- * 2. Delete all sessions for the user from the DB
- * 3. Fetch the end_session_endpoint from the configured issuer (charon proxy)
- * 4. Call end_session_endpoint server-side with id_token_hint (fire-and-forget)
+ * 2. Fetch the end_session_endpoint from the configured issuer (charon proxy)
+ * 3. Call end_session_endpoint server-side with id_token_hint (fire-and-forget)
  *
  * The browser is NOT redirected to ProConnect — the caller handles the redirect
  * directly to / (home page). This avoids the post_logout_redirect_uri registration issue
  * with ProConnect (charon proxy does not handle end_session redirect flow).
  *
- * Silently fails if ProConnect is unreachable — the local session is already cleared.
+ * The local session is JWT-based (stateless) — clearing the cookie is handled by the caller.
+ * Silently fails if ProConnect is unreachable.
  */
 export async function terminateProConnectSession(
 	userId: string,
@@ -35,9 +35,6 @@ export async function terminateProConnectSession(
 		where: eq(accounts.userId, userId),
 		columns: { id_token: true },
 	});
-
-	// Delete all local sessions for this user
-	await db.delete(sessions).where(eq(sessions.userId, userId));
 
 	const idToken = account?.id_token;
 	if (!idToken) {

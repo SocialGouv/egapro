@@ -65,33 +65,6 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 	user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
-export const sessions = createTable(
-	"session",
-	(d) => ({
-		sessionToken: d.varchar({ length: 255 }).notNull().primaryKey(),
-		userId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => users.id),
-		expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
-	}),
-	(t) => [index("t_user_id_idx").on(t.userId)],
-);
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-	user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
-export const verificationTokens = createTable(
-	"verification_token",
-	(d) => ({
-		identifier: d.varchar({ length: 255 }).notNull(),
-		token: d.varchar({ length: 255 }).notNull(),
-		expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
-	}),
-	(t) => [primaryKey({ columns: [t.identifier, t.token] })],
-);
-
 export const declarations = createTable(
 	"declaration",
 	(d) => ({

@@ -54,7 +54,7 @@ describe("ConfirmationPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders document download section", () => {
+	it("renders document download section without second declaration card", () => {
 		render(<ConfirmationPage />);
 
 		expect(
@@ -64,11 +64,54 @@ describe("ConfirmationPage", () => {
 			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
 		).toBeInTheDocument();
 		expect(
+			screen.queryByText(/récapitulatif de la seconde déclaration/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(/récapitulatif des éléments transmis/),
+		).toBeInTheDocument();
+	});
+
+	it("renders second declaration card when hasSecondDeclaration is true", () => {
+		render(<ConfirmationPage hasSecondDeclaration />);
+
+		expect(
+			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
+		).toBeInTheDocument();
+		expect(
 			screen.getByText(/récapitulatif de la seconde déclaration/),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/récapitulatif des éléments transmis/),
 		).toBeInTheDocument();
+	});
+
+	it("renders download cards as links with correct hrefs", () => {
+		render(<ConfirmationPage />);
+
+		const declarationLink = screen
+			.getByText(/récapitulatif de la déclaration des indicateurs/)
+			.closest("a");
+		expect(declarationLink).toHaveAttribute("href", "/api/declaration-pdf");
+		expect(declarationLink).toHaveAttribute("download");
+
+		const transmittedLink = screen
+			.getByText(/récapitulatif des éléments transmis/)
+			.closest("a");
+		expect(transmittedLink).toHaveAttribute("href", "/api/transmitted-pdf");
+		expect(transmittedLink).toHaveAttribute("download");
+	});
+
+	it("renders second declaration download card with correction href", () => {
+		render(<ConfirmationPage hasSecondDeclaration />);
+
+		const secondDeclLink = screen
+			.getByText(/récapitulatif de la seconde déclaration/)
+			.closest("a");
+		expect(secondDeclLink).toHaveAttribute(
+			"href",
+			"/api/declaration-pdf?type=correction",
+		);
+		expect(secondDeclLink).toHaveAttribute("download");
 	});
 
 	it("renders the feedback banner", () => {

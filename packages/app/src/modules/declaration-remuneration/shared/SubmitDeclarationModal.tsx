@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const MODAL_ID = "submit-modal";
+const MODAL_ID = "submit-declaration-modal";
 
 type Props = {
 	modalRef: React.RefObject<HTMLDialogElement | null>;
@@ -10,21 +10,27 @@ type Props = {
 	onSubmit: () => void;
 	isPending: boolean;
 	year: number;
+	isSecondDeclaration?: boolean;
 };
 
-/** Confirmation dialog for submitting the declaration with certification checkbox */
-export function SubmitModal({
+/** Shared confirmation dialog for submitting a declaration with certification checkbox */
+export function SubmitDeclarationModal({
 	modalRef,
 	onClose,
 	onSubmit,
 	isPending,
 	year,
+	isSecondDeclaration,
 }: Props) {
 	const [certified, setCertified] = useState(false);
 
+	const description = isSecondDeclaration
+		? `Vous allez soumettre la seconde déclaration des écarts de rémunération par catégorie de salariés ${year} aux services du ministère chargé du travail.`
+		: `Vous allez soumettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
+
 	return (
 		<dialog
-			aria-labelledby="submit-modal-title"
+			aria-labelledby="submit-declaration-modal-title"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={modalRef}
@@ -45,26 +51,24 @@ export function SubmitModal({
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id="submit-modal-title">
+								<h2
+									className="fr-modal__title"
+									id="submit-declaration-modal-title"
+								>
 									Soumettre
 								</h2>
-								<p>
-									Vous allez soumettre la déclaration des indicateurs de
-									rémunération {year} aux services du ministère chargé du
-									travail.
-								</p>
-								<p className="fr-text--bold">
-									Aucune obligation de déclaration ne s&apos;applique dans votre
-									cas.
-								</p>
+								<p>{description}</p>
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
 										checked={certified}
-										id="submit-certify"
+										id="submit-declaration-certify"
 										onChange={(e) => setCertified(e.target.checked)}
 										type="checkbox"
 									/>
-									<label className="fr-label" htmlFor="submit-certify">
+									<label
+										className="fr-label"
+										htmlFor="submit-declaration-certify"
+									>
 										Je certifie que les données saisies sont exactes et
 										conformes aux informations disponibles dans les systèmes de
 										paie et de gestion des ressources humaines de

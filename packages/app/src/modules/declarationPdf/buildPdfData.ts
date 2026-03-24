@@ -37,6 +37,7 @@ export async function buildPdfData(
 	siren: string,
 	year: number,
 	now: Date,
+	declarationType: "initial" | "correction" = "initial",
 ): Promise<DeclarationPdfData> {
 	const [declaration] = await db
 		.select()
@@ -119,7 +120,11 @@ export async function buildPdfData(
 	};
 
 	const step4Categories = mapStepCategories(categories, 4);
-	const step5Categories = mapToEmployeeCategoryRows(jobs, empCats, "initial");
+	const step5Categories = mapToEmployeeCategoryRows(
+		jobs,
+		empCats,
+		declarationType,
+	);
 
 	return {
 		companyName: company?.name ?? `Entreprise ${siren}`,
@@ -130,6 +135,7 @@ export async function buildPdfData(
 			month: "long",
 			year: "numeric",
 		}),
+		isSecondDeclaration: declarationType === "correction",
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
 		step1Categories,

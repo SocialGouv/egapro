@@ -83,6 +83,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 			<SecondDeclarationStep3Review
 				hasCse={company.hasCse}
 				secondDeclarationCategories={reviewCategories}
+				siren={data.declaration.siren}
 			/>
 		</HydrateClient>
 	);
