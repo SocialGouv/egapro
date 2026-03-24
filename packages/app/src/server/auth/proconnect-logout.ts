@@ -1,12 +1,13 @@
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { accounts } from "~/server/db/schema";
 
-interface OidcConfig {
-	end_session_endpoint: string;
-}
+const oidcConfigSchema = z.object({
+	end_session_endpoint: z.string().url(),
+});
 
 /**
  * Build the ProConnect OIDC end_session URL for browser-side redirect.
@@ -43,11 +44,7 @@ export async function buildProConnectLogoutUrl(
 
 	try {
 		const response = await fetch(wellKnownUrl);
-		const config = (await response.json()) as OidcConfig;
-
-		if (!config.end_session_endpoint) {
-			return null;
-		}
+		const config = oidcConfigSchema.parse(await response.json());
 
 		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
