@@ -47,3 +47,12 @@ export function formatTotal(value: number | null, unit: string): string {
 	if (value === null) return "-";
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
+
+/** Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`. */
+export function formatLongDate(date: Date): string {
+	return date.toLocaleDateString("fr-FR", {
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+	});
+}

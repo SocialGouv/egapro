@@ -23,6 +23,7 @@ export {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatLongDate,
 	formatTotal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
