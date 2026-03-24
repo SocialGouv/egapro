@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { getCurrentYear } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/home";
 import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
@@ -30,6 +31,8 @@ export function ComplianceConfirmation() {
 				Votre entreprise ne dispose pas de CSE. Aucun avis CSE n&apos;est
 				requis.
 			</p>
+
+			<DownloadDeclarationPdfButton />
 
 			<div className="fr-mt-4w">
 				<Link className="fr-btn" href="/mon-espace">

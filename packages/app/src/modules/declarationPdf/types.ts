@@ -11,6 +11,7 @@ export type DeclarationPdfData = {
 	siren: string;
 	year: number;
 	generatedAt: string;
+	isSecondDeclaration: boolean;
 	totalWomen: number;
 	totalMen: number;
 	step1Categories: CategoryData[];

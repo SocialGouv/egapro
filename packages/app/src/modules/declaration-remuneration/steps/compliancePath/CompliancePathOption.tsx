@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
+import styles from "./CompliancePathOption.module.scss";
+
 type Props = {
 	id: string;
 	name: string;
@@ -30,7 +32,7 @@ export function CompliancePathOption({
 	disabled = false,
 }: Props) {
 	return (
-		<div className="fr-border fr-p-2w fr-border-radius--s">
+		<div className={styles.option}>
 			<div className="fr-radio-group">
 				<input
 					checked={checked}

@@ -28,6 +28,7 @@ export function SecondDeclarationStep2Form({
 	const router = useRouter();
 	const [startDate, setStartDate] = useState(initialStartDate);
 	const [endDate, setEndDate] = useState(initialEndDate);
+	const [periodError, setPeriodError] = useState("");
 
 	const sourceData =
 		initialSecondDeclarationCategories &&
@@ -47,15 +48,22 @@ export function SecondDeclarationStep2Form({
 			initialSource={initialSource}
 			instructionText="Modifiez les données de votre première déclaration avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
-			onSubmit={(data) =>
+			onSubmit={(data) => {
+				if (!startDate || !endDate) {
+					setPeriodError(
+						"La période de référence est obligatoire. Veuillez renseigner les dates de début et de fin.",
+					);
+					return;
+				}
+				setPeriodError("");
 				mutation.mutate({
 					declarationType: "correction",
 					source: data.source,
 					categories: data.categories,
-					referencePeriodStart: startDate || undefined,
-					referencePeriodEnd: endDate || undefined,
-				})
-			}
+					referencePeriodStart: startDate,
+					referencePeriodEnd: endDate,
+				});
+			}}
 			previousHref={`${BASE_PATH}/etape/1`}
 			readOnlyNameDetail
 			referencePeriodPicker={
@@ -67,7 +75,7 @@ export function SecondDeclarationStep2Form({
 				/>
 			}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
-			submitError={mutation.error?.message}
+			submitError={periodError || mutation.error?.message}
 			title={
 				<h1 className="fr-h4 fr-mb-0">
 					Parcours de mise en conformité pour l&apos;indicateur par catégorie de

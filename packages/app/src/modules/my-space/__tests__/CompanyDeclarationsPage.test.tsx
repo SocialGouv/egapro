@@ -7,6 +7,7 @@ vi.mock("~/trpc/react", () => ({
 			updateHasCse: {
 				useMutation: vi.fn().mockReturnValue({
 					mutate: vi.fn(),
+					mutateAsync: vi.fn(),
 					isPending: false,
 				}),
 			},
@@ -15,6 +16,7 @@ vi.mock("~/trpc/react", () => ({
 			updatePhone: {
 				useMutation: vi.fn().mockReturnValue({
 					mutate: vi.fn(),
+					mutateAsync: vi.fn(),
 					isPending: false,
 				}),
 			},

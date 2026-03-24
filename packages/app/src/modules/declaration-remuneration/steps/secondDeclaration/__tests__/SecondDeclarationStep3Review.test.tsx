@@ -26,6 +26,14 @@ vi.mock("~/trpc/react", () => ({
 				}),
 			},
 		},
+		company: {
+			updateHasCse: {
+				useMutation: vi.fn().mockReturnValue({
+					mutate: vi.fn(),
+					isPending: false,
+				}),
+			},
+		},
 	},
 }));
 
@@ -77,6 +85,7 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(
@@ -92,6 +101,7 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(screen.getByText(/Catégorie d.emplois n°1/)).toBeInTheDocument();
@@ -102,6 +112,7 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
@@ -117,48 +128,40 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
-	it("renders certification checkbox", () => {
+	it("renders Soumettre button", () => {
 		render(
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(
-			screen.getByLabelText(/Je certifie que les données saisies/),
+			screen.getByRole("button", { name: /soumettre/i }),
 		).toBeInTheDocument();
 	});
 
-	it("disables submit button when not certified", () => {
+	it("renders modal with certification checkbox", () => {
 		render(
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
-		const submitButton = screen.getByRole("button", { name: /soumettre/i });
-		expect(submitButton).toBeDisabled();
-	});
-
-	it("enables submit button when certified", async () => {
-		const user = userEvent.setup();
-		render(
-			<SecondDeclarationStep3Review
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-			/>,
-		);
-		const checkbox = screen.getByLabelText(
-			/Je certifie que les données saisies/,
-		);
-		await user.click(checkbox);
-		const submitButton = screen.getByRole("button", { name: /soumettre/i });
-		expect(submitButton).not.toBeDisabled();
+		expect(
+			screen.getAllByText(/seconde déclaration des écarts de rémunération/)
+				.length,
+		).toBeGreaterThanOrEqual(1);
+		expect(
+			screen.getByLabelText(/Je certifie que les données saisies/),
+		).toBeInTheDocument();
 	});
 
 	it("renders previous link to step 2", () => {
@@ -166,6 +169,7 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
+				siren="532847196"
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
@@ -195,11 +199,10 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithHighGaps}
+				siren="532847196"
 			/>,
 		);
-		expect(
-			screen.getByText("Des écarts ont été de nouveau détectés"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
 	});
 
 	it("does not show gap warning when all gaps < 5%", () => {
@@ -223,10 +226,11 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithLowGaps}
+				siren="532847196"
 			/>,
 		);
 		expect(
-			screen.queryByText("Des écarts ont été de nouveau détectés"),
+			screen.queryByText("Des écarts ont été détectés"),
 		).not.toBeInTheDocument();
 	});
 
@@ -243,11 +247,22 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={true}
 				secondDeclarationCategories={categoriesWithHighGaps}
+				siren="532847196"
 			/>,
 		);
 
-		await user.click(screen.getByLabelText(/Je certifie/));
+		// Click Soumettre to trigger the modal open (modal stays in DOM but hidden in JSDOM)
 		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		// Interact with modal elements using hidden option (dialog is not open in JSDOM)
+		const checkbox = screen.getByLabelText(/Je certifie/, {
+			selector: "input",
+		});
+		await user.click(checkbox);
+		const validerButton = screen.getByRole("button", {
+			name: /valider/i,
+			hidden: true,
+		});
+		await user.click(validerButton);
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
@@ -268,11 +283,20 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={true}
 				secondDeclarationCategories={categoriesNoGaps}
+				siren="532847196"
 			/>,
 		);
 
-		await user.click(screen.getByLabelText(/Je certifie/));
 		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		const checkbox = screen.getByLabelText(/Je certifie/, {
+			selector: "input",
+		});
+		await user.click(checkbox);
+		const validerButton = screen.getByRole("button", {
+			name: /valider/i,
+			hidden: true,
+		});
+		await user.click(validerButton);
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
@@ -291,11 +315,20 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={false}
 				secondDeclarationCategories={categoriesNoGaps}
+				siren="532847196"
 			/>,
 		);
 
-		await user.click(screen.getByLabelText(/Je certifie/));
 		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		const checkbox = screen.getByLabelText(/Je certifie/, {
+			selector: "input",
+		});
+		await user.click(checkbox);
+		const validerButton = screen.getByRole("button", {
+			name: /valider/i,
+			hidden: true,
+		});
+		await user.click(validerButton);
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
@@ -308,6 +341,7 @@ describe("SecondDeclarationStep3Review", () => {
 			<SecondDeclarationStep3Review
 				hasCse={null}
 				secondDeclarationCategories={[]}
+				siren="532847196"
 			/>,
 		);
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
