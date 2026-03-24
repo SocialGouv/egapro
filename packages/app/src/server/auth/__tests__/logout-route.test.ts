@@ -9,6 +9,7 @@ vi.mock("~/server/auth/proconnect-logout", () => ({
 	buildProConnectLogoutUrl: vi.fn(),
 }));
 
+import { env } from "~/env";
 import { auth } from "~/server/auth";
 import { buildProConnectLogoutUrl } from "~/server/auth/proconnect-logout";
 
@@ -34,6 +35,10 @@ function mockSession(user: Record<string, unknown>) {
 describe("GET /api/auth/logout", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Default: no post_logout_redirect_uri (review app mode)
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI = undefined;
 	});
 
 	it("redirects to the home page when no session", async () => {
@@ -55,7 +60,21 @@ describe("GET /api/auth/logout", () => {
 		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
 	});
 
-	it("redirects to ProConnect end_session URL when available", async () => {
+	it("skips ProConnect logout when post_logout_redirect_uri is not configured", async () => {
+		mockSession({ id: "user-123", email: "test@example.com" });
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+		expect(mockBuildUrl).not.toHaveBeenCalled();
+	});
+
+	it("redirects to ProConnect end_session URL when post_logout_redirect_uri is configured", async () => {
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI =
+			"https://egapro.travail.gouv.fr/";
 		mockSession({ id: "user-123", email: "test@example.com", name: "Test" });
 		mockBuildUrl.mockResolvedValue(
 			"https://proconnect.example.com/session/end?id_token_hint=tok",
@@ -69,11 +88,15 @@ describe("GET /api/auth/logout", () => {
 		);
 		expect(mockBuildUrl).toHaveBeenCalledWith(
 			"user-123",
-			"http://localhost:3000/",
+			"https://egapro.travail.gouv.fr/",
 		);
 	});
 
 	it("falls back to home page when ProConnect URL is null", async () => {
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI =
+			"https://egapro.travail.gouv.fr/";
 		mockSession({ id: "user-123", email: "test@example.com" });
 		mockBuildUrl.mockResolvedValue(null);
 
@@ -84,6 +107,10 @@ describe("GET /api/auth/logout", () => {
 	});
 
 	it("still deletes cookie when redirecting to ProConnect", async () => {
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI =
+			"https://egapro.travail.gouv.fr/";
 		mockSession({ id: "user-123" });
 		mockBuildUrl.mockResolvedValue(
 			"https://proconnect.example.com/session/end",
@@ -97,6 +124,10 @@ describe("GET /api/auth/logout", () => {
 	});
 
 	it("does not call buildProConnectLogoutUrl when no session", async () => {
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI =
+			"https://egapro.travail.gouv.fr/";
 		mockAuth.mockResolvedValue(null);
 
 		await GET(buildRequest());
@@ -105,6 +136,10 @@ describe("GET /api/auth/logout", () => {
 	});
 
 	it("does not call buildProConnectLogoutUrl when session has no user id", async () => {
+		(
+			env as Record<string, unknown>
+		).EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI =
+			"https://egapro.travail.gouv.fr/";
 		mockSession({ id: "", email: "test@example.com" });
 
 		await GET(buildRequest());

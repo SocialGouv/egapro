@@ -19,15 +19,17 @@ import { buildProConnectLogoutUrl } from "~/server/auth/proconnect-logout";
  */
 export async function GET(_request: NextRequest) {
 	const session = await auth();
-	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
+	const postLogoutUri = env.EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI;
 
-	// Build the ProConnect logout URL for browser-side session termination
+	// When EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI is set (prod/preprod),
+	// redirect via ProConnect to clear its session cookies.
+	// When not set (review apps), skip ProConnect and just clear the local session.
 	let redirectTo = `${baseUrl}/`;
-	if (session?.user?.id) {
+	if (postLogoutUri && session?.user?.id) {
 		const proConnectUrl = await buildProConnectLogoutUrl(
 			session.user.id,
-			`${baseUrl}/`,
+			postLogoutUri,
 		);
 		if (proConnectUrl) {
 			redirectTo = proConnectUrl;
