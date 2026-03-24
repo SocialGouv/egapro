@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ResourceBanner } from "../ResourceBanner";
@@ -12,10 +12,10 @@ describe("ResourceBanner", () => {
 		});
 		expect(faqLink).toHaveAttribute("href", "/faq");
 
-		const textesLink = screen.getByRole("link", {
-			name: /textes de référence/i,
+		const aideLink = screen.getByRole("link", {
+			name: /aides et ressources/i,
 		});
-		expect(textesLink).toHaveAttribute("href", "/textes-reference");
+		expect(aideLink).toHaveAttribute("href", "/aide");
 
 		const contactLink = screen.getByRole("link", {
 			name: /nous contacter/i,
@@ -30,7 +30,7 @@ describe("ResourceBanner", () => {
 			screen.getByText("Réponses aux questions les plus courantes"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Consultez les textes législatifs et réglementaires"),
+			screen.getByText("Guides, ressources et textes de référence"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Besoin d'aide ? Contactez nos services d'assistance"),

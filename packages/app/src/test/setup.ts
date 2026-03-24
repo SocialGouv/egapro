@@ -68,8 +68,10 @@ vi.mock("~/env", () => ({
 	},
 }));
 
-// Global mock for ~/modules/layout — provides NewTabNotice and Breadcrumb passthroughs.
+// Global mock for ~/modules/layout — provides NewTabNotice, Breadcrumb and DsfrPictogram passthroughs.
 vi.mock("~/modules/layout", () => ({
+	DsfrPictogram: ({ path }: { path: string }) =>
+		React.createElement("svg", { "aria-hidden": "true", "data-src": path }),
 	NewTabNotice: () =>
 		React.createElement(
 			"span",

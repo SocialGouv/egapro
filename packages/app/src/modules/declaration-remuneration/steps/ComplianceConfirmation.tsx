@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { getCurrentYear } from "~/modules/domain";
-import { DsfrPictogram } from "~/modules/home";
+import { DsfrPictogram } from "~/modules/layout";
 import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
 import common from "../shared/common.module.scss";
 
