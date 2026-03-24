@@ -12,7 +12,7 @@ export function GET() {
 		headers: {
 			// Public read-only spec — intentionally open to all origins.
 			"Access-Control-Allow-Origin": "*",
-			"Cache-Control": "public, max-age=3600",
+			"Cache-Control": "public, max-age=3600, must-revalidate",
 		},
 	});
 }

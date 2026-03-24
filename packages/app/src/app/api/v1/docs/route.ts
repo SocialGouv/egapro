@@ -21,7 +21,7 @@ export function GET() {
   <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
   <script>
     SwaggerUIBundle({
-      url: "/api/v1/openapi.json",
+      url: "/api/v1/openapi.json?v=" + Date.now(),
       dom_id: "#swagger-ui",
       deepLinking: true,
       presets: [

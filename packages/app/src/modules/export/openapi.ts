@@ -197,12 +197,7 @@ export const openApiSpec = {
 			name: "Équipe EGAPRO — DNUM",
 		},
 	},
-	servers: [
-		{
-			url: "https://egapro-alpha.ovh.fabrique.social.gouv.fr",
-			description: "Alpha (test)",
-		},
-	],
+	servers: [{ url: "/" }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
