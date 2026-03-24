@@ -127,6 +127,7 @@ const declarationPdfData: DeclarationPdfData = {
 	siren: "123456789",
 	year: 2026,
 	generatedAt: "10 mars 2026",
+	isSecondDeclaration: false,
 	totalWomen: 50,
 	totalMen: 60,
 	step1Categories: [{ name: "Cadres", women: 20, men: 30 }],
@@ -222,5 +223,19 @@ describe("DeclarationPdfDocument", () => {
 		expect(mocks.categorySection).toHaveBeenCalledWith({
 			data: declarationPdfData,
 		});
+	});
+
+	it("renders second declaration title when isSecondDeclaration is true", () => {
+		const secondDeclData = {
+			...declarationPdfData,
+			isSecondDeclaration: true,
+		};
+		render(<DeclarationPdfDocument data={secondDeclData} />);
+
+		expect(
+			screen.getByText(
+				/Seconde déclaration de l.indicateur de rémunération par catégorie de salariés 2026/,
+			),
+		).toBeInTheDocument();
 	});
 });

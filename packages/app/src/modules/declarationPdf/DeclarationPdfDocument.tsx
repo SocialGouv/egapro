@@ -21,7 +21,9 @@ export function DeclarationPdfDocument({ data }: Props) {
 			<Page size="A4" style={styles.page}>
 				<View style={styles.header}>
 					<Text style={styles.title}>
-						Déclaration des indicateurs de rémunération {data.year}
+						{data.isSecondDeclaration
+							? `Seconde déclaration de l'indicateur de rémunération par catégorie de salariés ${data.year}`
+							: `Déclaration des indicateurs de rémunération ${data.year}`}
 					</Text>
 					<Text style={styles.subtitle}>
 						Au titre des données {data.year - 1}

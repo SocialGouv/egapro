@@ -4,7 +4,7 @@ import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfD
 import { extractSiren, getCurrentYear } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
 	const session = await auth();
 	if (!session?.user?.siret) {
 		return new Response("Non autorisé", { status: 401 });
@@ -12,11 +12,18 @@ export async function GET() {
 
 	const siren = extractSiren(session.user.siret);
 	const year = getCurrentYear();
+	const url = new URL(request.url);
+	const declarationType =
+		url.searchParams.get("type") === "correction" ? "correction" : "initial";
 
 	try {
-		const data = await buildPdfData(siren, year, new Date());
+		const data = await buildPdfData(siren, year, new Date(), declarationType);
 		const buffer = await renderToBuffer(DeclarationPdfDocument({ data }));
-		const filename = `declaration-remuneration-${siren}-${year}.pdf`;
+		const filenamePrefix =
+			declarationType === "correction"
+				? "seconde-declaration"
+				: "declaration-remuneration";
+		const filename = `${filenamePrefix}-${siren}-${year}.pdf`;
 
 		return new Response(new Uint8Array(buffer), {
 			headers: {
