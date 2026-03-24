@@ -145,7 +145,6 @@ export function SecondDeclarationStep3Review({
 			/>
 
 			<SubmitDeclarationModal
-				hasGapsAboveThreshold={gapsExist}
 				isPending={mutation.isPending}
 				isSecondDeclaration
 				modalRef={modalRef}
