@@ -216,7 +216,8 @@ export const openApiSpec = {
 						in: "query",
 						required: true,
 						description: "Date de début (inclusive). Format YYYY-MM-DD.",
-						schema: { type: "string", format: "date", example: "2026-03-01" },
+						example: "2026-03-01",
+						schema: { type: "string", format: "date" },
 					},
 					{
 						name: "date_end",
@@ -224,7 +225,8 @@ export const openApiSpec = {
 						required: false,
 						description:
 							"Date de fin (exclusive). Format YYYY-MM-DD. Si omis, retourne uniquement le jour de `date_begin` (équivalent à `date_begin + 1 jour`).",
-						schema: { type: "string", format: "date", example: "2026-03-24" },
+						example: "2026-03-24",
+						schema: { type: "string", format: "date" },
 					},
 				],
 				responses: {
