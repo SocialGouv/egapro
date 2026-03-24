@@ -376,8 +376,8 @@ data:
           ]
         },
         {
-          "username": "dominique.bouteiller@sg.social.gouv.fr",
-          "email": "dominique.bouteiller@sg.social.gouv.fr",
+          "username": "__KEYCLOAK_RGAA_EMAIL__",
+          "email": "__KEYCLOAK_RGAA_EMAIL__",
           "emailVerified": true,
           "enabled": true,
           "firstName": "Dominique",
@@ -405,8 +405,8 @@ data:
           ]
         },
         {
-          "username": "pro.lucievidal@gmail.com",
-          "email": "pro.lucievidal@gmail.com",
+          "username": "__KEYCLOAK_RGAA_EMAIL_2__",
+          "email": "__KEYCLOAK_RGAA_EMAIL_2__",
           "emailVerified": true,
           "enabled": true,
           "firstName": "Lucie",
@@ -434,8 +434,8 @@ data:
           ]
         },
         {
-          "username": "aljanuel.pro@gmail.com",
-          "email": "aljanuel.pro@gmail.com",
+          "username": "__KEYCLOAK_RGAA_EMAIL_3__",
+          "email": "__KEYCLOAK_RGAA_EMAIL_3__",
           "emailVerified": true,
           "enabled": true,
           "firstName": "A.",
