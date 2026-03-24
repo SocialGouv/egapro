@@ -11,7 +11,6 @@ type Props = {
 	isPending: boolean;
 	year: number;
 	isSecondDeclaration?: boolean;
-	hasGapsAboveThreshold?: boolean;
 };
 
 /** Shared confirmation dialog for submitting a declaration with certification checkbox */
