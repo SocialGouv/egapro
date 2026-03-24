@@ -198,10 +198,9 @@ export const openApiSpec = {
 		},
 	},
 	servers: [
-		{ url: "https://egapro.travail.gouv.fr", description: "Production" },
 		{
-			url: "https://egapro-preprod.ovh.fabrique.social.gouv.fr",
-			description: "Pré-production",
+			url: "https://egapro-alpha.ovh.fabrique.social.gouv.fr",
+			description: "Alpha (test)",
 		},
 	],
 	paths: {
