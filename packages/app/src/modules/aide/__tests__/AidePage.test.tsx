@@ -97,26 +97,4 @@ describe("AidePage", () => {
 		const backLink = screen.getByRole("link", { name: /retour à l'accueil/i });
 		expect(backLink).toHaveAttribute("href", "/");
 	});
-
-	it("renders the bottom banner with all three resource tiles", () => {
-		render(<AidePage />);
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: /questions fréquentes/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: /textes de référence/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: /nous contacter/i,
-			}),
-		).toBeInTheDocument();
-	});
 });

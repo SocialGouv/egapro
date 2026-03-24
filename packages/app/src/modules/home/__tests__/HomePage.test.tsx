@@ -40,16 +40,6 @@ describe("HomePage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the resources section", () => {
-		render(<HomePage />);
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: /questions fréquentes/i,
-			}),
-		).toBeInTheDocument();
-	});
-
 	it("renders the three placeholder sections", () => {
 		render(<HomePage />);
 		const placeholders = screen.getAllByText("Section non finalisée");

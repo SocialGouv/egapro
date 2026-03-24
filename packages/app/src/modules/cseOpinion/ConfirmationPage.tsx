@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ComplianceCompletionEffect } from "~/modules/declaration-remuneration";
 import { getCurrentYear } from "~/modules/domain";
-import { DsfrPictogram } from "~/modules/home";
+import { DsfrPictogram } from "~/modules/layout";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
 
