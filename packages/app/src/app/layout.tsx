@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 import { MatomoAnalytics } from "~/modules/analytics";
-import { Footer, Header, SkipLinks } from "~/modules/layout";
+import { Footer, Header, ResourceBanner, SkipLinks } from "~/modules/layout";
 import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -51,6 +51,7 @@ export default function RootLayout({
 				<TRPCReactProvider>
 					<Header />
 					{children}
+					<ResourceBanner />
 					<Footer />
 					<ProfileModal />
 				</TRPCReactProvider>

@@ -1,7 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 
-import { DsfrPictogram } from "./DsfrPictogram";
-import styles from "./HomeResources.module.scss";
+import { DsfrPictogram } from "./shared/DsfrPictogram";
 
 type ResourceTileProps = {
 	href: string;
@@ -21,7 +21,7 @@ function ResourceTile({
 			<div className="fr-tile__body">
 				<div className="fr-tile__content">
 					<h3 className="fr-tile__title">
-						<a href={href}>{title}</a>
+						<Link href={href}>{title}</Link>
 					</h3>
 					<p className="fr-tile__detail">{detail}</p>
 				</div>
@@ -35,11 +35,14 @@ function ResourceTile({
 	);
 }
 
-/** Resources section: FAQ, reference texts and contact. */
-export function HomeResources() {
+/** Global resource banner with links to FAQ, reference texts and contact. */
+export function ResourceBanner() {
 	return (
-		<section aria-label="Ressources utiles" className={styles.section}>
-			<div className="fr-container fr-py-6w">
+		<section
+			aria-label="Ressources et aide"
+			className="fr-background-alt--blue-france fr-py-7w"
+		>
+			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-9">
 						<div className="fr-grid-row fr-grid-row--gutters">
@@ -51,34 +54,30 @@ export function HomeResources() {
 									title="Questions fréquentes (FAQ)"
 								/>
 							</div>
-
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
-									detail="Consultez les textes législatifs et réglementaires"
-									href="/textes-reference"
+									detail="Guides, ressources et textes de référence"
+									href="/aide"
 									pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-									title="Textes de référence"
+									title="Aides et ressources"
 								/>
 							</div>
-
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
-									detail="Besoin d&apos;aide ? Contactez nos services d&apos;assistance"
-									href="/contact"
+									detail="Besoin d'aide ? Contactez nos services d'assistance"
+									href="/aide/nous-contacter"
 									pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
 									title="Nous contacter"
 								/>
 							</div>
 						</div>
 					</div>
-
 					<div
 						aria-hidden="true"
-						className={`fr-col-12 fr-col-md-3 ${styles.illustrationWrapper}`}
+						className="fr-col-12 fr-col-md-3 fr-hidden fr-unhidden-md"
 					>
 						<Image
 							alt=""
-							className={styles.illustration}
 							height={147}
 							src="/assets/images/home/help-illustration.svg"
 							unoptimized
