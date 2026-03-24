@@ -2,6 +2,7 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 import type { StepCategoryData } from "~/modules/declaration-remuneration";
+import { formatLongDate } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
@@ -11,7 +12,6 @@ import {
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";
-import { formatFrenchDate } from "./formatFrenchDate";
 
 import type { DeclarationPdfData } from "./types";
 
@@ -131,7 +131,7 @@ export async function buildPdfData(
 		companyName: company?.name ?? `Entreprise ${siren}`,
 		siren,
 		year,
-		generatedAt: formatFrenchDate(now),
+		generatedAt: formatLongDate(now),
 		isSecondDeclaration: declarationType === "correction",
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,

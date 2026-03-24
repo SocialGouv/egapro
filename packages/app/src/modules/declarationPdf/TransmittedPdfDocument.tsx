@@ -4,7 +4,7 @@ import type {
 	TransmittedPdfData,
 	TransmittedPdfOpinion,
 } from "./buildTransmittedPdfData";
-import { formatFrenchDate } from "./formatFrenchDate";
+import { formatLongDate } from "~/modules/domain";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 
@@ -129,7 +129,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 							<View key={file.fileName} style={styles.tableRow}>
 								<Text style={styles.tableCellLabel}>{file.fileName}</Text>
 								<Text style={styles.tableCellValue}>
-									Déposé le {formatFrenchDate(file.uploadedAt)}
+									Déposé le {formatLongDate(file.uploadedAt)}
 								</Text>
 							</View>
 						))
@@ -146,7 +146,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 							</Text>
 							<Text style={styles.tableCellValue}>
 								Déposé le{" "}
-								{formatFrenchDate(data.jointEvaluationFile.uploadedAt)}
+								{formatLongDate(data.jointEvaluationFile.uploadedAt)}
 							</Text>
 						</View>
 					) : (

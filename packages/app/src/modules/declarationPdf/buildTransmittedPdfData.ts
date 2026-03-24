@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import { getCseYear } from "~/modules/domain";
+import { formatLongDate, getCseYear } from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -9,7 +9,6 @@ import {
 	cseOpinions,
 	jointEvaluationFiles,
 } from "~/server/db/schema";
-import { formatFrenchDate } from "./formatFrenchDate";
 
 export type TransmittedPdfOpinion = {
 	declarationNumber: number;
@@ -85,7 +84,7 @@ export async function buildTransmittedPdfData(
 		companyName: company.name,
 		siren,
 		year,
-		generatedAt: formatFrenchDate(now),
+		generatedAt: formatLongDate(now),
 		opinions,
 		cseFiles,
 		jointEvaluationFile: jointFiles[0] ?? null,
