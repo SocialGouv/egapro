@@ -5,6 +5,8 @@ export {
 	buildExportKey,
 	generateYearlyExport,
 } from "./generateYearlyExport";
+export { openApiSpec } from "./openapi";
+export { SwaggerUI } from "./SwaggerUI";
 export {
 	exportDeclarationsQuerySchema,
 	exportYearOptionalQuerySchema,
