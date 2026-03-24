@@ -1,7 +1,12 @@
 // Types
 
 // Campaign
-export { getCseYear, getCurrentYear } from "./shared/campaign";
+export {
+	getCseYear,
+	getCurrentYear,
+	getDeclarationDeadline,
+	getSecondDeclarationDeadline,
+} from "./shared/campaign";
 // Company size
 export { classifyCompanySize, isCseRequired } from "./shared/companySize";
 // Constants

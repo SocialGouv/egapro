@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCseYear, getCurrentYear } from "../shared/campaign";
+import {
+	getCseYear,
+	getCurrentYear,
+	getDeclarationDeadline,
+	getSecondDeclarationDeadline,
+} from "../shared/campaign";
 
 describe("getCurrentYear", () => {
 	beforeEach(() => {
@@ -34,5 +39,17 @@ describe("getCseYear", () => {
 	it("returns current year + 1", () => {
 		vi.setSystemTime(new Date("2025-06-15"));
 		expect(getCseYear()).toBe(2026);
+	});
+});
+
+describe("getDeclarationDeadline", () => {
+	it("returns 1er juin for the given year", () => {
+		expect(getDeclarationDeadline(2027)).toBe("1\u1D49\u02B3 juin 2027");
+	});
+});
+
+describe("getSecondDeclarationDeadline", () => {
+	it("returns 1 décembre for the given year", () => {
+		expect(getSecondDeclarationDeadline(2027)).toBe("1 décembre 2027");
 	});
 });
