@@ -10,18 +10,15 @@ import {
 	jointEvaluationFiles,
 } from "~/server/db/schema";
 
-export type TransmittedPdfOpinion = {
-	declarationNumber: number;
-	type: string;
-	opinion: string | null;
-	opinionDate: string | null;
-	gapConsulted: boolean | null;
-};
+export type TransmittedPdfOpinion = Pick<
+	typeof cseOpinions.$inferSelect,
+	"declarationNumber" | "type" | "opinion" | "opinionDate" | "gapConsulted"
+>;
 
-export type TransmittedPdfFile = {
-	fileName: string;
-	uploadedAt: Date;
-};
+export type TransmittedPdfFile = Pick<
+	typeof cseOpinionFiles.$inferSelect,
+	"fileName" | "uploadedAt"
+>;
 
 export type TransmittedPdfData = {
 	companyName: string;
