@@ -224,4 +224,18 @@ describe("DeclarationPdfDocument", () => {
 			data: declarationPdfData,
 		});
 	});
+
+	it("renders second declaration title when isSecondDeclaration is true", () => {
+		const secondDeclData = {
+			...declarationPdfData,
+			isSecondDeclaration: true,
+		};
+		render(<DeclarationPdfDocument data={secondDeclData} />);
+
+		expect(
+			screen.getByText(
+				/Seconde déclaration de l.indicateur de rémunération par catégorie de salariés 2026/,
+			),
+		).toBeInTheDocument();
+	});
 });
