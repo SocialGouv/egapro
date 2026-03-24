@@ -24,6 +24,50 @@ spec:
         oblik.socialgouv.io/min-request-cpu: "200m"
         oblik.socialgouv.io/min-limit-cpu: "1"
     spec:
+      initContainers:
+        - name: inject-secrets
+          image: busybox:1.36
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+          command:
+            - sh
+            - -c
+            - |
+              awk '{
+                gsub(/__KEYCLOAK_RGAA_PASSWORD__/, ENVIRON["KEYCLOAK_RGAA_PASSWORD"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL__/, ENVIRON["KEYCLOAK_RGAA_EMAIL"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL_2__/, ENVIRON["KEYCLOAK_RGAA_EMAIL_2"]);
+                gsub(/__KEYCLOAK_RGAA_EMAIL_3__/, ENVIRON["KEYCLOAK_RGAA_EMAIL_3"]);
+                print
+              }' /realm-template/realm-egapro.json > /realm-ready/realm-egapro.json
+          env:
+            - name: KEYCLOAK_RGAA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_RGAA_PASSWORD
+            - name: KEYCLOAK_RGAA_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_RGAA_EMAIL
+            - name: KEYCLOAK_RGAA_EMAIL_2
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_RGAA_EMAIL_2
+            - name: KEYCLOAK_RGAA_EMAIL_3
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_RGAA_EMAIL_3
+          volumeMounts:
+            - name: realm-template
+              mountPath: /realm-template
+              readOnly: true
+            - name: realm-ready
+              mountPath: /realm-ready
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.0
@@ -44,11 +88,17 @@ spec:
             - name: KC_PROXY_HEADERS
               value: xforwarded
             - name: KEYCLOAK_ADMIN
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_ADMIN
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: KEYCLOAK_ADMIN_PASSWORD
           volumeMounts:
-            - name: realm-config
+            - name: realm-ready
               mountPath: /opt/keycloak/data/import/
               readOnly: true
           resources:
@@ -71,6 +121,8 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 30
       volumes:
-        - name: realm-config
+        - name: realm-template
           configMap:
             name: keycloak-realm
+        - name: realm-ready
+          emptyDir: {}
