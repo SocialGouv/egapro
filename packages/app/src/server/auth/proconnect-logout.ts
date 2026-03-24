@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -46,8 +47,11 @@ export async function buildProConnectLogoutUrl(
 		const response = await fetch(wellKnownUrl);
 		const config = oidcConfigSchema.parse(await response.json());
 
+		const state = crypto.randomBytes(32).toString("hex");
+
 		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
+		logoutUrl.searchParams.set("state", state);
 		logoutUrl.searchParams.set(
 			"post_logout_redirect_uri",
 			postLogoutRedirectUri,

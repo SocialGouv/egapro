@@ -86,6 +86,7 @@ describe("buildProConnectLogoutUrl", () => {
 		expect(url.origin).toBe("https://proconnect.example.com");
 		expect(url.pathname).toBe("/api/v2/session/end");
 		expect(url.searchParams.get("id_token_hint")).toBe("test-id-token");
+		expect(url.searchParams.get("state")).toBeTruthy();
 		expect(url.searchParams.get("post_logout_redirect_uri")).toBe(
 			"http://localhost:3000/",
 		);
