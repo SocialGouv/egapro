@@ -47,4 +47,13 @@ describe("ComplianceConfirmation", () => {
 		const link = screen.getByRole("link", { name: "Mon espace" });
 		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
+
+	it("has a download PDF button", () => {
+		render(<ComplianceConfirmation />);
+
+		const link = screen.getByRole("link", {
+			name: /Télécharger le récapitulatif/,
+		});
+		expect(link).toHaveAttribute("href", "/api/declaration-pdf");
+	});
 });
