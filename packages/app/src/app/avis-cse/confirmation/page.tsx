@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
 import { ConfirmationPage } from "~/modules/cseOpinion";
+import {
+	hasSubmittedSecondDeclaration,
+	isDeclarationSubmitted,
+} from "~/modules/cseOpinion/confirmationHelpers";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -9,17 +13,16 @@ export default async function CseOpinionConfirmationPage() {
 		api.declaration.getOrCreate(),
 	]);
 
-	if (declarationData.declaration.status !== "submitted") {
+	if (!isDeclarationSubmitted(declarationData.declaration.status)) {
 		redirect("/mon-espace");
 	}
-
-	const hasSecondDeclaration =
-		declarationData.declaration.secondDeclarationStatus === "submitted";
 
 	return (
 		<ConfirmationPage
 			email={session?.user?.email ?? undefined}
-			hasSecondDeclaration={hasSecondDeclaration}
+			hasSecondDeclaration={hasSubmittedSecondDeclaration(
+				declarationData.declaration.secondDeclarationStatus,
+			)}
 		/>
 	);
 }
