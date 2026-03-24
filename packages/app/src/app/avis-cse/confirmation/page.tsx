@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ConfirmationPage } from "~/modules/cseOpinion";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -7,6 +8,10 @@ export default async function CseOpinionConfirmationPage() {
 		auth(),
 		api.declaration.getOrCreate(),
 	]);
+
+	if (declarationData.declaration.status !== "submitted") {
+		redirect("/mon-espace");
+	}
 
 	const hasSecondDeclaration =
 		declarationData.declaration.secondDeclarationStatus === "submitted";

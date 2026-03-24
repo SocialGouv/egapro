@@ -7,18 +7,14 @@ import formStyles from "./shared/formActions.module.scss";
 
 type DownloadCardProps = {
 	dataYear: number;
-	href?: string;
+	href: string;
 	title: string;
 	year: number;
 };
 
 function DownloadCard({ dataYear, href, title, year }: DownloadCardProps) {
-	const Tag = href ? "a" : "div";
 	return (
-		<Tag
-			className={styles.downloadCard}
-			{...(href ? { download: true, href } : {})}
-		>
+		<a className={styles.downloadCard} download={title} href={href}>
 			<p className="fr-text--bold fr-text--md fr-mb-1w">{title}</p>
 			<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
 				Année {year} au titre des données {dataYear}
@@ -27,7 +23,7 @@ function DownloadCard({ dataYear, href, title, year }: DownloadCardProps) {
 				<span className="fr-text--xs fr-text--mention-grey">PDF</span>
 				<span aria-hidden="true" className="fr-icon-download-line" />
 			</div>
-		</Tag>
+		</a>
 	);
 }
 
