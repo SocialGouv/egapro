@@ -117,7 +117,7 @@ test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", 
 		await setCompanyHasCse(false);
 	});
 
-	test("shows only 2 options without justify (hasCse=false)", async ({
+	test("shows all 3 options including justify (hasCse=false)", async ({
 		page,
 	}) => {
 		await completeDeclaration(page, { hasGap: true });
@@ -125,7 +125,7 @@ test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", 
 			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
 				exact: true,
 			}),
-		).not.toBeVisible();
+		).toBeVisible();
 	});
 
 	test("joint evaluation → upload PDF → /confirmation", async ({ page }) => {
