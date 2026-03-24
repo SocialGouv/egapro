@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
 import { exports } from "~/server/db/schema";
-import { ensureBucket, uploadFile } from "~/server/services/s3";
+import { uploadFile } from "~/server/services/s3";
 import { buildExportRows, buildIndicatorGRows } from "./buildExportRows";
 import { generateXlsx } from "./generateXlsx";
 import { EXPORT_VERSION } from "./shared/constants";
@@ -41,7 +41,6 @@ export async function generateYearlyExport(
 	const xlsxBuffer = await generateXlsx(declarationRows, indicatorGRows);
 
 	const s3Key = buildExportKey(year, EXPORT_VERSION);
-	await ensureBucket();
 	await uploadFile(
 		s3Key,
 		xlsxBuffer,

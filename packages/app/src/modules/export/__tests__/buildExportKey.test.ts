@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/services/s3", () => ({
 	uploadFile: vi.fn(),
-	ensureBucket: vi.fn(),
 }));
 
 describe("buildExportKey", () => {
