@@ -53,15 +53,12 @@ export function NextStepsBox({
 
 				{hasGapsAboveThreshold && (
 					<>
-						<p className="fr-text--bold fr-mb-0">
-							Des écarts ont été détectés
-						</p>
+						<p className="fr-text--bold fr-mb-0">Des écarts ont été détectés</p>
 						<p className="fr-mb-0">
 							Suite à l&apos;analyse de vos données de l&apos;indicateur par
 							catégorie de salariés,{" "}
 							<strong>des écarts &ge; 5 % ont été identifiés</strong>. Vous
-							devez engager un des parcours de mise en conformité
-							suivant&nbsp;:
+							devez engager un des parcours de mise en conformité suivant&nbsp;:
 						</p>
 						<ul className="fr-text--md">
 							<li>
@@ -69,9 +66,9 @@ export function NextStepsBox({
 									Justifier les écarts par des critères objectifs et non
 									sexistes.
 								</strong>{" "}
-								Si vous choisissez ce parcours, vous devez informer et
-								consulter le CSE (avis à transmettre sur le portail lors de la
-								dernière étape)
+								Si vous choisissez ce parcours, vous devez informer et consulter
+								le CSE (avis à transmettre sur le portail lors de la dernière
+								étape)
 							</li>
 						</ul>
 						<p className="fr-mb-0">
