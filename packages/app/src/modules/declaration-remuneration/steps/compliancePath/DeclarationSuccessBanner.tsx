@@ -1,3 +1,8 @@
+import {
+	getDeclarationDeadline,
+	getSecondDeclarationDeadline,
+} from "~/modules/domain";
+
 type Props = {
 	currentYear: number;
 	email: string;
@@ -12,8 +17,8 @@ export function DeclarationSuccessBanner({
 	pdfDownloadHref,
 }: Props) {
 	const deadline = isSecondDeclaration
-		? `1 décembre ${currentYear}`
-		: `1\u1D49\u02B3 juin ${currentYear}`;
+		? getSecondDeclarationDeadline(currentYear)
+		: getDeclarationDeadline(currentYear);
 
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
