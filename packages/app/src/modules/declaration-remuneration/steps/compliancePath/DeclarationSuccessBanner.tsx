@@ -42,8 +42,8 @@ export function DeclarationSuccessBanner({
 								href={pdfDownloadHref}
 							>
 								{isSecondDeclaration
-								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-								: "Télécharger le récapitulatif de la déclaration des indicateurs"}
+									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
 								<span className="fr-link__detail">PDF</span>
 							</a>
 						)}
