@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { env } from "~/env";
@@ -17,17 +16,20 @@ export async function GET(_request: NextRequest) {
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
-	// Clear the NextAuth session cookie
-	const cookieStore = await cookies();
-	const sessionCookieName = baseUrl.startsWith("https://")
-		? "__Secure-next-auth.session-token"
-		: "next-auth.session-token";
-	cookieStore.delete(sessionCookieName);
-
 	if (session?.user?.id) {
 		// Terminate ProConnect OIDC session server-side (fire-and-forget)
 		await terminateProConnectSession(session.user.id);
 	}
 
-	return NextResponse.redirect(new URL("/", baseUrl));
+	const response = NextResponse.redirect(new URL("/", baseUrl));
+
+	// Delete the NextAuth session cookie directly on the redirect response
+	// to ensure the Set-Cookie header is included in the 307 response.
+	// Using cookies() from next/headers does not propagate to NextResponse.redirect().
+	const sessionCookieName = baseUrl.startsWith("https://")
+		? "__Secure-next-auth.session-token"
+		: "next-auth.session-token";
+	response.cookies.delete(sessionCookieName);
+
+	return response;
 }
