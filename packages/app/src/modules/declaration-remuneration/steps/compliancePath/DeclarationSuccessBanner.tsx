@@ -1,15 +1,24 @@
+import {
+	getDeclarationDeadline,
+	getSecondDeclarationDeadline,
+} from "~/modules/domain";
+
 type Props = {
 	currentYear: number;
 	email: string;
+	isSecondDeclaration?: boolean;
 	pdfDownloadHref?: string;
 };
 
 export function DeclarationSuccessBanner({
 	currentYear,
 	email,
+	isSecondDeclaration = false,
 	pdfDownloadHref,
 }: Props) {
-	const deadline = `1\u1D49\u02B3 juin ${currentYear}`;
+	const deadline = isSecondDeclaration
+		? getSecondDeclarationDeadline(currentYear)
+		: getDeclarationDeadline(currentYear);
 
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
@@ -23,7 +32,9 @@ export function DeclarationSuccessBanner({
 					</div>
 					<div className="fr-col">
 						<p className="fr-text--bold fr-text--lg fr-mb-1w">
-							Votre déclaration a été transmise
+							{isSecondDeclaration
+								? "Votre seconde déclaration a été transmise"
+								: "Votre déclaration a été transmise"}
 						</p>
 						<p className="fr-mb-1w">
 							Vous pouvez modifier votre déclaration jusqu'au{" "}
@@ -35,7 +46,9 @@ export function DeclarationSuccessBanner({
 								download
 								href={pdfDownloadHref}
 							>
-								Télécharger le récapitulatif de la déclaration des indicateurs
+								{isSecondDeclaration
+									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
 								<span className="fr-link__detail">PDF</span>
 							</a>
 						)}

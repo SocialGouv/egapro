@@ -126,17 +126,21 @@ function SecondRoundOptions({
 
 function FirstRoundOptions({
 	currentYear,
-	hasCse,
 	selectedPath,
 	setSelectedPath,
 }: {
 	currentYear: number;
-	hasCse: boolean | null;
 	selectedPath: CompliancePathValue | undefined;
 	setSelectedPath: (path: CompliancePathValue) => void;
 }) {
 	return (
 		<>
+			<JustifyOption
+				checked={selectedPath === "justify"}
+				currentYear={currentYear}
+				onChange={() => setSelectedPath("justify")}
+			/>
+
 			<h3 className="fr-h6 fr-mt-3w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
@@ -186,14 +190,6 @@ function FirstRoundOptions({
 				currentYear={currentYear}
 				onChange={() => setSelectedPath("joint_evaluation")}
 			/>
-
-			{hasCse === true && (
-				<JustifyOption
-					checked={selectedPath === "justify"}
-					currentYear={currentYear}
-					onChange={() => setSelectedPath("justify")}
-				/>
-			)}
 		</>
 	);
 }
@@ -245,6 +241,7 @@ export function CompliancePathChoice({
 			<DeclarationSuccessBanner
 				currentYear={currentYear}
 				email={email}
+				isSecondDeclaration={isSecondRound}
 				pdfDownloadHref={pdfDownloadHref}
 			/>
 
@@ -299,7 +296,6 @@ export function CompliancePathChoice({
 						) : (
 							<FirstRoundOptions
 								currentYear={currentYear}
-								hasCse={hasCse}
 								selectedPath={field.value}
 								setSelectedPath={field.onChange}
 							/>

@@ -78,6 +78,10 @@ export async function completeSecondDeclaration(
 		})
 		.fill(menSalary);
 
+	// Fill required reference period dates
+	await page.locator("#period-start-date").fill("2026-01-01");
+	await page.locator("#period-end-date").fill("2026-12-31");
+
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
 
