@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.js && next build",
+		"build": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.mjs && next build",
 		"check": "biome check .",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
@@ -16,7 +16,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.js && next dev --turbo",
+		"dev": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.mjs && next dev --turbo",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",
