@@ -39,6 +39,8 @@ describe("GET /api/v1/openapi.json", () => {
 		const response = GET();
 
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
-		expect(response.headers.get("Cache-Control")).toBe("public, max-age=3600");
+		expect(response.headers.get("Cache-Control")).toBe(
+			"public, max-age=3600, must-revalidate",
+		);
 	});
 });
