@@ -5,14 +5,7 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { extractSiren } from "~/modules/domain";
 import { db } from "~/server/db";
-import {
-	accounts,
-	companies,
-	sessions,
-	userCompanies,
-	users,
-	verificationTokens,
-} from "~/server/db/schema";
+import { accounts, companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 declare module "next-auth" {
@@ -22,6 +15,14 @@ declare module "next-auth" {
 			siret?: string | null;
 			phone?: string | null;
 		} & DefaultSession["user"];
+	}
+}
+
+declare module "next-auth/jwt" {
+	interface JWT {
+		id: string;
+		siret?: string | null;
+		phone?: string | null;
 	}
 }
 
@@ -92,12 +93,14 @@ export const authConfig = {
 	pages: {
 		signIn: "/login",
 	},
+	session: {
+		strategy: "jwt",
+		maxAge: 30 * 24 * 60 * 60, // 30 days
+	},
 	providers: getProviders(),
 	adapter: DrizzleAdapter(db, {
 		usersTable: users,
 		accountsTable: accounts,
-		sessionsTable: sessions,
-		verificationTokensTable: verificationTokens,
 	}),
 	events: {
 		async signIn({ user, profile }) {
@@ -172,21 +175,22 @@ export const authConfig = {
 			}
 			return `${baseUrl}/mon-espace`;
 		},
-		session: ({
-			session,
-			user,
-		}: {
-			session: DefaultSession & {
-				user?: { id?: string; siret?: string | null; phone?: string | null };
-			};
-			user: { id: string; siret?: string | null; phone?: string | null };
-		}) => ({
+		async jwt({ token, user }) {
+			if (user) {
+				token.id = user.id;
+				const dbUser = user as { siret?: string | null; phone?: string | null };
+				token.siret = dbUser.siret ?? null;
+				token.phone = dbUser.phone ?? null;
+			}
+			return token;
+		},
+		session: ({ session, token }) => ({
 			...session,
 			user: {
 				...session.user,
-				id: user.id,
-				siret: user.siret,
-				phone: user.phone,
+				id: token.id,
+				siret: token.siret ?? null,
+				phone: token.phone ?? null,
 			},
 		}),
 	},

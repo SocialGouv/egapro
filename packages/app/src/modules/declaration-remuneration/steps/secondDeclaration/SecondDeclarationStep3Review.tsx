@@ -1,33 +1,38 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
+import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import { GAP_ALERT_THRESHOLD, getCurrentYear } from "~/modules/domain";
+import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
 import { GapColumn } from "../step6/GapColumn";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
 import { BASE_PATH } from "./constants";
-import { NextStepsSection } from "./NextStepsSection";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
 	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
+	siren: string;
 };
 
 export function SecondDeclarationStep3Review({
 	hasCse,
 	secondDeclarationCategories,
+	siren,
 }: Props) {
 	const router = useRouter();
-	const [certified, setCertified] = useState(false);
+	const modalRef = useRef<HTMLDialogElement>(null);
+	const currentYear = getCurrentYear();
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some(
@@ -52,10 +57,21 @@ export function SecondDeclarationStep3Review({
 		},
 	});
 
+	const openModal = useCallback(() => {
+		if (modalRef.current) {
+			getDsfrModal(modalRef.current)?.disclose();
+		}
+	}, []);
+
+	const closeModal = useCallback(() => {
+		if (modalRef.current) {
+			getDsfrModal(modalRef.current)?.conceal();
+		}
+	}, []);
+
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		if (!certified) return;
-		mutation.mutate();
+		openModal();
 	}
 
 	return (
@@ -121,27 +137,24 @@ export function SecondDeclarationStep3Review({
 				)}
 			</div>
 
-			<NextStepsSection hasGapsAboveThreshold={gapsExist} />
-
-			<div className="fr-checkbox-group">
-				<input
-					checked={certified}
-					id="certification-checkbox"
-					onChange={(e) => setCertified(e.target.checked)}
-					type="checkbox"
-				/>
-				<label className="fr-label" htmlFor="certification-checkbox">
-					Je certifie que les données saisies sont exactes et conformes aux
-					informations disponibles dans les systèmes de paie et de gestion des
-					ressources humaines de l&apos;entreprise.
-				</label>
-			</div>
+			<NextStepsBox
+				hasGapsAboveThreshold={gapsExist}
+				isSecondDeclaration
+				siren={siren}
+			/>
 
 			<FormActions
-				isSubmitting={mutation.isPending}
-				nextDisabled={!certified}
 				nextLabel="Soumettre"
 				previousHref={`${BASE_PATH}/etape/2`}
+			/>
+
+			<SubmitDeclarationModal
+				isPending={mutation.isPending}
+				isSecondDeclaration
+				modalRef={modalRef}
+				onClose={closeModal}
+				onSubmit={() => mutation.mutate()}
+				year={currentYear}
 			/>
 		</form>
 	);

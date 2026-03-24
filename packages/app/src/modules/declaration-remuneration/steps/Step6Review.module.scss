@@ -54,21 +54,6 @@
 	flex: 1;
 }
 
-.nextSteps {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	padding: 1.875rem;
-	background: var(--background-alt-blue-france);
-	border-radius: 4px;
-}
-
-.separator {
-	border: none;
-	border-top: 1px solid var(--border-default-grey);
-	margin: 0;
-}
-
 .centeredLink {
 	align-self: center;
 }

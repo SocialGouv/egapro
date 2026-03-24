@@ -61,7 +61,7 @@ export function CookiesPage() {
 							<tr>
 								<td>next-auth.session-token</td>
 								<td>Authentification de l'utilisateur</td>
-								<td>Durée de la session</td>
+								<td>30 jours</td>
 							</tr>
 						</tbody>
 					</table>
