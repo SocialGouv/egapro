@@ -38,6 +38,16 @@ jobs:
           echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
           echo "KEYCLOAK_URL=https://keycloak.undercloud.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
+      - name: Wait for app and Keycloak to be ready
+        run: |
+          echo "Waiting for app at $SITE_URL ..."
+          timeout 180 bash -c 'until curl -sf -o /dev/null "$SITE_URL"; do sleep 5; done'
+          echo "✓ App is ready"
+
+          echo "Waiting for Keycloak at $KEYCLOAK_URL ..."
+          timeout 180 bash -c 'until curl -sf -o /dev/null "$KEYCLOAK_URL/realms/master"; do sleep 5; done'
+          echo "✓ Keycloak is ready"
+
       - name: Run test e2e
         run: |
           pnpm test:e2e:app -- --browser chrome

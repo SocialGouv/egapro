@@ -156,7 +156,7 @@ describe("Declaration", () => {
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
+    cy.checkUrl("/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
       cy.contains("span", "56").should("exist");
     });

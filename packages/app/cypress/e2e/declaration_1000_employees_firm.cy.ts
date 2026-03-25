@@ -28,7 +28,7 @@ describe("Declaration", () => {
     cy.contains("a", "Suivant").click();
 
     // Check if we're on the expected page
-    cy.url().should("include", "/index-egapro/declaration/commencer");
+    cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
     ).select("384964508");
@@ -140,7 +140,7 @@ describe("Declaration", () => {
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
+    cy.checkUrl("/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
       cy.contains("span", "94").should("exist");
     });
