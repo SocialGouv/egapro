@@ -152,6 +152,74 @@ describe("DeclarationsSection", () => {
 		expect(screen.getAllByRole("row").length).toBeLessThan(12);
 	});
 
+	it("navigates to next, previous, first and last page", () => {
+		const manyDeclarations: DeclarationItem[] = Array.from(
+			{ length: 25 },
+			(_, i) => ({
+				type: "remuneration" as const,
+				siren: "532847196",
+				year: currentYear - i,
+				status: "done" as const,
+				currentStep: 6,
+				updatedAt: new Date("2025-01-01"),
+			}),
+		);
+
+		renderSection({ declarations: manyDeclarations });
+
+		// Navigate to page 2 via "Page suivante"
+		fireEvent.click(screen.getByTitle("Page suivante"));
+		expect(
+			screen.getByRole("button", { name: "2", current: "page" }),
+		).toBeInTheDocument();
+
+		// Navigate to last page via "Dernière page"
+		fireEvent.click(screen.getByTitle("Dernière page"));
+		expect(
+			screen.getByRole("button", { name: "3", current: "page" }),
+		).toBeInTheDocument();
+
+		// Navigate to previous page via "Page précédente"
+		fireEvent.click(screen.getByTitle("Page précédente"));
+		expect(
+			screen.getByRole("button", { name: "2", current: "page" }),
+		).toBeInTheDocument();
+
+		// Navigate to first page via "Première page"
+		fireEvent.click(screen.getByTitle("Première page"));
+		expect(
+			screen.getByRole("button", { name: "1", current: "page" }),
+		).toBeInTheDocument();
+	});
+
+	it("renders ellipsis when there are many pages", () => {
+		const manyDeclarations: DeclarationItem[] = Array.from(
+			{ length: 80 },
+			(_, i) => ({
+				type: "remuneration" as const,
+				siren: "532847196",
+				year: currentYear - i,
+				status: "done" as const,
+				currentStep: 6,
+				updatedAt: new Date("2025-01-01"),
+			}),
+		);
+
+		renderSection({ declarations: manyDeclarations });
+
+		// With 80+ rows and page size 10, we get 9 pages
+		// On page 1, only end ellipsis is shown
+		expect(screen.getAllByText("…")).toHaveLength(1);
+
+		// Navigate to middle page using "Page suivante" repeatedly
+		fireEvent.click(screen.getByTitle("Page suivante")); // page 2
+		fireEvent.click(screen.getByTitle("Page suivante")); // page 3
+		fireEvent.click(screen.getByTitle("Page suivante")); // page 4
+		fireEvent.click(screen.getByTitle("Page suivante")); // page 5
+		// Now on page 5 of 9, both ellipses should be visible
+		expect(screen.getAllByText("…")).toHaveLength(2);
+	});
+
 	it("resets to page 1 when page size changes", () => {
 		const manyDeclarations: DeclarationItem[] = Array.from(
 			{ length: 15 },
