@@ -79,9 +79,7 @@ describe("MissingInfoModal", () => {
 		render(
 			<MissingInfoModal hasCse={true} siren="532847196" userPhone={null} />,
 		);
-		expect(
-			screen.getByLabelText(/Numéro de téléphone/),
-		).toBeInTheDocument();
+		expect(screen.getByLabelText(/Numéro de téléphone/)).toBeInTheDocument();
 	});
 
 	it("does not render phone field when userPhone is provided", () => {
@@ -105,12 +103,8 @@ describe("MissingInfoModal", () => {
 				userPhone="0122334455"
 			/>,
 		);
-		expect(
-			screen.getByLabelText("Oui"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByLabelText("Non"),
-		).toBeInTheDocument();
+		expect(screen.getByLabelText("Oui")).toBeInTheDocument();
+		expect(screen.getByLabelText("Non")).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				"Un CSE a-t-il été mis en place dans votre entreprise ?",
@@ -133,9 +127,9 @@ describe("MissingInfoModal", () => {
 		const { container } = render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
-		expect(
-			container.querySelector("button[type='submit']"),
-		).toHaveTextContent("Enregistrer");
+		expect(container.querySelector("button[type='submit']")).toHaveTextContent(
+			"Enregistrer",
+		);
 		expect(screen.getByText("Retour")).toBeInTheDocument();
 	});
 
@@ -150,8 +144,6 @@ describe("MissingInfoModal", () => {
 		const { container } = render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
-		expect(
-			container.querySelector("button[type='submit']"),
-		).not.toBeDisabled();
+		expect(container.querySelector("button[type='submit']")).not.toBeDisabled();
 	});
 });
