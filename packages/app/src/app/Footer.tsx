@@ -130,8 +130,8 @@ export const Footer = () => (
         </div>
         <div className="fr-footer__content">
           <p className="fr-footer__content-desc">
-            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
-            numérique des ministères sociaux.
+            Egapro permet aux entreprises de déclarer leurs indicateurs de rémunération et de représentation entre
+            les femmes et les hommes.
           </p>
           <ul className="fr-footer__content-list">
             <li className="fr-footer__content-item">
