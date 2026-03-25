@@ -60,6 +60,16 @@ describe("GET /api/v1/files", () => {
 		expect(response.status).toBe(400);
 	});
 
+	it("should return 400 when year is outside the allowed range", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		const request = new Request(
+			"http://localhost/api/v1/files?siren=123456789&year=0000",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(400);
+	});
+
 	it("should return empty files array when no files exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = new Request(
@@ -167,7 +177,7 @@ describe("GET /api/v1/files/:fileId", () => {
 	it("should stream file from S3 when file exists", async () => {
 		mockFetchFileById.mockResolvedValue({
 			filePath: "123456789/2027/abc.pdf",
-			fileName: "avis-cse.pdf",
+			fileName: "avis-cse-evaluation.pdf",
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
@@ -179,7 +189,25 @@ describe("GET /api/v1/files/:fileId", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("application/pdf");
 		expect(response.headers.get("Content-Disposition")).toBe(
-			'attachment; filename="avis-cse.pdf"',
+			`attachment; filename="avis-cse-evaluation.pdf"; filename*=UTF-8''avis-cse-evaluation.pdf`,
+		);
+	});
+
+	it("should provide an ASCII fallback and UTF-8 filename for non-ASCII names", async () => {
+		mockFetchFileById.mockResolvedValue({
+			filePath: "123456789/2027/abc.pdf",
+			fileName: "avis-cse-évaluation.pdf",
+		});
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Disposition")).toBe(
+			`attachment; filename="avis-cse-_valuation.pdf"; filename*=UTF-8''avis-cse-%C3%A9valuation.pdf`,
 		);
 	});
 

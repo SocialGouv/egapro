@@ -30,11 +30,10 @@ export async function GET(request: Request) {
 		}
 
 		const { siren, year } = parsed.data;
-		const key = [{ siren, year }];
 
 		const [cseFilesMap, jointFilesMap] = await Promise.all([
-			fetchCseFilesByDeclaration(key),
-			fetchJointEvaluationFilesByDeclaration(key),
+			fetchCseFilesByDeclaration([{ siren, year }]),
+			fetchJointEvaluationFilesByDeclaration([{ siren, year }]),
 		]);
 
 		const mapKey = `${siren}-${year}`;
