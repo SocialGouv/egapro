@@ -13,7 +13,7 @@ describe("<Footer />", () => {
 
     // Check that the main sections are present
     expect(screen.getByText("Liens utiles")).toBeInTheDocument();
-    expect(screen.getByText(/Index Egapro et Représentation équilibrée/)).toBeInTheDocument();
+    expect(screen.getByText(/Egapro permet aux entreprises de déclarer/)).toBeInTheDocument();
   });
 
   it("displays the correct accessibility status", () => {
