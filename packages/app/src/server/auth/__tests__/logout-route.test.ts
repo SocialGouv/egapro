@@ -15,8 +15,9 @@ import { buildProConnectLogoutUrl } from "~/server/auth/proconnect-logout";
 const mockAuth = vi.mocked(auth);
 const mockBuildUrl = vi.mocked(buildProConnectLogoutUrl);
 
-// Dynamic import to ensure mocks are registered before the module loads
-const { GET } = await import("~/app/api/auth/logout/route");
+const { GET, LOGOUT_STATE_COOKIE } = await import(
+	"~/app/api/auth/logout/route"
+);
 
 function buildRequest() {
 	return new Request(
@@ -67,10 +68,45 @@ describe("GET /api/auth/logout", () => {
 		expect(response.headers.get("Location")).toBe(
 			"https://proconnect.example.com/session/end?id_token_hint=tok",
 		);
+	});
+
+	it("passes logout-callback URI and state to buildProConnectLogoutUrl", async () => {
+		mockSession({ id: "user-123", email: "test@example.com" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end",
+		);
+
+		await GET(buildRequest());
+
 		expect(mockBuildUrl).toHaveBeenCalledWith(
 			"user-123",
-			"http://localhost:3000/",
+			"http://localhost:3000/api/auth/logout-callback",
+			expect.stringMatching(/^[a-f0-9]{64}$/),
 		);
+	});
+
+	it("sets state cookie when redirecting to ProConnect", async () => {
+		mockSession({ id: "user-123" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end",
+		);
+
+		const response = await GET(buildRequest());
+
+		const setCookie = response.headers.get("set-cookie") ?? "";
+		expect(setCookie).toContain(LOGOUT_STATE_COOKIE);
+		expect(setCookie).toContain("Path=/api/auth/logout-callback");
+		expect(setCookie).toContain("HttpOnly");
+	});
+
+	it("does not set state cookie when no ProConnect URL", async () => {
+		mockSession({ id: "user-123" });
+		mockBuildUrl.mockResolvedValue(null);
+
+		const response = await GET(buildRequest());
+
+		const setCookie = response.headers.get("set-cookie") ?? "";
+		expect(setCookie).not.toContain(LOGOUT_STATE_COOKIE);
 	});
 
 	it("falls back to home page when ProConnect URL is null", async () => {
@@ -83,7 +119,7 @@ describe("GET /api/auth/logout", () => {
 		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
 	});
 
-	it("still deletes cookie when redirecting to ProConnect", async () => {
+	it("still deletes session cookie when redirecting to ProConnect", async () => {
 		mockSession({ id: "user-123" });
 		mockBuildUrl.mockResolvedValue(
 			"https://proconnect.example.com/session/end",
@@ -91,7 +127,7 @@ describe("GET /api/auth/logout", () => {
 
 		const response = await GET(buildRequest());
 
-		const setCookie = response.headers.get("set-cookie");
+		const setCookie = response.headers.get("set-cookie") ?? "";
 		expect(setCookie).toContain("next-auth.session-token");
 		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
 	});

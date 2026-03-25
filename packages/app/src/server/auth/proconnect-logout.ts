@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -47,7 +46,8 @@ export function resetEndSessionCache(): void {
  */
 export async function buildProConnectLogoutUrl(
 	userId: string,
-	appRedirectUri: string,
+	postLogoutRedirectUri: string,
+	state: string,
 ): Promise<string | null> {
 	if (!env.EGAPRO_PROCONNECT_ISSUER || !env.EGAPRO_PROCONNECT_CLIENT_ID) {
 		return null;
@@ -65,12 +65,14 @@ export async function buildProConnectLogoutUrl(
 
 	try {
 		const endSessionEndpoint = await getEndSessionEndpoint();
-		const state = crypto.randomBytes(32).toString("hex");
 
 		const logoutUrl = new URL(endSessionEndpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
 		logoutUrl.searchParams.set("state", state);
-		logoutUrl.searchParams.set("post_logout_redirect_uri", appRedirectUri);
+		logoutUrl.searchParams.set(
+			"post_logout_redirect_uri",
+			postLogoutRedirectUri,
+		);
 
 		return logoutUrl.toString();
 	} catch {

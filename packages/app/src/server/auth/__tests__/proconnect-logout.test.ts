@@ -51,6 +51,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).toBeNull();
@@ -63,6 +64,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).toBeNull();
@@ -83,6 +85,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).not.toBeNull();
@@ -90,7 +93,9 @@ describe("buildProConnectLogoutUrl", () => {
 		expect(url.origin).toBe("https://proconnect.example.com");
 		expect(url.pathname).toBe("/api/v2/session/end");
 		expect(url.searchParams.get("id_token_hint")).toBe("test-id-token");
-		expect(url.searchParams.get("state")).toBeTruthy();
+		expect(url.searchParams.get("state")).toBe(
+			"test-state-value-with-at-least-32-characters-long",
+		);
 		expect(url.searchParams.get("post_logout_redirect_uri")).toBe(
 			"http://localhost:3000/",
 		);
@@ -107,6 +112,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).toBeNull();
@@ -122,6 +128,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).toBeNull();
@@ -134,6 +141,7 @@ describe("buildProConnectLogoutUrl", () => {
 		const result = await buildProConnectLogoutUrl(
 			"user-123",
 			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
 		);
 
 		expect(result).toBeNull();
