@@ -1,4 +1,4 @@
-import { DsfrPictogram } from "~/modules/home";
+import { DsfrPictogram } from "~/modules/layout";
 
 import styles from "./ArchivesSection.module.scss";
 
