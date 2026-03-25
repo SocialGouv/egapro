@@ -51,9 +51,9 @@ export async function buildProConnectLogoutUrl(
 
 		// Charon proxy rewrites redirect_uri to its own callback and stores
 		// the original in session. post_logout_redirect_uri must point to a
-		// URL registered with ProConnect (Charon's /login endpoint).
+		// URL registered with ProConnect (Charon's /oauth/callback endpoint).
 		const charonPostLogoutUri = new URL(
-			"/login",
+			"/oauth/callback",
 			env.EGAPRO_PROCONNECT_ISSUER,
 		).toString();
 
