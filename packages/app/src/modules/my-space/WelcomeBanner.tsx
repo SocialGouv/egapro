@@ -8,20 +8,28 @@ export function WelcomeBanner() {
 	if (dismissed) return null;
 
 	return (
-		<div className="fr-alert fr-alert--info fr-mb-4w">
-			<h3 className="fr-alert__title">Bienvenue sur votre espace Egapro</h3>
-			<p>
-				Vos informations professionnelles et personnelles ont été renseignées
-				automatiquement via ProConnect.
-			</p>
-			<button
-				className="fr-btn--close fr-btn"
-				onClick={() => setDismissed(true)}
-				title="Masquer le message"
-				type="button"
-			>
-				Masquer le message
-			</button>
+		<div className="fr-notice fr-notice--info">
+			<div className="fr-container">
+				<div className="fr-notice__body">
+					<p>
+						<span className="fr-notice__title">
+							Bienvenue sur votre espace Egapro
+						</span>
+						<span className="fr-notice__desc">
+							Vos informations professionnelles et personnelles ont été
+							renseignées automatiquement via ProConnect.
+						</span>
+					</p>
+					<button
+						className="fr-btn--close fr-btn"
+						onClick={() => setDismissed(true)}
+						title="Masquer le message"
+						type="button"
+					>
+						Masquer le message
+					</button>
+				</div>
+			</div>
 		</div>
 	);
 }
