@@ -8,7 +8,7 @@ type WeezLegalEntity = {
 	siren: string;
 	denominationunitelegale: string | null;
 	raisonsociale: string | null;
-	activiteprincipaleunitelegale: string | null;
+	activiteprincipalenaf25unitelegale: string | null;
 	effectiftotal: number | null;
 	numerovoie: string | null;
 	typevoie: string | null;
@@ -101,7 +101,7 @@ export async function fetchCompanyBySiren(
 			entity.raisonsociale ||
 			`Entreprise ${siren}`,
 		address: buildAddress(entity),
-		nafCode: entity.activiteprincipaleunitelegale ?? null,
+		nafCode: entity.activiteprincipalenaf25unitelegale ?? null,
 		workforce: entity.effectiftotal ?? null,
 	};
 }

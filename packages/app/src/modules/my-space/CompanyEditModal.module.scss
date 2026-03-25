@@ -1,7 +1,12 @@
 .infoRow {
 	display: flex;
-	align-items: center;
+	align-items: baseline;
+	flex-wrap: wrap;
 	gap: 0.25rem;
+}
+
+.label {
+	color: var(--text-default-grey);
 }
 
 .sourceText {
@@ -12,4 +17,19 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+}
+
+.requiredHint {
+	font-size: 0.875rem;
+	color: var(--text-mention-grey);
+}
+
+.cseFieldset {
+	:global(.fr-fieldset__element--inline) {
+		flex: 1;
+	}
+
+	> .sourceText {
+		padding: 0 0.5rem;
+	}
 }

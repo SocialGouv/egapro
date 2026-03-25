@@ -82,9 +82,23 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								<h2 className="fr-modal__title" id={MODAL_TITLE_ID}>
 									Modifier les informations
 								</h2>
-								<p className="fr-mb-3w">
+								<p className="fr-mb-4w">
 									Vérifier les données affichées et compléter l'information
-									manquante si nécessaire.
+									manquantes sur l'existence d'un CSE si nécessaire. Si vous
+									constatez une erreur, veuillez{" "}
+									<a
+										className="fr-link fr-icon-external-link-line fr-link--icon-right"
+										href="/aide/nous-contacter"
+										rel="noopener noreferrer"
+										target="_blank"
+									>
+										nous contacter
+										<span className="fr-sr-only">
+											{" "}
+											(ouvre une nouvelle fenêtre)
+										</span>
+									</a>
+									.
 								</p>
 
 								<form id="company-edit-form" onSubmit={onSubmit}>
@@ -147,24 +161,23 @@ type CompanyReadonlySectionProps = {
 function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 	return (
 		<>
-			<div className={`fr-mb-3w ${styles.section}`}>
+			<div className={`fr-mb-4w ${styles.section}`}>
 				<InfoRow label="Raison sociale :" value={company.name} />
 				<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
 				<InfoRow label="Adresse :" value={company.address} />
 				<InfoRow label="Code NAF :" value={company.nafCode} />
-				<p className={`fr-text--xs fr-mb-0 ${styles.sourceText}`}>
-					Source : INSEE. Pour toute correction ou mise à jour, contactez
-					l'INSEE.
+				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
+					Source : INSEE.
 				</p>
 			</div>
 
-			<div className={`fr-mb-3w ${styles.section}`}>
+			<div className={`fr-mb-4w ${styles.section}`}>
 				<InfoRow
 					label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
 					value={company.workforce?.toLocaleString("fr-FR")}
 				/>
-				<p className={`fr-text--xs fr-mb-0 ${styles.sourceText}`}>
-					Source : déclarations sociales nominatives.
+				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
+					Source : DSN (Déclarations sociales nominatives).
 				</p>
 			</div>
 		</>
@@ -179,7 +192,7 @@ type InfoRowProps = {
 function InfoRow({ label, value }: InfoRowProps) {
 	return (
 		<p className={`fr-mb-0 ${styles.infoRow}`}>
-			<span>{label}</span>
+			<span className={styles.label}>{label}</span>
 			<strong>{value ?? "—"}</strong>
 		</p>
 	);
@@ -192,9 +205,10 @@ type CseRadioGroupProps = {
 
 function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
-		<fieldset className="fr-fieldset">
+		<fieldset className={`fr-fieldset ${styles.cseFieldset}`}>
 			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
-				Existence d'un CSE (obligatoire)
+				Existence d'un CSE{" "}
+				<span className={styles.requiredHint}>(obligatoire)</span>
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
 				<div className="fr-radio-group fr-radio-rich">
@@ -228,7 +242,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 				</div>
 			</div>
 			<div aria-live="polite" className="fr-messages-group"></div>
-			<p className={`fr-text--xs fr-mb-0 ${styles.sourceText}`}>
+			<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 				Source : information relative aux élections professionnelles transmise à
 				l'administration.
 			</p>
