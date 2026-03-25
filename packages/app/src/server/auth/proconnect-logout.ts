@@ -7,6 +7,7 @@ import { db } from "~/server/db";
 import { accounts } from "~/server/db/schema";
 
 const oidcConfigSchema = z.object({
+	issuer: z.string().url(),
 	end_session_endpoint: z.string().url(),
 });
 
@@ -40,28 +41,30 @@ export async function buildProConnectLogoutUrl(
 		return null;
 	}
 
-	// Discover the end_session_endpoint from the OIDC provider (via Charon proxy)
+	// Discover the end_session_endpoint via Charon's well-known.
+	// Charon rewrites endpoint URLs to point to itself but preserves `issuer`.
+	// We must call ProConnect DIRECTLY (not through Charon) because Charon's
+	// catch-all adds a `redirect_uri` param that ProConnect rejects on end_session.
 	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
 		const response = await fetch(wellKnownUrl);
 		const config = oidcConfigSchema.parse(await response.json());
 
+		// Un-rewrite end_session_endpoint: replace Charon prefix with real issuer
+		const charonBase = env.EGAPRO_PROCONNECT_ISSUER.replace(/\/$/, "");
+		const issuerBase = config.issuer.replace(/\/$/, "");
+		const realEndSessionEndpoint = config.end_session_endpoint.replace(
+			charonBase,
+			issuerBase,
+		);
+
 		const state = crypto.randomBytes(32).toString("hex");
 
-		// Charon proxy rewrites redirect_uri to its own callback and stores
-		// the original in session. post_logout_redirect_uri must point to a
-		// URL registered with ProConnect (Charon's /oauth/callback endpoint).
-		const charonPostLogoutUri = new URL(
-			"/oauth/callback",
-			env.EGAPRO_PROCONNECT_ISSUER,
-		).toString();
-
-		const logoutUrl = new URL(config.end_session_endpoint);
+		const logoutUrl = new URL(realEndSessionEndpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
 		logoutUrl.searchParams.set("state", state);
-		logoutUrl.searchParams.set("post_logout_redirect_uri", charonPostLogoutUri);
-		logoutUrl.searchParams.set("redirect_uri", appRedirectUri);
+		logoutUrl.searchParams.set("post_logout_redirect_uri", appRedirectUri);
 
 		return logoutUrl.toString();
 	} catch {

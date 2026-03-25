@@ -65,13 +65,15 @@ describe("buildProConnectLogoutUrl", () => {
 		expect(mockFetch).not.toHaveBeenCalled();
 	});
 
-	it("returns end_session URL with id_token_hint and post_logout_redirect_uri", async () => {
+	it("returns direct ProConnect end_session URL bypassing Charon", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
 		mockFetch.mockResolvedValueOnce({
 			json: () =>
 				Promise.resolve({
+					// Charon preserves issuer but rewrites end_session_endpoint to itself
+					issuer: "https://fca.integ01.dev-agentconnect.fr/api/v2",
 					end_session_endpoint:
-						"https://proconnect.example.com/api/v2/session/end",
+						"https://proconnect.example.com/session/end",
 				}),
 		});
 
@@ -81,16 +83,17 @@ describe("buildProConnectLogoutUrl", () => {
 		);
 
 		expect(result).not.toBeNull();
-		expect(typeof result).toBe("string");
 		const url = new URL(result as string);
-		expect(url.origin).toBe("https://proconnect.example.com");
+		// URL should point to the real ProConnect issuer, not Charon
+		expect(url.origin).toBe("https://fca.integ01.dev-agentconnect.fr");
 		expect(url.pathname).toBe("/api/v2/session/end");
 		expect(url.searchParams.get("id_token_hint")).toBe("test-id-token");
 		expect(url.searchParams.get("state")).toBeTruthy();
 		expect(url.searchParams.get("post_logout_redirect_uri")).toBe(
-			"https://proconnect.example.com/oauth/callback",
+			"http://localhost:3000/",
 		);
-		expect(url.searchParams.get("redirect_uri")).toBe("http://localhost:3000/");
+		// No redirect_uri — ProConnect rejects extra params on end_session
+		expect(url.searchParams.has("redirect_uri")).toBe(false);
 	});
 
 	it("returns null when end_session_endpoint is missing from discovery", async () => {
