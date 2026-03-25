@@ -23,7 +23,7 @@ test.describe("404 Not Found page", () => {
 	test("displays the DSFR error artwork", async ({ page }) => {
 		await page.goto("/this-route-does-not-exist");
 
-		const artwork = page.locator("svg.fr-artwork");
+		const artwork = page.locator("#content svg.fr-artwork");
 		await expect(artwork).toBeVisible();
 		await expect(artwork).toHaveAttribute("aria-hidden", "true");
 	});
@@ -54,7 +54,7 @@ test.describe("500 Internal Server Error page", () => {
 	});
 
 	test("displays the DSFR error artwork", async ({ page }) => {
-		const artwork = page.locator("svg.fr-artwork");
+		const artwork = page.locator("#content svg.fr-artwork");
 		await expect(artwork).toBeVisible();
 		await expect(artwork).toHaveAttribute("aria-hidden", "true");
 	});
@@ -84,7 +84,7 @@ test.describe("503 Service Unavailable page", () => {
 	test("displays the DSFR error artwork", async ({ page }) => {
 		await page.goto("/maintenance");
 
-		const artwork = page.locator("svg.fr-artwork");
+		const artwork = page.locator("#content svg.fr-artwork");
 		await expect(artwork).toBeVisible();
 		await expect(artwork).toHaveAttribute("aria-hidden", "true");
 	});
