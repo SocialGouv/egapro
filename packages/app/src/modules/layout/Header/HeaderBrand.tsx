@@ -35,8 +35,7 @@ export function HeaderBrand() {
 					<p className="fr-header__service-title">Egapro</p>
 				</Link>
 				<p className="fr-header__service-tagline">
-					Index de l'égalité professionnelle et représentation équilibrée
-					femmes‑hommes
+					Indicateurs d'égalité professionnelle femmes‑hommes
 				</p>
 			</div>
 		</div>
