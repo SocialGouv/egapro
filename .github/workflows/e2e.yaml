@@ -44,8 +44,8 @@ jobs:
           timeout 180 bash -c 'until curl -sf -o /dev/null "$SITE_URL"; do sleep 5; done'
           echo "✓ App is ready"
 
-          echo "Waiting for Keycloak at $KEYCLOAK_URL ..."
-          timeout 180 bash -c 'until curl -sf -o /dev/null "$KEYCLOAK_URL/realms/master"; do sleep 5; done'
+          echo "Waiting for Keycloak realm egapro at $KEYCLOAK_URL ..."
+          timeout 180 bash -c 'until curl -sf -o /dev/null "$KEYCLOAK_URL/realms/egapro"; do sleep 5; done'
           echo "✓ Keycloak is ready"
 
       - name: Run test e2e

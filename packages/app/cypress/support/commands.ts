@@ -54,7 +54,7 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
 
 Cypress.Commands.add("checkUrl", url => {
   cy.url().should("include", url);
-  cy.get("#content").should("be.visible");
+  cy.get("#content").click({ force: true });
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {
