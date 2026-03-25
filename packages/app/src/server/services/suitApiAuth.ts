@@ -17,7 +17,7 @@ export function verifySuitApiKey(request: Request): true | Response {
 		return unauthorizedResponse("En-tête Authorization manquant");
 	}
 
-	const match = /^Bearer\s+(.+)$/i.exec(authorization);
+	const match = /^Bearer\s(\S+)$/i.exec(authorization);
 	if (!match?.[1]) {
 		return unauthorizedResponse(
 			"Format invalide. Attendu : Authorization: Bearer <clé>",
