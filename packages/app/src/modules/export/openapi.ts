@@ -211,7 +211,38 @@ const declarationSchema = {
 			type: "array",
 			items: cseOpinionSchema,
 			description:
-				"CSE opinions (PDF uploads, up to 3/year, companies >= 100 employees)",
+				"CSE opinions (PDF uploads, up to 4/year, companies >= 100 employees)",
+		},
+	},
+} as const;
+
+const fileMetadataSchema = {
+	type: "object",
+	properties: {
+		id: { type: "string", description: "File unique identifier" },
+		type: {
+			type: "string",
+			enum: ["cse_opinion", "joint_evaluation"],
+			description: "File type: CSE opinion or joint evaluation",
+		},
+		fileName: { type: "string", example: "avis-cse-2026.pdf" },
+		uploadedAt: { type: "string", format: "date-time" },
+	},
+} as const;
+
+const errorSchema = {
+	type: "object",
+	properties: {
+		error: { type: "string" },
+		details: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					path: { type: "array", items: { type: "string" } },
+					message: { type: "string" },
+				},
+			},
 		},
 	},
 } as const;
@@ -219,10 +250,10 @@ const declarationSchema = {
 export const openApiSpec = {
 	openapi: "3.1.0",
 	info: {
-		title: "EGAPRO — API d'export des déclarations",
+		title: "EGAPRO — API d'export",
 		description:
-			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle soumises sur la plateforme EGAPRO, filtrées par date de soumission. L'accès nécessite une clé API (Bearer token).",
-		version: "1.0.0",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API (Bearer token).",
+		version: "1.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -355,6 +386,92 @@ export const openApiSpec = {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		"/api/v1/files": {
+			get: {
+				operationId: "getFiles",
+				summary: "Lister les fichiers CSE et évaluations conjointes",
+				description:
+					"Retourne les métadonnées des fichiers (avis CSE et évaluations conjointes) pour un SIREN et une année donnés.",
+				parameters: [
+					{
+						name: "siren",
+						in: "query",
+						required: true,
+						description: "SIREN de l'entreprise (9 chiffres)",
+						example: "319159877",
+						schema: { type: "string", pattern: "^\\d{9}$" },
+					},
+					{
+						name: "year",
+						in: "query",
+						required: true,
+						description: "Année de la déclaration (YYYY)",
+						example: "2026",
+						schema: { type: "string", pattern: "^\\d{4}$" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Liste des fichiers",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										siren: { type: "string", example: "319159877" },
+										year: { type: "integer", example: 2026 },
+										files: { type: "array", items: fileMetadataSchema },
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Paramètres invalides",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"500": {
+						description: "Erreur serveur",
+						content: { "application/json": { schema: errorSchema } },
+					},
+				},
+			},
+		},
+		"/api/v1/files/{fileId}": {
+			get: {
+				operationId: "downloadFile",
+				summary: "Télécharger un fichier",
+				description:
+					"Télécharge le fichier PDF (avis CSE ou évaluation conjointe) correspondant à l'identifiant.",
+				parameters: [
+					{
+						name: "fileId",
+						in: "path",
+						required: true,
+						description: "Identifiant unique du fichier",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Fichier PDF",
+						content: {
+							"application/pdf": {
+								schema: { type: "string", format: "binary" },
+							},
+						},
+					},
+					"404": {
+						description: "Fichier non trouvé",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"500": {
+						description: "Erreur serveur",
+						content: { "application/json": { schema: errorSchema } },
 					},
 				},
 			},
