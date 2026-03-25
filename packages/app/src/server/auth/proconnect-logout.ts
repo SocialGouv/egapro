@@ -7,7 +7,6 @@ import { db } from "~/server/db";
 import { accounts } from "~/server/db/schema";
 
 const oidcConfigSchema = z.object({
-	issuer: z.string().url(),
 	end_session_endpoint: z.string().url(),
 });
 
@@ -42,26 +41,18 @@ export async function buildProConnectLogoutUrl(
 	}
 
 	// Discover the end_session_endpoint via Charon's well-known.
-	// Charon rewrites endpoint URLs to point to itself but preserves `issuer`.
-	// We must call ProConnect DIRECTLY (not through Charon) because Charon's
-	// catch-all adds a `redirect_uri` param that ProConnect rejects on end_session.
+	// Charon rewrites it to point to itself and handles the OIDC logout flow:
+	// it rewrites post_logout_redirect_uri to its own /oauth/logout-callback,
+	// stores the original URI in session, and redirects back after logout.
 	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
 		const response = await fetch(wellKnownUrl);
 		const config = oidcConfigSchema.parse(await response.json());
 
-		// Un-rewrite end_session_endpoint: replace Charon prefix with real issuer
-		const charonBase = env.EGAPRO_PROCONNECT_ISSUER.replace(/\/$/, "");
-		const issuerBase = config.issuer.replace(/\/$/, "");
-		const realEndSessionEndpoint = config.end_session_endpoint.replace(
-			charonBase,
-			issuerBase,
-		);
-
 		const state = crypto.randomBytes(32).toString("hex");
 
-		const logoutUrl = new URL(realEndSessionEndpoint);
+		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
 		logoutUrl.searchParams.set("state", state);
 		logoutUrl.searchParams.set("post_logout_redirect_uri", appRedirectUri);
