@@ -1,6 +1,15 @@
 import { fetchFileById } from "~/modules/export";
 import { getFile } from "~/server/services/s3";
 
+function buildContentDisposition(fileName: string): string {
+	const asciiFallback = fileName
+		.replace(/[^\x20-\x7E]/g, "_")
+		.replace(/["\\;\r\n]/g, "_");
+	const encodedFileName = encodeURIComponent(fileName);
+
+	return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodedFileName}`;
+}
+
 /**
  * GET /api/v1/files/:fileId
  *
@@ -20,12 +29,12 @@ export async function GET(
 		}
 
 		const { body, contentType } = await getFile(file.filePath);
-		const safeFileName = file.fileName.replace(/["\r\n]/g, "_");
+		const contentDisposition = buildContentDisposition(file.fileName);
 
 		return new Response(body, {
 			headers: {
 				"Content-Type": contentType,
-				"Content-Disposition": `attachment; filename="${safeFileName}"`,
+				"Content-Disposition": contentDisposition,
 				"Cache-Control": "private, max-age=3600",
 			},
 		});

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const MIN_DECLARATION_YEAR = 2018;
+const MAX_DECLARATION_YEAR = new Date().getFullYear() + 1;
+
 export const exportYearQuerySchema = z.object({
 	year: z
 		.string()
@@ -30,5 +33,18 @@ export const exportFilesQuerySchema = z.object({
 	year: z
 		.string()
 		.regex(/^\d{4}$/, "year must be YYYY format")
-		.transform(Number),
+		.transform(Number)
+		.pipe(
+			z
+				.number()
+				.int()
+				.min(
+					MIN_DECLARATION_YEAR,
+					`year must be greater than or equal to ${MIN_DECLARATION_YEAR}`,
+				)
+				.max(
+					MAX_DECLARATION_YEAR,
+					`year must be less than or equal to ${MAX_DECLARATION_YEAR}`,
+				),
+		),
 });
