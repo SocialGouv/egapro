@@ -88,8 +88,9 @@ describe("buildProConnectLogoutUrl", () => {
 		expect(url.searchParams.get("id_token_hint")).toBe("test-id-token");
 		expect(url.searchParams.get("state")).toBeTruthy();
 		expect(url.searchParams.get("post_logout_redirect_uri")).toBe(
-			"http://localhost:3000/",
+			"https://proconnect.example.com/login",
 		);
+		expect(url.searchParams.get("redirect_uri")).toBe("http://localhost:3000/");
 	});
 
 	it("returns null when end_session_endpoint is missing from discovery", async () => {

@@ -23,7 +23,7 @@ const oidcConfigSchema = z.object({
  */
 export async function buildProConnectLogoutUrl(
 	userId: string,
-	postLogoutRedirectUri: string,
+	appRedirectUri: string,
 ): Promise<string | null> {
 	if (!env.EGAPRO_PROCONNECT_ISSUER || !env.EGAPRO_PROCONNECT_CLIENT_ID) {
 		return null;
@@ -40,7 +40,7 @@ export async function buildProConnectLogoutUrl(
 		return null;
 	}
 
-	// Discover the end_session_endpoint from the OIDC provider
+	// Discover the end_session_endpoint from the OIDC provider (via Charon proxy)
 	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
 
 	try {
@@ -49,13 +49,19 @@ export async function buildProConnectLogoutUrl(
 
 		const state = crypto.randomBytes(32).toString("hex");
 
+		// Charon proxy rewrites redirect_uri to its own callback and stores
+		// the original in session. post_logout_redirect_uri must point to a
+		// URL registered with ProConnect (Charon's /login endpoint).
+		const charonPostLogoutUri = new URL(
+			"/login",
+			env.EGAPRO_PROCONNECT_ISSUER,
+		).toString();
+
 		const logoutUrl = new URL(config.end_session_endpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
 		logoutUrl.searchParams.set("state", state);
-		logoutUrl.searchParams.set(
-			"post_logout_redirect_uri",
-			postLogoutRedirectUri,
-		);
+		logoutUrl.searchParams.set("post_logout_redirect_uri", charonPostLogoutUri);
+		logoutUrl.searchParams.set("redirect_uri", appRedirectUri);
 
 		return logoutUrl.toString();
 	} catch {

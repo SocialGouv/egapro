@@ -4,4 +4,3 @@ metadata:
   name: proconnect
 data:
   EGAPRO_PROCONNECT_ISSUER: "https://egapro-charon.ovh.fabrique.social.gouv.fr/proconnecttest"
-  EGAPRO_PROCONNECT_POST_LOGOUT_REDIRECT_URI: "https://{{ .Values.global.host }}/"
