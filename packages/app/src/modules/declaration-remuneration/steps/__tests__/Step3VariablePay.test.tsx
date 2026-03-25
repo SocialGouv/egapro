@@ -48,10 +48,13 @@ describe("Step3VariablePay", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders table headers", () => {
-		render(<Step3VariablePay />);
+	it("renders table headers with line break in column header", () => {
+		const { container } = render(<Step3VariablePay />);
 		expect(screen.getByText(/Rémunération variable/)).toBeInTheDocument();
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
+
+		const headerBr = container.querySelector("th br");
+		expect(headerBr).toBeInTheDocument();
 	});
 
 	it("shows SavedIndicator when initialData has data", () => {
